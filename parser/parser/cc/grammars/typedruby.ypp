@@ -191,213 +191,408 @@ using namespace std::string_literals;
 
 %type <node>
   arg
+  arg_z
   arg_rhs
+  arg_rhs_z
   arg_value
+  arg_value_z
   assoc
+  assoc_z
   backref
+  backref_z
   block_arg
+  block_arg_z
   block_call
+  block_call_z
   block_command
+  block_command_z
   block_param_def
+  block_param_def_z
   bodystmt
+  bodystmt_z
   bvar
+  bvar_z
   command
+  command_z
   command_asgn
+  command_asgn_z
   command_call
+  command_call_z
   command_rhs
+  command_rhs_z
   compstmt
+  compstmt_z
   cpath
+  cpath_z
   defs_head
+  defs_head_z
   dsym
+  dsym_z
   expr
+  expr_z
   expr_value
+  expr_value_z
   f_arg_item
+  f_arg_item_z
   f_arglist
+  f_arglist_z
   f_block_kw
+  f_block_kw_z
   f_block_opt
+  f_block_opt_z
   f_kw
+  f_kw_z
   f_larglist
+  f_larglist_z
   f_marg
+  f_marg_z
   f_opt
+  f_opt_z
   f_paren_args
+  f_paren_args_z
   f_opt_paren_args
+  f_opt_paren_args_z
   f_rest_marg
+  f_rest_marg_z
   fitem
+  fitem_z
   for_var
+  for_var_z
   keyword_variable
+  keyword_variable_z
   lhs
+  lhs_z
   literal
+  literal_z
   method_call
+  method_call_z
   mlhs
+  mlhs_z
   mlhs_inner
+  mlhs_inner_z
   mlhs_item
+  mlhs_item_z
   mlhs_node
+  mlhs_node_z
   mrhs_arg
+  mrhs_arg_z
   none
+  none_z
   nonlocal_var
+  nonlocal_var_z
   numeric
+  numeric_z
   opt_block_param
+  opt_block_param_z
   p_alt
+  p_alt_z
   p_arg
+  p_arg_z
   p_as
+  p_as_z
   p_const
+  p_const_z
   p_expr
+  p_expr_z
   p_expr_basic
+  p_expr_basic_z
   p_expr_ref
+  p_expr_ref_z
   p_kw
+  p_kw_z
   p_kw_label
+  p_kw_label_z
   p_primitive
+  p_primitive_z
   p_rest
+  p_rest_z
   p_top_expr_body
+  p_top_expr_body_z
   p_var_ref
+  p_var_ref_z
   p_value
+  p_value_z
   p_variable
+  p_variable_z
   primary
+  primary_z
   primary_value
+  primary_value_z
   qsymbols
+  qsymbols_z
   qwords
+  qwords_z
   regexp
+  regexp_z
   ssym
+  ssym_z
   simple_numeric
+  simple_numeric_z
   singleton
+  singleton_z
   stmt
+  stmt_z
   stmt_or_begin
+  stmt_or_begin_z
   string1
+  string1_z
   string_content
+  string_content_z
   string_dvar
+  string_dvar_z
   strings
+  strings_z
   symbol
+  symbol_z
   symbols
+  symbols_z
   top_compstmt
+  top_compstmt_z
   top_stmt
+  top_stmt_z
   user_variable
+  user_variable_z
   var_lhs
+  var_lhs_z
   var_ref
+  var_ref_z
   words
+  words_z
   xstring
+  xstring_z
   rel_expr
+  rel_expr_z
 
 %type <list>
   aref_args
   args
+  args_z
   args_tail
+  args_tail_z
   assoc_list
+  assoc_list_z
   assocs
+  assocs_z
   block_args_tail
+  block_args_tail_z
   block_param
+  block_param_z
   bv_decls
+  bv_decls_z
   call_args
+  call_args_z
   command_args
+  command_args_z
   exc_list
+  exc_list_z
   f_arg
+  f_arg_z
   f_args
+  f_args_z
   f_block_arg
+  f_block_arg_z
   f_block_kwarg
+  f_block_kwarg_z
   f_block_optarg
+  f_block_optarg_z
   f_extra_labels
+  f_extra_labels_z
   f_kwarg
+  f_kwarg_z
   f_kwrest
+  f_kwrest_z
   f_marg_list
+  f_marg_list_z
   f_margs
+  f_margs_z
   f_optarg
+  f_optarg_z
   f_no_kwarg
+  f_no_kwarg_z
   f_rest_arg
+  f_rest_arg_z
   list_none
+  list_none_z
   mlhs_basic
+  mlhs_basic_z
   mlhs_head
+  mlhs_head_z
   mlhs_post
+  mlhs_post_z
   mrhs
+  mrhs_z
   opt_args_tail
+  opt_args_tail_z
   opt_block_arg
+  opt_block_arg_z
   opt_block_args_tail
+  opt_block_args_tail_z
   opt_bv_decl
+  opt_bv_decl_z
   opt_call_args
+  opt_call_args_z
   opt_f_block_arg
+  opt_f_block_arg_z
   opt_rescue
+  opt_rescue_z
   p_args
+  p_args_z
   p_args_head
+  p_args_head_z
   p_args_post
+  p_args_post_z
   p_args_tail
+  p_args_tail_z
   p_find
+  p_find_z
   p_kwarg
+  p_kwarg_z
   p_kwargs
+  p_kwargs_z
   p_kwnorest
+  p_kwnorest_z
   p_kwrest
+  p_kwrest_z
   p_top_expr
+  p_top_expr_z
   qsym_list
+  qsym_list_z
   qword_list
+  qword_list_z
   regexp_contents
+  regexp_contents_z
   stmts
+  stmts_z
   string
+  string_z
   string_contents
+  string_contents_z
   symbol_list
+  symbol_list_z
   top_stmts
+  top_stmts_z
   undef_list
+  undef_list_z
   word
+  word_z
   word_list
+  word_list_z
   xstring_contents
+  xstring_contents_z
 
 %type <token>
   args_forward
+  args_forward_z
   blkarg_mark
+  blkarg_mark_z
   call_op
+  call_op_z
   cname
+  cname_z
   def_name
+  def_name_z
   do
+  do_z
   dot_or_colon
+  dot_or_colon_z
   f_arg_asgn
+  f_arg_asgn_z
   f_bad_arg
+  f_bad_arg_z
   f_label
+  f_label_z
   f_norm_arg
+  f_norm_arg_z
   fcall
+  fcall_z
   fname
+  fname_z
   kwrest_mark
+  kwrest_mark_z
   op
+  op_z
   operation
+  operation_z
   operation2
+  operation2_z
   operation3
+  operation3_z
   p_lparen
+  p_lparen_z
   p_lbracket
+  p_lbracket_z
   rbrace
+  rbrace_z
   rbracket
+  rbracket_z
   restarg_mark
+  restarg_mark_z
   reswords
+  reswords_z
   rparen
+  rparen_z
   term
+  term_z
   then
+  then_z
   relop
+  relop_z
   k_return
+  k_return_z
   lcurly_block_start
+  lcurly_block_start_z
   lbrace_cmd_block_start
+  lbrace_cmd_block_start_z
 
 %type <delimited_list>
   defn_head
+  defn_head_z
   opt_paren_args
+  opt_paren_args_z
   paren_args
+  paren_args_z
 
 %type <delimited_block>
   brace_block
+  brace_block_z
   brace_body
+  brace_body_z
   cmd_brace_block
+  cmd_brace_block_z
   do_block
+  do_block_z
   do_body
+  do_body_z
   lambda
+  lambda_z
   lambda_body
+  lambda_body_z
   begin_block
+  begin_block_z
 
 %type <with_token>
   exc_var
+  exc_var_z
   if_tail
+  if_tail_z
   opt_else
+  opt_else_z
   opt_ensure
+  opt_ensure_z
   superclass
+  superclass_z
   expr_value_do
+  expr_value_do_z
 
 %type <case_body>
   case_body
+  case_body_z
   cases
+  cases_z
   p_case_body
+  p_case_body_z
   p_cases
+  p_cases_z
 
 %nonassoc tLOWEST
 %nonassoc tLBRACE_ARG
@@ -547,6 +742,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = driver.build.compstmt(self, $1);
                     }
 
+  top_compstmt_z: top_stmts_z opt_terms_z
+                    {
+                      $$ = driver.build.compstmt(self, $1);
+                    }
+
        top_stmts: // nothing
                     {
                       $$ = driver.alloc.node_list();
@@ -565,6 +765,20 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = driver.alloc.node_list($2);
                     }
 
+     top_stmts_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | top_stmt_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | top_stmts_z terms_z top_stmt_z
+                    {
+                      $1->emplace_back($3);
+                      $$ = $1;
+                    }
+
         top_stmt: stmt
                 | klBEGIN begin_block
                     {
@@ -572,7 +786,18 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = driver.build.preexe(self, $1, delimited_block->body, delimited_block->end);
                     }
 
+      top_stmt_z: stmt_z
+                | klBEGIN begin_block_z
+                    {
+                      auto &delimited_block = $2;
+                      $$ = driver.build.preexe(self, $1, delimited_block->body, delimited_block->end);
+                    }
+
      begin_block: tLCURLY top_compstmt tRCURLY
+                    {
+                      $$ = driver.alloc.delimited_block($1, nullptr, $2, $3);
+                    }
+   begin_block_z: tLCURLY top_compstmt_z tRCURLY
                     {
                       $$ = driver.alloc.delimited_block($1, nullptr, $2, $3);
                     }
@@ -602,7 +827,37 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       );
                     }
 
+      bodystmt_z: compstmt_z opt_rescue_z opt_else_z opt_ensure_z
+                    {
+                      auto &rescueBodies = $2;
+                      auto &else_ = $3;
+                      auto &ensure = $4;
+
+                      if (rescueBodies->size() == 0 && else_ != nullptr) {
+                        driver.diagnostics.emplace_back(
+			                    dlevel::ERROR,
+                          dclass::UselessElse,
+                          else_->tok
+                        );
+                      }
+
+                      $$ = driver.build.beginBody(
+                        self,
+                        $1,
+                        rescueBodies,
+                        else_ ? else_->tok : nullptr,
+                        else_ ? else_->nod : nullptr,
+                        ensure ? ensure->tok : nullptr,
+                        ensure ? ensure->nod : nullptr
+                      );
+                    }
+
         compstmt: stmts opt_terms
+                    {
+                      $$ = driver.build.compstmt(self, $1);
+                    }
+
+      compstmt_z: stmts_z opt_terms_z
                     {
                       $$ = driver.build.compstmt(self, $1);
                     }
@@ -625,8 +880,33 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = driver.alloc.node_list();
                     }
 
+         stmts_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | stmt_or_begin_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | stmts_z terms_z stmt_or_begin_z
+                    {
+                      $1->emplace_back($3);
+                      $$ = $1;
+                    }
+
    stmt_or_begin: stmt
                 | klBEGIN begin_block
+                    {
+                      driver.diagnostics.emplace_back(
+                        dlevel::ERROR,
+			                  dclass::BeginInMethod,
+                        $1
+                      );
+                      YYERROR;
+                    }
+
+ stmt_or_begin_z: stmt_z
+                | klBEGIN begin_block_z
                     {
                       driver.diagnostics.emplace_back(
                         dlevel::ERROR,
@@ -708,6 +988,79 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = driver.build.multi_assign(self, $1, $3);
                     }
                 | expr
+
+          stmt_z: kALIAS fitem_z
+                    {
+                      driver.lex.set_state_expr_fname();
+                    }
+                    fitem_z
+                    {
+                      $$ = driver.build.alias(self, $1, $2, $4);
+                    }
+                | kALIAS tGVAR tGVAR
+                    {
+                      $$ = driver.build.alias(self, $1, driver.build.gvar(self, $2), driver.build.gvar(self, $3));
+                    }
+                | kALIAS tGVAR tBACK_REF
+                    {
+                      $$ = driver.build.alias(self, $1, driver.build.gvar(self, $2), driver.build.backRef(self, $3));
+                    }
+                | kALIAS tGVAR tNTH_REF
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NthRefAlias, $3);
+                      YYERROR;
+                    }
+                | kUNDEF undef_list_z
+                    {
+                      $$ = driver.build.undefMethod(self, $1, $2);
+                    }
+                | stmt_z kIF_MOD expr_value_z
+                    {
+                      $$ = driver.build.conditionMod(self, $1, nullptr, $3);
+                    }
+                | stmt_z kUNLESS_MOD expr_value_z
+                    {
+                      $$ = driver.build.conditionMod(self, nullptr, $1, $3);
+                    }
+                | stmt_z kWHILE_MOD expr_value_z
+                    {
+                      $$ = driver.build.loop_while_mod(self, $1, $3);
+                    }
+                | stmt_z kUNTIL_MOD expr_value_z
+                    {
+                      $$ = driver.build.loopUntil_mod(self, $1, $3);
+                    }
+                | stmt_z kRESCUE_MOD stmt_z
+                    {
+                      ruby_parser::node_list rescue_body(
+						driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3));
+                      $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                    }
+                | klEND tLCURLY compstmt_z tRCURLY
+                    {
+                      $$ = driver.build.postexe(self, $1, $3, $4);
+                    }
+                | command_asgn_z
+                | mlhs_z tEQL command_call_z
+                    {
+                      $$ = driver.build.multi_assign(self, $1, $3);
+                    }
+                | lhs_z tEQL mrhs_z
+                    {
+                      $$ = driver.build.assign(self, $1, $2, driver.build.array(self, nullptr, $3, nullptr));
+                    }
+                | mlhs_z tEQL mrhs_arg_z kRESCUE_MOD stmt_z
+                    {
+                    ruby_parser::node_list rescue_body(
+						driver.build.rescue_body(self, $4, nullptr, nullptr, nullptr, nullptr, $5));
+                      auto begin_body = driver.build.beginBody(self, $3, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                      $$ = driver.build.multi_assign(self, $1, begin_body);
+                    }
+                | mlhs_z tEQL mrhs_arg_z
+                    {
+                      $$ = driver.build.multi_assign(self, $1, $3);
+                    }
+                | expr_z
 
     command_asgn: lhs tEQL command_rhs
                     {
@@ -796,6 +1149,93 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       DIAGCHECK();
                     }
 
+  command_asgn_z: lhs_z tEQL command_rhs_z
+                    {
+                      $$ = driver.build.assign(self, $1, $2, $3);
+                    }
+                | var_lhs_z tOP_ASGN command_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, $1, $2, $3);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tLBRACK2 opt_call_args_z rbracket_z tOP_ASGN command_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.index(self, $1, $2, $3, $4), $5, $6);
+                      DIAGCHECK();
+                    }
+                | primary_value_z call_op_z tIDENTIFIER tOP_ASGN command_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
+                      DIAGCHECK();
+                    }
+                | primary_value_z call_op_z tCONSTANT tOP_ASGN command_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tCOLON2 tCONSTANT tOP_ASGN command_rhs_z
+                    {
+                      auto const_node = driver.build.constOpAssignable(self, driver.build.constFetch(self, $1, $2, $3));
+                      $$ = driver.build.op_assign(self, const_node, $4, $5);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tCOLON2 tIDENTIFIER tOP_ASGN command_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
+                      DIAGCHECK();
+                    }
+                | defn_head_z f_opt_paren_args_z tEQL command_z
+                    {
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defn_head_z f_opt_paren_args_z tEQL command_z kRESCUE_MOD arg_z
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head_z f_opt_paren_args_z tEQL command_z
+                    {
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head_z f_opt_paren_args_z tEQL command_z kRESCUE_MOD arg_z
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | backref_z tOP_ASGN command_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, $1, $2, $3);
+                      DIAGCHECK();
+                    }
+
      command_rhs: command_call %prec tOP_ASGN
                 | command_call kRESCUE_MOD stmt
                     {
@@ -805,6 +1245,16 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
                     }
                 | command_asgn
+
+   command_rhs_z: command_call_z %prec tOP_ASGN
+                | command_call_z kRESCUE_MOD stmt_z
+                    {
+                      node_list rescue_body(
+			                  driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3)
+                      );
+                      $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                    }
+                | command_asgn_z
 
             expr: command_call
                 | expr kAND expr
@@ -857,12 +1307,70 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     }
                 | arg %prec tLBRACE_ARG
 
+          expr_z: command_call_z
+                | expr_z kAND expr_z
+                    {
+                      $$ = driver.build.logicalAnd(self, $1, $2, $3);
+                    }
+                | expr_z kOR expr_z
+                    {
+                      $$ = driver.build.logicalOr(self, $1, $2, $3);
+                    }
+                | kNOT opt_nl_z expr_z
+                    {
+                      $$ = driver.build.not_op(self, $1, nullptr, $3, nullptr);
+                    }
+                | tBANG command_call_z
+                    {
+                      $$ = driver.build.not_op(self, $1, nullptr, $2, nullptr);
+                    }
+                | arg_z tASSOC
+                    {
+                      driver.lex.set_state_expr_beg();
+                      driver.lex.unset_command_start();
+                      driver.pattern_variables.push();
+
+                      $<boolean>$ = driver.lex.in_kwarg;
+                      driver.lex.in_kwarg = true;
+                    }
+                  p_top_expr_body_z
+                    {
+                      driver.lex.in_kwarg = $<boolean>3;
+                      $$ = driver.build.match_pattern(self, $1, $2, $4);
+                    }
+                | arg_z kIN
+                    {
+                      driver.lex.set_state_expr_beg();
+                      driver.lex.unset_command_start();
+                      driver.pattern_variables.push();
+
+                      $<boolean>$ = driver.lex.in_kwarg;
+                      driver.lex.in_kwarg = true;
+                    }
+                  p_top_expr_body_z
+                    {
+                      driver.lex.in_kwarg = $<boolean>3;
+                      $$ = driver.build.match_pattern_p(self, $1, $2, $4);
+                    }
+                | arg_z %prec tLBRACE_ARG
+
       expr_value: expr
+    expr_value_z: expr_z
 
    expr_value_do:   {
                       driver.lex.cond.push(true);
                     }
                   expr_value do
+                    {
+                      driver.lex.cond.pop();
+
+                      $$ = driver.alloc.node_with_token($3, $2);
+                    }
+
+ expr_value_do_z:   {
+                      driver.lex.cond.push(true);
+                    }
+                  expr_value_z do_z
                     {
                       driver.lex.cond.pop();
 
@@ -878,8 +1386,23 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 
                       $$ = $1;
                     }
+        def_name_z: fname_z
+                    {
+                      driver.lex.extend_static();
+                      driver.lex.cmdarg.push(false);
+                      driver.lex.cond.push(false);
+                      driver.current_arg_stack.push("");
+
+                      $$ = $1;
+                    }
 
         defn_head: kDEF def_name
+                    {
+                      driver.lex.context.push(Context::State::DEF);
+                      $$ = driver.alloc.delimited_node_list($1, driver.alloc.node_list(), $2);
+                    }
+
+      defn_head_z: kDEF def_name_z
                     {
                       driver.lex.context.push(Context::State::DEF);
                       $$ = driver.alloc.delimited_node_list($1, driver.alloc.node_list(), $2);
@@ -894,18 +1417,36 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                        driver.lex.context.push(Context::State::DEFS);
                        $$ = driver.build.defsHead(self, $1, $2, $3, $5);
                      }
+      defs_head_z: kDEF singleton_z dot_or_colon_z
+                     {
+                       driver.lex.set_state_expr_fname();
+                     }
+                   def_name_z
+                     {
+                       driver.lex.context.push(Context::State::DEFS);
+                       $$ = driver.build.defsHead(self, $1, $2, $3, $5);
+                     }
 
     command_call: command
                 | block_command
+
+  command_call_z: command_z
+                | block_command_z
 
    block_command: block_call
                 | block_call dot_or_colon operation2 command_args
                     {
                       $$ = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                     }
+ block_command_z: block_call_z
+                | block_call_z dot_or_colon_z operation2_z command_args_z
+                    {
+                      $$ = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                    }
 
 lbrace_cmd_block_start:
                   tLBRACE_ARG { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+lbrace_cmd_block_start_z: lbrace_cmd_block_start
  cmd_brace_block: lbrace_cmd_block_start brace_body tRCURLY
                     {
                       auto &block = $2;
@@ -927,7 +1468,29 @@ lbrace_cmd_block_start:
                       driver.lex.context.pop();
                     }
 
+cmd_brace_block_z: lbrace_cmd_block_start_z brace_body_z tRCURLY
+                    {
+                      auto &block = $2;
+                      block->begin = $1;
+                      block->end = $3;
+                      $$ = block;
+                      driver.lex.context.pop();
+                    }
+                  // Error-recovery case for typos like "foo {&:bar}"
+                | lbrace_cmd_block_start_z tAMPER arg_value_z tRCURLY
+                    {
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
+                      block->begin = $1;
+                      block->end = $4;
+                      $$ = block;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
+                      driver.lex.context.pop();
+                    }
+
            fcall: operation
+         fcall_z: operation_z
 
          command: fcall command_args %prec tLOWEST
                     {
@@ -996,6 +1559,73 @@ lbrace_cmd_block_start:
                       $$ = driver.build.keywordNext(self, $1, nullptr, $2, nullptr);
                     }
 
+       command_z: fcall_z command_args_z %prec tLOWEST
+                    {
+                      $$ = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, $2, nullptr);
+                    }
+                | fcall_z command_args_z cmd_brace_block_z
+                    {
+                      auto method_call = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, $2, nullptr);
+                      auto &delimited_block = $3;
+                      $$ = driver.build.block(self, method_call,
+                                      delimited_block->begin,
+                                      delimited_block->args,
+                                      delimited_block->body,
+                                      delimited_block->end);
+                      DIAGCHECK();
+                    }
+                | primary_value_z call_op_z operation2_z command_args_z %prec tLOWEST
+                    {
+                      $$ = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                    }
+                | primary_value_z call_op_z operation2_z command_args_z cmd_brace_block_z
+                    {
+                      auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                      auto &delimited_block = $5;
+                      $$ = driver.build.block(self, method_call,
+                                      delimited_block->begin,
+                                      delimited_block->args,
+                                      delimited_block->body,
+                                      delimited_block->end);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tCOLON2 operation2_z command_args_z %prec tLOWEST
+                    {
+                      $$ = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                    }
+                | primary_value_z tCOLON2 operation2_z command_args_z cmd_brace_block_z
+                    {
+                      auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                      auto &delimited_block = $5;
+                      $$ = driver.build.block(self, method_call,
+                                      delimited_block->begin,
+                                      delimited_block->args,
+                                      delimited_block->body,
+                                      delimited_block->end);
+                      DIAGCHECK();
+                    }
+                | kSUPER command_args_z
+                    {
+                      $$ = driver.build.keywordSuper(self, $1, nullptr, $2, nullptr);
+                    }
+                | kYIELD command_args_z
+                    {
+                      $$ = driver.build.keywordYield(self, $1, nullptr, $2, nullptr);
+                      DIAGCHECK();
+                    }
+                | k_return_z call_args_z
+                    {
+                      $$ = driver.build.keywordReturn(self, $1, nullptr, $2, nullptr);
+                    }
+                | kBREAK call_args_z
+                    {
+                      $$ = driver.build.keywordBreak(self, $1, nullptr, $2, nullptr);
+                    }
+                | kNEXT call_args_z
+                    {
+                      $$ = driver.build.keywordNext(self, $1, nullptr, $2, nullptr);
+                    }
+
             mlhs: mlhs_basic
                     {
                       $$ = driver.build.multi_lhs(self, nullptr, $1, nullptr);
@@ -1005,11 +1635,29 @@ lbrace_cmd_block_start:
                       $$ = driver.build.begin(self, $1, $2, $3);
                     }
 
+          mlhs_z: mlhs_basic_z
+                    {
+                      $$ = driver.build.multi_lhs(self, nullptr, $1, nullptr);
+                    }
+                | tLPAREN mlhs_inner_z rparen_z
+                    {
+                      $$ = driver.build.begin(self, $1, $2, $3);
+                    }
+
       mlhs_inner: mlhs_basic
                     {
                       $$ = driver.build.multi_lhs(self, nullptr, $1, nullptr);
                     }
                 | tLPAREN mlhs_inner rparen
+                    {
+                      $$ = driver.build.multi_lhs1(self, $1, $2, $3);
+                    }
+
+    mlhs_inner_z: mlhs_basic_z
+                    {
+                      $$ = driver.build.multi_lhs(self, nullptr, $1, nullptr);
+                    }
+                | tLPAREN mlhs_inner_z rparen_z
                     {
                       $$ = driver.build.multi_lhs1(self, $1, $2, $3);
                     }
@@ -1068,8 +1716,68 @@ lbrace_cmd_block_start:
                       $$ = items;
                     }
 
+    mlhs_basic_z: mlhs_head_z
+                | mlhs_head_z mlhs_item_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+                | mlhs_head_z tSTAR mlhs_node_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.splat_mlhs(self, $2, $3));
+                      $$ = list;
+                    }
+                | mlhs_head_z tSTAR mlhs_node_z tCOMMA mlhs_post_z
+                    {
+                      auto &head = $1;
+                      head->emplace_back(driver.build.splat_mlhs(self, $2, $3));
+                      head->concat($5);
+                      $$ = head;
+                    }
+                | mlhs_head_z tSTAR
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.splat_mlhs(self, $2, nullptr));
+                      $$ = list;
+                    }
+                | mlhs_head_z tSTAR tCOMMA mlhs_post_z
+                    {
+                      auto &head = $1;
+                      head->emplace_back(driver.build.splat_mlhs(self, $2, nullptr));
+                      head->concat($4);
+                      $$ = head;
+                    }
+                | tSTAR mlhs_node_z
+                    {
+                      $$ = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, $2));
+                    }
+                | tSTAR mlhs_node_z tCOMMA mlhs_post_z
+                    {
+                      node_list *items = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, $2));
+                      items->concat($4);
+                      $$ = items;
+                    }
+                | tSTAR
+                    {
+                      $$ = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, nullptr));
+                    }
+                | tSTAR tCOMMA mlhs_post_z
+                    {
+                      node_list *items = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, nullptr));
+                      items->concat($3);
+                      $$ = items;
+                    }
+
        mlhs_item: mlhs_node
                 | tLPAREN mlhs_inner rparen
+                    {
+                      $$ = driver.build.begin(self, $1, $2, $3);
+                    }
+
+     mlhs_item_z: mlhs_node_z
+                | tLPAREN mlhs_inner_z rparen_z
                     {
                       $$ = driver.build.begin(self, $1, $2, $3);
                     }
@@ -1085,11 +1793,33 @@ lbrace_cmd_block_start:
                       $$ = list;
                     }
 
+     mlhs_head_z: mlhs_item_z tCOMMA
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | mlhs_head_z mlhs_item_z tCOMMA
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+
        mlhs_post: mlhs_item
                     {
                       $$ = driver.alloc.node_list($1);
                     }
                 | mlhs_post tCOMMA mlhs_item
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
+     mlhs_post_z: mlhs_item_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | mlhs_post_z tCOMMA mlhs_item_z
                     {
                       auto &list = $1;
                       list->emplace_back($3);
@@ -1138,6 +1868,48 @@ lbrace_cmd_block_start:
                       DIAGCHECK();
                     }
 
+     mlhs_node_z: user_variable_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+                | keyword_variable_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tLBRACK2 opt_call_args_z rbracket_z
+                    {
+                      $$ = driver.build.indexAsgn(self, $1, $2, $3, $4);
+                    }
+                | primary_value_z call_op_z tIDENTIFIER
+                    {
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, true);
+                    }
+                | primary_value_z tCOLON2 tIDENTIFIER
+                    {
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
+                    }
+                | primary_value_z call_op_z tCONSTANT
+                    {
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, true);
+                    }
+                | primary_value_z tCOLON2 tCONSTANT
+                    {
+                      $$ = driver.build.assignable(self, driver.build.constFetch(self, $1, $2, $3));
+                      DIAGCHECK();
+                    }
+                | tCOLON3 tCONSTANT
+                    {
+                      $$ = driver.build.assignable(self, driver.build.constGlobal(self, $1, $2));
+                      DIAGCHECK();
+                    }
+                | backref_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+
              lhs: user_variable
                     {
                       $$ = driver.build.assignable(self, $1);
@@ -1180,12 +1952,55 @@ lbrace_cmd_block_start:
                       DIAGCHECK();
                     }
 
+             lhs_z: user_variable_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+                | keyword_variable_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tLBRACK2 opt_call_args_z rbracket_z
+                    {
+                      $$ = driver.build.indexAsgn(self, $1, $2, $3, $4);
+                    }
+                | primary_value_z call_op_z tIDENTIFIER
+                    {
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
+                    }
+                | primary_value_z tCOLON2 tIDENTIFIER
+                    {
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
+                    }
+                | primary_value_z call_op_z tCONSTANT
+                    {
+                      $$ = driver.build.attrAsgn(self, $1, $2, $3, false);
+                    }
+                | primary_value_z tCOLON2 tCONSTANT
+                    {
+                      $$ = driver.build.assignable(self, driver.build.constFetch(self, $1, $2, $3));
+                      DIAGCHECK();
+                    }
+                | tCOLON3 tCONSTANT
+                    {
+                      $$ = driver.build.assignable(self, driver.build.constGlobal(self, $1, $2));
+                      DIAGCHECK();
+                    }
+                | backref_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+
            cname: tIDENTIFIER
                     {
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ModuleNameConst, $1);
                       YYERROR;
                     }
                 | tCONSTANT
+         cname_z: cname
 
            cpath: tCOLON3 cname
                     {
@@ -1200,15 +2015,38 @@ lbrace_cmd_block_start:
                       $$ = driver.build.constFetch(self, $1, $2, $3);
                     }
 
+         cpath_z: tCOLON3 cname_z
+                    {
+                      $$ = driver.build.constGlobal(self, $1, $2);
+                    }
+                | cname_z
+                    {
+                      $$ = driver.build.const_(self, $1);
+                    }
+                | primary_value_z tCOLON2 cname_z
+                    {
+                      $$ = driver.build.constFetch(self, $1, $2, $3);
+                    }
+
            fname: tIDENTIFIER | tCONSTANT | tFID
                 | op
                 | reswords
+
+           fname_z: tIDENTIFIER | tCONSTANT | tFID
+                | op_z
+                | reswords_z
 
             fitem: fname
                     {
                       $$ = driver.build.symbol(self, $1);
                     }
                 | symbol
+
+          fitem_z: fname_z
+                    {
+                      $$ = driver.build.symbol(self, $1);
+                    }
+                | symbol_z
 
       undef_list: fitem
                     {
@@ -1225,11 +2063,27 @@ lbrace_cmd_block_start:
                       $$ = list;
                     }
 
+    undef_list_z: fitem_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | undef_list_z tCOMMA
+                    {
+                      driver.lex.set_state_expr_fname();
+                    }
+                    fitem_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($4);
+                      $$ = list;
+                    }
+
               op:   tPIPE    | tCARET  | tAMPER2  | tCMP  | tEQ     | tEQQ
                 |   tMATCH   | tNMATCH | tGT      | tGEQ  | tLT     | tLEQ
                 |   tNEQ     | tLSHFT  | tRSHFT   | tPLUS | tMINUS  | tSTAR2
                 |   tSTAR    | tDIVIDE | tPERCENT | tPOW  | tBANG   | tTILDE
                 |   tUPLUS   | tUMINUS | tAREF    | tASET | tDSTAR  | tBACK_REF2
+            op_z: op
 
         reswords: k__LINE__ | k__FILE__ | k__ENCODING__ | klBEGIN | klEND
                 | kALIAS    | kAND      | kBEGIN        | kBREAK  | kCASE
@@ -1240,6 +2094,7 @@ lbrace_cmd_block_start:
                 | kSELF     | kSUPER    | kTHEN         | kTRUE   | kUNDEF
                 | kWHEN     | kYIELD    | kIF           | kUNLESS | kWHILE
                 | kUNTIL
+      reswords_z: reswords
 
              arg: lhs tEQL arg_rhs
                     {
@@ -1480,7 +2335,232 @@ lbrace_cmd_block_start:
                     }
                 | primary
 
+             arg_z: lhs_z tEQL arg_rhs_z
+                    {
+                      $$ = driver.build.assign(self, $1, $2, $3);
+                    }
+                | var_lhs_z tOP_ASGN arg_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, $1, $2, $3);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tLBRACK2 opt_call_args_z rbracket_z tOP_ASGN arg_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.index(self, $1, $2, $3, $4), $5, $6);
+                      DIAGCHECK();
+                    }
+                | primary_value_z call_op_z tIDENTIFIER tOP_ASGN arg_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
+                      DIAGCHECK();
+                    }
+                | primary_value_z call_op_z tCONSTANT tOP_ASGN arg_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tCOLON2 tIDENTIFIER tOP_ASGN arg_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr), $4, $5);
+                      DIAGCHECK();
+                    }
+                | primary_value_z tCOLON2 tCONSTANT tOP_ASGN arg_rhs_z
+                    {
+                      auto const_ = driver.build.constOpAssignable(self, driver.build.constFetch(self, $1, $2, $3));
+                      $$ = driver.build.op_assign(self, const_, $4, $5);
+                      DIAGCHECK();
+                    }
+                | tCOLON3 tCONSTANT tOP_ASGN arg_rhs_z
+                    {
+                      auto const_ = driver.build.constOpAssignable(self, driver.build.constGlobal(self, $1, $2));
+                      $$ = driver.build.op_assign(self, const_, $3, $4);
+                      DIAGCHECK();
+                    }
+                | backref_z tOP_ASGN arg_rhs_z
+                    {
+                      $$ = driver.build.op_assign(self, $1, $2, $3);
+                      DIAGCHECK();
+                    }
+                | arg_z tDOT2 arg_z
+                    {
+                      $$ = driver.build.range_inclusive(self, $1, $2, $3);
+                    }
+                | arg_z tDOT3 arg_z
+                    {
+                      $$ = driver.build.range_exclusive(self, $1, $2, $3);
+                    }
+                | arg_z tDOT2
+                    {
+                      $$ = driver.build.range_inclusive(self, $1, $2, nullptr);
+                    }
+                | arg_z tDOT3
+                    {
+                      $$ = driver.build.range_exclusive(self, $1, $2, nullptr);
+                    }
+                | tBDOT2 arg_z
+                    {
+                      $$ = driver.build.range_inclusive(self, nullptr, $1, $2);
+                    }
+                | tBDOT3 arg_z
+                    {
+                      $$ = driver.build.range_exclusive(self, nullptr, $1, $2);
+                    }
+                | arg_z tPLUS arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tMINUS arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tSTAR2 arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tDIVIDE arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tPERCENT arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tPOW arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | tUNARY_NUM simple_numeric_z tPOW arg_z
+                    {
+                      $$ = driver.build.unary_op(self, $1, driver.build.binaryOp(self, $2, $3, $4));
+                    }
+                | tUPLUS arg_z
+                    {
+                      $$ = driver.build.unary_op(self, $1, $2);
+                    }
+                | tUMINUS arg_z
+                    {
+                      $$ = driver.build.unary_op(self, $1, $2);
+                    }
+                | arg_z tPIPE arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tCARET arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tAMPER2 arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tCMP arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | rel_expr_z %prec tCMP
+                | arg_z tEQ arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tEQQ arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tNEQ arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tMATCH arg_z
+                    {
+                      $$ = driver.build.match_op(self, $1, $2, $3);
+                      DIAGCHECK();
+                    }
+                | arg_z tNMATCH arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | tBANG arg_z
+                    {
+                      $$ = driver.build.not_op(self, $1, nullptr, $2, nullptr);
+                    }
+                | tTILDE arg_z
+                    {
+                      $$ = driver.build.unary_op(self, $1, $2);
+                    }
+                | arg_z tLSHFT arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tRSHFT arg_z
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg_z tANDOP arg_z
+                    {
+                      $$ = driver.build.logicalAnd(self, $1, $2, $3);
+                    }
+                | arg_z tOROP arg_z
+                    {
+                      $$ = driver.build.logicalOr(self, $1, $2, $3);
+                    }
+                | kDEFINED opt_nl_z arg_z
+                    {
+                      $$ = driver.build.keywordDefined(self, $1, $3);
+                    }
+                | arg_z tEH arg_z opt_nl_z tCOLON arg_z
+                    {
+                      $$ = driver.build.ternary(self, $1, $2, $3, $5, $6);
+                    }
+                | defn_head_z f_opt_paren_args_z tEQL arg_z
+                    {
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defn_head_z f_opt_paren_args_z tEQL arg_z kRESCUE_MOD arg_z
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head_z f_opt_paren_args_z tEQL arg_z
+                    {
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head_z f_opt_paren_args_z tEQL arg_z kRESCUE_MOD arg_z
+                    {
+                      auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
+                      auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
+
+                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, method_body);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | primary_z
+
            relop: tGT | tLT | tGEQ | tLEQ
+         relop_z: relop
 
         rel_expr: arg relop arg %prec tGT
                     {
@@ -1491,23 +2571,40 @@ lbrace_cmd_block_start:
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
 
-       arg_value: arg
+        rel_expr_z: arg_z relop_z arg_z %prec tGT
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | rel_expr_z relop_z arg_z %prec tGT
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
 
-       aref_args: list_none
-                | args trailer
-                | args tCOMMA assocs trailer
+       arg_value: arg
+     arg_value_z: arg_z
+
+       aref_args: list_none_z
+                | args_z trailer_z
+                | args_z tCOMMA assocs_z trailer_z
                     {
                       auto &list = $1;
                       list->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
                       $$ = list;
                     }
-                | assocs trailer
+                | assocs_z trailer_z
                     {
                       $$ = driver.alloc.node_list(driver.build.associate(self, nullptr, $1, nullptr));
                     }
 
          arg_rhs: arg %prec tOP_ASGN
                 | arg kRESCUE_MOD arg
+                    {
+                      node_list rescue_body(driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3));
+                      $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
+                    }
+
+         arg_rhs_z: arg_z %prec tOP_ASGN
+                | arg_z kRESCUE_MOD arg_z
                     {
                       node_list rescue_body(driver.build.rescue_body(self, $2, nullptr, nullptr, nullptr, nullptr, $3));
                       $$ = driver.build.beginBody(self, $1, &rescue_body, nullptr, nullptr, nullptr, nullptr);
@@ -1529,11 +2626,32 @@ lbrace_cmd_block_start:
                       auto node_list = driver.alloc.node_list(forwarded_args);
                       $$ = driver.alloc.delimited_node_list($1, node_list, $3);
                     }
+    paren_args_z: tLPAREN2 opt_call_args_z rparen_z
+                    {
+                      $$ = driver.alloc.delimited_node_list($1, $2, $3);
+                    }
+                | tLPAREN2 args_z tCOMMA args_forward_z rparen_z
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $4);
+                      $2->emplace_back(forwarded_args);
+                      $$ = driver.alloc.delimited_node_list($1, $2, $5);
+                    }
+                | tLPAREN2 args_forward_z rparen_z
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $2);
+                      auto node_list = driver.alloc.node_list(forwarded_args);
+                      $$ = driver.alloc.delimited_node_list($1, node_list, $3);
+                    }
   opt_paren_args: // nothing
                     {
                       $$ = driver.alloc.delimited_node_list(nullptr, driver.alloc.node_list(), nullptr);
                     }
                 | paren_args
+opt_paren_args_z: // nothing
+                    {
+                      $$ = driver.alloc.delimited_node_list(nullptr, driver.alloc.node_list(), nullptr);
+                    }
+                | paren_args_z
 
    opt_call_args: // nothing
                     {
@@ -1548,6 +2666,23 @@ lbrace_cmd_block_start:
                       $$ = list;
                     }
                 | assocs tCOMMA
+                    {
+                      $$ = driver.alloc.node_list(driver.build.associate(self, nullptr, $1, nullptr));
+                    }
+
+   opt_call_args_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | call_args_z
+                | args_z tCOMMA
+                | args_z tCOMMA assocs_z tCOMMA
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
+                      $$ = list;
+                    }
+                | assocs_z tCOMMA
                     {
                       $$ = driver.alloc.node_list(driver.build.associate(self, nullptr, $1, nullptr));
                     }
@@ -1590,6 +2725,34 @@ lbrace_cmd_block_start:
                       $$ = driver.alloc.node_list($1);
                     }
 
+     call_args_z: command_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | args_z opt_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | assocs_z opt_block_arg_z
+                    {
+                      node_list *args = driver.alloc.node_list(driver.build.associate(self, nullptr, $1, nullptr));
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | args_z tCOMMA assocs_z opt_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | block_arg_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+
     command_args:   {
                       ruby_parser::token_type last_token = driver.last_token->type();
                       bool lookahead = (last_token == ruby_parser::token_type::tLBRACK) || (last_token == ruby_parser::token_type::tLPAREN_ARG);
@@ -1618,12 +2781,53 @@ lbrace_cmd_block_start:
                       $$ = $2;
                     }
 
+  command_args_z:   {
+                      ruby_parser::token_type last_token = driver.last_token->type();
+                      bool lookahead = (last_token == ruby_parser::token_type::tLBRACK) || (last_token == ruby_parser::token_type::tLPAREN_ARG);
+
+                      if (lookahead) {
+                        auto top = driver.lex.cmdarg.pop();
+                        driver.lex.cmdarg.push(true);
+                        driver.lex.cmdarg.push(top);
+                      } else {
+                        driver.lex.cmdarg.push(true);
+                      }
+                    }
+                  call_args_z
+                    {
+                      ruby_parser::token_type last_token = driver.last_token->type();
+                      bool lookahead = (last_token == ruby_parser::token_type::tLBRACE_ARG);
+
+                      if (lookahead) {
+                        auto top = driver.lex.cmdarg.pop();
+                        driver.lex.cmdarg.pop();
+                        driver.lex.cmdarg.push(top);
+                      } else {
+                        driver.lex.cmdarg.pop();
+                      }
+
+                      $$ = $2;
+                    }
+
        block_arg: tAMPER arg_value
+                    {
+                      $$ = driver.build.blockPass(self, $1, $2);
+                    }
+     block_arg_z: tAMPER arg_value_z
                     {
                       $$ = driver.build.blockPass(self, $1, $2);
                     }
 
    opt_block_arg: tCOMMA block_arg
+                    {
+                      $$ = driver.alloc.node_list($2);
+                    }
+                | // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+
+ opt_block_arg_z: tCOMMA block_arg_z
                     {
                       $$ = driver.alloc.node_list($2);
                     }
@@ -1664,11 +2868,38 @@ lbrace_cmd_block_start:
                       $$ = list;
                     }
 
+            args_z: arg_value_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | tSTAR arg_value_z
+                    {
+                      $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
+                    }
+                | args_z tCOMMA arg_value_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+                | args_z tCOMMA tSTAR arg_value_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.splat(self, $3, $4));
+                      $$ = list;
+                    }
+
         mrhs_arg: mrhs
                     {
                       $$ = driver.build.array(self, nullptr, $1, nullptr);
                     }
                 | arg_value
+
+      mrhs_arg_z: mrhs_z
+                    {
+                      $$ = driver.build.array(self, nullptr, $1, nullptr);
+                    }
+                | arg_value_z
 
             mrhs: args tCOMMA arg_value
                     {
@@ -1683,6 +2914,23 @@ lbrace_cmd_block_start:
                       $$ = list;
                     }
                 | tSTAR arg_value
+                    {
+                      $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
+                    }
+
+          mrhs_z: args_z tCOMMA arg_value_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+                | args_z tCOMMA tSTAR arg_value_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.splat(self, $3, $4));
+                      $$ = list;
+                    }
+                | tSTAR arg_value_z
                     {
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
                     }
@@ -1748,6 +2996,25 @@ lbrace_cmd_block_start:
                 | tLBRACK aref_args tRBRACK
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
+                    }
+/*
+       aref_args: list_none_z
+                | args_z trailer_z
+                | args_z tCOMMA assocs_z trailer_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
+                      $$ = list;
+                    }
+                | assocs_z trailer_z
+                    {
+                      $$ = driver.alloc.node_list(driver.build.associate(self, nullptr, $1, nullptr));
+                    }
+*/
+//                | tLBRACK args_z tCOMMA error
+                | tLBRACK error
+                    {
+                      $$ = driver.build.error_node(self,@1.begin, @1.end);
                     }
                 | tLBRACE assoc_list tRCURLY
                     {
@@ -1988,7 +3255,303 @@ lbrace_cmd_block_start:
                       $$ = driver.build.keywordRetry(self, $1);
                     }
 
+       primary_z: literal_z
+                | strings_z
+                | xstring_z
+                | regexp_z
+                | words_z
+                | qwords_z
+                | symbols_z
+                | qsymbols_z
+                | var_ref_z
+                | backref_z
+                | tFID
+                    {
+                      $$ = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
+                    }
+                | kBEGIN
+                    {
+                      $<stack>$ = driver.copy_stack();
+                      driver.lex.cmdarg.clear();
+                    }
+                    bodystmt_z kEND
+                    {
+                      driver.replace_stack($<stack>2);
+                      $$ = driver.build.beginKeyword(self, $1, $3, $4);
+                    }
+                | tLPAREN_ARG stmt_z
+                    {
+                      driver.lex.set_state_expr_endarg();
+                    }
+                    rparen_z
+                    {
+                      $$ = driver.build.begin(self, $1, $2, $4);
+                    }
+                | tLPAREN_ARG
+                    {
+                      driver.lex.set_state_expr_endarg();
+                    }
+                    opt_nl_z tRPAREN
+                    {
+                      $$ = driver.build.begin(self, $1, nullptr, $4);
+                    }
+                | tLPAREN compstmt_z tRPAREN
+                    {
+                      $$ = driver.build.begin(self, $1, $2, $3);
+                    }
+                | primary_value_z tCOLON2 tCONSTANT
+                    {
+                      $$ = driver.build.constFetch(self, $1, $2, $3);
+                    }
+                | tCOLON3 tCONSTANT
+                    {
+                      $$ = driver.build.constGlobal(self, $1, $2);
+                    }
+                | tLBRACK aref_args tRBRACK
+                    {
+                      $$ = driver.build.array(self, $1, $2, $3);
+                    }
+                | tLBRACE assoc_list_z tRCURLY
+                    {
+                      $$ = driver.build.associate(self, $1, $2, $3);
+                    }
+                | k_return_z
+                    {
+                      $$ = driver.build.keywordReturn(self, $1, nullptr, nullptr, nullptr);
+                    }
+                | kYIELD tLPAREN2 call_args_z rparen_z
+                    {
+                      $$ = driver.build.keywordYield(self, $1, $2, $3, $4);
+                      DIAGCHECK();
+                    }
+                | kYIELD tLPAREN2 rparen_z
+                    {
+                      node_list tmp;
+                      $$ = driver.build.keywordYield(self, $1, $2, &tmp, $3);
+                      DIAGCHECK();
+                    }
+                | kYIELD
+                    {
+                      $$ = driver.build.keywordYield(self, $1, nullptr, nullptr, nullptr);
+                      DIAGCHECK();
+                    }
+                | kDEFINED opt_nl_z tLPAREN2 expr_z rparen_z
+                    {
+                      $$ = driver.build.keywordDefined(self, $1, $4);
+                    }
+                | kNOT tLPAREN2 expr_z rparen_z
+                    {
+                      $$ = driver.build.not_op(self, $1, $2, $3, $4);
+                    }
+                | kNOT tLPAREN2 rparen_z
+                    {
+                      $$ = driver.build.not_op(self, $1, $2, nullptr, $3);
+                    }
+                | fcall_z brace_block_z
+                    {
+                      auto method_call = driver.build.call_method(self, nullptr, nullptr, $1, nullptr, nullptr, nullptr);
+                      auto &delimited_block = $2;
+
+                      $$ = driver.build.block(self, method_call,
+                        delimited_block->begin,
+                        delimited_block->args,
+                        delimited_block->body,
+                        delimited_block->end);
+                      DIAGCHECK();
+                    }
+                | method_call_z
+                | method_call_z brace_block_z
+                    {
+                      auto &delimited_block = $2;
+                      $$ = driver.build.block(self, $1,
+                        delimited_block->begin,
+                        delimited_block->args,
+                        delimited_block->body,
+                        delimited_block->end);
+                      DIAGCHECK();
+                    }
+                | tLAMBDA
+                    {
+                      driver.lex.context.push(Context::State::LAMBDA);
+                    }
+                    lambda
+                    {
+                      auto lambda_call = driver.build.callLambda(self, $1);
+                      auto &lambda = $3;
+                      $$ = driver.build.block(self, lambda_call,
+                        lambda->begin,
+                        lambda->args,
+                        lambda->body,
+                        lambda->end);
+                      DIAGCHECK();
+                    }
+                | kIF expr_value_z then_z compstmt_z if_tail_z kEND
+                    {
+                      auto &else_ = $5;
+                      $$ = driver.build.condition(self, $1, $2, $3, $4,
+                        else_ ? else_->tok : nullptr,
+                        else_ ? else_->nod : nullptr, $6);
+                    }
+                | kIF strings_z kDO compstmt_z if_tail_z kEND
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.begin, @1.end));
+                      auto &else_ = $5;
+                      $$ = driver.build.condition(self, $1, $2, $3, $4,
+                        else_ ? else_->tok : nullptr,
+                        else_ ? else_->nod : nullptr, $6);
+                    }
+                | kUNLESS expr_value_z then_z compstmt_z opt_else_z kEND
+                    {
+                      auto &else_ = $5;
+                      $$ = driver.build.condition(self, $1, $2, $3,
+                        else_ ? else_->nod : nullptr,
+			                  else_ ? else_->tok : nullptr, $4, $6);
+                    }
+                | kWHILE expr_value_do_z compstmt_z kEND
+                    {
+                      $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3, $4);
+                    }
+                | kUNTIL expr_value_do_z compstmt_z kEND
+                    {
+                      $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3, $4);
+                    }
+                | kCASE expr_value_z opt_terms_z case_body_z kEND
+                    {
+                      auto &case_body = $4;
+                      auto &else_ = case_body->els;
+                      $$ = driver.build.case_(self, $1, $2,
+                        &case_body->whens,
+                        else_ ? else_->tok : nullptr,
+			                  else_ ? else_->nod : nullptr, $5);
+                    }
+                | kCASE            opt_terms_z case_body_z kEND
+                    {
+                      auto &case_body = $3;
+                      auto &else_ = case_body->els;
+                      $$ = driver.build.case_(self, $1, nullptr,
+                        &case_body->whens,
+                        else_ ? else_->tok : nullptr,
+			                  else_ ? else_->nod : nullptr, $4);
+                    }
+                 | kCASE expr_value_z opt_terms_z p_case_body_z kEND
+                    {
+                      auto &case_body = $4;
+                      auto &else_ = case_body->els;
+                      $$ = driver.build.case_match(self, $1, $2,
+                        &case_body->whens,
+                        else_ ? else_->tok : nullptr,
+			                  else_ ? else_->nod : nullptr, $5);
+                    }
+                | kFOR for_var_z kIN expr_value_do_z compstmt_z kEND
+                    {
+                      $$ = driver.build.for_(self, $1, $2, $3, $4->nod, $4->tok, $5, $6);
+                    }
+                | kCLASS cpath_z superclass_z
+                    {
+                      driver.lex.extend_static();
+                      driver.lex.cmdarg.push(false);
+                      driver.lex.cond.push(false);
+                      driver.lex.context.push(Context::State::CLASS);
+                    }
+                    bodystmt_z kEND
+                    {
+                      if (!driver.lex.context.classDefintinionAllowed()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ClassInDef, $1);
+                        YYERROR;
+                      }
+
+                      auto class_tok = $1;
+                      auto end_tok = $6;
+
+                      auto &superclass_ = $3;
+                      auto lt_t       = superclass_ ? superclass_->tok : nullptr;
+                      auto superclass = superclass_ ? superclass_->nod : nullptr;
+
+                      $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, $5, end_tok);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                    }
+                | kCLASS tLSHFT expr_z term_z
+                    {
+                      driver.lex.extend_static();
+                      driver.lex.cmdarg.push(false);
+                      driver.lex.cond.push(false);
+                      driver.lex.context.push(Context::State::SCLASS);
+                    }
+                    bodystmt_z kEND
+                    {
+                      $$ = driver.build.def_sclass(self, $1, $2, $3, $6, $7);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                    }
+                | kMODULE cpath_z
+                    {
+                      driver.lex.extend_static();
+                      driver.lex.cmdarg.push(false);
+                      driver.lex.context.push(Context::State::MODULE);
+                    }
+                    bodystmt_z kEND
+                    {
+                      if (!driver.lex.context.moduleDefintinionAllowed()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ModuleInDef, $1);
+                        YYERROR;
+                      }
+
+                      auto module_tok = $1;
+                      auto end_tok = $5;
+
+                      $$ = driver.build.defModule(self, module_tok, $2, $4, end_tok);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                    }
+                | defn_head_z f_arglist_z bodystmt_z kEND
+                    {
+                      $$ = driver.build.defMethod(self, $1->begin, $1->end, $2, $3, $4);
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | defs_head_z f_arglist_z bodystmt_z kEND
+                    {
+                      $$ = driver.build.defSingleton(self, $1, $2, $3, $4);
+                      DIAGCHECK();
+
+                      driver.lex.cmdarg.pop();
+                      driver.lex.cond.pop();
+                      driver.lex.unextend();
+                      driver.lex.context.pop();
+                      driver.current_arg_stack.pop();
+                    }
+                | kBREAK
+                    {
+                      $$ = driver.build.keywordBreak(self, $1, nullptr, nullptr, nullptr);
+                    }
+                | kNEXT
+                    {
+                      $$ = driver.build.keywordNext(self, $1, nullptr, nullptr, nullptr);
+                    }
+                | kREDO
+                    {
+                      $$ = driver.build.keywordRedo(self, $1);
+                    }
+                | kRETRY
+                    {
+                      $$ = driver.build.keywordRetry(self, $1);
+                    }
+
    primary_value: primary
+ primary_value_z: primary_z
 
         k_return: kRETURN
                     {
@@ -1997,6 +3560,7 @@ lbrace_cmd_block_start:
                         YYERROR;
                       }
                     }
+      k_return_z: k_return
 
             then: term
                 | kTHEN
@@ -2005,11 +3569,34 @@ lbrace_cmd_block_start:
                       $$ = $2;
                     }
 
+          then_z: term_z
+                | kTHEN
+                | term_z kTHEN
+                    {
+                      $$ = $2;
+                    }
+
               do: term
+                | kDO_COND
+
+            do_z: term_z
                 | kDO_COND
 
          if_tail: opt_else
                 | kELSIF expr_value then compstmt if_tail
+                    {
+                      auto elsif_t = $1;
+                      auto &else_ = $5;
+                      $$ = driver.alloc.node_with_token(elsif_t,
+                        driver.build.condition(self,
+                          elsif_t, $2, $3, $4,
+                          else_ ? else_->tok : nullptr,
+                          else_ ? else_->nod : nullptr, nullptr)
+                      );
+                    }
+
+       if_tail_z: opt_else_z
+                | kELSIF expr_value_z then_z compstmt_z if_tail_z
                     {
                       auto elsif_t = $1;
                       auto &else_ = $5;
@@ -2030,8 +3617,20 @@ lbrace_cmd_block_start:
                       $$ = driver.alloc.node_with_token($1, $2);
                     }
 
+      opt_else_z: none_z
+                    {
+                      $$ = nullptr;
+                    }
+                | kELSE compstmt_z
+                    {
+                      $$ = driver.alloc.node_with_token($1, $2);
+                    }
+ 
          for_var: lhs
                 | mlhs
+
+       for_var_z: lhs_z
+                | mlhs_z
 
           f_marg: f_norm_arg
                     {
@@ -2042,11 +3641,31 @@ lbrace_cmd_block_start:
                       $$ = driver.build.multi_lhs(self, $1, $2, $3);
                     }
 
+        f_marg_z: f_norm_arg_z
+                    {
+                      $$ = driver.build.arg(self, $1);
+                    }
+                | tLPAREN f_margs_z rparen_z
+                    {
+                      $$ = driver.build.multi_lhs(self, $1, $2, $3);
+                    }
+
      f_marg_list: f_marg
                     {
                       $$ = driver.alloc.node_list($1);
                     }
                 | f_marg_list tCOMMA f_marg
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
+   f_marg_list_z: f_marg_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | f_marg_list_z tCOMMA f_marg_z
                     {
                       auto &list = $1;
                       list->emplace_back($3);
@@ -2078,7 +3697,41 @@ lbrace_cmd_block_start:
                       $$ = list;
                     }
 
+       f_margs_z: f_marg_list_z
+                | f_marg_list_z tCOMMA f_rest_marg_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+                | f_marg_list_z tCOMMA f_rest_marg_z tCOMMA f_marg_list_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      list->concat($5);
+                      $$ = list;
+                    }
+                |                    f_rest_marg_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                |                    f_rest_marg_z tCOMMA f_marg_list_z
+                    {
+                      auto &list = $3;
+                      list->push_front($1);
+                      $$ = list;
+                    }
+
      f_rest_marg: tSTAR f_norm_arg
+                    {
+                      $$ = driver.build.restarg(self, $1, $2);
+                    }
+                | tSTAR
+                    {
+                      $$ = driver.build.restarg(self, $1, nullptr);
+                    }
+
+   f_rest_marg_z: tSTAR f_norm_arg_z
                     {
                       $$ = driver.build.restarg(self, $1, $2);
                     }
@@ -2117,8 +3770,48 @@ lbrace_cmd_block_start:
                       $$ = $1;
                     }
 
+block_args_tail_z: f_block_kwarg_z tCOMMA f_kwrest_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_block_kwarg_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_kwrest_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_no_kwarg_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_block_arg_z
+                    {
+                      $$ = $1;
+                    }
+
 opt_block_args_tail:
                   tCOMMA block_args_tail
+                    {
+                      $$ = $2;
+                    }
+                | // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+
+opt_block_args_tail_z:
+                  tCOMMA block_args_tail_z
                     {
                       $$ = $2;
                     }
@@ -2230,12 +3923,125 @@ opt_block_args_tail:
                     }
                 |                                                                block_args_tail
 
+   block_param_z: f_arg_z tCOMMA f_block_optarg_z tCOMMA f_rest_arg_z              opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA f_block_optarg_z tCOMMA f_rest_arg_z tCOMMA f_arg_z opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($7);
+                      args->concat($8);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA f_block_optarg_z                                opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA f_block_optarg_z tCOMMA                   f_arg_z opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA                       f_rest_arg_z              opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA
+                | f_arg_z tCOMMA                       f_rest_arg_z tCOMMA f_arg_z opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_arg_z                                                      opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      auto &block_args_tail = $2;
+
+                      if (block_args_tail->size() == 0 && args->size() == 1) {
+                        $$ = driver.alloc.node_list(driver.build.procarg0(self, args->at(0)));
+                      } else {
+                        args->concat(block_args_tail);
+                        $$ = args;
+                      }
+                    }
+                | f_block_optarg_z tCOMMA              f_rest_arg_z              opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_block_optarg_z tCOMMA              f_rest_arg_z tCOMMA f_arg_z opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_block_optarg_z                                             opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_block_optarg_z tCOMMA                                f_arg_z opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                |                                    f_rest_arg_z              opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                |                                    f_rest_arg_z tCOMMA f_arg_z opt_block_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                |                                                                block_args_tail_z
+
  opt_block_param: // nothing
                     {
                       $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
                       DIAGCHECK();
                     }
                 | block_param_def
+                    {
+                      driver.lex.set_state_expr_value();
+                    }
+
+opt_block_param_z: // nothing
+                    {
+                      $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
+                      DIAGCHECK();
+                    }
+                | block_param_def_z
                     {
                       driver.lex.set_state_expr_value();
                     }
@@ -2257,11 +4063,37 @@ opt_block_args_tail:
                       DIAGCHECK();
                     }
 
-     opt_bv_decl: opt_nl
+block_param_def_z: tPIPE opt_bv_decl_z tPIPE
+                    {
+                      driver.numparam_stack.set_ordinary_params();
+                      $$ = driver.build.args(self, $1, $2, $3, true);
+                      driver.current_arg_stack.set("");
+                      DIAGCHECK();
+                    }
+                | tPIPE block_param_z opt_bv_decl_z tPIPE
+                    {
+                      driver.numparam_stack.set_ordinary_params();
+                      auto &params = $2;
+                      params->concat($3);
+                      driver.current_arg_stack.set("");
+                      $$ = driver.build.args(self, $1, params, $4, true);
+                      DIAGCHECK();
+                    }
+
+    opt_bv_decl: opt_nl
                     {
                       $$ = driver.alloc.node_list();
                     }
                 | opt_nl tSEMI bv_decls opt_nl
+                    {
+                      $$ = $3;
+                    }
+
+  opt_bv_decl_z: opt_nl_z
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | opt_nl_z tSEMI bv_decls_z opt_nl_z
                     {
                       $$ = $3;
                     }
@@ -2271,6 +4103,17 @@ opt_block_args_tail:
                       $$ = driver.alloc.node_list($1);
                     }
                 | bv_decls tCOMMA bvar
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
+      bv_decls_z: bvar_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | bv_decls_z tCOMMA bvar_z
                     {
                       auto &list = $1;
                       list->emplace_back($3);
@@ -2288,6 +4131,17 @@ opt_block_args_tail:
                       $$ = nullptr;
                     }
 
+          bvar_z: tIDENTIFIER
+                    {
+                      auto ident = $1;
+                      driver.lex.declare(ident->view());
+                      $$ = driver.build.shadowarg(self, ident);
+                    }
+                | f_bad_arg_z
+                    {
+                      $$ = nullptr;
+                    }
+
           lambda:   {
                       driver.lex.extend_dynamic();
                       driver.numparam_stack.push(driver.alloc.node_list());
@@ -2298,6 +4152,30 @@ opt_block_args_tail:
                       driver.lex.cmdarg.push(false);
                     }
                   lambda_body
+                    {
+                      driver.lex.cmdarg.pop();
+                      auto &delimited_block = $4;
+                      if (driver.numparam_stack.seen_numparams()) {
+                        delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                      } else {
+                        delimited_block->args = $2;
+                      }
+                      $$ = delimited_block;
+
+                      driver.numparam_stack.pop();
+                      driver.lex.unextend();
+                    }
+
+        lambda_z:   {
+                      driver.lex.extend_dynamic();
+                      driver.numparam_stack.push(driver.alloc.node_list());
+                    }
+                  f_larglist_z
+                    {
+                      driver.lex.context.pop();
+                      driver.lex.cmdarg.push(false);
+                    }
+                  lambda_body_z
                     {
                       driver.lex.cmdarg.pop();
                       auto &delimited_block = $4;
@@ -2329,6 +4207,23 @@ opt_block_args_tail:
                       DIAGCHECK();
                     }
 
+   f_larglist_z: tLPAREN2 f_args_z opt_bv_decl_z tRPAREN
+                    {
+                      driver.numparam_stack.set_ordinary_params();
+                      auto &args = $2;
+                      args->concat($3);
+                      $$ = driver.build.args(self, $1, args, $4, true);
+                      DIAGCHECK();
+                    }
+                | f_args_z
+                    {
+                      if ($1->size() > 0) {
+                        driver.numparam_stack.set_ordinary_params();
+                      }
+                      $$ = driver.build.args(self, nullptr, $1, nullptr, true);
+                      DIAGCHECK();
+                    }
+
      lambda_body: tLAMBEG
                     {
                       driver.lex.context.push(Context::State::LAMBDA);
@@ -2348,11 +4243,43 @@ opt_block_args_tail:
                       driver.lex.context.pop();
                     }
 
+   lambda_body_z: tLAMBEG
+                    {
+                      driver.lex.context.push(Context::State::LAMBDA);
+                    }
+                  compstmt_z tRCURLY
+                    {
+                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
+                      driver.lex.context.pop();
+                    }
+                | kDO_LAMBDA
+                    {
+                      driver.lex.context.push(Context::State::LAMBDA);
+                    }
+                  bodystmt_z kEND
+                    {
+                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
+                      driver.lex.context.pop();
+                    }
+
         do_block: kDO_BLOCK
                     {
                       driver.lex.context.push(Context::State::BLOCK);
                     }
                   do_body kEND
+                    {
+                      auto &delimited_block = $3;
+                      delimited_block->begin = $1;
+                      delimited_block->end = $4;
+                      $$ = delimited_block;
+                      driver.lex.context.pop();
+                    }
+
+      do_block_z: kDO_BLOCK
+                    {
+                      driver.lex.context.push(Context::State::BLOCK);
+                    }
+                  do_body_z kEND
                     {
                       auto &delimited_block = $3;
                       delimited_block->begin = $1;
@@ -2396,6 +4323,48 @@ opt_block_args_tail:
                       DIAGCHECK();
                     }
                 | block_call dot_or_colon operation2 command_args do_block
+                    {
+                      auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
+                      auto &block = $5;
+                      $$ = driver.build.block(self, method_call, block->begin, block->args, block->body, block->end);
+                      DIAGCHECK();
+                    }
+
+    block_call_z: command_z do_block_z
+                    {
+                      auto &delimited_block = $2;
+                      $$ = driver.build.block(self, $1,
+                          delimited_block->begin,
+                          delimited_block->args,
+                          delimited_block->body,
+                          delimited_block->end
+                        );
+                      DIAGCHECK();
+                    }
+                | block_call_z dot_or_colon_z operation2_z opt_paren_args_z
+                    {
+                      auto &delimited = $4;
+                      $$ = driver.build.call_method(self, $1, $2, $3,
+                                  delimited->begin,
+                                  delimited->inner,
+                                  delimited->end);
+                    }
+                | block_call_z dot_or_colon_z operation2_z opt_paren_args_z brace_block_z
+                    {
+                      auto &delimited = $4;
+                      auto method_call = driver.build.call_method(self, $1, $2, $3,
+                          delimited->begin,
+                          delimited->inner,
+                          delimited->end);
+                      auto &block = $5;
+                      $$ = driver.build.block(self, method_call,
+                          block->begin,
+                          block->args,
+                          block->body,
+                          block->end);
+                      DIAGCHECK();
+                    }
+                | block_call_z dot_or_colon_z operation2_z command_args_z do_block_z
                     {
                       auto method_call = driver.build.call_method(self, $1, $2, $3, nullptr, $4, nullptr);
                       auto &block = $5;
@@ -2468,8 +4437,69 @@ opt_block_args_tail:
                     {
                       $$ = driver.build.index(self, $1, $2, $3, $4);
                     }
+   method_call_z: fcall_z paren_args_z
+                    {
+                      auto &delimited = $2;
+                      $$ = driver.build.call_method(self, nullptr, nullptr, $1,
+                        delimited->begin,
+                        delimited->inner,
+                        delimited->end);
+                    }
+                | primary_value_z call_op_z operation2_z opt_paren_args_z
+                    {
+                      auto &delimited = $4;
+                      $$ = driver.build.call_method(self, $1, $2, $3,
+                          delimited->begin,
+                          delimited->inner,
+                          delimited->end);
+                    }
+                | primary_value_z tCOLON2 operation2_z paren_args_z
+                    {
+                      auto &delimited = $4;
+                      $$ = driver.build.call_method(self, $1, $2, $3,
+                          delimited->begin,
+                          delimited->inner,
+                          delimited->end);
+                    }
+                | primary_value_z tCOLON2 operation3_z
+                    {
+                      $$ = driver.build.call_method(self, $1, $2, $3, nullptr, nullptr, nullptr);
+                    }
+                | primary_value_z call_op_z paren_args_z
+                    {
+                      auto &delimited = $3;
+                      $$ = driver.build.call_method(self, $1, $2, nullptr,
+                          delimited->begin,
+                          delimited->inner,
+                          delimited->end);
+                    }
+                | primary_value_z tCOLON2 paren_args_z
+                    {
+                      auto &delimited = $3;
+                      $$ = driver.build.call_method(self, $1, $2, nullptr,
+                          delimited->begin,
+                          delimited->inner,
+                          delimited->end);
+                    }
+                | kSUPER paren_args_z
+                    {
+                      auto &delimited = $2;
+                      $$ = driver.build.keywordSuper(self, $1,
+                          delimited->begin,
+                          delimited->inner,
+                          delimited->end);
+                    }
+                | kSUPER
+                    {
+                      $$ = driver.build.keywordZsuper(self, $1);
+                    }
+                | primary_value_z tLBRACK2 opt_call_args_z rbracket_z
+                    {
+                      $$ = driver.build.index(self, $1, $2, $3, $4);
+                    }
 lcurly_block_start:
                   tLCURLY { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+lcurly_block_start_z: lcurly_block_start
      brace_block: lcurly_block_start brace_body tRCURLY
                     {
                       auto &block = $2;
@@ -2502,12 +4532,59 @@ lcurly_block_start:
                       $$ = block;
                       driver.lex.context.pop();
                     }
+   brace_block_z: lcurly_block_start_z brace_body_z tRCURLY
+                    {
+                      auto &block = $2;
+                      block->begin = $1;
+                      block->end = $3;
+                      $$ = block;
+                      driver.lex.context.pop();
+                    }
+                  // Error-recovery case for typos like "foo {&:bar}"
+                | lcurly_block_start_z tAMPER arg_value_z tRCURLY
+                    {
+                      auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                      auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
+                      block->begin = $1;
+                      block->end = $4;
+                      $$ = block;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
+                          diagnostic::range(@1.begin, @4.end));
+                      driver.lex.context.pop();
+                    }
+                | kDO
+                    {
+                      driver.lex.context.push(Context::State::BLOCK);
+                    }
+                  do_body_z kEND
+                    {
+                      auto &block = $3;
+                      block->begin = $1;
+                      block->end = $4;
+                      $$ = block;
+                      driver.lex.context.pop();
+                    }
 
       brace_body:   {
                       driver.lex.extend_dynamic();
                       driver.numparam_stack.push(driver.alloc.node_list());
                     }
                     opt_block_param bodystmt
+                    {
+                      if (driver.numparam_stack.seen_numparams()) {
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3, nullptr);
+                      } else {
+                        $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr);
+                      }
+                      driver.numparam_stack.pop();
+                      driver.lex.unextend();
+                    }
+    brace_body_z:   {
+                      driver.lex.extend_dynamic();
+                      driver.numparam_stack.push(driver.alloc.node_list());
+                    }
+                    opt_block_param_z bodystmt_z
                     {
                       if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
@@ -2540,7 +4617,35 @@ lcurly_block_start:
                       driver.lex.cmdarg.pop();
                     }
 
+       do_body_z:   {
+                      driver.lex.extend_dynamic();
+                      driver.numparam_stack.push(driver.alloc.node_list());
+                    }
+                    {
+                      driver.lex.cmdarg.push(false);
+                    }
+                    opt_block_param_z bodystmt_z
+                    {
+                      if (driver.numparam_stack.seen_numparams()) {
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4, nullptr);
+                      } else {
+                        $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
+                      }
+                      driver.lex.unextend();
+
+                      driver.numparam_stack.pop();
+                      driver.lex.cmdarg.pop();
+                    }
+
        case_body: kWHEN args then compstmt cases
+                    {
+                      auto &cases = $5;
+                      cases->whens.push_front(driver.build.when(self, $1, $2, $3, $4));
+                      $$ = cases;
+                    }
+
+     case_body_z: kWHEN args_z then_z compstmt_z cases_z
                     {
                       auto &cases = $5;
                       cases->whens.push_front(driver.build.when(self, $1, $2, $3, $4));
@@ -2552,6 +4657,12 @@ lcurly_block_start:
                       $$ = driver.alloc.case_body($1);
                     }
                 | case_body
+
+         cases_z: opt_else_z
+                    {
+                      $$ = driver.alloc.case_body($1);
+                    }
+                | case_body_z
 
      p_case_body: kIN
                     {
@@ -2577,11 +4688,40 @@ lcurly_block_start:
                       $$ = $7;
                       $$->whens.push_front(in_pattern);
                     }
+   p_case_body_z: kIN
+                    {
+                      driver.lex.set_state_expr_beg();
+                      driver.lex.unset_command_start();
+                      driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
+                      $<boolean>$ = driver.lex.in_kwarg;
+                      driver.lex.in_kwarg = true;
+                    }
+                  p_top_expr_z then_z
+                    {
+                      driver.lex.in_kwarg = $<boolean>2;
+                    }
+                  compstmt_z p_cases_z
+                    {
+                      ruby_parser::ForeignPtr pattern = $3->at(0);
+                      ruby_parser::ForeignPtr guard = nullptr;
+                      if ($3->size() > 1) {
+                        guard = $3->at(1);
+                      }
+                      auto in_pattern = driver.build.in_pattern(self, $1, pattern, guard, $4, $6);
+                      $$ = $7;
+                      $$->whens.push_front(in_pattern);
+                    }
          p_cases: opt_else
                     {
                       $$ = driver.alloc.case_body($1);
                     }
                 | p_case_body
+       p_cases_z: opt_else_z
+                    {
+                      $$ = driver.alloc.case_body($1);
+                    }
+                | p_case_body_z
       p_top_expr: p_top_expr_body
                     {
                       $$ = driver.alloc.node_list($1);
@@ -2592,6 +4732,20 @@ lcurly_block_start:
                       $$->emplace_back(driver.build.if_guard(self, $2, $3));
                     }
                 | p_top_expr_body kUNLESS_MOD expr_value
+                    {
+                      $$ = driver.alloc.node_list($1);
+                      $$->emplace_back(driver.build.unless_guard(self, $2, $3));
+                    }
+    p_top_expr_z: p_top_expr_body_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | p_top_expr_body_z kIF_MOD expr_value_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                      $$->emplace_back(driver.build.if_guard(self, $2, $3));
+                    }
+                | p_top_expr_body_z kUNLESS_MOD expr_value_z
                     {
                       $$ = driver.alloc.node_list($1);
                       $$->emplace_back(driver.build.unless_guard(self, $2, $3));
@@ -2624,23 +4778,68 @@ lcurly_block_start:
                     {
                       $$ = driver.build.hash_pattern(self, nullptr, $1, nullptr);
                     }
+p_top_expr_body_z: p_expr_z
+                | p_expr_z tCOMMA
+                    {
+                      // array patterns that end with comma
+                      // like 1, 2,
+                      // must be emitted as `array_pattern_with_tail`
+                      auto item = driver.build.match_with_trailing_comma(self, $1);
+                      auto list = driver.alloc.node_list(item);
+                      $$ = driver.build.array_pattern(self, nullptr, list, nullptr);
+                    }
+                | p_expr_z tCOMMA p_args_z
+                    {
+                      auto list = driver.alloc.node_list($1);
+                      list->concat($3);
+                      $$ = driver.build.array_pattern(self, nullptr, list, nullptr);
+                    }
+                | p_find_z
+                    {
+                      $$ = driver.build.find_pattern(self, nullptr, $1, nullptr);
+                    }
+                | p_args_tail_z
+                    {
+                      $$ = driver.build.array_pattern(self, nullptr, $1, nullptr);
+                    }
+                | p_kwargs_z
+                    {
+                      $$ = driver.build.hash_pattern(self, nullptr, $1, nullptr);
+                    }
           p_expr: p_as
+        p_expr_z: p_as_z
             p_as: p_expr tASSOC p_variable
                     {
                       $$ = driver.build.match_as(self, $1, $2, $3);
                     }
                 | p_alt
+          p_as_z: p_expr_z tASSOC p_variable_z
+                    {
+                      $$ = driver.build.match_as(self, $1, $2, $3);
+                    }
+                | p_alt_z
            p_alt: p_alt tPIPE p_expr_basic
                     {
                       $$ = driver.build.match_alt(self, $1, $2, $3);
                     }
                 | p_expr_basic
+         p_alt_z: p_alt_z tPIPE p_expr_basic_z
+                    {
+                      $$ = driver.build.match_alt(self, $1, $2, $3);
+                    }
+                | p_expr_basic_z
         p_lparen: tLPAREN2
                     {
                       $$ = $1;
                       driver.pattern_hash_keys.push();
                     }
+      p_lparen_z: p_lparen
       p_lbracket: tLBRACK2
+                    {
+                      $$ = $1;
+                      driver.pattern_hash_keys.push();
+                    }
+    p_lbracket_z: tLBRACK2
                     {
                       $$ = $1;
                       driver.pattern_hash_keys.push();
@@ -2734,6 +4933,95 @@ lcurly_block_start:
                       driver.pattern_hash_keys.pop();
                       $$ = driver.build.begin(self, $1, $3, $4);
                     }
+  p_expr_basic_z: p_value_z
+                | p_variable_z
+                | p_const_z p_lparen_z p_args_z rparen_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.array_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
+                | p_const_z p_lparen_z p_find_z rparen_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.find_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
+                | p_const_z p_lparen_z p_kwargs_z rparen_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.hash_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
+                | p_const_z tLPAREN2 rparen_z
+                    {
+                      auto list = driver.alloc.node_list();
+                      auto pattern = driver.build.array_pattern(self, $2, list, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $3);
+                    }
+                | p_const_z p_lbracket_z p_args_z rbracket_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.array_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
+                | p_const_z p_lbracket_z p_find_z rbracket_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.find_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
+                | p_const_z p_lbracket_z p_kwargs_z rbracket_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      auto pattern = driver.build.hash_pattern(self, nullptr, $3, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
+                    }
+                | p_const_z tLBRACK2 rbracket_z
+                    {
+                      auto list = driver.alloc.node_list();
+                      auto pattern = driver.build.array_pattern(self, $2, list, nullptr);
+                      $$ = driver.build.const_pattern(self, $1, $2, pattern, $3);
+                    }
+                | tLBRACK p_args_z rbracket_z
+                    {
+                      $$ = driver.build.array_pattern(self, $1, $2, $3);
+                    }
+                | tLBRACK p_find_z rbracket_z
+                    {
+                      $$ = driver.build.find_pattern(self, $1, $2, $3);
+                    }
+                | tLBRACK rbracket_z
+                    {
+                      auto list = driver.alloc.node_list();
+                      $$ = driver.build.array_pattern(self, $1, list, $2);
+                    }
+                | tLBRACE
+                    {
+                      driver.pattern_hash_keys.push();
+                      $<boolean>$ = driver.lex.in_kwarg;
+                      driver.lex.in_kwarg = false;
+                    }
+                  p_kwargs_z rbrace_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      driver.lex.in_kwarg = $<boolean>2;
+                      $$ = driver.build.hash_pattern(self, $1, $3, $4);
+                    }
+                | tLBRACE rbrace_z
+                    {
+                      auto list = driver.alloc.node_list();
+                      $$ = driver.build.hash_pattern(self, $1, list, $2);
+                    }
+                | tLPAREN
+                    {
+                      driver.pattern_hash_keys.push();
+                    }
+                  p_expr_z rparen_z
+                    {
+                      driver.pattern_hash_keys.pop();
+                      $$ = driver.build.begin(self, $1, $3, $4);
+                    }
           p_args: p_expr
                     {
                       $$ = driver.alloc.node_list($1);
@@ -2772,6 +5060,44 @@ lcurly_block_start:
                 | p_args_tail
                     {
                     }
+        p_args_z: p_expr_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | p_args_head_z
+                    {
+                      $$ = $1;
+                    }
+                | p_args_head_z p_arg_z
+                    {
+                      $$ = $1;
+                      $$->emplace_back($2);
+                    }
+                | p_args_head_z tSTAR tIDENTIFIER
+                    {
+                      $$ = $1;
+                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
+                    }
+                | p_args_head_z tSTAR tIDENTIFIER tCOMMA p_args_post_z
+                    {
+                      $$ = $1;
+                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
+                      $$->concat($5);
+                    }
+                | p_args_head_z tSTAR
+                    {
+                      $$ = $1;
+                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
+                    }
+                | p_args_head_z tSTAR tCOMMA p_args_post_z
+                    {
+                      $$ = $1;
+                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
+                      $$->concat($4);
+                    }
+                | p_args_tail_z
+                    {
+                    }
      p_args_head: p_arg tCOMMA
                     {
                       // array patterns that end with comma
@@ -2789,6 +5115,23 @@ lcurly_block_start:
                       $$ = $1;
                       $$->emplace_back(last_item);
                     }
+   p_args_head_z: p_arg_z tCOMMA
+                    {
+                      // array patterns that end with comma
+                      // like [1, 2,]
+                      // must be emitted as `array_pattern_with_tail`
+                      auto item = driver.build.match_with_trailing_comma(self, $1);
+                      $$ = driver.alloc.node_list(item);
+                    }
+                | p_args_head_z p_arg_z tCOMMA
+                    {
+                      // array patterns that end with comma
+                      // like [1, 2,]
+                      // must be emitted as `array_pattern_with_tail`
+                      auto last_item = driver.build.match_with_trailing_comma(self, $2);
+                      $$ = $1;
+                      $$->emplace_back(last_item);
+                    }
      p_args_tail: p_rest
                     {
                       $$ = driver.alloc.node_list($1);
@@ -2798,7 +5141,22 @@ lcurly_block_start:
                       $$ = driver.alloc.node_list($1);
                       $$->concat($3);
                     }
+   p_args_tail_z: p_rest_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | p_rest_z tCOMMA p_args_post_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                      $$->concat($3);
+                    }
          p_find: p_rest tCOMMA p_args_post tCOMMA p_rest
+                    {
+                      $$ = driver.alloc.node_list($1);
+                      $$->concat($3);
+                      $$->emplace_back($5);
+                    }
+       p_find_z: p_rest_z tCOMMA p_args_post_z tCOMMA p_rest_z
                     {
                       $$ = driver.alloc.node_list($1);
                       $$->concat($3);
@@ -2812,6 +5170,7 @@ lcurly_block_start:
                     {
                       $$ = driver.build.match_rest(self, $1, nullptr);
                     }
+        p_rest_z: p_rest
      p_args_post: p_arg
                     {
                       $$ = driver.alloc.node_list($1);
@@ -2821,7 +5180,17 @@ lcurly_block_start:
                       $$ = $1;
                       $$->emplace_back($3);
                     }
+   p_args_post_z: p_arg_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | p_args_post_z tCOMMA p_arg_z
+                    {
+                      $$ = $1;
+                      $$->emplace_back($3);
+                    }
            p_arg: p_expr
+         p_arg_z: p_expr_z
         p_kwargs: p_kwarg tCOMMA p_kwrest
                     {
                       $$ = $1;
@@ -2848,11 +5217,46 @@ lcurly_block_start:
                     {
                       $$ = $1;
                     }
+      p_kwargs_z: p_kwarg_z tCOMMA p_kwrest_z
+                    {
+                      $$ = $1;
+                      $$->concat($3);
+                    }
+                | p_kwarg_z
+                    {
+                      $$ = $1;
+                    }
+                | p_kwarg_z tCOMMA
+                    {
+                      $$ = $1;
+                    }
+                | p_kwrest_z
+                    {
+                      $$ = $1;
+                    }
+                | p_kwarg_z tCOMMA p_kwnorest_z
+                    {
+                      $$ = $1;
+                      $$->concat($3);
+                    }
+                | p_kwnorest_z
+                    {
+                      $$ = $1;
+                    }
          p_kwarg: p_kw
                     {
                       $$ = driver.alloc.node_list($1);
                     }
                 | p_kwarg tCOMMA p_kw
+                    {
+                      $$ = $1;
+                      $$->emplace_back($3);
+                    }
+       p_kwarg_z: p_kw_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | p_kwarg_z tCOMMA p_kw_z
                     {
                       $$ = $1;
                       $$->emplace_back($3);
@@ -2865,11 +5269,27 @@ lcurly_block_start:
                     {
                       $$ = driver.build.match_label(self, $1);
                     }
+          p_kw_z: p_kw_label_z p_expr_z
+                    {
+                      $$ = driver.build.match_pair(self, $1, $2);
+                    }
+                | p_kw_label_z
+                    {
+                      $$ = driver.build.match_label(self, $1);
+                    }
       p_kw_label: tLABEL
                   {
                     $$ = driver.build.pair_keyword(self, $1, nullptr);
                   }
                 | tSTRING_BEG string_contents tLABEL_END
+                  {
+                    $$ = driver.build.pair_quoted(self, $1, $2, $3, nullptr);
+                  }
+    p_kw_label_z: tLABEL
+                  {
+                    $$ = driver.build.pair_keyword(self, $1, nullptr);
+                  }
+                | tSTRING_BEG string_contents_z tLABEL_END
                   {
                     $$ = driver.build.pair_quoted(self, $1, $2, $3, nullptr);
                   }
@@ -2883,7 +5303,22 @@ lcurly_block_start:
                       auto rest = driver.build.match_rest(self, $1, nullptr);
                       $$ = driver.alloc.node_list(rest);
                     }
+      p_kwrest_z: kwrest_mark_z tIDENTIFIER
+                    {
+                      auto rest = driver.build.match_rest(self, $1, $2);
+                      $$ = driver.alloc.node_list(rest);
+                    }
+                | kwrest_mark_z
+                    {
+                      auto rest = driver.build.match_rest(self, $1, nullptr);
+                      $$ = driver.alloc.node_list(rest);
+                    }
       p_kwnorest: kwrest_mark kNIL
+                    {
+                      auto nil = driver.build.match_nil_pattern(self, $1, $2);
+                      $$ = driver.alloc.node_list(nil);
+                    }
+    p_kwnorest_z: kwrest_mark_z kNIL
                     {
                       auto nil = driver.build.match_nil_pattern(self, $1, $2);
                       $$ = driver.alloc.node_list(nil);
@@ -2916,6 +5351,34 @@ lcurly_block_start:
                     {
                       $$ = driver.build.range_exclusive(self, nullptr, $1, $2);
                     }
+       p_value_z: p_primitive_z
+                | p_primitive_z tDOT2 p_primitive_z
+                    {
+                      $$ = driver.build.range_inclusive(self, $1, $2, $3);
+                    }
+                | p_primitive_z tDOT3 p_primitive_z
+                    {
+                      $$ = driver.build.range_exclusive(self, $1, $2, $3);
+                    }
+                | p_primitive_z tDOT2
+                    {
+                      $$ = driver.build.range_inclusive(self, $1, $2, nullptr);
+                    }
+                | p_primitive_z tDOT3
+                    {
+                      $$ = driver.build.range_exclusive(self, $1, $2, nullptr);
+                    }
+                | p_var_ref_z
+                | p_expr_ref_z
+                | p_const_z
+                | tBDOT2 p_primitive_z
+                    {
+                      $$ = driver.build.range_inclusive(self, nullptr, $1, $2);
+                    }
+                | tBDOT3 p_primitive_z
+                    {
+                      $$ = driver.build.range_exclusive(self, nullptr, $1, $2);
+                    }
      p_primitive: literal
                 | strings
                 | xstring
@@ -2943,10 +5406,38 @@ lcurly_block_start:
                         lambda->end);
                       DIAGCHECK();
                     }
+   p_primitive_z: literal_z
+                | strings_z
+                | xstring_z
+                | regexp_z
+                | words_z
+                | qwords_z
+                | symbols_z
+                | qsymbols_z
+                | keyword_variable_z
+                    {
+                      $$ = driver.build.accessible(self, $1);
+                    }
+                | tLAMBDA
+                    {
+                      driver.lex.context.push(Context::State::LAMBDA);
+                    }
+                  lambda_z
+                    {
+                      auto lambda_call = driver.build.callLambda(self, $1);
+                      auto &lambda = $3;
+                      $$ = driver.build.block(self, lambda_call,
+                        lambda->begin,
+                        lambda->args,
+                        lambda->body,
+                        lambda->end);
+                      DIAGCHECK();
+                    }
       p_variable: tIDENTIFIER
                     {
                       $$ = driver.build.match_var(self, $1);
                     }
+    p_variable_z: p_variable
        p_var_ref: tCARET tIDENTIFIER
                     {
                       auto pid = driver.build.p_ident(self, $2);
@@ -2958,7 +5449,23 @@ lcurly_block_start:
                       auto non_lvar = driver.build.accessible(self, $2);
                       $$ = driver.build.pin(self, $1, non_lvar);
                     }
+     p_var_ref_z: tCARET tIDENTIFIER
+                    {
+                      auto pid = driver.build.p_ident(self, $2);
+                      auto lvar = driver.build.accessible(self, pid);
+                      $$ = driver.build.pin(self, $1, lvar);
+                    }
+                | tCARET nonlocal_var_z
+                    {
+                      auto non_lvar = driver.build.accessible(self, $2);
+                      $$ = driver.build.pin(self, $1, non_lvar);
+                    }
       p_expr_ref: tCARET tLPAREN expr_value tRPAREN
+                    {
+                      auto expr = driver.build.begin(self, $2, $3, $4);
+                      $$ = driver.build.pin(self, $1, expr);
+                    }
+    p_expr_ref_z: tCARET tLPAREN expr_value_z tRPAREN
                     {
                       auto expr = driver.build.begin(self, $2, $3, $4);
                       $$ = driver.build.pin(self, $1, expr);
@@ -2968,6 +5475,18 @@ lcurly_block_start:
                       $$ = driver.build.constGlobal(self, $1, $2);
                     }
                 | p_const tCOLON2 cname
+                    {
+                      $$ = driver.build.constFetch(self, $1, $2, $3);
+                    }
+                | tCONSTANT
+                   {
+                      $$ = driver.build.const_(self, $1);
+                   }
+       p_const_z: tCOLON3 cname_z
+                    {
+                      $$ = driver.build.constGlobal(self, $1, $2);
+                    }
+                | p_const_z tCOLON2 cname_z
                     {
                       $$ = driver.build.constFetch(self, $1, $2, $3);
                     }
@@ -2998,14 +5517,51 @@ lcurly_block_start:
                       $$ = driver.alloc.node_list();
                     }
 
+    opt_rescue_z: kRESCUE exc_list_z exc_var_z then_z compstmt_z opt_rescue_z
+                    {
+                      auto &exc_var = $3;
+                      auto &exc_list_ = $2;
+                      auto exc_list = exc_list_
+                        ? driver.build.array(self, nullptr, exc_list_, nullptr)
+                        : nullptr;
+                      auto &rescues = $6;
+
+                      rescues->push_front(driver.build.rescue_body(self, $1,
+                          exc_list,
+                          exc_var ? exc_var->tok : nullptr,
+                          exc_var ? exc_var->nod : nullptr,
+                          $4, $5));
+
+                      $$ = rescues;
+                    }
+                |
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+
         exc_list: arg_value
                     {
                       $$ = driver.alloc.node_list($1);
                     }
                 | mrhs
                 | list_none
+      exc_list_z: arg_value_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | mrhs_z
+                | list_none_z
 
          exc_var: tASSOC lhs
+                    {
+                      $$ = driver.alloc.node_with_token($1, $2);
+                    }
+                | // nothing
+                    {
+                      $$ = nullptr;
+                    }
+
+       exc_var_z: tASSOC lhs_z
                     {
                       $$ = driver.alloc.node_with_token($1, $2);
                     }
@@ -3023,10 +5579,25 @@ lcurly_block_start:
                       $$ = nullptr;
                     }
 
+    opt_ensure_z: kENSURE compstmt_z
+                    {
+                      $$ = driver.alloc.node_with_token($1, $2);
+                    }
+                | // nothing
+                    {
+                      $$ = nullptr;
+                    }
+
          literal: numeric
                 | symbol
+       literal_z: numeric_z
+                | symbol_z
 
          strings: string
+                    {
+                      $$ = driver.build.string_compose(self, nullptr, $1, nullptr);
+                    }
+       strings_z: string_z
                     {
                       $$ = driver.build.string_compose(self, nullptr, $1, nullptr);
                     }
@@ -3036,6 +5607,17 @@ lcurly_block_start:
                       $$ = driver.alloc.node_list($1);
                     }
                 | string string1
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+
+        string_z: string1_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | string_z string1_z
                     {
                       auto &list = $1;
                       list->emplace_back($2);
@@ -3057,7 +5639,28 @@ lcurly_block_start:
                       $$ = driver.build.character(self, $1);
                     }
 
+       string1_z: tSTRING_BEG string_contents_z tSTRING_END
+                    {
+                      auto str = driver.build.string_compose(self, $1, $2, $3);
+                      $$ = driver.build.dedentString(self, str, driver.lex.dedentLevel().value_or(0));
+                    }
+                | tSTRING
+                    {
+                      auto str = driver.build.string(self, $1);
+                      $$ = driver.build.dedentString(self, str, driver.lex.dedentLevel().value_or(0));
+                    }
+                | tCHARACTER
+                    {
+                      $$ = driver.build.character(self, $1);
+                    }
+
          xstring: tXSTRING_BEG xstring_contents tSTRING_END
+                    {
+                      auto xstr = driver.build.xstring_compose(self, $1, $2, $3);
+                      $$ = driver.build.dedentString(self, xstr, driver.lex.dedentLevel().value_or(0));
+                    }
+
+       xstring_z: tXSTRING_BEG xstring_contents_z tSTRING_END
                     {
                       auto xstr = driver.build.xstring_compose(self, $1, $2, $3);
                       $$ = driver.build.dedentString(self, xstr, driver.lex.dedentLevel().value_or(0));
@@ -3070,7 +5673,19 @@ lcurly_block_start:
                       DIAGCHECK();
                     }
 
+        regexp_z: tREGEXP_BEG regexp_contents_z tSTRING_END tREGEXP_OPT
+                    {
+                      auto opts = driver.build.regexp_options(self, $4);
+                      $$ = driver.build.regexp_compose(self, $1, $2, $3, opts);
+                      DIAGCHECK();
+                    }
+
            words: tWORDS_BEG word_list tSTRING_END
+                    {
+                      $$ = driver.build.words_compose(self, $1, $2, $3);
+                    }
+
+         words_z: tWORDS_BEG word_list_z tSTRING_END
                     {
                       $$ = driver.build.words_compose(self, $1, $2, $3);
                     }
@@ -3080,6 +5695,17 @@ lcurly_block_start:
                       $$ = driver.alloc.node_list();
                     }
                 | word_list word tSPACE
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.word(self, $2));
+                      $$ = list;
+                    }
+
+     word_list_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | word_list_z word_z tSPACE
                     {
                       auto &list = $1;
                       list->emplace_back(driver.build.word(self, $2));
@@ -3097,7 +5723,23 @@ lcurly_block_start:
                       $$ = list;
                     }
 
+          word_z: string_content_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | word_z string_content_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+
          symbols: tSYMBOLS_BEG symbol_list tSTRING_END
+                    {
+                      $$ = driver.build.symbols_compose(self, $1, $2, $3);
+                    }
+
+       symbols_z: tSYMBOLS_BEG symbol_list_z tSTRING_END
                     {
                       $$ = driver.build.symbols_compose(self, $1, $2, $3);
                     }
@@ -3113,7 +5755,23 @@ lcurly_block_start:
                       $$ = list;
                     }
 
+   symbol_list_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | symbol_list_z word_z tSPACE
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.word(self, $2));
+                      $$ = list;
+                    }
+
           qwords: tQWORDS_BEG qword_list tSTRING_END
+                    {
+                      $$ = driver.build.words_compose(self, $1, $2, $3);
+                    }
+
+        qwords_z: tQWORDS_BEG qword_list_z tSTRING_END
                     {
                       $$ = driver.build.words_compose(self, $1, $2, $3);
                     }
@@ -3123,11 +5781,27 @@ lcurly_block_start:
                       $$ = driver.build.symbols_compose(self, $1, $2, $3);
                     }
 
+      qsymbols_z: tQSYMBOLS_BEG qsym_list_z tSTRING_END
+                    {
+                      $$ = driver.build.symbols_compose(self, $1, $2, $3);
+                    }
+
       qword_list: // nothing
                     {
                       $$ = driver.alloc.node_list();
                     }
                 | qword_list tSTRING_CONTENT tSPACE
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.string_internal(self, $2));
+                      $$ = list;
+                    }
+
+    qword_list_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | qword_list_z tSTRING_CONTENT tSPACE
                     {
                       auto &list = $1;
                       list->emplace_back(driver.build.string_internal(self, $2));
@@ -3145,11 +5819,33 @@ lcurly_block_start:
                       $$ = list;
                     }
 
+     qsym_list_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | qsym_list_z tSTRING_CONTENT tSPACE
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.symbol_internal(self, $2));
+                      $$ = list;
+                    }
+
  string_contents: // nothing
                     {
                       $$ = driver.alloc.node_list();
                     }
                 | string_contents string_content
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+
+string_contents_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | string_contents_z string_content_z
                     {
                       auto &list = $1;
                       list->emplace_back($2);
@@ -3167,11 +5863,33 @@ xstring_contents: // nothing
                       $$ = list;
                     }
 
+xstring_contents_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | xstring_contents_z string_content_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+
 regexp_contents: // nothing
                     {
                       $$ = driver.alloc.node_list();
                     }
                 | regexp_contents string_content
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                    }
+
+regexp_contents_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | regexp_contents_z string_content_z
                     {
                       auto &list = $1;
                       list->emplace_back($2);
@@ -3198,6 +5916,26 @@ regexp_contents: // nothing
                       $$ = driver.build.begin(self, $1, $3, $4);
                     }
 
+string_content_z: tSTRING_CONTENT
+                    {
+                      $$ = driver.build.string_internal(self, $1);
+                    }
+                | tSTRING_DVAR string_dvar_z
+                    {
+                      $$ = $2;
+                    }
+                | tSTRING_DBEG
+                    {
+                      driver.lex.cond.push(false);
+                      driver.lex.cmdarg.push(false);
+                    }
+                    compstmt_z tSTRING_DEND
+                    {
+                      driver.lex.cond.pop();
+                      driver.lex.cmdarg.pop();
+                      $$ = driver.build.begin(self, $1, $3, $4);
+                    }
+
      string_dvar: tGVAR
                     {
                       $$ = driver.build.gvar(self, $1);
@@ -3212,17 +5950,41 @@ regexp_contents: // nothing
                     }
                 | backref
 
+   string_dvar_z: tGVAR
+                    {
+                      $$ = driver.build.gvar(self, $1);
+                    }
+                | tIVAR
+                    {
+                      $$ = driver.build.ivar(self, $1);
+                    }
+                | tCVAR
+                    {
+                      $$ = driver.build.cvar(self, $1);
+                    }
+                | backref_z
+
 
           symbol: ssym
                 | dsym
+
+        symbol_z: ssym_z
+                | dsym_z
 
             ssym: tSYMBOL
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol(self, $1);
                     }
+          ssym_z: ssym
 
             dsym: tSYMBEG string_contents tSTRING_END
+                    {
+                      driver.lex.set_state_expr_end();
+                      $$ = driver.build.symbol_compose(self, $1, $2, $3);
+                    }
+
+          dsym_z: tSYMBEG string_contents_z tSTRING_END
                     {
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.symbol_compose(self, $1, $2, $3);
@@ -3233,6 +5995,15 @@ regexp_contents: // nothing
                       $$ = $1;
                     }
                 | tUNARY_NUM simple_numeric %prec tLOWEST
+                    {
+                      $$ = driver.build.unary_op(self, $1, $2);
+                    }
+
+       numeric_z: simple_numeric_z
+                    {
+                      $$ = $1;
+                    }
+                | tUNARY_NUM simple_numeric_z %prec tLOWEST
                     {
                       $$ = driver.build.unary_op(self, $1, $2);
                     }
@@ -3267,6 +6038,7 @@ regexp_contents: // nothing
                       driver.lex.set_state_expr_end();
                       $$ = driver.build.floatComplex(self, $1);
                     }
+simple_numeric_z: simple_numeric
 
     nonlocal_var: tIVAR
                     {
@@ -3280,6 +6052,7 @@ regexp_contents: // nothing
                     {
                       $$ = driver.build.cvar(self, $1);
                     }
+  nonlocal_var_z: nonlocal_var
 
    user_variable: tIDENTIFIER
                     {
@@ -3301,6 +6074,7 @@ regexp_contents: // nothing
                     {
                       $$ = driver.build.cvar(self, $1);
                     }
+ user_variable_z: user_variable
 
 keyword_variable: kNIL
                     {
@@ -3330,12 +6104,22 @@ keyword_variable: kNIL
                     {
                       $$ = driver.build.encodingLiteral(self, $1);
                     }
+keyword_variable_z: keyword_variable
 
          var_ref: user_variable
                     {
                       $$ = driver.build.accessible(self, $1);
                     }
                 | keyword_variable
+                    {
+                      $$ = driver.build.accessible(self, $1);
+                    }
+
+       var_ref_z: user_variable_z
+                    {
+                      $$ = driver.build.accessible(self, $1);
+                    }
+                | keyword_variable_z
                     {
                       $$ = driver.build.accessible(self, $1);
                     }
@@ -3351,6 +6135,17 @@ keyword_variable: kNIL
                       DIAGCHECK();
                     }
 
+       var_lhs_z: user_variable_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+                | keyword_variable_z
+                    {
+                      $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
+                    }
+
          backref: tNTH_REF
                     {
                       $$ = driver.build.nth_ref(self, $1);
@@ -3359,6 +6154,7 @@ keyword_variable: kNIL
                     {
                       $$ = driver.build.backRef(self, $1);
                     }
+       backref_z: backref
 
       superclass: tLT
                     {
@@ -3372,8 +6168,25 @@ keyword_variable: kNIL
                     {
                       $$ = nullptr;
                     }
+    superclass_z: tLT
+                    {
+                      driver.lex.set_state_expr_value();
+                    }
+                    expr_value_z term_z
+                    {
+                      $$ = driver.alloc.node_with_token($1, $3);
+                    }
+                | // nothing
+                    {
+                      $$ = nullptr;
+                    }
 f_opt_paren_args: f_paren_args
                 | none
+                    {
+                      $$ = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
+                    }
+f_opt_paren_args_z: f_paren_args_z
+                | none_z
                     {
                       $$ = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
                     }
@@ -3398,12 +6211,43 @@ f_opt_paren_args: f_paren_args
                       auto node_list = driver.alloc.node_list(forward_arg);
                       $$ = driver.build.args(self, $1, node_list, $3, true);
                     }
+     f_paren_args_z: tLPAREN2 f_args_z rparen_z
+                    {
+                      driver.lex.set_state_expr_value();
+                      $$ = driver.build.args(self, $1, $2, $3, true);
+                    }
+                | tLPAREN2 f_arg_z tCOMMA args_forward_z rparen_z
+                    {
+                      driver.lex.declare_forward_args();
+                      auto forward_arg = driver.build.forward_arg(self, nullptr, $4, nullptr);
+                      $2->emplace_back(forward_arg);
+                      $$ = driver.build.args(self, $1, $2, $5, true);
+                    }
+                | tLPAREN2 args_forward_z rparen_z
+                    {
+                      driver.lex.set_state_expr_value();
+                      driver.lex.declare_forward_args();
+                      auto forward_arg = driver.build.forward_arg(self, $1, $2, $3);
+                      auto node_list = driver.alloc.node_list(forward_arg);
+                      $$ = driver.build.args(self, $1, node_list, $3, true);
+                    }
        f_arglist: f_paren_args
                 |   {
                       $<boolean>$ = driver.lex.in_kwarg;
                       driver.lex.in_kwarg = true;
                     }
                   f_args term
+                    {
+                      driver.lex.in_kwarg = $<boolean>1;
+                      $$ = driver.build.args(self, nullptr, $2, nullptr, true);
+                      DIAGCHECK();
+                    }
+     f_arglist_z: f_paren_args_z
+                |   {
+                      $<boolean>$ = driver.lex.in_kwarg;
+                      driver.lex.in_kwarg = true;
+                    }
+                  f_args_z term_z
                     {
                       driver.lex.in_kwarg = $<boolean>1;
                       $$ = driver.build.args(self, nullptr, $2, nullptr, true);
@@ -3440,7 +6284,45 @@ f_opt_paren_args: f_paren_args
                       $$ = $1;
                     }
 
+     args_tail_z: f_kwarg_z tCOMMA f_kwrest_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_kwarg_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_kwrest_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_no_kwarg_z opt_f_block_arg_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                | f_block_arg_z
+                    {
+                      $$ = $1;
+                    }
+
    opt_args_tail: tCOMMA args_tail
+                    {
+                      $$ = $2;
+                    }
+                | // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+ opt_args_tail_z: tCOMMA args_tail_z
                     {
                       $$ = $2;
                     }
@@ -3552,10 +6434,114 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = driver.alloc.node_list();
                     }
+        f_args_z: f_arg_z tCOMMA f_optarg_z tCOMMA f_rest_arg_z              opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA f_optarg_z tCOMMA f_rest_arg_z tCOMMA f_arg_z opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($7);
+                      args->concat($8);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA f_optarg_z                                opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA f_optarg_z tCOMMA                   f_arg_z opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA                 f_rest_arg_z              opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                | f_arg_z tCOMMA                 f_rest_arg_z tCOMMA f_arg_z opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                | f_arg_z                                                opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                |              f_optarg_z tCOMMA f_rest_arg_z              opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                |              f_optarg_z tCOMMA f_rest_arg_z tCOMMA f_arg_z opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($5);
+                      args->concat($6);
+                      $$ = args;
+                    }
+                |              f_optarg_z                                opt_args_tail_z
+                    {
+
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                |              f_optarg_z tCOMMA                   f_arg_z opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                |                              f_rest_arg_z              opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($2);
+                      $$ = args;
+                    }
+                |                              f_rest_arg_z tCOMMA f_arg_z opt_args_tail_z
+                    {
+                      auto &args = $1;
+                      args->concat($3);
+                      args->concat($4);
+                      $$ = args;
+                    }
+                |                                                          args_tail_z
+                    {
+                      $$ = $1;
+                    }
+                | // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
     args_forward: tBDOT3
                     {
                       $$ = $1;
                     }
+  args_forward_z: args_forward
        f_bad_arg: tCONSTANT
                     {
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ArgumentConst, $1);
@@ -3576,8 +6562,18 @@ f_opt_paren_args: f_paren_args
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ArgumentCvar, $1);
                       YYERROR;
                     }
+     f_bad_arg_z: f_bad_arg
 
       f_norm_arg: f_bad_arg
+                | tIDENTIFIER
+                    {
+                      auto ident = $1;
+                      driver.lex.declare(ident->view());
+                      driver.numparam_stack.set_ordinary_params();
+                      $$ = ident;
+                    }
+
+    f_norm_arg_z: f_bad_arg_z
                 | tIDENTIFIER
                     {
                       auto ident = $1;
@@ -3591,6 +6587,11 @@ f_opt_paren_args: f_paren_args
                       driver.current_arg_stack.set($1[0].view());
                       $$ = $1;
                     }
+    f_arg_asgn_z: f_norm_arg_z
+                    {
+                      driver.current_arg_stack.set($1[0].view());
+                      $$ = $1;
+                    }
 
       f_arg_item: f_arg_asgn
                     {
@@ -3598,6 +6599,16 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.build.arg(self, $1);
                     }
                 | tLPAREN f_margs rparen
+                    {
+                      $$ = driver.build.multi_lhs(self, $1, $2, $3);
+                    }
+
+    f_arg_item_z: f_arg_asgn_z
+                    {
+                      driver.current_arg_stack.set("0");
+                      $$ = driver.build.arg(self, $1);
+                    }
+                | tLPAREN f_margs_z rparen_z
                     {
                       $$ = driver.build.multi_lhs(self, $1, $2, $3);
                     }
@@ -3618,6 +6629,17 @@ f_opt_paren_args: f_paren_args
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
                     }
 
+         f_arg_z: f_arg_item_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | f_arg_z tCOMMA f_arg_item_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
          f_label: tLABEL
                     {
                       auto label = $1;
@@ -3630,6 +6652,7 @@ f_opt_paren_args: f_paren_args
                       driver.numparam_stack.set_ordinary_params();
                       $$ = label;
                     }
+       f_label_z: f_label
 
             f_kw: f_label arg_value
                     {
@@ -3642,11 +6665,31 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.build.kwarg(self, $1);
                     }
 
+          f_kw_z: f_label_z arg_value_z
+                    {
+                      driver.current_arg_stack.set("");
+                      $$ = driver.build.kwoptarg(self, $1, $2);
+                    }
+                | f_label_z
+                    {
+                      driver.current_arg_stack.set("");
+                      $$ = driver.build.kwarg(self, $1);
+                    }
+
       f_block_kw: f_label primary_value
                     {
                       $$ = driver.build.kwoptarg(self, $1, $2);
                     }
                 | f_label
+                    {
+                      $$ = driver.build.kwarg(self, $1);
+                    }
+
+    f_block_kw_z: f_label_z primary_value_z
+                    {
+                      $$ = driver.build.kwoptarg(self, $1, $2);
+                    }
+                | f_label_z
                     {
                       $$ = driver.build.kwarg(self, $1);
                     }
@@ -3662,6 +6705,17 @@ f_opt_paren_args: f_paren_args
                       $$ = list;
                     }
 
+ f_block_kwarg_z: f_block_kw_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | f_block_kwarg_z tCOMMA f_block_kw_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
                 // Matches extra (syntactically incorrect) labels stacked up before an f_kw, for error recovery from
                 // missing commas (e.g. def foo(x:, y: z:))
   f_extra_labels: f_label
@@ -3669,6 +6723,18 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.alloc.node_list(driver.build.kwarg(self, $1));
                     }
                 | f_extra_labels f_label
+                    {
+                      auto &list = $1;
+                      list->emplace_back(driver.build.kwarg(self, $2));
+                      $$ = list;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@1.end, @2.begin));
+                    }
+
+f_extra_labels_z: f_label_z
+                    {
+                      $$ = driver.alloc.node_list(driver.build.kwarg(self, $1));
+                    }
+                | f_extra_labels_z f_label_z
                     {
                       auto &list = $1;
                       list->emplace_back(driver.build.kwarg(self, $2));
@@ -3703,9 +6769,41 @@ f_opt_paren_args: f_paren_args
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@1.end, @2.begin));
                     }
 
+       f_kwarg_z: f_kw_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | f_kwarg_z tCOMMA f_kw_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+                // Recovery rules for when commas are missing between kwargs.
+                | f_kwarg_z tCOMMA f_extra_labels_z f_kw_z
+                    {
+                      auto &list = $1;
+                      list->concat($3);
+                      list->emplace_back($4);
+                      $$ = list;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@3.end, @4.begin));
+                    }
+                | f_extra_labels_z f_kw_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($2);
+                      $$ = list;
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingCommaBetweenKwargs, diagnostic::range(@1.end, @2.begin));
+                    }
+
      kwrest_mark: tPOW | tDSTAR
+   kwrest_mark_z: kwrest_mark
 
       f_no_kwarg: kwrest_mark kNIL
+                    {
+                      $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1, $2));
+                    }
+    f_no_kwarg_z: kwrest_mark_z kNIL
                     {
                       $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1, $2));
                     }
@@ -3727,13 +6825,42 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.alloc.node_list(kwrestarg);
                     }
 
+      f_kwrest_z: kwrest_mark_z tIDENTIFIER
+                    {
+                      auto ident = $2;
+
+                      driver.lex.declare(ident->view());
+
+                      auto kwrestarg = driver.build.kwrestarg(self, $1, ident);
+
+                      $$ = driver.alloc.node_list(kwrestarg);
+                    }
+                | kwrest_mark_z
+                    {
+                      auto kwrestarg = driver.build.kwrestarg(self, $1, nullptr);
+
+                      $$ = driver.alloc.node_list(kwrestarg);
+                    }
+
            f_opt: f_arg_asgn tEQL arg_value
                     {
                       driver.current_arg_stack.set("0");
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 
+         f_opt_z: f_arg_asgn_z tEQL arg_value_z
+                    {
+                      driver.current_arg_stack.set("0");
+                      $$ = driver.build.optarg(self, $1, $2, $3);
+                    }
+
      f_block_opt: f_arg_asgn tEQL primary_value
+                    {
+                      driver.current_arg_stack.set("0");
+                      $$ = driver.build.optarg(self, $1, $2, $3);
+                    }
+
+   f_block_opt_z: f_arg_asgn_z tEQL primary_value_z
                     {
                       driver.current_arg_stack.set("0");
                       $$ = driver.build.optarg(self, $1, $2, $3);
@@ -3750,6 +6877,17 @@ f_opt_paren_args: f_paren_args
                       $$ = list;
                     }
 
+f_block_optarg_z: f_block_opt_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | f_block_optarg_z tCOMMA f_block_opt_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
         f_optarg: f_opt
                     {
                       $$ = driver.alloc.node_list($1);
@@ -3760,8 +6898,19 @@ f_opt_paren_args: f_paren_args
                       list->emplace_back($3);
                       $$ = list;
                     }
+      f_optarg_z: f_opt_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | f_optarg_z tCOMMA f_opt_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
 
     restarg_mark: tSTAR2 | tSTAR
+  restarg_mark_z: restarg_mark
 
       f_rest_arg: restarg_mark tIDENTIFIER
                     {
@@ -3780,9 +6929,38 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.alloc.node_list(restarg);
                     }
 
+    f_rest_arg_z: restarg_mark_z tIDENTIFIER
+                    {
+                      auto ident = $2;
+
+                      driver.lex.declare(ident->view());
+
+                      auto restarg = driver.build.restarg(self, $1, ident);
+
+                      $$ = driver.alloc.node_list(restarg);
+                    }
+                | restarg_mark_z
+                    {
+                      auto restarg = driver.build.restarg(self, $1, nullptr);
+
+                      $$ = driver.alloc.node_list(restarg);
+                    }
+
      blkarg_mark: tAMPER2 | tAMPER
+   blkarg_mark_z: blkarg_mark
 
      f_block_arg: blkarg_mark tIDENTIFIER
+                    {
+                      auto ident = $2;
+
+                      driver.lex.declare(ident->view());
+
+                      auto blockarg = driver.build.blockarg(self, $1, ident);
+
+                      $$ = driver.alloc.node_list(blockarg);
+                    }
+
+   f_block_arg_z: blkarg_mark_z tIDENTIFIER
                     {
                       auto ident = $2;
 
@@ -3807,8 +6985,22 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.alloc.node_list();
                     }
 
+opt_f_block_arg_z: tCOMMA f_block_arg_z
+                    {
+                      $$ = $2;
+                    }
+                |
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+
        singleton: var_ref
                 | tLPAREN2 expr rparen
+                    {
+                      $$ = $2;
+                    }
+     singleton_z: var_ref_z
+                | tLPAREN2 expr_z rparen_z
                     {
                       $$ = $2;
                     }
@@ -3818,6 +7010,12 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.alloc.node_list();
                     }
                 | assocs trailer
+
+    assoc_list_z: // nothing
+                    {
+                      $$ = driver.alloc.node_list();
+                    }
+                | assocs_z trailer_z
 
           assocs: assoc
                     {
@@ -3884,6 +7082,26 @@ f_opt_paren_args: f_paren_args
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingToken, diagnostic::range(@4.end, @5.begin), "\",\"");
                     }
 
+        assocs_z: assoc_z
+                    {
+                      $$ = driver.alloc.node_list($1);
+                    }
+                | tLABEL assoc_z
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, "tLABEL");
+                      auto result = driver.alloc.node_list();
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      result->emplace_back(driver.build.pair_keyword(self, $1, err));
+                      result->emplace_back($2);
+                      $$ = result;
+                    }
+                | assocs_z tCOMMA assoc_z
+                    {
+                      auto &list = $1;
+                      list->emplace_back($3);
+                      $$ = list;
+                    }
+
            assoc: arg_value tASSOC arg_value
                     {
                       $$ = driver.build.pair(self, $1, $2, $3);
@@ -3908,10 +7126,38 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.build.kwsplat(self, $1, $2);
                     }
 
+         assoc_z: arg_value_z tASSOC arg_value_z
+                    {
+                      $$ = driver.build.pair(self, $1, $2, $3);
+                    }
+                | tLABEL arg_value_z
+                    {
+                      $$ = driver.build.pair_keyword(self, $1, $2);
+                    }
+                | tLABEL
+                    {
+                      auto *selector = $1;
+                      selector->setEnd(selector->end() - 1);
+                      auto method_call = driver.build.call_method(self, nullptr, nullptr, selector, nullptr, nullptr, nullptr);
+                      $$ = driver.build.pair_keyword(self, $1, method_call);
+                    }
+                | tSTRING_BEG string_contents_z tLABEL_END arg_value_z
+                    {
+                      $$ = driver.build.pair_quoted(self, $1, $2, $3, $4);
+                    }
+                | tDSTAR arg_value_z
+                    {
+                      $$ = driver.build.kwsplat(self, $1, $2);
+                    }
+
        operation: tIDENTIFIER | tCONSTANT | tFID
+     operation_z: operation
       operation2: tIDENTIFIER | tCONSTANT | tFID | op
+    operation2_z: tIDENTIFIER | tCONSTANT | tFID | op_z
       operation3: tIDENTIFIER | tFID | op
+    operation3_z: tIDENTIFIER | tFID | op_z
     dot_or_colon: call_op | tCOLON2
+  dot_or_colon_z: call_op_z | tCOLON2
          call_op: tDOT
                     {
                       // XXX what is this???
@@ -3927,13 +7173,24 @@ f_opt_paren_args: f_paren_args
                       // $$ = [:anddot, $1[1]]
                       $$ = $1;
                     }
+       call_op_z: call_op
        opt_terms:  | terms
+     opt_terms_z:  | terms_z
           opt_nl:  | tNL
+        opt_nl_z: opt_nl
           rparen: opt_nl tRPAREN
                     {
                       $$ = $2;
                     }
+        rparen_z: opt_nl_z tRPAREN
+                    {
+                      $$ = $2;
+                    }
         rbracket: opt_nl tRBRACK
+                    {
+                      $$ = $2;
+                    }
+      rbracket_z: opt_nl_z tRBRACK
                     {
                       $$ = $2;
                     }
@@ -3942,29 +7199,40 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = $2;
                     }
+        rbrace_z: opt_nl_z tRCURLY
+                    {
+                      $$ = $2;
+                    }
 
          trailer:  | tNL | tCOMMA
+       trailer_z: trailer
 
             term: tSEMI
                   {
                     yyerrok;
                   }
                 | tNL
+          term_z: term
 
 
            // "terms" here stands for "terminators" (as in line terminators),
            // not "terms" as in types & terms
            terms: term
                 | terms tSEMI
+         terms_z: term_z
+                | terms_z tSEMI
 
             none: // nothing
                   {
                     $$ = nullptr;
                   }
+          none_z: none
 
        list_none: // nothing
                   {
                     $$ = nullptr;
                   }
+        
+     list_none_z: list_none
 
 %%
