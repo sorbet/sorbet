@@ -26,8 +26,8 @@ class ErrorToError {
         return min((uint32_t)(pos), maxOff);
     }
 
-    static void maybeAddAutocorrect(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
-                                    ruby_parser::dclass errorClass) {
+    static void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
+                             ruby_parser::dclass errorClass) {
         switch (errorClass) {
             case ruby_parser::dclass::IfInsteadOfItForTest:
                 e.replaceWith("Replace with `it`", loc, "it");
@@ -49,6 +49,11 @@ class ErrorToError {
                 }
                 break;
             }
+            case ruby_parser::dclass::DedentedEnd:
+                e.addErrorNote("Sorbet found a syntax error it could not recover from.\n"
+                               "    To provide a better message, it re-parsed the file while tracking indentation.\n"
+                               "    If this message obscures the root cause, please let us know.");
+                break;
             default:
                 break;
         }
@@ -75,7 +80,7 @@ public:
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader("{}",
                             fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
-                maybeAddAutocorrect(gs, e, loc, diag.error_class());
+                explainError(gs, e, loc, diag.error_class());
             }
         }
     }
