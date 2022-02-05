@@ -534,19 +534,13 @@ void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
         name.append(send.fun.shortName(ctx));
         e.setHeader("`{}` does not accept keyword arguments", name);
 
-        core::LocOffsets start;
-        if (send.hasPosArgs()) {
-            // Using the endPos of the last positional argument ensures that we also cut out the trailing comma on that
-            // argument.
-            auto end = send.getPosArg(send.numPosArgs() - 1).loc().endPos();
-            start = core::LocOffsets{end, end};
-        } else {
-            start = send.getKwKey(0).loc();
-        }
-
+        auto start = send.getKwKey(0).loc();
         auto end = send.getKwValue(send.numKwArgs() - 1).loc();
-        if (start.exists()) {
-            e.replaceWith("Remove keyword args", core::Loc{ctx.file, start.join(end)}, "");
+        if (start.exists() && end.exists()) {
+            core::Loc loc{ctx.file, start.join(end)};
+            if (auto keywords = loc.source(ctx)) {
+                e.replaceWith("Remove keyword args", core::Loc{ctx.file, start.join(end)}, "{{{}}}", *keywords);
+            }
         }
     }
 }
