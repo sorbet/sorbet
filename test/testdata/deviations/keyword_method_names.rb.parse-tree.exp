@@ -358,7 +358,42 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U if>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U if>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          If {
+            condition = Const {
+              scope = NULL
+              name = <C <U <ErrorNode>>>
+            }
+            then_ = NULL
+            else_ = NULL
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_in>

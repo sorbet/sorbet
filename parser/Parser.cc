@@ -36,7 +36,7 @@ class ErrorToError {
             case ruby_parser::dclass::CurlyBracesAroundBlockPass: {
                 auto source = loc.source(gs);
                 if (source.has_value()) {
-                    auto replacement = string(loc.source(gs).value());
+                    auto replacement = string(source.value());
                     size_t lCurlyPos = replacement.find("{");
                     size_t rCurlyPos = replacement.rfind("}");
                     if (lCurlyPos != string::npos && rCurlyPos != string::npos) {

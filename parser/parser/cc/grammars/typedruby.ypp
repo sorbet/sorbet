@@ -22,6 +22,16 @@ using namespace std::string_literals;
 
 %param { ruby_parser::TYPEDRUBY27& driver }
 %parse-param { ruby_parser::SelfPtr self }
+// This code runs at the beginning of typedruby_release27::parser::parse()
+// We use it to stash some otherwise-private members of the parser so that we
+// don't have to write helper functions entirely in C macros.
+%initial-action {
+  this->driver.yytname = this->yytname_;
+  this->driver.yytranslate = this->yytranslate_;
+  // yyla is a stack-allocated local variable at the start of the parse() function,
+  // referenced by the yyclearin macro.
+  this->driver.clear_lookahead = [&yyla]() { yyclearin; };
+}
 %define api.namespace {ruby_parser::bison::TYPEDRUBY27}
 %define api.prefix {TYPEDRUBY27}
 %define api.value.type { union parser_value }
@@ -468,19 +478,7 @@ namespace TYPEDRUBY27 {
 // token was NOT consumed, like in Happy for Haskell.)
 void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 	std::string error_message = msg;
-
-	int token_type = static_cast<int>(driver.last_token->type());
-	const char* token_str_name = yytname_[yytranslate_(token_type)];
-
-	if (token_type == token_type::tBDOT2) {
-		// Because we have two tokens matching `..`, we can't set the token name as `..` directly.
-		// This hack allows to display the real token string instead of `tBDOT2` in parsing errors.
-		error_message = "\"..\"";
-	} else if (token_type == token_type::tBDOT3) {
-		// Because we have two tokens matching `...`, we can't set the token name as `...` directly.
-		// This hack allows to display the real token string instead of `tBDOT3` in parsing errors.
-		error_message = "\"...\"";
-	} else if (token_str_name != nullptr) {
+	if (auto *token_str_name = driver.token_name(driver.last_token->type())) {
 		error_message = token_str_name;
 	}
 
@@ -500,38 +498,6 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 	lloc->end = token->end();
 	return token_type;
 }
-
-// We've patched the lexer to break compatibility with Ruby w.r.t. method calls
-// for methods sharing names with ruby reserved words. See this PR:
-//   https://github.com/sorbet/sorbet/pull/1993
-// That makes some error recovery better, and other parts worse. This fixes the
-// parts it makes worse.
-//
-// The idea is that there's a rule in the parser below like
-//
-//     stmts: ... | stmts terms stmt_or_begin
-//
-// which means that a list of statements grows by adding a 'terms' (\n or ;) and
-// a 'stmt' to an existing list of `stmts`. But when we consider this example:
-//
-// def foo
-//   x = 1
-//   x.
-// end
-//
-// Due to our lexer change, the parser sees `tIDENTIFIER tDOT kEND`, which
-// means there's no 'terms' in between the `stmts` (`x = 1`) and the
-// (recovered) method call "x.", so another error token shows up, and drops a
-// bunch of the already-parsed program.
-//
-// So in rules where we expect something like that to happen, we can call this
-// function to request that the lexer start again after `tDOT` token in the
-// expr_end state.
-#define rewind_and_reset(newPos)     \
-  do {                               \
-    yyclearin;                       \
-    driver.lex.rewind_and_reset_to_expr_end(newPos);       \
-  } while (false);
 
 }}} // namespace
 } // %code
@@ -1738,7 +1704,7 @@ lbrace_cmd_block_start:
                 | primary_value tCOLON2 error
                     {
                       $$ = driver.build.constFetchError(self, $1, $2);
-                      rewind_and_reset(@2.end);
+                      driver.rewind_and_reset(@2.end);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.begin, @2.end));
                     }
                 | tCOLON3 tCONSTANT
@@ -1829,6 +1795,11 @@ lbrace_cmd_block_start:
                       $$ = driver.build.condition(self, $1, $2, $3, $4,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
+                    }
+                | kIF error
+                    {
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
                     }
                 | kIF strings kDO compstmt if_tail kEND
                     {
@@ -2422,7 +2393,7 @@ opt_block_args_tail:
                 | primary_value call_op error
                     {
                       $$ = driver.build.call_method_error(self, $1, $2);
-                      rewind_and_reset(@2.end);
+                      driver.rewind_and_reset(@2.end);
                     }
                 | primary_value tCOLON2 operation2 paren_args
                     {

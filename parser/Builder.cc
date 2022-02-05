@@ -2503,7 +2503,7 @@ ForeignPtr xstring_compose(SelfPtr builder, const token *begin, const node_list 
 
 namespace sorbet::parser {
 
-unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver, bool trace) {
+unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver, bool trace) const {
     impl_->driver_ = driver;
     return impl_->cast_node(driver->parse(impl_.get(), trace));
 }
