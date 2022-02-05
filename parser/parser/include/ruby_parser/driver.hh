@@ -285,6 +285,9 @@ public:
     // yytranslate_ is a static method, so we don't have to worry about binding `this`
     std::function<unsigned char(int)> yytranslate;
 
+    // Stores a lambda that can be called to clear Bison's current lookahead token.
+    std::function<void()> clear_lookahead;
+
     base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
                 const struct builder &builder, bool traceLexer);
     virtual ~base_driver() {}
@@ -317,6 +320,34 @@ public:
     }
 
     const char *const token_name(token_type type);
+
+    // We've patched the lexer to break compatibility with Ruby w.r.t. method calls
+    // for methods sharing names with ruby reserved words. See this PR:
+    //   https://github.com/sorbet/sorbet/pull/1993
+    // That makes some error recovery better, and other parts worse. This fixes the
+    // parts it makes worse.
+    //
+    // The idea is that there's a rule in the parser below like
+    //
+    //     stmts: ... | stmts terms stmt_or_begin
+    //
+    // which means that a list of statements grows by adding a 'terms' (\n or ;) and
+    // a 'stmt' to an existing list of `stmts`. But when we consider this example:
+    //
+    // def foo
+    //   x = 1
+    //   x.
+    // end
+    //
+    // Due to our lexer change, the parser sees `tIDENTIFIER tDOT kEND`, which
+    // means there's no 'terms' in between the `stmts` (`x = 1`) and the
+    // (recovered) method call "x.", so another error token shows up, and drops a
+    // bunch of the already-parsed program.
+    //
+    // So in rules where we expect something like that to happen, we can call this
+    // function to request that the lexer start again after `tDOT` token in the
+    // expr_end state.
+    void rewind_and_reset(size_t newPos);
 };
 
 class typedruby_release27 : public base_driver {

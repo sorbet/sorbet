@@ -28,6 +28,11 @@ const char *const base_driver::token_name(token_type type) {
     }
 }
 
+void base_driver::rewind_and_reset(size_t newPos) {
+    this->clear_lookahead();
+    this->lex.rewind_and_reset_to_expr_end(newPos);
+}
+
 typedruby_release27::typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                          const struct builder &builder, bool traceLexer)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer) {}
