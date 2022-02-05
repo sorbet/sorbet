@@ -61,6 +61,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     unique_ptr<core::GlobalState> gs;
     { gs = commonGs->deepCopy(true); }
     string inputData((const char *)data, size);
+    inputData += "\0\0"s;
     vector<ast::ParsedFile> indexed;
     vector<core::FileRef> inputFiles;
     {

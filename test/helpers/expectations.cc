@@ -114,7 +114,8 @@ vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
 void populateSourceFileContents(Expectations &exp) {
     for (auto &file : exp.sourceFiles) {
         string filename = exp.folder + file;
-        string fileContents = FileOps::read(filename);
+        auto nullPadding = 2;
+        string fileContents = FileOps::read(filename, nullPadding);
         auto &slot = exp.sourceFileContents[filename];
         slot = make_shared<core::File>(move(filename), move(fileContents), core::File::Type::Normal);
     }

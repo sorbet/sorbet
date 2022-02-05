@@ -27,7 +27,7 @@ TEST_CASE("SimpleDesugar") { // NOLINT
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
     sorbet::core::UnfreezeFileTable ft(gs);
 
-    sorbet::core::FileRef fileId = gs.enterFile("<test>", "def hello_world; p :hello; end");
+    sorbet::core::FileRef fileId = gs.enterFile("<test>", "def hello_world; p :hello; end\0\0"s);
     auto settings = sorbet::parser::Parser::Settings{};
     auto ast = sorbet::parser::Parser::run(gs, fileId, settings);
     sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root(), fileId);

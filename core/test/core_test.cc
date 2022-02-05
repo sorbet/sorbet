@@ -43,7 +43,7 @@ TEST_CASE("TestOffset2Pos") {
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
         INFO(name);
-        FileRef f = gs.enterFile(move(name), tc.src);
+        FileRef f = gs.enterFile(move(name), tc.src + "\0\0"s);
 
         auto detail = Loc::offset2Pos(f.data(gs), tc.off);
 
@@ -57,7 +57,7 @@ TEST_CASE("Errors") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     UnfreezeFileTable fileTableAccess(gs);
-    FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
+    FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n\0\0"s));
     if (auto e = gs.beginError(Loc{f, 0, 3}, errors::Internal::InternalError)) {
         e.setHeader("Use of metavariable: `{}`", "foo");
     }

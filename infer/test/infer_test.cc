@@ -31,7 +31,7 @@ void processSource(core::GlobalState &cb, string str) {
     sorbet::core::UnfreezeNameTable nt(cb);
     sorbet::core::UnfreezeSymbolTable st(cb);
     sorbet::core::UnfreezeFileTable ft(cb);
-    core::FileRef fileId = cb.enterFile("<test>", str);
+    core::FileRef fileId = cb.enterFile("<test>", str + "\0\0"s);
     auto settings = parser::Parser::Settings{};
     auto ast = parser::Parser::run(cb, fileId, settings);
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), fileId);

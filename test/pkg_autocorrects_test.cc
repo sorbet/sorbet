@@ -40,8 +40,8 @@ struct TestPackageFile {
         vector<core::FileRef> files;
         {
             core::UnfreezeFileTable fileTableAccess(gs);
-            files.emplace_back(gs.enterFile(filename, source));
-            files.emplace_back(gs.enterFile(examplePackagePath, examplePackage));
+            files.emplace_back(gs.enterFile(filename, source + "\0\0"s));
+            files.emplace_back(gs.enterFile(examplePackagePath, examplePackage + "\0\0"s));
         }
 
         // run through the pipeline up through the packager

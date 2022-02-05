@@ -37,7 +37,7 @@ TEST_CASE("ParserCheck") {
     sorbet::core::UnfreezeSymbolTable st(gs);
     sorbet::core::UnfreezeFileTable ft(gs);
 
-    core::FileRef fileId = gs.enterFile("<test input>", "a");
+    core::FileRef fileId = gs.enterFile("<test input>", "a\0\0"s);
     auto settings = parser::Parser::Settings{};
     auto ast = sorbet::parser::Parser::run(gs, fileId, settings);
 

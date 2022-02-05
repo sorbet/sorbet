@@ -76,7 +76,7 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -113,7 +113,7 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     ErrorReporter er(cs);
     auto epoch = 0;
     auto newEpoch = 1;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -154,7 +154,7 @@ TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
     ErrorReporter er(cs);
     auto epoch = 0;
     auto newEpoch = 1;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -183,7 +183,7 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
     auto initialEpoch = 0;
     auto slowPathEpoch = 1;
     auto latestEpoch = 2;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, initialEpoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, initialEpoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -222,7 +222,7 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -275,7 +275,7 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -317,7 +317,7 @@ TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
     auto cs = makeConfig();
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
@@ -351,8 +351,8 @@ TEST_CASE("filesWithErrorsSince") {
     ErrorReporter er(cs);
     auto epoch = 0;
     auto requestedEpoch = 3;
-    auto file = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
-    auto fileWithoutErrors = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
+    auto file = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
+    auto fileWithoutErrors = make_shared<core::File>("bar.rb", "bar\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref;
     core::FileRef frefWithoutErrors;
     {
@@ -396,8 +396,8 @@ TEST_CASE("Global error limit") {
 
     ErrorReporter er(cs);
     auto epoch = 0;
-    auto file1 = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
-    auto file2 = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
+    auto file1 = make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, epoch);
+    auto file2 = make_shared<core::File>("bar.rb", "bar\0\0"s, core::File::Type::Normal, epoch);
     core::FileRef fref1;
     core::FileRef fref2;
     {

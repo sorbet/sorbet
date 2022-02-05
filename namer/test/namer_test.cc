@@ -29,7 +29,7 @@ static string_view testClass_str = "Test"sv;
 ast::ParsedFile getTree(core::GlobalState &gs, string str) {
     sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
     sorbet::core::UnfreezeFileTable ft(gs);              // enters original strings
-    auto file = gs.enterFile("<test>", str);
+    auto file = gs.enterFile("<test>", str + "\0\0"s);
     auto settings = parser::Parser::Settings{};
     auto tree = parser::Parser::run(gs, file, settings);
     file.data(gs).strictLevel = core::StrictLevel::Strict;
