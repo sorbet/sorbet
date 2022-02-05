@@ -33,12 +33,11 @@ void base_driver::rewind_and_reset(size_t newPos) {
     this->lex.rewind_and_reset_to_expr_end(newPos);
 }
 
-void base_driver::rewind_if_dedented(token_t token, token_t kEND, location &kEND_loc) {
+void base_driver::rewind_if_dedented(token_t token, token_t kEND) {
     if (this->indentationAware && this->lex.compare_indent_level(token, kEND) < 0) {
-        this->rewind_and_reset(kEND_loc.begin);
+        this->rewind_and_reset(kEND->start());
         const char *token_str_name = this->token_name(token->type());
-        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd,
-                                       diagnostic::range(kEND_loc.begin, kEND_loc.end), token_str_name);
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, kEND, token_str_name);
     }
 }
 

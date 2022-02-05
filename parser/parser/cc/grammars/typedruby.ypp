@@ -1912,7 +1912,7 @@ lbrace_cmd_block_start:
                       $$ = driver.build.condition(self, $1, $2, $3, $4,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
-                      driver.rewind_if_dedented($1, $6, @6);
+                      driver.rewind_if_dedented($1, $6);
                     }
                 | kIF error
                     {
