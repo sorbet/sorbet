@@ -190,7 +190,9 @@ File::Flags::Flags(string_view path)
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(File::Flags(path_)), path_(move(path_)), source_(move(source_)),
       originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
-      compiledLevel(fileCompiledSigil(this->source_)) {}
+      compiledLevel(fileCompiledSigil(this->source_)) {
+    ENFORCE(this->source_.size() >= 2 && string_view(this->source_.data() + this->source_.size() - 2, 2) == "\0\0"sv);
+}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -248,7 +250,6 @@ string_view File::path() const {
 string_view File::source() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
-    ENFORCE(this->source_.size() >= 2 && string_view(this->source_.data() + this->source_.size() - 2, 2) == "\0\0"sv);
     return string_view(this->source_.data(), this->source_.size() - 2);
 }
 
