@@ -61,13 +61,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def no_syntax_error_3<<todo method>>(&<blk>)
-      x = if <self>.y()
-        <emptyTree>
-      else
-        <emptyTree>
+      begin
+        x = if <self>.y()
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+        <self>.puts("after")
       end
     end
-
-    <self>.puts("after")
   end
 end

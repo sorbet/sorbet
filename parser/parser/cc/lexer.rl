@@ -246,7 +246,9 @@ int lexer::arg_or_cmdarg(int cmd_state) {
 void lexer::emit_comment(const char* s, const char* e) {
   /* unused for now */
   (void)s;
-  (void)e;
+  if (*e == '\n') { // might also be \0
+    newline_s = e;
+  }
 }
 
 std::string lexer::tok() const {
