@@ -43,7 +43,7 @@ string sorbet::FileOps::read(string_view filename, size_t nullPadding) {
         rewind(fp);
         auto readBytes = fread(&contents[0], 1, sz, fp);
         fclose(fp);
-        if (readBytes != contents.size()) {
+        if (readBytes != (contents.size() - nullPadding)) {
             // Error reading file?
             throw sorbet::FileNotFoundException();
         }

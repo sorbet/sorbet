@@ -248,7 +248,7 @@ string_view File::path() const {
 string_view File::source() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
-    ENFORCE(this->source_.size() >= 2 && string_view(this->source_.data() + this->source_.size() - 2, 2) == "\0\0");
+    ENFORCE(this->source_.size() >= 2 && string_view(this->source_.data() + this->source_.size() - 2, 2) == "\0\0"sv);
     return string_view(this->source_.data(), this->source_.size() - 2);
 }
 

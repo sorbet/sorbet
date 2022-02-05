@@ -598,7 +598,7 @@ int realmain(int argc, char *argv[]) {
                 auto input = opts.inlineInput;
                 if (core::File::fileStrictSigil(opts.inlineInput) == core::StrictLevel::None) {
                     // put it at the end so as to not upset line numbers
-                    input += "\n# typed: true";
+                    input += "\n# typed: true\0\0"sv;
                 }
                 auto file = gs->enterFile(string("-e"), input);
                 inputFiles.emplace_back(file);

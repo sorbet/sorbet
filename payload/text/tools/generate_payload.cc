@@ -41,7 +41,9 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     for (auto &file : sourceFiles) {
         string permalink = "https://github.com/sorbet/sorbet/tree/" + version + "/" + file;
         out << "  string_view " + sourceName2funcName(file) << "() {" << '\n';
-        out << "  return \"" + absl::CEscape(addSourceURLToTypedLine(sorbet::FileOps::read(file.c_str()), permalink)) +
+        size_t nullPadding = 2;
+        out << "  return \"" +
+                   absl::CEscape(addSourceURLToTypedLine(sorbet::FileOps::read(file.c_str(), nullPadding), permalink)) +
                    "\"sv;"
             << '\n'
             << "}" << '\n';
