@@ -8,7 +8,7 @@ class A
       puts 'then'
     end
     Integer.class
-  end
+  end # error: Closing "end" token was not indented as far as "if" token
 
   def test2
     puts 'before'
@@ -16,8 +16,9 @@ class A
     if x.y do
       puts 'then'
     else # error: else without rescue is useless
+      # TODO(jez) better parse would drop the `do` keyword and put this branch in the else
       puts 'else'
     end
     Integer.class
-  end
-end # error: unexpected token "end of file"
+  end # error: Closing "end" token was not indented as far as "if" token
+end
