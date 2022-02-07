@@ -8,7 +8,7 @@ class A
       puts 'then'
     end
     Integer.class
-  end # error: Closing "end" token was not indented as far as "if" token
+  end # error: Hint: closing "end" token was not indented as far as "if" token
 
   def test2
     puts 'before'
@@ -20,5 +20,5 @@ class A
       puts 'else'
     end
     Integer.class
-  end # error: Closing "end" token was not indented as far as "if" token
+  end # error: Hint: closing "end" token was not indented as far as "if" token
 end

@@ -3,7 +3,7 @@
 class A
   def foo
     if true
-  end # error: Closing "end" token was not indented as far as "if" token
+  end # error: Hint: closing "end" token was not indented as far as "if" token
 end
 
 class B

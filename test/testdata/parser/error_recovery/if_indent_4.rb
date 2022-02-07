@@ -7,7 +7,7 @@ class A
   def test1
     if x.f
     puts 'inside if'
-  end # error: Closing "end" token was not indented as far as "if" token
+  end # error: Hint: closing "end" token was not indented as far as "if" token
     # We this ends up at the class top-level, not inside test1
     puts 'after if but inside test1'
   end
@@ -16,5 +16,5 @@ class A
   # the whole file.
   def test2
     if x.f
-  end # error: Closing "end" token was not indented as far as "if" token
+  end # error: Hint: closing "end" token was not indented as far as "if" token
 end # error: unexpected token "end"

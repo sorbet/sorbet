@@ -60,8 +60,7 @@ class ErrorToError {
             }
             case ruby_parser::dclass::DedentedEnd:
                 e.addErrorNote("Sorbet found a syntax error it could not recover from.\n"
-                               "    To provide a better message, it re-parsed the file while tracking indentation.\n"
-                               "    If this message obscures the root cause, please let us know.");
+                               "    To provide a better message, it re-parsed the file while tracking indentation.");
                 break;
             default:
                 break;

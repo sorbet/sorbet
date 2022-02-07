@@ -13,7 +13,7 @@ module A::B
   class C2
     def foo
       if x
-    end # error: Closing "end" token was not indented as far as "if" token
+    end # error: Hint: closing "end" token was not indented as far as "if" token
 
     sig {void}
     private def bar; end
