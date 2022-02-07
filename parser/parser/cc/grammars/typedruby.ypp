@@ -1529,6 +1529,50 @@ lbrace_cmd_block_start:
                       auto node_list = driver.alloc.node_list(forwarded_args);
                       $$ = driver.alloc.delimited_node_list($1, node_list, $3);
                     }
+                  // Error-recovery cases
+                | tLPAREN2 error rparen
+                    {
+                      $$ = driver.alloc.delimited_node_list($1, driver.alloc.node_list(driver.build.error_node(self, @2.begin, @2.end)), $3);
+                    }
+                | tLPAREN2 error tCOMMA args rparen
+                    {
+                      $4->push_front(driver.build.error_node(self, @2.begin, @2.end));
+                      $$ = driver.alloc.delimited_node_list($1, $4, $5);
+                    }
+                | tLPAREN2 error tCOMMA args tCOMMA args_forward rparen
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $6);
+                      $4->emplace_back(forwarded_args);
+                      $4->push_front(driver.build.error_node(self, @2.begin, @2.end));
+                      $$ = driver.alloc.delimited_node_list($1, $4, $7);
+                    }
+                | tLPAREN2 error tCOMMA args_forward rparen
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $4);
+                      auto list = driver.alloc.node_list(driver.build.error_node(self, @2.begin, @2.end));
+                      list->emplace_back(forwarded_args);
+                      $$ = driver.alloc.delimited_node_list($1, list, $5);
+                    }
+                | tLPAREN2 tCOMMA opt_call_args rparen
+                    {
+                      $3->push_front(driver.build.error_node(self, @2.begin, @2.end));
+                      $$ = driver.alloc.delimited_node_list($1, $3, $4);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                    }
+                | tLPAREN2 tCOMMA args tCOMMA args_forward rparen
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $5);
+                      $3->emplace_back(forwarded_args);
+                      $$ = driver.alloc.delimited_node_list($1, $3, $6);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                    }
+                | tLPAREN2 tCOMMA args_forward rparen
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $3);
+                      auto list = driver.alloc.node_list(forwarded_args);
+                      $$ = driver.alloc.delimited_node_list($1, list, $4);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                    }
   opt_paren_args: // nothing
                     {
                       $$ = driver.alloc.delimited_node_list(nullptr, driver.alloc.node_list(), nullptr);
@@ -1635,10 +1679,6 @@ lbrace_cmd_block_start:
             args: arg_value
                     {
                       $$ = driver.alloc.node_list($1);
-                    }
-                | error
-                    {
-                      $$ = driver.alloc.node_list(driver.build.error_node(self, @1.begin, @1.end));
                     }
                 | tSTAR arg_value
                     {
