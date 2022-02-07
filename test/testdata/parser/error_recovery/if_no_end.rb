@@ -9,4 +9,4 @@ end
 class B
   def bar
   end
-end
+end # error: unexpected token "end of file"

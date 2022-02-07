@@ -18,5 +18,4 @@ module A::B
     sig {void}
     private def bar; end
   end
-end
-
+end # error: unexpected token "end of file"

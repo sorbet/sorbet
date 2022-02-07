@@ -41,4 +41,4 @@ class A
     end
     puts 'after'
   end
-end
+end # error: unexpected token "end of file"

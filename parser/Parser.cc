@@ -65,12 +65,8 @@ void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc, r
     }
 }
 
-void errorToError(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
-    if (diagnostics.empty()) {
-        return;
-    }
-    uint32_t maxOff = file.data(gs).source().size();
-    file.data(gs).setHasParseErrors(true);
+void reportDiagnostics(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics,
+                       bool onlyHints) {
     for (auto &diag : diagnostics) {
         switch (diag.level()) {
             case ruby_parser::dlevel::NOTE:
@@ -80,13 +76,27 @@ void errorToError(core::GlobalState &gs, core::FileRef file, ruby_parser::diagno
             case ruby_parser::dlevel::FATAL:
                 break;
         }
+        auto errorClass = dclassToErrorClass(diag.error_class());
+        if (onlyHints && errorClass != core::errors::Parser::ErrorRecoveryHint) {
+            continue;
+        }
+        uint32_t maxOff = file.data(gs).source().size();
         core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
                       translatePos(diag.location().endPos, maxOff));
-        if (auto e = gs.beginError(loc, dclassToErrorClass(diag.error_class()))) {
+        if (auto e = gs.beginError(loc, errorClass)) {
             e.setHeader("{}", fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
             explainError(gs, e, loc, diag.error_class());
         }
     }
+}
+
+void errorToError(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
+    if (diagnostics.empty()) {
+        return;
+    }
+    file.data(gs).setHasParseErrors(true);
+    auto onlyHints = false;
+    reportDiagnostics(gs, file, diagnostics, onlyHints);
 }
 
 unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, string_view buffer,
@@ -126,9 +136,12 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     auto driver = makeDriver(settings, buffer, scratch, initialLocals);
     auto ast = builder.build(driver.get(), settings.traceParser);
+
+    // Always report the original parse errors
+    errorToError(gs, file, driver->diagnostics);
+
     if (ast != nullptr) {
         // Successful parse on first try
-        errorToError(gs, file, driver->diagnostics);
         return ast;
     }
 
@@ -136,22 +149,17 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     auto astRetry = builder.build(driverRetry.get(), settings.traceParser);
 
     if (astRetry == nullptr) {
-        // Retry did not produce a parse result; flush original errors and make empty parse result
-        errorToError(gs, file, driver->diagnostics);
+        // Retry did not produce a parse result
         return make_unique<Begin>(core::LocOffsets{0, 0}, NodeVec{});
     }
 
-    // Make sure that at least one error is printed. Probably doesn't make sense to show errors from
-    // BOTH runs (could be confusing and/or report the same error(s) twice). Probably if the second
-    // run produced a parse and it also has errors, they're more relevant, so show those.
-    if (!driverRetry->diagnostics.empty()) {
-        errorToError(gs, file, driverRetry->diagnostics);
-        return astRetry;
-    }
-
-    ENFORCE(false, "Error-recovery mode of the parser should always emit an error if it produced a parse result.");
-    // Report original run's set of errors, but still use the second parse.
-    errorToError(gs, file, driver->diagnostics);
+    ENFORCE(absl::c_any_of(driverRetry->diagnostics,
+                           [](const auto &diag) {
+                               return dclassToErrorClass(diag.error_class()) == core::errors::Parser::ErrorRecoveryHint;
+                           }),
+            "Error-recovery mode of the parser should always emit an error hint if it produced a parse result.");
+    auto onlyHints = true;
+    reportDiagnostics(gs, file, driverRetry->diagnostics, onlyHints);
     return astRetry;
 }
 }; // namespace sorbet::parser

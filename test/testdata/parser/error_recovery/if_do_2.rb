@@ -21,4 +21,4 @@ class A
     end
     Integer.class
   end # error: Hint: closing "end" token was not indented as far as "if" token
-end
+end # error: unexpected token "end of file"
