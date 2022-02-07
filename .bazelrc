@@ -12,6 +12,9 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
+# The --crosstool_top option has been deprecated in favor of this incompatible cc toolchain resolution option for
+# selecting toolchains. This flag can be removed once https://github.com/bazelbuild/bazel/issues/7260 is closed and the
+# migration is complete
 build --incompatible_enable_cc_toolchain_resolution --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
