@@ -18,81 +18,76 @@ using namespace std;
 
 namespace {
 
-class ErrorToError {
-    static uint32_t translatePos(size_t pos, uint32_t maxOff) {
-        if (pos == 0) {
-            return pos;
-        }
-        return min((uint32_t)(pos), maxOff);
+uint32_t translatePos(size_t pos, uint32_t maxOff) {
+    if (pos == 0) {
+        return pos;
     }
+    return min((uint32_t)(pos), maxOff);
+}
 
-    static core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
-        switch (diagClass) {
-            case ruby_parser::dclass::DedentedEnd:
-                return core::errors::Parser::ErrorRecoveryHint;
-            default:
-                return core::errors::Parser::ParserError;
-        }
+core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
+    switch (diagClass) {
+        case ruby_parser::dclass::DedentedEnd:
+            return core::errors::Parser::ErrorRecoveryHint;
+        default:
+            return core::errors::Parser::ParserError;
     }
+}
 
-    static void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
-                             ruby_parser::dclass errorClass) {
-        switch (errorClass) {
-            case ruby_parser::dclass::IfInsteadOfItForTest:
-                e.replaceWith("Replace with `it`", loc, "it");
-                break;
-            case ruby_parser::dclass::MissingCommaBetweenKwargs:
-                e.replaceWith("Insert a comma", loc, ", ");
-                break;
-            case ruby_parser::dclass::CurlyBracesAroundBlockPass: {
-                auto source = loc.source(gs);
-                if (source.has_value()) {
-                    auto replacement = string(source.value());
-                    size_t lCurlyPos = replacement.find("{");
-                    size_t rCurlyPos = replacement.rfind("}");
-                    if (lCurlyPos != string::npos && rCurlyPos != string::npos) {
-                        replacement[lCurlyPos] = '(';
-                        replacement[rCurlyPos] = ')';
-                        e.replaceWith("Replace the curly braces with parens", loc, replacement);
-                    }
+void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc, ruby_parser::dclass errorClass) {
+    switch (errorClass) {
+        case ruby_parser::dclass::IfInsteadOfItForTest:
+            e.replaceWith("Replace with `it`", loc, "it");
+            break;
+        case ruby_parser::dclass::MissingCommaBetweenKwargs:
+            e.replaceWith("Insert a comma", loc, ", ");
+            break;
+        case ruby_parser::dclass::CurlyBracesAroundBlockPass: {
+            auto source = loc.source(gs);
+            if (source.has_value()) {
+                auto replacement = string(source.value());
+                size_t lCurlyPos = replacement.find("{");
+                size_t rCurlyPos = replacement.rfind("}");
+                if (lCurlyPos != string::npos && rCurlyPos != string::npos) {
+                    replacement[lCurlyPos] = '(';
+                    replacement[rCurlyPos] = ')';
+                    e.replaceWith("Replace the curly braces with parens", loc, replacement);
                 }
-                break;
             }
-            case ruby_parser::dclass::DedentedEnd:
-                e.addErrorNote("Sorbet found a syntax error it could not recover from.\n"
-                               "    To provide a better message, it re-parsed the file while tracking indentation.");
-                break;
-            default:
-                break;
+            break;
         }
+        case ruby_parser::dclass::DedentedEnd:
+            e.addErrorNote("Sorbet found a syntax error it could not recover from.\n"
+                           "    To provide a better message, it re-parsed the file while tracking indentation.");
+            break;
+        default:
+            break;
     }
+}
 
-public:
-    static void run(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
-        if (diagnostics.empty()) {
-            return;
+void errorToError(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
+    if (diagnostics.empty()) {
+        return;
+    }
+    uint32_t maxOff = file.data(gs).source().size();
+    file.data(gs).setHasParseErrors(true);
+    for (auto &diag : diagnostics) {
+        switch (diag.level()) {
+            case ruby_parser::dlevel::NOTE:
+            case ruby_parser::dlevel::WARNING:
+                continue;
+            case ruby_parser::dlevel::ERROR:
+            case ruby_parser::dlevel::FATAL:
+                break;
         }
-        uint32_t maxOff = file.data(gs).source().size();
-        file.data(gs).setHasParseErrors(true);
-        for (auto &diag : diagnostics) {
-            switch (diag.level()) {
-                case ruby_parser::dlevel::NOTE:
-                case ruby_parser::dlevel::WARNING:
-                    continue;
-                case ruby_parser::dlevel::ERROR:
-                case ruby_parser::dlevel::FATAL:
-                    break;
-            }
-            core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
-                          translatePos(diag.location().endPos, maxOff));
-            if (auto e = gs.beginError(loc, dclassToErrorClass(diag.error_class()))) {
-                e.setHeader("{}",
-                            fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
-                explainError(gs, e, loc, diag.error_class());
-            }
+        core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
+                      translatePos(diag.location().endPos, maxOff));
+        if (auto e = gs.beginError(loc, dclassToErrorClass(diag.error_class()))) {
+            e.setHeader("{}", fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
+            explainError(gs, e, loc, diag.error_class());
         }
     }
-};
+}
 
 unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, string_view buffer,
                                                 StableStringStorage<> &scratch, const vector<string> &initialLocals) {
@@ -133,7 +128,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     auto ast = builder.build(driver.get(), settings.traceParser);
     if (ast != nullptr) {
         // Successful parse on first try
-        ErrorToError::run(gs, file, driver->diagnostics);
+        errorToError(gs, file, driver->diagnostics);
         return ast;
     }
 
@@ -142,7 +137,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     if (astRetry == nullptr) {
         // Retry did not produce a parse result; flush original errors and make empty parse result
-        ErrorToError::run(gs, file, driver->diagnostics);
+        errorToError(gs, file, driver->diagnostics);
         return make_unique<Begin>(core::LocOffsets{0, 0}, NodeVec{});
     }
 
@@ -150,13 +145,13 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     // BOTH runs (could be confusing and/or report the same error(s) twice). Probably if the second
     // run produced a parse and it also has errors, they're more relevant, so show those.
     if (!driverRetry->diagnostics.empty()) {
-        ErrorToError::run(gs, file, driverRetry->diagnostics);
+        errorToError(gs, file, driverRetry->diagnostics);
         return astRetry;
     }
 
     ENFORCE(false, "Error-recovery mode of the parser should always emit an error if it produced a parse result.");
     // Report original run's set of errors, but still use the second parse.
-    ErrorToError::run(gs, file, driver->diagnostics);
+    errorToError(gs, file, driver->diagnostics);
     return astRetry;
 }
 }; // namespace sorbet::parser
