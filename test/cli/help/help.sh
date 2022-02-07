@@ -19,12 +19,16 @@ echo
 echo ----- Full help output: --------------------------------------------------
 echo
 
+# capturing the full help output is really brittle, because it needlessly
+# requires changing after every new option is added or deleted, and we don't
+# need to be in the business of testing our arg parsing library's ability to
+# generate help text.
+#
+# Instead just show that `--help` outputs more `... options:` sections than
+# would normally be printed with just `-h`, but none of the options in those
+# sections.
+
 main/sorbet --help 2>&1 | \
-  # max-threads help output (default) is hardware-specific
-  grep -v -- '--max-threads' | \
-  # --suggest-sig only shows up in debug builds
-  grep -v -- '--suggest-sig' | \
-  # --suggest-sig output spills out onto two lines
-  grep -v -- 'debug builds'
+  grep 'options:'
 
 echo --------------------------------------------------------------------------
