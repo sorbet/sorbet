@@ -153,8 +153,8 @@ class SelfReferential
 end
 ```
 
-Unfortunate for the case of typing JSON, this generally leads to more verbosity
-than in other languages, but can still accomplish somethin similar:
+Unfortunately for the case of typing JSON, this generally leads to more
+verbosity than in other languages, but can still accomplish something similar:
 
 [→ Full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Amodule%20MyJSON%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20sealed!%0A%0A%20%20sig%20%7Bparams%28json%3A%20T.untyped%29.returns%28MyJSON%29%7D%0A%20%20def%20self.from_untyped%28json%29%0A%20%20%20%20case%20json%0A%20%20%20%20when%20nil%20then%20JSONNull.instance%0A%20%20%20%20when%20String%20then%20JSONString.new%28val%3A%20json%29%0A%20%20%20%20when%20Numeric%20then%20JSONNumber.new%28val%3A%20json%29%0A%20%20%20%20when%20Array%20then%20JSONArray.new%28val%3A%20json.map%20%7B%7Cj%7C%20from_untyped%28j%29%7D%29%0A%20%20%20%20when%20Hash%20then%20JSONObject.new%28val%3A%20json.transform_values%20%7B%7Cj%7C%20from_untyped%28j%29%7D%29%0A%20%20%20%20else%20raise%28ArgumentError.new%28%22malformed%20json%22%29%29%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20class%20JSONNull%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20include%20Singleton%0A%20%20end%0A%0A%20%20class%20JSONString%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20String%0A%20%20end%0A%0A%20%20class%20JSONNumber%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20Numeric%0A%20%20end%0A%0A%20%20class%20JSONArray%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20T%3A%3AArray%5BMyJSON%5D%0A%20%20end%0A%0A%20%20class%20JSONObject%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20T%3A%3AHash%5BString%2C%20MyJSON%5D%0A%20%20end%0Aend)
 
