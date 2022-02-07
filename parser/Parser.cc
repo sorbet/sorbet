@@ -26,6 +26,15 @@ class ErrorToError {
         return min((uint32_t)(pos), maxOff);
     }
 
+    static core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
+        switch (diagClass) {
+            case ruby_parser::dclass::DedentedEnd:
+                return core::errors::Parser::ErrorRecoveryHint;
+            default:
+                return core::errors::Parser::ParserError;
+        }
+    }
+
     static void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
                              ruby_parser::dclass errorClass) {
         switch (errorClass) {
@@ -77,7 +86,7 @@ public:
             }
             core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
                           translatePos(diag.location().endPos, maxOff));
-            if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
+            if (auto e = gs.beginError(loc, dclassToErrorClass(diag.error_class()))) {
                 e.setHeader("{}",
                             fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
                 explainError(gs, e, loc, diag.error_class());

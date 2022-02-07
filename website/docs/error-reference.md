@@ -53,6 +53,46 @@ and should not be reported.
 
 [#1993]: https://github.com/sorbet/sorbet/pull/1993
 
+## 2003
+
+If you're seeing this error code, it means that Sorbet already emitted a parse
+error for the file, but found some extra information that might help point out
+the root cause of a syntax error. For example:
+
+```ruby
+class A
+  def foo
+    if x
+  end
+end
+```
+
+This Ruby snippet does not parse, but the reason why is confusing. Sorbet (and
+the Ruby VM) attempt to parse this file as if it were indented like this:
+
+```ruby
+class A
+  def foo
+    if x
+    end
+  end
+```
+
+and so Sorbet will report `unexpected token "end of file"` because the `class A`
+definition was not matched with an `end` token.
+
+But given the indentation structure present in the original program, it's more
+likely that the `if x` statement is unclosed. Thus, in some cases, Sorbet will
+provide extra "Hint:" diagnostics that point out things that might be the root
+cause.
+
+It's important to note that **these hints are imperfect**—fixing them might not
+actually fix the real parse error. Instead, they're provided as a way to help
+recover from the real parse error.
+
+As with all Sorbet error messages, if one of these hint error messages is
+confusing or misleading, please [report an issue] to let us know.
+
 ## 3001
 
 Sorbet doesn’t support singleton definitions outside of the class itself:
@@ -1510,8 +1550,6 @@ did not cover all the cases.
 
 See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
-[report an issue]: https://github.com/sorbet/sorbet/issues
-
 ## 7030
 
 This error is consistently used when the user is trying (implicitly or
@@ -1613,5 +1651,9 @@ end
 Of the two, the first solution is preferred because not only will the program
 type check as written, but Sorbet will know that the `x` variable is not `nil`
 throughout the body of the `if` statement.
+
+<!-- -->
+
+[report an issue]: https://github.com/sorbet/sorbet/issues
 
 <script src="/js/error-reference.js"></script>
