@@ -55,9 +55,7 @@ bool amIBeingDebugged()
     mib[3] = getpid();
 
     // Call sysctl.
-
-    size_t size = sizeof(info);
-    assert(sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0) == 0);
+    assert(sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &sizeof(info), nullptr, 0) == 0);
 
     // We're being debugged if the P_TRACED flag is set.
 

@@ -254,7 +254,8 @@ build:webasm --cpu=webasm --spawn_strategy=local --genrule_strategy=local --copt
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
-build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
+build:webasm --copt=-DEMSCRIPTEN
+build:webasm --linkopt=-lto-O2
 # Specify a "sane" C++ toolchain for the host platform.
 build:webasm --host_crosstool_top=@llvm_toolchain_13_0_0//:toolchain
 
