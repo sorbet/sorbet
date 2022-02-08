@@ -96,15 +96,6 @@ void reportDiagnostics(core::GlobalState &gs, core::FileRef file, ruby_parser::d
     }
 }
 
-void errorToError(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
-    if (diagnostics.empty()) {
-        return;
-    }
-    file.data(gs).setHasParseErrors(true);
-    auto onlyHints = false;
-    reportDiagnostics(gs, file, diagnostics, onlyHints);
-}
-
 unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, string_view buffer,
                                                 StableStringStorage<> &scratch, const vector<string> &initialLocals) {
     unique_ptr<ruby_parser::base_driver> driver;
@@ -143,8 +134,14 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     auto driver = makeDriver(settings, buffer, scratch, initialLocals);
     auto ast = builder.build(driver.get(), settings.traceParser);
 
-    // Always report the original parse errors
-    errorToError(gs, file, driver->diagnostics);
+    // Always report the original parse errors. If we need to run the parser again, we'll only
+    // report the hints. Always reporting the origial parse errors ensures that the user can always
+    // see the real cause in case the hints are misleading.
+    if (!driver->diagnostics.empty()) {
+        file.data(gs).setHasParseErrors(true);
+        auto onlyHints = false;
+        reportDiagnostics(gs, file, driver->diagnostics, onlyHints);
+    }
 
     if (ast != nullptr) {
         // Successful parse on first try
