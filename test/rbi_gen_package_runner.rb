@@ -123,7 +123,6 @@ module Runner
     if chdir
       opts[:chdir] = chdir
     end
-    puts "Calling #{command}"
     pid = T.unsafe(Process).spawn({}, *command, opts)
     Process.wait(pid)
     status = $?
@@ -150,7 +149,6 @@ module Runner
     Dir.mktmpdir do |tmpdir|
       # Copy the package's Ruby files to the tmpdir, mirroring the directory
       # structure.
-      puts "Copying in #{files.to_a}"
       dirnames = files.map {|f| File.dirname(f)}.uniq
       dirnames.each do |dirname|
         target = File.join(tmpdir, dirname)
@@ -161,13 +159,11 @@ module Runner
         files.each do |f|
           dirname = File.dirname(f)
           target = File.join(tmpdir, dirname)
-          puts "Copying #{f} to #{target}"
           FileUtils.cp(f, target)
         end
       end
 
       # Copy the RBI files into the root.
-      puts "Copying RBI files #{rbi_files.to_a}"
       rbi_files.each do |rbi|
         source = File.join(rbi_package_dir, rbi)
         FileUtils.cp(source, File.join(tmpdir, test_directory))
