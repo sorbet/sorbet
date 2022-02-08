@@ -1,0 +1,86 @@
+autocorrect-t-combinator-kwargs.rb:8: `T.nilable` does not accept keyword arguments https://srb.help/5003
+     8 |      nilable: T.nilable(x: Integer),
+                       ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-t-combinator-kwargs.rb:8: Replaced with `{x: Integer}`
+     8 |      nilable: T.nilable(x: Integer),
+                                 ^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:9: `T.all` does not accept keyword arguments https://srb.help/5003
+     9 |      all: T.all(Integer, M, a: Integer, b: String),
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-t-combinator-kwargs.rb:9: Replaced with `{a: Integer, b: String}`
+     9 |      all: T.all(Integer, M, a: Integer, b: String),
+                                     ^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:10: `T.any` does not accept keyword arguments https://srb.help/5003
+    10 |      any: T.any(Integer, String, a: Integer, b: String),
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-t-combinator-kwargs.rb:10: Replaced with `{a: Integer, b: String}`
+    10 |      any: T.any(Integer, String, a: Integer, b: String),
+                                          ^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:11: `T.type_parameter` does not accept keyword arguments https://srb.help/5003
+    11 |      param: T.type_parameter(a: Integer),
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-t-combinator-kwargs.rb:11: Replaced with `{a: Integer}`
+    11 |      param: T.type_parameter(a: Integer),
+                                      ^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:12: `T.deprecated_enum` does not accept keyword arguments https://srb.help/5003
+    12 |      enum: T.deprecated_enum(a: Integer),
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-t-combinator-kwargs.rb:12: Replaced with `{a: Integer}`
+    12 |      enum: T.deprecated_enum(a: Integer),
+                                      ^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:13: `T.class_of` does not accept keyword arguments https://srb.help/5003
+    13 |      klass: T.class_of(a: Integer),
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-t-combinator-kwargs.rb:13: Replaced with `{a: Integer}`
+    13 |      klass: T.class_of(a: Integer),
+                                ^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:9: Unsupported usage of literal type https://srb.help/7009
+     9 |      all: T.all(Integer, M, a: Integer, b: String),
+                                     ^
+
+autocorrect-t-combinator-kwargs.rb:9: Unsupported usage of literal type https://srb.help/7009
+     9 |      all: T.all(Integer, M, a: Integer, b: String),
+                                                 ^
+
+autocorrect-t-combinator-kwargs.rb:10: Unsupported usage of literal type https://srb.help/7009
+    10 |      any: T.any(Integer, String, a: Integer, b: String),
+                                          ^
+
+autocorrect-t-combinator-kwargs.rb:10: Unsupported usage of literal type https://srb.help/7009
+    10 |      any: T.any(Integer, String, a: Integer, b: String),
+                                                      ^
+Errors: 10
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+module M
+  extend T::Sig
+
+  sig do
+    params(
+      nilable: T.nilable({x: Integer}),
+      all: T.all(Integer, M, {a: Integer, b: String}),
+      any: T.any(Integer, String, {a: Integer, b: String}),
+      param: T.type_parameter({a: Integer}),
+      enum: T.deprecated_enum({a: Integer}),
+      klass: T.class_of({a: Integer}),
+    ).void
+  end
+  def test(nilable, all, any, param, enum, klass)
+  end
+
+end

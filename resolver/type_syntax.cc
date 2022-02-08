@@ -524,11 +524,33 @@ bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::strin
     }
 }
 
+void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
+    if (!send.hasKwArgs()) {
+        return;
+    }
+
+    if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMethodSignature)) {
+        string name = "T.";
+        name.append(send.fun.shortName(ctx));
+        e.setHeader("`{}` does not accept keyword arguments", name);
+
+        auto start = send.getKwKey(0).loc();
+        auto end = send.getKwValue(send.numKwArgs() - 1).loc();
+        if (start.exists() && end.exists()) {
+            core::Loc loc{ctx.file, start.join(end)};
+            if (auto keywords = loc.source(ctx)) {
+                e.replaceWith("Remove keyword args", core::Loc{ctx.file, start.join(end)}, "{{{}}}", *keywords);
+            }
+        }
+    }
+}
+
 TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                             TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
         case core::Names::nilable().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
+                unexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(),
                                               core::Symbols::noClassOrModule()}; // error will be reported in infer.
             }
@@ -554,8 +576,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
         }
         case core::Names::all().rawId(): {
-            if (send.numPosArgs() == 0) {
-                // Error will be reported in infer
+            if (send.numPosArgs() == 0 || send.hasKwArgs()) {
+                unexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto result = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -568,8 +590,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::any().rawId(): {
-            if (send.numPosArgs() == 0) {
-                // Error will be reported in infer
+            if (send.numPosArgs() == 0 || send.hasKwArgs()) {
+                unexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto result = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -582,8 +604,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::typeParameter().rawId(): {
-            if (send.numPosArgs() != 1) {
-                // Error will be reported in infer
+            if (send.numPosArgs() != 1 || send.hasKwArgs()) {
+                unexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto arr = ast::cast_tree<ast::Literal>(send.getPosArg(0));
@@ -604,8 +626,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
         }
         case core::Names::enum_().rawId():
         case core::Names::deprecatedEnum().rawId(): {
-            if (send.numPosArgs() != 1) {
-                // Error will be reported in infer
+            if (send.numPosArgs() != 1 || send.hasKwArgs()) {
+                unexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
@@ -650,8 +672,8 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::classOf().rawId(): {
-            if (send.numPosArgs() != 1) {
-                // Error will be reported in infer
+            if (send.numPosArgs() != 1 || send.hasKwArgs()) {
+                unexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
