@@ -69,7 +69,8 @@ class A
     puts (!t)
     puts (!def) # error: unexpected token ")"
     puts (!) # error: unexpected token ")"
-    puts (~19)
+    nineteen = 19
+    puts (~nineteen)
     puts (~def) # error: unexpected token ")"
     puts (~) # error: unexpected token ")"
     puts (20 << 20)
