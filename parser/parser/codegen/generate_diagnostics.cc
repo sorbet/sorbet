@@ -38,6 +38,7 @@ tuple<string, string> MESSAGES[] = {
     {"InvalidAssignment", "cannot assign to a keyword"},
     {"ModuleNameConst", "class or module name must be a constant literal"},
     {"UnexpectedToken", "unexpected token {}"},
+    {"UnterminatedToken", "unterminated {}"},
     {"MissingToken", "missing token {}"},
     {"ArgumentConst", "formal argument cannot be a constant"},
     {"ArgumentIvar", "formal argument cannot be an instance variable"},
