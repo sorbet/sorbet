@@ -209,14 +209,16 @@ int lexer::compare_indent_level(token_t left, token_t right) {
             return 0; // left == right
         } else if (!leftIsSpace && rightIsSpace) {
             return 1;  // left > right
-        } else if (leftChar == rightChar) {
-            leftPtr++;
-            rightPtr++;
-        } else {
+        }
+
+        if (leftChar != rightChar) {
             // mismatched indent. give up and say equal
             // TODO(jez) Might want to handle this case better
             return 0;
         }
+
+        leftPtr++;
+        rightPtr++;
     }
 
     // This is weird. One or both of the tokens' first characters was a whitespace character.
