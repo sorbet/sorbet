@@ -25,6 +25,7 @@ public:
         const size_t endPos;
 
         range(size_t beginPos, size_t endPos) : beginPos(beginPos), endPos(endPos) {}
+        explicit range(token_t token) : beginPos(token->start()), endPos(token->end()) {}
     };
 
 private:
@@ -41,10 +42,8 @@ public:
 
     diagnostic(dlevel lvl, dclass type, const token_t token, const std::string &data = "",
                const token_t extra_token = nullptr)
-        : level_(lvl), type_(type), location_(token->start(), token->end()), data_(data),
-          extra_location_(extra_token != nullptr
-                              ? std::make_optional<range>(range(extra_token->start(), extra_token->end()))
-                              : std::nullopt) {}
+        : diagnostic(lvl, type, range(token), data,
+                     extra_token != nullptr ? std::make_optional<range>(range(extra_token)) : std::nullopt) {}
 
     dlevel level() const {
         return level_;
