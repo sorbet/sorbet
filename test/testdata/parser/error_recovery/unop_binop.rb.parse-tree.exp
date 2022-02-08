@@ -1,0 +1,1399 @@
+Class {
+  name = Const {
+    scope = NULL
+    name = <C <U A>>
+  }
+  superclass = NULL
+  body = DefMethod {
+    name = <U g>
+    args = NULL
+    body = Begin {
+      stmts = [
+        Assign {
+          lhs = LVarLhs {
+            name = <U t>
+          }
+          rhs = Send {
+            receiver = Const {
+              scope = NULL
+              name = <C <U T>>
+            }
+            method = <U let>
+            args = [
+              True {
+              }
+              Const {
+                scope = Const {
+                  scope = NULL
+                  name = <C <U T>>
+                }
+                name = <C <U Boolean>>
+              }
+            ]
+          }
+        }
+        Assign {
+          lhs = LVarLhs {
+            name = <U f>
+          }
+          rhs = Send {
+            receiver = Const {
+              scope = NULL
+              name = <C <U T>>
+            }
+            method = <U let>
+            args = [
+              False {
+              }
+              Const {
+                scope = Const {
+                  scope = NULL
+                  name = <C <U T>>
+                }
+                name = <C <U Boolean>>
+              }
+            ]
+          }
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                IRange {
+                  from = Integer {
+                    val = "0"
+                  }
+                  to = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                ERange {
+                  from = Integer {
+                    val = "1"
+                  }
+                  to = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "2"
+                  }
+                  method = <U +>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "2"
+                  }
+                  method = <U +>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "3"
+                  }
+                  method = <U ->
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "3"
+                  }
+                  method = <U ->
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "4"
+                  }
+                  method = <U *>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "4"
+                  }
+                  method = <U *>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "5"
+                  }
+                  method = <U />
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "5"
+                  }
+                  method = <U />
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "6"
+                  }
+                  method = <U %>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "6"
+                  }
+                  method = <U %>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "7"
+                  }
+                  method = <U **>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "7"
+                  }
+                  method = <U **>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Send {
+                    receiver = Integer {
+                      val = "8"
+                    }
+                    method = <U **>
+                    args = [
+                      Const {
+                        scope = NULL
+                        name = <C <U <ErrorNode>>>
+                      }
+                    ]
+                  }
+                  method = <U -@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Send {
+                    receiver = Integer {
+                      val = "8"
+                    }
+                    method = <U **>
+                    args = [
+                      Const {
+                        scope = NULL
+                        name = <C <U <ErrorNode>>>
+                      }
+                    ]
+                  }
+                  method = <U -@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Send {
+                    receiver = Integer {
+                      val = "9"
+                    }
+                    method = <U **>
+                    args = [
+                      Const {
+                        scope = NULL
+                        name = <C <U <ErrorNode>>>
+                      }
+                    ]
+                  }
+                  method = <U +@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Send {
+                    receiver = Integer {
+                      val = "9"
+                    }
+                    method = <U **>
+                    args = [
+                      Const {
+                        scope = NULL
+                        name = <C <U <ErrorNode>>>
+                      }
+                    ]
+                  }
+                  method = <U +@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U -@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U -@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U +@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U +@>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "10"
+                  }
+                  method = <U |>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "10"
+                  }
+                  method = <U |>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "11"
+                  }
+                  method = <U ^>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "11"
+                  }
+                  method = <U ^>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "12"
+                  }
+                  method = <U &>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "12"
+                  }
+                  method = <U &>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "13"
+                  }
+                  method = <U <=>>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "13"
+                  }
+                  method = <U <=>>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "14"
+                  }
+                  method = <U ==>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "14"
+                  }
+                  method = <U ==>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "15"
+                  }
+                  method = <U ===>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "15"
+                  }
+                  method = <U ===>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "16"
+                  }
+                  method = <U !=>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "16"
+                  }
+                  method = <U !=>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Regexp {
+                    regex = [
+                      String {
+                        val = <U 17>
+                      }
+                    ]
+                    opts = Regopt {
+                      opts = ""
+                    }
+                  }
+                  method = <U =~>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Regexp {
+                    regex = [
+                      String {
+                        val = <U 17>
+                      }
+                    ]
+                    opts = Regopt {
+                      opts = ""
+                    }
+                  }
+                  method = <U =~>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Regexp {
+                    regex = [
+                      String {
+                        val = <U 18>
+                      }
+                    ]
+                    opts = Regopt {
+                      opts = ""
+                    }
+                  }
+                  method = <U !~>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Regexp {
+                    regex = [
+                      String {
+                        val = <U 18>
+                      }
+                    ]
+                    opts = Regopt {
+                      opts = ""
+                    }
+                  }
+                  method = <U !~>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U !>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U !>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U ~>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                  method = <U ~>
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "20"
+                  }
+                  method = <U <<>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "20"
+                  }
+                  method = <U <<>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "21"
+                  }
+                  method = <U >>>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "21"
+                  }
+                  method = <U >>>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = LVar {
+                    name = <U t>
+                  }
+                  method = <U &&>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = LVar {
+                    name = <U t>
+                  }
+                  method = <U &&>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = LVar {
+                    name = <U f>
+                  }
+                  method = <U ||>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = LVar {
+                    name = <U f>
+                  }
+                  method = <U ||>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "24"
+                  }
+                  method = <U >>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "24"
+                  }
+                  method = <U >>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "25"
+                  }
+                  method = <U <>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "25"
+                  }
+                  method = <U <>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "26"
+                  }
+                  method = <U >=>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "26"
+                  }
+                  method = <U >=>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "27"
+                  }
+                  method = <U <=>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = <U puts>
+          args = [
+            Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "27"
+                  }
+                  method = <U <=>
+                  args = [
+                    Const {
+                      scope = NULL
+                      name = <C <U <ErrorNode>>>
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
