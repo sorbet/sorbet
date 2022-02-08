@@ -1436,8 +1436,12 @@ lbrace_cmd_block_start:
                     }
                 | arg tMATCH error
                     {
+                      // Note that the rule above for `tMATCH` has a `DIAGCHECK` call. This seems to be vestigial,
+                      // inherited from the typedruby parser, which could produce a diagnostic from inside the builder
+                      // in the event of an invalid regex literal (a behavior we don't implement). For that reason,
+                      // and since this production already implies that we're in an error state, we don't duplicate
+                      // the `DIAGCHECK` here.
                       $$ = driver.build.match_op(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
-                      DIAGCHECK();
                     }
                 | arg tNMATCH arg
                     {
