@@ -1135,17 +1135,14 @@ Class {
           args = [
             Begin {
               stmts = [
-                Send {
-                  receiver = LVar {
+                And {
+                  left = LVar {
                     name = <U t>
                   }
-                  method = <U &&>
-                  args = [
-                    Const {
-                      scope = NULL
-                      name = <C <U <ErrorNode>>>
-                    }
-                  ]
+                  right = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
                 }
               ]
             }
@@ -1157,17 +1154,14 @@ Class {
           args = [
             Begin {
               stmts = [
-                Send {
-                  receiver = LVar {
+                And {
+                  left = LVar {
                     name = <U t>
                   }
-                  method = <U &&>
-                  args = [
-                    Const {
-                      scope = NULL
-                      name = <C <U <ErrorNode>>>
-                    }
-                  ]
+                  right = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
                 }
               ]
             }
@@ -1179,17 +1173,14 @@ Class {
           args = [
             Begin {
               stmts = [
-                Send {
-                  receiver = LVar {
+                Or {
+                  left = LVar {
                     name = <U f>
                   }
-                  method = <U ||>
-                  args = [
-                    Const {
-                      scope = NULL
-                      name = <C <U <ErrorNode>>>
-                    }
-                  ]
+                  right = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
                 }
               ]
             }
@@ -1201,17 +1192,14 @@ Class {
           args = [
             Begin {
               stmts = [
-                Send {
-                  receiver = LVar {
+                Or {
+                  left = LVar {
                     name = <U f>
                   }
-                  method = <U ||>
-                  args = [
-                    Const {
-                      scope = NULL
-                      name = <C <U <ErrorNode>>>
-                    }
-                  ]
+                  right = Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
                 }
               ]
             }

@@ -1485,7 +1485,7 @@ lbrace_cmd_block_start:
                     }
                 | arg tANDOP error
                     {
-                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      $$ = driver.build.logicalAnd(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tOROP arg
                     {
@@ -1493,7 +1493,7 @@ lbrace_cmd_block_start:
                     }
                 | arg tOROP error
                     {
-                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      $$ = driver.build.logicalOr(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | kDEFINED opt_nl arg
                     {
