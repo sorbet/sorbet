@@ -67,19 +67,12 @@ class A
 end
 ```
 
-This Ruby snippet does not parse, but the reason why is confusing. Sorbet (and
-the Ruby VM) attempt to parse this file as if it were indented like this:
-
-```ruby
-class A
-  def foo
-    if x
-    end
-  end
-```
-
-and so Sorbet will report `unexpected token "end of file"` because the `class A`
-definition was not matched with an `end` token.
+This Ruby snippet does not parse, but the reason why is confusing. Because Ruby
+does not care about indentation, it will try to consune `end` keywords eagerly
+if there is something available to match. In this example, the first `end`
+matches with `if` and the second matches with `def` and so Sorbet will report
+`unexpected token "end of file"` because the `class A` definition was not
+matched with an `end` token.
 
 But given the indentation structure present in the original program, it's more
 likely that the `if x` statement is unclosed. Thus, in some cases, Sorbet will
