@@ -25,6 +25,12 @@ uint32_t translatePos(size_t pos, uint32_t maxOff) {
     return min((uint32_t)(pos), maxOff);
 }
 
+core::Loc rangeToLoc(const core::GlobalState &gs, core::FileRef file, const ruby_parser::diagnostic::range &range) {
+    uint32_t maxOff = file.data(gs).source().size();
+    core::Loc loc(file, translatePos(range.beginPos, maxOff - 1), translatePos(range.endPos, maxOff));
+    return core::Loc(file, translatePos(range.beginPos, maxOff - 1), translatePos(range.endPos, maxOff));
+}
+
 core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
     switch (diagClass) {
         case ruby_parser::dclass::DedentedEnd:
@@ -34,8 +40,9 @@ core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
     }
 }
 
-void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc, ruby_parser::dclass errorClass) {
-    switch (errorClass) {
+void explainError(core::GlobalState &gs, core::FileRef file, core::ErrorBuilder &e, core::Loc loc,
+                  ruby_parser::diagnostic diag) {
+    switch (diag.error_class()) {
         case ruby_parser::dclass::IfInsteadOfItForTest:
             e.replaceWith("Replace with `it`", loc, "it");
             break;
@@ -57,6 +64,8 @@ void explainError(core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc, r
             break;
         }
         case ruby_parser::dclass::DedentedEnd:
+            ENFORCE(diag.extra_location().has_value());
+            e.addErrorLine(rangeToLoc(gs, file, diag.extra_location().value()), "Matching token was here");
             e.addErrorNote("Sorbet found a syntax error it could not recover from.\n"
                            "    To provide a better message, it re-parsed the file while tracking indentation.");
             break;
@@ -80,12 +89,10 @@ void reportDiagnostics(core::GlobalState &gs, core::FileRef file, ruby_parser::d
         if (onlyHints && errorClass != core::errors::Parser::ErrorRecoveryHint) {
             continue;
         }
-        uint32_t maxOff = file.data(gs).source().size();
-        core::Loc loc(file, translatePos(diag.location().beginPos, maxOff - 1),
-                      translatePos(diag.location().endPos, maxOff));
+        auto loc = rangeToLoc(gs, file, diag.location());
         if (auto e = gs.beginError(loc, errorClass)) {
             e.setHeader("{}", fmt::vformat(dclassStrings[(int)diag.error_class()], fmt::make_format_args(diag.data())));
-            explainError(gs, e, loc, diag.error_class());
+            explainError(gs, file, e, loc, diag);
         }
     }
 }
