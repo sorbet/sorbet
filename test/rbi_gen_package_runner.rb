@@ -173,7 +173,7 @@ module Runner
         FileUtils.cp(source, File.join(tmpdir, test_directory))
       end
 
-      check_call([sorbet, '--stripe-mode', '--stripe-packages', test_directory],
+      check_call([sorbet, '--stripe-mode', '--ignore', '__package.rb', test_directory],
                  chdir: tmpdir)
     end
   end
