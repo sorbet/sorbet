@@ -302,6 +302,125 @@ private:
 
     static const int MAX_SUGGESTION_COUNT = 10;
 
+    struct ParentPackageStub {
+        core::NameRef packageId;
+        vector<core::NameRef> fullName;
+        vector<core::NameRef> exports;
+
+        // Check that the candidate name is one of the top-level exported names from a parent package.
+        bool exportsSymbol(core::NameRef candidate) const {
+            return absl::c_find(this->exports, candidate) != this->exports.end();
+        }
+
+        // Check that a symbol matches the full name of this parent package.
+        bool matchesOwners(const core::GlobalState &gs, core::ClassOrModuleRef sym) const {
+            for (auto it = this->fullName.rbegin(); it != this->fullName.rend(); ++it) {
+                if (!sym.exists()) {
+                    return false;
+                }
+
+                if (sym.data(gs)->name != *it) {
+                    return false;
+                }
+
+                auto owner = sym.data(gs)->owner;
+                if (!owner.isClassOrModule()) {
+                    return false;
+                }
+
+                sym = owner.asClassOrModuleRef();
+            }
+
+            return sym == core::Symbols::root();
+        }
+    };
+
+    static core::ClassOrModuleRef stubParentNamespace(core::MutableContext ctx, core::NameRef mangledPkg) {
+        auto &db = ctx.state.packageDB();
+        auto &info = db.getPackageInfo(mangledPkg);
+
+        core::ClassOrModuleRef owner = core::Symbols::root();
+        for (auto part : info.fullName()) {
+            // TODO: is none okay for the loc?
+            owner = ctx.state.enterClassSymbol(core::Loc::none(), owner, part);
+        }
+
+        return owner;
+    }
+
+    static vector<ParentPackageStub> initParentStubs(core::MutableContext ctx) {
+        vector<ParentPackageStub> stubs;
+
+        auto &db = ctx.state.packageDB();
+
+        for (auto parent : *ctx.state.singlePackageParents) {
+            auto &info = db.getPackageInfo(parent);
+
+            auto &stub = stubs.emplace_back();
+            stub.packageId = parent;
+            stub.fullName = info.fullName();
+
+            auto exportPaths = info.exports();
+            auto prefixLen = info.fullName().size();
+            for (auto &path : exportPaths) {
+                stub.exports.emplace_back(path[prefixLen]);
+            }
+        }
+
+        return stubs;
+    }
+
+    static void stubForRbiGeneration(core::MutableContext ctx, const Nesting *scope, ast::ConstantLit *out) {
+        static std::vector<ParentPackageStub> parents = initParentStubs(ctx);
+
+        if (out->symbol.exists()) {
+            return;
+        }
+
+        auto owner = core::Symbols::root();
+
+        // if the scope of the constant lit is non-empty, attempt to resolve that first to help determine the owner.
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
+        if (auto *origScope = ast::cast_tree<ast::ConstantLit>(original.scope)) {
+            stubForRbiGeneration(ctx, scope, origScope);
+            owner = origScope->symbol.asClassOrModuleRef();
+        } else {
+            for (auto *cursor = scope; cursor != nullptr; cursor = cursor->parent.get()) {
+                if (!cursor->scope.isClassOrModule()) {
+                    continue;
+                }
+
+                auto sym = cursor->scope.asClassOrModuleRef();
+                auto name = sym.data(ctx)->name;
+
+                const auto parent =
+                    absl::c_find_if(parents, [name](auto &stub) { return stub.fullName.back() == name; });
+                if (parent == parents.end()) {
+                    continue;
+                }
+
+                if (!parent->exportsSymbol(original.cnst)) {
+                    continue;
+                }
+
+                if (!parent->matchesOwners(ctx, sym)) {
+                    continue;
+                }
+
+                owner = sym;
+                break;
+            }
+        }
+
+        auto symbol = ctx.state.enterClassSymbol(core::Loc{ctx.file, out->loc}, owner,
+                                                 ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
+
+        // force a singleton into existence
+        symbol.data(ctx)->singletonClass(ctx);
+
+        out->symbol = symbol;
+    }
+
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job, int &suggestionCount) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
@@ -328,6 +447,13 @@ private:
             job.out->symbol = core::Symbols::untyped();
             return;
         }
+
+        // When generating rbis in single-package mode, we may need to invent a symbol at this point
+        if (ctx.state.singlePackageParents.has_value()) {
+            stubForRbiGeneration(ctx.withOwner(job.scope->scope), job.scope.get(), job.out);
+            return;
+        }
+
         ENFORCE(!resolved.exists());
         ENFORCE(!job.out->symbol.exists());
 

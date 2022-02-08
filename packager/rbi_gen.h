@@ -23,8 +23,21 @@ public:
     static RBIOutput runOnce(const core::GlobalState &gs, core::NameRef pkg,
                              const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces);
 
-    static void run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamspaces,
+    // Generate RBIs for all packages named in `packageFiles`.
+    static void run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                     std::string outputDir, WorkerPool &workers);
+
+    // Generate RBIs for a single package, whose path is given by `packageName`. The `packageFiles` vector must include
+    // the file named by `packageName`, or an error will be raised.
+    static void runSinglePackage(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
+                                 core::NameRef package, std::string outputDir, WorkerPool &workers);
+
+    struct SinglePackageInfo {
+        core::NameRef packageName;
+        std::vector<core::NameRef> parents;
+    };
+
+    static SinglePackageInfo findSinglePackage(core::GlobalState &gs, std::string packageName);
 };
 } // namespace sorbet::packager
 

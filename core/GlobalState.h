@@ -280,6 +280,8 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    std::optional<std::vector<core::NameRef>> singlePackageParents;
+
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
