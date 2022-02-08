@@ -1272,9 +1272,17 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.build.range_inclusive(self, $1, $2, $3);
                     }
+                | arg tDOT2 error
+                    {
+                      $$ = driver.build.range_inclusive(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tDOT3 arg
                     {
                       $$ = driver.build.range_exclusive(self, $1, $2, $3);
+                    }
+                | arg tDOT3 error
+                    {
+                      $$ = driver.build.range_exclusive(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tDOT2
                     {
@@ -1296,99 +1304,196 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tPLUS error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tMINUS arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tMINUS error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tSTAR2 arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tSTAR2 error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tDIVIDE arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tDIVIDE error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tPERCENT arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tPERCENT error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tPOW arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tPOW error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | tUNARY_NUM simple_numeric tPOW arg
                     {
                       $$ = driver.build.unary_op(self, $1, driver.build.binaryOp(self, $2, $3, $4));
                     }
+                | tUNARY_NUM simple_numeric tPOW error
+                    {
+                      $$ = driver.build.unary_op(self, $1, driver.build.binaryOp(self, $2, $3, driver.build.error_node(self, @3.end, @4.end)));
+                    }
                 | tUPLUS arg
                     {
                       $$ = driver.build.unary_op(self, $1, $2);
+                    }
+                | tUPLUS error
+                    {
+                      $$ = driver.build.unary_op(self, $1, driver.build.error_node(self, @1.end, @2.end));
                     }
                 | tUMINUS arg
                     {
                       $$ = driver.build.unary_op(self, $1, $2);
                     }
+                | tUMINUS error
+                    {
+                      $$ = driver.build.unary_op(self, $1, driver.build.error_node(self, @1.end, @2.end));
+                    }
                 | arg tPIPE arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tPIPE error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tCARET arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tCARET error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tAMPER2 arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tAMPER2 error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tCMP arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tCMP error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | rel_expr %prec tCMP
                 | arg tEQ arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tEQ error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tEQQ arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tEQQ error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tNEQ arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tNEQ error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tMATCH arg
                     {
                       $$ = driver.build.match_op(self, $1, $2, $3);
                       DIAGCHECK();
                     }
+                | arg tMATCH error
+                    {
+                      $$ = driver.build.match_op(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      DIAGCHECK();
+                    }
                 | arg tNMATCH arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tNMATCH error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | tBANG arg
                     {
                       $$ = driver.build.not_op(self, $1, nullptr, $2, nullptr);
                     }
+                | tBANG error
+                    {
+                      $$ = driver.build.not_op(self, $1, nullptr, driver.build.error_node(self, @2.end, @2.end), nullptr);
+                    }
                 | tTILDE arg
                     {
                       $$ = driver.build.unary_op(self, $1, $2);
+                    }
+                | tTILDE error
+                    {
+                      $$ = driver.build.unary_op(self, $1, driver.build.error_node(self, @2.end, @2.end));
                     }
                 | arg tLSHFT arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg tLSHFT error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tRSHFT arg
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | arg tRSHFT error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | arg tANDOP arg
                     {
                       $$ = driver.build.logicalAnd(self, $1, $2, $3);
                     }
+                | arg tANDOP error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | arg tOROP arg
                     {
                       $$ = driver.build.logicalOr(self, $1, $2, $3);
+                    }
+                | arg tOROP error
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
                 | kDEFINED opt_nl arg
                     {
@@ -1452,9 +1557,17 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
                     }
+                | arg relop error %prec tGT
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                    }
                 | rel_expr relop arg %prec tGT
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, $3);
+                    }
+                | rel_expr relop error %prec tGT
+                    {
+                      $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
                     }
 
        arg_value: arg
