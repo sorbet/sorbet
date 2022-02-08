@@ -1,0 +1,42 @@
+test/cli/dedent_hint/dedent_hint.rb:7: unexpected token "end" https://srb.help/2001
+     7 |  end
+          ^^^
+
+test/cli/dedent_hint/dedent_hint.rb:17: unexpected token "end" https://srb.help/2001
+    17 |  end
+          ^^^
+
+test/cli/dedent_hint/dedent_hint.rb:42: unexpected token "end of file" https://srb.help/2001
+    42 |end
+    43 |
+
+test/cli/dedent_hint/dedent_hint.rb:12: Hint: closing "end" token was not indented as far as "if" token https://srb.help/2003
+    12 |  end
+          ^^^
+    test/cli/dedent_hint/dedent_hint.rb:11: Matching token was here
+    11 |    if x
+            ^^
+  Note:
+    Sorbet found a syntax error it could not recover from.
+    To provide a better message, it re-parsed the file while tracking indentation.
+
+test/cli/dedent_hint/dedent_hint.rb:17: Hint: closing "end" token was not indented as far as "if" token https://srb.help/2003
+    17 |  end
+          ^^^
+    test/cli/dedent_hint/dedent_hint.rb:16: Matching token was here
+    16 |    if x.
+            ^^
+  Note:
+    Sorbet found a syntax error it could not recover from.
+    To provide a better message, it re-parsed the file while tracking indentation.
+
+test/cli/dedent_hint/dedent_hint.rb:22: Hint: closing "end" token was not indented as far as "if" token https://srb.help/2003
+    22 |  end
+          ^^^
+    test/cli/dedent_hint/dedent_hint.rb:21: Matching token was here
+    21 |    if x.f
+            ^^
+  Note:
+    Sorbet found a syntax error it could not recover from.
+    To provide a better message, it re-parsed the file while tracking indentation.
+Errors: 6
