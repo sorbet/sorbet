@@ -170,7 +170,7 @@ module Runner
       puts "Copying RBI files #{rbi_files.to_a}"
       rbi_files.each do |rbi|
         source = File.join(rbi_package_dir, rbi)
-        FileUtils.cp(source, tmpdir)
+        FileUtils.cp(source, File.join(tmpdir, test_directory))
       end
 
       check_call([sorbet, '--stripe-mode', '--stripe-packages', test_directory],
