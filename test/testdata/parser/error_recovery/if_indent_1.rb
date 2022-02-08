@@ -8,20 +8,19 @@ class A
 
   def test1
     x = nil
-    if x
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+    if x # error: Hint: this "if" token might not be properly closed
+  end
 
   def test2
     x = nil
-    if x.
+    if x. # error: Hint: this "if" token might not be properly closed
   end
 # ^^^ error: unexpected token "end"
-# ^^^ error: Hint: closing "end" token was not indented as far as "if" token
 
   def test3
     x = nil
-    if x.f
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+    if x.f # error: Hint: this "if" token might not be properly closed
+  end
 
   # -- These should still have no errors even in indentationAware mode --
 

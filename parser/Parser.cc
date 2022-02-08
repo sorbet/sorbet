@@ -64,9 +64,8 @@ void explainError(core::GlobalState &gs, core::FileRef file, core::ErrorBuilder 
         }
         case ruby_parser::dclass::DedentedEnd:
             ENFORCE(diag.extra_location().has_value());
-            e.addErrorLine(rangeToLoc(gs, file, diag.extra_location().value()), "Matching token was here");
-            e.addErrorNote("Sorbet found a syntax error it could not recover from.\n"
-                           "    To provide a better message, it re-parsed the file while tracking indentation.");
+            e.addErrorLine(rangeToLoc(gs, file, diag.extra_location().value()),
+                           "Matching `{}` found here but is not indented as far", "end");
             break;
         default:
             break;

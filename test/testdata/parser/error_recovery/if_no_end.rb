@@ -2,8 +2,8 @@
 
 class A
   def foo
-    if true
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+    if true # error: Hint: this "if" token might not be properly closed
+  end
 end
 
 class B

@@ -3,31 +3,31 @@
 class A
   def test0
     x = nil
-    if
+    if # error: Hint: this "if" token might not be properly closed
     puts 'after'
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+  end
 
   def test1
     x = nil
-    if x
+    if x # error: Hint: this "if" token might not be properly closed
     puts 'after'
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+  end
 
   def test2
     x = nil
-    if x.
+    if x. # error: Hint: this "if" token might not be properly closed
     puts 'after'
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+  end
 
   def test3
     x = nil
-    if x.f
+    if x.f # error: Hint: this "if" token might not be properly closed
     puts 'after'
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+  end
 
   def test4
     x = nil
-    if x.f()
+    if x.f() # error: Hint: this "if" token might not be properly closed
     puts 'after'
-  end # error: Hint: closing "end" token was not indented as far as "if" token
+  end
 end # error: unexpected token "end of file"

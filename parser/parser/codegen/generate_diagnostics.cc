@@ -69,7 +69,7 @@ tuple<string, string> MESSAGES[] = {
     {"CurlyBracesAroundBlockPass", "block pass should not be enclosed in curly braces"},
 
     // Error recovery hints
-    {"DedentedEnd", "Hint: closing \\\"end\\\" token was not indented as far as {} token"},
+    {"DedentedEnd", "Hint: this {} token might not be properly closed"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
