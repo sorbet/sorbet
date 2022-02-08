@@ -352,9 +352,10 @@ public:
     void rewind_and_reset(size_t newPos);
 
     // When recovering from errors, sometimes we'd like to force a production rule to become an
-    // error if indentation didn't match in an attempt to both show an error near where the error
-    // belongs as well as so a tokens that would be consumed eagerly are left untouched for later
-    // production rules to use.
+    // error if indentation didn't match, so that hopefully a token that would have been eagerly
+    // consumed can be delayed until a later production rule.
+    //
+    // This helper essentially implements a crude form of backtracking.
     void rewind_if_dedented(token_t token, token_t kEND);
 };
 
