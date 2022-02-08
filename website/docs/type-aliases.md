@@ -3,8 +3,6 @@ id: type-aliases
 title: Type Aliases
 ---
 
-> TODO: This page is still a fragment. Contributions welcome!
-
 ```ruby
 Alias = T.type_alias {Type}
 ```
@@ -113,4 +111,60 @@ def valid(x)
 end
 ```
 
+## What about type aliases for method signatures?
+
+Sometimes a question arises like, "Is there a way to factor an entire method
+signature into a type alias, not just types for individual arguments?"
+
+No, there is not. This is mostly for simplicity of implementation within Sorbet.
+
+Two workarounds are:
+
+1.  Define type aliases for all argument and return types of the methods in
+    question.
+2.  Factor shared arguments into a typed data structure (perhaps using
+    [T::Struct]), and update the methods in question to take that structure.
+
+Note that types for lambdas and procs can be written in type aliases using
+[proc types](procs.md).
+
+## What about recursive type aliases?
+
+Some languages have recursive type aliases. For example, TypeScript allows
+writing type aliases like this one which vaguely describes the type of all JSON
+documents (example uses TypeScript syntax):
+
+```typescript
+type JSON = null | number | string | JSON[] | {[arg: string]: JSON};
+```
+
+Sorbet does not support recursive type aliases. To have types that reference
+themselves, use [class types].
+
+```ruby
+class SelfReferential
+  extend T::Sig
+
+  sig {returns(T.nilable(SelfReferential))}
+  attr_reader :val
+
+  sig {params(val: T.nilable(SelfReferential)).void}
+  def initialize(val); @val = val; end
+end
+```
+
+Unfortunately for the case of typing JSON, this generally leads to more
+verbosity than in other languages, but can still accomplish something similar:
+
+[→ Full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Amodule%20MyJSON%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20sealed!%0A%0A%20%20sig%20%7Bparams%28json%3A%20T.untyped%29.returns%28MyJSON%29%7D%0A%20%20def%20self.from_untyped%28json%29%0A%20%20%20%20case%20json%0A%20%20%20%20when%20nil%20then%20JSONNull.instance%0A%20%20%20%20when%20String%20then%20JSONString.new%28val%3A%20json%29%0A%20%20%20%20when%20Numeric%20then%20JSONNumber.new%28val%3A%20json%29%0A%20%20%20%20when%20Array%20then%20JSONArray.new%28val%3A%20json.map%20%7B%7Cj%7C%20from_untyped%28j%29%7D%29%0A%20%20%20%20when%20Hash%20then%20JSONObject.new%28val%3A%20json.transform_values%20%7B%7Cj%7C%20from_untyped%28j%29%7D%29%0A%20%20%20%20else%20raise%28ArgumentError.new%28%22malformed%20json%22%29%29%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20class%20JSONNull%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20include%20Singleton%0A%20%20end%0A%0A%20%20class%20JSONString%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20String%0A%20%20end%0A%0A%20%20class%20JSONNumber%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20Numeric%0A%20%20end%0A%0A%20%20class%20JSONArray%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20T%3A%3AArray%5BMyJSON%5D%0A%20%20end%0A%0A%20%20class%20JSONObject%20%3C%20T%3A%3AStruct%0A%20%20%20%20include%20MyJSON%0A%20%20%20%20prop%20%3Aval%2C%20T%3A%3AHash%5BString%2C%20MyJSON%5D%0A%20%20end%0Aend)
+
+For the specific example of typing JSON, note that most Sorbet users tend to
+just use `T::Hash[String, T.untyped]` or `T.untyped`. Serializing and
+deserializing JSON is usually handled better by purpose-built serialization
+libraries. The type of "all JSON documents" is usually unnaturally wide—it's
+better to have an explicit step which converts the loosely JSON data structure
+into a more structured internal representation.
+
 [1]: https://sorbet.org/docs/error-reference#5034
+[t::struct]: tstruct.md
+[class types]: class-types.md
