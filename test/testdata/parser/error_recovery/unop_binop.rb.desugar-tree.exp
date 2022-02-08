@@ -1,0 +1,86 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def g<<todo method>>(&<blk>)
+      begin
+        t = <emptyTree>::<C T>.let(true, <emptyTree>::<C T>::<C Boolean>)
+        f = <emptyTree>::<C T>.let(false, <emptyTree>::<C T>::<C Boolean>)
+        <self>.puts(::<Magic>.<build-range>(0, <emptyTree>::<C <ErrorNode>>, false))
+        <self>.puts(::<Magic>.<build-range>(1, <emptyTree>::<C <ErrorNode>>, true))
+        <self>.puts(2.+(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(2.+(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(3.-(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(3.-(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(4.*(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(4.*(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(5./(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(5./(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(6.%(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(6.%(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(7.**(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(7.**(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(8.**(<emptyTree>::<C <ErrorNode>>).-@())
+        <self>.puts(8.**(<emptyTree>::<C <ErrorNode>>).-@())
+        <self>.puts(9.**(<emptyTree>::<C <ErrorNode>>).+@())
+        <self>.puts(9.**(<emptyTree>::<C <ErrorNode>>).+@())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.-@())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.-@())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.+@())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.+@())
+        <self>.puts(10.|(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(10.|(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(11.^(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(11.^(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(12.&(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(12.&(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(13.<=>(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(13.<=>(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(14.==(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(14.==(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(15.===(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(15.===(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(16.!=(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(16.!=(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.!())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.!())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.~())
+        <self>.puts(<emptyTree>::<C <ErrorNode>>.~())
+        <self>.puts(20.<<(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(20.<<(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(21.>>(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(21.>>(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(if t
+            <emptyTree>::<C <ErrorNode>>
+          else
+            t
+          end)
+        <self>.puts(if t
+            <emptyTree>::<C <ErrorNode>>
+          else
+            t
+          end)
+        <self>.puts(if f
+            f
+          else
+            <emptyTree>::<C <ErrorNode>>
+          end)
+        <self>.puts(if f
+            f
+          else
+            <emptyTree>::<C <ErrorNode>>
+          end)
+        <self>.puts(24.>(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(24.>(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(25.<(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(25.<(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(26.>=(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(26.>=(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(27.<=(<emptyTree>::<C <ErrorNode>>))
+        <self>.puts(27.<=(<emptyTree>::<C <ErrorNode>>))
+      end
+    end
+  end
+end
