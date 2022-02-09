@@ -48,6 +48,50 @@ exp_test = rule(
     },
 )
 
+_GEN_PACKAGE_RUNNER_SCRIPT = """
+set -x
+
+{runner} {inputs}
+"""
+
+def _end_to_end_rbi_test_impl(ctx):
+    outputs = []
+
+    ctx.actions.run_shell(
+        command = _GEN_PACKAGE_RUNNER_SCRIPT.format(
+            runner = ctx.executable._runner.path,
+            inputs = " ".join([file.path for file in ctx.files.rb_files]),
+        ),
+        tools = ctx.files._runner,
+        inputs = ctx.files.rb_files,
+        outputs = outputs,
+    )
+
+    runfiles = ctx.runfiles(ctx.files._runner)
+
+    return [DefaultInfo(runfiles = runfiles)]
+
+end_to_end_rbi_test = rule(
+    implementation = _end_to_end_rbi_test_impl,
+    test = True,
+    attrs = {
+        "rb_files": attr.label_list(
+            mandatory = True,
+        ),
+        "_runner": attr.label(
+            cfg = "target",
+            default = "//test:single_package_runner",
+            executable = True,
+        ),
+    }
+)
+
+def single_package_rbi_test(name, deps):
+    end_to_end_rbi_test(
+        name = name,
+        rb_files = deps,
+    )
+
 _TEST_RUNNERS = {
     "PosTests": ":pipeline_test_runner",
     "LSPTests": ":lsp_test_runner",

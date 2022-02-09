@@ -204,7 +204,17 @@ cc_binary(
     deps = ["//common"],
 )
 
-load(":pipeline_test.bzl", "pipeline_tests")
+load(":pipeline_test.bzl", "pipeline_tests", "single_package_rbi_test")
+
+filegroup(
+    name = "rbi_gen_typechecking",
+    srcs = glob(["testdata/package/rbi_gen_typechecking/**/*.rb"]),
+)
+
+single_package_rbi_test(
+    name = "end_to_end_rbi_test",
+    deps = [":rbi_gen_typechecking"],
+)
 
 pipeline_tests(
     "test_corpus",
