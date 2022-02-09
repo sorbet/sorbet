@@ -342,6 +342,20 @@ sh_binary(
 )
 
 sh_binary(
+    name = "single_package_runner",
+    srcs = ["test_single_package_runner.sh"],
+    data = [
+        "rbi_gen_package_runner.rb",
+        "//main:sorbet",
+        "@sorbet_ruby_2_7//:ruby",
+    ],
+    deps = [
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+sh_binary(
     name = "filecheck",
     testonly = 1,
     srcs = ["filecheck.sh"],
