@@ -2041,7 +2041,7 @@ lbrace_cmd_block_start:
 			                  else_ ? else_->nod : nullptr, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
-                | kCASE expr_value opt_terms kEND
+                | kCASE expr_value opt_terms           kEND
                     {
                       $$ = driver.build.case_error(self, $1, $2, $4);
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::EmptyCase, $1, driver.token_name($1->type()));
@@ -2049,7 +2049,7 @@ lbrace_cmd_block_start:
                       // even if we aren't in indentationAware mode.
                       driver.rewind_if_dedented($1, $4, /*force*/true);
                     }
-                | kCASE opt_terms kEND
+                | kCASE            opt_terms           kEND
                     {
                       auto cond = driver.build.error_node(self, @1.end, @3.begin);
                       $$ = driver.build.case_error(self, $1, cond, $3);
