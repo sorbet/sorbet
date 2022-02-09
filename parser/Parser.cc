@@ -147,6 +147,8 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
         return ast;
     }
 
+    Timer timeit(gs.tracer(), "withIndentationAware");
+
     auto driverRetry = makeDriver(settings.withIndentationAware(), buffer, scratch, initialLocals);
     auto astRetry = builder.build(driverRetry.get(), settings.traceParser);
 
