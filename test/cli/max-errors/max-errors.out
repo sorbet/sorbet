@@ -1,0 +1,168 @@
+------------
+max-errors=3
+------------
+max-errors.rb:8: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+     8 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:9: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+     9 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:10: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    10 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+Too many errors (--max-errors=3). Further error messages will be suppressed.
+
+Errors: 5
+------------
+max-errors=0
+------------
+max-errors.rb:8: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+     8 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:9: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+     9 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:10: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    10 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:11: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    11 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:12: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    12 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+Errors: 5
+-------------
+no max-errors
+-------------
+max-errors.rb:8: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+     8 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:9: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+     9 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:10: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    10 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:11: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    11 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+
+max-errors.rb:12: Expected `Integer` but found `String` for argument `arg0` https://srb.help/7002
+    12 |  puts (x+y)
+                ^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String` originating from:
+    max-errors.rb:7:
+     7 |def f(x, y)
+                 ^
+Errors: 5
