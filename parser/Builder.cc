@@ -614,10 +614,6 @@ public:
 
     unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec whenBodies,
                            const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
-        auto loc = tokLoc(case_);
-        if (end != nullptr) {
-            loc = loc.join(tokLoc(end));
-        }
         return make_unique<Case>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(whenBodies),
                                  std::move(elseBody));
     }
