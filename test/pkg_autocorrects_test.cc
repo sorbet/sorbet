@@ -5,7 +5,6 @@
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "core/Error.h"
-#include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
@@ -19,8 +18,7 @@ using namespace std;
 
 namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("pkg-autocorrects-test");
-auto errorFlusher = make_shared<sorbet::core::ErrorFlusherStdout>(0);
-auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger, errorFlusher);
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 string examplePackage = "class Opus::ExamplePackage < PackageSpec\nend\n";
 string examplePackagePath = "example/__package.rb";

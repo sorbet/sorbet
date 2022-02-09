@@ -1,5 +1,4 @@
 #include "main/lsp/wrapper.h"
-#include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
 #include "core/errors/namer.h"
@@ -43,9 +42,7 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     loggerOut = make_shared<spd::logger>("console", stderrColorSinkOut);
     typeErrorsConsoleOut = make_shared<spd::logger>("typeDiagnostics", stderrColorSinkOut);
     typeErrorsConsoleOut->set_pattern("%v");
-    auto errorFlusher = make_shared<core::ErrorFlusherStdout>(0);
-    auto gs =
-        make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut, errorFlusher));
+    auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut));
 
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(options);
     payload::createInitialGlobalState(gs, options, kvstore);
