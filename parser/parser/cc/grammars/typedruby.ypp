@@ -1794,7 +1794,7 @@ lbrace_cmd_block_start:
                       auto &list = $1;
                       list->emplace_back(driver.build.error_node(self, @2.end, @3.end));
                       $$ = $1;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $2, driver.token_name($2->type()));
                     }
                 | args tCOMMA tSTAR arg_value
                     {
