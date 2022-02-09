@@ -8,7 +8,7 @@ namespace sorbet::core {
 
 void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
                                      vector<unique_ptr<ErrorQueueMessage>> errors) {
-    fmt::memory_buffer critical, nonCritical;
+    fmt::memory_buffer critical, nonCritical, countExceeded;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
             if (error->error->isSilenced) {
@@ -17,15 +17,24 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
 
             prodHistogramAdd("error", error->error->what.code, 1);
 
-            auto &out = error->error->isCritical() ? critical : nonCritical;
-            if (out.size() != 0) {
-                fmt::format_to(std::back_inserter(out), "\n\n");
-            }
-            ENFORCE(error->text.has_value());
-            fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
+            if (maxErrors == 0 || errorsPrinted < maxErrors) {
+                auto &out = error->error->isCritical() ? critical : nonCritical;
+                if (out.size() != 0) {
+                    fmt::format_to(std::back_inserter(out), "\n\n");
+                }
+                ENFORCE(error->text.has_value());
+                fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
 
-            for (auto &autocorrect : error->error->autocorrects) {
-                autocorrects.emplace_back(move(autocorrect));
+                for (auto &autocorrect : error->error->autocorrects) {
+                    autocorrects.emplace_back(move(autocorrect));
+                }
+
+                errorsPrinted++;
+            } else if (!printedErrorLimitMessage) {
+                fmt::format_to(std::back_inserter(countExceeded),
+                               "Too many errors (--max-errors={}). Further error messages will be suppressed.\n",
+                               maxErrors);
+                printedErrorLimitMessage = true;
             }
         }
     }
@@ -44,6 +53,14 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
             printedAtLeastOneError = true;
         } else {
             logger.log(spdlog::level::err, "\n{}", to_string(nonCritical));
+        }
+    }
+    if (countExceeded.size() != 0) {
+        if (!printedAtLeastOneError) {
+            logger.log(spdlog::level::critical, "{}", to_string(countExceeded));
+            printedAtLeastOneError = true;
+        } else {
+            logger.log(spdlog::level::critical, "\n{}", to_string(countExceeded));
         }
     }
 }

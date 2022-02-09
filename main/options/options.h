@@ -138,6 +138,7 @@ struct Options {
     bool suggestTyped = false;
     std::optional<std::string> suggestUnsafe = std::nullopt;
     bool silenceErrors = false;
+    int maxErrors = 0;
     bool silenceDevMessage = false;
     bool suggestSig = false;
     bool supressNonCriticalErrors = false;

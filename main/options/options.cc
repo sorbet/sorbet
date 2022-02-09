@@ -267,6 +267,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // Advanced options
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
+    options.add_options("advanced")("max-errors", "Limit number of errors displayed. Defaults to 0 (no limit)",
+                                    cxxopts::value<int>()->default_value(to_string(empty.maxErrors)), "num errors");
     options.add_options("advanced")("allowed-extension", "Allowed extension", cxxopts::value<vector<string>>());
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
                                     cxxopts::value<string>()->default_value(empty.webTraceFile), "file");
@@ -707,6 +709,8 @@ void readOptions(Options &opts,
                 addFilesFromDir(opts, dir, logger);
             }
         }
+
+        opts.maxErrors = raw["max-errors"].as<int>();
 
         if (opts.pathPrefix.empty() && opts.rawInputDirNames.size() == 1 && opts.rawInputFileNames.size() == 0) {
             // If Sorbet is provided with a single input directory, the

@@ -11,10 +11,15 @@ namespace sorbet::core {
 class ErrorFlusherStdout : public ErrorFlusher {
 private:
     std::vector<AutocorrectSuggestion> autocorrects;
+    int errorsPrinted{0};
+    bool printedErrorLimitMessage{false};
+
+    // Maximum number of errors to print before stopping. 0 means no limit.
+    int maxErrors;
     bool printedAtLeastOneError{false};
 
 public:
-    ErrorFlusherStdout() = default;
+    ErrorFlusherStdout(int maxErrors) : maxErrors{maxErrors} {}
     ~ErrorFlusherStdout() = default;
 
     void flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,

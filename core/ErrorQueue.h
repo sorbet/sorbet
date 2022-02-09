@@ -28,8 +28,7 @@ public:
     std::atomic<int> nonSilencedErrorCount{0};
     std::atomic<int> filesFlushedCount{0};
 
-    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
-               std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
+    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, std::shared_ptr<ErrorFlusher> errorFlusher);
 
     /** register a new error to be reported */
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);

@@ -448,7 +448,7 @@ int realmain(int argc, char *argv[]) {
     }
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
-    auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
+    auto errorFlusher = make_shared<core::ErrorFlusherStdout>(opts.maxErrors);
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, errorFlusher));
     gs->pathPrefix = opts.pathPrefix;
