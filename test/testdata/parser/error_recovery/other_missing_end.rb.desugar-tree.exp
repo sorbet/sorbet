@@ -1,0 +1,104 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def test1<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        <self>.x() do ||
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test2<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        <self>.x(<self>.y()) do ||
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test3<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        <emptyTree>::<C Kernel>.lambda() do ||
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test4<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        while <self>.x()
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test5<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        <self>.puts("after")
+      end
+    end
+
+    def test6<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        if nil
+          <emptyTree>
+        else
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test7<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        while nil
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test8<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        while nil.!()
+          <self>.puts("after")
+        end
+      end
+    end
+
+    def test9<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        if <emptyTree>::<C <ErrorNode>>
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+    end
+
+    def test10<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        while <emptyTree>::<C <ErrorNode>>
+          <emptyTree>
+        end
+      end
+    end
+
+    def test11<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        while <emptyTree>::<C <ErrorNode>>.!()
+          <emptyTree>
+        end
+      end
+    end
+  end
+end
