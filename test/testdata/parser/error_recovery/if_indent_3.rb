@@ -2,8 +2,8 @@
 
 class A
   def test0
-    x = if
-  end # error: unexpected token "end"
+    x = if # error: unexpected token "if"
+  end
 
   def test1
     x = if x # error: Hint: this "if" token might not be properly closed

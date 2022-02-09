@@ -3,8 +3,8 @@
 class A
   def test0
     x = nil
-    if
-  end # error: unexpected token "end"
+    if # error: unexpected token "if"
+  end
 
   def test1
     x = nil

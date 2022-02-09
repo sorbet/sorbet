@@ -1,6 +1,6 @@
-test/cli/dedent_hint/dedent_hint.rb:7: unexpected token "end" https://srb.help/2001
-     7 |  end
-          ^^^
+test/cli/dedent_hint/dedent_hint.rb:6: unexpected token "if" https://srb.help/2001
+     6 |    if
+            ^^
 
 test/cli/dedent_hint/dedent_hint.rb:17: unexpected token "end" https://srb.help/2001
     17 |  end
