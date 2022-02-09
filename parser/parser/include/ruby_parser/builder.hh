@@ -41,6 +41,7 @@ struct builder {
     ForeignPtr (*call_method_error)(SelfPtr builder, ForeignPtr receiver, const token *dot);
     ForeignPtr (*case_)(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *whenBodies,
                         const token *elseTok, ForeignPtr elseBody, const token *end);
+    ForeignPtr (*case_error)(SelfPtr builder, const token *case_, ForeignPtr cond, const token *end);
     ForeignPtr (*case_match)(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *inBodies,
                              const token *elseTok, ForeignPtr elseBody, const token *end);
     ForeignPtr (*character)(SelfPtr builder, const token *char_);

@@ -67,6 +67,7 @@ tuple<string, string> MESSAGES[] = {
     {"IfInsteadOfItForTest", "Unexpected token \\\"if\\\"; did you mean \\\"it\\\"?"},
     {"MissingCommaBetweenKwargs", "missing \\\",\\\" between keyword args"},
     {"CurlyBracesAroundBlockPass", "block pass should not be enclosed in curly braces"},
+    {"EmptyCase", "{} statement must at least have one \\\"when\\\" clause"},
 
     // Error recovery hints
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
