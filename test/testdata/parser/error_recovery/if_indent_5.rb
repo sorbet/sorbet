@@ -3,8 +3,8 @@
 module A::B
   class C1
     def foo
-      if
-    end # error: unexpected token "end"
+      if # error: unexpected token "if"
+    end
 
     sig {void}
     private def bar; end

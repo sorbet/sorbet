@@ -1975,6 +1975,7 @@ lbrace_cmd_block_start:
                     {
                       auto err = driver.build.error_node(self, @1.end, @2.begin);
                       $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
                 | kIF strings kDO compstmt if_tail kEND
                     {
