@@ -1849,6 +1849,7 @@ lbrace_cmd_block_start:
                     {
                       driver.replace_stack($<stack>2);
                       $$ = driver.build.beginKeyword(self, $1, $3, $4);
+                      driver.rewind_if_dedented($1, $4);
                     }
                 | tLPAREN_ARG stmt
                     {
@@ -1989,14 +1990,17 @@ lbrace_cmd_block_start:
                       $$ = driver.build.condition(self, $1, $2, $3,
                         else_ ? else_->nod : nullptr,
 			                  else_ ? else_->tok : nullptr, $4, $6);
+                      driver.rewind_if_dedented($1, $6);
                     }
                 | kWHILE expr_value_do compstmt kEND
                     {
                       $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3, $4);
+                      driver.rewind_if_dedented($1, $4);
                     }
                 | kUNTIL expr_value_do compstmt kEND
                     {
                       $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3, $4);
+                      driver.rewind_if_dedented($1, $4);
                     }
                 | kCASE expr_value opt_terms case_body kEND
                     {
@@ -2491,6 +2495,7 @@ opt_block_args_tail:
                     {
                       $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
                       driver.lex.context.pop();
+                      driver.rewind_if_dedented($1, $4);
                     }
 
         do_block: kDO_BLOCK
@@ -2504,6 +2509,7 @@ opt_block_args_tail:
                       delimited_block->end = $4;
                       $$ = delimited_block;
                       driver.lex.context.pop();
+                      driver.rewind_if_dedented($1, $4);
                     }
 
       block_call: command do_block
@@ -2646,6 +2652,7 @@ lcurly_block_start:
                       block->end = $4;
                       $$ = block;
                       driver.lex.context.pop();
+                      driver.rewind_if_dedented($1, $4);
                     }
 
       brace_body:   {
