@@ -356,7 +356,11 @@ public:
     // consumed can be delayed until a later production rule.
     //
     // This helper essentially implements a crude form of backtracking.
-    void rewind_if_dedented(token_t token, token_t kEND);
+    //
+    // Use `force = true` to ignore checking indentationAware. This probably is only ok to use if
+    // you're implementing an "`error` rule in disguise" kind of rule (i.e., reducing tokens
+    // manually for the purpose of emitting an error).
+    void rewind_if_dedented(token_t token, token_t kEND, bool force = false);
 };
 
 class typedruby_release27 : public base_driver {

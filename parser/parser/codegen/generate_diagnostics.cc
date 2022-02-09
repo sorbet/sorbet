@@ -68,6 +68,7 @@ tuple<string, string> MESSAGES[] = {
     {"MissingCommaBetweenKwargs", "missing \\\",\\\" between keyword args"},
     {"MissingOperatorArg", "missing arg to {} operator"},
     {"CurlyBracesAroundBlockPass", "block pass should not be enclosed in curly braces"},
+    {"EmptyCase", "{} statement must at least have one \\\"when\\\" clause"},
 
     // Error recovery hints
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
