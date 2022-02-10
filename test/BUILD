@@ -204,7 +204,17 @@ cc_binary(
     deps = ["//common"],
 )
 
-load(":pipeline_test.bzl", "pipeline_tests")
+load(":pipeline_test.bzl", "pipeline_tests", "single_package_rbi_test")
+
+filegroup(
+    name = "rbi_gen_typechecking",
+    srcs = glob(["testdata/packager/rbi_gen_typechecking/**/*.rb"]),
+)
+
+single_package_rbi_test(
+    name = "end_to_end_rbi_test",
+    rb_files = ["//test:rbi_gen_typechecking"],
+)
 
 pipeline_tests(
     "test_corpus",
@@ -335,6 +345,21 @@ sh_binary(
         "@sorbet_ruby_2_7_for_compiler//:ruby",
     ],
     tags = ["compiler"],
+    deps = [
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+sh_binary(
+    name = "single_package_runner",
+    srcs = ["test_single_package_runner.sh"],
+    data = [
+        "rbi_gen_package_runner.rb",
+        "//gems/sorbet-runtime",
+        "//main:sorbet",
+        "@sorbet_ruby_2_7//:ruby",
+    ],
     deps = [
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
