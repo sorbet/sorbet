@@ -1,0 +1,565 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Opus>::<C Log><<C <todo sym>>> < ()
+    def self.info<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def g<<todo method>>(&<blk>)
+      begin
+        t = <emptyTree>::<C T>.let(true, <emptyTree>::<C T>::<C Boolean>)
+        f = <emptyTree>::<C T>.let(false, <emptyTree>::<C T>::<C Boolean>)
+        <self>.puts(::<Magic>.<build-range>(0, 0, false))
+        <self>.puts(::<Magic>.<build-range>(0, <emptyTree>, false))
+        if <emptyTree>::<C <ErrorNode>>
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+    end
+
+    if <emptyTree>
+      <self>.puts("hello")
+    else
+      <emptyTree>
+    end
+
+    <self>.puts(::<Magic>.<build-range>(1, 1, true))
+
+    <self>.puts(::<Magic>.<build-range>(1, <emptyTree>, true))
+
+    if <emptyTree>::<C <ErrorNode>>
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+
+  if <emptyTree>
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(2.+(2))
+
+  <self>.puts(2.+(<emptyTree>::<C <ErrorNode>>))
+
+  if 2.+(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 2.+(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(3.-(3))
+
+  <self>.puts(3.-(<emptyTree>::<C <ErrorNode>>))
+
+  if 3.-(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 3.-(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(4.*(4))
+
+  <self>.puts(4.*(<emptyTree>::<C <ErrorNode>>))
+
+  if 4.*(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 4.*(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(5./(5))
+
+  <self>.puts(5./(<emptyTree>::<C <ErrorNode>>))
+
+  if 5./(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 5./(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(6.%(6))
+
+  <self>.puts(6.%(<emptyTree>::<C <ErrorNode>>))
+
+  if 6.%(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 6.%(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(7.**(7))
+
+  <self>.puts(7.**(<emptyTree>::<C <ErrorNode>>))
+
+  if 7.**(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 7.**(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(8.**(8).-@())
+
+  <self>.puts(8.**(<emptyTree>::<C <ErrorNode>>).-@())
+
+  if 8.**(<emptyTree>::<C <ErrorNode>>).-@()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 8.**(<emptyTree>::<C <ErrorNode>>).-@()
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(9.**(9).+@())
+
+  <self>.puts(9.**(<emptyTree>::<C <ErrorNode>>).+@())
+
+  if 9.**(<emptyTree>::<C <ErrorNode>>).+@()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 9.**(<emptyTree>::<C <ErrorNode>>).+@()
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(-10)
+
+  <self>.puts(<emptyTree>::<C <ErrorNode>>.-@())
+
+  if <emptyTree>::<C <ErrorNode>>.-@()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C <ErrorNode>>.-@()
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(10)
+
+  <self>.puts(<emptyTree>::<C <ErrorNode>>.+@())
+
+  if <emptyTree>::<C <ErrorNode>>.+@()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C <ErrorNode>>.+@()
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(10.|(10))
+
+  <self>.puts(10.|(<emptyTree>::<C <ErrorNode>>))
+
+  if 10.|(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 10.|(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(11.^(11))
+
+  <self>.puts(11.^(<emptyTree>::<C <ErrorNode>>))
+
+  if 11.^(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 11.^(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(12.&(12))
+
+  <self>.puts(12.&(<emptyTree>::<C <ErrorNode>>))
+
+  if 12.&(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 12.&(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(13.<=>(13))
+
+  <self>.puts(13.<=>(<emptyTree>::<C <ErrorNode>>))
+
+  if 13.<=>(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 13.<=>(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(14.==(14))
+
+  <self>.puts(14.==(<emptyTree>::<C <ErrorNode>>))
+
+  if 14.==(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 14.==(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(15.===(15))
+
+  <self>.puts(15.===(<emptyTree>::<C <ErrorNode>>))
+
+  if 15.===(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 15.===(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(16.!=(16))
+
+  <self>.puts(16.!=(<emptyTree>::<C <ErrorNode>>))
+
+  if 16.!=(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 16.!=(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(::Regexp.new("17", 0).=~("17"))
+
+  <self>.puts(::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>))
+
+  if ::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if ::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(::Regexp.new("18", 0).!~("eighteen"))
+
+  <self>.puts(::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>))
+
+  if ::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if ::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(<self>.t().!())
+
+  <self>.puts(<emptyTree>::<C <ErrorNode>>.!())
+
+  if <emptyTree>::<C <ErrorNode>>.!()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if <self>.puts("hello").!()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(-20)
+
+  <self>.puts(<emptyTree>::<C <ErrorNode>>.~())
+
+  if <emptyTree>::<C <ErrorNode>>.~()
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C <ErrorNode>>.~()
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(20.<<(20))
+
+  <self>.puts(20.<<(<emptyTree>::<C <ErrorNode>>))
+
+  if 20.<<(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 20.<<(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(21.>>(21))
+
+  <self>.puts(21.>>(<emptyTree>::<C <ErrorNode>>))
+
+  if 21.>>(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 21.>>(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(begin
+      &&$2 = <self>.t()
+      if &&$2
+        <self>.t()
+      else
+        &&$2
+      end
+    end)
+
+  <self>.puts(begin
+      &&$3 = <self>.t()
+      if &&$3
+        <emptyTree>::<C <ErrorNode>>
+      else
+        &&$3
+      end
+    end)
+
+  if begin
+      &&$4 = <self>.t()
+      if &&$4
+        <emptyTree>::<C <ErrorNode>>
+      else
+        &&$4
+      end
+    end
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if begin
+      &&$5 = <self>.t()
+      if &&$5
+        <emptyTree>::<C <ErrorNode>>
+      else
+        &&$5
+      end
+    end
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(begin
+      ||$6 = <self>.f()
+      if ||$6
+        ||$6
+      else
+        <self>.f()
+      end
+    end)
+
+  <self>.puts(begin
+      ||$7 = <self>.f()
+      if ||$7
+        ||$7
+      else
+        <emptyTree>::<C <ErrorNode>>
+      end
+    end)
+
+  if begin
+      ||$8 = <self>.f()
+      if ||$8
+        ||$8
+      else
+        <emptyTree>::<C <ErrorNode>>
+      end
+    end
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if begin
+      ||$9 = <self>.f()
+      if ||$9
+        ||$9
+      else
+        <emptyTree>::<C <ErrorNode>>
+      end
+    end
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(24.>(24))
+
+  <self>.puts(24.>(<emptyTree>::<C <ErrorNode>>))
+
+  if 24.>(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 24.>(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(25.<(25))
+
+  <self>.puts(25.<(<emptyTree>::<C <ErrorNode>>))
+
+  if 25.<(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 25.<(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(26.>=(26))
+
+  <self>.puts(26.>=(<emptyTree>::<C <ErrorNode>>))
+
+  if 26.>=(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 26.>=(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+
+  <self>.puts(27.<=(27))
+
+  <self>.puts(27.<=(<emptyTree>::<C <ErrorNode>>))
+
+  if 27.<=(<emptyTree>::<C <ErrorNode>>)
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if 27.<=(<emptyTree>::<C <ErrorNode>>)
+    <self>.puts("hello")
+  else
+    <emptyTree>
+  end
+end

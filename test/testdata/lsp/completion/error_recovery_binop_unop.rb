@@ -2,11 +2,14 @@
 
 class A
   def f(a, b, c)
-    if a + 
-    #      ^ completion:
-    # We would like the above line to be "completion: a, b, c, ...", but this doesn't work yet. If you make it work,
-    # please feel free to adjust this test.
+    if a + # error: missing arg to "+" operator
+    #     ^ completion: a, b, c, ...
+    #      ^ completion: a, b, c, ...
     end
-  # ^^^ error: unexpected token "end"
+
+    if a == # error: missing arg to "==" operator
+    #      ^ completion: a, b, c, ...
+    #       ^ completion: a, b, c, ...
+    end
   end
 end
