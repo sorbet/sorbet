@@ -169,7 +169,14 @@ module Runner
         FileUtils.cp(source, File.join(tmpdir, test_directory))
       end
 
-      check_call([sorbet, '--stripe-mode', '--ignore', '__package.rb', test_directory],
+      check_call([
+                   sorbet,
+                   '--silence-dev-message',
+                   '--stripe-mode',
+                   '--ignore',
+                   '__package.rb',
+                   test_directory
+                 ],
                  chdir: tmpdir)
     end
   end
@@ -179,6 +186,7 @@ module Runner
     Tempfile.open('package_info') do |package_info_file|
       check_call([
                    sorbet,
+                   '--silence-dev-message',
                    '--stripe-mode',
                    '--stripe-packages',
                    '--dump-package-info',
@@ -200,6 +208,7 @@ module Runner
       Dir.mktmpdir do |rbi_package_dir|
         check_call([
                      sorbet,
+                     '--silence-dev-message',
                      '--stripe-mode',
                      '--package-rbi-output',
                      rbi_package_dir,
