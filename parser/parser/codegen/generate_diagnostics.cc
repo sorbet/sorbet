@@ -69,6 +69,9 @@ tuple<string, string> MESSAGES[] = {
     {"MissingOperatorArg", "missing arg to {} operator"},
     {"CurlyBracesAroundBlockPass", "block pass should not be enclosed in curly braces"},
 
+    // Error recovery hints
+    {"DedentedEnd", "Hint: this {} token might not be properly closed"},
+
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
 };

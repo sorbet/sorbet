@@ -273,6 +273,8 @@ public:
     bool pending_error;
     size_t def_level;
     ForeignPtr ast;
+    // true when in indentation-aware error recovery mode
+    bool indentationAware;
     token_t last_token;
 
     // Stores a reference to the private yytname_ field from the generated bison parser,
@@ -289,7 +291,7 @@ public:
     std::function<void()> clear_lookahead;
 
     base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                const struct builder &builder, bool traceLexer);
+                const struct builder &builder, bool traceLexer, bool indentationAware);
     virtual ~base_driver() {}
     virtual ForeignPtr parse(SelfPtr self, bool traceParser) = 0;
 
@@ -348,12 +350,19 @@ public:
     // function to request that the lexer start again after `tDOT` token in the
     // expr_end state.
     void rewind_and_reset(size_t newPos);
+
+    // When recovering from errors, sometimes we'd like to force a production rule to become an
+    // error if indentation didn't match, so that hopefully a token that would have been eagerly
+    // consumed can be delayed until a later production rule.
+    //
+    // This helper essentially implements a crude form of backtracking.
+    void rewind_if_dedented(token_t token, token_t kEND);
 };
 
 class typedruby_release27 : public base_driver {
 public:
     typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
-                        bool traceLexer);
+                        bool traceLexer, bool indentationAware);
     virtual ForeignPtr parse(SelfPtr self, bool traceParser);
     ~typedruby_release27() {}
 };
@@ -361,7 +370,7 @@ public:
 class typedruby_debug27 : public base_driver {
 public:
     typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
-                      bool traceLexer);
+                      bool traceLexer, bool indentationAware);
     virtual ForeignPtr parse(SelfPtr self, bool traceParser);
     ~typedruby_debug27() {}
 };

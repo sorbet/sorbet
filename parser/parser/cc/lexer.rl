@@ -158,6 +158,75 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_
   cs_before_block_comment = lex_en_line_begin;
 }
 
+// At the moment, having a method like this instead of using Ragel to properly
+// track indentation at the time we emit a token could be a recipe for really
+// bad performance (having a function like this makes lexing accidentally
+// quadratic in the worst case).
+//
+// While we're saved by the fact that ~most files don't have syntax errors and
+// this method should only be called when there are syntax errors, it's still
+// prudent to not make things excessively slow. This method attempts to exit
+// after doing the least amount of work possible.
+//
+// We may want to revisit this (e.g. to simplify or move into the state machine)
+int lexer::compare_indent_level(token_t left, token_t right) {
+    // token::lineStart is non-sensical for tNL tokens
+    assert(left->type() != token_type::tNL && right->type() != token_type::tNL);
+
+    const auto leftStart = left->start();
+    const auto leftLineStart = left->lineStart();
+    const auto rightStart = right->start();
+    const auto rightLineStart = right->lineStart();
+
+    // optimization: tokens start on same line
+    if (leftStart == rightStart) {
+        return 0;
+    }
+
+    // attempt to defeat pathological cases (extremely long lines)
+    if ((leftStart - leftLineStart > 100) || (rightStart - rightLineStart > 100)) {
+        // In this case, lie say that the indentation level is the same.
+        // This will basically mean falling back to the indendation-agnostic behavior.
+        // We could alternatively attempt to return some sort of error state here.
+        return 0;
+    }
+
+    auto *data = this->source_buffer.data();
+    auto *leftPtr = data + leftLineStart;
+    const auto * const leftStartPtr = data + leftStart;
+    auto *rightPtr = data + rightLineStart;
+    const auto * const rightStartPtr = data + rightStart;
+
+    while (leftPtr <= leftStartPtr && rightPtr <= rightStartPtr) {
+        auto leftChar = *leftPtr;
+        auto rightChar = *rightPtr;
+        auto leftIsSpace = leftChar == ' ' || leftChar == '\t';
+        auto rightIsSpace = rightChar == ' ' || rightChar == '\t';
+
+        if (leftIsSpace && !rightIsSpace) {
+            return -1; // left < right
+        } else if (!leftIsSpace && !rightIsSpace) {
+            return 0; // left == right
+        } else if (!leftIsSpace && rightIsSpace) {
+            return 1;  // left > right
+        }
+
+        if (leftChar != rightChar) {
+            // mismatched indent. give up and say equal
+            // TODO(jez) Might want to handle this case better
+            return 0;
+        }
+
+        leftPtr++;
+        rightPtr++;
+    }
+
+    // This is weird. One or both of the tokens' first characters was a whitespace character.
+    // Assert so that we can add a test case if we ever find this in the wild.
+    assert(false);
+    return 0;
+}
+
 void lexer::check_stack_capacity() {
     if (stack.size() == (size_t)top) {
     stack.resize(stack.size() * 2);
@@ -179,7 +248,9 @@ int lexer::arg_or_cmdarg(int cmd_state) {
 void lexer::emit_comment(const char* s, const char* e) {
   /* unused for now */
   (void)s;
-  (void)e;
+  if (*e == '\n') { // might also be \0
+    newline_s = e;
+  }
 }
 
 std::string lexer::tok() const {
@@ -498,10 +569,10 @@ token_t lexer::advance_() {
 
   if (cs == lex_error) {
     size_t start = (size_t)(p - source_buffer.data());
-    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1));
+    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1), cur_line_start());
   }
 
-  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0));
+  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0), cur_line_start());
 }
 
 void lexer::emit(token_type type) {
@@ -516,7 +587,8 @@ void lexer::emit(token_type type, std::string_view str, const char* start, const
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
-  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str));
+  size_t line = type == token_type::tNL ? SIZE_MAX : cur_line_start();
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str, line));
 }
 
 void lexer::emit(token_type type, const std::string &str) {
@@ -527,9 +599,10 @@ void lexer::emit(token_type type, const std::string &str, const char* start, con
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
+  size_t line = type == token_type::tNL ? SIZE_MAX : cur_line_start();
   // Copy the string into stable storage.
   auto scratch_view = scratch.enterString(str);
-  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view));
+  token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view, line));
 }
 
 void lexer::emit_do(bool do_block) {
