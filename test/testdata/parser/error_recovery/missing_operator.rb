@@ -10,16 +10,16 @@ class A
     f = T.let(false, T::Boolean)
     puts(0 .. 0)
     puts(0 .. )
-    if 0 ..
-    end # error: unexpected token "end"
+    if 0 .. # error: unexpected token "if"
+    end
     if 0 .. # error: Unsupported node type `IFlipflop`
       #  ^^ error: missing arg to ".." operator
       puts 'hello'
     end
     puts(1 ... 1)
     puts(1 ... )
-    if 1...
-    end # error: unexpected token "end"
+    if 1... # error: unexpected token "if"
+    end
     if 1... # error: Unsupported node type `EFlipflop`
       # ^^^ error: missing arg to "..." operator
       puts 'hello'
