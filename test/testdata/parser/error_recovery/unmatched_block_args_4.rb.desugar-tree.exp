@@ -32,28 +32,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           x
         end
         1.times() do ||
-          begin
-            x
-            <self>.puts("hello")
-          end
+          <self>.x(<self>.puts("hello"))
         end
         1.times() do ||
-          begin
-            x
-            <self>.puts("hello")
-          end
+          <self>.x(<self>.puts("hello"))
         end
         1.times() do ||
-          begin
-            x
-            x = nil
-          end
+          <self>.x(x = nil)
         end
         1.times() do ||
-          begin
-            x
-            <emptyTree>::<C Opus>::<C Log>.info()
-          end
+          <self>.x(<emptyTree>::<C Opus>::<C Log>.info())
         end
       end
     end
@@ -82,22 +70,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def test_two_args<<todo method>>(&<blk>)
-      begin
-        1.times() do ||
-          <emptyTree>
-        end
-        1.times() do ||
-          <self>.puts("hello")
-        end
-        1.times() do ||
-          <self>.puts("hello")
-        end
-        1.times() do ||
-          x = nil
-        end
-        1.times() do ||
-          <emptyTree>::<C Opus>::<C Log>.info()
-        end
+      1.times() do ||
+        <emptyTree>
       end
     end
   end

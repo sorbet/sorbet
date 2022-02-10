@@ -2417,9 +2417,12 @@ opt_block_args_tail:
                       driver.numparam_stack.set_ordinary_params();
                       driver.current_arg_stack.set("");
                       $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
-                      if (@1.lineStart < yyla.location.lineStart) {
+                      if (driver.indentationAware && @1.lineStart < yyla.location.lineStart) {
                         auto newline_s = yyla.location.lineStart - 1;
                         driver.rewind_and_reset(newline_s);
+                        driver.replace_last_diagnostic(dlevel::NOTE, dclass::BlockArgsUnexpectedNewline, diagnostic::range(newline_s, newline_s));
+                      } else {
+                        driver.rewind_and_reset(@1.end);
                         driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnmatchedBlockArgs, $1);
                       }
                     }

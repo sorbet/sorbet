@@ -33,6 +33,7 @@ core::Loc rangeToLoc(const core::GlobalState &gs, core::FileRef file, const ruby
 core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
     switch (diagClass) {
         case ruby_parser::dclass::DedentedEnd:
+        case ruby_parser::dclass::BlockArgsUnexpectedNewline:
             return core::errors::Parser::ErrorRecoveryHint;
         default:
             return core::errors::Parser::ParserError;
