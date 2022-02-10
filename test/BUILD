@@ -357,6 +357,7 @@ sh_binary(
     data = [
         "rbi_gen_package_runner.rb",
         "//main:sorbet",
+        "//gems/sorbet-runtime",
         "@sorbet_ruby_2_7//:ruby",
     ],
     deps = [
