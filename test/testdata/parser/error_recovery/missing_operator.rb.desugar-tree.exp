@@ -1,0 +1,17 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.puts(27.<=(27))
+
+  <self>.puts(27.<=(<emptyTree>::<C <ErrorNode>>))
+
+  if <emptyTree>::<C <ErrorNode>>
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+
+  if <emptyTree>::<C <ErrorNode>>
+    <emptyTree>
+  else
+    <emptyTree>
+  end
+end
