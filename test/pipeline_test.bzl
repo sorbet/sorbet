@@ -51,23 +51,26 @@ exp_test = rule(
 _GEN_PACKAGE_RUNNER_SCRIPT = """
 set -x
 
-{runner} {inputs}
+{runner} {test_directory}
 """
 
 def _end_to_end_rbi_test_impl(ctx):
-    outputs = []
+    packager_folder = "/packager/"
 
-    ctx.actions.run_shell(
-        command = _GEN_PACKAGE_RUNNER_SCRIPT.format(
-            runner = ctx.executable._runner.path,
-            inputs = " ".join([file.path for file in ctx.files.rb_files]),
+    rb_file_path = ctx.files.rb_files[0].path
+    pos = rb_file_path.find(packager_folder)
+    final_dirsep = rb_file_path.find("/", pos + len(packager_folder))
+    test_directory = rb_file_path[0:final_dirsep]
+
+    ctx.actions.write(
+        output = ctx.outputs.executable,
+        content = _GEN_PACKAGE_RUNNER_SCRIPT.format(
+            runner = ctx.executable._runner.short_path,
+            test_directory = test_directory,
         ),
-        tools = ctx.files._runner,
-        inputs = ctx.files.rb_files,
-        outputs = outputs,
     )
-
-    runfiles = ctx.runfiles(ctx.files._runner)
+    runfiles = ctx.runfiles(ctx.files.rb_files)
+    runfiles = runfiles.merge(ctx.attr._runner[DefaultInfo].default_runfiles)
 
     return [DefaultInfo(runfiles = runfiles)]
 
@@ -76,6 +79,7 @@ end_to_end_rbi_test = rule(
     test = True,
     attrs = {
         "rb_files": attr.label_list(
+            allow_files = True,
             mandatory = True,
         ),
         "_runner": attr.label(
@@ -86,10 +90,11 @@ end_to_end_rbi_test = rule(
     }
 )
 
-def single_package_rbi_test(name, deps):
+def single_package_rbi_test(name, rb_files):
     end_to_end_rbi_test(
         name = name,
-        rb_files = deps,
+        rb_files = rb_files,
+        size = "small",
     )
 
 _TEST_RUNNERS = {
