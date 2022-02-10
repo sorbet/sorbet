@@ -2440,6 +2440,11 @@ opt_block_args_tail:
                       $$ = args;
                     }
                 |                                                                block_args_tail
+                | tBDOT3
+                    {
+                      $$ = driver.alloc.node_list();
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
+                    }
 
  opt_block_param: // nothing
                     {
