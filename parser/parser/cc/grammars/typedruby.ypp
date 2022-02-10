@@ -1953,7 +1953,6 @@ lbrace_cmd_block_start:
                         delimited_block->args,
                         delimited_block->body,
                         delimited_block->end);
-                      DIAGCHECK();
                     }
                 | method_call
                 | method_call brace_block
@@ -2466,7 +2465,6 @@ opt_block_args_tail:
                       params->concat($3);
                       driver.current_arg_stack.set("");
                       $$ = driver.build.args(self, $1, params, $4, true);
-                      DIAGCHECK();
                     }
                 | tPIPE error
                     {

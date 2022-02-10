@@ -226,8 +226,11 @@ public:
             }
 
             if (driver_->lex.is_declared(name_str)) {
-                checkCircularArgumentReferences(node.get(), name_str);
-                return make_unique<LVar>(node->loc, id->name);
+                if (!hasCircularArgumentReferences(node.get(), name_str)) {
+                    return make_unique<LVar>(node->loc, id->name);
+                } else {
+                    return error_node(node->loc.beginPos(), node->loc.endPos());
+                }
             } else {
                 return make_unique<Send>(node->loc, nullptr, id->name, node->loc, sorbet::parser::NodeVec());
             }
@@ -1616,10 +1619,12 @@ public:
         return parser::isa_node<String>(firstPart) || parser::isa_node<DString>(firstPart);
     }
 
-    void checkCircularArgumentReferences(const Node *node, std::string_view name) {
+    bool hasCircularArgumentReferences(const Node *node, std::string_view name) {
         if (name == driver_->current_arg_stack.top()) {
             error(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
+            return true;
         }
+        return false;
     }
 
     void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<std::string, core::LocOffsets> &map) {
