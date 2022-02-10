@@ -30,7 +30,7 @@ source "test/logging.sh"
 
 # Argument Parsing #############################################################
 
-inputs=( "$@" )
+test_directory=$1
 
 # Environment Setup ############################################################
 
@@ -43,4 +43,4 @@ rbi_gen_package_runner="$(rlocation com_stripe_ruby_typer/test/rbi_gen_package_r
 
 # Main #########################################################################
 
-exec "$ruby" -I "${sorbet_runtime}" "${rbi_gen_package_runner}" --sorbet "${sorbet}" --root="$root" "${inputs[@]}"
+exec "$ruby" -I "${sorbet_runtime}" "${rbi_gen_package_runner}" --sorbet "${sorbet}" --root="$root" --test-directory="${test_directory}"
