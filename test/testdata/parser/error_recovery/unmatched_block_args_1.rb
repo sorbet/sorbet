@@ -42,9 +42,9 @@ class A
   def test_one_arg_comma
     1.times do |x,
     end
-    1.times do |x,
-      puts 'hello'
-    end
+    # 1.times do |x,
+    #   puts 'hello'
+    # end
     1.times do |x,
       puts('hello')
     end
