@@ -1,0 +1,65 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Opus>::<C Log><<C <todo sym>>> < ()
+    def self.info<<todo method>>(msg, &<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C MethodCompletion><<C <todo sym>>> < (::<todo sym>)
+    def self.test1<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        begin
+          <assignTemp>$2 = x
+          if <emptyTree>::<C <ErrorNode>>.===(<assignTemp>$2)
+            <emptyTree>
+          else
+            <emptyTree>
+          end
+        end
+      end
+    end
+
+    def self.test2<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        begin
+          <assignTemp>$2 = x
+          if <emptyTree>::<C MethodCompletion>.puts("hello").===(<assignTemp>$2)
+            <emptyTree>
+          else
+            <emptyTree>
+          end
+        end
+      end
+    end
+
+    def self.test3<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        begin
+          <assignTemp>$2 = x
+          if <emptyTree>::<C MethodCompletion>.Opus()::<C Log>.info("hello").===(<assignTemp>$2)
+            <emptyTree>
+          else
+            <emptyTree>
+          end
+        end
+      end
+    end
+
+    def self.test4<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("before")
+        begin
+          <assignTemp>$2 = x
+          if <emptyTree>::<C MethodCompletion>.y=(nil).===(<assignTemp>$2)
+            <emptyTree>
+          else
+            <emptyTree>
+          end
+        end
+      end
+    end
+  end
+end

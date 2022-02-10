@@ -1,0 +1,29 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.puts("before")
+
+    def test1<<todo method>>(&<blk>)
+      begin
+        <assignTemp>$2 = <emptyTree>::<C <ErrorNode>>
+        if <emptyTree>::<C <ErrorNode>>.===(<assignTemp>$2)
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+    end
+
+    def test2<<todo method>>(&<blk>)
+      begin
+        <assignTemp>$2 = <self>.x()
+        if <emptyTree>::<C <ErrorNode>>.===(<assignTemp>$2)
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+    end
+
+    <self>.puts("after")
+  end
+end
