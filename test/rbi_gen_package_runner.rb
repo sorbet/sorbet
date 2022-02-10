@@ -211,15 +211,15 @@ module Runner
         db = PackageDB.new(rbi_package_dir, package_info)
 
         package_info.map do |info|
-          files = T.let(Set.new, T::Set[String])
+          required_files = T.let(Set.new, T::Set[String])
           rbi_files = T.let(Set.new, T::Set[String])
           visited = T.let(Set.new, T::Set[String])
           worklist = T.let([], T::Array[String])
 
           # We always need the rb files from the package itself, but we should only
           # need the RBI files from any transitive imports.
-          files.merge(info.files)
-          files.merge(info.testFiles)
+          required_files.merge(info.files)
+          required_files.merge(info.testFiles)
           visited.add(info.name)
           worklist.append(*info.imports)
           worklist.append(*info.testImports)
@@ -237,7 +237,7 @@ module Runner
             worklist.append(*info_for_dependency.testImports)
           end
 
-          verify_single_package_typechecking(sorbet, root, test_directory, files,
+          verify_single_package_typechecking(sorbet, root, test_directory, required_files,
                                              rbi_package_dir, rbi_files)
         end
       end
