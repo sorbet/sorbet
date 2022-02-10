@@ -1,0 +1,104 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Opus>::<C Log><<C <todo sym>>> < ()
+    def self.info<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def test_no_args<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          x = nil
+        end
+        1.times() do ||
+          <emptyTree>::<C Opus>::<C Log>.info()
+        end
+      end
+    end
+
+    def test_one_arg<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          x
+        end
+        1.times() do ||
+          begin
+            x
+            <self>.puts("hello")
+          end
+        end
+        1.times() do ||
+          begin
+            x
+            <self>.puts("hello")
+          end
+        end
+        1.times() do ||
+          begin
+            x
+            x = nil
+          end
+        end
+        1.times() do ||
+          begin
+            x
+            <emptyTree>::<C Opus>::<C Log>.info()
+          end
+        end
+      end
+    end
+
+    def test_one_arg_comma<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          begin
+            <assignTemp>$2 = nil
+            <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
+            x = <assignTemp>$3.[](0)
+            x = <assignTemp>$3.[](1)
+            <assignTemp>$2
+          end
+        end
+        1.times() do ||
+          <emptyTree>
+        end
+      end
+    end
+
+    def test_two_args<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          x = nil
+        end
+        1.times() do ||
+          <emptyTree>::<C Opus>::<C Log>.info()
+        end
+      end
+    end
+  end
+end

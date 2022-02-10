@@ -496,8 +496,26 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 	lval->token = token;
 	lloc->begin = token->start();
 	lloc->end = token->end();
+	lloc->lineStart = token->lineStart();
 	return token_type;
 }
+
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                      \
+do                                                        \
+  if (N)                                                  \
+    {                                                     \
+      (Cur).begin     = YYRHSLOC(Rhs, 1).begin;           \
+      (Cur).end       = YYRHSLOC(Rhs, N).end;             \
+      (Cur).lineStart = YYRHSLOC(Rhs, 1).lineStart;       \
+    }                                                     \
+  else                                                    \
+    {                                                     \
+      (Cur).begin     = YYRHSLOC(Rhs, 0).begin;           \
+      (Cur).end       = YYRHSLOC(Rhs, 0).end;             \
+      (Cur).lineStart = YYRHSLOC(Rhs, 0).lineStart;       \
+    }                                                     \
+while (0)
+
 
 }}} // namespace
 } // %code
@@ -1935,7 +1953,6 @@ lbrace_cmd_block_start:
                         delimited_block->args,
                         delimited_block->body,
                         delimited_block->end);
-                      DIAGCHECK();
                     }
                 | method_call
                 | method_call brace_block
@@ -2423,6 +2440,11 @@ opt_block_args_tail:
                       $$ = args;
                     }
                 |                                                                block_args_tail
+                | tBDOT3
+                    {
+                      $$ = driver.alloc.node_list();
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
+                    }
 
  opt_block_param: // nothing
                     {
@@ -2448,7 +2470,20 @@ opt_block_args_tail:
                       params->concat($3);
                       driver.current_arg_stack.set("");
                       $$ = driver.build.args(self, $1, params, $4, true);
-                      DIAGCHECK();
+                    }
+                | tPIPE error
+                    {
+                      driver.numparam_stack.set_ordinary_params();
+                      driver.current_arg_stack.set("");
+                      $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
+                      if (driver.indentationAware && @1.lineStart < yyla.location.lineStart) {
+                        auto newline_s = yyla.location.lineStart - 1;
+                        driver.rewind_and_reset(newline_s);
+                        driver.replace_last_diagnostic(dlevel::NOTE, dclass::BlockArgsUnexpectedNewline, diagnostic::range(newline_s, newline_s));
+                      } else {
+                        driver.rewind_and_reset(@1.end);
+                        driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnmatchedBlockArgs, $1);
+                      }
                     }
 
      opt_bv_decl: opt_nl
