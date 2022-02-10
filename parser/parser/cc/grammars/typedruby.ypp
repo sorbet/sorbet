@@ -1275,6 +1275,8 @@ lbrace_cmd_block_start:
                 | arg tDOT2 error
                     {
                       $$ = driver.build.range_inclusive(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tDOT3 arg
                     {
@@ -1283,6 +1285,8 @@ lbrace_cmd_block_start:
                 | arg tDOT3 error
                     {
                       $$ = driver.build.range_exclusive(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tDOT2
                     {
@@ -1307,6 +1311,8 @@ lbrace_cmd_block_start:
                 | arg tPLUS error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tMINUS arg
                     {
@@ -1315,6 +1321,8 @@ lbrace_cmd_block_start:
                 | arg tMINUS error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tSTAR2 arg
                     {
@@ -1323,6 +1331,8 @@ lbrace_cmd_block_start:
                 | arg tSTAR2 error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tDIVIDE arg
                     {
@@ -1331,6 +1341,8 @@ lbrace_cmd_block_start:
                 | arg tDIVIDE error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tPERCENT arg
                     {
@@ -1339,6 +1351,8 @@ lbrace_cmd_block_start:
                 | arg tPERCENT error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tPOW arg
                     {
@@ -1347,6 +1361,8 @@ lbrace_cmd_block_start:
                 | arg tPOW error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | tUNARY_NUM simple_numeric tPOW arg
                     {
@@ -1355,6 +1371,8 @@ lbrace_cmd_block_start:
                 | tUNARY_NUM simple_numeric tPOW error
                     {
                       $$ = driver.build.unary_op(self, $1, driver.build.binaryOp(self, $2, $3, driver.build.error_node(self, @3.end, @4.end)));
+                      driver.rewind_and_reset(@3.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $3, driver.token_name($3->type()));
                     }
                 | tUPLUS arg
                     {
@@ -1363,6 +1381,8 @@ lbrace_cmd_block_start:
                 | tUPLUS error
                     {
                       $$ = driver.build.unary_op(self, $1, driver.build.error_node(self, @1.end, @2.end));
+                      driver.rewind_and_reset(@1.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $1, driver.token_name($1->type()));
                     }
                 | tUMINUS arg
                     {
@@ -1371,6 +1391,8 @@ lbrace_cmd_block_start:
                 | tUMINUS error
                     {
                       $$ = driver.build.unary_op(self, $1, driver.build.error_node(self, @1.end, @2.end));
+                      driver.rewind_and_reset(@1.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $1, driver.token_name($1->type()));
                     }
                 | arg tPIPE arg
                     {
@@ -1379,6 +1401,8 @@ lbrace_cmd_block_start:
                 | arg tPIPE error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tCARET arg
                     {
@@ -1387,6 +1411,8 @@ lbrace_cmd_block_start:
                 | arg tCARET error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tAMPER2 arg
                     {
@@ -1395,6 +1421,8 @@ lbrace_cmd_block_start:
                 | arg tAMPER2 error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tCMP arg
                     {
@@ -1403,6 +1431,8 @@ lbrace_cmd_block_start:
                 | arg tCMP error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | rel_expr %prec tCMP
                 | arg tEQ arg
@@ -1412,6 +1442,8 @@ lbrace_cmd_block_start:
                 | arg tEQ error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tEQQ arg
                     {
@@ -1420,6 +1452,8 @@ lbrace_cmd_block_start:
                 | arg tEQQ error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tNEQ arg
                     {
@@ -1428,6 +1462,8 @@ lbrace_cmd_block_start:
                 | arg tNEQ error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tMATCH arg
                     {
@@ -1442,6 +1478,8 @@ lbrace_cmd_block_start:
                       // and since this production already implies that we're in an error state, we don't duplicate
                       // the `DIAGCHECK` here.
                       $$ = driver.build.match_op(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tNMATCH arg
                     {
@@ -1450,6 +1488,8 @@ lbrace_cmd_block_start:
                 | arg tNMATCH error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | tBANG arg
                     {
@@ -1458,6 +1498,8 @@ lbrace_cmd_block_start:
                 | tBANG error
                     {
                       $$ = driver.build.not_op(self, $1, nullptr, driver.build.error_node(self, @2.end, @2.end), nullptr);
+                      driver.rewind_and_reset(@1.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $1, driver.token_name($1->type()));
                     }
                 | tTILDE arg
                     {
@@ -1466,6 +1508,8 @@ lbrace_cmd_block_start:
                 | tTILDE error
                     {
                       $$ = driver.build.unary_op(self, $1, driver.build.error_node(self, @2.end, @2.end));
+                      driver.rewind_and_reset(@1.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $1, driver.token_name($1->type()));
                     }
                 | arg tLSHFT arg
                     {
@@ -1474,6 +1518,8 @@ lbrace_cmd_block_start:
                 | arg tLSHFT error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tRSHFT arg
                     {
@@ -1482,6 +1528,8 @@ lbrace_cmd_block_start:
                 | arg tRSHFT error
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tANDOP arg
                     {
@@ -1490,6 +1538,8 @@ lbrace_cmd_block_start:
                 | arg tANDOP error
                     {
                       $$ = driver.build.logicalAnd(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | arg tOROP arg
                     {
@@ -1498,6 +1548,8 @@ lbrace_cmd_block_start:
                 | arg tOROP error
                     {
                       $$ = driver.build.logicalOr(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | kDEFINED opt_nl arg
                     {
@@ -1564,6 +1616,8 @@ lbrace_cmd_block_start:
                 | arg relop error %prec tGT
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
                 | rel_expr relop arg %prec tGT
                     {
@@ -1572,6 +1626,8 @@ lbrace_cmd_block_start:
                 | rel_expr relop error %prec tGT
                     {
                       $$ = driver.build.binaryOp(self, $1, $2, driver.build.error_node(self, @2.end, @3.end));
+                      driver.rewind_and_reset(@2.end);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
 
        arg_value: arg

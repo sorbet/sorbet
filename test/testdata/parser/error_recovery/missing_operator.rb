@@ -11,219 +11,221 @@ class A
     puts(0 .. 0)
     puts(0 .. )
     if 0 ..
-    end
-    if 0 ..
+    end # error: unexpected token "end"
+    if 0 .. # error: Unsupported node type `IFlipflop`
+      #  ^^ error: missing arg to ".." operator
       puts 'hello'
     end
     puts(1 ... 1)
     puts(1 ... )
     if 1...
-    end
-    if 1...
+    end # error: unexpected token "end"
+    if 1... # error: Unsupported node type `EFlipflop`
+      # ^^^ error: missing arg to "..." operator
       puts 'hello'
     end
     puts(2 + 2)
-    puts(2 + )
-    if 2 +
+    puts(2 + ) # error: missing arg to "+" operator
+    if 2 + # error: missing arg to "+" operator
     end
-    if 2 +
+    if 2 + # error: missing arg to "+" operator
       puts 'hello'
     end
     puts(3 - 3)
-    puts(3 - )
-    if 3 -
+    puts(3 - ) # error: missing arg to "-" operator
+    if 3 - # error: missing arg to "-" operator
     end
-    if 3 -
+    if 3 - # error: missing arg to "-" operator
       puts 'hello'
     end
     puts(4 * 4)
-    puts(4 * )
-    if 4 *
+    puts(4 * ) # error: missing arg to tSTAR2 operator
+    if 4 * # error: missing arg to tSTAR2 operator
     end
-    if 4 *
+    if 4 * # error: missing arg to tSTAR2 operator
       puts 'hello'
     end
     puts(5 / 5)
-    puts(5 / )
-    if 5 /
+    puts(5 / ) # error: missing arg to "/" operator
+    if 5 / # error: missing arg to "/" operator
     end
-    if 5 /
+    if 5 / # error: missing arg to "/" operator
       puts 'hello'
     end
     puts(6 % 6)
-    puts(6 % )
-    if 6 %
+    puts(6 % ) # error: missing arg to "%" operator
+    if 6 % # error: missing arg to "%" operator
     end
-    if 6 %
+    if 6 % # error: missing arg to "%" operator
       puts 'hello'
     end
     puts(7 ** 7)
-    puts(7 ** )
-    if 7 **
+    puts(7 ** ) # error: missing arg to tPOW operator
+    if 7 ** # error: missing arg to tPOW operator
     end
-    if 7 **
+    if 7 ** # error: missing arg to tPOW operator
       puts 'hello'
     end
     puts(-8 ** 8)
-    puts(-8 ** )
-    if -8 **
+    puts(-8 ** ) # error: missing arg to tPOW operator
+    if -8 ** # error: missing arg to tPOW operator
     end
-    if -8 **
+    if -8 ** # error: missing arg to tPOW operator
       puts 'hello'
     end
     puts(+9 ** 9)
-    puts(+9 ** )
-    if +9 **
+    puts(+9 ** ) # error: missing arg to tPOW operator
+    if +9 ** # error: missing arg to tPOW operator
     end
-    if +9 **
+    if +9 ** # error: missing arg to tPOW operator
       puts 'hello'
     end
     puts(-10)
-    puts(-)
-    if -
+    puts(-) # error: missing arg to tUMINUS operator
+    if - # error: missing arg to tUMINUS operator
     end
-    if -
+    if - # error: missing arg to tUMINUS operator
       puts 'hello'
     end
     puts(+10)
-    puts(+)
-    if +
+    puts(+) # error: missing arg to tUPLUS operator
+    if + # error: missing arg to tUPLUS operator
     end
-    if +
+    if + # error: missing arg to tUPLUS operator
       puts 'hello'
     end
     puts(10 | 10)
-    puts(10 | )
-    if 10 |
+    puts(10 | ) # error: missing arg to "|" operator
+    if 10 | # error: missing arg to "|" operator
     end
-    if 10 |
+    if 10 | # error: missing arg to "|" operator
       puts 'hello'
     end
     puts(11 ^ 11)
-    puts(11 ^ )
-    if 11 ^
+    puts(11 ^ ) # error: missing arg to "^" operator
+    if 11 ^ # error: missing arg to "^" operator
     end
-    if 11 ^
+    if 11 ^ # error: missing arg to "^" operator
       puts 'hello'
     end
     puts(12 & 12)
-    puts(12 & )
-    if 12 &
+    puts(12 & ) # error: missing arg to tAMPER2 operator
+    if 12 & # error: missing arg to tAMPER2 operator
     end
-    if 12 &
+    if 12 & # error: missing arg to tAMPER2 operator
       puts 'hello'
     end
     puts(13 <=> 13)
-    puts(13 <=> )
-    if 13 <=>
+    puts(13 <=> ) # error: missing arg to "<=>" operator
+    if 13 <=> # error: missing arg to "<=>" operator
     end
-    if 13 <=>
+    if 13 <=> # error: missing arg to "<=>" operator
       puts 'hello'
     end
     puts(14 == 14)
-    puts(14 == )
-    if 14 ==
+    puts(14 == ) # error: missing arg to "==" operator
+    if 14 == # error: missing arg to "==" operator
     end
-    if 14 ==
+    if 14 == # error: missing arg to "==" operator
       puts 'hello'
     end
     puts(15 === 15)
-    puts(15 === )
-    if 15 ===
+    puts(15 === ) # error: missing arg to "===" operator
+    if 15 === # error: missing arg to "===" operator
     end
-    if 15 ===
+    if 15 === # error: missing arg to "===" operator
       puts 'hello'
     end
     puts(16 != 16)
-    puts(16 != )
-    if 16 !=
+    puts(16 != ) # error: missing arg to "!=" operator
+    if 16 != # error: missing arg to "!=" operator
     end
-    if 16 !=
+    if 16 != # error: missing arg to "!=" operator
       puts 'hello'
     end
     puts(/17/ =~ "17")
-    puts(/17/ =~ )
-    if /17/ =~
+    puts(/17/ =~ ) # error: missing arg to "=~" operator
+    if /17/ =~ # error: missing arg to "=~" operator
     end
-    if /17/ =~
+    if /17/ =~ # error: missing arg to "=~" operator
       puts 'hello'
     end
     puts(/18/ !~ "eighteen")
-    puts(/18/ !~ )
-    if /18/ !~
+    puts(/18/ !~ ) # error: missing arg to "!~" operator
+    if /18/ !~ # error: missing arg to "!~" operator
     end
-    if /18/ !~
+    if /18/ !~ # error: missing arg to "!~" operator
       puts 'hello'
     end
     puts(!t)
-    puts(!)
-    if !
+    puts(!) # error: missing arg to "!" operator
+    if ! # error: missing arg to "!" operator
     end
     if !
       puts 'hello'
     end
     puts(~19)
-    puts(~)
-    if ~
+    puts(~) # error: missing arg to "~" operator
+    if ~ # error: missing arg to "~" operator
     end
-    if ~
+    if ~ # error: missing arg to "~" operator
       puts 'hello'
     end
     puts(20 << 20)
-    puts(20 << )
-    if 20 <<
+    puts(20 << ) # error: missing arg to "<<" operator
+    if 20 << # error: missing arg to "<<" operator
     end
-    if 20 <<
+    if 20 << # error: missing arg to "<<" operator
       puts 'hello'
     end
     puts(21 >> 21)
-    puts(21 >> )
-    if 21 >>
+    puts(21 >> ) # error: missing arg to ">>" operator
+    if 21 >> # error: missing arg to ">>" operator
     end
-    if 21 >>
+    if 21 >> # error: missing arg to ">>" operator
       puts 'hello'
     end
     puts(t && t)
-    puts(t && )
-    if t &&
+    puts(t && ) # error: missing arg to "&&" operator
+    if t && # error: missing arg to "&&" operator
     end
-    if t &&
+    if t && # error: missing arg to "&&" operator
       puts 'hello'
     end
     puts(f || f)
-    puts(f || )
-    if f ||
+    puts(f || ) # error: missing arg to "||" operator
+    if f || # error: missing arg to "||" operator
     end
-    if f ||
+    if f || # error: missing arg to "||" operator
       puts 'hello'
     end
     puts(24 > 24)
-    puts(24 > )
-    if 24 >
+    puts(24 > ) # error: missing arg to ">" operator
+    if 24 > # error: missing arg to ">" operator
     end
-    if 24 >
+    if 24 > # error: missing arg to ">" operator
       puts 'hello'
     end
     puts(25 < 25)
-    puts(25 < )
-    if 25 <
+    puts(25 < ) # error: missing arg to "<" operator
+    if 25 < # error: missing arg to "<" operator
     end
-    if 25 <
+    if 25 < # error: missing arg to "<" operator
       puts 'hello'
     end
     puts(26 >= 26)
-    puts(26 >= )
-    if 26 >=
+    puts(26 >= ) # error: missing arg to ">=" operator
+    if 26 >= # error: missing arg to ">=" operator
     end
-    if 26 >=
+    if 26 >= # error: missing arg to ">=" operator
       puts 'hello'
     end
     puts(27 <= 27)
-    puts(27 <= )
-    if 27 <=
+    puts(27 <= ) # error: missing arg to "<=" operator
+    if 27 <= # error: missing arg to "<=" operator
     end
-    if 27 <=
+    if 27 <= # error: missing arg to "<=" operator
       puts 'hello'
     end
-  end
+  end # error: unexpected token "end"
 end
