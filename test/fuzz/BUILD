@@ -21,6 +21,28 @@ cc_library(
 )
 
 cc_binary(
+    name = "fuzz_namer",
+    srcs = ["empty.cc"],
+    tags = ["manual"],
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "fuzz_namer_impl",
+    ],
+)
+
+cc_library(
+    name = "fuzz_namer_impl",
+    srcs = [
+        "fuzz_namer.cc",
+    ],
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//main/pipeline",
+        "//payload",
+    ],
+)
+
+cc_binary(
     name = "fuzz_hover",
     srcs = [
         "fuzz_hover.cc",

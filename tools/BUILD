@@ -23,6 +23,8 @@ compilation_database(
         "//test/fuzz:fuzz_doc_symbols",
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",
+        "//test/fuzz:fuzz_namer",
+        "//test/fuzz:fuzz_namer_impl",
         "//test:print_document_symbols",
         "//test:pkg-autocorrects-test",
         "//test:pipeline_test_runner",
