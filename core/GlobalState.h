@@ -110,22 +110,26 @@ public:
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule, Symbols::noSymbol(),
                                     /* ignoreKind */ true);
     }
-    TypeMemberRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::TypeMember, Symbols::noTypeMember())
+    TypeMemberRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name, bool stubIfMissing = false) const {
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::TypeMember,
+                                    stubIfMissing ? Symbols::StubTypeMember() : Symbols::noTypeMember())
             .asTypeMemberRef();
     }
-    ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule, Symbols::noClassOrModule())
+    ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name, bool stubIfMissing = false) const {
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule,
+                                    stubIfMissing ? Symbols::StubModule() : Symbols::noClassOrModule())
             .asClassOrModuleRef();
     }
     MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::Method, Symbols::noMethod()).asMethodRef();
     }
-    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
-                                         const std::vector<uint32_t> &methodHash) const;
-    FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
+    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<uint32_t> &methodHash,
+                                         bool stubIfMissing = false) const;
+    FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name, bool stubIfMissing = false) const {
         // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.
-        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField, Symbols::noField()).asFieldRef();
+        return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField,
+                                    stubIfMissing ? Symbols::StubField() : Symbols::noField())
+            .asFieldRef();
     }
     FieldRef lookupFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
         // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.

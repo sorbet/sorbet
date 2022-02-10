@@ -800,7 +800,7 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
-                                                  const vector<uint32_t> &methodHash) const {
+                                                  const vector<uint32_t> &methodHash, bool stubIfMissing) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -826,7 +826,7 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noMethod();
+    return stubIfMissing ? Symbols::StubMethod() : Symbols::noMethod();
 }
 
 // look up a symbol whose flags match the desired kind (or ignores the kind filter if `ignoreKind` is `true`).

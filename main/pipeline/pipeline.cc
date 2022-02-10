@@ -683,6 +683,14 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
     return what;
 }
 
+ast::ParsedFilesOrCancelled nameWithStubs(const core::GlobalState &gs, vector<ast::ParsedFile> what,
+                                          const options::Options &opts, WorkerPool &workers) {
+    Timer timeit(gs.tracer(), "nameWithStubs");
+    auto result = namer::Namer::runWithStubs(gs, move(what), workers);
+
+    return result;
+}
+
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers) {
     Timer timeit(gs.tracer(), "name");

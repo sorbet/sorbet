@@ -1438,6 +1438,8 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
+    bool stubNewSymbols;
+
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
@@ -1467,9 +1469,10 @@ class TreeSymbolizer {
 
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+        core::SymbolRef existing =
+            ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst, stubNewSymbols);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
-            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst, stubNewSymbols);
             if (existing.exists()) {
                 existing = existing.dealias(ctx.state);
             }
@@ -1562,6 +1565,8 @@ class TreeSymbolizer {
     }
 
 public:
+    TreeSymbolizer(bool stubNewSymbols) : stubNewSymbols(stubNewSymbols) {}
+
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -1577,7 +1582,7 @@ public:
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
                 if (!squashedSymbol.isClassOrModule()) {
                     klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
-                                                               klass.symbol.data(ctx)->name);
+                                                               klass.symbol.data(ctx)->name, stubNewSymbols);
                     ENFORCE(klass.symbol.exists());
                 } else {
                     klass.symbol = squashedSymbol.asClassOrModuleRef();
@@ -1687,7 +1692,8 @@ public:
 
         auto owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
-        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
+        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs),
+                                                        stubNewSymbols);
         ENFORCE(sym.exists());
         method.symbol = sym;
         method.args = fillInArgs(ctx.withOwner(method.symbol), move(parsedArgs), std::move(method.args));
@@ -1709,11 +1715,12 @@ public:
         core::SymbolRef maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
         if (!maybeScope.isClassOrModule()) {
             auto scopeName = maybeScope.name(ctx);
-            maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
+            maybeScope =
+                ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName, stubNewSymbols);
         }
         auto scope = maybeScope.asClassOrModuleRef();
 
-        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
+        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst, stubNewSymbols);
         ENFORCE(cnst.exists());
         auto loc = lhs.loc;
         asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
@@ -1761,7 +1768,8 @@ public:
             auto onSymbol =
                 isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
             ENFORCE(onSymbol.exists());
-            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
+            core::SymbolRef sym =
+                ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst, stubNewSymbols);
             ENFORCE(sym.exists());
 
             if (send->hasKwArgs()) {
@@ -1919,8 +1927,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
-vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                       WorkerPool &workers) {
+vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
+                                       bool stubNewSymbols) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -1928,9 +1936,9 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, stubNewSymbols]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
-        TreeSymbolizer inserter;
+        TreeSymbolizer inserter{stubNewSymbols};
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1964,6 +1972,11 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 
 } // namespace
 
+ast::ParsedFilesOrCancelled Namer::runWithStubs(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                                WorkerPool &workers) {
+    return symbolizeTrees(gs, move(trees), workers, /*stubNewSymbols=*/true);
+}
+
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
@@ -1977,7 +1990,7 @@ ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::Parsed
     if (!result.hasResult()) {
         return result;
     }
-    trees = symbolizeTrees(gs, move(result.result()), workers);
+    trees = symbolizeTrees(gs, move(result.result()), workers, /*stubNewSymbols=*/false);
     return trees;
 }
 

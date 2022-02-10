@@ -11,6 +11,8 @@ namespace sorbet::namer {
 
 class Namer final {
 public:
+    static ast::ParsedFilesOrCancelled runWithStubs(const core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
+                                                    WorkerPool &workers);
     static ast::ParsedFilesOrCancelled run(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                            WorkerPool &workers);
 
