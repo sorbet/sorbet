@@ -618,6 +618,19 @@ public:
                                  std::move(elseBody));
     }
 
+    unique_ptr<Node> case_error(const token *case_, unique_ptr<Node> cond, const token *end) {
+        auto loc = tokLoc(case_);
+        if (end != nullptr) {
+            loc = loc.join(tokLoc(end));
+        }
+        auto zloc = loc.copyWithZeroLength();
+        auto whenPatterns = NodeVec{};
+        whenPatterns.emplace_back(error_node(loc.beginPos(), loc.beginPos()));
+        auto whens = NodeVec{};
+        whens.emplace_back(make_unique<When>(zloc, std::move(whenPatterns), nullptr));
+        return make_unique<Case>(loc, std::move(cond), std::move(whens), nullptr);
+    }
+
     unique_ptr<Node> case_match(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec inBodies,
                                 const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
         if (elseTok != nullptr && elseBody == nullptr) {
@@ -1869,6 +1882,11 @@ ForeignPtr case_(SelfPtr builder, const token *case_, ForeignPtr expr, const nod
                                          build->cast_node(elseBody), end));
 }
 
+ForeignPtr case_error(SelfPtr builder, const token *case_, ForeignPtr cond, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->case_error(case_, build->cast_node(cond), end));
+}
+
 ForeignPtr case_match(SelfPtr builder, const token *case_, ForeignPtr expr, const node_list *inBodies,
                       const token *elseTok, ForeignPtr elseBody, const token *end) {
     auto build = cast_builder(builder);
@@ -2532,6 +2550,7 @@ struct ruby_parser::builder Builder::interface = {
     call_method,
     call_method_error,
     case_,
+    case_error,
     case_match,
     character,
     complex,

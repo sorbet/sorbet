@@ -113,7 +113,8 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     unique_ptr<parser::Node> nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        auto settings = parser::Parser::Settings{traceLexer, traceParser};
+        auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
+        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware};
         nodes = parser::Parser::run(gs, file, settings);
     }
     if (print.ParseTree.enabled) {

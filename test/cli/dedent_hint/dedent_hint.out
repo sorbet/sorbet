@@ -1,0 +1,33 @@
+test/cli/dedent_hint/dedent_hint.rb:6: unexpected token "if" https://srb.help/2001
+     6 |    if
+            ^^
+
+test/cli/dedent_hint/dedent_hint.rb:17: unexpected token "end" https://srb.help/2001
+    17 |  end
+          ^^^
+
+test/cli/dedent_hint/dedent_hint.rb:42: unexpected token "end of file" https://srb.help/2001
+    42 |end
+    43 |
+
+test/cli/dedent_hint/dedent_hint.rb:11: Hint: this "if" token might not be properly closed https://srb.help/2003
+    11 |    if x
+            ^^
+    test/cli/dedent_hint/dedent_hint.rb:12: Matching `end` found here but is not indented as far
+    12 |  end
+          ^^^
+
+test/cli/dedent_hint/dedent_hint.rb:16: Hint: this "if" token might not be properly closed https://srb.help/2003
+    16 |    if x.
+            ^^
+    test/cli/dedent_hint/dedent_hint.rb:17: Matching `end` found here but is not indented as far
+    17 |  end
+          ^^^
+
+test/cli/dedent_hint/dedent_hint.rb:21: Hint: this "if" token might not be properly closed https://srb.help/2003
+    21 |    if x.f
+            ^^
+    test/cli/dedent_hint/dedent_hint.rb:22: Matching `end` found here but is not indented as far
+    22 |  end
+          ^^^
+Errors: 6

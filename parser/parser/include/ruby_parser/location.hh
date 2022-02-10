@@ -10,15 +10,16 @@ namespace ruby_parser {
 struct location {
     size_t begin;
     size_t end;
+    size_t lineStart;
 
-    location() : begin(SIZE_MAX), end(SIZE_MAX) {}
-    location(size_t begin, size_t end) : begin(begin), end(end) {}
+    location() : begin(SIZE_MAX), end(SIZE_MAX), lineStart(SIZE_MAX) {}
+    location(size_t begin, size_t end, size_t lineStart) : begin(begin), end(end), lineStart(lineStart) {}
 
     location(const location &other) = default;
     location &operator=(const location &other) = default;
 
     bool exists() {
-        return begin != SIZE_MAX && end != SIZE_MAX;
+        return begin != SIZE_MAX && end != SIZE_MAX && lineStart != SIZE_MAX;
     };
 };
 

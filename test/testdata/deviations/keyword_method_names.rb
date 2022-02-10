@@ -52,7 +52,10 @@ def method_named_case(x)
   x
     .case # ok
   x.
-    case # error: unexpected token
+    case
+  # ^^^^ error: unexpected token "case"
+  # ^^^^ error: "case" statement must at least have one "when" clause
+  # ^^^^ error: Hint: this "case" token might not be properly closed
 end
 
 def method_named_class(x)

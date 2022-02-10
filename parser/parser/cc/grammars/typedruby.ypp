@@ -496,8 +496,26 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 	lval->token = token;
 	lloc->begin = token->start();
 	lloc->end = token->end();
+	lloc->lineStart = token->lineStart();
 	return token_type;
 }
+
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                      \
+do                                                        \
+  if (N)                                                  \
+    {                                                     \
+      (Cur).begin     = YYRHSLOC(Rhs, 1).begin;           \
+      (Cur).end       = YYRHSLOC(Rhs, N).end;             \
+      (Cur).lineStart = YYRHSLOC(Rhs, 1).lineStart;       \
+    }                                                     \
+  else                                                    \
+    {                                                     \
+      (Cur).begin     = YYRHSLOC(Rhs, 0).begin;           \
+      (Cur).end       = YYRHSLOC(Rhs, 0).end;             \
+      (Cur).lineStart = YYRHSLOC(Rhs, 0).lineStart;       \
+    }                                                     \
+while (0)
+
 
 }}} // namespace
 } // %code
@@ -1794,7 +1812,7 @@ lbrace_cmd_block_start:
                       auto &list = $1;
                       list->emplace_back(driver.build.error_node(self, @2.end, @3.end));
                       $$ = $1;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.begin, @2.end), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $2, driver.token_name($2->type()));
                     }
                 | args tCOMMA tSTAR arg_value
                     {
@@ -1849,6 +1867,7 @@ lbrace_cmd_block_start:
                     {
                       driver.replace_stack($<stack>2);
                       $$ = driver.build.beginKeyword(self, $1, $3, $4);
+                      driver.rewind_if_dedented($1, $4);
                     }
                 | tLPAREN_ARG stmt
                     {
@@ -1968,11 +1987,13 @@ lbrace_cmd_block_start:
                       $$ = driver.build.condition(self, $1, $2, $3, $4,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
+                      driver.rewind_if_dedented($1, $6);
                     }
                 | kIF error
                     {
                       auto err = driver.build.error_node(self, @1.end, @2.begin);
                       $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
                 | kIF strings kDO compstmt if_tail kEND
                     {
@@ -1988,14 +2009,35 @@ lbrace_cmd_block_start:
                       $$ = driver.build.condition(self, $1, $2, $3,
                         else_ ? else_->nod : nullptr,
 			                  else_ ? else_->tok : nullptr, $4, $6);
+                      driver.rewind_if_dedented($1, $6);
+                    }
+                | kUNLESS error
+                    {
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
                 | kWHILE expr_value_do compstmt kEND
                     {
                       $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3, $4);
+                      driver.rewind_if_dedented($1, $4);
+                    }
+                | kWHILE error
+                    {
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      $$ = driver.build.loop_while(self, $1, err, nullptr, nullptr, $1);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
                 | kUNTIL expr_value_do compstmt kEND
                     {
                       $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3, $4);
+                      driver.rewind_if_dedented($1, $4);
+                    }
+                | kUNTIL error
+                    {
+                      auto err = driver.build.error_node(self, @1.end, @2.begin);
+                      $$ = driver.build.loopUntil(self, $1, err, nullptr, nullptr, $1);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
                 | kCASE expr_value opt_terms case_body kEND
                     {
@@ -2005,6 +2047,7 @@ lbrace_cmd_block_start:
                         &case_body->whens,
                         else_ ? else_->tok : nullptr,
 			                  else_ ? else_->nod : nullptr, $5);
+                      driver.rewind_if_dedented($1, $5);
                     }
                 | kCASE            opt_terms case_body kEND
                     {
@@ -2014,8 +2057,32 @@ lbrace_cmd_block_start:
                         &case_body->whens,
                         else_ ? else_->tok : nullptr,
 			                  else_ ? else_->nod : nullptr, $4);
+                      driver.rewind_if_dedented($1, $4);
                     }
-                 | kCASE expr_value opt_terms p_case_body kEND
+                | kCASE expr_value opt_terms           kEND
+                    {
+                      $$ = driver.build.case_error(self, $1, $2, $4);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::EmptyCase, $1, driver.token_name($1->type()));
+                      // This is an `error` rule in disguise, so we can actually use indentation to rewind
+                      // even if we aren't in indentationAware mode.
+                      driver.rewind_if_dedented($1, $4, /*force*/true);
+                    }
+                | kCASE            opt_terms           kEND
+                    {
+                      auto cond = driver.build.error_node(self, @1.end, @3.begin);
+                      $$ = driver.build.case_error(self, $1, cond, $3);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::EmptyCase, $1, driver.token_name($1->type()));
+                      // This is an `error` rule in disguise, so we can actually use indentation to rewind
+                      // even if we aren't in indentationAware mode.
+                      driver.rewind_if_dedented($1, $3, /*force*/true);
+                    }
+                | kCASE error
+                    {
+                      auto cond = driver.build.error_node(self, @1.end, @2.end);
+                      $$ = driver.build.case_error(self, $1, cond, nullptr);
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
+                    }
+                | kCASE expr_value opt_terms p_case_body kEND
                     {
                       auto &case_body = $4;
                       auto &else_ = case_body->els;
@@ -2023,6 +2090,7 @@ lbrace_cmd_block_start:
                         &case_body->whens,
                         else_ ? else_->tok : nullptr,
 			                  else_ ? else_->nod : nullptr, $5);
+                      driver.rewind_if_dedented($1, $5);
                     }
                 | kFOR for_var kIN expr_value_do compstmt kEND
                     {
@@ -2400,6 +2468,20 @@ opt_block_args_tail:
                       $$ = driver.build.args(self, $1, params, $4, true);
                       DIAGCHECK();
                     }
+                | tPIPE error
+                    {
+                      driver.numparam_stack.set_ordinary_params();
+                      driver.current_arg_stack.set("");
+                      $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
+                      if (driver.indentationAware && @1.lineStart < yyla.location.lineStart) {
+                        auto newline_s = yyla.location.lineStart - 1;
+                        driver.rewind_and_reset(newline_s);
+                        driver.replace_last_diagnostic(dlevel::NOTE, dclass::BlockArgsUnexpectedNewline, diagnostic::range(newline_s, newline_s));
+                      } else {
+                        driver.rewind_and_reset(@1.end);
+                        driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnmatchedBlockArgs, $1);
+                      }
+                    }
 
      opt_bv_decl: opt_nl
                     {
@@ -2490,6 +2572,7 @@ opt_block_args_tail:
                     {
                       $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
                       driver.lex.context.pop();
+                      driver.rewind_if_dedented($1, $4);
                     }
 
         do_block: kDO_BLOCK
@@ -2503,6 +2586,7 @@ opt_block_args_tail:
                       delimited_block->end = $4;
                       $$ = delimited_block;
                       driver.lex.context.pop();
+                      driver.rewind_if_dedented($1, $4);
                     }
 
       block_call: command do_block
@@ -2645,6 +2729,7 @@ lcurly_block_start:
                       block->end = $4;
                       $$ = block;
                       driver.lex.context.pop();
+                      driver.rewind_if_dedented($1, $4);
                     }
 
       brace_body:   {

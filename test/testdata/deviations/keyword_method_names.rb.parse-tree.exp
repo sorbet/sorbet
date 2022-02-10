@@ -181,7 +181,52 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U case>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U case>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Case {
+            condition = Const {
+              scope = NULL
+              name = <C <U <ErrorNode>>>
+            }
+            whens = [
+              When {
+                patterns = [
+                  Const {
+                    scope = NULL
+                    name = <C <U <ErrorNode>>>
+                  }
+                ]
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_class>
@@ -831,7 +876,42 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U unless>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U unless>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          If {
+            condition = Const {
+              scope = NULL
+              name = <C <U <ErrorNode>>>
+            }
+            then_ = NULL
+            else_ = NULL
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_until>
@@ -842,7 +922,41 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U until>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U until>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          Until {
+            cond = Const {
+              scope = NULL
+              name = <C <U <ErrorNode>>>
+            }
+            body = NULL
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_when>
@@ -864,7 +978,41 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U while>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U while>
+            args = [
+            ]
+          }
+          Send {
+            receiver = LVar {
+              name = <U x>
+            }
+            method = <U <method-name-missing>>
+            args = [
+            ]
+          }
+          While {
+            cond = Const {
+              scope = NULL
+              name = <C <U <ErrorNode>>>
+            }
+            body = NULL
+          }
+        ]
+      }
     }
     DefMethod {
       name = <U method_named_yield>

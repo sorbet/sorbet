@@ -1,0 +1,39 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C A>::<C B><<C <todo sym>>> < ()
+    class <emptyTree>::<C C1><<C <todo sym>>> < (::<todo sym>)
+      def foo<<todo method>>(&<blk>)
+        if <emptyTree>::<C <ErrorNode>>
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+
+      <self>.sig() do ||
+        <self>.void()
+      end
+
+      <self>.private(def bar<<todo method>>(&<blk>)
+          <emptyTree>
+        end)
+    end
+
+    class <emptyTree>::<C C2><<C <todo sym>>> < (::<todo sym>)
+      def foo<<todo method>>(&<blk>)
+        if <self>.x()
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+
+      <self>.sig() do ||
+        <self>.void()
+      end
+
+      <self>.private(def bar<<todo method>>(&<blk>)
+          <emptyTree>
+        end)
+    end
+  end
+end
