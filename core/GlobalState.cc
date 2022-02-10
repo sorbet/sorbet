@@ -295,6 +295,17 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::Sorbet_Private_StaticSingleton());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(klass == Symbols::StubModule());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::StubModule(), core::Names::Constants::StubField());
+    ENFORCE(field == Symbols::StubField());
+
+    typeMember = enterTypeMember(Loc::none(), Symbols::StubModule(), core::Names::Constants::StubTypeMember(),
+                                 Variance::CoVariant);
+    ENFORCE(typeMember == Symbols::StubTypeMember());
+
+    method = enterMethod(*this, Symbols::StubModule(), core::Names::Constants::StubMethod()).build();
+    ENFORCE(method == Symbols::StubMethod());
+
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     ENFORCE(klass == Symbols::StubMixin());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());

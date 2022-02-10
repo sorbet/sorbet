@@ -772,6 +772,10 @@ public:
         return FieldRef::fromRaw(0);
     }
 
+    static FieldRef StubField() {
+        return FieldRef::fromRaw(1);
+    }
+
     static TypeArgumentRef noTypeArgument() {
         return TypeArgumentRef::fromRaw(0);
     }
@@ -780,8 +784,12 @@ public:
         return TypeMemberRef::fromRaw(0);
     }
 
+    static TypeMemberRef StubTypeMember() {
+        return TypeMemberRef::fromRaw(4);
+    }
+
     static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
-        return MethodRef::fromRaw(1);
+        return MethodRef::fromRaw(2);
     }
 
     static TypeArgumentRef
@@ -803,11 +811,11 @@ public:
     }
 
     static FieldRef Magic_undeclaredFieldStub() {
-        return FieldRef::fromRaw(1);
+        return FieldRef::fromRaw(2);
     }
 
     static MethodRef Sorbet_Private_Static_badAliasMethodStub() {
-        return MethodRef::fromRaw(2);
+        return MethodRef::fromRaw(3);
     }
 
     static ClassOrModuleRef T_Helpers() {
@@ -859,7 +867,7 @@ public:
     }
 
     static MethodRef sig() {
-        return MethodRef::fromRaw(3);
+        return MethodRef::fromRaw(4);
     }
 
     static ClassOrModuleRef Enumerator_Lazy() {
@@ -891,7 +899,7 @@ public:
     }
 
     static MethodRef sigWithoutRuntime() {
-        return MethodRef::fromRaw(4);
+        return MethodRef::fromRaw(5);
     }
 
     static ClassOrModuleRef T_NonForcingConstants() {
@@ -899,7 +907,7 @@ public:
     }
 
     static MethodRef SorbetPrivateStaticSingleton_sig() {
-        return MethodRef::fromRaw(5);
+        return MethodRef::fromRaw(6);
     }
 
     static ClassOrModuleRef PackageRegistry() {
@@ -919,23 +927,23 @@ public:
     }
 
     static MethodRef PackageSpec_import() {
-        return MethodRef::fromRaw(6);
-    }
-
-    static MethodRef PackageSpec_test_import() {
         return MethodRef::fromRaw(7);
     }
 
-    static MethodRef PackageSpec_export() {
+    static MethodRef PackageSpec_test_import() {
         return MethodRef::fromRaw(8);
     }
 
-    static MethodRef PackageSpec_export_for_test() {
+    static MethodRef PackageSpec_export() {
         return MethodRef::fromRaw(9);
     }
 
-    static MethodRef PackageSpec_restrict_to_service() {
+    static MethodRef PackageSpec_export_for_test() {
         return MethodRef::fromRaw(10);
+    }
+
+    static MethodRef PackageSpec_restrict_to_service() {
+        return MethodRef::fromRaw(11);
     }
 
     static ClassOrModuleRef Encoding() {
@@ -947,11 +955,15 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(11);
+        return MethodRef::fromRaw(12);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(12);
+        return MethodRef::fromRaw(13);
+    }
+
+    static MethodRef StubMethod() {
+        return MethodRef::fromRaw(1);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
@@ -993,10 +1005,10 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 203;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 44;
-    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 45;
+    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 5;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 100;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 101;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
