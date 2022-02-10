@@ -343,11 +343,16 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                 lastSourceLineNum = lineNum;
             }
 
+            string assertionType = matches[3].str();
+            string assertionContents = matches[4].str();
+
             unique_ptr<Range> range;
             if (numCarets > 0) {
                 int caretBeginPos = textBeforeComment.size() + matches[1].str().size();
                 int caretEndPos = caretBeginPos + numCarets;
                 range = RangeAssertion::makeRange(lastSourceLineNum, caretBeginPos, caretEndPos);
+            } else if (assertionContents == "unexpected token tNL") {
+                range = RangeAssertion::makeRange(lineNum);
             } else {
                 range = RangeAssertion::makeRange(lastSourceLineNum);
             }
@@ -357,9 +362,6 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                 // next line could point to code on this line.
                 lastSourceLineNum = lineNum;
             }
-
-            string assertionType = matches[3].str();
-            string assertionContents = matches[4].str();
 
             const auto &findConstructor = assertionConstructors.find(assertionType);
             if (findConstructor != assertionConstructors.end()) {
