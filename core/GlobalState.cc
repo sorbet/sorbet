@@ -299,7 +299,7 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::StubModule(), core::Names::Constants::StubField());
     ENFORCE(field == Symbols::StubField());
 
-    typeMember = enterTypeMember(Loc::none(), Symbols::StubModule(), core::Names::Constants::StubTypeMember(),
+    typeMember = enterTypeMember(Loc::none(), Symbols::noClassOrModule(), core::Names::Constants::StubTypeMember(),
                                  Variance::CoVariant);
     ENFORCE(typeMember == Symbols::StubTypeMember());
 
@@ -929,7 +929,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     uint32_t flags;
-    ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember() || name == Names::Constants::StubTypeMember());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
