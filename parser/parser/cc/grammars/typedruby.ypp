@@ -2468,6 +2468,17 @@ opt_block_args_tail:
                       $$ = driver.build.args(self, $1, params, $4, true);
                       DIAGCHECK();
                     }
+                | tPIPE error
+                    {
+                      driver.numparam_stack.set_ordinary_params();
+                      driver.current_arg_stack.set("");
+                      $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
+                      if (@1.lineStart < yyla.location.lineStart) {
+                        auto newline_s = yyla.location.lineStart - 1;
+                        driver.rewind_and_reset(newline_s);
+                        driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnmatchedBlockArgs, $1);
+                      }
+                    }
 
      opt_bv_decl: opt_nl
                     {

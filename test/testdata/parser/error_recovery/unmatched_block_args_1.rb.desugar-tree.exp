@@ -1,0 +1,89 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Opus>::<C Log><<C <todo sym>>> < ()
+    def self.info<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def test_no_args<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <emptyTree>::<C Opus>::<C Log>.info()
+        end
+      end
+    end
+
+    def test_one_arg<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          x = nil
+        end
+        1.times() do ||
+          <emptyTree>::<C Opus>::<C Log>.info()
+        end
+      end
+    end
+
+    def test_one_arg_comma<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <emptyTree>::<C Opus>::<C Log>.info()
+        end
+      end
+    end
+
+    def test_two_args<<todo method>>(&<blk>)
+      begin
+        1.times() do ||
+          <emptyTree>
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          <self>.puts("hello")
+        end
+        1.times() do ||
+          x = nil
+        end
+        1.times() do ||
+          <emptyTree>::<C Opus>::<C Log>.info()
+        end
+      end
+    end
+  end
+end

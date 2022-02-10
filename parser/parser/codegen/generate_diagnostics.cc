@@ -64,6 +64,7 @@ tuple<string, string> MESSAGES[] = {
     {"PatternDuplicateVariable", "duplicate variable name {}"},
     {"PatternDuplicateKey", "duplicate hash pattern key {}"},
     {"PositionalAfterKeyword", "positional arg \\\"{}\\\" after keyword arg"},
+    {"UnmatchedBlockArgs", "unmatched \\\"|\\\" in block argument list"},
     {"IfInsteadOfItForTest", "Unexpected token \\\"if\\\"; did you mean \\\"it\\\"?"},
     {"MissingCommaBetweenKwargs", "missing \\\",\\\" between keyword args"},
     {"MissingOperatorArg", "missing arg to {} operator"},
