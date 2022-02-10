@@ -1,4 +1,4 @@
 # typed: true
 
 a ? b ~ '': nil
-#     ^ error: unexpected token "~"
+#     ^ error: missing arg to "~" operator
