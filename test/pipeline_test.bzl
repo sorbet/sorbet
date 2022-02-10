@@ -87,7 +87,7 @@ end_to_end_rbi_test = rule(
             default = "//test:single_package_runner",
             executable = True,
         ),
-    }
+    },
 )
 
 def single_package_rbi_test(name, rb_files):
