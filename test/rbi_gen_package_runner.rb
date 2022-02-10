@@ -141,22 +141,22 @@ module Runner
   end
 
   sig {params(sorbet: String, root: String, test_directory: String,
-              files: T::Set[String], rbi_package_dir: String,
+              required_files: T::Set[String], rbi_package_dir: String,
               rbi_files: T::Set[String]).void}
   def self.verify_single_package_typechecking(
-        sorbet, root, test_directory, files,
+        sorbet, root, test_directory, required_files,
         rbi_package_dir, rbi_files)
     Dir.mktmpdir do |tmpdir|
       # Copy the package's Ruby files to the tmpdir, mirroring the directory
       # structure.
-      dirnames = files.map {|f| File.dirname(f)}.uniq
+      dirnames = required_files.map {|f| File.dirname(f)}.uniq
       dirnames.each do |dirname|
         target = File.join(tmpdir, dirname)
         FileUtils.mkdir_p(target)
       end
 
       Dir.chdir(root) do |root|
-        files.each do |f|
+        required_files.each do |f|
           dirname = File.dirname(f)
           target = File.join(tmpdir, dirname)
           FileUtils.cp(f, target)
