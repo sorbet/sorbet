@@ -64,7 +64,7 @@ TODO(jez) compiler internals
 ## Running Sorbet Ruby and the Sorbet Compiler
 
 For a more complete walk through, see
-[docs/running-compiled-code.md](docs/running-compiled-code.md).
+[docs/running-compiled-code.md](/docs/running-compiled-code.md).
 
 There's a fair amount of set up before you can run Sorbet Ruby on a file or load
 a compiled Ruby file:
