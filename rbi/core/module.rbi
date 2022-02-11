@@ -212,7 +212,7 @@ class Module < Object
         new_name: Symbol,
         old_name: Symbol,
     )
-    .returns(T.self_type)
+    .returns(Symbol)
   end
   def alias_method(new_name, old_name); end
 
