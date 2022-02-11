@@ -455,6 +455,7 @@ int realmain(int argc, char *argv[]) {
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
+    UnorderedSet<core::ClassOrModuleRef> packageNamespaces;
 
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
@@ -542,6 +543,51 @@ int realmain(int argc, char *argv[]) {
         }
 
         { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
+
+        if (!opts.packageRBIOutput.empty()) {
+#ifdef SORBET_REALMAIN_MIN
+            logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
+            return 1;
+#else
+            if (opts.stripePackages) {
+                logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
+                return 1;
+            }
+
+            if (opts.rawInputDirNames.size() != 1) {
+                logger->error("Serializing package RBIs requires one input folder.");
+                return 1;
+            }
+
+            if (!FileOps::dirExists(opts.packageRBIOutput)) {
+                logger->error("Directory {} for serialized package RBIs does not exist.", opts.packageRBIOutput);
+                return 1;
+            }
+
+            auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
+            auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
+            if (it != relativeIgnorePatterns.end()) {
+                relativeIgnorePatterns.erase(it);
+            } else {
+                Exception::raise("Couldn't find ignore pattern.");
+            }
+            auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
+                                                        opts.absoluteIgnorePatterns, relativeIgnorePatterns);
+            packageFiles.erase(
+                remove_if(packageFiles.begin(), packageFiles.end(),
+                          [](const auto &packageFile) { return !absl::EndsWith(packageFile, "__package.rb"); }),
+                packageFiles.end());
+
+            if (packageFiles.empty()) {
+                logger->error("No package files found!");
+                return 1;
+            }
+
+            auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
+            auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
+            packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, packages, *workers);
+#endif
+        }
 
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
@@ -691,43 +737,7 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-            if (opts.stripePackages) {
-                logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
-                return 1;
-            }
-
-            if (opts.rawInputDirNames.size() != 1) {
-                logger->error("Serializing package RBIs requires one input folder.");
-                return 1;
-            }
-
-            if (!FileOps::dirExists(opts.packageRBIOutput)) {
-                logger->error("Directory {} for serialized package RBIs does not exist.", opts.packageRBIOutput);
-                return 1;
-            }
-
-            auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
-            auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
-            if (it != relativeIgnorePatterns.end()) {
-                relativeIgnorePatterns.erase(it);
-            } else {
-                Exception::raise("Couldn't find ignore pattern.");
-            }
-            auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
-                                                        opts.absoluteIgnorePatterns, relativeIgnorePatterns);
-            packageFiles.erase(
-                remove_if(packageFiles.begin(), packageFiles.end(),
-                          [](const auto &packageFile) { return !absl::EndsWith(packageFile, "__package.rb"); }),
-                packageFiles.end());
-
-            if (packageFiles.empty()) {
-                logger->error("No package files found!");
-                return 1;
-            }
-
-            auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
-            auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
-            packager::RBIGenerator::run(*gs, move(packages), opts.packageRBIOutput, *workers);
+            packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIOutput, *workers);
 #endif
         }
 

@@ -1257,10 +1257,9 @@ RBIGenerator::RBIOutput RBIGenerator::runOnce(const core::GlobalState &gs, core:
     return exporter.emit();
 }
 
-void RBIGenerator::run(core::GlobalState &gs, vector<ast::ParsedFile> packageFiles, string outputDir,
-                       WorkerPool &workers) {
+void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
+                       string outputDir, WorkerPool &workers) {
     absl::BlockingCounter threadBarrier(std::max(workers.size(), 1));
-    UnorderedSet<core::ClassOrModuleRef> packageNamespaces = buildPackageNamespace(gs, packageFiles, workers);
 
     const auto &packageDB = gs.packageDB();
     auto &packages = packageDB.packages();

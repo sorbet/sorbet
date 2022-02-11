@@ -24,8 +24,8 @@ public:
     static RBIOutput runOnce(const core::GlobalState &gs, core::NameRef pkg,
                              const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces);
 
-    static void run(core::GlobalState &gs, std::vector<ast::ParsedFile> packageFiles, std::string outputDir,
-                    WorkerPool &workers);
+    static void run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamspaces,
+                    std::string outputDir, WorkerPool &workers);
 };
 } // namespace sorbet::packager
 
