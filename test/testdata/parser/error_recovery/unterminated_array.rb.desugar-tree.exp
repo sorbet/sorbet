@@ -1,0 +1,36 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def f<<todo method>>(&<blk>)
+      [<emptyTree>::<C <ErrorNode>>]
+    end
+
+    def g<<todo method>>(&<blk>)
+      []
+    end
+
+    def h<<todo method>>(&<blk>)
+      <self>.puts("ho")
+    end
+  end
+
+  class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
+    def q<<todo method>>(&<blk>)
+      begin
+        <self>.puts("ho")
+        []
+      end
+    end
+
+    def r<<todo method>>(&<blk>)
+      <self>.puts("hi")
+    end
+
+    def s<<todo method>>(&<blk>)
+      <self>.puts([].+([]))
+    end
+
+    def t<<todo method>>(&<blk>)
+      <self>.puts("hi")
+    end
+  end
+end
