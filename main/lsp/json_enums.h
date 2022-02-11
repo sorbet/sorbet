@@ -18,6 +18,7 @@ enum class LSPErrorCodes {
 
     // Defined by the LSP
     RequestCancelled = -32800,
+    RequestFailed = -32803,
 };
 
 // Is not an enum, but is as simple as one. Putting it here reduces dependencies on json_types.h.
