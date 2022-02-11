@@ -13,16 +13,36 @@ base_driver::base_driver(ruby_version version, std::string_view source, sorbet::
       ast(nullptr), indentationAware(indentationAware) {}
 
 const char *const base_driver::token_name(token_type type) {
-    // We have two tokens matching `..` and `...`. Bison won't let us specify the same
-    // human-readable string for both of them (because bison lets you use those names like ".."
-    // directly in the productcion rules, which would lead to ambiguity).
+    // We have several tokens that have the same human-readable string, but Bison won't
+    // let us specify the same human-readable string for both of them (because bison
+    // lets you use those names like ".." directory in production rules, which would
+    // lead to ambiguity.
     //
-    // This hack allows to display the real token string instead of tBDOT2/tBDOT3 in parsing errors.
+    // Instead, we have this translation layer, which intercepts certain tokens and
+    // displays their proper human-readable string.
     switch (type) {
         case token_type::tBDOT2:
             return "\"..\"";
         case token_type::tBDOT3:
             return "\"...\"";
+        case token_type::tBACK_REF:
+            return "\"`\"";
+        case token_type::tAMPER2:
+            return "\"&\"";
+        case token_type::tSTAR2:
+            return "\"*\"";
+        case token_type::tLBRACK2:
+            return "\"[\"";
+        case token_type::tLPAREN2:
+            return "\"(\"";
+        case token_type::tCOLON3:
+            return "\"::\"";
+        case token_type::tPOW:
+            return "\"**\"";
+        case token_type::tUPLUS:
+            return "\"unary +\"";
+        case token_type::tUMINUS:
+            return "\"unary -\"";
         default:
             return this->yytname[this->yytranslate(static_cast<int>(type))];
     }
