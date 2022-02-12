@@ -10,7 +10,6 @@ class WorkerPool;
 }
 
 namespace sorbet::autogen {
-
 // Contains same information as `realmain::options::AutoloaderConfig` except with `core::NameRef`s
 // instead of strings.
 struct AutoloaderConfig {
@@ -95,6 +94,7 @@ public:
     std::string fullName(const core::GlobalState &) const;
 
     std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &) const;
+    std::string renderBazel(const core::GlobalState &gs, const AutoloaderConfig &) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;

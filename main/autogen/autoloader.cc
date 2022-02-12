@@ -247,6 +247,58 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     return to_string(buf);
 }
 
+string DefTree::renderBazel(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
+    fmt::memory_buffer buf;
+
+    // Top level
+    fmt::format_to(std::back_inserter(buf), "{}\n", "filegroup(");
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  name=\"toplevel\",");
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  srcs=[");
+
+    for (auto &[cnr, child] : children) {
+        fmt::format_to(std::back_inserter(buf), "    \"{}.rb\",\n", cnr.show(gs));
+    }
+
+    if (root()) {
+        fmt::format_to(std::back_inserter(buf), "    \"{}.rb\",\n", "root");
+    }
+
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  ],");
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  visibility = [\"//visibility:public\"],");
+    fmt::format_to(std::back_inserter(buf), "{}\n", ")");
+
+    // Full outputs
+    fmt::format_to(std::back_inserter(buf), "{}\n", "filegroup(");
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  name=\"outs\",");
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  srcs=[");
+
+    for (auto &[cnr, child] : children) {
+        auto childName = fmt::format("{}", fmt::map_join(child->qname.nameParts, "/", [&](const auto &nr) -> string {
+                                            return nr.show(gs);
+                                        }));
+        auto childFullName = fmt::format("{}/{}/{}", "build", alCfg.rootDir, childName);
+
+        if (!(child->children.empty())) {
+            fmt::format_to(std::back_inserter(buf), "    \"//{}:outs\",\n", childFullName);
+        }
+    }
+
+    if (!root()) {
+        auto fullName = fmt::format("{}", fmt::map_join(qname.nameParts, "/", [&](const auto &nr) -> string {
+                                            return nr.show(gs);
+                                      }));
+        fmt::format_to(std::back_inserter(buf), "    \"//{}/{}/{}:toplevel\",\n", "build", alCfg.rootDir, fullName);
+    } else {
+        fmt::format_to(std::back_inserter(buf), "    \"//{}/{}:toplevel\",\n", "build", alCfg.rootDir);
+    }
+
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  ],");
+    fmt::format_to(std::back_inserter(buf), "{}\n", "  visibility = [\"//visibility:public\"],");
+    fmt::format_to(std::back_inserter(buf), "{}\n", ")");
+
+    return to_string(buf);
+}
+
 void DefTree::requireStatements(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
                                 fmt::memory_buffer &buf) const {
     if (root() || !hasDef()) {
@@ -427,11 +479,17 @@ struct RenderAutoloadTask {
     const DefTree &node;
 };
 
+struct RenderBazelTask {
+    string bazelFilePath;
+    const DefTree &node;
+};
+
 // This function has two duties:
 // * It creates autoload rendering tasks which will occur in a later parallel phase.
 // * It creates subdirectories when needed, as they are required to write the autoloader output.
 void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vector<RenderAutoloadTask> &tasks,
-                                               const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
+    vector<RenderBazelTask> &bazelTasks, 
+    const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
     if (!alCfg.packagedAutoloader || !node.root()) {
@@ -442,6 +500,10 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
         if (!node.root()) {
             FileOps::ensureDir(subdir);
         }
+
+        string bazelFilePath = join(subdir, "BUILD.bazel");
+        bazelTasks.emplace_back(RenderBazelTask{bazelFilePath, node});
+
         for (auto &[_, child] : node.children) {
             if (alCfg.packagedAutoloader && node.root()) {
                 // in a packaged context, we want to make sure that these constants are also put in their packages
@@ -456,33 +518,16 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                 string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
                 auto pkgSubdir = join(subdir, packageName);
                 FileOps::ensureDir(pkgSubdir);
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, bazelTasks, alCfg, pkgSubdir, *child);
             } else {
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, bazelTasks, alCfg, subdir, *child);
             }
         }
     }
 }
 }; // namespace
 
-void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
-                                    const std::string &path, const DefTree &root) {
-    vector<RenderAutoloadTask> tasks;
-    populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
-
-    if (FileOps::exists(path)) {
-        // Clear out files that we do not plan to write.
-        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
-        UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
-                                              make_move_iterator(existingFiles.end()));
-        for (auto &task : tasks) {
-            existingFilesSet.erase(task.filePath);
-        }
-        for (const auto &file : existingFilesSet) {
-            FileOps::removeFile(file);
-        }
-    }
-
+void runAutoloadWriteTasks(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg, vector<RenderAutoloadTask> &tasks) {
     // Parallelize writing the files.
     auto inputq = make_shared<ConcurrentBoundedQueue<int>>(tasks.size());
     auto outputq = make_shared<BlockingBoundedQueue<CounterState>>(tasks.size());
@@ -514,6 +559,73 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         }
         counterConsume(move(out));
     }
+}
+
+void runBazelWriteTasks(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg, vector<RenderBazelTask> &tasks) {
+    // Parallelize writing the files.
+    auto inputq = make_shared<ConcurrentBoundedQueue<int>>(tasks.size());
+    auto outputq = make_shared<BlockingBoundedQueue<CounterState>>(tasks.size());
+    for (int i = 0; i < tasks.size(); ++i) {
+        inputq->push(i, 1);
+    }
+
+    workers.multiplexJob("runAutogenWriteBazelsAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
+        int n = 0;
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
+            int idx = 0;
+
+            for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
+                ++n;
+                auto &task = tasks[idx];
+                FileOps::writeIfDifferent(task.bazelFilePath, task.node.renderBazel(gs, alCfg));
+            }
+        }
+
+        outputq->push(getAndClearThreadCounters(), n);
+    });
+
+    CounterState out;
+    for (auto res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !res.done();
+         res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+        if (!res.gotItem()) {
+            continue;
+        }
+        counterConsume(move(out));
+    }
+}
+
+void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
+                                    const std::string &path, const DefTree &root) {
+    vector<RenderAutoloadTask> tasks;
+    vector<RenderBazelTask> bazelTasks;
+    populateAutoloadTasksAndCreateDirectories(gs, tasks, bazelTasks, alCfg, path, root);
+
+    if (FileOps::exists(path)) {
+        // Clear out files that we do not plan to write.
+        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
+        UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
+                                              make_move_iterator(existingFiles.end()));
+        for (auto &task : tasks) {
+            existingFilesSet.erase(task.filePath);
+        }
+        for (const auto &file : existingFilesSet) {
+            FileOps::removeFile(file);
+        }
+
+        vector<string> existingBazelFiles = FileOps::listFilesInDir(path, {".bazel"}, true, {}, {});
+        UnorderedSet<string> existingBazelFilesSet(make_move_iterator(existingBazelFiles.begin()),
+                                              make_move_iterator(existingBazelFiles.end()));
+        for (auto &bazelTask : bazelTasks) {
+            existingBazelFilesSet.erase(bazelTask.bazelFilePath);
+        }
+        for (const auto &bazelFile : existingBazelFilesSet) {
+            FileOps::removeFile(bazelFile);
+        }
+    }
+
+    runAutoloadWriteTasks(gs, workers, alCfg, tasks);
+    runBazelWriteTasks(gs, workers, alCfg, bazelTasks);
 }
 
 namespace {
