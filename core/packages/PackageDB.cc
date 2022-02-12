@@ -138,7 +138,7 @@ NameRef PackageDB::lookupPackage(NameRef pkgMangledName) const {
 
 const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
-    auto &fileData = file.data(gs);
+    auto &fileData = file.dataAllowingUnsafe(gs);
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
