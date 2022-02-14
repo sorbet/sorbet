@@ -252,7 +252,7 @@ LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_v
 
     if (!fref.exists() && config.isFileIgnored(config.remoteName2Local(uri))) {
         auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::RequestFailed,
+            (int)LSPErrorCodes::InvalidParams,
             fmt::format("Ignored file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
         return LSPQueryResult{{}, move(error)};
     }
