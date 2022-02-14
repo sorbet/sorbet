@@ -138,7 +138,14 @@ NameRef PackageDB::lookupPackage(NameRef pkgMangledName) const {
 
 const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
-    auto &fileData = file.data(gs);
+
+    // Note about safety: we're only using the file data for two pieces of information: the file path and the
+    // sourceType. The path is present even on unloaded files, and the sourceType we're interested in is `Package`,
+    // which will have been loaded by a previous step for the packageDB to be valid.
+    //
+    // See https://github.com/sorbet/sorbet/pull/5291 for more information.
+    auto &fileData = file.dataAllowingUnsafe(gs);
+
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
