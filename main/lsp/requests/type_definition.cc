@@ -40,6 +40,43 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
             for (auto loc : locsForType(gs, t.right)) {
                 result.emplace_back(loc);
             }
+        },
+        [&](const core::SelfTypeParam &s) {
+            for (auto loc : s.definition.locs(gs)) {
+                result.emplace_back(loc);
+            }
+        },
+        [&](const core::LambdaParam &l) {
+            for (auto loc : l.definition.data(gs)->locs()) {
+                result.emplace_back(loc);
+            }
+        },
+        [&](const core::LiteralType &_) {
+            // nothing
+        },
+        [&](const core::ShapeType &_) {
+            // nothing
+        },
+        [&](const core::TupleType &_) {
+            // nothing
+        },
+        [&](const core::MetaType &_) {
+            // nothing
+        },
+        [&](const core::AliasType &a) {
+            ENFORCE(false, "Please add a test case for this test, and delete this enforce.");
+            for (auto loc : a.symbol.locs(gs)) {
+                result.emplace_back(loc);
+            }
+        },
+        [&](const core::SelfType &_) {
+            ENFORCE(false, "Please add a test case for this test, and delete this enforce.");
+        },
+        [&](const core::TypeVar &s) {
+            ENFORCE(false, "Please add a test case for this test, and delete this enforce.");
+        },
+        [&](const core::TypePtr &t) {
+            Exception::raise("Unhandled case in textDocument/typeDefinition: {}", core::TypePtr::tagToString(t.tag()));
         });
     return result;
 }
