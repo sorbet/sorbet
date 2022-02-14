@@ -39,10 +39,10 @@ class A
       puts 'hello'
     end
     puts(4 * 4)
-    puts(4 * ) # error: missing arg to tSTAR2 operator
-    if 4 * # error: missing arg to tSTAR2 operator
+    puts(4 * ) # error: missing arg to "*" operator
+    if 4 * # error: missing arg to "*" operator
     end
-    if 4 * # error: missing arg to tSTAR2 operator
+    if 4 * # error: missing arg to "*" operator
       puts 'hello'
     end
     puts(5 / 5)
@@ -60,38 +60,38 @@ class A
       puts 'hello'
     end
     puts(7 ** 7)
-    puts(7 ** ) # error: missing arg to tPOW operator
-    if 7 ** # error: missing arg to tPOW operator
+    puts(7 ** ) # error: missing arg to "**" operator
+    if 7 ** # error: missing arg to "**" operator
     end
-    if 7 ** # error: missing arg to tPOW operator
+    if 7 ** # error: missing arg to "**" operator
       puts 'hello'
     end
     puts(-8 ** 8)
-    puts(-8 ** ) # error: missing arg to tPOW operator
-    if -8 ** # error: missing arg to tPOW operator
+    puts(-8 ** ) # error: missing arg to "**" operator
+    if -8 ** # error: missing arg to "**" operator
     end
-    if -8 ** # error: missing arg to tPOW operator
+    if -8 ** # error: missing arg to "**" operator
       puts 'hello'
     end
     puts(+9 ** 9)
-    puts(+9 ** ) # error: missing arg to tPOW operator
-    if +9 ** # error: missing arg to tPOW operator
+    puts(+9 ** ) # error: missing arg to "**" operator
+    if +9 ** # error: missing arg to "**" operator
     end
-    if +9 ** # error: missing arg to tPOW operator
+    if +9 ** # error: missing arg to "**" operator
       puts 'hello'
     end
     puts(-10)
-    puts(-) # error: missing arg to tUMINUS operator
-    if - # error: missing arg to tUMINUS operator
+    puts(-) # error: missing arg to "-" operator
+    if - # error: missing arg to "-" operator
     end
-    if - # error: missing arg to tUMINUS operator
+    if - # error: missing arg to "-" operator
       puts 'hello'
     end
     puts(+10)
-    puts(+) # error: missing arg to tUPLUS operator
-    if + # error: missing arg to tUPLUS operator
+    puts(+) # error: missing arg to "+" operator
+    if + # error: missing arg to "+" operator
     end
-    if + # error: missing arg to tUPLUS operator
+    if + # error: missing arg to "+" operator
       puts 'hello'
     end
     puts(10 | 10)
@@ -109,10 +109,10 @@ class A
       puts 'hello'
     end
     puts(12 & 12)
-    puts(12 & ) # error: missing arg to tAMPER2 operator
-    if 12 & # error: missing arg to tAMPER2 operator
+    puts(12 & ) # error: missing arg to "&" operator
+    if 12 & # error: missing arg to "&" operator
     end
-    if 12 & # error: missing arg to tAMPER2 operator
+    if 12 & # error: missing arg to "&" operator
       puts 'hello'
     end
     puts(13 <=> 13)

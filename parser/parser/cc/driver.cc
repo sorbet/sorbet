@@ -19,6 +19,46 @@ const char *const base_driver::token_name(token_type type) {
     //
     // This hack allows to display the real token string instead of tBDOT2/tBDOT3 in parsing errors.
     switch (type) {
+        case token_type::kDO_COND:
+            return "\"do\"";
+        case token_type::kDO_BLOCK:
+            return "\"do\"";
+        case token_type::kDO_LAMBDA:
+            return "\"do\"";
+        case token_type::kIF_MOD:
+            return "\"if\"";
+        case token_type::kUNLESS_MOD:
+            return "\"unless\"";
+        case token_type::kWHILE_MOD:
+            return "\"while\"";
+        case token_type::kUNTIL_MOD:
+            return "\"until\"";
+        case token_type::kRESCUE_MOD:
+            return "\"rescue\"";
+        case token_type::tPOW:
+            return "\"**\"";
+        case token_type::tCOLON3:
+            return "\"::\"";
+        case token_type::tLPAREN2:
+            return "\"(\"";
+        case token_type::tLPAREN_ARG:
+            return "\"(\"";
+        case token_type::tLBRACK2:
+            return "\"[\"";
+        case token_type::tLBRACE_ARG:
+            return "\"{\"";
+        case token_type::tSTAR2:
+            return "\"*\"";
+        case token_type::tAMPER2:
+            return "\"&\"";
+        case token_type::tLCURLY:
+            return "\"{\"";
+        case token_type::tRCURLY:
+            return "\"}\"";
+        case token_type::tUMINUS:
+            return "\"-\"";
+        case token_type::tUPLUS:
+            return "\"+\"";
         case token_type::tBDOT2:
             return "\"..\"";
         case token_type::tBDOT3:
