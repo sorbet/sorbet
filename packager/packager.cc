@@ -1846,35 +1846,37 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
-            if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
-                if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
-                    // if the `__package.rb` file is at `typed:
-                    // ignore`, then we haven't even parsed it, which
-                    // means none of the other stuff here is going to
-                    // actually work (since it all assumes we've got a
-                    // file to actually analyze.) If we've got a
-                    // `typed: ignore` package, then skip it.
-                    continue;
-                }
+            if (FileOps::getFileName(file.file.data(gs).path()) != PACKAGE_FILE_NAME) {
+                continue;
+            }
 
-                file.file.data(gs).sourceType = core::File::Type::Package;
-                core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
-                if (pkg == nullptr) {
-                    // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
-                    // surfaced that error to the user. Nothing to do here.
-                    continue;
+            if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                // if the `__package.rb` file is at `typed:
+                // ignore`, then we haven't even parsed it, which
+                // means none of the other stuff here is going to
+                // actually work (since it all assumes we've got a
+                // file to actually analyze.) If we've got a
+                // `typed: ignore` package, then skip it.
+                continue;
+            }
+
+            file.file.data(gs).sourceType = core::File::Type::Package;
+            core::MutableContext ctx(gs, core::Symbols::root(), file.file);
+            auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+            if (pkg == nullptr) {
+                // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
+                // surfaced that error to the user. Nothing to do here.
+                continue;
+            }
+            auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
+            if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
+                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
+                    auto pkgName = pkg->name.toString(ctx);
+                    e.setHeader("Redefinition of package `{}`", pkgName);
+                    e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
                 }
-                auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
-                if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
-                    if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                        auto pkgName = pkg->name.toString(ctx);
-                        e.setHeader("Redefinition of package `{}`", pkgName);
-                        e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
-                    }
-                } else {
-                    packages.db.enterPackage(move(pkg));
-                }
+            } else {
+                packages.db.enterPackage(move(pkg));
             }
         }
     }
