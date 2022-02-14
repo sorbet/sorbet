@@ -1280,7 +1280,7 @@ struct PackageInfoFinder {
 unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package,
                                            const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
+    ENFORCE(package.file.data(ctx).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
     // for `typed: ignore` files, so we should make sure to catch that
     // elsewhere.)
@@ -1794,7 +1794,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFile) {
     auto &file = parsedFile.file.data(ctx);
-    ENFORCE(file.sourceType != core::File::Type::Package);
+    ENFORCE(!file.isPackage());
     auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (pkg.exists()) {
         auto &pkgImpl = PackageInfoImpl::from(pkg);
@@ -1859,7 +1859,6 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
                 continue;
             }
 
-            file.file.data(gs).sourceType = core::File::Type::Package;
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
             auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
             if (pkg == nullptr) {
@@ -1918,10 +1917,10 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     auto &file = job.file.data(gs);
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
-                    if (file.sourceType == core::File::Type::Normal) {
-                        job = rewritePackagedFile(ctx, move(job));
-                    } else if (file.sourceType == core::File::Type::Package) {
+                    if (file.isPackage()) {
                         job = rewritePackage(ctx, move(job));
+                    } else {
+                        job = rewritePackagedFile(ctx, move(job));
                     }
                     results.emplace_back(move(job));
                 }

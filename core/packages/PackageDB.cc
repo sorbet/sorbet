@@ -156,7 +156,7 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
             return pkg;
         }
 
-        if (fileData.sourceType == core::File::Type::Package) {
+        if (fileData.isPackage()) {
             // When looking up a `__package.rb` file do not search parent directories
             break;
         }

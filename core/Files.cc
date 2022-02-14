@@ -174,8 +174,18 @@ bool isPackageRBIPath(string_view path) {
     return absl::EndsWith(path, ".package.rbi");
 }
 
+bool isPackagePath(string_view path) {
+    auto pos = path.rfind("/");
+    if (pos != string_view::npos) {
+        path = path.substr(pos + 1);
+    }
+
+    return path == "__package.rb";
+}
+
 File::Flags::Flags(string_view path)
-    : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)) {}
+    : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
+      isPackage(isPackagePath(path)) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(File::Flags(path_)), path_(move(path_)), source_(move(source_)),
@@ -258,7 +268,7 @@ bool File::isStdlib() const {
 }
 
 bool File::isPackage() const {
-    return sourceType == File::Type::Package;
+    return flags.isPackage;
 }
 
 vector<int> &File::lineBreaks() const {

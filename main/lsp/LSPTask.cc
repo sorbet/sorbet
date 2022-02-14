@@ -293,8 +293,8 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
         const auto &usedSymbolNames = hash.usages.symbols;
         auto ref = core::FileRef(i);
 
-        const bool fileIsValid = ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal ||
-                                                  ref.data(gs).sourceType == core::File::Type::Package);
+        const bool fileIsValid =
+            ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal || ref.data(gs).isPackage());
         if (fileIsValid &&
             (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
              std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symNameHash) != usedSymbolNames.end())) {
