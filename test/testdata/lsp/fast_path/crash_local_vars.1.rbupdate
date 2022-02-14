@@ -1,0 +1,10 @@
+# typed: strict
+
+class Outer
+  describe 'client' do
+    class Inner <
+    it 'foo' do
+      1.times {|x| puts(x)}
+    end
+  end
+end
