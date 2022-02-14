@@ -1567,66 +1567,69 @@ private:
             parts.pop_back();
         }
 
-        if (source.exists()) {
-            // If we do not need to map the given import for the given module type, return
-            if (source.skipBuildMappingFor(moduleType)) {
-                return;
-            }
-
-            const bool isFriendImport = source.isFriendImport();
-            // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
-            // begin with "Test::".
-            if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
-                return;
-            }
-
-            if (parentSrc.exists()) {
-                // A conflicting import exists. Only report errors while constructing the test output
-                // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
-                    addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
-                }
-
-                return;
-            }
-
-            if (moduleType != ModuleType::Private || source.isNormalImport()) {
-                // Construct a module containing an assignment for an imported name:
-                // For name `A::B::C::D` imported from package `A::B` construct:
-                // module A::B::C
-                //   D = <Mangled A::B>::A::B::C::D
-                // end
-                const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
-                auto assignRhs =
-                    prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
-
-                auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
-                                              std::move(assignRhs));
-
-                ast::ClassDef::RHS_store rhs;
-                rhs.emplace_back(std::move(assign));
-
-                // Use the loc from the import in the module name and declaration to get the
-                // following jump to definition behavior in the case of enumerated imports:
-                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to the import statement
-                //                               ^^^  jump to actual definition of `Baz` class
-                //
-                // In the case of un-enumerated imports, we don't use the loc at the import site,
-                // but effectively use the one from the export site (due to the export-mapping/public module).
-                // This results in the following behavior:
-                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
-                //                               ^^^  jump to actual definition of `Baz` class
-
-                // Ensure import's do not add duplicate loc-s in the test_module
-                const auto &moduleLoc = getModuleLoc(source, packageLoc);
-
-                auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
-                                           importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
-                modRhs.emplace_back(std::move(mod));
-            }
+        if (!source.exists()) {
+            return;
         }
+
+        // If we do not need to map the given import for the given module type, return
+        if (source.skipBuildMappingFor(moduleType)) {
+            return;
+        }
+
+        const bool isFriendImport = source.isFriendImport();
+        // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
+        // begin with "Test::".
+        if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
+            return;
+        }
+
+        if (parentSrc.exists()) {
+            // A conflicting import exists. Only report errors while constructing the test output
+            // to avoid duplicate errors because test imports are a superset of normal imports.
+            if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
+                addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
+            }
+
+            return;
+        }
+
+        if (moduleType == ModuleType::Private && !source.isNormalImport()) {
+            return;
+        }
+
+        // Construct a module containing an assignment for an imported name:
+        // For name `A::B::C::D` imported from package `A::B` construct:
+        // module A::B::C
+        //   D = <Mangled A::B>::A::B::C::D
+        // end
+        const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
+        auto assignRhs = prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
+
+        auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
+                                      std::move(assignRhs));
+
+        ast::ClassDef::RHS_store rhs;
+        rhs.emplace_back(std::move(assign));
+
+        // Use the loc from the import in the module name and declaration to get the
+        // following jump to definition behavior in the case of enumerated imports:
+        // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+        //                     ^^^^^^^^       jump to the import statement
+        //                               ^^^  jump to actual definition of `Baz` class
+        //
+        // In the case of un-enumerated imports, we don't use the loc at the import site,
+        // but effectively use the one from the export site (due to the export-mapping/public module).
+        // This results in the following behavior:
+        // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+        //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
+        //                               ^^^  jump to actual definition of `Baz` class
+
+        // Ensure import's do not add duplicate loc-s in the test_module
+        const auto &moduleLoc = getModuleLoc(source, packageLoc);
+
+        auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc, importModuleName(parts, moduleLoc, moduleType),
+                                   {}, std::move(rhs));
+        modRhs.emplace_back(std::move(mod));
     }
 
     const core::LocOffsets getModuleLoc(ImportTree::Source &source, const core::Loc *packageLoc) {
@@ -1842,35 +1845,37 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
-            if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
-                if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
-                    // if the `__package.rb` file is at `typed:
-                    // ignore`, then we haven't even parsed it, which
-                    // means none of the other stuff here is going to
-                    // actually work (since it all assumes we've got a
-                    // file to actually analyze.) If we've got a
-                    // `typed: ignore` package, then skip it.
-                    continue;
-                }
+            if (FileOps::getFileName(file.file.data(gs).path()) != PACKAGE_FILE_NAME) {
+                continue;
+            }
 
-                file.file.data(gs).sourceType = core::File::Type::Package;
-                core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
-                if (pkg == nullptr) {
-                    // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
-                    // surfaced that error to the user. Nothing to do here.
-                    continue;
+            if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                // if the `__package.rb` file is at `typed:
+                // ignore`, then we haven't even parsed it, which
+                // means none of the other stuff here is going to
+                // actually work (since it all assumes we've got a
+                // file to actually analyze.) If we've got a
+                // `typed: ignore` package, then skip it.
+                continue;
+            }
+
+            file.file.data(gs).sourceType = core::File::Type::Package;
+            core::MutableContext ctx(gs, core::Symbols::root(), file.file);
+            auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+            if (pkg == nullptr) {
+                // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
+                // surfaced that error to the user. Nothing to do here.
+                continue;
+            }
+            auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
+            if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
+                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
+                    auto pkgName = pkg->name.toString(ctx);
+                    e.setHeader("Redefinition of package `{}`", pkgName);
+                    e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
                 }
-                auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
-                if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
-                    if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                        auto pkgName = pkg->name.toString(ctx);
-                        e.setHeader("Redefinition of package `{}`", pkgName);
-                        e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
-                    }
-                } else {
-                    packages.db.enterPackage(move(pkg));
-                }
+            } else {
+                packages.db.enterPackage(move(pkg));
             }
         }
     }
