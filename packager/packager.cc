@@ -1603,8 +1603,7 @@ private:
         //   D = <Mangled A::B>::A::B::C::D
         // end
         const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
-        auto assignRhs =
-            prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
+        auto assignRhs = prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
 
         auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                       std::move(assignRhs));
@@ -1628,8 +1627,8 @@ private:
         // Ensure import's do not add duplicate loc-s in the test_module
         const auto &moduleLoc = getModuleLoc(source, packageLoc);
 
-        auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
-                                   importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
+        auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc, importModuleName(parts, moduleLoc, moduleType),
+                                   {}, std::move(rhs));
         modRhs.emplace_back(std::move(mod));
     }
 
