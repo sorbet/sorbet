@@ -271,6 +271,10 @@ bool File::isPackage() const {
     return flags.isPackage;
 }
 
+void File::setIsPackage(bool isPackage) {
+    this->flags.isPackage = isPackage;
+}
+
 vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);

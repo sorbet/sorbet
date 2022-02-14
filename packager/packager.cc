@@ -1856,6 +1856,11 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
                 // actually work (since it all assumes we've got a
                 // file to actually analyze.) If we've got a
                 // `typed: ignore` package, then skip it.
+
+                // `File::isPackage` is determined by the filename, so we need to clear it explicitly at this point
+                // to ensure that the file is no longer treated as a package.
+                file.file.data(gs).setIsPackage(false);
+
                 continue;
             }
 

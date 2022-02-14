@@ -88,8 +88,10 @@ public:
     bool isPayload() const;
     bool isRBI() const;
     bool isStdlib() const;
-    bool isPackage() const;
     bool isPackageRBI() const;
+
+    bool isPackage() const;
+    void setIsPackage(bool isPackage);
 
     // flag accessors
     bool isPackagedTest() const;
