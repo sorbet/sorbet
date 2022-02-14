@@ -1567,65 +1567,67 @@ private:
             parts.pop_back();
         }
 
-        if (source.exists()) {
-            // If we do not need to map the given import for the given module type, return
-            if (source.skipBuildMappingFor(moduleType)) {
-                return;
+        if (!source.exists()) {
+            return;
+        }
+
+        // If we do not need to map the given import for the given module type, return
+        if (source.skipBuildMappingFor(moduleType)) {
+            return;
+        }
+
+        const bool isFriendImport = source.isFriendImport();
+        // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
+        // begin with "Test::".
+        if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
+            return;
+        }
+
+        if (parentSrc.exists()) {
+            // A conflicting import exists. Only report errors while constructing the test output
+            // to avoid duplicate errors because test imports are a superset of normal imports.
+            if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
+                addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
             }
 
-            const bool isFriendImport = source.isFriendImport();
-            // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
-            // begin with "Test::".
-            if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
-                return;
-            }
+            return;
+        }
 
-            if (parentSrc.exists()) {
-                // A conflicting import exists. Only report errors while constructing the test output
-                // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
-                    addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
-                }
+        if (moduleType != ModuleType::Private || source.isNormalImport()) {
+            // Construct a module containing an assignment for an imported name:
+            // For name `A::B::C::D` imported from package `A::B` construct:
+            // module A::B::C
+            //   D = <Mangled A::B>::A::B::C::D
+            // end
+            const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
+            auto assignRhs =
+                prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
 
-                return;
-            }
+            auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
+                                          std::move(assignRhs));
 
-            if (moduleType != ModuleType::Private || source.isNormalImport()) {
-                // Construct a module containing an assignment for an imported name:
-                // For name `A::B::C::D` imported from package `A::B` construct:
-                // module A::B::C
-                //   D = <Mangled A::B>::A::B::C::D
-                // end
-                const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
-                auto assignRhs =
-                    prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
+            ast::ClassDef::RHS_store rhs;
+            rhs.emplace_back(std::move(assign));
 
-                auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
-                                              std::move(assignRhs));
+            // Use the loc from the import in the module name and declaration to get the
+            // following jump to definition behavior in the case of enumerated imports:
+            // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+            //                     ^^^^^^^^       jump to the import statement
+            //                               ^^^  jump to actual definition of `Baz` class
+            //
+            // In the case of un-enumerated imports, we don't use the loc at the import site,
+            // but effectively use the one from the export site (due to the export-mapping/public module).
+            // This results in the following behavior:
+            // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+            //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
+            //                               ^^^  jump to actual definition of `Baz` class
 
-                ast::ClassDef::RHS_store rhs;
-                rhs.emplace_back(std::move(assign));
+            // Ensure import's do not add duplicate loc-s in the test_module
+            const auto &moduleLoc = getModuleLoc(source, packageLoc);
 
-                // Use the loc from the import in the module name and declaration to get the
-                // following jump to definition behavior in the case of enumerated imports:
-                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to the import statement
-                //                               ^^^  jump to actual definition of `Baz` class
-                //
-                // In the case of un-enumerated imports, we don't use the loc at the import site,
-                // but effectively use the one from the export site (due to the export-mapping/public module).
-                // This results in the following behavior:
-                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
-                //                               ^^^  jump to actual definition of `Baz` class
-
-                // Ensure import's do not add duplicate loc-s in the test_module
-                const auto &moduleLoc = getModuleLoc(source, packageLoc);
-
-                auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
-                                           importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
-                modRhs.emplace_back(std::move(mod));
-            }
+            auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
+                                       importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
+            modRhs.emplace_back(std::move(mod));
         }
     }
 
