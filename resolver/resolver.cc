@@ -2947,9 +2947,18 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
+            bool isBlkArg = arg.name == core::Names::blkArg();
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
+
+                if (!isBlkArg && spec->rebind.exists()) {
+                    if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
+                        e.setHeader("Using `{}` is not permitted here", "bind");
+                        e.addErrorNote("Only block arguments can use `{}`", "bind");
+                    }
+                }
+
                 arg.type = std::move(spec->type);
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
@@ -2960,7 +2969,6 @@ private:
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                bool isBlkArg = arg.name == core::Names::blkArg();
                 if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {

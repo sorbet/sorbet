@@ -76,6 +76,7 @@ constexpr ErrorClass NonClassSuperclass{5067, StrictLevel::False};
 constexpr ErrorClass AmbiguousDefinitionError{5068, StrictLevel::False};
 constexpr ErrorClass MultipleStatementsInSig{5069, StrictLevel::False};
 constexpr ErrorClass NilableUntyped{5070, StrictLevel::False};
+constexpr ErrorClass BindNonBlockParameter{5071, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

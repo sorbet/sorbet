@@ -37,6 +37,10 @@ class BadBinds
   extend T::Sig
 
   sig {params(blk: T.proc.params(x: T.proc.bind(T.attached_class).void).void).void}
-                                              # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
-  def foo(&blk); end
+                                  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
+  def self.lambda_argument(&blk); end
+
+  sig {params(it: T.proc.bind(T.attached_class).void).void}
+            # ^^ error: Using `bind` is not permitted here
+  def self.non_block_argument(it); end
 end
