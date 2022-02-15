@@ -1645,6 +1645,55 @@ Of the two, the first solution is preferred because not only will the program
 type check as written, but Sorbet will know that the `x` variable is not `nil`
 throughout the body of the `if` statement.
 
+## 7038
+
+Consider this example:
+
+```ruby
+sig do
+  type_parameters(:U)
+    .params(x: T.type_parameter(:U))
+    .void
+end
+def example(x)
+  x.foo # error!
+end
+```
+
+This snippet declares a method `example` with a signature that says it can be
+passed any input, but then attempts to call a specific method `.foo`.
+
+Since this method can be given any type of value, Sorbet rejects the call to
+`x.foo`.
+
+To allow code like this, use [interfaces](abstract.md) with [intersection
+types](intersection-types.md):
+
+```ruby
+# (1) Declare an interface
+module IFoo
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  sig {abstract.void}
+  def foo; end
+end
+
+sig do
+  type_parameters(:U)
+    # (2) Use the interface with an intersection type
+    .params(x: T.all(IFoo, T.type_parameter(:U)))
+    .void
+end
+def example(x)
+  x.foo # error!
+end
+```
+
+Remember that in Sorbet, [interfaces](abstract.md) must be explicitly
+implemented in a given class.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
