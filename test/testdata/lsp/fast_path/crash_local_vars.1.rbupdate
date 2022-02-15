@@ -1,0 +1,11 @@
+# typed: strict
+
+class Outer
+  describe 'client' do
+    #               ^^ error: Hint: this kDO_BLOCK token might not be properly closed
+    class Inner <
+    it 'foo' do # error: Superclasses must only contain constant literals
+      1.times {|x| puts(x)}
+    end
+  end
+end # error: unexpected token "end of file"
