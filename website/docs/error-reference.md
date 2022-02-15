@@ -1666,8 +1666,8 @@ passed any input, but then attempts to call a specific method `.foo`.
 Since this method can be given any type of value, Sorbet rejects the call to
 `x.foo`.
 
-To allow code like this, use [interfaces](abstract.md) with [intersection
-types](intersection-types.md):
+To allow code like this, use [interfaces](abstract.md) with
+[intersection types](intersection-types.md):
 
 ```ruby
 # (1) Declare an interface
