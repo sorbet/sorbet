@@ -157,8 +157,9 @@ class Module < Object
   # instance of one of *mod*'s descendants. Of limited use for modules, but can
   # be used in `case` statements to classify objects by class.
   sig do
-    params(
-        other: BasicObject,
+    type_parameters(:U)
+    .params(
+        other: T.type_parameter(:U),
     )
     .returns(T::Boolean)
   end
