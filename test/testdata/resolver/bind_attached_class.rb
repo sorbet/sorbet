@@ -32,3 +32,11 @@ Model.before_create do
   does_exist
   does_not_exist # error: Method `does_not_exist` does not exist on `Model`
 end
+
+class BadBinds
+  extend T::Sig
+
+  sig {params(blk: T.proc.params(x: T.proc.bind(T.attached_class).void).void).void}
+                                              # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
+  def foo(&blk); end
+end
