@@ -1547,7 +1547,8 @@ private:
         std::transform(node->children.begin(), node->children.end(), back_inserter(childPairs),
                        [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
         fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.first.show(ctx) < rhs.first.show(ctx);
+            int compareResult = lhs.first.shortName(ctx).compare(rhs.first.shortName(ctx));
+            return compareResult < 0;
         });
         for (auto const &[nameRef, child] : childPairs) {
             if (parts.empty()) {
