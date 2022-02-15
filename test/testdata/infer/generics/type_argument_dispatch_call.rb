@@ -30,5 +30,5 @@ sig do
     .void
 end
 def example3(x)
-  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
+  x.foo # error: Call to method `foo` on generic type `Object#example3#U` component of `T.any(M, Object#example3#U)`
 end

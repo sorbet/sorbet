@@ -12,7 +12,7 @@ end
 def self.foo(xs)
   xs.find do |x|
     if x.is_a?(A)
-      #  ^^^^^ error: `is_a?` does not exist on `Object.foo#T` component
+      #  ^^^^^ error: Call to method `is_a?` on generic type `Object.foo#T` component
       #  ^^^^^ error: `is_a?` does not exist on `M` component
       puts x
     end

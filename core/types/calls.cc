@@ -150,7 +150,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
         if (e) {
             auto thisStr = args.thisType.show(gs);
             if (args.fullType.type != args.thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
+                e.setHeader("Call to method `{}` on generic type `{}` component of `{}`", args.name.show(gs), thisStr,
                             args.fullType.type.show(gs));
             } else {
                 e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
