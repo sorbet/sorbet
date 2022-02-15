@@ -129,8 +129,8 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     // Note that this means we copy the source buffer every time we go to parse it.
     // However, we prototyped a version of Sorbet that ENFORCE'd that those two null bytes were
     // present in the source buffer on `core::File` creation (so that we would never have to copy)
-    // and it had a 0.2% average improvement to cold-cache runtime. We opted not to land the change,
-    // because it was quite sprawling given such low impact.
+    // and it had a 0.2% average improvement to cold-cache runtime at Stripe. We opted not to land
+    // the change, because it was quite sprawling given such low impact.
     string buffer;
     buffer.reserve(source.size() + 2);
     buffer += source;
