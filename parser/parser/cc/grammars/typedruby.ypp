@@ -467,6 +467,14 @@ namespace TYPEDRUBY27 {
 	} \
 } while(false);
 
+// The bison docs mention a variable yylloc that holds the location of the
+// lookahead token. The C++ skeleton does not have such a variable--instead, it
+// has a composite structure stored in yyla that can be used to get access to
+// that location. But searching for yyla in the official docs yields no
+// results. We define this macro here so there's an obvious place in the code
+// that people might find when grepping for these two concepts.
+#define yylloc yyla.location
+
 // When changing this function, make sure to ALWAYS report a diagnostic!
 // Otherwise, Sorbet could sometimes say things parse when they shouldn't
 // because the parser uses the `error` token for error recovery, which will end
@@ -2476,8 +2484,8 @@ opt_block_args_tail:
                       driver.numparam_stack.set_ordinary_params();
                       driver.current_arg_stack.set("");
                       $$ = driver.build.args(self, nullptr, nullptr, nullptr, true);
-                      if (driver.indentationAware && @1.lineStart < yyla.location.lineStart) {
-                        auto newline_s = yyla.location.lineStart - 1;
+                      if (driver.indentationAware && @1.lineStart < yylloc.lineStart) {
+                        auto newline_s = yylloc.lineStart - 1;
                         driver.rewind_and_reset(newline_s);
                         driver.replace_last_diagnostic(dlevel::NOTE, dclass::BlockArgsUnexpectedNewline, diagnostic::range(newline_s, newline_s));
                       } else {
