@@ -153,6 +153,27 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             } else {
                 e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
             }
+
+            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
+            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
+                auto wrapInFn = gs.suggestUnsafe.value();
+                if (receiverLoc.empty()) {
+                    auto shortName = args.name.shortName(gs);
+                    auto beginAdjust = -2;                     // (&
+                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
+                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+                    if (blockPassLoc.exists()) {
+                        auto blockPassSource = blockPassLoc.source(gs).value();
+                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
+                        }
+                    }
+                } else {
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
+                                  receiverLoc.source(gs).value());
+                }
+            }
         }
         result.main.errors.emplace_back(e.build());
         return result;

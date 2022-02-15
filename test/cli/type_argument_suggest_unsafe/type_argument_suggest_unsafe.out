@@ -1,0 +1,69 @@
+type_argument_suggest_unsafe.rb:10: Call to method `foo` on unconstrained generic type `Object#example1#U` https://srb.help/7003
+    10 |  x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
+          ^^^^^
+  Autocorrect: Done
+    type_argument_suggest_unsafe.rb:10: Replaced with `T.unsafe(x)`
+    10 |  x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
+          ^
+
+type_argument_suggest_unsafe.rb:32: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)` https://srb.help/7003
+    32 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
+          ^^^^^
+  Autocorrect: Done
+    type_argument_suggest_unsafe.rb:32: Replaced with `T.unsafe(x)`
+    32 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
+          ^
+
+type_argument_suggest_unsafe.rb:41: Call to method `foo` on unconstrained generic type `Object#example4#U` https://srb.help/7003
+    41 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
+                  ^^^^
+  Autocorrect: Done
+    type_argument_suggest_unsafe.rb:41: Replaced with ` {|x| T.unsafe(x).foo}`
+    41 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
+                ^^^^^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+sig do
+  type_parameters(:U)
+    .params(x: T.type_parameter(:U))
+    .void
+end
+def example1(x)
+  T.unsafe(x).foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
+end
+
+module M
+  def foo; end
+end
+
+sig do
+  type_parameters(:U)
+    .params(x: T.all(T.type_parameter(:U), M))
+    .void
+end
+def example2(x)
+  x.foo
+end
+
+sig do
+  type_parameters(:U)
+    .params(x: T.any(T.type_parameter(:U), M))
+    .void
+end
+def example3(x)
+  T.unsafe(x).foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
+end
+
+sig do
+  type_parameters(:U)
+    .params(xs: T::Array[T.type_parameter(:U)])
+    .void
+end
+def example4(xs)
+  xs.map {|x| T.unsafe(x).foo} # error: Method `foo` does not exist on `Object#example4#U`
+end
