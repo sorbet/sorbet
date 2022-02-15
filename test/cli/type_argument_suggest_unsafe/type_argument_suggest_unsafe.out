@@ -1,4 +1,4 @@
-type_argument_suggest_unsafe.rb:10: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example1)` https://srb.help/7003
+type_argument_suggest_unsafe.rb:10: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example1)` https://srb.help/7038
     10 |  x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
             ^^^
   Got `T.type_parameter(:U) (of Object#example1)` originating from:
@@ -10,7 +10,7 @@ type_argument_suggest_unsafe.rb:10: Call to method `foo` on unconstrained generi
     10 |  x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
           ^
 
-type_argument_suggest_unsafe.rb:32: Call to method `foo` on generic type `T.type_parameter(:U) (of Object#example3)` component of `T.any(M, T.type_parameter(:U) (of Object#example3))` https://srb.help/7003
+type_argument_suggest_unsafe.rb:32: Call to method `foo` on generic type `T.type_parameter(:U) (of Object#example3)` component of `T.any(M, T.type_parameter(:U) (of Object#example3))` https://srb.help/7038
     32 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
             ^^^
   Got `T.any(M, T.type_parameter(:U) (of Object#example3))` originating from:
@@ -22,7 +22,7 @@ type_argument_suggest_unsafe.rb:32: Call to method `foo` on generic type `T.type
     32 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
           ^
 
-type_argument_suggest_unsafe.rb:41: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example4)` https://srb.help/7003
+type_argument_suggest_unsafe.rb:41: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example4)` https://srb.help/7038
     41 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                   ^^^^
   Got `T.type_parameter(:U) (of Object#example4)` originating from:
