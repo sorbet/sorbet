@@ -1215,11 +1215,7 @@ public:
 };
 } // namespace
 
-UnorderedSet<core::ClassOrModuleRef>
-RBIGenerator::buildPackageNamespace(core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles, WorkerPool &workers) {
-    // Populate package database.
-    packageFiles = Packager::findPackages(gs, workers, move(packageFiles));
-
+UnorderedSet<core::ClassOrModuleRef> RBIGenerator::buildPackageNamespace(core::GlobalState &gs, WorkerPool &workers) {
     const auto &packageDB = gs.packageDB();
 
     auto &packages = packageDB.packages();

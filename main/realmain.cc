@@ -455,7 +455,6 @@ int realmain(int argc, char *argv[]) {
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
-    UnorderedSet<core::ClassOrModuleRef> packageNamespaces;
 
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
@@ -585,7 +584,7 @@ int realmain(int argc, char *argv[]) {
 
             auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
             auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
-            packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, packages, *workers);
+            packages = packager::Packager::findPackages(*gs, *workers, move(packages));
 #endif
         }
 
@@ -737,6 +736,7 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
             return 1;
 #else
+            auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, *workers);
             packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIOutput, *workers);
 #endif
         }

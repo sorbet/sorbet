@@ -19,8 +19,7 @@ public:
     };
 
     // Exposed for testing.
-    static UnorderedSet<core::ClassOrModuleRef>
-    buildPackageNamespace(core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles, WorkerPool &workers);
+    static UnorderedSet<core::ClassOrModuleRef> buildPackageNamespace(core::GlobalState &gs, WorkerPool &workers);
     static RBIOutput runOnce(const core::GlobalState &gs, core::NameRef pkg,
                              const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces);
 
