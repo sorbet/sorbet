@@ -24,13 +24,6 @@ string readFile(string_view path, const FileSystem &fs) {
     }
 }
 
-core::File::Type getFileType(string_view path, const options::Options &opts) {
-    if (opts.stripePackages && absl::EndsWith(path, "/__package.rb")) {
-        return core::File::Type::Package;
-    }
-    return core::File::Type::Normal;
-}
-
 } // namespace
 
 LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr<absl::Mutex> taskQueueMutex,
@@ -317,7 +310,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
             string fileContents = changeParams->getSource(getFileContents(localPath));
-            auto fileType = getFileType(localPath, config->opts);
+            auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
             edit->updates.push_back(file);
@@ -335,7 +328,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentPar
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
-            auto fileType = getFileType(localPath, config->opts);
+            auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
             edit->updates.push_back(file);
@@ -355,7 +348,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentPa
         if (!config->isFileIgnored(localPath)) {
             openFiles.erase(localPath);
             // Use contents of file on disk.
-            auto fileType = getFileType(localPath, config->opts);
+            auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
@@ -372,7 +365,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
         string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
         // Editor contents supercede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
-            auto fileType = getFileType(localPath, config->opts);
+            auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
