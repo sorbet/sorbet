@@ -11,7 +11,9 @@ sig do
 end
 def self.foo(xs)
   xs.find do |x|
-    if x.is_a?(A) # error: `is_a?` does not exist on `M` component
+    if x.is_a?(A)
+      #  ^^^^^ error: `is_a?` does not exist on `Object.foo#T` component
+      #  ^^^^^ error: `is_a?` does not exist on `M` component
       puts x
     end
   end

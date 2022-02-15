@@ -144,7 +144,9 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             // Short circuit here to avoid constructing an expensive error message.
             return result;
         }
-        auto e = gs.beginError(args.callLoc(), errors::Infer::UnknownMethod);
+        auto funLoc = args.funLoc();
+        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+        auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
         if (e) {
             auto thisStr = args.thisType.show(gs);
             if (args.fullType.type != args.thisType) {
