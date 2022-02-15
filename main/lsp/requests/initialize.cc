@@ -37,7 +37,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     auto codeActionProvider = make_unique<CodeActionOptions>();
     codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet};
     if (opts.lspExtractMethodEnabled) {
-      codeActionProvider->codeActionKinds->push_back(CodeActionKind::RefactorExtract);
+        codeActionProvider->codeActionKinds->push_back(CodeActionKind::RefactorExtract);
     }
     serverCap->codeActionProvider = move(codeActionProvider);
 

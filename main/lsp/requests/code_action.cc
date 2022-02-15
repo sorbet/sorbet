@@ -106,24 +106,24 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     }
 
     if (config.opts.lspExtractMethodEnabled) {
-      auto queryResult =
-          queryByLoc(typechecker, params->textDocument->uri, *params->range->start, LSPMethod::TextDocumentCodeAction, false);
+        auto queryResult = queryByLoc(typechecker, params->textDocument->uri, *params->range->start,
+                                      LSPMethod::TextDocumentCodeAction, false);
 
-      // Generate "Extract method" code actions only for method definitions
-      if (queryResult.error == nullptr) {
-        for (auto &resp : queryResult.responses) {
-          if (auto def = resp->isDefinition()) {
-            if (def->symbol.isMethod()) {
-              auto action = make_unique<CodeAction>("Extract method to module");
-              action->kind = CodeActionKind::RefactorExtract;
-              auto workspaceEdit = make_unique<WorkspaceEdit>();
-              // workspaceEdit->documentChanges = getEdits(config, gs, allEdits);
-              action->edit = move(workspaceEdit);
-              result.emplace_back(move(action));
+        // Generate "Extract method" code actions only for method definitions
+        if (queryResult.error == nullptr) {
+            for (auto &resp : queryResult.responses) {
+                if (auto def = resp->isDefinition()) {
+                    if (def->symbol.isMethod()) {
+                        auto action = make_unique<CodeAction>("Extract method to module");
+                        action->kind = CodeActionKind::RefactorExtract;
+                        auto workspaceEdit = make_unique<WorkspaceEdit>();
+                        // workspaceEdit->documentChanges = getEdits(config, gs, allEdits);
+                        action->edit = move(workspaceEdit);
+                        result.emplace_back(move(action));
+                    }
+                }
             }
-          }
         }
-      }
     }
 
     response->result = move(result);
