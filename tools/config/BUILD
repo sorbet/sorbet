@@ -1,13 +1,35 @@
 package(default_visibility = ["//visibility:public"])
 
+platform(
+    name = "darwin_x86_64",
+    constraint_values = [
+        "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+platform(
+    name = "linux_x86_64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 config_setting(
     name = "darwin",
-    values = {"host_cpu": "darwin"},
+    constraint_values = [
+        "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
+    ],
 )
 
 config_setting(
     name = "linux",
-    values = {"host_cpu": "k8"},
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
 )
 
 config_setting(
@@ -56,8 +78,10 @@ config_setting(
 
 config_setting(
     name = "darwindbg",
+    constraint_values = [
+        "@platforms//os:osx",
+    ],
     values = {
-        "host_cpu": "darwin",
         "compilation_mode": "dbg",
     },
 )
