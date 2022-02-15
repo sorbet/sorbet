@@ -325,6 +325,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Signature Help");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
+    options.add_options("advanced")("enable-experimental-lsp-extract-method",
+                                    "Enable experimental LSP feature: Extract Method");
 
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
@@ -728,6 +730,7 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
+        opts.lspExtractMethodEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-extract-method"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
