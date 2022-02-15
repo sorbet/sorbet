@@ -7,7 +7,7 @@ sig do
     .void
 end
 def example1(x)
-  x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
+  x.foo # error: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example1)`
 end
 
 module M
@@ -30,5 +30,5 @@ sig do
     .void
 end
 def example3(x)
-  x.foo # error: Call to method `foo` on generic type `Object#example3#U` component of `T.any(M, Object#example3#U)`
+  x.foo # error: Call to method `foo` on generic type `T.type_parameter(:U) (of Object#example3)` component of `T.any(M, T.type_parameter(:U) (of Object#example3))`
 end
