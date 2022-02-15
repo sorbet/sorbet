@@ -350,7 +350,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
                 tree = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(tree)));
 
-                if (FileOps::getFileName(tree.file.data(*rbiGenGs).path()) == packageFileName) {
+                if (tree.file.data(*rbiGenGs).isPackage()) {
                     packageTrees.emplace_back(move(tree));
                 } else {
                     trees.emplace_back(move(tree));
@@ -373,8 +373,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
             // RBI generation
             {
-                auto packageNamespaces =
-                    packager::RBIGenerator::buildPackageNamespace(*rbiGenGs, packageTrees, *workers);
+                packageTrees = packager::Packager::findPackages(*rbiGenGs, *workers, move(packageTrees));
+                auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*rbiGenGs, *workers);
                 for (auto &package : rbiGenGs->packageDB().packages()) {
                     auto output = packager::RBIGenerator::runOnce(*rbiGenGs, package, packageNamespaces);
                     if (!output.rbi.empty()) {
