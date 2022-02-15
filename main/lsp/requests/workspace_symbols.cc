@@ -83,7 +83,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         }
 
         // Don't report definitions in __package.rb files, as they're references to symbols defined elsewhere.
-        if (loc.file().data(gs).isPackage()) {
+        if (this->config.opts.stripePackages && loc.file().data(gs).isPackage()) {
             continue;
         }
 
