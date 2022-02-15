@@ -155,6 +155,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             } else {
                 e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
             }
+            e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
             auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
             if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
