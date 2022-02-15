@@ -138,25 +138,29 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
 }
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    // auto untypedUntracked = Types::untypedUntracked();
-    // return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
-    auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-    if (args.suppressErrors) {
-        // Short circuit here to avoid constructing an expensive error message.
-        return result;
-    }
-    auto e = gs.beginError(args.callLoc(), errors::Infer::UnknownMethod);
-    if (e) {
-        auto thisStr = args.thisType.show(gs);
-        if (args.fullType.type != args.thisType) {
-            e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
-                        args.fullType.type.show(gs));
-        } else {
-            e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
+    if (this->definition.isTypeArgument()) {
+        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+        if (args.suppressErrors) {
+            // Short circuit here to avoid constructing an expensive error message.
+            return result;
         }
+        auto e = gs.beginError(args.callLoc(), errors::Infer::UnknownMethod);
+        if (e) {
+            auto thisStr = args.thisType.show(gs);
+            if (args.fullType.type != args.thisType) {
+                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
+                            args.fullType.type.show(gs));
+            } else {
+                e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
+            }
+        }
+        result.main.errors.emplace_back(e.build());
+        return result;
+    } else {
+        // TODO: https://github.com/sorbet/sorbet/issues/1731
+        auto untypedUntracked = Types::untypedUntracked();
+        return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
     }
-    result.main.errors.emplace_back(e.build());
-    return result;
 }
 
 namespace {
