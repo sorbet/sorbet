@@ -249,6 +249,14 @@ LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_v
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
+
+    if (!fref.exists() && config.isFileIgnored(config.remoteName2Local(uri))) {
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Ignored file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPQueryResult{{}, move(error)};
+    }
+
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
