@@ -1370,11 +1370,14 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (rebind == core::Symbols::BindToSelfType()) {
                         tp.type = l.link->result->main.receiver;
                     } else if (rebind == core::Symbols::BindToAttachedClass()) {
-                        tp.type = core::cast_type<core::AppliedType>(l.link->result->main.receiver)
-                                      ->klass.data(ctx)
-                                      ->attachedClass(ctx)
-                                      .data(ctx)
-                                      ->externalType();
+                        auto appliedType = core::cast_type<core::AppliedType>(l.link->result->main.receiver);
+                        auto attachedClass =
+                            appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+                        auto lambdaParam =
+                            core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
+
+                        tp.type = lambdaParam->upperBound;
                     } else {
                         tp.type = rebind.data(ctx)->externalType();
                     }
