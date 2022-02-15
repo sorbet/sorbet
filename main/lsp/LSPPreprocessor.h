@@ -80,7 +80,7 @@ class LSPPreprocessor final {
      * Get the current contents of the file at the given path. Returns "" (empty string view) if file does not yet
      * exist.
      */
-    std::string_view getFileContents(std::string_view path) const;
+    std::string_view getNullTerminatedContents(std::string_view path) const;
 
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
 

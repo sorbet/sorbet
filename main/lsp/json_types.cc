@@ -192,7 +192,7 @@ string TextDocumentContentChangeEvent::apply(string_view oldSource) const {
         auto endOffset = core::Loc::pos2Offset(old, end).value();
         return string(oldSource).replace(startOffset, endOffset - startOffset, text);
     } else {
-        return text;
+        return text + "\0\0"s;
     }
 }
 

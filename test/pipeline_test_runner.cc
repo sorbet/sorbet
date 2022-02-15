@@ -666,7 +666,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
 
         const int prohibitedLines = f.file.data(*gs).source().size();
-        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
+        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).null_terminated_source());
         auto newFile =
             make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
         gs->replaceFile(f.file, move(newFile));

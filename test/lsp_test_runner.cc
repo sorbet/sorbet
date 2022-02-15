@@ -595,7 +595,8 @@ TEST_CASE("LSPTest") {
             for (auto &update : updates) {
                 auto originalFile = test.folder + update.first;
                 auto updateFile = test.folder + update.second;
-                auto fileContents = FileOps::read(updateFile);
+                auto nullPadding = 2;
+                auto fileContents = FileOps::read(updateFile, nullPadding);
                 lspUpdates.push_back(makeChange(testFileUris[originalFile], fileContents, baseVersion + version));
                 updatesAndContents[originalFile] =
                     make_shared<core::File>(string(originalFile), move(fileContents), core::File::Type::Normal);

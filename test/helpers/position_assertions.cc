@@ -1353,10 +1353,12 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
             auto extensionIndex = filePath.rfind(".rbedited", filePath.length());
             auto fileVersion = string(FileOps::getExtension(filePath.substr(0, extensionIndex)));
             if (fileVersion == this->version) {
-                expectedEditedFiles[filePath] = FileOps::read(filePath);
+                auto nullPadding = 2;
+                expectedEditedFiles[filePath] = FileOps::read(filePath, nullPadding);
             }
         } else {
-            sourceFiles[filePath] = FileOps::read(filePath);
+            auto nullPadding = 2;
+            sourceFiles[filePath] = FileOps::read(filePath, nullPadding);
         }
     }
 

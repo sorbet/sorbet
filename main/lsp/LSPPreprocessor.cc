@@ -13,14 +13,15 @@ namespace sorbet::realmain::lsp {
 namespace {
 string readFile(string_view path, const FileSystem &fs) {
     try {
-        return fs.readFile(path);
+        auto nullPadding = 2;
+        return fs.readFile(path, nullPadding);
     } catch (FileNotFoundException e) {
         // Act as if file is completely empty.
         // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman
         // updates that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted
         // files.
         // TODO(jvilk): Use Tombstone files instead.
-        return "";
+        return "\0\0"s;
     }
 }
 
@@ -31,13 +32,13 @@ LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr
     : config(move(config)), taskQueueMutex(std::move(taskQueueMutex)), taskQueue(move(taskQueue)),
       owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
 
-string_view LSPPreprocessor::getFileContents(string_view path) const {
+string_view LSPPreprocessor::getNullTerminatedContents(string_view path) const {
     auto it = openFiles.find(path);
     if (it == openFiles.end()) {
         ENFORCE(false, "Editor sent a change request without a matching open request.");
         return string_view();
     }
-    return it->second->source();
+    return it->second->null_terminated_source();
 }
 
 void LSPPreprocessor::mergeFileChanges() {
@@ -309,7 +310,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
-            string fileContents = changeParams->getSource(getFileContents(localPath));
+            string fileContents = changeParams->getSource(getNullTerminatedContents(localPath));
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
@@ -330,6 +331,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentPar
         if (!config->isFileIgnored(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
+            openParams->textDocument->text += "\0\0"sv;
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
             edit->updates.push_back(file);
             slot = move(file);
