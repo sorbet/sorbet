@@ -51,12 +51,13 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     auto relativeFilepath = "test.rb";
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
     // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
-    auto fileContents = "# typed: true\nclass Foo extend T::Sig\nsig {returns(Integer)}\ndef bar\n'hello'\nend\nend\n";
+    auto fileContents =
+        "# typed: true\nclass Foo extend T::Sig\nsig {returns(Integer)}\ndef bar\n'hello'\nend\nend\n\0\0"s;
     auto key =
         realmain::pipeline::fileKey(core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
 
     // Note: We need to introduce a new name, otherwise nametable doesn't change and we don't update the cache.
-    auto updatedFileContents = "# typed: true\nclass NewName\nend\n";
+    auto updatedFileContents = "# typed: true\nclass NewName\nend\n\0\0"s;
     auto updatedKey = realmain::pipeline::fileKey(
         core::File(string(filePath), string(updatedFileContents), core::File::Type::Normal, 0));
 
@@ -160,12 +161,13 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
     auto relativeFilepath = "test.rb";
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
     // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
-    auto fileContents = "# typed: true\nclass Foo extend T::Sig\nsig {returns(Integer)}\ndef bar\n'hello'\nend\nend\n";
+    auto fileContents =
+        "# typed: true\nclass Foo extend T::Sig\nsig {returns(Integer)}\ndef bar\n'hello'\nend\nend\n\0\0"s;
     auto key =
         realmain::pipeline::fileKey(core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
 
     // Note: We need to introduce a new name, otherwise nametable doesn't change and we don't update the cache.
-    auto updatedFileContents = "# typed: true\nclass NewName\nend\n";
+    auto updatedFileContents = "# typed: true\nclass NewName\nend\n\0\0"s;
 
     // LSP should write a cache to disk corresponding to initialization state.
     {

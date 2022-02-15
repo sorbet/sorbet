@@ -291,7 +291,7 @@ vector<int> &File::lineBreaks() const {
     if (ptr != nullptr) {
         return *ptr;
     } else {
-        auto my = make_shared<vector<int>>(findLineBreaks(this->source_));
+        auto my = make_shared<vector<int>>(findLineBreaks(this->source()));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
         return lineBreaks();
     }

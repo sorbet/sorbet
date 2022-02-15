@@ -95,14 +95,14 @@ TEST_CASE("MergeUpdatedFiles") {
     LSPFileUpdates oldUpdates;
     oldUpdates.editCount = 6;
     oldUpdates.epoch = 10;
-    addFile(oldUpdates, core::FileRef(1), "foo.rb", "foo");
-    addFile(oldUpdates, core::FileRef(2), "bar.rb", "oldcontents");
+    addFile(oldUpdates, core::FileRef(1), "foo.rb", "foo\0\0"s);
+    addFile(oldUpdates, core::FileRef(2), "bar.rb", "oldcontents\0\0"s);
 
     LSPFileUpdates newUpdates;
     newUpdates.editCount = 4;
     newUpdates.epoch = 14;
-    addFile(newUpdates, core::FileRef(2), "bar.rb", "newcontents");
-    addFile(newUpdates, core::FileRef(3), "baz.rb", " ");
+    addFile(newUpdates, core::FileRef(2), "bar.rb", "newcontents\0\0"s);
+    addFile(newUpdates, core::FileRef(3), "baz.rb", " \0\0"s);
 
     newUpdates.mergeOlder(oldUpdates);
     REQUIRE_EQ(3, newUpdates.updatedFiles.size());
@@ -148,8 +148,8 @@ TEST_CASE("Copy") {
     updates.canTakeFastPath = true;
     updates.hasNewFiles = true;
     updates.updatedGS = unique_ptr<core::GlobalState>(nullptr);
-    addFile(updates, core::FileRef(1), "foo.rb", "foo");
-    addFile(updates, core::FileRef(2), "bar.rb", "bar");
+    addFile(updates, core::FileRef(1), "foo.rb", "foo\0\0"s);
+    addFile(updates, core::FileRef(2), "bar.rb", "bar\0\0"s);
 
     LSPFileUpdates copy = updates.copy();
     CHECK_EQ(10, copy.epoch);

@@ -313,13 +313,13 @@ TEST_CASE("SorbetWorkspaceEditParamsMerge") {
     oldEdit.mergeCount = 10;
     oldEdit.sorbetCancellationExpected = true;
     oldEdit.epoch = 4;
-    oldEdit.updates = {make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, 4)};
+    oldEdit.updates = {make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, 4)};
 
     SorbetWorkspaceEditParams newEdit;
     newEdit.mergeCount = 2;
     newEdit.sorbetCancellationExpected = false;
     newEdit.epoch = 5;
-    newEdit.updates = {make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, 5)};
+    newEdit.updates = {make_shared<core::File>("bar.rb", "bar\0\0"s, core::File::Type::Normal, 5)};
 
     // Merge merges the new edit into the old edit.
     oldEdit.merge(newEdit);
@@ -340,13 +340,13 @@ TEST_CASE("SorbetWorkspaceEditParamsMergeTakesNewerEdit") {
     oldEdit.mergeCount = 10;
     oldEdit.sorbetCancellationExpected = false;
     oldEdit.epoch = 4;
-    oldEdit.updates = {make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, 4)};
+    oldEdit.updates = {make_shared<core::File>("foo.rb", "foo\0\0"s, core::File::Type::Normal, 4)};
 
     SorbetWorkspaceEditParams newEdit;
     newEdit.mergeCount = 0;
     newEdit.sorbetCancellationExpected = true;
     newEdit.epoch = 5;
-    newEdit.updates = {make_shared<core::File>("foo.rb", "bar", core::File::Type::Normal, 5)};
+    newEdit.updates = {make_shared<core::File>("foo.rb", "bar\0\0"s, core::File::Type::Normal, 5)};
 
     // Merge merges the new edit into the old edit.
     oldEdit.merge(newEdit);

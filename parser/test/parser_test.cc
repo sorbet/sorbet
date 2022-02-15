@@ -26,11 +26,11 @@ TEST_CASE("SimpleParse") { // NOLINT
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
     sorbet::core::UnfreezeFileTable ft(gs);
     auto settings = sorbet::parser::Parser::Settings{};
-    sorbet::core::FileRef fileId1 = gs.enterFile("<test1>", "def hello_world; p :hello; end");
+    sorbet::core::FileRef fileId1 = gs.enterFile("<test1>", "def hello_world; p :hello; end\0\0"s);
     sorbet::parser::Parser::run(gs, fileId1, settings);
-    sorbet::core::FileRef fileId2 = gs.enterFile("<test2>", "class A; class B; end; end");
+    sorbet::core::FileRef fileId2 = gs.enterFile("<test2>", "class A; class B; end; end\0\0"s);
     sorbet::parser::Parser::run(gs, fileId2, settings);
-    sorbet::core::FileRef fileId3 = gs.enterFile("<test3>", "class A::B; module B; end; end");
+    sorbet::core::FileRef fileId3 = gs.enterFile("<test3>", "class A::B; module B; end; end\0\0"s);
     sorbet::parser::Parser::run(gs, fileId3, settings);
 }
 
