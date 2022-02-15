@@ -164,7 +164,17 @@ private:
         }
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
-        // They are guaranteed to be simple trees in the desugarer.
+        //
+        // These lists used to be guaranteed to be simple trees (only constant literals) by desugar,
+        // but that was later relaxed. In places where walking ancestors is required, instead define
+        // your `preTransformClassDef` method to contain this:
+        //
+        //   for (auto &ancestor : klass.ancestors) {
+        //       ancestor = ast::TreeMap::apply(ctx, *this, std::move(ancestor))
+        //   }
+        //
+        // and that will have the same effect, without having to retroactively change all TreeMaps.
+
         for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
             def = mapIt(std::move(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
         }
@@ -624,7 +634,17 @@ private:
         }
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
-        // They are guaranteed to be simple trees in the desugarer.
+        //
+        // These lists used to be guaranteed to be simple trees (only constant literals) by desugar,
+        // but that was later relaxed. In places where walking ancestors is required, instead define
+        // your `preTransformClassDef` method to contain this:
+        //
+        //   for (auto &ancestor : klass.ancestors) {
+        //       ancestor = ast::TreeMap::apply(ctx, *this, std::move(ancestor))
+        //   }
+        //
+        // and that will have the same effect, without having to retroactively change all TreeMaps.
+
         for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
             def = mapIt(std::move(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol));
         }
