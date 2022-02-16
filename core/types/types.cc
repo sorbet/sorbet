@@ -660,11 +660,6 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
     return false;
 }
 
-DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    auto untypedUntracked = Types::untypedUntracked();
-    return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
-}
-
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {}
 

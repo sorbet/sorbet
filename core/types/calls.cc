@@ -137,6 +137,56 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
+DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    if (this->definition.isTypeArgument()) {
+        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+        if (args.suppressErrors) {
+            // Short circuit here to avoid constructing an expensive error message.
+            return result;
+        }
+        auto funLoc = args.funLoc();
+        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+        auto e = gs.beginError(errLoc, errors::Infer::CallOnTypeArgument);
+        if (e) {
+            auto thisStr = args.thisType.show(gs);
+            if (args.fullType.type != args.thisType) {
+                e.setHeader("Call to method `{}` on generic type `{}` component of `{}`", args.name.show(gs), thisStr,
+                            args.fullType.type.show(gs));
+            } else {
+                e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
+            }
+            e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+
+            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
+            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
+                auto wrapInFn = gs.suggestUnsafe.value();
+                if (receiverLoc.empty()) {
+                    auto shortName = args.name.shortName(gs);
+                    auto beginAdjust = -2;                     // (&
+                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
+                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+                    if (blockPassLoc.exists()) {
+                        auto blockPassSource = blockPassLoc.source(gs).value();
+                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
+                        }
+                    }
+                } else {
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
+                                  receiverLoc.source(gs).value());
+                }
+            }
+        }
+        result.main.errors.emplace_back(e.build());
+        return result;
+    } else {
+        // TODO: https://github.com/sorbet/sorbet/issues/1731
+        auto untypedUntracked = Types::untypedUntracked();
+        return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
+    }
+}
+
 namespace {
 bool isSetter(const GlobalState &gs, NameRef fun) {
     if (fun.kind() != NameKind::UTF8) {

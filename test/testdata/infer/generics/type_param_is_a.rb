@@ -14,6 +14,7 @@ class Test
   end
   def test(x)
     if x.is_a? Integer
+      #  ^^^^^ error: Call to method `is_a?` on unconstrained generic type `T.type_parameter(:T) (of Test#test)`
       T.reveal_type(x) # error: Revealed type: `T.all(Integer, T.type_parameter(:T) (of Test#test))`
       take_integer(x)
     else
