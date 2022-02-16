@@ -987,8 +987,8 @@ end
 ```
 
 While it looks like `returns_int_or_string` is the name of a variable, it's
-actually a method call (Ruby allows method calls to omit parentheses). In order
-to get this code to pass, store the result of calling `returns_int_or_string` in
+actually a method call (Ruby allows method calls to omit parentheses). To fix
+this error, store the result of calling `returns_int_or_string` in
 a variable, and use that variable with the `case` and `T.absurd`:
 
 ```ruby
