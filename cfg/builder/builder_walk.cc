@@ -359,24 +359,28 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 return;
                             }
 
-                            if (!ast::isa_tree<ast::Local>(s.getPosArg(0)) &&
-                                !ast::isa_tree<ast::UnresolvedIdent>(s.getPosArg(0))) {
+                            auto &posArg0 = s.getPosArg(0);
+                            if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0)) {
                                 if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                                     // Providing a send is the most common way T.absurd is misused, so we provide a
                                     // little extra hint in the error message in that case.
-                                    if (ast::isa_tree<ast::Send>(s.getPosArg(0))) {
+                                    if (ast::isa_tree<ast::Send>(posArg0)) {
                                         e.setHeader("`{}` expects to be called on a variable, not a method call",
                                                     "T.absurd");
                                     } else {
                                         e.setHeader("`{}` expects to be called on a variable", "T.absurd");
                                     }
+                                    e.addErrorLine(core::Loc(cctx.ctx.file, posArg0.loc()),
+                                                   "Assign this expression to a variable, and use it in both the "
+                                                   "conditional and the `{}` call",
+                                                   "T.absurd");
                                 }
                                 ret = current;
                                 return;
                             }
 
                             auto temp = cctx.newTemporary(core::Names::statTemp());
-                            current = walk(cctx.withTarget(temp), s.getPosArg(0), current);
+                            current = walk(cctx.withTarget(temp), posArg0, current);
                             current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
                             ret = current;
                             return;
