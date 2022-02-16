@@ -349,6 +349,7 @@ using namespace std::string_literals;
 
 %type <token>
   args_forward
+  array_premature_end
   blkarg_mark
   call_op
   cname
@@ -1852,6 +1853,21 @@ lbrace_cmd_block_start:
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
                     }
 
+                     // While scanning an array, if we hit any of these tokens in places where a terminating `]` would
+                     // fit, we should stop scanning the array and report an error.
+array_premature_end: eof
+                   | kRESCUE
+                   | kENSURE
+                   | kEND
+                   | kTHEN
+                   | kELSIF
+                   | kELSE
+                   | kWHEN
+                   | kIN
+                   | tRPAREN
+                   | tRCURLY
+                   | tCOLON
+
          primary: literal
                 | strings
                 | xstring
@@ -1914,6 +1930,12 @@ lbrace_cmd_block_start:
                 | tLBRACK aref_args tRBRACK
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
+                    }
+                | tLBRACK aref_args array_premature_end
+                    {
+                      $$ = driver.build.array(self, $1, $2, $3);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1.begin, @1.end), "\"[\"");
+                      driver.rewind_and_reset(@2.end);
                     }
                 | tLBRACE assoc_list tRCURLY
                     {
