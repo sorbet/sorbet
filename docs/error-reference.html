@@ -1290,9 +1290,48 @@ x = a.foo
 <p>Of the two, the first solution is preferred because not only will the program
 type check as written, but Sorbet will know that the <code>x</code> variable is not <code>nil</code>
 throughout the body of the <code>if</code> statement.</p>
+<h2><a class="anchor" aria-hidden="true" id="7038"></a><a href="#7038" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7038</h2>
+<p>Consider this example:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(<span class="hljs-symbol">x:</span> T.type_parameter(<span class="hljs-symbol">:U</span>))
+    .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
+  x.foo <span class="hljs-comment"># error!</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This snippet declares a method <code>example</code> with a signature that says it can be
+passed any input, but then attempts to call a specific method <code>.foo</code>.</p>
+<p>Since this method can be given any type of value, Sorbet rejects the call to
+<code>x.foo</code>.</p>
+<p>To allow code like this, use <a href="/docs/abstract">interfaces</a> with
+<a href="/docs/intersection-types">intersection types</a>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Declare an interface</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IFoo</span></span>
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  sig {abstract.void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    <span class="hljs-comment"># (2) Use the interface with an intersection type</span>
+    .params(<span class="hljs-symbol">x:</span> T.all(IFoo, T.type_parameter(<span class="hljs-symbol">:U</span>)))
+    .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
+  x.foo <span class="hljs-comment"># error!</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Remember that in Sorbet, <a href="/docs/abstract">interfaces</a> must be explicitly
+implemented in a given class.</p>
 <!-- -->
 <script src="/js/error-reference.js"></script>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#1004">1004</a></li><li><a href="#2001">2001</a></li><li><a href="#2003">2003</a></li><li><a href="#3001">3001</a></li><li><a href="#3002">3002</a></li><li><a href="#3011">3011</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#4011">4011</a></li><li><a href="#4012">4012</a></li><li><a href="#4015">4015</a></li><li><a href="#5001">5001</a></li><li><a href="#5002">5002</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5023">5023</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#5035">5035</a></li><li><a href="#5036">5036</a></li><li><a href="#5037">5037</a></li><li><a href="#5041">5041</a></li><li><a href="#5046">5046</a></li><li><a href="#5047">5047</a></li><li><a href="#5048">5048</a></li><li><a href="#5054">5054</a></li><li><a href="#5056">5056</a></li><li><a href="#5057">5057</a></li><li><a href="#5058">5058</a></li><li><a href="#5064">5064</a></li><li><a href="#5068">5068</a></li><li><a href="#6002">6002</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7004">7004</a></li><li><a href="#7005">7005</a></li><li><a href="#7006">7006</a></li><li><a href="#7007">7007</a></li><li><a href="#7009">7009</a></li><li><a href="#7013">7013</a></li><li><a href="#7010">7010</a></li><li><a href="#7014">7014</a></li><li><a href="#7017">7017</a></li><li><a href="#7018">7018</a></li><li><a href="#7019">7019</a></li><li><a href="#7021">7021</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li><li><a href="#7026">7026</a></li><li><a href="#7030">7030</a></li><li><a href="#7034">7034</a></li><li><a href="#7037">7037</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#1004">1004</a></li><li><a href="#2001">2001</a></li><li><a href="#2003">2003</a></li><li><a href="#3001">3001</a></li><li><a href="#3002">3002</a></li><li><a href="#3011">3011</a></li><li><a href="#4002">4002</a></li><li><a href="#4010">4010</a></li><li><a href="#4011">4011</a></li><li><a href="#4012">4012</a></li><li><a href="#4015">4015</a></li><li><a href="#5001">5001</a></li><li><a href="#5002">5002</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5023">5023</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#5035">5035</a></li><li><a href="#5036">5036</a></li><li><a href="#5037">5037</a></li><li><a href="#5041">5041</a></li><li><a href="#5046">5046</a></li><li><a href="#5047">5047</a></li><li><a href="#5048">5048</a></li><li><a href="#5054">5054</a></li><li><a href="#5056">5056</a></li><li><a href="#5057">5057</a></li><li><a href="#5058">5058</a></li><li><a href="#5064">5064</a></li><li><a href="#5068">5068</a></li><li><a href="#6002">6002</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7004">7004</a></li><li><a href="#7005">7005</a></li><li><a href="#7006">7006</a></li><li><a href="#7007">7007</a></li><li><a href="#7009">7009</a></li><li><a href="#7013">7013</a></li><li><a href="#7010">7010</a></li><li><a href="#7014">7014</a></li><li><a href="#7017">7017</a></li><li><a href="#7018">7018</a></li><li><a href="#7019">7019</a></li><li><a href="#7021">7021</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li><li><a href="#7026">7026</a></li><li><a href="#7030">7030</a></li><li><a href="#7034">7034</a></li><li><a href="#7037">7037</a></li><li><a href="#7038">7038</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
