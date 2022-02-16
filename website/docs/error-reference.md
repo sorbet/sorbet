@@ -964,6 +964,47 @@ For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [5028](#5028), [7017](#7017).
 
+# 6004
+
+In order to statically check [exhaustiveness](exhaustiveness), Sorbet provides
+`T.absurd`, which lets people opt into exhaustiveness checks.
+
+`T.absurd` must be given a variable. If not, like in this example, it reports an
+error:
+
+```ruby
+# -- bad example --
+
+sig {returns(T.any(Integer, String))}
+def returns_int_or_string; 0; end
+
+case returns_int_or_string
+when Integer then puts 'got int'
+when String then puts 'got string'
+# error! `returns_int_or_string` is not a variable!
+else T.absurd(returns_int_or_string)
+end
+```
+
+While it looks like `returns_int_or_string` is the name of a variable, it's
+actually a method call (Ruby allows method calls to omit parentheses). In order
+to get this code to pass, store the result of calling `returns_int_or_string` in
+a variable, and use that variable with the `case` and `T.absurd`:
+
+```ruby
+sig {returns(T.any(Integer, String))}
+def returns_int_or_string; 0; end
+
+# calls returns_int_or_string, stores result in x
+x = returns_int_or_string
+
+case x
+when Integer then puts 'got int'
+when String then puts 'got string'
+else T.absurd(x)
+end
+```
+
 ## 7001
 
 Sorbet does not allow reassigning a variable to a different type within a loop
