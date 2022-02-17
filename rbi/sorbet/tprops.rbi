@@ -202,6 +202,17 @@ module T::Props::HasLazilySpecializedMethods
   def self.disable_lazy_evaluation!; end
 end
 
+module T::Props::HasLazilySpecializedMethods::DecoratorMethods
+  def lazily_defined_methods; end
+  def lazily_defined_vm_methods; end
+  def eval_lazily_defined_method!(name); end
+  def eval_lazily_defined_vm_method!(name); end
+  def enqueue_lazy_method_definition!(name, &blk); end
+  def enqueue_lazy_vm_method_definition!(name, &blk); end
+  def eagerly_define_lazy_methods!; end
+  def eagerly_define_lazy_vm_methods!; end
+end
+
 module T::Props::GeneratedCodeValidation
   class ValidationError < RuntimeError; end
   def self.validate_deserialize(source); end
