@@ -195,6 +195,29 @@ core::FileRef DefTree::getDefiningFile() const {
     return definingFile;
 }
 
+void DefTree::writeNewPackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                       fmt::memory_buffer &buf, const DefTree *parent) const {
+    if (this != parent && (getDefiningFile().exists() || pkgName.exists())) {
+        string parentFullName = fmt::format(
+            "{}", fmt::map_join(parent->qname.nameParts, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+        fmt::format_to(std::back_inserter(buf), "{}.autoload_map({}, {{{}: '{}/{}'}})\n", alCfg.registryModule,
+                       parentFullName, name().show(gs), alCfg.rootDir, path(gs));
+    }
+
+    const bool isNestedPkg = (this != parent) && pkgName.exists();
+    if (!children.empty() && !isNestedPkg) {
+        if (this != parent) {
+            string fullName = fmt::format(
+                "{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+            predeclare(gs, fullName, buf);
+        }
+
+        for (const auto &[_, tree] : children) {
+            tree->writeNewPackageAutoloads(gs, alCfg, buf, this);
+        }
+    }
+}
+
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
@@ -207,38 +230,41 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     string fullName = "nil";
     string casgnArg;
     auto type = definitionType(gs);
-    if (type == Definition::Type::Module || type == Definition::Type::Class) {
-        fullName = root() ? alCfg.rootObject
-                          : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
-                                            return nr.show(gs);
-                                        }));
-        if (!root()) {
-            fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
-            predeclare(gs, fullName, buf);
-        }
+    fullName = root() ? alCfg.rootObject
+                      : fmt::format("{}", fmt::map_join(qname.nameParts,
+                                                        "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+    if (!root()) {
+        fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
+        predeclare(gs, fullName, buf);
+    }
 
-        if (!children.empty()) {
-            fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
-            vector<pair<core::NameRef, string>> childNames;
-            std::transform(children.begin(), children.end(), back_inserter(childNames),
-                           [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
-            fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
-            for (const auto &pair : childNames) {
-                fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
-                               children.at(pair.first)->path(gs));
-            }
-            fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
-        }
+    if (pkgName.exists()) {
+        // package autoloads
+        writeNewPackageAutoloads(gs, alCfg, buf, this);
 
-        if (pkgName.exists()) {
-            ENFORCE(!gs.packageDB().empty());
-            const string_view shortName = pkgName.shortName(gs);
-            const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
-            fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
-                           mungedName);
+        // package registration
+        ENFORCE(!gs.packageDB().empty());
+        const string_view shortName = pkgName.shortName(gs);
+        const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
+
+        fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
+                       mungedName);
+    } else if (!children.empty() && (type == Definition::Type::Module || type == Definition::Type::Class)) {
+        // prefix node
+        fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
+        vector<pair<core::NameRef, string>> childNames;
+        std::transform(children.begin(), children.end(), back_inserter(childNames),
+                       [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
+        fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
+        for (const auto &pair : childNames) {
+            fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
+                           children.at(pair.first)->path(gs));
         }
-    } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
-               type == Definition::Type::TypeAlias) {
+        fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
+    }
+
+    // any definition node
+    if (type == Definition::Type::Casgn || type == Definition::Type::Alias || type == Definition::Type::TypeAlias) {
         ENFORCE(qname.size() > 1);
         casgnArg = fmt::format(", [{}, :{}]",
                                fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
@@ -344,9 +370,15 @@ void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core:
 }
 
 void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root) {
+    const auto testChildIt = root.children.find(core::Names::Constants::Test());
+    ENFORCE(testChildIt != root.children.end());
+
+    const auto &testNamespaceNode = testChildIt->second;
+
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
         root.markPackageNamespace(pkg.mangledName(), pkg.fullName());
+        testNamespaceNode->markPackageNamespace(pkg.mangledName(), pkg.fullName());
     }
 }
 
@@ -450,8 +482,8 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
         if (!node.root()) {
             FileOps::ensureDir(subdir);
         }
+        bool childrenInsidePkgSubtree = insidePkgSubtree || node.pkgName.exists();
         for (auto &[_, child] : node.children) {
-            bool childInsidePkgSubtree = insidePkgSubtree || node.pkgName.exists();
             if (alCfg.packagedAutoloader && node.root()) {
                 // in a packaged context, we want to make sure that these constants are also put in their packages
                 ENFORCE(child->qname.package);
@@ -465,9 +497,10 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                 string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
                 auto pkgSubdir = join(subdir, packageName);
                 FileOps::ensureDir(pkgSubdir);
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child, childInsidePkgSubtree);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child,
+                                                          childrenInsidePkgSubtree);
             } else {
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child, childInsidePkgSubtree);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child, childrenInsidePkgSubtree);
             }
         }
     }
