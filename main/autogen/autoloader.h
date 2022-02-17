@@ -91,6 +91,7 @@ public:
     bool root() const;
     core::NameRef name() const;
     std::string path(const core::GlobalState &gs) const;
+    core::FileRef getDefiningFile() const;
     std::string show(const core::GlobalState &gs, int level = 0) const; // Render the entire tree
     std::string fullName(const core::GlobalState &) const;
 
