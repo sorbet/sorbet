@@ -252,7 +252,6 @@ class RBIGen::Public::AttachedClassType < Object
   def self.method(a); end
 end
 class RBIGen::Public::AlsoDefinedInRBIFile < Object
-  include Sorbet::Private::Static::StubModule
 end
 class RBIGen::Public::AliasMethod < Object
   sig {params(other: BasicObject).returns(T::Boolean)}

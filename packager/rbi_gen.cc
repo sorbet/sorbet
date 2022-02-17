@@ -767,6 +767,15 @@ private:
 
             // Mixins (include/extend)
             for (auto mixin : klass.data(gs)->mixins()) {
+                // The resolver turns unresolved constant literals into StubModules.
+                // Ideally, we'd never see these, but we might have out-of-date RBIs
+                // as input to the package generation process.  Since mixins that
+                // were stubbed out wouldn't have affected typechecking, they
+                // won't affect uses of the generated RBIs, either, and we should
+                // just skip them.
+                if (mixin == core::Symbols::StubModule()) {
+                    continue;
+                }
                 auto isSingleton = mixin.data(gs)->isSingletonClass(gs);
                 auto keyword = isSingleton ? "extend"sv : "include"sv;
                 out.println("{} {}", keyword, mixin.show(gs));
@@ -907,6 +916,15 @@ private:
             if (singleton.exists()) {
                 // Mixins (include/extend)
                 for (auto mixin : singleton.data(gs)->mixins()) {
+                    // The resolver turns unresolved constant literals into StubModules.
+                    // Ideally, we'd never see these, but we might have out-of-date RBIs
+                    // as input to the package generation process.  Since mixins that
+                    // were stubbed out wouldn't have affected typechecking, they
+                    // won't affect uses of the generated RBIs, either, and we should
+                    // just skip them.
+                    if (mixin == core::Symbols::StubModule()) {
+                        continue;
+                    }
                     out.println("extend {}", mixin.show(gs));
                     maybeEmit(mixin);
                 }
