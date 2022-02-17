@@ -105,13 +105,14 @@ rmdir release/webasm
 pushd release
 files=()
 while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
+backticks='```' # hack for bad Vim syntax highlighting definition
 release_notes="To use Sorbet add this line to your Gemfile:
-\`\`\`
+$backticks
 gem 'sorbet', '$release_version', :group => :development
 gem 'sorbet-runtime', '$release_version'
-\`\`\`"
+$backticks"
 if [ "$dryrun" = "" ]; then
-    echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
+  echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd
 
