@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -318,7 +318,7 @@
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",
     "typescript": "^3.7.2",
-    "vsce": "~1.75",
+    "vsce": "~1.76",
     "vscode-languageserver": "^6.1.1",
     "vscode-test": "^1.0.2"
   }

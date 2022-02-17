@@ -88,12 +88,10 @@ steps:
     artifact_paths: _out_/**/*
     <<: *elastic
 
-  # TODO: Run on Linux agent and auto-publish when version is bumped.
-  # - label: ":mac: build-vscode-extension.sh"
-  #   command: .buildkite/build-vscode-extension.sh
-  #   artifact_paths: _out_/**/*
-  #   agents:
-  #     os: mac
+  - label: ":linux: build-vscode-extension.sh"
+    command: .buildkite/build-vscode-extension.sh
+    artifact_paths: _out_/**/*
+    <<: *elastic
 
   - wait: ~
 

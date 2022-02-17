@@ -7,8 +7,15 @@ if [ "${CLEAN_BUILD:-}" != "" ] || [ "${PUBLISH_TO_RUBYGEMS:-}" != "" ]; then
 fi
 
 echo "--- setup"
+
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+echo "deb https://deb.nodesource.com/node_16.x focal main" | tee /etc/apt/sources.list.d/nodesource.list
+echo "deb-src https://deb.nodesource.com/node_16.x focal main" | tee -a /etc/apt/sources.list.d/nodesource.list
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+
 apt-get update
-apt-get install -yy curl jq rubygems file
+apt-get install -yy curl jq rubygems file nodejs yarn
 
 git config --global user.email "sorbet+bot@stripe.com"
 git config --global user.name "Sorbet build farm"
@@ -116,3 +123,26 @@ if [ "$dryrun" = "" ]; then
 fi
 popd
 
+echo "--- releasing VS Code extension"
+pushd vscode_extension
+
+extension_release_version="$(jq --raw-output '.version' package.json)"
+echo "releasing $extension_release_version"
+
+# (progress bar messes with Buildkite timestamps)
+yarn install --no-progress
+
+if node_modules/.bin/vsce show --json sorbet.sorbet-vscode-extension | \
+    jq --raw-output '.versions[] | .version' | \
+    grep -qFx "$extension_release_version"; then
+  echo "... $extension_release_version is already published"
+  node_modules/.bin/vsce show sorbet.sorbet-vscode-extension
+elif [ "$dryrun" = "" ]; then
+  echo "... starting publish"
+  # Reads from the VSCE_PAT variable
+  node_modules/.bin/vsce publish --packagePath "../_out_/vscode_extension/sorbet.vsix" < /dev/null
+  echo "... published version $extension_release_version"
+else
+  echo "... skipping extension publish for dryrun."
+fi
+popd
