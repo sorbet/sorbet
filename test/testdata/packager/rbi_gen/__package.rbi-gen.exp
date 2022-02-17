@@ -79,6 +79,8 @@ end
 RBIGen::Public::RefersToPrivateTypes::ClassAlias = RBIGen::Private::PrivateClassPulledInByClassAlias
 class RBIGen::Private::PrivateClassPulledInByClassAlias < Object
 end
+class RBIGen::Public::Parent < Object
+end
 class RBIGen::Public::MyStruct < T::Struct
   prop :foo, Integer
   const :singleton_type, T.class_of(RBIGen::Public::MyStruct)
@@ -113,6 +115,15 @@ end
 module RBIGen::Public::ModuleWithTypeParams
   A = type_member(:in)
   B = type_member(:out)
+  C = type_member(upper: RBIGen::Public::Parent)
+  D = type_member(lower: RBIGen::Public::Child)
+  E = type_member(upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
+  F = type_member(:in, upper: RBIGen::Public::Parent)
+  G = type_member(:in, lower: RBIGen::Public::Child)
+  H = type_member(:in, upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
+  I = type_member(:out, upper: RBIGen::Public::Parent)
+  J = type_member(:out, lower: RBIGen::Public::Child)
+  K = type_member(:out, upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
   extend T::Generic
   extend T::Helpers
 end
@@ -222,6 +233,9 @@ class RBIGen::Public::CustomStruct < Object
 end
 class RBIGen::Public::ClassWithTypeParams < Object
   C = type_member()
+  D = type_member(upper: RBIGen::Public::Parent)
+  E = type_member(lower: RBIGen::Public::Child)
+  F = type_member(upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
   extend T::Generic
   extend T::Helpers
   A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
@@ -229,6 +243,8 @@ class RBIGen::Public::ClassWithTypeParams < Object
 end
 class RBIGen::Public::ClassWithPrivateMethods < Object
   extend T::Sig
+end
+class RBIGen::Public::Child < RBIGen::Public::Parent
 end
 class RBIGen::Public::AttachedClassType < Object
   extend T::Sig

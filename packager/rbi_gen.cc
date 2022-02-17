@@ -34,7 +34,7 @@ private:
 public:
     template <typename... Args> void println(fmt::format_string<Args...> fmt, Args &&...args) {
         fmt::format_to(std::back_inserter(out), "{:{}}", "", this->indent * 2);
-        fmt::format_to(std::back_inserter(out), fmt, args...);
+        fmt::format_to(std::back_inserter(out), fmt, std::forward<Args>(args)...);
         fmt::format_to(std::back_inserter(out), "\n");
     }
 
@@ -506,22 +506,36 @@ private:
 
     Output out;
 
-    // copied from variance.cc
-    string showVariance(core::TypeMemberRef tm) {
-        if (tm.data(gs)->isFixed()) {
-            auto &lambdaParam = core::cast_type_nonnull<core::LambdaParam>(tm.data(gs)->resultType);
-            return absl::StrCat("fixed: ", showType(lambdaParam.upperBound));
-        }
+    vector<string> typeMemberDetails(core::TypeMemberRef tm) {
+        vector<string> res;
 
         switch (tm.data(gs)->variance()) {
             case core::Variance::CoVariant:
-                return ":out";
+                res.emplace_back(":out");
+                break;
+
             case core::Variance::Invariant:
-                // Default.
-                return "";
+                break;
+
             case core::Variance::ContraVariant:
-                return ":in";
+                res.emplace_back(":in");
+                break;
         }
+
+        auto &lambdaParam = core::cast_type_nonnull<core::LambdaParam>(tm.data(gs)->resultType);
+        if (tm.data(gs)->isFixed()) {
+            res.emplace_back(fmt::format("fixed: {}", showType(lambdaParam.upperBound)));
+        } else {
+            if (lambdaParam.upperBound != core::Types::top()) {
+                res.emplace_back(fmt::format("upper: {}", showType(lambdaParam.upperBound)));
+            }
+
+            if (lambdaParam.lowerBound != core::Types::bottom()) {
+                res.emplace_back(fmt::format("lower: {}", showType(lambdaParam.lowerBound)));
+            }
+        }
+
+        return res;
     }
 
     bool isInTestPackage(core::SymbolRef sym) {
@@ -1095,10 +1109,11 @@ private:
         }
 
         // If this is a type template, there will be an alias type defined on the non-singleton class w/ the same name.
+        auto details = typeMemberDetails(tm);
         if (tm.data(gs)->owner.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
-            out.println("{} = type_template({})", tm.data(gs)->name.show(gs), showVariance(tm));
+            out.println("{} = type_template({})", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
         } else {
-            out.println("{} = type_member({})", tm.data(gs)->name.show(gs), showVariance(tm));
+            out.println("{} = type_member({})", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
         }
     }
 
