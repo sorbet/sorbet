@@ -195,30 +195,38 @@ core::FileRef DefTree::getDefiningFile() const {
     return definingFile;
 }
 
-void DefTree::writeNewPackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
-                                       fmt::memory_buffer &buf, const DefTree *parent) const {
-    if (this != parent && (getDefiningFile().exists() || pkgName.exists())) {
-        string parentFullName = fmt::format(
-            "{}", fmt::map_join(parent->qname.nameParts, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
-        fmt::format_to(std::back_inserter(buf), "{}.autoload_map({}, {{{}: '{}/{}'}})\n", alCfg.registryModule,
-                       parentFullName, name().show(gs), alCfg.rootDir, path(gs));
-    }
-
-    const bool isNestedPkg = (this != parent) && pkgName.exists();
-    if (!children.empty() && !isNestedPkg) {
-        if (this != parent) {
+void DefTree::writeCollapsedAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                      fmt::memory_buffer &buf, const DefTree *parent) const {
+    if (this == parent) {
+        // namespace root
+        for (const auto &[_, tree] : children) {
+            tree->writeCollapsedAutoloads(gs, alCfg, buf, this);
+        }
+    } else {
+        // inside namespace
+        const bool isNestedPkg = pkgName.exists();
+        const core::FileRef definingFile = getDefiningFile();
+        if (definingFile.exists() || isNestedPkg) {
+            // behavior-defining node, or nested package
+            string parentFullName =
+                fmt::format("{}", fmt::map_join(parent->qname.nameParts,
+                                                "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+            fmt::format_to(std::back_inserter(buf), "{}.autoload_map({}, {{{}: '{}/{}'}})\n", alCfg.registryModule,
+                           parentFullName, name().show(gs), alCfg.rootDir, path(gs));
+        } else if (!children.empty()) {
+            // raw namespace
             string fullName = fmt::format(
                 "{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
             predeclare(gs, fullName, buf);
-        }
-
-        for (const auto &[_, tree] : children) {
-            tree->writeNewPackageAutoloads(gs, alCfg, buf, this);
+            for (const auto &[_, tree] : children) {
+                tree->writeCollapsedAutoloads(gs, alCfg, buf, this);
+            }
         }
     }
 }
 
-string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
+string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                  const bool pkgPrefix) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
 
@@ -238,19 +246,23 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
         predeclare(gs, fullName, buf);
     }
 
-    if (pkgName.exists()) {
-        // package autoloads
-        writeNewPackageAutoloads(gs, alCfg, buf, this);
+    if (!pkgPrefix && (pkgName.exists() || definingFile.exists())) {
+        // package/namespace autoloads
+        writeCollapsedAutoloads(gs, alCfg, buf, this);
 
-        // package registration
-        ENFORCE(!gs.packageDB().empty());
-        const string_view shortName = pkgName.shortName(gs);
-        const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
+        if (pkgName.exists()) {
+            // package registration
+            ENFORCE(!gs.packageDB().empty());
+            const string_view shortName = pkgName.shortName(gs);
+            const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
 
-        fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
-                       mungedName);
-    } else if (!children.empty() && (type == Definition::Type::Module || type == Definition::Type::Class)) {
+            fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
+                           mungedName);
+        }
+    } else if (pkgPrefix) {
         // prefix node
+        ENFORCE(!definingFile.exists(), "Found package prefix with behavior {}", fullName);
+
         fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
         vector<pair<core::NameRef, string>> childNames;
         std::transform(children.begin(), children.end(), back_inserter(childNames),
@@ -263,19 +275,19 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
         fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
     }
 
-    // any definition node
-    if (type == Definition::Type::Casgn || type == Definition::Type::Alias || type == Definition::Type::TypeAlias) {
-        ENFORCE(qname.size() > 1);
-        casgnArg = fmt::format(", [{}, :{}]",
-                               fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
-                                             "::", [&](const auto &nr) -> string { return nr.show(gs); }),
-                               qname.name().show(gs));
-    }
-
     if (definingFile.exists()) {
+        if (type == Definition::Type::Casgn || type == Definition::Type::Alias || type == Definition::Type::TypeAlias) {
+            ENFORCE(qname.size() > 1);
+            casgnArg = fmt::format(", [{}, :{}]",
+                                   fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
+                                                 "::", [&](const auto &nr) -> string { return nr.show(gs); }),
+                                   qname.name().show(gs));
+        }
+
         fmt::format_to(std::back_inserter(buf), "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
                        alCfg.normalizePath(gs, definingFile), casgnArg);
     }
+
     return to_string(buf);
 }
 
@@ -463,6 +475,7 @@ namespace {
 struct RenderAutoloadTask {
     string filePath;
     const DefTree &node;
+    const bool pkgPrefix;
 };
 
 // This function has two duties:
@@ -473,16 +486,16 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                                                bool insidePkgSubtree) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
+    bool nextInsidePkgSubtree = insidePkgSubtree || node.pkgName.exists();
     if ((!alCfg.packagedAutoloader || !node.root()) &&
         (!insidePkgSubtree || node.pkgName.exists() || node.getDefiningFile().exists())) {
-        tasks.emplace_back(RenderAutoloadTask{filePath, node});
+        tasks.emplace_back(RenderAutoloadTask{filePath, node, !nextInsidePkgSubtree});
     }
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
         if (!node.root()) {
             FileOps::ensureDir(subdir);
         }
-        bool childrenInsidePkgSubtree = insidePkgSubtree || node.pkgName.exists();
         for (auto &[_, child] : node.children) {
             if (alCfg.packagedAutoloader && node.root()) {
                 // in a packaged context, we want to make sure that these constants are also put in their packages
@@ -497,10 +510,9 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                 string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
                 auto pkgSubdir = join(subdir, packageName);
                 FileOps::ensureDir(pkgSubdir);
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child,
-                                                          childrenInsidePkgSubtree);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child, nextInsidePkgSubtree);
             } else {
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child, childrenInsidePkgSubtree);
+                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child, nextInsidePkgSubtree);
             }
         }
     }
@@ -541,7 +553,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
                 ++n;
                 auto &task = tasks[idx];
-                FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
+                FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg, task.pkgPrefix));
             }
         }
 

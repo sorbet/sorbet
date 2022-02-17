@@ -95,7 +95,7 @@ public:
     std::string show(const core::GlobalState &gs, int level = 0) const; // Render the entire tree
     std::string fullName(const core::GlobalState &) const;
 
-    std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &) const;
+    std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &, bool pkgPrefix) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
@@ -112,8 +112,8 @@ private:
     const NamedDefinition &definition(const core::GlobalState &) const;
     Definition::Type definitionType(const core::GlobalState &) const;
     void markPackageNamespace(core::NameRef mangledName, const std::vector<core::NameRef> &nameParts);
-    void writeNewPackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf,
-                                  const DefTree *parent) const;
+    void writeCollapsedAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, fmt::memory_buffer &buf,
+                                 const DefTree *parent) const;
 
     friend class DefTreeBuilder;
 };
