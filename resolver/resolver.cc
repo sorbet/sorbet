@@ -579,6 +579,11 @@ private:
             core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
 
         auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+
+        // Add a fake block argument so that this method symbol passes sanity checks
+        auto &arg = ctx.state.enterMethodArgumentSymbol(core::Loc::none(), uaSym, core::Names::blkArg());
+        arg.flags.isBlock = true;
+
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
         if (!resultType) {
             uaSym.data(ctx)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{ancestorType});
