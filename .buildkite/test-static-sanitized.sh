@@ -59,7 +59,7 @@ if [ "$err" -ne 0 ]; then
 
   # Take the lines that start with target labels.
   # Lines look like "//foo  FAILED in 10s"
-  ./bazel test --test_summary=terse "${test_args[@]}" | \
+  { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
     grep '^//' | \
     sed -e 's/ .*/ \\/' | \
     sed -e 's/^/  /' >> "$failing_tests"
