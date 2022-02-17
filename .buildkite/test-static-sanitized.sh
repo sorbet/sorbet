@@ -31,19 +31,48 @@ err=0
 mkdir -p _out_
 
 # NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
+test_args=(
+  "$CONFIG_OPTS"
+  "--test_tag_filters=-compiler"
+  "--build_tag_filters=-compiler"
+  "--build_tests_only"
+  "@gems//..."
+  "//gems/sorbet/test/snapshot"
+  "//gems/sorbet/test/hidden-method-finder"
+  "//..."
+)
+
 ./bazel test \
-  --experimental_generate_json_trace_profile --profile=_out_/profile.json \
-  --test_tag_filters=-compiler \
-  --build_tag_filters=-compiler \
-  --build_tests_only \
-  @gems//... \
-  //gems/sorbet/test/snapshot \
-  //gems/sorbet/test/hidden-method-finder \
-  //... $CONFIG_OPTS --test_summary=terse || err=$?
-
-
-# --- post process test results here if you want ---
+  --experimental_generate_json_trace_profile \
+  --profile=_out_/profile.json \
+  --test_summary=terse \
+  "${test_args[@]}" || err=$?
 
 if [ "$err" -ne 0 ]; then
-    exit "$err"
+  echo "--- annotating build result"
+  failing_tests="$(mktemp)"
+
+  echo 'Run this command to run failing tests locally:' >> "$failing_tests"
+  echo >> "$failing_tests"
+  echo '```bash' >> "$failing_tests"
+  echo "./bazel test \\" >> "$failing_tests"
+
+  # Take the lines that start with target labels.
+  # Lines look like "//foo  FAILED in 10s"
+  ./bazel test --test_summary=terse "${test_args[@]}" | \
+    grep '^//' | \
+    sed -e 's/ .*/ \\/' | \
+    sed -e 's/^/  /' >> "$failing_tests"
+
+  # Put this last as an easy way to not have a `\` on the last line.
+  #
+  # Use --config=dbg instead of sanitized because it's more likely that they've
+  # already built this config locally, and most test failures reproduce outside
+  # of sanitized mode anyways.
+  echo '  --config=dbg' >> "$failing_tests"
+  echo '```' >> "$failing_tests"
+
+  buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+
+  exit "$err"
 fi
