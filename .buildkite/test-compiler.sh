@@ -41,13 +41,13 @@ test_args=(
   "-c"
   "opt"
   "--config=forcedebug"
+  "--spawn_strategy=local"
 )
 
 ./bazel test \
   --experimental_generate_json_trace_profile \
   --profile=_out_/profile.json \
   --test_summary=terse \
-  --spawn_strategy=local \
   --test_output=errors \
   "${test_args[@]}" || err=$?
 
