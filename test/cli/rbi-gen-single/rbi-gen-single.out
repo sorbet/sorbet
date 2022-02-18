@@ -1,0 +1,34 @@
+-- sanity-checking package with --stripe-packages
+-- ./test/cli/rbi-gen-single/family/__package.rb (Family)
+-- RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+# typed: true
+
+class Family::Simpsons < Object
+  sig {returns(Bart::Character)}
+  def bart; end
+  extend T::Sig
+end
+-- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+{"packageRefs":[], "rbiRefs":[]}-- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+-- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+# typed: true
+
+class Family::Bart::Character < Object
+  sig {void}
+  def catchphrase; end
+  sig {returns(T.class_of(Family::Simpsons))}
+  def family; end
+  extend T::Sig
+end
+-- JSON: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+{"packageRefs":["Family"], "rbiRefs":[]}-- ./test/cli/rbi-gen-single/util/__package.rb (Util)
+-- RBI: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+# typed: true
+
+class Util::Messages < Object
+  extend T::Sig
+  sig {params(msg: String).void}
+  def self.say(msg); end
+end
+-- JSON: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+{"packageRefs":[], "rbiRefs":[]}
