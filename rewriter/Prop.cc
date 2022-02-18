@@ -262,7 +262,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
 
             if (addDefault) {
-                auto end = core::Loc{ctx.file, core::LocOffsets{send->loc.endPos(), send->loc.endPos()}};
+                auto end = core::Loc{ctx.file, send->loc.copyEndWithZeroLength()};
                 e.replaceWith("Add `default: nil`", end, ", default: nil");
             }
         }

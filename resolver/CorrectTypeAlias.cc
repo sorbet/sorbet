@@ -48,7 +48,7 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
                           argsLoc.source(ctx).value());
         }
     } else {
-        core::Loc endLoc(argsLoc.file(), argsLoc.endPos(), argsLoc.endPos());
+        core::Loc endLoc = argsLoc.copyEndWithZeroLength();
         string argIndent = getIndent(ctx, endLoc);
         string argSrc = fmt::format("{}{}", argIndent, argsLoc.source(ctx).value());
         if (wrapHash) {

@@ -37,6 +37,10 @@ struct LocOffsets {
     LocOffsets copyWithZeroLength() const {
         return LocOffsets{beginPos(), beginPos()};
     }
+    // As above, but returns a zero-length version that starts at the end of the location.
+    LocOffsets copyEndWithZeroLength() const {
+        return LocOffsets{endPos(), endPos()};
+    }
 
     std::string showRaw(const Context ctx) const;
     std::string showRaw(const MutableContext ctx) const;
@@ -79,6 +83,10 @@ public:
     // For a given Loc, returns a zero-length version that starts at the same location.
     Loc copyWithZeroLength() const {
         return {this->storage.fileRef, this->storage.offsets.copyWithZeroLength()};
+    }
+    // As above, but returns a zero-length version that starts at the end of the Loc.
+    Loc copyEndWithZeroLength() const {
+        return {this->storage.fileRef, this->storage.offsets.copyEndWithZeroLength()};
     }
 
     uint32_t beginPos() const {

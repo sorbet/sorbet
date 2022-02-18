@@ -328,7 +328,7 @@ public:
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
             auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
@@ -368,8 +368,8 @@ public:
         auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
         if (!exports_.empty()) {
-            auto lastOffset = exports_.back().fqn.loc;
-            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+            auto lastOffset = exports_.back().fqn.loc.offsets();
+            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
