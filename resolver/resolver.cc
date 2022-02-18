@@ -2892,7 +2892,14 @@ private:
             method.data(ctx)->flags.isFinal = true;
         }
         if (sig.seen.bind) {
-            method.data(ctx)->rebind = sig.bind;
+            if (sig.bind == core::Symbols::BindToAttachedClass()) {
+                if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::BindNonBlockParameter)) {
+                    e.setHeader("Using `{}` is not permitted here", "bind");
+                    e.addErrorNote("Only block arguments can use `{}`", "bind");
+                }
+            } else {
+                method.data(ctx)->rebind = sig.bind;
+            }
         }
 
         auto methodInfo = method.data(ctx);
@@ -2952,7 +2959,10 @@ private:
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
 
-                if (!isBlkArg && spec->rebind.exists()) {
+                // It would be nice to remove the restriction on more than these two specific binds, but that would
+                // raise a lot more errors
+                if (!isBlkArg && (spec->rebind == core::Symbols::BindToAttachedClass() ||
+                                  spec->rebind == core::Symbols::BindToSelfType())) {
                     if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");

@@ -36,11 +36,13 @@ end
 class BadBinds
   extend T::Sig
 
-  sig {params(blk: T.proc.params(x: T.proc.bind(T.attached_class).void).void).void}
-                                  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
-  def self.lambda_argument(&blk); end
-
   sig {params(it: T.proc.bind(T.attached_class).void).void}
             # ^^ error: Using `bind` is not permitted here
   def self.non_block_argument(it); end
+
+  sig {returns(T.proc.bind(T.attached_class).void)}
+             # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
+  def self.attached_class_return
+    T.unsafe(nil)
+  end
 end
