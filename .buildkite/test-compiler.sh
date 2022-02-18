@@ -68,11 +68,7 @@ if [ "$err" -ne 0 ]; then
     sed -e 's/^/  /' >> "$failing_tests"
 
   # Put this last as an easy way to not have a `\` on the last line.
-  #
-  # Use --config=dbg instead of sanitized because it's more likely that they've
-  # already built this config locally, and most test failures reproduce outside
-  # of sanitized mode anyways.
-  echo '  --config=dbg' >> "$failing_tests"
+  echo '  -c opt --config=forcedebug' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
