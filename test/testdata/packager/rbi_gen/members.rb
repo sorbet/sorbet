@@ -427,4 +427,8 @@ module RBIGen::Public
       field :boo
     end
   end
+
+  class AlsoDefinedInRBIFile
+    # Nothing here, but the RBI file contains includes of nonexistent modules.
+  end
 end
