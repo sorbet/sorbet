@@ -56,7 +56,7 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
         e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), loc, "{}({})", *gs.suggestUnsafe,
                       loc.source(gs).value());
     } else {
-        auto withoutNil = Types::approximateSubtract(gs, actualType, Types::nilClass());
+        auto withoutNil = Types::dropNil(gs, actualType);
         if (!withoutNil.isBottom() &&
             Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
             e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs).value());
