@@ -183,10 +183,6 @@ int lexer::compare_indent_level(token_t left, token_t right) {
         return 0;
     }
 
-    // attempt to defeat pathological cases (extremely long lines)
-    if ((leftStart - leftLineStart > 100) || (rightStart - rightLineStart > 100)) {
-    }
-
     auto *data = this->source_buffer.data();
     auto *leftPtr = data + leftLineStart;
     const auto * const leftStartPtr = data + leftStart;
