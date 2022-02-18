@@ -1253,7 +1253,6 @@ UnorderedSet<core::ClassOrModuleRef> RBIGenerator::buildPackageNamespace(core::G
 
     auto &packages = packageDB.packages();
 
-    // TODO: should this be an enforce?
     if (packages.empty()) {
         Exception::raise("No packages found?");
     }

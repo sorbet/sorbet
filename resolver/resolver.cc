@@ -341,7 +341,6 @@ private:
 
         core::ClassOrModuleRef owner = core::Symbols::root();
         for (auto part : info.fullName()) {
-            // TODO: is none okay for the loc?
             owner = ctx.state.enterClassSymbol(core::Loc::none(), owner, part);
         }
 
