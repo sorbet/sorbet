@@ -1522,7 +1522,7 @@ public:
             }
             return;
         }
-        auto ret = Types::approximateSubtract(gs, args.args[0]->type, Types::nilClass());
+        auto ret = Types::dropNil(gs, args.args[0]->type);
         if (ret == args.args[0]->type) {
             if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
                 if (args.args[0]->type.isUntyped()) {
@@ -3314,7 +3314,7 @@ public:
         ENFORCE(!ap->targs.empty());
         element = ap->targs.front();
 
-        auto ret = Types::approximateSubtract(gs, element, Types::nilClass());
+        auto ret = Types::dropNil(gs, element);
         res.returnType = Types::arrayOf(gs, ret);
     }
 } Array_compact;
