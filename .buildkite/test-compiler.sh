@@ -35,16 +35,47 @@ mkdir -p _out_
 # `-c opt` is required, otherwise the tests are too slow
 # forcedebug is really the ~only thing in `--config=dbg` we care about.
 # must come after `-c opt` because `-c opt` will define NDEBUG on its own
-./bazel test //test:compiler //test/cli/compiler \
-  --experimental_generate_json_trace_profile --profile=_out_/profile.json \
-  -c opt \
-  --config=forcedebug \
+test_args=(
+  "//test:compiler"
+  "//test/cli/compiler"
+  "-c"
+  "opt"
+  "--config=forcedebug"
+)
+
+./bazel test \
+  --experimental_generate_json_trace_profile \
+  --profile=_out_/profile.json \
   --test_summary=terse \
   --spawn_strategy=local \
-  --test_output=errors || err=$?
-
-# --- post process test results here if you want ---
+  --test_output=errors \
+  "${test_args[@]}" || err=$?
 
 if [ "$err" -ne 0 ]; then
-    exit "$err"
+  echo "--- annotating build result"
+  failing_tests="$(mktemp)"
+
+  echo 'Run this command to run failing tests locally:' >> "$failing_tests"
+  echo >> "$failing_tests"
+  echo '```bash' >> "$failing_tests"
+  echo "./bazel test \\" >> "$failing_tests"
+
+  # Take the lines that start with target labels.
+  # Lines look like "//foo  FAILED in 10s"
+  { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
+    grep '^//' | \
+    sed -e 's/ .*/ \\/' | \
+    sed -e 's/^/  /' >> "$failing_tests"
+
+  # Put this last as an easy way to not have a `\` on the last line.
+  #
+  # Use --config=dbg instead of sanitized because it's more likely that they've
+  # already built this config locally, and most test failures reproduce outside
+  # of sanitized mode anyways.
+  echo '  --config=dbg' >> "$failing_tests"
+  echo '```' >> "$failing_tests"
+
+  buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+
+  exit "$err"
 fi
