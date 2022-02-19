@@ -168,8 +168,10 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
     sig.origSend = const_cast<ast::Send *>(&sigSend);
 
     const ast::Send *send = nullptr;
+    bool isProc = false;
     if (isTProc(ctx, &sigSend)) {
         send = &sigSend;
+        isProc = true;
     } else {
         sig.seen.sig = true;
         ENFORCE(sigSend.fun == core::Names::sig());
@@ -290,6 +292,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         sig.bind = appType->klass;
                         validBind = true;
                     }
+                } else if (auto arg = ast::cast_tree<ast::Send>(send->getPosArg(0))) {
+                    if (arg->fun == core::Names::selfType()) {
+                        sig.bind = core::Symbols::BindToSelfType();
+                        validBind = true;
+                    } else if (arg->fun == core::Names::attachedClass()) {
+                        sig.bind = core::Symbols::BindToAttachedClass();
+                        validBind = true;
+                    }
                 }
 
                 if (!validBind) {
@@ -361,8 +371,16 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     auto *lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol(ctx)) {
                         core::NameRef name = lit->asSymbol(ctx);
-                        auto resultAndBind =
-                            getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
+                        TypeSyntax::ResultType resultAndBind;
+
+                        if (isProc) {
+                            resultAndBind =
+                                getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withoutRebind());
+                        } else {
+                            resultAndBind =
+                                getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
+                        }
+
                         sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key.loc()), name,
                                                                      resultAndBind.type, resultAndBind.rebind});
                     }
@@ -991,7 +1009,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
         },
         [&](const ast::Send &s) {
             if (isTProc(ctx, &s)) {
-                auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
+                auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
                 if (sig.bind.exists()) {
                     if (!args.allowRebind) {
                         if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {

@@ -1364,10 +1364,25 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             },
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
-                if (l.link->result->main.blockSpec.rebind.exists()) {
-                    tp.type = l.link->result->main.blockSpec.rebind.data(ctx)->externalType();
-                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                auto rebind = l.link->result->main.blockSpec.rebind;
 
+                if (rebind.exists()) {
+                    if (rebind == core::Symbols::BindToSelfType()) {
+                        tp.type = l.link->result->main.receiver;
+                    } else if (rebind == core::Symbols::BindToAttachedClass()) {
+                        auto appliedType = core::cast_type<core::AppliedType>(l.link->result->main.receiver);
+                        auto attachedClass =
+                            appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+                        auto lambdaParam =
+                            core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
+
+                        tp.type = lambdaParam->upperBound;
+                    } else {
+                        tp.type = rebind.data(ctx)->externalType();
+                    }
+
+                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
                 } else {
                     tp = getTypeAndOrigin(ctx, l.fallback);
                 }
