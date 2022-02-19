@@ -605,7 +605,7 @@ public:
             loc = loc.join(tokLoc(dot));
         }
 
-        auto methodLoc = locOffset(loc.endPos(), loc.endPos());
+        auto methodLoc = loc.copyEndWithZeroLength();
 
         auto method = core::Names::methodNameMissing();
         if ((dot != nullptr) && dot->view() == "&.") {
