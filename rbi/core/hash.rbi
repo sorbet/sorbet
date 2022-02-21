@@ -689,6 +689,21 @@ class Hash < Object
   # ```
   def fetch_values(*_); end
 
+  # Returns a new Hash excluding entries for the given keys.
+  # [`Hash#except`](https://ruby-doc.org/core-3.0.0/Hash.html#method-i-except)
+  #
+  # ```ruby
+  # h = { a: 100, b: 200, c: 300 }
+  # h.except(:a)          #=> {:b=>200, :c=>300}
+  # ```
+  sig do
+    params(
+        args: K,
+    )
+    .returns(T::Hash[K, V])
+  end
+  def except(*args); end
+
   # Returns a new array that is a one-dimensional flattening of this hash. That
   # is, for every key or value that is an array, extract its elements into the
   # new array. Unlike
