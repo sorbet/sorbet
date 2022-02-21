@@ -188,6 +188,8 @@ ConstExprStr LSPTask::methodString() const {
             return "textDocument.typeDefinition";
         case LSPMethod::WorkspaceSymbol:
             return "workspace.symbol";
+        case LSPMethod::WorkspaceExecuteCommand:
+            return "workspace.executeCommand";
         case LSPMethod::TextDocumentImplementation:
             return "textDocument.implementation";
     }

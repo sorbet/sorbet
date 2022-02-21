@@ -278,7 +278,7 @@ int File::lineCount() const {
     return lineBreaks().size() - 1;
 }
 
-string_view File::getLine(int i) {
+string_view File::getLine(int i) const {
     auto &lineBreaks = this->lineBreaks();
     ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);

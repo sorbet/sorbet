@@ -2,6 +2,9 @@
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
+#include "sig_finder/sig_finder.h"
+#include <optional>
+#include <vector>
 
 using namespace std;
 
@@ -28,6 +31,108 @@ vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, co
             make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
     }
     return documentEdits;
+}
+
+std::optional<const ast::MethodDef*> findMethodTree(const ast::ExpressionPtr &tree, const core::SymbolRef &method) {
+    if (auto seq = ast::cast_tree<ast::InsSeq>(tree)) {
+        for (auto &subtree : seq->stats) {
+            auto maybeMethod = findMethodTree(subtree, method);
+            if (maybeMethod.has_value()) {
+                return maybeMethod.value();
+            }
+        }
+    } else if (auto klass = ast::cast_tree<ast::ClassDef>(tree)) {
+        for (auto &subtree : klass->rhs) {
+            auto maybeMethod = findMethodTree(subtree, method);
+            if (maybeMethod.has_value()) {
+                return maybeMethod.value();
+            }
+        }
+    } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(tree)) {
+        if (methodDef->symbol == method.asMethodRef()) {
+            return methodDef;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<std::pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs, const ast::ExpressionPtr &rootTree, const core::SymbolRef &method, const core::FileRef &fref) {
+    auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
+    if (!maybeTree.has_value()) {
+        return std::nullopt;
+    }
+    auto methodLoc = maybeTree.value()->loc;
+
+    auto maybeSig = sig_finder::findSignature(gs, method);
+    if (!maybeSig.has_value()) {
+        return std::nullopt;
+    }
+    core::LocOffsets sigLoc = {maybeSig->sig.beginPos(), maybeSig->body.endPos()};
+
+    return make_pair(sigLoc, methodLoc);
+}
+
+unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets &sigLoc, const core::LocOffsets &methodLoc, const core::FileRef &fref) {
+
+    auto cutSource = [&](core::LocOffsets loc) { return fref.data(gs).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos()); };
+
+
+    auto sigSource = cutSource(sigLoc);
+    auto methodSource = cutSource(methodLoc);
+    return make_unique<string>(absl::StrCat(sigSource, "\n  ",  methodSource));
+}
+
+vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
+                                                        const core::lsp::DefinitionResponse *definition, LSPTypecheckerDelegate &typechecker) {
+
+    ENFORCE(definition->symbol.isMethod());
+
+
+    auto moduleStart = "module NewModule\n  extend T::Sig\n  ";
+    auto moduleEnd = "\nend";
+
+    auto fref = definition->termLoc.file();
+    auto &file = fref.data(gs);
+
+
+    auto trees = typechecker.getResolved({fref});
+    auto &rootTree = trees[0].tree;
+    auto beginLoc = core::Loc::offset2Pos(fref.data(gs), rootTree.loc().beginPos());
+
+    auto pos2Loc = [&](const auto &pos) {
+        auto loc = core::Loc::offset2Pos(fref.data(gs), pos);
+        return make_unique<Position>(loc.line-1, loc.column-1);
+    };
+
+    auto range2Loc = [&](const auto &pos) {
+        return make_unique<Range>(pos2Loc(pos.beginPos()), pos2Loc(pos.endPos()));
+    };
+
+    auto topOfTheFile = file.getLine(beginLoc.line);
+    auto sigAndMethodLocs = methodLocs(gs, rootTree, definition->symbol, fref);
+    if (!sigAndMethodLocs.has_value()) {
+        return {};
+    }
+    auto [sigLoc, methodLoc] = sigAndMethodLocs.value();
+    auto methodSource = copyMethodSource(gs, sigLoc, methodLoc, fref);
+
+    auto range = make_unique<Range>(make_unique<Position>(beginLoc.line-1, 0), make_unique<Position>(beginLoc.line-1, topOfTheFile.length()));
+    auto replacement = fmt::format("{}{}{}\n\n{}", moduleStart, *methodSource, moduleEnd, topOfTheFile);
+    auto moveNewMethod = make_unique<TextEdit>(std::move(range), replacement);
+    auto deleteOldSig = make_unique<TextEdit>( range2Loc(sigLoc), "");
+    auto deleteOldMethod = make_unique<TextEdit>( range2Loc(methodLoc), "");
+    vector<unique_ptr<TextEdit>> edits;
+    edits.emplace_back(std::move(moveNewMethod));
+    edits.emplace_back(std::move(deleteOldSig));
+    edits.emplace_back(std::move(deleteOldMethod));
+    auto docEdit = make_unique<TextDocumentEdit>(make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, definition->termLoc.file()), JSONNullObject()), std::move(edits));
+
+
+
+
+    vector<unique_ptr<TextDocumentEdit>> res;
+    res.emplace_back(std::move(docEdit));
+    return res;
 }
 } // namespace
 
@@ -114,10 +219,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             for (auto &resp : queryResult.responses) {
                 if (auto def = resp->isDefinition()) {
                     if (def->symbol.isMethod()) {
+                        auto command = make_unique<Command>()
                         auto action = make_unique<CodeAction>("Extract method to module");
                         action->kind = CodeActionKind::RefactorExtract;
                         auto workspaceEdit = make_unique<WorkspaceEdit>();
-                        // workspaceEdit->documentChanges = getEdits(config, gs, allEdits);
+                        workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, def, typechecker);
                         action->edit = move(workspaceEdit);
                         result.emplace_back(move(action));
                     }
