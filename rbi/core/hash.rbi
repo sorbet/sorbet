@@ -696,15 +696,13 @@ class Hash < Object
   # h = { a: 100, b: 200, c: 300 }
   # h.except(:a)          #=> {:b=>200, :c=>300}
   # ```
-  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.0.0")
-    sig do
-      params(
-          args: K,
-      )
-      .returns(T::Hash[K, V])
-    end
-    def except(*args); end
+  sig do
+    params(
+        args: K,
+    )
+    .returns(T::Hash[K, V])
   end
+  def except(*args); end
 
   # Returns a new array that is a one-dimensional flattening of this hash. That
   # is, for every key or value that is an array, extract its elements into the
