@@ -703,7 +703,7 @@ class Hash < Object
       )
       .returns(T::Hash[K, V])
     end
-    def except(*_); end
+    def except(*args); end
   end
 
   # Returns a new array that is a one-dimensional flattening of this hash. That
