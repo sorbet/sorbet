@@ -1252,6 +1252,7 @@ UnorderedSet<core::ClassOrModuleRef> RBIGenerator::buildPackageNamespace(core::G
     const auto &packageDB = gs.packageDB();
 
     auto &packages = packageDB.packages();
+
     if (packages.empty()) {
         Exception::raise("No packages found?");
     }
@@ -1260,7 +1261,7 @@ UnorderedSet<core::ClassOrModuleRef> RBIGenerator::buildPackageNamespace(core::G
 
     UnorderedSet<core::ClassOrModuleRef> packageNamespaces;
     for (auto package : packages) {
-        auto &pkg = gs.packageDB().getPackageInfo(package);
+        auto &pkg = packageDB.getPackageInfo(package);
         vector<core::NameRef> fullName = pkg.fullName();
         auto packageNamespace = lookupFQN(gs, fullName);
         // Might not exist if package has no files.
@@ -1321,4 +1322,54 @@ void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrMo
         });
     threadBarrier.Wait();
 }
+
+void RBIGenerator::runSinglePackage(core::GlobalState &gs,
+                                    const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
+                                    core::NameRef package, string outputDir, WorkerPool &workers) {
+    auto output = runOnce(gs, package, packageNamespaces);
+    if (!output.rbi.empty()) {
+        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".package.rbi"), output.rbi);
+        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".deps.json"), output.rbiPackageDependencies);
+    }
+
+    if (!output.testRBI.empty()) {
+        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.package.rbi"), output.testRBI);
+        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
+                       output.testRBIPackageDependencies);
+    }
+}
+
+RBIGenerator::SinglePackageInfo RBIGenerator::findSinglePackage(core::GlobalState &gs, std::string packageName) {
+    SinglePackageInfo res;
+
+    auto &db = gs.packageDB();
+    auto &packages = db.packages();
+
+    auto nameParts = absl::StrSplit(packageName, "::");
+    auto nameSize = std::distance(nameParts.begin(), nameParts.end());
+    for (auto pkg : packages) {
+        auto &info = db.getPackageInfo(pkg);
+
+        auto &fullName = info.fullName();
+        if (nameSize < fullName.size()) {
+            continue;
+        }
+
+        // `nameParts` will be at least as long as `fullName` because of the check above, so using `nameParts` as the
+        // third argument to `std::equal` is safe. When the two don't match in length but prefixEqual is true,
+        // `pkg` is a parent package of the package we're looking for.
+        bool prefixEqual = std::equal(fullName.begin(), fullName.end(), nameParts.begin(),
+                                      [&gs](auto name, auto part) { return name.shortName(gs) == part; });
+        if (prefixEqual) {
+            if (nameSize == fullName.size()) {
+                res.packageName = pkg;
+            } else {
+                res.parents.emplace_back(pkg);
+            }
+        }
+    }
+
+    return res;
+}
+
 } // namespace sorbet::packager

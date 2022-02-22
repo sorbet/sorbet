@@ -455,6 +455,7 @@ int realmain(int argc, char *argv[]) {
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
+    core::NameRef singlePackageTarget;
 
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
@@ -548,6 +549,8 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
             return 1;
 #else
+            Timer rbiGenTimer(logger, "rbiGeneration.setup");
+
             if (opts.stripePackages) {
                 logger->error("Cannot serialize package RBIs in legacy stripe packages mode.");
                 return 1;
@@ -582,9 +585,35 @@ int realmain(int argc, char *argv[]) {
                 return 1;
             }
 
+            // Indexing package files is by far the most expensive part of rbi generation. If we could instead select
+            // only the package files that we know we need to load, it would cut down command-line rbi generation by
+            // seconds.
             auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
             auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
             packages = packager::Packager::findPackages(*gs, *workers, move(packages));
+
+            if (!opts.singlePackage.empty()) {
+                Timer singlePackageTimer(logger, "singlePackage.setup");
+
+                auto info = packager::RBIGenerator::findSinglePackage(*gs, opts.singlePackage);
+                if (!info.packageName.exists()) {
+                    logger->error("Unable to find package `{}`", opts.singlePackage);
+                    return 1;
+                }
+                singlePackageTarget = info.packageName;
+
+                // Only keep inputs that are part of the package whose interface we're generating
+                auto &db = gs->packageDB();
+                auto it = std::remove_if(inputFiles.begin(), inputFiles.end(), [&gs = *gs, &db, &info](auto file) {
+                    auto &pkg = db.getPackageForFile(gs, file);
+                    return pkg.exists() && pkg.mangledName() != info.packageName;
+                });
+                inputFiles.erase(it, inputFiles.end());
+
+                // Record parent information in GlobalState to guide the resolver when stubbing out constants that come
+                // from other packages.
+                gs->singlePackageParents.emplace(std::move(info.parents));
+            }
 #endif
         }
 
@@ -736,8 +765,15 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
             return 1;
 #else
+            Timer rbiGenTimer(logger, "rbiGeneration.run");
             auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, *workers);
-            packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIOutput, *workers);
+
+            if (!opts.singlePackage.empty()) {
+                packager::RBIGenerator::runSinglePackage(*gs, packageNamespaces, singlePackageTarget,
+                                                         opts.packageRBIOutput, *workers);
+            } else {
+                packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIOutput, *workers);
+            }
 #endif
         }
 
