@@ -1355,21 +1355,17 @@ RBIGenerator::SinglePackageInfo RBIGenerator::findSinglePackage(core::GlobalStat
             continue;
         }
 
-        bool equal = true;
-        auto it = fullName.begin();
-        for (auto part : nameParts) {
-            if (it == fullName.end() || it->shortName(gs) != part) {
-                equal = false;
-                break;
+        // `nameParts` will be at least as long as `fullName` because of the check above, so using `nameParts` as the
+        // third argument to `std::equal` is safe. When the two don't match in length but prefixEqual is true,
+        // `pkg` is a parent package of the package we're looking for.
+        bool prefixEqual = std::equal(fullName.begin(), fullName.end(), nameParts.begin(),
+                                      [&gs](auto name, auto part) { return name.shortName(gs) == part; });
+        if (prefixEqual) {
+            if (nameSize == fullName.size()) {
+                res.packageName = pkg;
+            } else {
+                res.parents.emplace_back(pkg);
             }
-
-            ++it;
-        }
-
-        if (equal) {
-            res.packageName = pkg;
-        } else if (it != fullName.begin()) {
-            res.parents.emplace_back(pkg);
         }
     }
 
