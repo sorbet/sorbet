@@ -602,7 +602,7 @@ int realmain(int argc, char *argv[]) {
                 }
                 singlePackageTarget = info.packageName;
 
-                // Only keep inputs that are part of the package we're generating rbis for
+                // Only keep inputs that are part of the package whose interface we're generating
                 auto &db = gs->packageDB();
                 auto it = std::remove_if(inputFiles.begin(), inputFiles.end(), [&gs = *gs, &db, &info](auto file) {
                     auto &pkg = db.getPackageForFile(gs, file);
@@ -610,8 +610,8 @@ int realmain(int argc, char *argv[]) {
                 });
                 inputFiles.erase(it, inputFiles.end());
 
-                // Record parent information in GlobalState to indicate to the resolver that we should stub out
-                // constants that fail to resolve.
+                // Record parent information in GlobalState to guide the resolver when stubbing out constants that come
+                // from other packages.
                 gs->singlePackageParents.emplace(std::move(info.parents));
             }
 #endif
