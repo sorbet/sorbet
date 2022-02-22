@@ -1140,7 +1140,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 const auto &main = i.link->result->main;
                 if (main.constr) {
                     if (!main.constr->solve(ctx)) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstraintUnsolved)) {
                             e.setHeader("Could not find valid instantiation of type parameters for `{}`",
                                         main.method.show(ctx));
                             e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here", main.method.show(ctx));
