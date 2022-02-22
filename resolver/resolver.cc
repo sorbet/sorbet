@@ -419,23 +419,35 @@ private:
         out->symbol = symbol;
     }
 
+    // Mark type aliases as TODO items for a later pass, as all constants will have been stubbed out by then.
+    static void stubTypeAliasForRbiGeneration(core::MutableContext ctx, core::SymbolRef sym) {
+        sym.setResultType(ctx, core::make_type<core::ClassType>(core::Symbols::todo()));
+    }
+
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job,
                                          const vector<ParentPackageStub> &parentPackageStubs, int &suggestionCount) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
 
+        bool singlePackageRbiGeneration = ctx.state.singlePackageParents.has_value();
+
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
-                // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
-                auto loc = resolvedField.data(ctx)->loc();
-                if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
-                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
+                if (singlePackageRbiGeneration) {
+                    stubTypeAliasForRbiGeneration(ctx, job.out->symbol);
+                } else {
+                    // This is actually a use-site error, but we limit ourselves to emitting it once by checking
+                    // resultType
+                    auto loc = resolvedField.data(ctx)->loc();
+                    if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
+                        e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
+                        e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
+                    }
+                    resolvedField.data(ctx)->resultType =
+                        core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
                 }
-                resolvedField.data(ctx)->resultType =
-                    core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
             }
             job.out->symbol = resolved;
             return;
@@ -448,7 +460,7 @@ private:
         }
 
         // When generating rbis in single-package mode, we may need to invent a symbol at this point
-        if (ctx.state.singlePackageParents.has_value()) {
+        if (singlePackageRbiGeneration) {
             stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out);
             return;
         }
