@@ -1236,7 +1236,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(gs)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::GenericMethodConstaintUnsolved)) {
+            if (auto e = gs.beginError(args.callLoc(), errors::Infer::GenericMethodConstraintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
@@ -2231,7 +2231,7 @@ private:
         }
         if (constr) {
             if (!constr->solve(gs)) {
-                if (auto e = gs.beginError(callLoc, errors::Infer::GenericMethodConstaintUnsolved)) {
+                if (auto e = gs.beginError(callLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                     e.setHeader("Could not find valid instantiation of type parameters");
                 }
                 res.returnType = core::Types::untypedUntracked();
