@@ -347,12 +347,12 @@ private:
         return owner;
     }
 
-    static vector<ParentPackageStub> initParentStubs(core::MutableContext ctx) {
+    static vector<ParentPackageStub> initParentStubs(core::GlobalState &gs) {
         vector<ParentPackageStub> stubs;
 
-        auto &db = ctx.state.packageDB();
+        auto &db = gs.packageDB();
 
-        for (auto parent : *ctx.state.singlePackageParents) {
+        for (auto parent : *gs.singlePackageParents) {
             auto &info = db.getPackageInfo(parent);
 
             auto &stub = stubs.emplace_back();
@@ -369,9 +369,8 @@ private:
         return stubs;
     }
 
-    static void stubForRbiGeneration(core::MutableContext ctx, const Nesting *scope, ast::ConstantLit *out) {
-        static std::vector<ParentPackageStub> parents = initParentStubs(ctx);
-
+    static void stubForRbiGeneration(core::MutableContext ctx, const vector<ParentPackageStub> &parentPackageStubs,
+                                     const Nesting *scope, ast::ConstantLit *out) {
         if (out->symbol.exists()) {
             return;
         }
@@ -381,7 +380,7 @@ private:
         // if the scope of the constant lit is non-empty, attempt to resolve that first to help determine the owner.
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
         if (auto *origScope = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            stubForRbiGeneration(ctx, scope, origScope);
+            stubForRbiGeneration(ctx, parentPackageStubs, scope, origScope);
             owner = origScope->symbol.asClassOrModuleRef();
         } else {
             for (auto *cursor = scope; cursor != nullptr; cursor = cursor->parent.get()) {
@@ -393,8 +392,8 @@ private:
                 auto name = sym.data(ctx)->name;
 
                 const auto parent =
-                    absl::c_find_if(parents, [name](auto &stub) { return stub.fullName.back() == name; });
-                if (parent == parents.end()) {
+                    absl::c_find_if(parentPackageStubs, [name](auto &stub) { return stub.fullName.back() == name; });
+                if (parent == parentPackageStubs.end()) {
                     continue;
                 }
 
@@ -421,7 +420,8 @@ private:
     }
 
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
-    static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job, int &suggestionCount) {
+    static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job,
+                                         const vector<ParentPackageStub> &parentPackageStubs, int &suggestionCount) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
 
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
@@ -449,7 +449,7 @@ private:
 
         // When generating rbis in single-package mode, we may need to invent a symbol at this point
         if (ctx.state.singlePackageParents.has_value()) {
-            stubForRbiGeneration(ctx.withOwner(job.scope->scope), job.scope.get(), job.out);
+            stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out);
             return;
         }
 
@@ -1551,12 +1551,19 @@ public:
 
         {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
+
+            // Initialize the stubbed parent namespaces if we're generating an interface for a single package
+            vector<ParentPackageStub> parentPackageStubs;
+            if (gs.singlePackageParents.has_value()) {
+                parentPackageStubs = initParentStubs(gs);
+            }
+
             // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
             int suggestionCount = 0;
             for (auto &job : todo) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
-                    constantResolutionFailed(ctx, item, suggestionCount);
+                    constantResolutionFailed(ctx, item, parentPackageStubs, suggestionCount);
                 }
             }
 

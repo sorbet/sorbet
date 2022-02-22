@@ -768,7 +768,7 @@ int realmain(int argc, char *argv[]) {
             Timer rbiGenTimer(logger, "rbiGeneration.run");
             auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, *workers);
 
-            if (gs->singlePackageParents.has_value()) {
+            if (!opts.singlePackage.empty()) {
                 packager::RBIGenerator::runSinglePackage(*gs, packageNamespaces, singlePackageTarget,
                                                          opts.packageRBIOutput, *workers);
             } else {

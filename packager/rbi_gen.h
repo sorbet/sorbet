@@ -23,17 +23,21 @@ public:
     static RBIOutput runOnce(const core::GlobalState &gs, core::NameRef pkg,
                              const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces);
 
-    // Generate RBIs for all packages named in `packageFiles`.
+    // Generate RBIs for all packages present in the package database of `gs`.
     static void run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                     std::string outputDir, WorkerPool &workers);
 
-    // Generate RBIs for a single package, whose path is given by `packageName`. The `packageFiles` vector must include
-    // the file named by `packageName`, or an error will be raised.
+    // Generate RBIs for a single package, provided as the mangled package name `package`.
     static void runSinglePackage(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                                  core::NameRef package, std::string outputDir, WorkerPool &workers);
 
     struct SinglePackageInfo {
+        // The mangled name of the package we're generating an interface for.
         core::NameRef packageName;
+
+        // The mangled names of all packages that lie in the parent namespace of `packageName` above. For example, if
+        // the package we're generating an interface for is `Foo::Bar` and `Foo` is also a package, the mangled name of
+        // `Foo` will be the only element in this vector.
         std::vector<core::NameRef> parents;
     };
 
