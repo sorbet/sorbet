@@ -843,7 +843,7 @@ private:
                         if (field.data(gs)->flags.isField) {
                             pendingFields.emplace_back(field);
                         } else {
-                            if (absl::StartsWith(field.data(gs)->name.show(gs), "@@") || shouldEmit(field)) {
+                            if (shouldEmit(field)) {
                                 emittedSymbols.insert(field);
                                 emit(field, true);
                             }
@@ -975,12 +975,11 @@ private:
                         case core::SymbolRef::Kind::FieldOrStaticField: {
                             auto field = member.asFieldRef();
                             if (field.data(gs)->flags.isField) {
-                                emit(field);
+                                emit(field, true);
                             } else {
-                                if (absl::StartsWith(field.data(gs)->name.show(gs), "@@")) {
+                                if (shouldEmit(field)) {
+                                    emittedSymbols.insert(field);
                                     emit(field, true);
-                                } else {
-                                    maybeEmit(field);
                                 }
                             }
                             break;
@@ -1078,7 +1077,7 @@ private:
             {
                 Indent indent(out);
                 for (auto field : fields) {
-                    emit(field);
+                    emit(field, true);
                 }
                 fields.clear();
             }
@@ -1086,7 +1085,15 @@ private:
         }
     }
 
-    void emit(core::FieldRef field, bool isCVar = false) {
+    std::string showFieldName(core::FieldRef field, bool inContext) {
+        if (inContext) {
+            return std::string(field.data(gs)->name.shortName(gs));
+        } else {
+            return field.show(gs);
+        }
+    }
+
+    void emit(core::FieldRef field, bool inContext) {
         // cerr << "Emitting " << field.show(gs) << "\n";
         if (field.data(gs)->flags.isStaticField) {
             const auto &resultType = field.data(gs)->resultType;
@@ -1109,14 +1116,12 @@ private:
             }
 
             if (field.data(gs)->flags.isStaticFieldTypeAlias) {
-                out.println("{} = T.type_alias {{{}}}", field.show(gs), showType(resultType));
-            } else if (isCVar) {
-                out.println("{} = {}", field.data(gs)->name.show(gs), typeDeclaration(resultType));
+                out.println("{} = T.type_alias {{{}}}", showFieldName(field, inContext), showType(resultType));
             } else {
-                out.println("{} = {}", field.show(gs), typeDeclaration(resultType));
+                out.println("{} = {}", showFieldName(field, inContext), typeDeclaration(resultType));
             }
         } else {
-            out.println("{} = {}", field.data(gs)->name.show(gs), typeDeclaration(field.data(gs)->resultType));
+            out.println("{} = {}", showFieldName(field, inContext), typeDeclaration(field.data(gs)->resultType));
         }
     }
 
@@ -1154,7 +1159,7 @@ private:
                     emit(symbol.asMethodRef(), empty);
                     break;
                 case core::SymbolRef::Kind::FieldOrStaticField:
-                    emit(symbol.asFieldRef());
+                    emit(symbol.asFieldRef(), false);
                     break;
                 case core::SymbolRef::Kind::TypeMember:
                     break;
