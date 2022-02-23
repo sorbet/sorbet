@@ -6,8 +6,11 @@
 class Family::Simpsons < Object
   sig {returns(Bart::Character)}
   def bart; end
+  sig {returns(T.nilable(Bart::Character))}
+  def no_bart; end
   extend T::Sig
 end
+Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Bart::Character)}
 -- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
 {"packageRefs":[], "rbiRefs":[]}-- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 -- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
