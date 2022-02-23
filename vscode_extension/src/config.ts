@@ -8,8 +8,10 @@ import {
   ExtensionContext,
   Memento,
   FileSystemWatcher,
-  Uri
+  Uri,
+  WorkspaceFolder
 } from "vscode";
+import * as fs from "fs";
 
 interface ISorbetLspConfig {
   readonly id: string;
@@ -111,6 +113,9 @@ export interface ISorbetWorkspaceContext {
 
   /** See `vscode.workspace.onDidChangeConfiguration` */
   onDidChangeConfiguration: Event<ConfigurationChangeEvent>;
+
+  /** See `vscode.workspace.workspaceFolders` */
+  workspaceFolders(): ReadonlyArray<WorkspaceFolder> | undefined;
 }
 
 /** Default implementation accesses `workspace` directly. */
@@ -157,6 +162,10 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   public get onDidChangeConfiguration(): Event<ConfigurationChangeEvent> {
     return this._emitter.event;
   }
+
+  public workspaceFolders(): readonly WorkspaceFolder[] | undefined {
+    return workspace.workspaceFolders;
+  }
 }
 
 export class SorbetExtensionConfig implements Disposable {
@@ -175,7 +184,7 @@ export class SorbetExtensionConfig implements Disposable {
   private _userLspConfigs: ReadonlyArray<SorbetLspConfig> = [];
   private _selectedLspConfigId: string | undefined = undefined;
 
-  private _enabled: boolean = false;
+  private _enabled: boolean;
   private _revealOutputOnError: boolean = false;
   private _configFilePatterns: ReadonlyArray<string> = [];
   private _configFileWatchers: ReadonlyArray<FileSystemWatcher> = [];
@@ -183,6 +192,12 @@ export class SorbetExtensionConfig implements Disposable {
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
     this._sorbetWorkspaceContext = sorbetWorkspaceContext;
     this._sorbetWorkspaceContext.onDidChangeConfiguration(_ => this._refresh());
+
+    const workspaceFolders = sorbetWorkspaceContext.workspaceFolders();
+    this._enabled = workspaceFolders
+      ? fs.existsSync(`${workspaceFolders[0].uri.fsPath}/sorbet/config`)
+      : false;
+
     this._refresh();
   }
 
