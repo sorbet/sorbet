@@ -495,10 +495,9 @@ private:
                 break;
             }
             case core::TypePtr::Tag::LambdaParam: {
-                // Running .show on LambdaParam doesn't print out the types.
-                // const auto &lambdaParam = core::cast_type_nonnull<core::LambdaParam>(type);
-                // enqueueSymbolsInType(lambdaParam.lowerBound);
-                // enqueueSymbolsInType(lambdaParam.upperBound);
+                const auto &lambdaParam = core::cast_type_nonnull<core::LambdaParam>(type);
+                enqueueSymbolsInType(lambdaParam.lowerBound);
+                enqueueSymbolsInType(lambdaParam.upperBound);
                 break;
             }
         }
