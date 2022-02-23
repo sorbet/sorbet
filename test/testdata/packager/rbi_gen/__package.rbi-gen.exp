@@ -9,6 +9,8 @@ class RBIGen::Sealed::Parent < Object
 end
 RBIGen::DirectlyExported::MyString = String
 module RBIGen::Public
+  RBIGen::Public::MaybeString = T.type_alias {T.nilable(String)}
+  RBIGen::Public::ShapeType = T.type_alias {{:$str => String}}
 end
 class RBIGen::Public::XMLNode < Opus::Flatfiles::MarkupLanguageNodeStruct
   flatfile do
@@ -16,6 +18,7 @@ class RBIGen::Public::XMLNode < Opus::Flatfiles::MarkupLanguageNodeStruct
   end
 end
 module RBIGen::Public::VariousMethods
+  RBIGen::Public::VariousMethods::MyString = T.type_alias {String}
   sig {void}
   def initialize
     @if = T.let(T.unsafe(nil), Integer)
@@ -55,7 +58,6 @@ module RBIGen::Public::VariousMethods
 end
 class RBIGen::Private::PrivateClassPulledInByPrivateMethod < Object
 end
-RBIGen::Public::VariousMethods::MyString = T.type_alias {String}
 class RBIGen::Public::StructWithInitializer < T::Struct
   prop :foo, T.nilable(String), default: T.let(T.unsafe(nil), T.nilable(String))
   sig {params(foo: T.nilable(String)).void}
@@ -64,19 +66,18 @@ class RBIGen::Public::StructWithInitializer < T::Struct
   end
   extend T::Sig
 end
-RBIGen::Public::ShapeType = T.type_alias {{:$str => String}}
 class RBIGen::Public::SealedClass < Object
   sealed!
   extend T::Helpers
 end
 class RBIGen::Public::RefersToPrivateTypes < Object
+  ClassAlias = RBIGen::Private::PrivateClassPulledInByClassAlias
   sig {params(a: RBIGen::Private::PrivateClass).void}
   def method(a); end
   extend T::Sig
 end
 class RBIGen::Private::PrivateClass < Object
 end
-RBIGen::Public::RefersToPrivateTypes::ClassAlias = RBIGen::Private::PrivateClassPulledInByClassAlias
 class RBIGen::Private::PrivateClassPulledInByClassAlias < Object
 end
 class RBIGen::Public::Parent < Object
@@ -137,7 +138,6 @@ module RBIGen::Public::MixesInClassMethods::ClassMethods
   def method; end
   extend T::Sig
 end
-RBIGen::Public::MaybeString = T.type_alias {T.nilable(String)}
 module RBIGen::Public::InterfaceModule
   abstract!
   interface!
@@ -187,6 +187,9 @@ class RBIGen::Public::FinalClass < Object
 end
 class RBIGen::Public::FieldCheck < Object
   @@static_field = T.let(T.unsafe(nil), Integer)
+  Alias = RBIGen::Public::FieldCheck
+  AliasConstant = T.let(T.unsafe(nil), T.class_of(RBIGen::Public::FieldCheck))
+  Constant = T.let(T.unsafe(nil), Integer)
   sig {void}
   def initialize
     @field = T.let(T.unsafe(nil), Integer)
@@ -196,9 +199,6 @@ class RBIGen::Public::FieldCheck < Object
   extend T::Sig
   @statically_declared_field = T.let(T.unsafe(nil), Integer)
 end
-RBIGen::Public::FieldCheck::Constant = T.let(T.unsafe(nil), Integer)
-RBIGen::Public::FieldCheck::AliasConstant = T.let(T.unsafe(nil), T.class_of(RBIGen::Public::FieldCheck))
-RBIGen::Public::FieldCheck::Alias = RBIGen::Public::FieldCheck
 module RBIGen::Public::DefDelegator
   sig {void}
   def initialize
