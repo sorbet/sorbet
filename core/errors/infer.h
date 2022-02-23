@@ -19,7 +19,7 @@ constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::True};
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, StrictLevel::True};
 // constexpr ErrorClass GenericMethodConstraintUnsolved{7013, StrictLevel::True};
 constexpr ErrorClass RevealType{7014, StrictLevel::True};
-constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
+constexpr ErrorClass InvalidCast{7015, StrictLevel::True};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::True};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
 constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
