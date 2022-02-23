@@ -12,6 +12,8 @@ module Family
       nil
     end
 
+    LocalBart = Bart::Character
+
     sig {returns(Bart::Character)}
     def bart
       Bart::Character.new

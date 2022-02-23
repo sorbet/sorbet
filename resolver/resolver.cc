@@ -1566,7 +1566,8 @@ public:
 
             // Initialize the stubbed parent namespaces if we're generating an interface for a single package
             vector<ParentPackageStub> parentPackageStubs;
-            if (gs.singlePackageParents.has_value()) {
+            bool singlePackageRbiGeneration = gs.singlePackageParents.has_value();
+            if (singlePackageRbiGeneration) {
                 parentPackageStubs = initParentStubs(gs);
             }
 
@@ -1576,6 +1577,15 @@ public:
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
                     constantResolutionFailed(ctx, item, parentPackageStubs, suggestionCount);
+                }
+            }
+
+            if (singlePackageRbiGeneration) {
+                for (auto &job : todoClassAliases) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    for (auto &item : job.items) {
+                        resolveClassAliasJob(ctx, item);
+                    }
                 }
             }
 
