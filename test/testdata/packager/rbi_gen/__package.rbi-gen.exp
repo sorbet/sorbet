@@ -9,8 +9,8 @@ class RBIGen::Sealed::Parent < Object
 end
 RBIGen::DirectlyExported::MyString = String
 module RBIGen::Public
-  RBIGen::Public::MaybeString = T.type_alias {T.nilable(String)}
-  RBIGen::Public::ShapeType = T.type_alias {{:$str => String}}
+  MaybeString = T.type_alias {T.nilable(String)}
+  ShapeType = T.type_alias {{:$str => String}}
 end
 class RBIGen::Public::XMLNode < Opus::Flatfiles::MarkupLanguageNodeStruct
   flatfile do
@@ -18,7 +18,7 @@ class RBIGen::Public::XMLNode < Opus::Flatfiles::MarkupLanguageNodeStruct
   end
 end
 module RBIGen::Public::VariousMethods
-  RBIGen::Public::VariousMethods::MyString = T.type_alias {String}
+  MyString = T.type_alias {String}
   sig {void}
   def initialize
     @if = T.let(T.unsafe(nil), Integer)
