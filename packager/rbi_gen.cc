@@ -147,12 +147,17 @@ private:
     UnorderedMap<core::ClassOrModuleRef, core::SymbolRef> referencedPackages;
     UnorderedSet<core::FileRef> referencedRBIs;
     vector<core::SymbolRef> toEmit;
-    void maybeEmit(core::SymbolRef symbol) {
+
+    bool shouldEmit(core::SymbolRef symbol) {
         if (symbol.isClassOrModule() && symbol.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
-            maybeEmit(symbol.asClassOrModuleRef().data(gs)->attachedClass(gs));
-            return;
+            return shouldEmit(symbol.asClassOrModuleRef().data(gs)->attachedClass(gs));
         }
-        if (!emittedSymbols.contains(symbol) && isInPackage(symbol)) {
+
+        return !emittedSymbols.contains(symbol) && isInPackage(symbol);
+    }
+
+    void maybeEmit(core::SymbolRef symbol) {
+        if (shouldEmit(symbol)) {
             emittedSymbols.insert(symbol);
             toEmit.emplace_back(symbol);
         }
@@ -838,10 +843,9 @@ private:
                         if (field.data(gs)->flags.isField) {
                             pendingFields.emplace_back(field);
                         } else {
-                            if (absl::StartsWith(field.data(gs)->name.show(gs), "@@")) {
+                            if (absl::StartsWith(field.data(gs)->name.show(gs), "@@") || shouldEmit(field)) {
+                                emittedSymbols.insert(field);
                                 emit(field, true);
-                            } else {
-                                maybeEmit(field);
                             }
                         }
                         break;
@@ -1369,6 +1373,10 @@ RBIGenerator::SinglePackageInfo RBIGenerator::findSinglePackage(core::GlobalStat
                 res.parents.emplace_back(pkg);
             }
         }
+    }
+
+    for (auto p : res.parents) {
+        fmt::print("parent: {}\n", p.show(gs));
     }
 
     return res;
