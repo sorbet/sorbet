@@ -152,7 +152,7 @@ private:
             maybeEmit(symbol.asClassOrModuleRef().data(gs)->attachedClass(gs));
             return;
         }
-        if (!emittedSymbols.contains(symbol) && isInPackage(symbol, symbol)) {
+        if (!emittedSymbols.contains(symbol) && isInPackage(symbol)) {
             emittedSymbols.insert(symbol);
             toEmit.emplace_back(symbol);
         }
@@ -556,27 +556,30 @@ private:
         return isInTestPackage(sym.owner(gs));
     }
 
-    bool isInPackage(core::SymbolRef sym, core::SymbolRef original) {
-        if (sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
-            // Symbol isn't part of a package. Check if it was defined in an RBI.
-            auto locs = original.locs(gs);
-            for (auto loc : locs) {
-                if (loc.exists() && loc.file().data(gs).isRBI() && !loc.file().data(gs).isPayload()) {
-                    referencedRBIs.insert(loc.file());
+    bool isInPackage(core::SymbolRef original) {
+        for (auto sym = original; sym.exists(); sym = sym.owner(gs)) {
+            if (sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
+                // Symbol isn't part of a package. Check if it was defined in an RBI.
+                auto locs = original.locs(gs);
+                for (auto loc : locs) {
+                    if (loc.exists() && loc.file().data(gs).isRBI() && !loc.file().data(gs).isPayload()) {
+                        referencedRBIs.insert(loc.file());
+                    }
                 }
-            }
-            return false;
-        }
-        if (sym == pkgNamespace || sym == pkgTestNamespace) {
-            return true;
-        }
-        if (sym.isClassOrModule()) {
-            if (pkgNamespaces.contains(sym.asClassOrModuleRef())) {
-                referencedPackages[sym.asClassOrModuleRef()] = original;
                 return false;
             }
+            if (sym == pkgNamespace || sym == pkgTestNamespace) {
+                return true;
+            }
+            if (sym.isClassOrModule()) {
+                if (pkgNamespaces.contains(sym.asClassOrModuleRef())) {
+                    referencedPackages[sym.asClassOrModuleRef()] = original;
+                    return false;
+                }
+            }
         }
-        return isInPackage(sym.owner(gs), original);
+
+        return false;
     }
 
     string typeDeclaration(const core::TypePtr &type) {
@@ -713,7 +716,7 @@ private:
     }
 
     void emit(core::ClassOrModuleRef klass) {
-        if (!isInPackage(klass, klass) || !emittedSymbols.contains(klass)) {
+        if (!isInPackage(klass) || !emittedSymbols.contains(klass)) {
             // We don't emit class definitions for items defined in other packages.
             Exception::raise("Invalid klass");
         }
