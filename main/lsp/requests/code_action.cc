@@ -219,7 +219,6 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             for (auto &resp : queryResult.responses) {
                 if (auto def = resp->isDefinition()) {
                     if (def->symbol.isMethod()) {
-                        auto command = make_unique<Command>()
                         auto action = make_unique<CodeAction>("Extract method to module");
                         action->kind = CodeActionKind::RefactorExtract;
                         auto workspaceEdit = make_unique<WorkspaceEdit>();

@@ -56,7 +56,6 @@ shared_ptr<JSONType> makeArray(shared_ptr<JSONType> type) {
 
 void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_ptr<JSONObjectType>> &classTypes) {
     // Singletons
-    shared_ptr<JSONType> JSONAny = make_shared<JSONObjectType>();
     shared_ptr<JSONType> JSONNull = make_shared<JSONNullType>();
     shared_ptr<JSONType> JSONBool = make_shared<JSONBooleanType>();
     shared_ptr<JSONType> JSONInt = make_shared<JSONIntType>();
@@ -154,7 +153,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                               {
                                   makeField("title", JSONString), makeField("command", JSONString),
                                   // Unused in Sorbet.
-                                  makeField("arguments", makeOptional(makeVariant({JSONNull, makeArray(JSONAny)}))),
+                                  // makeField("arguments", makeOptional(makeVariant({JSONNull, makeArray(JSONAny)}))),
                               },
                               classTypes);
 
@@ -781,7 +780,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                            {
                                                makeField("command", JSONString),
                                                // Unused in Sorbet.
-                                               makeField("arguments", makeOptional(makeArray(JSONAny))),
+                                               // makeField("arguments", makeOptional(makeArray(JSONAny))),
                                            },
                                            classTypes);
 
@@ -1424,7 +1423,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"textDocument/formatting", makeVariant({JSONNull, makeArray(TextEdit)})},
             // (CodeAction | Command)[] | null
             // Sorbet only sends CodeAction[].
-            {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
+            {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
             // TODO: the following are more correct but I can only get the above to work.
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
