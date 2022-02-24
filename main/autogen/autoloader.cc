@@ -209,8 +209,10 @@ void DefTree::writeCollapsedAutoloads(const core::GlobalState &gs, const Autoloa
         if (definingFile.exists() || isNestedPkg) {
             // behavior-defining node, or nested package
             string parentFullName =
-                fmt::format("{}", fmt::map_join(parent->qname.nameParts,
-                                                "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+                parent->root()
+                    ? alCfg.rootObject
+                    : fmt::format("{}", fmt::map_join(parent->qname.nameParts,
+                                                      "::", [&](const auto &nr) -> string { return nr.show(gs); }));
             fmt::format_to(std::back_inserter(buf), "{}.autoload_map({}, {{{}: '{}/{}'}})\n", alCfg.registryModule,
                            parentFullName, name().show(gs), alCfg.rootDir, path(gs));
         } else if (!children.empty()) {
@@ -225,8 +227,7 @@ void DefTree::writeCollapsedAutoloads(const core::GlobalState &gs, const Autoloa
     }
 }
 
-string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
-                                  const bool pkgPrefix) const {
+string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
 
@@ -246,7 +247,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
         predeclare(gs, fullName, buf);
     }
 
-    if (!pkgPrefix && (pkgName.exists() || definingFile.exists())) {
+    if (pkgName.exists() || definingFile.exists() || root()) {
         // package/namespace autoloads
         writeCollapsedAutoloads(gs, alCfg, buf, this);
 
@@ -259,20 +260,6 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
                            mungedName);
         }
-    } else if (pkgPrefix) {
-        // prefix node
-        ENFORCE(!definingFile.exists(), "Found package prefix with behavior {}", fullName);
-
-        fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
-        vector<pair<core::NameRef, string>> childNames;
-        std::transform(children.begin(), children.end(), back_inserter(childNames),
-                       [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
-        fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
-        for (const auto &pair : childNames) {
-            fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
-                           children.at(pair.first)->path(gs));
-        }
-        fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
     }
 
     if (definingFile.exists()) {
@@ -475,21 +462,17 @@ namespace {
 struct RenderAutoloadTask {
     string filePath;
     const DefTree &node;
-    const bool pkgPrefix;
 };
 
 // This function has two duties:
 // * It creates autoload rendering tasks which will occur in a later parallel phase.
 // * It creates subdirectories when needed, as they are required to write the autoloader output.
 void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vector<RenderAutoloadTask> &tasks,
-                                               const AutoloaderConfig &alCfg, string_view path, const DefTree &node,
-                                               bool insidePkgSubtree) {
+                                               const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    bool nextInsidePkgSubtree = insidePkgSubtree || node.pkgName.exists();
-    if ((!alCfg.packagedAutoloader || !node.root()) &&
-        (!insidePkgSubtree || node.pkgName.exists() || node.getDefiningFile().exists())) {
-        tasks.emplace_back(RenderAutoloadTask{filePath, node, !nextInsidePkgSubtree});
+    if (node.pkgName.exists() || node.getDefiningFile().exists() || node.root()) {
+        tasks.emplace_back(RenderAutoloadTask{filePath, node});
     }
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
@@ -497,23 +480,7 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
             FileOps::ensureDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            if (alCfg.packagedAutoloader && node.root()) {
-                // in a packaged context, we want to make sure that these constants are also put in their packages
-                ENFORCE(child->qname.package);
-                auto namespaceName = child->qname.package->show(gs);
-                // this package name will include the suffix _Package on the end, and we want to remove that
-                constexpr int suffixLen = core::PACKAGE_SUFFIX.size();
-
-                // TODO (ngroman, aadi-stripe) Determine if we need to check _Package_Private here in this autoloader
-                // context.
-                ENFORCE(namespaceName.size() > suffixLen);
-                string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
-                auto pkgSubdir = join(subdir, packageName);
-                FileOps::ensureDir(pkgSubdir);
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child, nextInsidePkgSubtree);
-            } else {
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child, nextInsidePkgSubtree);
-            }
+            populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child);
         }
     }
 }
@@ -522,7 +489,7 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
 void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
                                     const std::string &path, const DefTree &root) {
     vector<RenderAutoloadTask> tasks;
-    populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root, false);
+    populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
 
     if (FileOps::exists(path)) {
         // Clear out files that we do not plan to write.
@@ -553,7 +520,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
                 ++n;
                 auto &task = tasks[idx];
-                FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg, task.pkgPrefix));
+                FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
             }
         }
 

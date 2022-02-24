@@ -95,7 +95,7 @@ public:
     std::string show(const core::GlobalState &gs, int level = 0) const; // Render the entire tree
     std::string fullName(const core::GlobalState &) const;
 
-    std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &, bool pkgPrefix) const;
+    std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
