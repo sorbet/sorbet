@@ -63,7 +63,7 @@ void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
 
 typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                      const struct builder &builder, bool traceLexer, bool indentationAware)
-    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
+    : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
     bison::typedruby_release::parser p(*this, self);
@@ -73,7 +73,7 @@ ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
 
 typedruby_debug::typedruby_debug(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                  const struct builder &builder, bool traceLexer, bool indentationAware)
-    : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
+    : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_debug::parse(SelfPtr self, bool traceParser) {
     bison::typedruby_debug::parser p(*this, self);
