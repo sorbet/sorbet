@@ -44,8 +44,11 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 }
 
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
-    return fmt::format("{}[{}] (unresolved)", this->klass.show(gs, options),
-                       fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs, options); }));
+    string resolvedString = options.showForRBI ? "" : " (unresolved)";
+
+    return fmt::format("{}[{}]{}", this->klass.show(gs, options),
+                       fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs, options); }),
+                       resolvedString);
 }
 
 string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
