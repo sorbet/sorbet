@@ -7,6 +7,7 @@
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
+#include "common/sort.h"
 #include "core/GlobalState.h"
 #include "packager/packager.h"
 
@@ -51,14 +52,10 @@ public:
     }
 };
 
-class QuoteStringNameFormatter final {
-    const core::GlobalState &gs;
-
+class QuoteStringFormatter final {
 public:
-    QuoteStringNameFormatter(const core::GlobalState &gs) : gs(gs) {}
-
-    void operator()(std::string *out, pair<core::ClassOrModuleRef, core::SymbolRef> klass) const {
-        out->append(fmt::format("\"{}\"", klass.first.show(gs)));
+    void operator()(std::string *out, const string &str) const {
+        out->append(fmt::format("\"{}\"", str));
     }
 };
 
@@ -1167,6 +1164,23 @@ private:
         return lookupFQN(gs, fullName).asClassOrModuleRef();
     }
 
+    string buildPackageDependenciesString(const core::GlobalState &gs) {
+        vector<string> packageNames;
+        packageNames.reserve(referencedPackages.size());
+        absl::c_transform(referencedPackages, back_inserter(packageNames),
+                          [&gs](const auto &p) -> string { return p.first.show(gs); });
+        fast_sort(packageNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs < rhs; });
+
+        vector<core::FileRef> rbiFiles;
+        rbiFiles.reserve(referencedRBIs.size());
+        rbiFiles.insert(rbiFiles.end(), referencedRBIs.begin(), referencedRBIs.end());
+        fast_sort(rbiFiles, [](const auto &lhs, const auto &rhs) -> bool { return lhs < rhs; });
+
+        return fmt::format("{{\"packageRefs\":[{}], \"rbiRefs\":[{}]}}",
+                           absl::StrJoin(packageNames.begin(), packageNames.end(), ",", QuoteStringFormatter()),
+                           absl::StrJoin(rbiFiles.begin(), rbiFiles.end(), ",", QuoteStringFileFormatter(gs)));
+    }
+
 public:
     RBIExporter(const core::GlobalState &gs, const core::packages::PackageInfo &pkg,
                 const UnorderedSet<core::ClassOrModuleRef> &pkgNamespaces)
@@ -1219,10 +1233,7 @@ public:
             emitLoop();
 
             output.rbi = "# typed: true\n\n" + out.toString();
-            output.rbiPackageDependencies = fmt::format(
-                "{{\"packageRefs\":[{}], \"rbiRefs\":[{}]}}",
-                absl::StrJoin(referencedPackages.begin(), referencedPackages.end(), ",", QuoteStringNameFormatter(gs)),
-                absl::StrJoin(referencedRBIs.begin(), referencedRBIs.end(), ",", QuoteStringFileFormatter(gs)));
+            output.rbiPackageDependencies = buildPackageDependenciesString(gs);
         }
 
         // N.B.: We don't need to generate this in the same pass. Test code only relies on exported symbols from regular
@@ -1237,11 +1248,7 @@ public:
             auto rbiText = out.toString();
             if (!rbiText.empty()) {
                 output.testRBI = "# typed: true\n\n" + rbiText;
-                output.testRBIPackageDependencies = fmt::format(
-                    "{{\"packageRefs\":[{}], \"rbiRefs\":[{}]}}",
-                    absl::StrJoin(referencedPackages.begin(), referencedPackages.end(), ",",
-                                  QuoteStringNameFormatter(gs)),
-                    absl::StrJoin(referencedRBIs.begin(), referencedRBIs.end(), ",", QuoteStringFileFormatter(gs)));
+                output.testRBIPackageDependencies = buildPackageDependenciesString(gs);
             }
         }
 
