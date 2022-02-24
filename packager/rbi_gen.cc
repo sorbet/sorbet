@@ -1176,7 +1176,7 @@ private:
         rbiFiles.insert(rbiFiles.end(), referencedRBIs.begin(), referencedRBIs.end());
         fast_sort(rbiFiles, [](const auto &lhs, const auto &rhs) -> bool { return lhs < rhs; });
 
-        return fmt::format("{{\"packageRefs\":[{}], \"rbiRefs\":[{}]}}",
+        return fmt::format("{{\"packageRefs\":[{}], \"rbiRefs\":[{}]}}\n",
                            absl::StrJoin(packageNames.begin(), packageNames.end(), ",", QuoteStringFormatter()),
                            absl::StrJoin(rbiFiles.begin(), rbiFiles.end(), ",", QuoteStringFileFormatter(gs)));
     }
