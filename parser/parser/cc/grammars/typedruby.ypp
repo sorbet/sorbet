@@ -20,7 +20,7 @@ using namespace std::string_literals;
 #endif
 }
 
-%param { ruby_parser::TYPEDRUBY27& driver }
+%param { ruby_parser::TYPEDRUBY& driver }
 %parse-param { ruby_parser::SelfPtr self }
 // This code runs at the beginning of typedruby_release27::parser::parse()
 // We use it to stash some otherwise-private members of the parser so that we
@@ -32,8 +32,8 @@ using namespace std::string_literals;
   // referenced by the yyclearin macro.
   this->driver.clear_lookahead = [&yyla]() { yyclearin; };
 }
-%define api.namespace {ruby_parser::bison::TYPEDRUBY27}
-%define api.prefix {TYPEDRUBY27}
+%define api.namespace {ruby_parser::bison::TYPEDRUBY}
+%define api.prefix {TYPEDRUBY}
 %define api.value.type { union parser_value }
 // TODO(jez) Does this degrade parser performance?
 %define api.location.type { location }
@@ -437,7 +437,7 @@ using namespace std::string_literals;
 
 namespace ruby_parser {
 namespace bison {
-namespace TYPEDRUBY27 {
+namespace TYPEDRUBY {
 union parser_value {
   ruby_parser::token *token;
   ruby_parser::delimited_node_list *delimited_list;
@@ -459,7 +459,7 @@ union parser_value {
 %code {
 namespace ruby_parser {
 namespace bison {
-namespace TYPEDRUBY27 {
+namespace TYPEDRUBY {
 
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
@@ -497,7 +497,7 @@ void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 		error_message);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::TYPEDRUBY27 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::TYPEDRUBY &driver) {
 	auto token = driver.lex.advance();
 	driver.last_token = token;
 	int token_type = static_cast<int>(token->type());
