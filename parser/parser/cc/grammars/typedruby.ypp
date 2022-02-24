@@ -210,13 +210,11 @@ using namespace std::string_literals;
   block_call
   block_command
   block_param_def
-  bodystmt
   bvar
   command
   command_asgn
   command_call
   command_rhs
-  compstmt
   cpath
   defs_head
   dsym
@@ -338,7 +336,6 @@ using namespace std::string_literals;
   qsym_list
   qword_list
   regexp_contents
-  stmts
   string
   string_contents
   symbol_list
@@ -386,11 +383,14 @@ using namespace std::string_literals;
   defn_head
   opt_paren_args
   paren_args
+  stmts
 
 %type <delimited_block>
+  bodystmt
   brace_block
   brace_body
   cmd_brace_block
+  compstmt
   do_block
   do_body
   lambda
@@ -568,38 +568,56 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                         );
                       }
 
-                      $$ = driver.build.beginBody(
+                      $1->body = driver.build.beginBody(
                         self,
-                        $1,
+                        $1->body,
                         rescueBodies,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr,
                         ensure ? ensure->tok : nullptr,
                         ensure ? ensure->nod : nullptr
                       );
+                      $$ = $1;
                     }
 
         compstmt: stmts opt_terms
                     {
-                      $$ = driver.build.compstmt(self, $1);
+                      auto compstmt = driver.build.compstmt(self, $1->inner);
+                      $$ = driver.alloc.delimited_block($1->begin, /*args*/nullptr, compstmt, $1->end);
                     }
 
+                  // This returns a delimited_list not because there are actual delimiters,
+                  // but just because in certain situations we want to be able to communicate
+                  // two relevant token_t's back up to the next rule that will reduce
+                  // (for indentation-aware error recovery)
            stmts: // nothing
                     {
-                      $$ = driver.alloc.node_list();
+                      auto list = driver.alloc.node_list();
+                      $$ = driver.alloc.delimited_node_list(nullptr, list, nullptr);
                     }
                 | stmt_or_begin
                     {
-                      $$ = driver.alloc.node_list($1);
+                      auto list = driver.alloc.node_list($1);
+                      $$ = driver.alloc.delimited_node_list(nullptr, list, nullptr);
                     }
                 | stmts terms stmt_or_begin
                     {
-                      $1->emplace_back($3);
-                      $$ = $1;
+                      auto *result = $1;
+                      result->inner->emplace_back($3);
+                      $$ = result;
+
+                      if (driver.indentationAware) {
+                        auto already_found_first_dedent = result->begin != nullptr && result->end != nullptr;
+                        if (!already_found_first_dedent && driver.lex.compare_indent_level(@1.end, @3.begin) < 0) {
+                          result->begin = @1.end;
+                          result->end = @3.begin;
+                        }
+                      }
                     }
                 | error
                     {
-                      $$ = driver.alloc.node_list();
+                      auto list = driver.alloc.node_list();
+                      $$ = driver.alloc.delimited_node_list(nullptr, list, nullptr);
                     }
 
    stmt_or_begin: stmt
@@ -662,7 +680,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     }
                 | klEND tLCURLY compstmt tRCURLY
                     {
-                      $$ = driver.build.postexe(self, $1, $3, $4);
+                      $$ = driver.build.postexe(self, $1, $3->body, $4);
                     }
                 | command_asgn
                 | mlhs tEQL command_call
@@ -1874,7 +1892,7 @@ array_premature_end: eof
                     bodystmt kEND
                     {
                       driver.replace_stack($<stack>2);
-                      $$ = driver.build.beginKeyword(self, $1, $3, $4);
+                      $$ = driver.build.beginKeyword(self, $1, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
                 | tLPAREN_ARG stmt
@@ -1895,7 +1913,8 @@ array_premature_end: eof
                     }
                 | tLPAREN compstmt tRPAREN
                     {
-                      $$ = driver.build.begin(self, $1, $2, $3);
+                      // TODO(jez) Might be able to use delimited_block stuff here to do some indentation-uaware stuff.
+                      $$ = driver.build.begin(self, $1, $2->body, $3);
                     }
                 | primary_value tCOLON2 tCONSTANT
                     {
@@ -1997,7 +2016,7 @@ array_premature_end: eof
                 | kIF expr_value then compstmt if_tail kEND
                     {
                       auto &else_ = $5;
-                      $$ = driver.build.condition(self, $1, $2, $3, $4,
+                      $$ = driver.build.condition(self, $1, $2, $3, $4->body,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
                       driver.rewind_if_dedented($1, $6);
@@ -2012,7 +2031,7 @@ array_premature_end: eof
                     {
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.beginPos(), @1.endPos()));
                       auto &else_ = $5;
-                      $$ = driver.build.condition(self, $1, $2, $3, $4,
+                      $$ = driver.build.condition(self, $1, $2, $3, $4->body,
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
                     }
@@ -2021,7 +2040,7 @@ array_premature_end: eof
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3,
                         else_ ? else_->nod : nullptr,
-			                  else_ ? else_->tok : nullptr, $4, $6);
+			                  else_ ? else_->tok : nullptr, $4->body, $6);
                       driver.rewind_if_dedented($1, $6);
                     }
                 | kUNLESS error
@@ -2032,7 +2051,7 @@ array_premature_end: eof
                     }
                 | kWHILE expr_value_do compstmt kEND
                     {
-                      $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3, $4);
+                      $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
                 | kWHILE error
@@ -2043,7 +2062,7 @@ array_premature_end: eof
                     }
                 | kUNTIL expr_value_do compstmt kEND
                     {
-                      $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3, $4);
+                      $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
                 | kUNTIL error
@@ -2107,7 +2126,7 @@ array_premature_end: eof
                     }
                 | kFOR for_var kIN expr_value_do compstmt kEND
                     {
-                      $$ = driver.build.for_(self, $1, $2, $3, $4->nod, $4->tok, $5, $6);
+                      $$ = driver.build.for_(self, $1, $2, $3, $4->nod, $4->tok, $5->body, $6);
                     }
                 | kCLASS cpath superclass
                     {
@@ -2130,7 +2149,7 @@ array_premature_end: eof
                       auto lt_t       = superclass_ ? superclass_->tok : nullptr;
                       auto superclass = superclass_ ? superclass_->nod : nullptr;
 
-                      $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, $5, end_tok);
+                      $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, $5->body, end_tok);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
@@ -2146,7 +2165,7 @@ array_premature_end: eof
                     }
                     bodystmt kEND
                     {
-                      $$ = driver.build.def_sclass(self, $1, $2, $3, $6, $7);
+                      $$ = driver.build.def_sclass(self, $1, $2, $3, $6->body, $7);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
@@ -2169,7 +2188,7 @@ array_premature_end: eof
                       auto module_tok = $1;
                       auto end_tok = $5;
 
-                      $$ = driver.build.defModule(self, module_tok, $2, $4, end_tok);
+                      $$ = driver.build.defModule(self, module_tok, $2, $4->body, end_tok);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.unextend();
@@ -2177,7 +2196,7 @@ array_premature_end: eof
                     }
                 | defn_head f_arglist bodystmt kEND
                     {
-                      $$ = driver.build.defMethod(self, $1->begin, $1->end, $2, $3, $4);
+                      $$ = driver.build.defMethod(self, $1->begin, $1->end, $2, $3->body, $4);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
@@ -2187,7 +2206,7 @@ array_premature_end: eof
                     }
                 | defs_head f_arglist bodystmt kEND
                     {
-                      $$ = driver.build.defSingleton(self, $1, $2, $3, $4);
+                      $$ = driver.build.defSingleton(self, $1, $2, $3->body, $4);
                       DIAGCHECK();
 
                       driver.lex.cmdarg.pop();
@@ -2240,7 +2259,7 @@ array_premature_end: eof
                       auto &else_ = $5;
                       $$ = driver.alloc.node_with_token(elsif_t,
                         driver.build.condition(self,
-                          elsif_t, $2, $3, $4,
+                          elsif_t, $2, $3, $4->body,
                           else_ ? else_->tok : nullptr,
                           else_ ? else_->nod : nullptr, nullptr)
                       );
@@ -2252,7 +2271,7 @@ array_premature_end: eof
                     }
                 | kELSE compstmt
                     {
-                      $$ = driver.alloc.node_with_token($1, $2);
+                      $$ = driver.alloc.node_with_token($1, $2->body);
                     }
 
          for_var: lhs
@@ -2578,7 +2597,7 @@ opt_block_args_tail:
                     }
                   compstmt tRCURLY
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
+                      $$ = driver.alloc.delimited_block($1, nullptr, $3->body, $4);
                       driver.lex.context.pop();
                     }
                 | kDO_LAMBDA
@@ -2587,7 +2606,7 @@ opt_block_args_tail:
                     }
                   bodystmt kEND
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $3, $4);
+                      $$ = driver.alloc.delimited_block($1, nullptr, $3->body, $4);
                       driver.lex.context.pop();
                       driver.rewind_if_dedented($1, $4);
                     }
@@ -2757,9 +2776,9 @@ lcurly_block_start:
                     {
                       if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
-                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3->body, nullptr);
                       } else {
-                        $$ = driver.alloc.delimited_block(nullptr, $2, $3, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, $2, $3->body, nullptr);
                       }
                       driver.numparam_stack.pop();
                       driver.lex.unextend();
@@ -2776,9 +2795,9 @@ lcurly_block_start:
                     {
                       if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
-                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4->body, nullptr);
                       } else {
-                        $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, $3, $4->body, nullptr);
                       }
                       driver.lex.unextend();
 
@@ -2789,7 +2808,7 @@ lcurly_block_start:
        case_body: kWHEN args then compstmt cases
                     {
                       auto &cases = $5;
-                      cases->whens.push_front(driver.build.when(self, $1, $2, $3, $4));
+                      cases->whens.push_front(driver.build.when(self, $1, $2, $3, $4->body));
                       $$ = cases;
                     }
 
@@ -2819,7 +2838,7 @@ lcurly_block_start:
                       if ($3->size() > 1) {
                         guard = $3->at(1);
                       }
-                      auto in_pattern = driver.build.in_pattern(self, $1, pattern, guard, $4, $6);
+                      auto in_pattern = driver.build.in_pattern(self, $1, pattern, guard, $4, $6->body);
                       $$ = $7;
                       $$->whens.push_front(in_pattern);
                     }
@@ -3235,7 +3254,7 @@ lcurly_block_start:
                           exc_list,
                           exc_var ? exc_var->tok : nullptr,
                           exc_var ? exc_var->nod : nullptr,
-                          $4, $5));
+                          $4, $5->body));
 
                       $$ = rescues;
                     }
@@ -3262,7 +3281,7 @@ lcurly_block_start:
 
       opt_ensure: kENSURE compstmt
                     {
-                      $$ = driver.alloc.node_with_token($1, $2);
+                      $$ = driver.alloc.node_with_token($1, $2->body);
                     }
                 | // nothing
                     {
@@ -3441,7 +3460,7 @@ regexp_contents: // nothing
                     {
                       driver.lex.cond.pop();
                       driver.lex.cmdarg.pop();
-                      $$ = driver.build.begin(self, $1, $3, $4);
+                      $$ = driver.build.begin(self, $1, $3->body, $4);
                     }
 
      string_dvar: tGVAR
