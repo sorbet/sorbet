@@ -23,15 +23,22 @@ class Family::Bart::Character < Object
   def catchphrase; end
   sig {returns(T.class_of(Family::Simpsons))}
   def family; end
+  sig {params(msg: Util::GenericMessage[String]).void}
+  def ignore(msg); end
   extend T::Sig
 end
 Family::Bart::Character::FamilyClass = Family::Simpsons
 -- JSON: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
-{"packageRefs":["Family"], "rbiRefs":[]}
+{"packageRefs":["Family","Util"], "rbiRefs":[]}
 -- ./test/cli/rbi-gen-single/util/__package.rb (Util)
 -- RBI: ./test/cli/rbi-gen-single/util/__package.rb (Util)
 # typed: true
 
+class Util::GenericMessage < Object
+  Elem = type_member()
+  extend T::Generic
+  extend T::Helpers
+end
 class Util::Messages < Object
   extend T::Sig
   sig {params(msg: String).void}
