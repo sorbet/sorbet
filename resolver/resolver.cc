@@ -485,7 +485,8 @@ private:
 
         // When generating rbis in single-package mode, we may need to invent a symbol at this point
         if (singlePackageRbiGeneration) {
-            stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out, job.possibleGenericType);
+            stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out,
+                                 job.possibleGenericType);
             return;
         }
 

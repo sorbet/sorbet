@@ -50,7 +50,7 @@ string argTypeForUnresolvedAppliedType(const GlobalState &gs, const TypePtr &t, 
     }
     return t.show(gs, options);
 }
-}
+} // namespace
 
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
     string resolvedString = options.showForRBI ? "" : " (unresolved)";
@@ -64,7 +64,11 @@ string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) c
     }
 
     return fmt::format("{}[{}]{}", symForPrinting.show(gs, options),
-                       fmt::map_join(targs, ", ", [&](auto targ) { return options.showForRBI ? argTypeForUnresolvedAppliedType(gs, targ, options) : targ.show(gs, options); }),
+                       fmt::map_join(targs, ", ",
+                                     [&](auto targ) {
+                                         return options.showForRBI ? argTypeForUnresolvedAppliedType(gs, targ, options)
+                                                                   : targ.show(gs, options);
+                                     }),
                        resolvedString);
 }
 
