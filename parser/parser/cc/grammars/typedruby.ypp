@@ -5,6 +5,7 @@
 %code requires {
   #include <ruby_parser/builder.hh>
   #include <ruby_parser/token.hh>
+  #include <ruby_parser/location.hh>
   #include <ruby_parser/lexer.hh>
   #include <ruby_parser/driver.hh>
   #include <ruby_parser/state_stack.hh>
@@ -503,28 +504,10 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 	int token_type = static_cast<int>(token->type());
 	assert(token_type >= 0);
 	lval->token = token;
-	lloc->begin = token->start();
-	lloc->end = token->end();
-	lloc->lineStart = token->lineStart();
+	lloc->begin = token;
+	lloc->end = token;
 	return token_type;
 }
-
-#define YYLLOC_DEFAULT(Cur, Rhs, N)                      \
-do                                                        \
-  if (N)                                                  \
-    {                                                     \
-      (Cur).begin     = YYRHSLOC(Rhs, 1).begin;           \
-      (Cur).end       = YYRHSLOC(Rhs, N).end;             \
-      (Cur).lineStart = YYRHSLOC(Rhs, 1).lineStart;       \
-    }                                                     \
-  else                                                    \
-    {                                                     \
-      (Cur).begin     = YYRHSLOC(Rhs, 0).begin;           \
-      (Cur).end       = YYRHSLOC(Rhs, 0).end;             \
-      (Cur).lineStart = YYRHSLOC(Rhs, 0).lineStart;       \
-    }                                                     \
-while (0)
-
 
 }}} // namespace
 } // %code

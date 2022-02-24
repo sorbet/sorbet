@@ -1,26 +1,38 @@
 #ifndef RUBY_PARSER_LOCATION_HH
 #define RUBY_PARSER_LOCATION_HH
 
+#include <cassert>
 #include <cstddef>
 #include <iostream>
 #include <stdint.h>
 
+#include "token.hh"
+
 namespace ruby_parser {
 
 struct location {
-    size_t begin;
-    size_t end;
-    size_t lineStart;
+    token_t begin;
+    token_t end;
 
-    location() : begin(SIZE_MAX), end(SIZE_MAX), lineStart(SIZE_MAX) {}
-    location(size_t begin, size_t end, size_t lineStart) : begin(begin), end(end), lineStart(lineStart) {}
+    location() : begin(nullptr), end(nullptr) {}
+    location(token_t begin, token_t end) : begin(begin), end(end) {}
 
     location(const location &other) = default;
     location &operator=(const location &other) = default;
 
-    bool exists() {
-        return begin != SIZE_MAX && end != SIZE_MAX && lineStart != SIZE_MAX;
+    bool exists() const {
+        return begin != nullptr && end != nullptr;
     };
+
+    size_t beginPos() const {
+        assert(exists());
+        return begin->start();
+    }
+
+    size_t endPos() const {
+        assert(exists());
+        return end->end();
+    }
 };
 
 } // namespace ruby_parser
