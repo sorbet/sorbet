@@ -205,11 +205,11 @@ int lexer::compare_indent_level(token_t left, token_t right) {
         auto rightIsSpace = rightChar == ' ' || rightChar == '\t';
 
         if (leftIsSpace && !rightIsSpace) {
-            return -1; // left < right
+            return 1; // left > right
         } else if (!leftIsSpace && !rightIsSpace) {
             return 0; // left == right
         } else if (!leftIsSpace && rightIsSpace) {
-            return 1;  // left > right
+            return -1;  // left < right
         }
 
         if (leftChar != rightChar) {
