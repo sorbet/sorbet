@@ -603,8 +603,16 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     auto propContext = PropContext{syntacticSuperClass, klass->kind};
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     replaceNodes.reserve(klass->rhs.size());
+    bool hasInitialize = false;
     vector<PropInfo> props;
     for (auto &stat : klass->rhs) {
+        auto *mdef = ast::cast_tree<ast::MethodDef>(stat);
+        if (mdef) {
+            if (mdef->name == core::Names::initialize()) {
+                hasInitialize = true;
+            }
+        }
+
         auto *send = ast::cast_tree<ast::Send>(stat);
         if (send == nullptr) {
             continue;
@@ -626,7 +634,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
     // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
-    if (wantTypedInitialize(syntacticSuperClass)) {
+    if (wantTypedInitialize(syntacticSuperClass) && !hasInitialize) {
         // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
         for (auto &stat : mkTypedInitialize(ctx, klass->loc, klass->declLoc, props)) {
             klass->rhs.emplace_back(std::move(stat));
