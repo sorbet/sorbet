@@ -213,8 +213,17 @@ void DefTree::writeCollapsedAutoloads(const core::GlobalState &gs, const Autoloa
                     ? alCfg.rootObject
                     : fmt::format("{}", fmt::map_join(parent->qname.nameParts,
                                                       "::", [&](const auto &nr) -> string { return nr.show(gs); }));
-            fmt::format_to(std::back_inserter(buf), "{}.autoload_map({}, {{{}: '{}/{}'}})\n", alCfg.registryModule,
-                           parentFullName, name().show(gs), alCfg.rootDir, path(gs));
+            if (!children.empty() || isNestedPkg) {
+                fmt::format_to(std::back_inserter(buf), "{}.autoload_map({}, {{{}: '{}/{}'}})\n", alCfg.registryModule,
+                               parentFullName, name().show(gs), alCfg.rootDir, path(gs));
+            } else {
+                // inline autoload with side-loading
+                auto innerSrc = renderAutoloadSrc(gs, alCfg);
+                fmt::format_to(std::back_inserter(buf),
+                               "{}.autoload_sideload_experimental({}, :{}, '_FAKE_{}/{}', <<~CODE\n{}\nCODE\n)\n",
+                               alCfg.registryModule, parentFullName, name().show(gs), alCfg.rootDir, path(gs),
+                               std::move(innerSrc));
+            }
         } else if (!children.empty()) {
             // raw namespace
             string fullName = fmt::format(
@@ -471,7 +480,7 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                                                const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    if (node.pkgName.exists() || node.getDefiningFile().exists() || node.root()) {
+    if (node.pkgName.exists() || (node.getDefiningFile().exists() && !node.children.empty()) || node.root()) {
         tasks.emplace_back(RenderAutoloadTask{filePath, node});
     }
     if (!node.children.empty()) {
