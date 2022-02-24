@@ -64,5 +64,33 @@ public:
 
     static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
 };
+
+// Information about the packages that lie above and below a package in the package database. For example, if you have
+// the following packages:
+//
+// > Foo
+// > Foo::Bar
+// > Foo::Bar::Baz
+//
+// then for the focused package `Foo::Bar`, `Foo` is a parent packge and `Foo::Bar::Baz` is a child package.
+class PackageNamespaceInfo final {
+public:
+
+    // The mangled name for the package in the middle of the parent and child namespaces.
+    core::NameRef package;
+
+    // The mangled names of packages whose name is a prefix of `focusedPackage`.
+    std::vector<core::NameRef> parents;
+
+    // The mangled names of packages that have `focusedPackage` as a prefix of their namespace.
+    std::vector<core::NameRef> children;
+
+    PackageNamespaceInfo() = default;
+
+    // Load namespace info for a package out of the package database.
+    static PackageNamespaceInfo load(const core::GlobalState &gs, core::NameRef focusedPackage);
+};
+
+
 } // namespace sorbet::core::packages
 #endif

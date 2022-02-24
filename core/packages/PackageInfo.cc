@@ -1,4 +1,5 @@
 #include "core/packages/PackageInfo.h"
+#include "core/GlobalState.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
 #include "core/Symbols.h"
@@ -32,4 +33,40 @@ bool PackageInfo::lexCmp(const std::vector<core::NameRef> &lhs, const std::vecto
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
                                         [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
 }
+
+PackageNamespaceInfo PackageNamespaceInfo::load(const core::GlobalState &gs, core::NameRef package) {
+    PackageNamespaceInfo res;
+    res.package = package;
+
+    auto &db = gs.packageDB();
+    auto &packageInfo = db.getPackageInfo(package);
+    auto &packageName = packageInfo.fullName();
+    auto packageNameSize = packageName.size();
+
+    for (auto pkg : db.packages()) {
+        if (pkg == package) {
+            continue;
+        }
+
+        auto &info = db.getPackageInfo(pkg);
+        auto &fullName = info.fullName();
+
+        // If this package's name is longer than the focused package, it might be a child package of the focused
+        // package, otherwise it might be a parent package.
+        if (packageNameSize < fullName.size()) {
+            bool focusedIsPrefix = std::equal(packageName.begin(), packageName.end(), fullName.begin());
+            if (focusedIsPrefix) {
+                res.children.emplace_back(pkg);
+            }
+        } else {
+            bool prefixOfFocused = std::equal(fullName.begin(), fullName.end(), packageName.begin());
+            if (prefixOfFocused) {
+                res.parents.emplace_back(pkg);
+            }
+        }
+    }
+
+    return res;
+}
+
 } // namespace sorbet::core::packages

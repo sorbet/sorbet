@@ -595,18 +595,20 @@ int realmain(int argc, char *argv[]) {
             if (!opts.singlePackage.empty()) {
                 Timer singlePackageTimer(logger, "singlePackage.setup");
 
-                auto info = packager::RBIGenerator::findSinglePackage(*gs, opts.singlePackage);
-                if (!info.packageName.exists()) {
+                auto &pkgInfo = gs->packageDB().getPackageInfo(*gs, opts.singlePackage);
+                if (!pkgInfo.exists()) {
                     logger->error("Unable to find package `{}`", opts.singlePackage);
                     return 1;
                 }
-                singlePackageTarget = info.packageName;
+
+                auto info = core::packages::PackageNamespaceInfo::load(*gs, pkgInfo.mangledName());
+                singlePackageTarget = info.package;
 
                 // Only keep inputs that are part of the package whose interface we're generating
                 auto &db = gs->packageDB();
                 auto it = std::remove_if(inputFiles.begin(), inputFiles.end(), [&gs = *gs, &db, &info](auto file) {
                     auto &pkg = db.getPackageForFile(gs, file);
-                    return pkg.exists() && pkg.mangledName() != info.packageName;
+                    return pkg.exists() && pkg.mangledName() != info.package;
                 });
                 inputFiles.erase(it, inputFiles.end());
 
