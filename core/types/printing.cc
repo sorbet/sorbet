@@ -43,6 +43,15 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
     return this->show(gs);
 }
 
+namespace {
+string argTypeForUnresolvedAppliedType(const GlobalState &gs, const TypePtr &t, ShowOptions options) {
+    if (auto *m = cast_type<MetaType>(t)) {
+        return m->wrapped.show(gs, options);
+    }
+    return t.show(gs, options);
+}
+}
+
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
     string resolvedString = options.showForRBI ? "" : " (unresolved)";
     ClassOrModuleRef symForPrinting;
@@ -55,7 +64,7 @@ string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) c
     }
 
     return fmt::format("{}[{}]{}", symForPrinting.show(gs, options),
-                       fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs, options); }),
+                       fmt::map_join(targs, ", ", [&](auto targ) { return options.showForRBI ? argTypeForUnresolvedAppliedType(gs, targ, options) : targ.show(gs, options); }),
                        resolvedString);
 }
 
