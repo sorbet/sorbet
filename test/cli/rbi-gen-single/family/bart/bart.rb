@@ -18,6 +18,8 @@ module Family
         Util::Messages.say "eat pant"
       end
 
+      FamilyClass = Simpsons
+
     end
 
   end

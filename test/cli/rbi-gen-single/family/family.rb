@@ -12,6 +12,10 @@ module Family
       nil
     end
 
+    # This exposes another problem, Bart::Character is used completely
+    # unqualified at the top level in the rbi.
+    LocalBart = Bart::Character
+
     sig {returns(Bart::Character)}
     def bart
       Bart::Character.new

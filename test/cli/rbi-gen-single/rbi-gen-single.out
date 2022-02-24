@@ -11,6 +11,7 @@ class Family::Simpsons < Object
   extend T::Sig
 end
 Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Bart::Character)}
+Family::Simpsons::LocalBart = Bart::Character
 -- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
 {"packageRefs":[], "rbiRefs":[]}-- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 -- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
@@ -23,6 +24,7 @@ class Family::Bart::Character < Object
   def family; end
   extend T::Sig
 end
+Family::Bart::Character::FamilyClass = Family::Simpsons
 -- JSON: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 {"packageRefs":["Family"], "rbiRefs":[]}-- ./test/cli/rbi-gen-single/util/__package.rb (Util)
 -- RBI: ./test/cli/rbi-gen-single/util/__package.rb (Util)
