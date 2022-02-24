@@ -258,7 +258,24 @@ public:
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
+        validateNoForwardArgAfterRestArg(args);
+
         return make_unique<Args>(collectionLoc(begin, args, end), std::move(args));
+    }
+
+    void validateNoForwardArgAfterRestArg(const sorbet::parser::NodeVec &args) {
+        bool restArg = false;
+        bool forwardArg = false;
+        for (auto &arg : args) {
+            if (parser::isa_node<Restarg>(arg.get())) {
+                restArg = true;
+            } else if (parser::isa_node<ForwardArg>(arg.get())) {
+                forwardArg = true;
+            }
+        }
+        if (forwardArg && restArg) {
+            error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
+        }
     }
 
     unique_ptr<Node> array(const token *begin, sorbet::parser::NodeVec elements, const token *end) {
