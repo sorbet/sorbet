@@ -222,7 +222,6 @@ pipeline_tests(
         [
             "testdata/**/*.rb",
             "testdata/**/*.exp",
-            "testdata/**/*.exp.svg",
         ],
         exclude = [
             "testdata/compiler/**/*",
@@ -258,7 +257,6 @@ pipeline_tests(
         [
             "testdata/**/*.rb",
             "testdata/**/*.exp",
-            "testdata/**/*.exp.svg",
         ],
         exclude = [
             "testdata/compiler/**/*",
