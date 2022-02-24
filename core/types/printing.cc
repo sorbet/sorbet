@@ -45,8 +45,16 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
     string resolvedString = options.showForRBI ? "" : " (unresolved)";
+    ClassOrModuleRef symForPrinting;
 
-    return fmt::format("{}[{}]{}", this->klass.show(gs, options),
+    if (options.showForRBI) {
+        auto attachedClass = this->klass.data(gs)->attachedClass(gs);
+        symForPrinting = attachedClass;
+    } else {
+        symForPrinting = this->klass;
+    }
+
+    return fmt::format("{}[{}]{}", symForPrinting.show(gs, options),
                        fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs, options); }),
                        resolvedString);
 }
