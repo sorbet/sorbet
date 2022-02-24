@@ -30,7 +30,7 @@ prefix="0.5"
 release_version="$prefix.${git_commit_count}"
 long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 
-echo "--- Dowloading artifacts"
+echo "--- Downloading artifacts"
 rm -rf release
 rm -rf _out_
 buildkite-agent artifact download "_out_/**/*" .
