@@ -127,15 +127,6 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
-NameRef PackageDB::lookupPackage(NameRef pkgMangledName) const {
-    ENFORCE(pkgMangledName.exists());
-    auto it = packages_.find(pkgMangledName);
-    if (it == packages_.end()) {
-        return NameRef::noName();
-    }
-    return it->first;
-}
-
 const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
 
