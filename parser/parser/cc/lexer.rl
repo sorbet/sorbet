@@ -3073,6 +3073,14 @@ bool lexer::is_declared_forward_args() {
   return is_declared(FORWARD_ARGS);
 }
 
+void lexer::declare_anonymous_args() {
+  declare(ANONYMOUS_BLOCKARG);
+}
+
+bool lexer::is_declared_anonymous_args() {
+  return is_declared(ANONYMOUS_BLOCKARG);
+}
+
 optional_size lexer::dedentLevel() {
   // We erase @dedentLevel as a precaution to avoid accidentally
   // using a stale value.

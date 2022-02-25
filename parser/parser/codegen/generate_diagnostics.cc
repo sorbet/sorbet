@@ -73,6 +73,7 @@ tuple<string, string> MESSAGES[] = {
     {"EmptyCase", "{} statement must at least have one \\\"when\\\" clause"},
     {"ForwardArgAfterRestArg", "... after rest argument"},
     {"InvalidIdToGet", "identifier {} is not valid to get"},
+    {"NoAnonymousBlockArg", "no anonymous block parameter"},
 
     // Error recovery hints
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
