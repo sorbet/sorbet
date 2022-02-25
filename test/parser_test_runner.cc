@@ -51,6 +51,7 @@ namespace spd = spdlog;
 using namespace std;
 
 string singleTest;
+bool updateExpectations;
 
 UnorderedSet<string> knownExpectations = {
     "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
@@ -153,12 +154,14 @@ TEST_CASE("WhitequarkParserTest") {
 
         auto checker = test.folder + expectation->second.begin()->second;
         auto expect = FileOps::read(checker.c_str());
-        {
+        if (!updateExpectations) {
             INFO("Mismatch on: " << checker);
             CHECK_EQ(expect, gotPhase.second);
         }
         if (expect == gotPhase.second) {
             MESSAGE(gotPhase.first << " OK");
+        } else if (updateExpectations) {
+            FileOps::write(checker, gotPhase.second);
         }
     }
 
@@ -186,8 +189,10 @@ TEST_CASE("WhitequarkParserTest") {
 
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
-    options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+    options.allow_unrecognised_options();
+    options.add_options()("single_test", "run over single test.",
+                          cxxopts::value<std::string>()->default_value(""), "testpath");
+    options.add_options()("update_exp", "update expectations");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -196,6 +201,7 @@ int main(int argc, char *argv[]) {
     }
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
+    sorbet::test::updateExpectations = res["update_exp"].as<bool>();
 
     doctest::Context context(argc, argv);
     return context.run();
