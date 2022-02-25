@@ -110,11 +110,11 @@ LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)
 }
 
 string LoadSelf::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return "loadSelf";
+    return fmt::format("loadSelf({})", this->link->fun.toString(gs));
 }
 
 string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
+    return fmt::format("LoadSelf {{ link = {} }}", this->link->fun.showRaw(gs));
 }
 
 Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,

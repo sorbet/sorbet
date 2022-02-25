@@ -388,7 +388,7 @@ bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$9: Sorbet::Private::Stat
 # - bb2(rubyRegionId=1)
 bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$15: Symbol(:a) = :a
     <cfgAlias>$18: T.class_of(T) = alias <C T>
     <cfgAlias>$20: T.class_of(Integer) = alias <C Integer>
@@ -423,7 +423,7 @@ bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$32: Sorbet::Private::Sta
 # - bb6(rubyRegionId=2)
 bb9[rubyRegionId=2, firstDead=7](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$32: Sorbet::Private::Static::Void, <selfRestore>$33: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$38: Symbol(:a) = :a
     <cfgAlias>$40: T.class_of(Integer) = alias <C Integer>
     <statTemp>$36: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$38: Symbol(:a), <cfgAlias>$40: T.class_of(Integer))
@@ -455,7 +455,7 @@ bb11[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$50: Sorbet::Private::St
 # - bb10(rubyRegionId=3)
 bb13[rubyRegionId=3, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$50: Sorbet::Private::Static::Void, <selfRestore>$51: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$56: Symbol(:a) = :a
     <cfgAlias>$59: T.class_of(T) = alias <C T>
     <cfgAlias>$61: T.class_of(Integer) = alias <C Integer>
@@ -490,7 +490,7 @@ bb15[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$73: Sorbet::Private::St
 # - bb14(rubyRegionId=4)
 bb17[rubyRegionId=4, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$73: Sorbet::Private::Static::Void, <selfRestore>$74: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$79: Symbol(:a) = :a
     <cfgAlias>$82: T.class_of(T) = alias <C T>
     <cfgAlias>$84: T.class_of(Integer) = alias <C Integer>
@@ -525,7 +525,7 @@ bb19[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$96: Sorbet::Private::St
 # - bb18(rubyRegionId=5)
 bb21[rubyRegionId=5, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$96: Sorbet::Private::Static::Void, <selfRestore>$97: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$102: Symbol(:a) = :a
     <cfgAlias>$105: T.class_of(T) = alias <C T>
     <cfgAlias>$107: T.class_of(Integer) = alias <C Integer>
@@ -560,7 +560,7 @@ bb23[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$119: Sorbet::Private::S
 # - bb22(rubyRegionId=6)
 bb25[rubyRegionId=6, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$119: Sorbet::Private::Static::Void, <selfRestore>$120: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$125: Symbol(:a) = :a
     <cfgAlias>$128: T.class_of(T) = alias <C T>
     <cfgAlias>$130: T.class_of(Integer) = alias <C Integer>
@@ -595,7 +595,7 @@ bb27[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$142: Sorbet::Private::S
 # - bb26(rubyRegionId=7)
 bb29[rubyRegionId=7, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$142: Sorbet::Private::Static::Void, <selfRestore>$143: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$148: Symbol(:a) = :a
     <cfgAlias>$151: T.class_of(T) = alias <C T>
     <cfgAlias>$153: T.class_of(Integer) = alias <C Integer>
@@ -630,7 +630,7 @@ bb31[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$165: Sorbet::Private::S
 # - bb30(rubyRegionId=8)
 bb33[rubyRegionId=8, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$165: Sorbet::Private::Static::Void, <selfRestore>$166: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$171: Symbol(:a) = :a
     <cfgAlias>$174: T.class_of(T) = alias <C T>
     <cfgAlias>$176: T.class_of(Integer) = alias <C Integer>
@@ -700,7 +700,7 @@ bb35[rubyRegionId=0, firstDead=42](<block-pre-call-temp>$188: Sorbet::Private::S
 # - bb34(rubyRegionId=9)
 bb37[rubyRegionId=9, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$188: Sorbet::Private::Static::Void, <selfRestore>$189: T.class_of(ControlFlow)):
     # outerLoops: 1
-    <self>: T::Private::Methods::DeclBuilder = loadSelf
+    <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$194: Symbol(:a) = :a
     <cfgAlias>$197: T.class_of(T) = alias <C T>
     <cfgAlias>$199: T.class_of(Integer) = alias <C Integer>
