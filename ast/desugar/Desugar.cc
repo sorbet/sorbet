@@ -1309,6 +1309,16 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 // location to node.
                 auto zeroLengthLoc = loc.copyWithZeroLength();
                 auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
+                auto csendLoc = recvLoc.copyEndWithZeroLength();
+                if (recvLoc.endPos() + 1 <= dctx.ctx.file.data(dctx.ctx).source().size()) {
+                    auto ampersandLoc = core::LocOffsets{recvLoc.endPos(), recvLoc.endPos() + 1};
+                    // The arg loc for the synthetic variable created for the purpose of this safe navigation
+                    // check is a bit of a hack. It's intentionally one character too short so that for
+                    // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
+                    if (core::Loc(dctx.ctx.file, ampersandLoc).source(dctx.ctx) == "&") {
+                        csendLoc = ampersandLoc;
+                    }
+                }
 
                 auto assgn = MK::Assign(zeroLengthRecvLoc, tempRecv, node2TreeImpl(dctx, std::move(csend->receiver)));
 
@@ -1322,9 +1332,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                               csend->methodLoc, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
-                ExpressionPtr nil = MK::Send1(
-                    zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
-                    core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
+                ExpressionPtr nil =
+                    MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
                 auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
                 result = std::move(res);

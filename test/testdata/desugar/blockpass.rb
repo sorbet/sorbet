@@ -45,7 +45,8 @@ def foo(&blk)
     calls_with_object(&HasToProc.new)
     calls_with_object {|*args| HasToProc.new.to_proc.call(*args)}
     CallsWithObject.calls_with_object(&:meth)
-    CallsWithObject&.calls_with_object(&:meth) # error: Used `&.` operator on `T.class_of(CallsWithObject)`, which can never be nil
+    CallsWithObject&.calls_with_object(&:meth)
+    #              ^^ error: Used `&.` operator on `T.class_of(CallsWithObject)`, which can never be nil
     CallsWithObjectChild.calls_with_object(&:meth)
     calls_arg_with_object(HasMeth.new, &:meth)
     calls_arg_with_object(HasMeth.new) {|x| x.meth}
