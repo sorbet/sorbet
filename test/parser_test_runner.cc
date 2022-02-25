@@ -190,8 +190,8 @@ TEST_CASE("WhitequarkParserTest") {
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options();
-    options.add_options()("single_test", "run over single test.",
-                          cxxopts::value<std::string>()->default_value(""), "testpath");
+    options.add_options()("single_test", "run over single test.", cxxopts::value<std::string>()->default_value(""),
+                          "testpath");
     options.add_options()("update_exp", "update expectations");
     auto res = options.parse(argc, argv);
 
