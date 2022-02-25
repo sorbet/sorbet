@@ -215,6 +215,11 @@ core::SymbolRef TypePtr::untypedBlame() const {
     return Symbols::noSymbol();
 }
 
+// Converts a type like this:
+//   T.proc.params(arg0: Integer, arg1: Integer).void
+// into this:
+//   [Integer, Integer]
+// for use with LoadYieldParams
 TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
     switch (tag()) {
         case Tag::MetaType:
