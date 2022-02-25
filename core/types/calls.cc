@@ -577,7 +577,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name == Names::new_()) {
         if (!args.suppressErrors) {
             if (auto e =
-                    gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::MetaTypeDispatchCall)) {
+                    gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                             symbol.show(gs));
             }
@@ -3243,11 +3243,10 @@ public:
             auto argTyp = args.args[0]->type;
             ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
                     args.locs.args.size());
-            auto argLoc = args.locs.args[0];
 
             if (!isa_type<LiteralType>(argTyp)) {
                 if (auto e =
-                        gs.beginError(core::Loc(args.locs.file, argLoc), core::errors::Infer::ExpectedLiteralType)) {
+                        gs.beginError(args.argLoc(0), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
