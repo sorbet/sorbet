@@ -109,7 +109,7 @@ bb5[rubyRegionId=1, firstDead=5](<self>: Main, <blk>: T.untyped, <block-pre-call
     # outerLoops: 1
     <self>: Main = loadSelf
     <blk>$6: T.untyped = load_yield_params(yielder)
-    i$1: T.untyped = yield_load_arg(0)
+    i$1: T.untyped = yield_load_arg(0, <blk>$6: T.untyped)
     <blockReturnTemp>$7: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)
     <blockReturnTemp>$10: T.noreturn = blockreturn<yielder> <blockReturnTemp>$7: T.untyped
     <unconditional> -> bb2
@@ -162,7 +162,7 @@ bb5[rubyRegionId=1, firstDead=6](<self>: Main, <block-pre-call-temp>$5: Sorbet::
     # outerLoops: 1
     <self>: Main = loadSelf
     <blk>$7: T.untyped = load_yield_params(lambda)
-    x$1: T.untyped = yield_load_arg(0)
+    x$1: T.untyped = yield_load_arg(0, <blk>$7: T.untyped)
     <statTemp>$9: NilClass = <self>: Main.puts(x$1: T.untyped)
     <blockReturnTemp>$8: Integer(3) = 3
     <blockReturnTemp>$12: T.noreturn = blockreturn<lambda> <blockReturnTemp>$8: Integer(3)

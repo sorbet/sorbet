@@ -95,7 +95,7 @@ bb5[rubyRegionId=1, firstDead=5](<self>: Bar, <block-pre-call-temp>$5: Sorbet::P
     # outerLoops: 1
     <self>: Bar = loadSelf
     <blk>$7: T.untyped = load_yield_params(<super>)
-    a$1: T.untyped = yield_load_arg(0)
+    a$1: T.untyped = yield_load_arg(0, <blk>$7: T.untyped)
     <blockReturnTemp>$8: NilClass = <self>: Bar.puts(a$1: T.untyped)
     <blockReturnTemp>$11: T.noreturn = blockreturn<<super>> <blockReturnTemp>$8: NilClass
     <unconditional> -> bb2

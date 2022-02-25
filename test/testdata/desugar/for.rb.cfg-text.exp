@@ -173,7 +173,7 @@ bb5[rubyRegionId=1, firstDead=6](<self>: T.class_of(Main), <block-pre-call-temp>
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf
     <blk>$8: T.untyped = load_yield_params(each)
-    a$1: T.untyped = yield_load_arg(0)
+    a$1: T.untyped = yield_load_arg(0, <blk>$8: T.untyped)
     <statTemp>$11: T.untyped = a$1: T.untyped.inspect()
     <blockReturnTemp>$9: NilClass = <self>: T.class_of(Main).puts(<statTemp>$11: T.untyped)
     <blockReturnTemp>$13: T.noreturn = blockreturn<each> <blockReturnTemp>$9: NilClass
@@ -202,7 +202,7 @@ bb9[rubyRegionId=2, firstDead=14](<self>: T.class_of(Main), <block-pre-call-temp
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf
     <blk>$19: T.untyped = load_yield_params(each)
-    forTemp$2: T.untyped = yield_load_arg(0)
+    forTemp$2: T.untyped = yield_load_arg(0, <blk>$19: T.untyped)
     <cfgAlias>$24: T.class_of(<Magic>) = alias <C <Magic>>
     <assignTemp>$2$2: T.untyped = <cfgAlias>$24: T.class_of(<Magic>).<splat>(forTemp$2: T.untyped)
     <cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>
@@ -239,8 +239,8 @@ bb13[rubyRegionId=3, firstDead=9](<self>: T.class_of(Main), <block-pre-call-temp
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf
     <blk>$44: T.untyped = load_yield_params(each)
-    a$3: T.untyped = yield_load_arg(0)
-    b$3: T.untyped = yield_load_arg(1)
+    a$3: T.untyped = yield_load_arg(0, <blk>$44: T.untyped)
+    b$3: T.untyped = yield_load_arg(1, <blk>$44: T.untyped)
     <statTemp>$48: T.untyped = a$3: T.untyped.inspect()
     <statTemp>$46: NilClass = <self>: T.class_of(Main).puts(<statTemp>$48: T.untyped)
     <statTemp>$51: T.untyped = b$3: T.untyped.inspect()
@@ -273,7 +273,7 @@ bb17[rubyRegionId=4, firstDead=18](<self>: T.class_of(Main), <block-pre-call-tem
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf
     <blk>$59: T.untyped = load_yield_params(each)
-    forTemp$4: T.untyped = yield_load_arg(0)
+    forTemp$4: T.untyped = yield_load_arg(0, <blk>$59: T.untyped)
     <cfgAlias>$64: T.class_of(<Magic>) = alias <C <Magic>>
     <assignTemp>$4$4: T.untyped = <cfgAlias>$64: T.class_of(<Magic>).<splat>(forTemp$4: T.untyped)
     <cfgAlias>$68: T.class_of(<Magic>) = alias <C <Magic>>
@@ -364,7 +364,7 @@ bb25[rubyRegionId=6, firstDead=34](<self>: T.class_of(Main), @a$105: T.untyped, 
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf
     <blk>$151: T.untyped = load_yield_params(each)
-    forTemp$6: T.untyped = yield_load_arg(0)
+    forTemp$6: T.untyped = yield_load_arg(0, <blk>$151: T.untyped)
     <cfgAlias>$156: T.class_of(<Magic>) = alias <C <Magic>>
     <assignTemp>$9$6: T.untyped = <cfgAlias>$156: T.class_of(<Magic>).<splat>(forTemp$6: T.untyped)
     <cfgAlias>$160: T.class_of(<Magic>) = alias <C <Magic>>

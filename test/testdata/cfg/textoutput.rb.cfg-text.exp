@@ -115,7 +115,7 @@ bb5[rubyRegionId=1, firstDead=5](<self>: A, y: T.untyped, <block-pre-call-temp>$
     # outerLoops: 1
     <self>: A = loadSelf
     <blk>$6: T.untyped = load_yield_params(map)
-    e$1: T.untyped = yield_load_arg(0)
+    e$1: T.untyped = yield_load_arg(0, <blk>$6: T.untyped)
     <blockReturnTemp>$7: T.untyped = <self>: A.g(e$1: T.untyped, y: T.untyped)
     <blockReturnTemp>$11: T.noreturn = blockreturn<map> <blockReturnTemp>$7: T.untyped
     <unconditional> -> bb2

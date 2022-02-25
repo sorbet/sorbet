@@ -42,7 +42,7 @@ bb5[rubyRegionId=1, firstDead=-1](<self>: Object, <selfRestore>$9: Object):
     # outerLoops: 1
     <self>: Object = loadSelf
     <blk>$10: [Integer] = load_yield_params(map)
-    x$1: Integer = yield_load_arg(0)
+    x$1: Integer = yield_load_arg(0, <blk>$10: [Integer])
     <returnTemp>$14: Integer = x$1
     <block-break-assign>$15: Integer = x$1
     <magic>$16: T.class_of(<Magic>) = alias <C <Magic>>
@@ -161,7 +161,7 @@ bb9[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-te
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf
     <blk>$55: [Integer] = load_yield_params(bar)
-    x$2: Integer = yield_load_arg(0)
+    x$2: Integer = yield_load_arg(0, <blk>$55: [Integer])
     <statTemp>$60: Integer(5) = 5
     <ifTemp>$58: T::Boolean = x$2: Integer.>(<statTemp>$60: Integer(5))
     <ifTemp>$58 -> (T::Boolean ? bb10 : bb11)
@@ -212,7 +212,7 @@ bb15[rubyRegionId=3, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-t
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf
     <blk>$74: [Integer] = load_yield_params(bar)
-    x$3: Integer = yield_load_arg(0)
+    x$3: Integer = yield_load_arg(0, <blk>$74: [Integer])
     <statTemp>$79: Integer(5) = 5
     <ifTemp>$77: T::Boolean = x$3: Integer.>(<statTemp>$79: Integer(5))
     <ifTemp>$77 -> (T::Boolean ? bb16 : bb17)
