@@ -173,7 +173,15 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
 
         data = []
         if tests[name]["isDirectory"]:
-            data += native.glob(["{}**/*".format(prefix)])
+            data += native.glob(["{}**/*.rb".format(prefix)])
+
+            toplevel_exp = native.glob(["{}*.exp".format(prefix)])
+            all_exp = native.glob(["{}**/*.exp".format(prefix)])
+            if len(toplevel_exp) != len(all_exp):
+                fail("non-toplevel exp files not permitted in {}".format(prefix))
+            data += toplevel_exp
+
+            data += native.glob(["{}**/*.rbupdate".format(prefix)])
         elif tests[name]["isMultiFile"]:
             data += native.glob(["{}*".format(prefix)])
         else:
