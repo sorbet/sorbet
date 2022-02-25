@@ -14,7 +14,7 @@ def dropExtension(p):
 
 _TEST_SCRIPT = """#!/usr/bin/env bash
 set -x
-exec {runner} --single_test="{test}"
+exec {runner} --single_test="{test}"{update}
 """
 
 def _exp_test_impl(ctx):
@@ -23,6 +23,7 @@ def _exp_test_impl(ctx):
         content = _TEST_SCRIPT.format(
             runner = ctx.executable.runner.short_path,
             test = ctx.file.test.path,
+            update =  " --update_exp" if ctx.attr.update else ""
         ),
     )
 
@@ -39,6 +40,9 @@ exp_test = rule(
         ),
         "data": attr.label_list(
             allow_files = True,
+        ),
+        "update": attr.bool(
+            default = False,
         ),
         "runner": attr.label(
             executable = True,
@@ -157,8 +161,10 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
 
     enabled_tests = []
     disabled_tests = []
+    update_tests = []
     for name in tests.keys():
         test_name = "test_{}/{}".format(test_name_prefix, name)
+        update_name = "update_{}/{}".format(test_name_prefix, name)
         path = tests[name]["path"]
         prefix = tests[name]["prefix"]
         sentinel = tests[name]["sentinel"]
@@ -170,6 +176,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
             disabled_tests.append(test_name)
         else:
             enabled_tests.append(test_name)
+        update_tests.append(update_name)
 
         data = []
         if tests[name]["isDirectory"]:
@@ -200,6 +207,20 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
             tags = tags + extra_tags,
         )
 
+        exp_test(
+            name = update_name,
+            update = True,
+            runner = runner,
+            data = data,
+            test = sentinel,
+            size = "small",
+            tags = [
+                "manual",
+                "external",
+                "local",
+            ] + tags + extra_tags,
+        )
+
     native.test_suite(
         name = suite_name,
         tests = enabled_tests,
@@ -209,4 +230,10 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
         native.test_suite(
             name = "{}_disabled".format(suite_name),
             tests = disabled_tests,
+        )
+
+    if len(update_tests) > 0:
+        native.test_suite(
+            name = "{}_update".format(suite_name),
+            tests = update_tests,
         )
