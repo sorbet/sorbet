@@ -182,13 +182,7 @@ const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::s
     if (!cnst.exists()) {
         return NONE_PKG;
     }
-
-    auto it = this->packages_.find(cnst);
-    if (it == this->packages_.end()) {
-        return NONE_PKG;
-    }
-
-    return *it->second;
+    return getPackageInfo(cnst);
 }
 
 const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {
