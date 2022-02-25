@@ -250,11 +250,12 @@ string YieldParamPresent::showRaw(const core::GlobalState &gs, const CFG &cfg, i
 }
 
 string YieldLoadArg::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("yield_load_arg({})", this->argId);
+    return fmt::format("yield_load_arg({}, {})", this->argId, this->yieldParam.toString(gs, cfg));
 }
 
 string YieldLoadArg::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("YieldLoadArg {{ argId = {} }}", this->argId);
+    return fmt::format("YieldLoadArg {{ argId = {}, yieldParam = {} }}", this->argId,
+                       this->yieldParam.showRaw(gs, cfg));
 }
 
 string GetCurrentException::toString(const core::GlobalState &gs, const CFG &cfg) const {
