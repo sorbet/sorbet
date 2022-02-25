@@ -27,6 +27,9 @@ public:
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
 
+    // Lookup `PackageInfo` from the string representation of the un-mangled package name.
+    const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
+
     bool empty() const;
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
