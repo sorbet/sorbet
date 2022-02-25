@@ -1364,7 +1364,25 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             },
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
-                tp = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
+                auto tpo = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
+                auto it = l.link->result->secondary.get();
+                while (it != nullptr) {
+                    auto secondaryTpo = getTypeFromRebind(ctx, it->main, l.fallback);
+                    switch (l.link->result->secondaryKind) {
+                        case core::DispatchResult::Combinator::OR:
+                            tpo.type = core::Types::any(ctx, tpo.type, secondaryTpo.type);
+                            break;
+                        case core::DispatchResult::Combinator::AND:
+                            tpo.type = core::Types::all(ctx, tpo.type, secondaryTpo.type);
+                            break;
+                    }
+                    tpo.origins.insert(tpo.origins.begin(), make_move_iterator(secondaryTpo.origins.begin()),
+                                       make_move_iterator(secondaryTpo.origins.end()));
+
+                    it = it->secondary.get();
+                }
+
+                tp = tpo;
             },
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
