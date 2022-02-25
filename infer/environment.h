@@ -192,6 +192,9 @@ class Environment {
 
     void cloneFrom(const Environment &rhs);
 
+    core::TypeAndOrigins getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
+                                           cfg::LocalRef fallback);
+
 public:
     Environment(core::Loc ownerLoc);
     Environment(const Environment &rhs) = delete;

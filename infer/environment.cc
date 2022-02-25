@@ -1364,28 +1364,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             },
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
-                auto rebind = l.link->result->main.blockSpec.rebind;
-
-                if (rebind.exists()) {
-                    if (rebind == core::Symbols::BindToSelfType()) {
-                        tp.type = l.link->result->main.receiver;
-                    } else if (rebind == core::Symbols::BindToAttachedClass()) {
-                        auto appliedType = core::cast_type<core::AppliedType>(l.link->result->main.receiver);
-                        auto attachedClass =
-                            appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-
-                        auto lambdaParam =
-                            core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
-
-                        tp.type = lambdaParam->upperBound;
-                    } else {
-                        tp.type = rebind.data(ctx)->externalType();
-                    }
-
-                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
-                } else {
-                    tp = getTypeAndOrigin(ctx, l.fallback);
-                }
+                tp = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
             },
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
@@ -1584,6 +1563,33 @@ void Environment::cloneFrom(const Environment &rhs) {
     this->bb = rhs.bb;
     this->pinnedTypes = rhs.pinnedTypes;
     this->typeTestsWithVar.cloneFrom(rhs.typeTestsWithVar);
+}
+
+core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
+                                                    cfg::LocalRef fallback) {
+    auto rebind = main.blockSpec.rebind;
+
+    if (rebind.exists()) {
+        core::TypeAndOrigins result;
+        if (rebind == core::Symbols::BindToSelfType()) {
+            result.type = main.receiver;
+        } else if (rebind == core::Symbols::BindToAttachedClass()) {
+            auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
+            auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+            auto lambdaParam =
+                core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
+
+            result.type = lambdaParam->upperBound;
+        } else {
+            result.type = rebind.data(ctx)->externalType();
+        }
+
+        result.origins.emplace_back(main.blockSpec.loc);
+        return result;
+    } else {
+        return getTypeAndOrigin(ctx, fallback);
+    }
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
