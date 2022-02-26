@@ -668,6 +668,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                           " {{|x| {}(x).{}}}", wrapInFn, shortName);
                         }
                     }
+                } else if (errLoc == args.funLoc() &&
+                           args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
+                                  receiverLoc.source(gs).value(), args.name.shortName(gs));
                 } else {
                     e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
                                   receiverLoc.source(gs).value());
