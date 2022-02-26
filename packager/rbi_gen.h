@@ -30,18 +30,6 @@ public:
     // Generate RBIs for a single package, provided as the mangled package name `package`.
     static void runSinglePackage(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                                  core::NameRef package, std::string outputDir, WorkerPool &workers);
-
-    struct SinglePackageInfo {
-        // The mangled name of the package we're generating an interface for.
-        core::NameRef packageName;
-
-        // The mangled names of all packages that lie in the parent namespace of `packageName` above. For example, if
-        // the package we're generating an interface for is `Foo::Bar` and `Foo` is also a package, the mangled name of
-        // `Foo` will be the only element in this vector.
-        std::vector<core::NameRef> parents;
-    };
-
-    static SinglePackageInfo findSinglePackage(core::GlobalState &gs, std::string packageName);
 };
 } // namespace sorbet::packager
 

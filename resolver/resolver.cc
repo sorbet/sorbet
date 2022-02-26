@@ -352,7 +352,7 @@ private:
 
         auto &db = gs.packageDB();
 
-        for (auto parent : *gs.singlePackageParents) {
+        for (auto parent : gs.singlePackageImports->parentImports) {
             auto &info = db.getPackageInfo(parent);
 
             auto &stub = stubs.emplace_back();
@@ -429,7 +429,7 @@ private:
                                          const vector<ParentPackageStub> &parentPackageStubs, int &suggestionCount) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
 
-        bool singlePackageRbiGeneration = ctx.state.singlePackageParents.has_value();
+        bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
@@ -1566,7 +1566,7 @@ public:
 
             // Initialize the stubbed parent namespaces if we're generating an interface for a single package
             vector<ParentPackageStub> parentPackageStubs;
-            bool singlePackageRbiGeneration = gs.singlePackageParents.has_value();
+            bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
             if (singlePackageRbiGeneration) {
                 parentPackageStubs = initParentStubs(gs);
             }
