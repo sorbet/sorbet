@@ -1,6 +1,6 @@
 autocorrect_csend.rb:16: Expected `String` but found `T.nilable(String)` for argument `x` https://srb.help/7002
     16 |use_string(maybe_a&.foo)
-                   ^
+                   ^^^^^^^^^^^^
   Expected `String` for argument `x` of method `Object#use_string`:
     autocorrect_csend.rb:11:
     11 |sig {params(x: String).void}
@@ -8,14 +8,14 @@ autocorrect_csend.rb:16: Expected `String` but found `T.nilable(String)` for arg
   Got `T.nilable(String)` originating from:
     autocorrect_csend.rb:16:
     16 |use_string(maybe_a&.foo)
-                   ^
+                   ^^^^^^^^^^^^
     autocorrect_csend.rb:16:
     16 |use_string(maybe_a&.foo)
-                   ^^^^^^^^^^^^
+                          ^
   Autocorrect: Done
-    autocorrect_csend.rb:16: Inserted `T.must()`
+    autocorrect_csend.rb:16: Replaced with `T.must(maybe_a&.foo)`
     16 |use_string(maybe_a&.foo)
-                   ^
+                   ^^^^^^^^^^^^
 Errors: 1
 
 --------------------------------------------------------------------------
@@ -35,13 +35,13 @@ def use_string(x)
 end
 
 maybe_a = T.let(A.new, T.nilable(A))
-use_string(T.must()maybe_a&.foo)
+use_string(T.must(maybe_a&.foo))
 
 --------------------------------------------------------------------------
 
 autocorrect_csend.rb:16: Expected `String` but found `T.nilable(String)` for argument `x` https://srb.help/7002
     16 |use_string(maybe_a&.foo)
-                   ^
+                   ^^^^^^^^^^^^
   Expected `String` for argument `x` of method `Object#use_string`:
     autocorrect_csend.rb:11:
     11 |sig {params(x: String).void}
@@ -49,14 +49,14 @@ autocorrect_csend.rb:16: Expected `String` but found `T.nilable(String)` for arg
   Got `T.nilable(String)` originating from:
     autocorrect_csend.rb:16:
     16 |use_string(maybe_a&.foo)
-                   ^
+                   ^^^^^^^^^^^^
     autocorrect_csend.rb:16:
     16 |use_string(maybe_a&.foo)
-                   ^^^^^^^^^^^^
+                          ^
   Autocorrect: Done
-    autocorrect_csend.rb:16: Inserted `T.unsafe()`
+    autocorrect_csend.rb:16: Replaced with `T.unsafe(maybe_a&.foo)`
     16 |use_string(maybe_a&.foo)
-                   ^
+                   ^^^^^^^^^^^^
 Errors: 1
 
 --------------------------------------------------------------------------
@@ -76,4 +76,4 @@ def use_string(x)
 end
 
 maybe_a = T.let(A.new, T.nilable(A))
-use_string(T.unsafe()maybe_a&.foo)
+use_string(T.unsafe(maybe_a&.foo))
