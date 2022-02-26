@@ -28,7 +28,7 @@ suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.
 
 suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
     10 |"hi" + foo
-        ^^^^^^^^^^
+               ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
     68 |        arg0: String,
@@ -144,7 +144,7 @@ suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.
 
 suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
     10 |"hi" + foo
-        ^^^^^^^^^^
+               ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
     68 |        arg0: String,

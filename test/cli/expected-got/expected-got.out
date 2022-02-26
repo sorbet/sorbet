@@ -24,7 +24,7 @@ test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass
 
 test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(String, Integer)` for argument `x` https://srb.help/7002
     27 |  takes_integer(x)
-          ^^^^^^^^^^^^^^^^
+                        ^
   Expected `Integer` for argument `x` of method `Object#takes_integer`:
     test/cli/expected-got/expected-got.rb:15:
     15 |sig {params(x: Integer).void}
@@ -137,7 +137,7 @@ test/cli/expected-got/expected-got.rb:68: Can not call method `foo` on void type
 
 test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found `[Integer(1), Integer(2), T.nilable(Integer)]` for argument `xs` https://srb.help/7002
     73 |takes_int_array(xs)
-        ^^^^^^^^^^^^^^^^^^^
+                        ^^
   Expected `T::Array[Integer]` for argument `xs` of method `Object#takes_int_array`:
     test/cli/expected-got/expected-got.rb:70:
     70 |sig {params(xs: T::Array[Integer]).void}
