@@ -1188,8 +1188,24 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(insn.link);
                 ENFORCE(insn.link->result);
                 ENFORCE(insn.link->result->main.blockPreType);
+
                 auto &procType = insn.link->result->main.blockPreType;
                 auto params = procType.getCallArguments(ctx, core::Names::call());
+                auto it = insn.link->result->secondary.get();
+                while (it != nullptr) {
+                    auto &secondaryProcType = it->main.blockPreType;
+                    auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                    switch (insn.link->result->secondaryKind) {
+                        case core::DispatchResult::Combinator::OR:
+                            params = core::Types::any(ctx, params, secondaryParams);
+                            break;
+                        case core::DispatchResult::Combinator::AND:
+                            params = core::Types::all(ctx, params, secondaryParams);
+                            break;
+                    }
+
+                    it = it->secondary.get();
+                }
 
                 // A multi-arg proc, if provided a single arg which is an array,
                 // will implicitly splat it out.
