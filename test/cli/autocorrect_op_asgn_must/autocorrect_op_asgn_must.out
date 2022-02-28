@@ -1,0 +1,229 @@
+autocorrect_op_asgn_must.rb:25: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    25 |  a.foo += 1
+                ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:25:
+    25 |  a.foo += 1
+          ^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:25: Replaced with `= T.must(a.foo) +`
+    25 |  a.foo += 1
+                ^^
+
+autocorrect_op_asgn_must.rb:29: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    29 |  A.new.foo += 1
+                    ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:29:
+    29 |  A.new.foo += 1
+          ^^^^^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:29: Replaced with `= T.must(A.new.foo) +`
+    29 |  A.new.foo += 1
+                    ^^
+
+autocorrect_op_asgn_must.rb:31: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    31 |  xs[0] += 1
+                ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:31:
+    31 |  xs[0] += 1
+          ^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:31: Replaced with `= T.must(xs[0]) +`
+    31 |  xs[0] += 1
+                ^^
+
+autocorrect_op_asgn_must.rb:33: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    33 |  opts[:foo] += 1
+                     ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:33:
+    33 |  opts[:foo] += 1
+          ^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:33: Replaced with `= T.must(opts[:foo]) +`
+    33 |  opts[:foo] += 1
+                     ^^
+
+autocorrect_op_asgn_must.rb:43: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    43 |  maybe_a&.foo += 1
+                       ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:43:
+    43 |  maybe_a&.foo += 1
+          ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:43: Replaced with `= T.must(maybe_a&.foo) +`
+    43 |  maybe_a&.foo += 1
+                       ^^
+Errors: 5
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+extend T::Sig
+
+class A
+  extend T::Sig
+  sig {returns(T.nilable(Integer))}
+  attr_accessor :foo
+end
+
+sig do
+  params(
+    x: T.nilable(Integer),
+    xs: T::Array[T.nilable(Integer)],
+    opts: T::Hash[Symbol, T.nilable(Integer)],
+    shape: {foo: T.nilable(Integer)},
+    maybe_a: T.nilable(A),
+  )
+  .void
+end
+def example1(x, xs, opts, shape, maybe_a)
+  # x += 1
+
+  a = A.new
+  a.foo = T.must(a.foo) + 1
+
+  # This one is not great, because the autocorrect changes the meaning of the
+  # program (doesn't increment the right instance of `A`).
+  A.new.foo = T.must(A.new.foo) + 1
+
+  xs[0] = T.must(xs[0]) + 1
+
+  opts[:foo] = T.must(opts[:foo]) + 1
+
+  # One day we will have better shape types, this will become an error, and
+  # there should be an autocorrect.
+  shape[:foo] += 1
+
+  # This one is also not great, because the thing it suggests will error
+  # because Sorbet will be able to know that the `&.` in T.must(maybe_a&.foo)
+  # is redundant. We're fine with that being bad, because there's also an
+  # auto-fix for that as well.
+  maybe_a&.foo = T.must(maybe_a&.foo) + 1
+
+  # These aren't affected, because `||` and `&&` are available everywhere.
+  bool = T.let(false, T.nilable(T::Boolean))
+  bool ||= true
+  bool = T.let(false, T.nilable(T::Boolean))
+  bool &&= false
+end
+
+--------------------------------------------------------------------------
+
+autocorrect_op_asgn_must.rb:25: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    25 |  a.foo += 1
+                ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:25:
+    25 |  a.foo += 1
+          ^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:25: Replaced with `= T.unsafe(a.foo) +`
+    25 |  a.foo += 1
+                ^^
+
+autocorrect_op_asgn_must.rb:29: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    29 |  A.new.foo += 1
+                    ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:29:
+    29 |  A.new.foo += 1
+          ^^^^^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:29: Replaced with `= T.unsafe(A.new.foo) +`
+    29 |  A.new.foo += 1
+                    ^^
+
+autocorrect_op_asgn_must.rb:31: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    31 |  xs[0] += 1
+                ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:31:
+    31 |  xs[0] += 1
+          ^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:31: Replaced with `= T.unsafe(xs[0]) +`
+    31 |  xs[0] += 1
+                ^^
+
+autocorrect_op_asgn_must.rb:33: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    33 |  opts[:foo] += 1
+                     ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:33:
+    33 |  opts[:foo] += 1
+          ^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:33: Replaced with `= T.unsafe(opts[:foo]) +`
+    33 |  opts[:foo] += 1
+                     ^^
+
+autocorrect_op_asgn_must.rb:43: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    43 |  maybe_a&.foo += 1
+                       ^^
+  Got `T.nilable(Integer)` originating from:
+    autocorrect_op_asgn_must.rb:43:
+    43 |  maybe_a&.foo += 1
+          ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect_op_asgn_must.rb:43: Replaced with `= T.unsafe(maybe_a&.foo) +`
+    43 |  maybe_a&.foo += 1
+                       ^^
+Errors: 5
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+extend T::Sig
+
+class A
+  extend T::Sig
+  sig {returns(T.nilable(Integer))}
+  attr_accessor :foo
+end
+
+sig do
+  params(
+    x: T.nilable(Integer),
+    xs: T::Array[T.nilable(Integer)],
+    opts: T::Hash[Symbol, T.nilable(Integer)],
+    shape: {foo: T.nilable(Integer)},
+    maybe_a: T.nilable(A),
+  )
+  .void
+end
+def example1(x, xs, opts, shape, maybe_a)
+  # x += 1
+
+  a = A.new
+  a.foo = T.unsafe(a.foo) + 1
+
+  # This one is not great, because the autocorrect changes the meaning of the
+  # program (doesn't increment the right instance of `A`).
+  A.new.foo = T.unsafe(A.new.foo) + 1
+
+  xs[0] = T.unsafe(xs[0]) + 1
+
+  opts[:foo] = T.unsafe(opts[:foo]) + 1
+
+  # One day we will have better shape types, this will become an error, and
+  # there should be an autocorrect.
+  shape[:foo] += 1
+
+  # This one is also not great, because the thing it suggests will error
+  # because Sorbet will be able to know that the `&.` in T.must(maybe_a&.foo)
+  # is redundant. We're fine with that being bad, because there's also an
+  # auto-fix for that as well.
+  maybe_a&.foo = T.unsafe(maybe_a&.foo) + 1
+
+  # These aren't affected, because `||` and `&&` are available everywhere.
+  bool = T.let(false, T.nilable(T::Boolean))
+  bool ||= true
+  bool = T.let(false, T.nilable(T::Boolean))
+  bool &&= false
+end

@@ -544,7 +544,12 @@ NodeDef nodes[] = {
     {
         "OpAsgn",
         "op_asgn",
-        vector<FieldDef>({{"left", FieldType::Node}, {"op", FieldType::Name}, {"right", FieldType::Node}}),
+        vector<FieldDef>({
+            {"left", FieldType::Node},
+            {"op", FieldType::Name},
+            {"opLoc", FieldType::Loc},
+            {"right", FieldType::Node},
+        }),
     },
     // logical or
     {

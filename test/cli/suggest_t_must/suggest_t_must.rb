@@ -20,3 +20,6 @@ class A
     @result = xs[i]
   end
 end
+
+x, y = [1, T.let('', T.nilable(String))]
+y.split
