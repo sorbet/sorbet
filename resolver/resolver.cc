@@ -370,6 +370,13 @@ private:
         return stubs;
     }
 
+    static void ensureTGenericMixin(core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        auto &mixins = klass.data(gs)->mixins();
+        if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
+            mixins.emplace_back(core::Symbols::T_Generic());
+        }
+    }
+
     static void stubForRbiGeneration(core::MutableContext ctx, const vector<ParentPackageStub> &parentPackageStubs,
                                      const Nesting *scope, ast::ConstantLit *out, bool possibleGenericType) {
         if (out->symbol.exists()) {
@@ -383,10 +390,7 @@ private:
                 return;
             }
             auto singletonClass = out->symbol.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
-            auto &mixins = singletonClass.data(ctx)->mixins();
-            if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
-                mixins.emplace_back(core::Symbols::T_Generic());
-            }
+            ensureTGenericMixin(ctx, singletonClass);
             return;
         }
 
@@ -434,10 +438,7 @@ private:
         // force a singleton into existence
         auto singletonClass = data->singletonClass(ctx);
         if (possibleGenericType) {
-            auto &mixins = singletonClass.data(ctx)->mixins();
-            if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
-                mixins.emplace_back(core::Symbols::T_Generic());
-            }
+            ensureTGenericMixin(ctx, singletonClass);
         }
 
         out->symbol = symbol;
