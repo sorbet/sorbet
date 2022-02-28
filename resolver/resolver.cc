@@ -336,18 +336,6 @@ private:
         }
     };
 
-    static core::ClassOrModuleRef stubParentNamespace(core::MutableContext ctx, core::NameRef mangledPkg) {
-        auto &db = ctx.state.packageDB();
-        auto &info = db.getPackageInfo(mangledPkg);
-
-        core::ClassOrModuleRef owner = core::Symbols::root();
-        for (auto part : info.fullName()) {
-            owner = ctx.state.enterClassSymbol(core::Loc::none(), owner, part);
-        }
-
-        return owner;
-    }
-
     static vector<ParentPackageStub> initParentStubs(core::GlobalState &gs) {
         vector<ParentPackageStub> stubs;
 
