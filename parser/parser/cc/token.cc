@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include <map>
 #include <ruby_parser/token.hh>
 
