@@ -1,0 +1,14 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
+    def method1<<todo method>>(abc, xyz, &<blk>)
+      begin
+        <self>.puts("hello")
+        <self>.puts("hello")
+      end
+    end
+
+    def method2<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+end
