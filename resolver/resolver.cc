@@ -1298,7 +1298,7 @@ public:
                 send.fun == core::Names::mixesInClassMethods()) {
                 this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
             } else if (recvAsConstantLit != nullptr && send.fun == core::Names::squareBrackets() &&
-                       ctx.state.singlePackageParents.has_value()) {
+                       ctx.state.singlePackageImports.has_value()) {
                 // In single-package RBI generation mode, we treat Constant[...] as
                 // possible generic types.
                 ResolutionItem job{nesting_, recvAsConstantLit};
