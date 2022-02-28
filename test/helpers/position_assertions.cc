@@ -1253,10 +1253,9 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText);
 
     {
-        INFO(fmt::format("The expected (rbedited) file contents for this completion did not match the actual file "
-                         "contents post-edit",
-                         expectedUpdatedFilePath));
-        CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
+        CHECK_EQ_DIFF(expectedEditedFileContents, actualEditedFileContents,
+                      "The expected (rbedited) file contents for this completion did not match the actual file "
+                      "contents post-edit");
     }
 }
 
