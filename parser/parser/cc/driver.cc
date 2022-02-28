@@ -61,6 +61,47 @@ void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
     }
 }
 
+// headerEndPos should be the end of the line immediately before the start of the body
+ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t beginToken, size_t headerEndPos,
+                                                          ForeignPtr body, token_t bodyStartToken,
+                                                          token_t lastTokBeforeDedent, token_t endToken) {
+    if (!this->indentationAware || this->lex.compare_indent_level(beginToken, endToken) <= 0) {
+        return body;
+    }
+
+    const char *token_str_name = this->token_name(beginToken->type());
+    this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, beginToken, token_str_name, endToken);
+
+    if (body == nullptr) {
+        // Special case of "entire method was properly indented"
+        // But bodyStartToken is tNL if empty body, which fails the assertion in compare_indent_level
+        this->rewind_and_reset(endToken->start());
+        return body;
+    } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
+        // Not even the very first thing in the body is indented. Treat this like emtpy method.
+        this->rewind_and_reset(headerEndPos);
+        auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
+        return emptyBody;
+    } else if (lastTokBeforeDedent != nullptr) {
+        // Something in the body is dedented. Only put the properly indented stmts in the method.
+        auto truncatedBody = this->build.truncateBeginBody(self, body, lastTokBeforeDedent);
+        if (truncatedBody != nullptr) {
+            this->rewind_and_reset(lastTokBeforeDedent->end());
+            return truncatedBody;
+        } else {
+            // bodystmt had opt_else and/or opt_rescue; this is unhandled.
+            // give up, and say that the method body was empty
+            this->rewind_and_reset(headerEndPos);
+            auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
+            return emptyBody;
+        }
+    } else {
+        // Entire method body was properly indented, except for final kEND
+        this->rewind_and_reset(endToken->start());
+        return body;
+    }
+}
+
 typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                      const struct builder &builder, bool traceLexer, bool indentationAware)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
