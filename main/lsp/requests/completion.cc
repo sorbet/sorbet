@@ -256,7 +256,13 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef method,
                      const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs) {
     fmt::memory_buffer result;
-    fmt::format_to(std::back_inserter(result), "{}", method.data(gs)->name.shortName(gs));
+    auto shortName = method.data(gs)->name.shortName(gs);
+    auto isSetter = method.data(gs)->name.isSetter(gs);
+    if (isSetter) {
+        fmt::format_to(std::back_inserter(result), "{}", string_view(shortName.data(), shortName.size() - 1));
+    } else {
+        fmt::format_to(std::back_inserter(result), "{}", shortName);
+    }
     auto nextTabstop = 1;
 
     /* If we are completing an existing send that either has some arguments
@@ -265,6 +271,11 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
      */
     if (totalArgs > 0 || dispatchResult.main.blockReturnType != nullptr) {
         fmt::format_to(std::back_inserter(result), "${{0}}");
+        return to_string(result);
+    }
+
+    if (isSetter) {
+        fmt::format_to(std::back_inserter(result), " = ${{0}}");
         return to_string(result);
     }
 

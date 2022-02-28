@@ -367,6 +367,21 @@ NameRef NameRef::lookupWithEq(const GlobalState &gs) const {
     return gs.lookupNameUTF8(nameEq);
 }
 
+bool NameRef::isSetter(const GlobalState &gs) const {
+    if (this->kind() != NameKind::UTF8) {
+        return false;
+    }
+    const string_view rawName = this->dataUtf8(gs)->utf8;
+    if (rawName.size() < 2) {
+        return false;
+    }
+    if (rawName.back() == '=') {
+        return !(*this == Names::leq() || *this == Names::geq() || *this == Names::tripleEq() ||
+                 *this == Names::eqeq() || *this == Names::neq());
+    }
+    return false;
+}
+
 NameRef NameRef::addQuestion(GlobalState &gs) const {
     auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat(name->utf8, "?");
