@@ -7,9 +7,9 @@ def _verify_single_test_script(scripts):
        words = script.split("/")
        name = words[-2]
        script_file = words[-1]
-       expected_file = "{}.sh".format(name)
+       expected_file = "test.sh"
        if script_file != expected_file:
-           fail("cli test scripts must be named cli/$name/$name.sh")
+           fail("cli test scripts must be named cli/$name/test.sh")
 
        existing = mapping.get(name)
        if existing != None:
