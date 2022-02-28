@@ -1,3 +1,22 @@
+def cli_tests(suite_name, scripts, tags = []):
+    tests = []
+    updates = []
+    for script in scripts:
+        test_name, update_name = cli_test(script, tags)
+        tests.append(test_name)
+        updates.append(update_name)
+
+    native.test_suite(
+        name = suite_name,
+        tests = tests,
+    )
+
+    native.test_suite(
+        name = "update",
+        tags = ["manual"],
+        tests = updates,
+    )
+
 def cli_test(path, tags = []):
     # path will be like `$name/$name.sh`
     words = path.split("/")
@@ -37,8 +56,10 @@ def cli_test(path, tags = []):
         tags = tags,
     )
 
+    update_name = "update_{}".format(name)
+
     native.sh_test(
-        name = "update_{}".format(name),
+        name = update_name,
         srcs = ["update_one.sh"],
         args = ["$(location {})".format(path), "$(location {})".format(output)],
         data = [
@@ -54,17 +75,4 @@ def cli_test(path, tags = []):
         size = "small",
     )
 
-    return test_name
-
-def update_test():
-    existing = native.existing_rules()
-    update_rules = [
-        rule
-        for (rule, data) in existing.items()
-        if rule.startswith("update_") and data["kind"] == "sh_test"
-    ]
-    native.test_suite(
-        name = "update",
-        tags = ["manual"],
-        tests = update_rules,
-    )
+    return test_name, update_name

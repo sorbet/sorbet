@@ -1,8 +1,6 @@
-load(":cli_test.bzl", "cli_test", "update_test")
+load(":cli_test.bzl", "cli_tests")
 
-test_suite(
-    name = "cli",
-    tests = [cli_test(script) for script in glob(["*/*.sh"])],
+cli_tests(
+    "cli",
+    glob(["*/*.sh"]),
 )
-
-update_test()
