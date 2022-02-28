@@ -1331,10 +1331,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
                 ExpressionPtr nil =
-                    MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
+                    MK::Send1(recvLoc.copyEndWithZeroLength(), ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
                               core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
-                auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
+                auto res = MK::InsSeq1(csend->loc, std::move(assgn), std::move(iff));
                 result = std::move(res);
             },
             [&](parser::Self *self) {
