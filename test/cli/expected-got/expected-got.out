@@ -101,11 +101,15 @@ test/cli/expected-got/expected-got.rb:47: Revealed type: `Integer(42)` https://s
 
 test/cli/expected-got/expected-got.rb:57: Used `&.` operator on `Integer(1)`, which can never be nil https://srb.help/7034
     57 |1&.even?
-        ^
+         ^^
   Got `Integer(1)` originating from:
     test/cli/expected-got/expected-got.rb:57:
     57 |1&.even?
         ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/expected-got/expected-got.rb:57: Replace with `.`
+    57 |1&.even?
+         ^^
 
 test/cli/expected-got/expected-got.rb:59: Method `top_level_does_not_exist` does not exist on `T.class_of(<root>)` https://srb.help/7003
     59 |top_level_does_not_exist

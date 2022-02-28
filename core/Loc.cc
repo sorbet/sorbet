@@ -262,6 +262,8 @@ optional<string_view> Loc::source(const GlobalState &gs) const {
 }
 
 bool Loc::contains(const Loc &other) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(other.exists());
     return file() == other.file() && other.beginPos() >= beginPos() && other.endPos() <= endPos();
 }
 
