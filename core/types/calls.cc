@@ -188,20 +188,6 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
 }
 
 namespace {
-bool isSetter(const GlobalState &gs, NameRef fun) {
-    if (fun.kind() != NameKind::UTF8) {
-        return false;
-    }
-    const string_view rawName = fun.dataUtf8(gs)->utf8;
-    if (rawName.size() < 2) {
-        return false;
-    }
-    if (rawName.back() == '=') {
-        return !(fun == Names::leq() || fun == Names::geq() || fun == Names::tripleEq() || fun == Names::eqeq() ||
-                 fun == Names::neq());
-    }
-    return false;
-}
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
                                MethodRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
@@ -219,7 +205,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     }
 
     if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
-        if (mayBeSetter && isSetter(gs, method.data(gs)->name)) {
+        if (mayBeSetter && method.data(gs)->name.isSetter(gs)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
                         expectedType.show(gs));
         } else {
@@ -1208,7 +1194,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (resultType == nullptr) {
-        if (args.args.size() == 1 && isSetter(gs, method.data(gs)->name)) {
+        if (args.args.size() == 1 && method.data(gs)->name.isSetter(gs)) {
             // assignments always return their right hand side
             resultType = args.args.front()->type;
         } else if (args.args.size() == 2 && method.data(gs)->name == Names::squareBracketsEq()) {
