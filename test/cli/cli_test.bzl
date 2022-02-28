@@ -4,17 +4,17 @@ def _verify_single_test_script(scripts):
 
     # script will be "$name/$name.sh"
     for script in scripts:
-       words = script.split("/")
-       name = words[-2]
-       script_file = words[-1]
-       expected_file = "test.sh"
-       if script_file != expected_file:
-           fail("cli test scripts must be named cli/$name/test.sh")
+        words = script.split("/")
+        name = words[-2]
+        script_file = words[-1]
+        expected_file = "test.sh"
+        if script_file != expected_file:
+            fail("cli test scripts must be named cli/$name/test.sh")
 
-       existing = mapping.get(name)
-       if existing != None:
-           fail("cli tests must have a single shell script in their top-level directory")
-       mapping[name] = script_file
+        existing = mapping.get(name)
+        if existing != None:
+            fail("cli tests must have a single shell script in their top-level directory")
+        mapping[name] = script_file
 
     return mapping
 
