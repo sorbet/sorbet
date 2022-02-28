@@ -1348,37 +1348,4 @@ void RBIGenerator::runSinglePackage(core::GlobalState &gs,
     }
 }
 
-RBIGenerator::SinglePackageInfo RBIGenerator::findSinglePackage(core::GlobalState &gs, std::string packageName) {
-    SinglePackageInfo res;
-
-    auto &db = gs.packageDB();
-    auto &packages = db.packages();
-
-    auto nameParts = absl::StrSplit(packageName, "::");
-    auto nameSize = std::distance(nameParts.begin(), nameParts.end());
-    for (auto pkg : packages) {
-        auto &info = db.getPackageInfo(pkg);
-
-        auto &fullName = info.fullName();
-        if (nameSize < fullName.size()) {
-            continue;
-        }
-
-        // `nameParts` will be at least as long as `fullName` because of the check above, so using `nameParts` as the
-        // third argument to `std::equal` is safe. When the two don't match in length but prefixEqual is true,
-        // `pkg` is a parent package of the package we're looking for.
-        bool prefixEqual = std::equal(fullName.begin(), fullName.end(), nameParts.begin(),
-                                      [&gs](auto name, auto part) { return name.shortName(gs) == part; });
-        if (prefixEqual) {
-            if (nameSize == fullName.size()) {
-                res.packageName = pkg;
-            } else {
-                res.parents.emplace_back(pkg);
-            }
-        }
-    }
-
-    return res;
-}
-
 } // namespace sorbet::packager

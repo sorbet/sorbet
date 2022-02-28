@@ -280,15 +280,9 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
-    // When present, this is a vector of mangled package names for the parent packages of the package whose interface
-    // we're currently generating. For example, if we're generating the interface for the package
-    //
-    // > Foo::Bar::Baz
-    //
-    // And both `Foo` and `Foo::Bar` are packages, the mangled names of those two packages would be in this vector.
-    // These names are used when deciding how to stub unknown constant references in the resolver, and this optional
-    // having a value is used to signal single-package interface generation.
-    std::optional<std::vector<core::NameRef>> singlePackageParents;
+    // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
+    // the packages that are imported by the one whose interface is being generated.
+    std::optional<packages::ImportInfo> singlePackageImports;
 
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);

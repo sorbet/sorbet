@@ -64,5 +64,25 @@ public:
 
     static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
 };
+
+// Information about the imports of a package. The imports are split into two categories, packages whose name falls
+// within the namespace of `package`, and everything else. The reason for pre-processing the imports this way is that it
+// simplifies some work when stubbing constants for rbi generation.
+class ImportInfo final {
+public:
+    // The mangled name of the package whose imports are described.
+    core::NameRef package;
+
+    // Imported packages whose name is a prefix of `package`. For example, if the package `Foo::Bar` imports `Foo` that
+    // package's name would be in `parentImports` because its name is a prefix of `Foo::Bar`.
+    std::vector<core::NameRef> parentImports;
+
+    // The mangled names of packages that are imported by this package, minus any imports that fall in the parent
+    // namespace of this package.
+    std::vector<core::NameRef> regularImports;
+
+    static ImportInfo fromPackage(const core::GlobalState &gs, const PackageInfo &info);
+};
+
 } // namespace sorbet::core::packages
 #endif
