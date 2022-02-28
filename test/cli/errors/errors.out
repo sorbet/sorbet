@@ -11,7 +11,7 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
-            ^^^^^^^^^
+                  ^^^
   Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2744:
     .. |        arg0: String,
@@ -35,7 +35,7 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
 
 test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` for argument `a` https://srb.help/7002
     .. |    bar(a)
-            ^^^^^^
+                ^
   Expected `Integer` for argument `a` of method `ErrorLines#bar`:
     test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
@@ -68,7 +68,7 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
-            ^^^^^^^^^
+                  ^^^
   Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2744:
     .. |        arg0: String,
@@ -92,7 +92,7 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
 
 test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` for argument `a` https://srb.help/7002
     .. |    bar(a)
-            ^^^^^^
+                ^
   Expected `Integer` for argument `a` of method `ErrorLines#bar`:
     test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
@@ -125,7 +125,7 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
 
 test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
-            ^^^^^^^^^
+                  ^^^
   Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2744:
     .. |        arg0: String,
@@ -149,7 +149,7 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
 
 test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` for argument `a` https://srb.help/7002
     .. |    bar(a)
-            ^^^^^^
+                ^
   Expected `Integer` for argument `a` of method `ErrorLines#bar`:
     test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}

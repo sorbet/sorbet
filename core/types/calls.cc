@@ -203,25 +203,9 @@ bool isSetter(const GlobalState &gs, NameRef fun) {
     return false;
 }
 
-uint32_t locSize(core::Loc loc) {
-    return loc.endPos() - loc.beginPos();
-}
-
-// Find the smallest applicable arg loc that falls within the callLoc. Returns the call site's loc if none found.
-// Used to ignore origins that are not relevant to call site.
-core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTpe) {
-    core::Loc chosen = callLoc;
-    for (auto loc : argTpe.origins) {
-        if (callLoc.contains(loc) && locSize(loc) < locSize(chosen)) {
-            chosen = loc;
-        }
-    }
-    return chosen;
-}
-
-unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
-                               ClassOrModuleRef inClass, MethodRef method, const TypeAndOrigins &argTpe,
-                               const ArgInfo &argSym, const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
+unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
+                               MethodRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
+                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
@@ -234,7 +218,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         return nullptr;
     }
 
-    if (auto e = gs.beginError(smallestLocWithin(callLoc, argTpe), errors::Infer::MethodArgumentMismatch)) {
+    if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(gs, method.data(gs)->name)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
                         expectedType.show(gs));
@@ -246,7 +230,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
         core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, expectedType, argTpe.type);
-        TypeErrorDiagnostics::maybeAutocorrect(gs, e, loc, constr, expectedType, argTpe.type);
+        TypeErrorDiagnostics::maybeAutocorrect(gs, e, argLoc, constr, expectedType, argTpe.type);
         return e.build();
     }
     return nullptr;
@@ -803,9 +787,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         auto offset = ait - args.args.begin();
-        if (auto e =
-                matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method, *arg, spec, args.selfType,
-                             targs, args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
+        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, spec, args.selfType, targs,
+                                  args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
         }
 
@@ -933,7 +916,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             // If there are positional arguments left to be filled, but there were keyword arguments present,
             // consume the keyword args hash as though it was a positional arg.
-            if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method,
+            if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method,
                                       TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
                                       args.originForUninitialized, args.args.size() == 1)) {
                 result.main.errors.emplace_back(std::move(e));
@@ -967,8 +950,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
 
             if (hasKwSplatParam && !hasKwParam) {
-                if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method, kwSplatTPO,
-                                          *kwSplatParam, args.selfType, targs, kwargsLoc, args.originForUninitialized,
+                if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, kwSplatTPO, *kwSplatParam,
+                                          args.selfType, targs, kwargsLoc, args.originForUninitialized,
                                           args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
@@ -1051,9 +1034,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         tpe.origins = {kwargsLoc};
                         auto offset = it - hash->keys.begin();
                         tpe.type = hash->values[offset];
-                        if (auto e =
-                                matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method, tpe, spec,
-                                             args.selfType, targs, Loc::none(), args.originForUninitialized)) {
+                        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec,
+                                                  args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
+                            stopInDebugger();
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1107,11 +1090,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 bool argInBounds = kwaValue < ait;
                 auto kwargOffset = kwaValue - args.args.begin();
                 auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
-                auto argLoc = argInBounds ? args.argLoc(kwargOffset) : Loc::none();
+                auto argLoc = argInBounds ? args.argLoc(kwargOffset) : args.callLoc();
                 tpe.origins = {originLoc};
                 tpe.type = hash->values[offset];
-                if (auto e = matchArgType(gs, *constr, args.callLoc(), args.receiverLoc(), symbol, method, tpe, spec,
-                                          args.selfType, targs, argLoc, args.originForUninitialized)) {
+                if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec, args.selfType,
+                                          targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }

@@ -118,7 +118,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <self>.include(::Mixin)
-        <self>.include(<emptyTree>)
+        <self>.include(3)
         <self>.include(::Mixin) do ||
           <emptyTree>
         end

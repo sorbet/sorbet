@@ -1544,7 +1544,6 @@ class TreeSymbolizer {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
                 }
-                arg = ast::MK::EmptyTree();
             }
         }
     }

@@ -12,7 +12,7 @@ suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.ni
 
 suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
-        ^^^^^^^^^^
+               ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
     68 |        arg0: String,
