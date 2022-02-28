@@ -109,6 +109,7 @@ private:
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
+        bool possibleGenericType = false;
 
         ResolutionItem() = default;
         ResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -369,9 +370,27 @@ private:
         return stubs;
     }
 
+    static void ensureTGenericMixin(core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        auto &mixins = klass.data(gs)->mixins();
+        if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
+            mixins.emplace_back(core::Symbols::T_Generic());
+        }
+    }
+
     static void stubForRbiGeneration(core::MutableContext ctx, const vector<ParentPackageStub> &parentPackageStubs,
-                                     const Nesting *scope, ast::ConstantLit *out) {
+                                     const Nesting *scope, ast::ConstantLit *out, bool possibleGenericType) {
         if (out->symbol.exists()) {
+            // In single-package RBI generation mode, we might have already
+            // resolved a class that we later identified as generic, and
+            // we need to attempt to fix that up.
+            if (!out->symbol.isClassOrModule()) {
+                return;
+            }
+            if (!possibleGenericType) {
+                return;
+            }
+            auto singletonClass = out->symbol.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
+            ensureTGenericMixin(ctx, singletonClass);
             return;
         }
 
@@ -380,7 +399,9 @@ private:
         // if the scope of the constant lit is non-empty, attempt to resolve that first to help determine the owner.
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
         if (auto *origScope = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            stubForRbiGeneration(ctx, parentPackageStubs, scope, origScope);
+            // The scope of the original is not a possible generic type.
+            const bool isGenericType = false;
+            stubForRbiGeneration(ctx, parentPackageStubs, scope, origScope, isGenericType);
             owner = origScope->symbol.asClassOrModuleRef();
         } else {
             for (auto *cursor = scope; cursor != nullptr; cursor = cursor->parent.get()) {
@@ -413,8 +434,12 @@ private:
         auto symbol = ctx.state.enterClassSymbol(core::Loc{ctx.file, out->loc}, owner,
                                                  ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
 
+        auto data = symbol.data(ctx);
         // force a singleton into existence
-        symbol.data(ctx)->singletonClass(ctx);
+        auto singletonClass = data->singletonClass(ctx);
+        if (possibleGenericType) {
+            ensureTGenericMixin(ctx, singletonClass);
+        }
 
         out->symbol = symbol;
     }
@@ -461,7 +486,8 @@ private:
 
         // When generating rbis in single-package mode, we may need to invent a symbol at this point
         if (singlePackageRbiGeneration) {
-            stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out);
+            stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out,
+                                 job.possibleGenericType);
             return;
         }
 
@@ -564,6 +590,9 @@ private:
 
     static bool resolveJob(core::Context ctx, ResolutionItem &job) {
         if (isAlreadyResolved(ctx, *job.out)) {
+            if (job.possibleGenericType) {
+                return false;
+            }
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
@@ -1268,6 +1297,15 @@ public:
             if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
                 send.fun == core::Names::mixesInClassMethods()) {
                 this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
+            } else if (recvAsConstantLit != nullptr && send.fun == core::Names::squareBrackets() &&
+                       ctx.state.singlePackageParents.has_value()) {
+                // In single-package RBI generation mode, we treat Constant[...] as
+                // possible generic types.
+                ResolutionItem job{nesting_, recvAsConstantLit};
+                job.possibleGenericType = true;
+                if (!resolveJob(ctx, job)) {
+                    todo_.emplace_back(std::move(job));
+                }
             }
         }
         return tree;

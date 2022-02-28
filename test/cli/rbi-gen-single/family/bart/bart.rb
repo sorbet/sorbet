@@ -20,6 +20,9 @@ module Family
 
       FamilyClass = Simpsons
 
+      sig {params(msg: Util::GenericMessage[String]).void}
+      def ignore(msg); end
+
     end
 
   end
