@@ -1496,6 +1496,19 @@ public:
         return make_unique<True>(tokLoc(tok));
     }
 
+    unique_ptr<Node> truncateBeginBody(unique_ptr<Node> body, const token *truncateToken) {
+        auto begin = parser::cast_node<Begin>(body.get());
+        if (begin == nullptr) {
+            return nullptr;
+        }
+
+        auto firstToTruncate = absl::c_find_if(
+            begin->stmts, [&](const auto &stmt) { return stmt->loc.beginPos() >= truncateToken->end(); });
+        begin->stmts.erase(firstToTruncate, begin->stmts.end());
+
+        return body;
+    }
+
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
         core::LocOffsets loc = tokLoc(oper).join(receiver->loc);
 
@@ -2488,6 +2501,11 @@ ForeignPtr true_(SelfPtr builder, const token *tok) {
     return build->toForeign(build->true_(tok));
 }
 
+ForeignPtr truncateBeginBody(SelfPtr builder, ForeignPtr body, const token *truncateToken) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->truncateBeginBody(build->cast_node(body), truncateToken));
+}
+
 ForeignPtr unary_op(SelfPtr builder, const token *oper, ForeignPtr receiver) {
     auto build = cast_builder(builder);
     return build->toForeign(build->unary_op(oper, build->cast_node(receiver)));
@@ -2668,6 +2686,7 @@ struct ruby_parser::builder Builder::interface = {
     symbols_compose,
     ternary,
     true_,
+    truncateBeginBody,
     unary_op,
     undefMethod,
     unless_guard,

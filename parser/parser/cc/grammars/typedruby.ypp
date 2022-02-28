@@ -199,6 +199,7 @@ using namespace std::string_literals;
 %printer { yyo << $$->view(); } tIDENTIFIER
 %printer { yyo << $$->view(); } tCONSTANT
 %printer { yyo << $$->view() << ":"; } tLABEL
+%printer { yyo << ":\"" << $$->view() << "\""; } tSYMBOL
 
 %type <node>
   arg
@@ -607,10 +608,14 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       $$ = result;
 
                       if (driver.indentationAware) {
-                        auto already_found_first_dedent = result->begin != nullptr && result->end != nullptr;
-                        if (!already_found_first_dedent && driver.lex.compare_indent_level(@1.end, @3.begin) < 0) {
-                          result->begin = @1.end;
-                          result->end = @3.begin;
+                        auto already_found_first_dedent = result->end != nullptr;
+                        if (!already_found_first_dedent && driver.lex.compare_indent_level(@1.begin, @3.begin) > 0) {
+                          // TODO(jez) update this comment
+                          // note: compare indent using leading tokens, but store the begin and end of the first
+                          // token, because the tokens for the start of the dedented code aren't needed.
+                          // result->begin = @1.begin;
+                          // TODO(jez) This we only need one token right now I think. True?
+                          result->end = @1.end;
                         }
                       }
                     }
@@ -2196,13 +2201,61 @@ array_premature_end: eof
                     }
                 | defn_head f_arglist bodystmt kEND
                     {
-                      $$ = driver.build.defMethod(self, $1->begin, $1->end, $2, $3->body, $4);
-
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.lex.context.pop();
                       driver.current_arg_stack.pop();
+
+                      // TODO(jez) This duplicates a lot of the code in rewind_if_dedented, and
+                      // you'll want to factor it anyways so that you can call this in all the
+                      // various other production rules you care about.
+
+                      auto *defToken = $1->begin;
+                      auto *methodNameToken = $1->end;
+                      auto *arglist = $2;
+                      auto headerEndPos = @2.endPos();
+                      auto *body = $3->body;
+                      auto *bodyStartToken = @3.begin;
+                      auto *lastTokBeforeDedent = $3->end;
+                      auto *endToken = $4;
+
+                      if (driver.indentationAware && driver.lex.compare_indent_level(defToken, endToken) > 0) {
+                        const char *token_str_name = driver.token_name(defToken->type());
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, defToken,
+                            token_str_name, endToken);
+
+                        if (body == nullptr) {
+                          // Special case of "entire method was properly indented"
+                          // But bodyStartToken is tNL if empty body, which fails the assertion in compare_indent_level
+                          driver.rewind_and_reset(endToken->start());
+                          $$ = driver.build.defMethod(self, defToken, methodNameToken, arglist, body, endToken);
+                        } else if (driver.lex.compare_indent_level(bodyStartToken, defToken) <= 0) {
+                          // Not even the very first thing in the body is indented. Treat this like emtpy method.
+                          driver.rewind_and_reset(headerEndPos);
+                          auto emptyBody = driver.build.compstmt(self, driver.alloc.node_list());
+                          $$ = driver.build.defMethod(self, defToken, methodNameToken, arglist, emptyBody, endToken);
+                        } else if (lastTokBeforeDedent != nullptr) {
+                          // Something in the body is dedented. Only put the properly indented stmts in the method.
+                          auto truncatedBody = driver.build.truncateBeginBody(self, body, lastTokBeforeDedent);
+                          if (truncatedBody != nullptr) {
+                            driver.rewind_and_reset(lastTokBeforeDedent->end());
+                            $$ = driver.build.defMethod(self, defToken, methodNameToken, arglist, truncatedBody, endToken);
+                          } else {
+                            // bodystmt had opt_else and/or opt_rescue; this is unhandled.
+                            // give up, and say that the method body was empty
+                            driver.rewind_and_reset(headerEndPos);
+                            auto emptyBody = driver.build.compstmt(self, driver.alloc.node_list());
+                            $$ = driver.build.defMethod(self, defToken, methodNameToken, arglist, emptyBody, endToken);
+                          }
+                        } else {
+                          // Entire method body was properly indented, except for final kEND
+                          driver.rewind_and_reset(endToken->start());
+                          $$ = driver.build.defMethod(self, defToken, methodNameToken, arglist, body, endToken);
+                        }
+                      } else {
+                        $$ = driver.build.defMethod(self, defToken, methodNameToken, arglist, body, endToken);
+                      }
                     }
                 | defs_head f_arglist bodystmt kEND
                     {
