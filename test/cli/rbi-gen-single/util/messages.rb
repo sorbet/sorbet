@@ -10,6 +10,15 @@ module Util
       puts msg
     end
 
+    sig do
+      type_parameters(:T)
+        .params(msg: GenericMessage[T.type_parameter(:T)])
+        .void
+    end
+    def self.print_message(msg)
+      print msg
+    end
+
   end
 
 end

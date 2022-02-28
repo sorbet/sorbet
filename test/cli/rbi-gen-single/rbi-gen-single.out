@@ -41,6 +41,14 @@ class Util::GenericMessage < Object
 end
 class Util::Messages < Object
   extend T::Sig
+  sig do
+    type_parameters(:T)
+    .params(
+      msg: Util::GenericMessage[T.type_parameter(:T)]
+    )
+    .void
+  end
+  def self.print_message(msg); end
   sig {params(msg: String).void}
   def self.say(msg); end
 end
