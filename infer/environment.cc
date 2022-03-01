@@ -1194,14 +1194,24 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto it = insn.link->result->secondary.get();
                 while (it != nullptr) {
                     auto &secondaryProcType = it->main.blockPreType;
-                    auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
-                    switch (insn.link->result->secondaryKind) {
-                        case core::DispatchResult::Combinator::OR:
-                            params = core::Types::any(ctx, params, secondaryParams);
-                            break;
-                        case core::DispatchResult::Combinator::AND:
-                            params = core::Types::all(ctx, params, secondaryParams);
-                            break;
+                    if (secondaryProcType != nullptr) {
+                        auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        switch (insn.link->result->secondaryKind) {
+                            case core::DispatchResult::Combinator::OR:
+                                params = core::Types::any(ctx, params, secondaryParams);
+                                break;
+                            case core::DispatchResult::Combinator::AND:
+                                params = core::Types::all(ctx, params, secondaryParams);
+                                break;
+                        }
+                    } else {
+                        // One of the components doesn't have a blockPreType. An error was already
+                        // reported by calls.cc (like "Method `.map` doesn't exist on `NilClass`")
+                        // Here, we just want to not crash.
+                        //
+                        // We could do something like set `params` to `T.untyped`, but it's probably
+                        // nicer to let it be whatever it would have been. This way they'll get
+                        // completion results as if the previous type error was fixed. So do nothing.
                     }
 
                     it = it->secondary.get();
