@@ -61,7 +61,31 @@ void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
     }
 }
 
-// headerEndPos should be the end of the line immediately before the start of the body
+// TODO(jez) This can quite easily get out of hand performance-wise. The major selling point of
+// LR parsers is that they admit linear-time implementations.
+//
+// For the time being (read: until we start seeing performance problems in practice), introducing
+// arbitrary-size backtracking like this method does is probably fine, because
+//
+// - It's only when there are syntax errors
+// - Parse results are cached
+// - It substantially improves the editor experience
+//
+// This backtracking makes the parser accidentally quadratic. Consider:
+//
+//     def f1
+//       def f2
+//         def f3
+//     end
+//
+// The lexer and parser will analyze the source substring of f1 once, f2 twice, and f3 three times.
+//
+// A future extension might be to limit the number of bytes allowed to be reprocessed (say: all
+// calls to rewind_and_reset when parsing a given file must move the lexer cursor by less than some
+// multiple of the file size, or even than some magic constant).
+//
+// Most other uses of rewind_and_reset don't currently suffer as acutely from this problem, because
+// they just back up over the last one or two tokens, not potentially back to the top of the file.
 ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t beginToken, size_t headerEndPos,
                                                           ForeignPtr body, token_t bodyStartToken,
                                                           token_t lastTokBeforeDedent, token_t endToken) {

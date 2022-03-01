@@ -366,6 +366,11 @@ public:
     // indentation happens midway through a list of statements. The properly indented statements are
     // returned, and the lexer is reset to a point where the improperly indented statements will be
     // re-lexed and re-parsed.
+    //
+    // Most params are self explanatory.
+    //
+    // `headerEndPos` should be the end of the line immediately before the start of the body. It's
+    // what we rewind to if even the first thing in the body is improperly indented.
     ForeignPtr rewind_and_munge_body_if_dedented(SelfPtr self, token_t defToken, size_t headerEndPos, ForeignPtr body,
                                                  token_t bodyStartToken, token_t lastTokBeforeDedent, token_t endToken);
 };
