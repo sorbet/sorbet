@@ -24,6 +24,6 @@ Parent.new.[]
 #
 # This test is intended to ensure we don't run into that situation again.
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>$152"
+# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>$153"
 # INITIAL: call i64 @"direct_func_Parent#2[]"
 # INITIAL{LITERAL}: }
