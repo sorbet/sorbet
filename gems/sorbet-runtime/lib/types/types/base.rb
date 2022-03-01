@@ -160,6 +160,8 @@ module T::Types
       name.hash
     end
 
+    # Type equivalence, defined by serializing the type to a string (with
+    # `#name`) and comparing the resulting strings for equality.
     def ==(other)
       (T::Utils.resolve_alias(other).class == T::Utils.resolve_alias(self).class) &&
         other.name == self.name

@@ -511,7 +511,7 @@ string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string MetaType::show(const GlobalState &gs, ShowOptions options) const {
-    return "<Type: " + wrapped.show(gs, options) + ">";
+    return fmt::format("Runtime type object with value: {}", wrapped.show(gs, options));
 }
 
 } // namespace sorbet::core

@@ -64,8 +64,6 @@ module T
   sig {params(arg: T.untyped).returns(T.untyped)}
   def self.must(arg); end
 
-  def self.coerce(type); end
-
   sig {params(value: BasicObject).returns(T.noreturn)}
   def self.absurd(value); end
 end
@@ -184,7 +182,12 @@ end
 
 module T::Utils
   def self.arity(method); end
+
+  # Converts Sorbet type syntax into a T::Types::Base instance to provide
+  # access to run-time Sorbet type information.
+  sig {params(type: T.untyped).returns(T::Types::Base)}
   def self.coerce(val); end
+
   def self.resolve_alias(type); end
   def self.run_all_sig_blocks; end
   def self.signature_for_method(method); end
