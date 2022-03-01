@@ -2197,10 +2197,16 @@ array_premature_end: eof
                         YYERROR;
                       }
 
-                      auto module_tok = $1;
-                      auto end_tok = $5;
+                      auto *module_tok = $1;
+                      auto headerEndPos = @2.endPos();
+                      auto *body = $4->body;
+                      auto *bodyStartToken = @4.begin;
+                      auto *lastTokBeforeDedent = $4->end;
+                      auto *end_tok = $5;
+                      auto *newBody = driver.rewind_and_munge_body_if_dedented(
+                          self, module_tok, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, end_tok);
 
-                      $$ = driver.build.defModule(self, module_tok, $2, $4->body, end_tok);
+                      $$ = driver.build.defModule(self, module_tok, $2, newBody, end_tok);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.unextend();
