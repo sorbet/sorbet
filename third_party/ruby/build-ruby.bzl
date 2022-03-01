@@ -609,6 +609,7 @@ _rubyfmt_static_deps = rule(
     },
     fragments = ["cpp"],
     implementation = _rubyfmt_static_deps_impl,
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
 )
 
 def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = [], post_build_patches = []):

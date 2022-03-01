@@ -339,6 +339,7 @@ llvm_copts = [
 
     # don't compile llvm with lto. It's too slow to compile and not worth it
     "-fno-lto",
+    "-Wno-unused-but-set-variable",
 ]
 
 # Platform specific sources for libSupport.

@@ -25,9 +25,11 @@ JEMALLOC_BUILD_COMMAND = """
   export CC=$$(absolutize $(CC))
   export CXX=$$(absolutize $(CC))
   [ "$$(uname)" = "Linux" ] && export AR=$$(absolutize $(AR))
+  [ "$$(uname)" = "Darwin" ] && export DEVELOPER_DIR=$$(xcode-select --print-path)
+  [ "$$(uname)" = "Darwin" ] && export SDKROOT=$$(xcrun --show-sdk-path)
   export NM=$$(absolutize $(NM))
   export OBJCOPY=$$(absolutize $(OBJCOPY))
-  export CFLAGS=$(CC_FLAGS)
+  export CFLAGS="$(CC_FLAGS) -Wno-c++11-narrowing"
   export CXXFLAGS=$(CC_FLAGS)
   export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
   export EXTRA_CFLAGS="$${LTOFLAGS}"

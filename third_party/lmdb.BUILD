@@ -10,7 +10,10 @@ cc_library(
         "libraries/liblmdb/lmdb.h",
         "libraries/liblmdb/midl.h",
     ],
-    copts = ["-Wno-implicit-fallthrough"],
+    copts = [
+        "-Wno-implicit-fallthrough",
+        "-Wno-unused-but-set-variable",
+    ],
     includes = [
         "libraries/liblmdb/",
     ],

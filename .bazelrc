@@ -12,7 +12,10 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+# The --crosstool_top option has been deprecated in favor of this incompatible cc toolchain resolution option for
+# selecting toolchains. This flag can be removed once https://github.com/bazelbuild/bazel/issues/7260 is closed and the
+# migration is complete
+build --incompatible_enable_cc_toolchain_resolution --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
@@ -205,9 +208,9 @@ build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_13_0_0/lib/clang/13.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_13_0_0/lib/clang/13.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_13_0_0/lib/clang/13.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -254,9 +257,10 @@ build:webasm --cpu=webasm --spawn_strategy=local --genrule_strategy=local --copt
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
-build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
+build:webasm --copt=-DEMSCRIPTEN
+build:webasm --linkopt=-lto-O2
 # Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain_12_0_0//:toolchain
+build:webasm --host_crosstool_top=@llvm_toolchain_13_0_0//:toolchain
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist
