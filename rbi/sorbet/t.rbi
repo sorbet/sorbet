@@ -185,7 +185,7 @@ module T::Utils
 
   # Converts Sorbet type syntax into a T::Types::Base instance to provide
   # access to run-time Sorbet type information.
-  sig {params(type: T.untyped).returns(T::Types::Base)}
+  sig {params(val: T.untyped).returns(T::Types::Base)}
   def self.coerce(val); end
 
   def self.resolve_alias(type); end
