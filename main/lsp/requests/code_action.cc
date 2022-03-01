@@ -3,7 +3,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include "sig_finder/sig_finder.h"
+#include "main/sig_finder/sig_finder.h"
 
 using namespace std;
 
@@ -89,7 +89,7 @@ std::optional<std::pair<core::LocOffsets, core::LocOffsets>> methodLocs(const co
     }
     auto methodLoc = maybeTree.value()->loc;
 
-    auto maybeSig = sig_finder::findSignature(gs, method);
+    auto maybeSig = sorbet::sig_finder::findSignature(gs, method);
     if (!maybeSig.has_value()) {
         return std::nullopt;
     }

@@ -75,7 +75,7 @@ cc_library(
         "//payload:interface",
         "//payload/binary",
         "//payload/text",
-        "//sig_finder",
+        "//main/sig_finder",
         "@com_google_absl//absl/synchronization",
         "@cpp_subprocess",
         "@rapidjson",
