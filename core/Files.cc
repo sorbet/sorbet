@@ -19,6 +19,7 @@ constexpr auto EXTERNAL_PREFIX = "external/com_stripe_ruby_typer/"sv;
 } // namespace
 
 vector<int> findLineBreaks(string_view s) {
+    prodCounterInc("types.input.files.findLineBreaks");
     vector<int> res;
     int i = -1;
     res.emplace_back(-1);
