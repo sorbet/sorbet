@@ -2153,8 +2153,15 @@ array_premature_end: eof
                       auto &superclass_ = $3;
                       auto lt_t       = superclass_ ? superclass_->tok : nullptr;
                       auto superclass = superclass_ ? superclass_->nod : nullptr;
+                      auto headerEndPos = superclass_ ? @3.endPos() : @2.endPos();
 
-                      $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, $5->body, end_tok);
+                      auto body = $5->body;
+                      auto bodyStartToken = @5.begin;
+                      auto lastTokBeforeDedent = $5->end;
+
+                      auto newBody = driver.rewind_and_munge_body_if_dedented(
+                          self, class_tok, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, end_tok);
+                      $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, newBody, end_tok);
 
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
