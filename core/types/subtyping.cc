@@ -1262,6 +1262,11 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             // both are proxy
         } else {
             // only 1st is proxy
+            if (isa_type<MetaType>(t1)) {
+                // t1 and t2 must be equiv for t1 <: t2. If we're already here, they're not equiv.
+                return false;
+            }
+
             TypePtr und = t1.underlying(gs);
             return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2);
         }
