@@ -57,6 +57,7 @@ private:
     ruby_version version;
     std::string_view source_buffer;
     sorbet::StableStringStorage<> &scratch;
+    const std::vector<int> lineBreaks;
 
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
@@ -137,9 +138,7 @@ private:
 
     bool traceLexer;
 
-    size_t cur_line_start() {
-        return this->newline_s ? (this->newline_s - this->source_buffer.data()) + 1 : 0;
-    }
+    size_t line_start(token_type type, size_t beginPos);
     void check_stack_capacity();
     int stack_pop();
     int arg_or_cmdarg(int cmd_state);

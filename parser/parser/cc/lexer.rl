@@ -125,6 +125,7 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_
   , version(version)
   , source_buffer(source_buffer)
   , scratch(scratch)
+  , lineBreaks(sorbet::findLineBreaks(source_buffer))
   , cs(lex_en_line_begin)
   , _p(source_buffer.data())
   , _pe(source_buffer.data() + source_buffer.size())
@@ -226,6 +227,33 @@ int lexer::compare_indent_level(token_t left, token_t right) {
     // Assert so that we can add a test case if we ever find this in the wild.
     assert(false);
     return 0;
+}
+
+size_t lexer::line_start(token_type type, size_t beginPos) {
+    if (type == token_type::tNL) {
+        // Doesn't make sense to ask for line start of newline character
+        return SIZE_MAX;
+    }
+
+    // If this assertion ever fires, we'll have to change File::lineBreaks to operate on size_t
+    assert(beginPos < INT_MAX);
+    int beginPosInt = static_cast<int>(beginPos);
+
+    // Gets the first element which compares greater than or equal to `beginPos`.
+    // Since we already handled newline characters, it should be just the first elem greater.
+    auto it = absl::c_lower_bound(this->lineBreaks, beginPosInt);
+    if (it != this->lineBreaks.begin()) {
+        // First element of lineBreaks is always -1 (as if there was an
+        // imaginary `\n`) one character before the start of a file. But we're
+        // actually looking for the start of the line (i.e., the offset right
+        // after the newline).
+        //
+        // If we're not at begin, that means we found something the first newline after beginPos,
+        // and we want last newline before beginPos.
+        --it;
+    }
+    // return offset immediately after offset of newline char
+    return (*it) + 1;
 }
 
 void lexer::check_stack_capacity() {
@@ -570,10 +598,10 @@ token_t lexer::advance_() {
 
   if (cs == lex_error) {
     size_t start = (size_t)(p - source_buffer.data());
-    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1), cur_line_start());
+    return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1), line_start(token_type::error, start));
   }
 
-  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0), cur_line_start());
+  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0), line_start(token_type::eof, source_buffer.size()));
 }
 
 void lexer::emit(token_type type) {
@@ -588,7 +616,7 @@ void lexer::emit(token_type type, std::string_view str, const char* start, const
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
-  size_t line = type == token_type::tNL ? SIZE_MAX : cur_line_start();
+  size_t line = line_start(type, offset_start);
   token_queue.push_back(mempool.alloc(type, offset_start, offset_end, str, line));
 }
 
@@ -600,7 +628,7 @@ void lexer::emit(token_type type, const std::string &str, const char* start, con
   size_t offset_start = (size_t)(start - source_buffer.data());
   size_t offset_end = (size_t)(end - source_buffer.data());
 
-  size_t line = type == token_type::tNL ? SIZE_MAX : cur_line_start();
+  size_t line = line_start(type, offset_start);
   // Copy the string into stable storage.
   auto scratch_view = scratch.enterString(str);
   token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view, line));
