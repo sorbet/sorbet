@@ -349,12 +349,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
-
-    if (opts.autoloaderConfig.packagedAutoloader) {
-        Timer timeit(logger, "autogenPackageAutoloads");
-        autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
-                                                       packageq);
-    }
 }
 #endif
 
