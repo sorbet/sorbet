@@ -2220,14 +2220,24 @@ array_premature_end: eof
                     }
                 | defs_head f_arglist bodystmt kEND
                     {
-                      $$ = driver.build.defSingleton(self, $1, $2, $3->body, $4);
-                      DIAGCHECK();
-
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.lex.context.pop();
                       driver.current_arg_stack.pop();
+
+                      auto *defToken = @1.begin;
+                      auto headerEndPos = @2.endPos();
+                      auto *body = $3->body;
+                      auto *bodyStartToken = @3.begin;
+                      auto *lastTokBeforeDedent = $3->end;
+                      auto *endToken = $4;
+                      auto *newBody = driver.rewind_and_munge_body_if_dedented(
+                          self, defToken, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, endToken);
+
+                      $$ = driver.build.defSingleton(self, $1, $2, newBody, $4);
+                      DIAGCHECK();
+
                     }
                 | kBREAK
                     {

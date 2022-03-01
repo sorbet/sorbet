@@ -1,0 +1,15 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C F><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.void()
+    end
+
+    def self.method1<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def self.method2<<todo method>>(&<blk>)
+      <self>.puts("hello")
+    end
+  end
+end
