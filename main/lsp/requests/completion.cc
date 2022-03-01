@@ -236,16 +236,16 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
     return result;
 }
 
-vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const vector<core::LocalVariable> &locals,
-                                             string_view prefix) {
-    auto result = vector<core::LocalVariable>{};
+vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const vector<core::NameRef> &locals,
+                                           string_view prefix) {
+    auto result = vector<core::NameRef>{};
     for (const auto &local : locals) {
-        if (hasAngleBrackets(local._name.shortName(gs))) {
+        if (hasAngleBrackets(local.shortName(gs))) {
             // Gets rid of locals like <blk>
             continue;
         }
 
-        if (hasSimilarName(gs, local._name, prefix)) {
+        if (hasSimilarName(gs, local, prefix)) {
             result.emplace_back(local);
         }
     }
@@ -464,10 +464,10 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     return item;
 }
 
-unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                     const core::LocalVariable &local, const core::Loc queryLoc,
-                                                     string_view prefix, size_t sortIdx) {
-    auto label = string(local._name.shortName(gs));
+unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                         const core::NameRef &local, const core::Loc queryLoc,
+                                                         string_view prefix, size_t sortIdx) {
+    auto label = string(local.shortName(gs));
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);
     item->kind = CompletionItemKind::Variable;
@@ -483,8 +483,8 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
     return item;
 }
 
-vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
-                                            const core::Loc queryLoc) {
+vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
+                                          const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
@@ -502,10 +502,10 @@ vector<core::LocalVariable> localsForMethod(LSPTypecheckerDelegate &typechecker,
     auto result = localVarFinder.result();
     fast_sort(result, [&gs](const auto &left, const auto &right) {
         // Sort by actual name, not by NameRef id
-        if (left._name != right._name) {
-            return left._name.shortName(gs) < right._name.shortName(gs);
+        if (left != right) {
+            return left.shortName(gs) < right.shortName(gs);
         } else {
-            return left < right;
+            return left.rawId() < right.rawId();
         }
     });
 
@@ -837,10 +837,10 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     // ----- locals -----
 
-    vector<core::LocalVariable> similarLocals;
+    vector<core::NameRef> similarLocals;
     if (params.enclosingMethod.exists()) {
-        auto locals = localsForMethod(typechecker, params.enclosingMethod, params.queryLoc);
-        similarLocals = allSimilarLocals(gs, locals, params.prefix);
+        auto locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
+        similarLocals = allSimilarLocalNames(gs, locals, params.prefix);
     }
 
     // ----- keywords -----
@@ -913,8 +913,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
                                                     items.size()));
     }
     for (auto &similarLocal : similarLocals) {
-        items.push_back(
-            getCompletionItemForLocal(gs, this->config, similarLocal, params.queryLoc, params.prefix, items.size()));
+        items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc, params.prefix,
+                                                      items.size()));
     }
     for (auto &similarMethod : dedupedSimilarMethods) {
         // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this completion
