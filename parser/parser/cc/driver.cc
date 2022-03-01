@@ -108,7 +108,7 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
         return emptyBody;
     } else if (lastTokBeforeDedent != nullptr) {
         // Something in the body is dedented. Only put the properly indented stmts in the method.
-        auto truncatedBody = this->build.truncateBeginBody(self, body, lastTokBeforeDedent);
+        auto truncatedBody = this->build.truncateBodyStmt(self, body, lastTokBeforeDedent);
         if (truncatedBody != nullptr) {
             this->rewind_and_reset(lastTokBeforeDedent->end());
             return truncatedBody;

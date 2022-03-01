@@ -1496,9 +1496,13 @@ public:
         return make_unique<True>(tokLoc(tok));
     }
 
-    unique_ptr<Node> truncateBeginBody(unique_ptr<Node> body, const token *truncateToken) {
+    // A helper for use with indentation-aware error recovery. Mutates `body` by dropping all
+    // expressions from it that begin after the end of `truncateToken`.
+    unique_ptr<Node> truncateBodyStmt(unique_ptr<Node> body, const token *truncateToken) {
         auto begin = parser::cast_node<Begin>(body.get());
         if (begin == nullptr) {
+            // There can also be rescue/else nodes in a bodystmt, but we don't attempt to handle
+            // those right now.
             return nullptr;
         }
 
@@ -2501,9 +2505,9 @@ ForeignPtr true_(SelfPtr builder, const token *tok) {
     return build->toForeign(build->true_(tok));
 }
 
-ForeignPtr truncateBeginBody(SelfPtr builder, ForeignPtr body, const token *truncateToken) {
+ForeignPtr truncateBodyStmt(SelfPtr builder, ForeignPtr body, const token *truncateToken) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->truncateBeginBody(build->cast_node(body), truncateToken));
+    return build->toForeign(build->truncateBodyStmt(build->cast_node(body), truncateToken));
 }
 
 ForeignPtr unary_op(SelfPtr builder, const token *oper, ForeignPtr receiver) {
@@ -2686,7 +2690,7 @@ struct ruby_parser::builder Builder::interface = {
     symbols_compose,
     ternary,
     true_,
-    truncateBeginBody,
+    truncateBodyStmt,
     unary_op,
     undefMethod,
     unless_guard,
