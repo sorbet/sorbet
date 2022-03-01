@@ -237,7 +237,7 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
 }
 
 vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const vector<core::NameRef> &locals,
-                                                 string_view prefix) {
+                                           string_view prefix) {
     auto result = vector<core::NameRef>{};
     for (const auto &local : locals) {
         if (hasAngleBrackets(local.shortName(gs))) {
@@ -484,7 +484,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState
 }
 
 vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
-                                                const core::Loc queryLoc) {
+                                          const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
@@ -913,8 +913,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
                                                     items.size()));
     }
     for (auto &similarLocal : similarLocals) {
-        items.push_back(
-            getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc, params.prefix, items.size()));
+        items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc, params.prefix,
+                                                      items.size()));
     }
     for (auto &similarMethod : dedupedSimilarMethods) {
         // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this completion
