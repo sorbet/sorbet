@@ -100,11 +100,11 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
                                                 StableStringStorage<> &scratch, const vector<string> &initialLocals) {
     unique_ptr<ruby_parser::base_driver> driver;
     if (settings.traceParser) {
-        driver = make_unique<ruby_parser::typedruby_debug27>(buffer, scratch, Builder::interface, !!settings.traceLexer,
-                                                             !!settings.indentationAware);
+        driver = make_unique<ruby_parser::typedruby_debug>(buffer, scratch, Builder::interface, !!settings.traceLexer,
+                                                           !!settings.indentationAware);
     } else {
-        driver = make_unique<ruby_parser::typedruby_release27>(buffer, scratch, Builder::interface,
-                                                               !!settings.traceLexer, !!settings.indentationAware);
+        driver = make_unique<ruby_parser::typedruby_release>(buffer, scratch, Builder::interface, !!settings.traceLexer,
+                                                             !!settings.indentationAware);
     }
 
     for (string local : initialLocals) {
@@ -125,6 +125,12 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     auto source = file.data(gs).source();
     // The lexer requires that its buffers end with a null terminator, which core::File
     // does not guarantee.  Parsing heredocs for some mysterious reason requires two.
+    //
+    // Note that this means we copy the source buffer every time we go to parse it.
+    // However, we prototyped a version of Sorbet that ENFORCE'd that those two null bytes were
+    // present in the source buffer on `core::File` creation (so that we would never have to copy)
+    // and it had a 0.2% average improvement to cold-cache runtime at Stripe. We opted not to land
+    // the change, because it was quite sprawling given such low impact.
     string buffer;
     buffer.reserve(source.size() + 2);
     buffer += source;

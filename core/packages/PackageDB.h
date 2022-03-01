@@ -23,10 +23,12 @@ class PackageDB final {
 
 public:
     NameRef enterPackage(std::unique_ptr<PackageInfo> pkg);
-    NameRef lookupPackage(NameRef pkgMangledName) const;
 
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
+
+    // Lookup `PackageInfo` from the string representation of the un-mangled package name.
+    const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
 
     bool empty() const;
     // Get mangled names for all packages.

@@ -293,6 +293,11 @@ public:
 
     core::SymbolRef untypedBlame() const;
 
+    // Converts a type like this:
+    //   T.proc.params(arg0: Integer, arg1: Integer).void
+    // into this:
+    //   [Integer, Integer]
+    // for use with LoadYieldParams
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;

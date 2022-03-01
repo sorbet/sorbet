@@ -17,14 +17,14 @@ constexpr ErrorClass GenericArgumentCountMismatch{7010, StrictLevel::True};
 constexpr ErrorClass IncompleteType{7011, StrictLevel::True};
 constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::True};
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, StrictLevel::True};
-// constexpr ErrorClass GenericMethodConstaintUnsolved{7013, StrictLevel::True};
+// constexpr ErrorClass GenericMethodConstraintUnsolved{7013, StrictLevel::True};
 constexpr ErrorClass RevealType{7014, StrictLevel::True};
 constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::True};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
 constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
 constexpr ErrorClass UntypedSplat{7019, StrictLevel::True};
-constexpr ErrorClass GenericMethodConstaintUnsolved{7020, StrictLevel::True};
+constexpr ErrorClass GenericMethodConstraintUnsolved{7020, StrictLevel::True};
 constexpr ErrorClass BlockNotPassed{7021, StrictLevel::True};
 constexpr ErrorClass SuggestTyped{7022, StrictLevel::True};
 constexpr ErrorClass ProcArityUnknown{7023, StrictLevel::Strict};
@@ -42,6 +42,7 @@ constexpr ErrorClass UnnecessarySafeNavigation{7034, StrictLevel::True};
 constexpr ErrorClass TakesNoBlock{7035, StrictLevel::True};
 constexpr ErrorClass PackagePrivateMethod{7036, StrictLevel::True};
 constexpr ErrorClass CallAfterAndAnd{7037, StrictLevel::True};
+constexpr ErrorClass CallOnTypeArgument{7038, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif

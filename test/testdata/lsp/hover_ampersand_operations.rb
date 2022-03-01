@@ -19,24 +19,28 @@ def main
 
   # Safenav
   dog = Dog.new
-  breed = dog&.breed # error: Used `&.` operator on `Dog`, which can never be nil
+  breed = dog&.breed
+  #          ^^ error: Used `&.` operator on `Dog`, which can never be nil
 # ^ hover: String
-        # ^ hover: Dog
-            # ^ hover: sig {returns(String)}
+  #       ^ hover: Dog
+  #          ^ hover: Dog
+  #           ^ hover: sig {returns(String)}
+  #            ^ hover: sig {returns(String)}
+  #             ^ hover: sig {returns(String)}
 
   maybeDog = T.let(nil, T.nilable(Dog))
   maybeBreed = maybeDog&.breed
 # ^ hover: T.nilable(String)
-             # ^ hover: T.nilable(Dog)
-                      # ^ hover: sig {returns(String)}
-                       # ^ hover: sig {returns(String)}
+  #            ^ hover: T.nilable(Dog)
+  #                     ^ hover: NilClass
+  #                      ^ hover: sig {returns(String)}
   breed2 = T.let(nil, T.nilable(String))
   breed2 ||= maybeDog&.breed
 # ^ hover: T.nilable(String)
-                    # ^ hover: sig {returns(String)}
-                     # ^ hover: sig {returns(String)}
+  #                   ^ hover: NilClass
+  #                    ^ hover: sig {returns(String)}
   breed2 &&= maybeDog&.breed
   # ^ hover: T.nilable(String)
-                    # ^ hover: sig {returns(String)}
-                     # ^ hover: sig {returns(String)}
+  #                   ^ hover: NilClass
+  #                    ^ hover: sig {returns(String)}
 end

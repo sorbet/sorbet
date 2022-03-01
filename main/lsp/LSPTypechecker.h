@@ -134,11 +134,11 @@ public:
 class LSPTypecheckerDelegate {
     LSPTypechecker &typechecker;
 
-public:
     /** The WorkerPool on which work will be performed. If the task is multithreaded, the pool will contain multiple
      * worker threads. */
     WorkerPool &workers;
 
+public:
     /**
      * Creates a new delegate that runs LSPTypechecker operations on the WorkerPool threads.
      */

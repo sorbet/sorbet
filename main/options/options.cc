@@ -436,6 +436,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "Errors not mentioned will be silenced. "
                                "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("single-package", "Run in single-package mode",
+                               cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("package-rbi-output", "Serialize package RBIs to folder.",
                                cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("dump-package-info", "Dump package info in JSON form to the given file.",
@@ -924,7 +926,33 @@ void readOptions(Options &opts,
         }
 
         opts.packageRBIOutput = raw["package-rbi-output"].as<string>();
+        if (!opts.packageRBIOutput.empty()) {
+            if (opts.stripePackages) {
+                logger->error("--package-rbi-output must not be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
+        opts.singlePackage = raw["single-package"].as<string>();
+        if (!opts.singlePackage.empty()) {
+            if (opts.stripePackages) {
+                logger->error("--single-package must not be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.packageRBIOutput.empty()) {
+                logger->error("--single-package requires --package-rbi-output also be provided");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
         opts.dumpPackageInfo = raw["dump-package-info"].as<string>();
+        if (!opts.dumpPackageInfo.empty()) {
+            if (!opts.stripePackages) {
+                logger->error("--dump-package-info can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+        }
 
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();

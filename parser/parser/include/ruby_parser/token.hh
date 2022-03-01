@@ -5,8 +5,6 @@
 #include <memory>
 #include <string>
 
-#include "location.hh"
-
 // these token values are mirrored in src/grammars/*.y
 // any changes *must* be applied to the grammars as well.
 #define RUBY_PARSER_TOKEN_TYPES(XX) \
@@ -168,7 +166,6 @@ enum class token_type : int {
 #endif
 };
 
-// TODO(jez) Worth using location here?
 class token {
     token_type _type;
     size_t _start;

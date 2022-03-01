@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C X> = [<emptyTree>::<C <ErrorNode>>]
+  end
+end

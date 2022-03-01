@@ -328,7 +328,7 @@ public:
         // first let's try adding it to the end of the imports.
         if (!importedPackageNames.empty()) {
             auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
@@ -368,8 +368,8 @@ public:
         auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
         if (!exports_.empty()) {
-            auto lastOffset = exports_.back().fqn.loc;
-            insertionLoc = {loc.file(), lastOffset.endPos(), lastOffset.endPos()};
+            auto lastOffset = exports_.back().fqn.loc.offsets();
+            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
         } else {
             // if we don't have any imports, then we can try adding it
             // either before the first export, or if we have no
@@ -1280,7 +1280,7 @@ struct PackageInfoFinder {
 unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package,
                                            const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(ctx).sourceType == core::File::Type::Package);
+    ENFORCE(package.file.data(ctx).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
     // for `typed: ignore` files, so we should make sure to catch that
     // elsewhere.)
@@ -1547,7 +1547,8 @@ private:
         std::transform(node->children.begin(), node->children.end(), back_inserter(childPairs),
                        [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
         fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.first.show(ctx) < rhs.first.show(ctx);
+            int compareResult = lhs.first.shortName(ctx).compare(rhs.first.shortName(ctx));
+            return compareResult < 0;
         });
         for (auto const &[nameRef, child] : childPairs) {
             if (parts.empty()) {
@@ -1567,66 +1568,69 @@ private:
             parts.pop_back();
         }
 
-        if (source.exists()) {
-            // If we do not need to map the given import for the given module type, return
-            if (source.skipBuildMappingFor(moduleType)) {
-                return;
-            }
-
-            const bool isFriendImport = source.isFriendImport();
-            // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
-            // begin with "Test::".
-            if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
-                return;
-            }
-
-            if (parentSrc.exists()) {
-                // A conflicting import exists. Only report errors while constructing the test output
-                // to avoid duplicate errors because test imports are a superset of normal imports.
-                if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
-                    addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
-                }
-
-                return;
-            }
-
-            if (moduleType != ModuleType::Private || source.isNormalImport()) {
-                // Construct a module containing an assignment for an imported name:
-                // For name `A::B::C::D` imported from package `A::B` construct:
-                // module A::B::C
-                //   D = <Mangled A::B>::A::B::C::D
-                // end
-                const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
-                auto assignRhs =
-                    prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
-
-                auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
-                                              std::move(assignRhs));
-
-                ast::ClassDef::RHS_store rhs;
-                rhs.emplace_back(std::move(assign));
-
-                // Use the loc from the import in the module name and declaration to get the
-                // following jump to definition behavior in the case of enumerated imports:
-                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to the import statement
-                //                               ^^^  jump to actual definition of `Baz` class
-                //
-                // In the case of un-enumerated imports, we don't use the loc at the import site,
-                // but effectively use the one from the export site (due to the export-mapping/public module).
-                // This results in the following behavior:
-                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
-                //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
-                //                               ^^^  jump to actual definition of `Baz` class
-
-                // Ensure import's do not add duplicate loc-s in the test_module
-                const auto &moduleLoc = getModuleLoc(source, packageLoc);
-
-                auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc,
-                                           importModuleName(parts, moduleLoc, moduleType), {}, std::move(rhs));
-                modRhs.emplace_back(std::move(mod));
-            }
+        if (!source.exists()) {
+            return;
         }
+
+        // If we do not need to map the given import for the given module type, return
+        if (source.skipBuildMappingFor(moduleType)) {
+            return;
+        }
+
+        const bool isFriendImport = source.isFriendImport();
+        // For the test module, we do not need to map friend-imports (i.e. exports from the current package) that
+        // begin with "Test::".
+        if (moduleType == ModuleType::PrivateTest && isFriendImport && isTestNamespace(ctx, parts[0])) {
+            return;
+        }
+
+        if (parentSrc.exists()) {
+            // A conflicting import exists. Only report errors while constructing the test output
+            // to avoid duplicate errors because test imports are a superset of normal imports.
+            if (moduleType == ModuleType::PrivateTest && !isFriendImport) {
+                addConflictingImportSourcesError(ctx, source.importLoc, parentSrc.importLoc, parts);
+            }
+
+            return;
+        }
+
+        if (moduleType == ModuleType::Private && !source.isNormalImport()) {
+            return;
+        }
+
+        // Construct a module containing an assignment for an imported name:
+        // For name `A::B::C::D` imported from package `A::B` construct:
+        // module A::B::C
+        //   D = <Mangled A::B>::A::B::C::D
+        // end
+        const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
+        auto assignRhs = prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
+
+        auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
+                                      std::move(assignRhs));
+
+        ast::ClassDef::RHS_store rhs;
+        rhs.emplace_back(std::move(assign));
+
+        // Use the loc from the import in the module name and declaration to get the
+        // following jump to definition behavior in the case of enumerated imports:
+        // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+        //                     ^^^^^^^^       jump to the import statement
+        //                               ^^^  jump to actual definition of `Baz` class
+        //
+        // In the case of un-enumerated imports, we don't use the loc at the import site,
+        // but effectively use the one from the export site (due to the export-mapping/public module).
+        // This results in the following behavior:
+        // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+        //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
+        //                               ^^^  jump to actual definition of `Baz` class
+
+        // Ensure import's do not add duplicate loc-s in the test_module
+        const auto &moduleLoc = getModuleLoc(source, packageLoc);
+
+        auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc, importModuleName(parts, moduleLoc, moduleType),
+                                   {}, std::move(rhs));
+        modRhs.emplace_back(std::move(mod));
     }
 
     const core::LocOffsets getModuleLoc(ImportTree::Source &source, const core::Loc *packageLoc) {
@@ -1791,7 +1795,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
 
 ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFile) {
     auto &file = parsedFile.file.data(ctx);
-    ENFORCE(file.sourceType != core::File::Type::Package);
+    ENFORCE(!file.isPackage());
     auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (pkg.exists()) {
         auto &pkgImpl = PackageInfoImpl::from(pkg);
@@ -1842,35 +1846,41 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
-            if (FileOps::getFileName(file.file.data(gs).path()) == PACKAGE_FILE_NAME) {
-                if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
-                    // if the `__package.rb` file is at `typed:
-                    // ignore`, then we haven't even parsed it, which
-                    // means none of the other stuff here is going to
-                    // actually work (since it all assumes we've got a
-                    // file to actually analyze.) If we've got a
-                    // `typed: ignore` package, then skip it.
-                    continue;
-                }
+            if (FileOps::getFileName(file.file.data(gs).path()) != PACKAGE_FILE_NAME) {
+                continue;
+            }
 
-                file.file.data(gs).sourceType = core::File::Type::Package;
-                core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
-                if (pkg == nullptr) {
-                    // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
-                    // surfaced that error to the user. Nothing to do here.
-                    continue;
+            if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                // if the `__package.rb` file is at `typed:
+                // ignore`, then we haven't even parsed it, which
+                // means none of the other stuff here is going to
+                // actually work (since it all assumes we've got a
+                // file to actually analyze.) If we've got a
+                // `typed: ignore` package, then skip it.
+
+                // `File::isPackage` is determined by the filename, so we need to clear it explicitly at this point
+                // to ensure that the file is no longer treated as a package.
+                file.file.data(gs).setIsPackage(false);
+
+                continue;
+            }
+
+            core::MutableContext ctx(gs, core::Symbols::root(), file.file);
+            auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+            if (pkg == nullptr) {
+                // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
+                // surfaced that error to the user. Nothing to do here.
+                continue;
+            }
+            auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
+            if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
+                if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
+                    auto pkgName = pkg->name.toString(ctx);
+                    e.setHeader("Redefinition of package `{}`", pkgName);
+                    e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
                 }
-                auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
-                if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
-                    if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
-                        auto pkgName = pkg->name.toString(ctx);
-                        e.setHeader("Redefinition of package `{}`", pkgName);
-                        e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
-                    }
-                } else {
-                    packages.db.enterPackage(move(pkg));
-                }
+            } else {
+                packages.db.enterPackage(move(pkg));
             }
         }
     }
@@ -1913,10 +1923,10 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     auto &file = job.file.data(gs);
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
-                    if (file.sourceType == core::File::Type::Normal) {
-                        job = rewritePackagedFile(ctx, move(job));
-                    } else if (file.sourceType == core::File::Type::Package) {
+                    if (file.isPackage()) {
                         job = rewritePackage(ctx, move(job));
+                    } else {
+                        job = rewritePackagedFile(ctx, move(job));
                     }
                     results.emplace_back(move(job));
                 }

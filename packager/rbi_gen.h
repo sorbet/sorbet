@@ -19,13 +19,17 @@ public:
     };
 
     // Exposed for testing.
-    static UnorderedSet<core::ClassOrModuleRef>
-    buildPackageNamespace(core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles, WorkerPool &workers);
+    static UnorderedSet<core::ClassOrModuleRef> buildPackageNamespace(core::GlobalState &gs, WorkerPool &workers);
     static RBIOutput runOnce(const core::GlobalState &gs, core::NameRef pkg,
                              const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces);
 
-    static void run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamspaces,
+    // Generate RBIs for all packages present in the package database of `gs`.
+    static void run(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
                     std::string outputDir, WorkerPool &workers);
+
+    // Generate RBIs for a single package, provided as the mangled package name `package`.
+    static void runSinglePackage(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
+                                 core::NameRef package, std::string outputDir, WorkerPool &workers);
 };
 } // namespace sorbet::packager
 

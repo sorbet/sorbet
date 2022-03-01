@@ -964,6 +964,47 @@ For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [5028](#5028), [7017](#7017).
 
+# 6004
+
+In order to statically check [exhaustiveness](exhaustiveness), Sorbet provides
+`T.absurd`, which lets people opt into exhaustiveness checks.
+
+`T.absurd` must be given a variable. If not, like in this example, it reports an
+error:
+
+```ruby
+# -- bad example --
+
+sig {returns(T.any(Integer, String))}
+def returns_int_or_string; 0; end
+
+case returns_int_or_string
+when Integer then puts 'got int'
+when String then puts 'got string'
+# error! `returns_int_or_string` is not a variable!
+else T.absurd(returns_int_or_string)
+end
+```
+
+While it looks like `returns_int_or_string` is the name of a variable, it's
+actually a method call (Ruby allows method calls to omit parentheses). To fix
+this error, store the result of calling `returns_int_or_string` in a variable,
+and use that variable with the `case` and `T.absurd`:
+
+```ruby
+sig {returns(T.any(Integer, String))}
+def returns_int_or_string; 0; end
+
+# calls returns_int_or_string, stores result in x
+x = returns_int_or_string
+
+case x
+when Integer then puts 'got int'
+when String then puts 'got string'
+else T.absurd(x)
+end
+```
+
 ## 7001
 
 Sorbet does not allow reassigning a variable to a different type within a loop
@@ -1644,6 +1685,55 @@ end
 Of the two, the first solution is preferred because not only will the program
 type check as written, but Sorbet will know that the `x` variable is not `nil`
 throughout the body of the `if` statement.
+
+## 7038
+
+Consider this example:
+
+```ruby
+sig do
+  type_parameters(:U)
+    .params(x: T.type_parameter(:U))
+    .void
+end
+def example(x)
+  x.foo # error!
+end
+```
+
+This snippet declares a method `example` with a signature that says it can be
+passed any input, but then attempts to call a specific method `.foo`.
+
+Since this method can be given any type of value, Sorbet rejects the call to
+`x.foo`.
+
+To allow code like this, use [interfaces](abstract.md) with
+[intersection types](intersection-types.md):
+
+```ruby
+# (1) Declare an interface
+module IFoo
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  sig {abstract.void}
+  def foo; end
+end
+
+sig do
+  type_parameters(:U)
+    # (2) Use the interface with an intersection type
+    .params(x: T.all(IFoo, T.type_parameter(:U)))
+    .void
+end
+def example(x)
+  x.foo # error!
+end
+```
+
+Remember that in Sorbet, [interfaces](abstract.md) must be explicitly
+implemented in a given class.
 
 <!-- -->
 

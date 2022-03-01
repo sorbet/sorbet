@@ -251,6 +251,14 @@ LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_v
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
+
+    if (!fref.exists() && config.isFileIgnored(config.remoteName2Local(uri))) {
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Ignored file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPQueryResult{{}, move(error)};
+    }
+
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
@@ -295,8 +303,7 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
         const auto &usedSymbolNames = hash.usages.symbols;
         auto ref = core::FileRef(i);
 
-        const bool fileIsValid = ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal ||
-                                                  ref.data(gs).sourceType == core::File::Type::Package);
+        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
         if (fileIsValid &&
             (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
              std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symNameHash) != usedSymbolNames.end())) {
@@ -375,7 +382,11 @@ LSPTask::extractLocations(const core::GlobalState &gs,
                           vector<unique_ptr<Location>> locations) const {
     auto queryResponsesFiltered = filterAndDedup(gs, queryResponses);
     for (auto &q : queryResponsesFiltered) {
-        addLocIfExists(gs, locations, q->getLoc());
+        if (auto *send = q->isSend()) {
+            addLocIfExists(gs, locations, send->funLoc);
+        } else {
+            addLocIfExists(gs, locations, q->getLoc());
+        }
     }
     return locations;
 }

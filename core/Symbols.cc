@@ -440,7 +440,11 @@ string FieldRef::show(const GlobalState &gs, ShowOptions options) const {
 
 string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
-    return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+    if (options.showForRBI) {
+        return fmt::format("T.type_parameter(:{})", sym->name.show(gs));
+    } else {
+        return fmt::format("T.type_parameter(:{}) (of {})", sym->name.show(gs), sym->owner.show(gs));
+    }
 }
 
 string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {

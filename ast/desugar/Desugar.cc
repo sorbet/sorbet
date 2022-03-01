@@ -1244,8 +1244,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                     auto prevValue = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                               std::move(readArgs), s->flags);
-                    auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, sendLoc.copyWithZeroLength(),
-                                              std::move(rhs));
+                    auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, opAsgn->opLoc, std::move(rhs));
                     auto numPosAssgnArgs = numPosArgs + 1;
                     assgnArgs.emplace_back(std::move(newValue));
 
@@ -1255,7 +1254,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
                     auto lhs = MK::cpRef(recv);
-                    auto send = MK::Send1(loc, std::move(recv), opAsgn->op, locZeroLen, std::move(rhs));
+                    auto send = MK::Send1(loc, std::move(recv), opAsgn->op, opAsgn->opLoc, std::move(rhs));
                     auto res = MK::Assign(loc, std::move(lhs), std::move(send));
                     result = std::move(res);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
@@ -1286,8 +1285,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
                     auto prevValue = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                               std::move(readArgs), s->flags);
-                    auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, sendLoc.copyWithZeroLength(),
-                                              std::move(rhs));
+                    auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, opAsgn->opLoc, std::move(rhs));
                     auto numPosAssgnArgs = numPosArgs + 1;
                     assgnArgs.emplace_back(std::move(newValue));
 
@@ -1309,6 +1307,16 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 // location to node.
                 auto zeroLengthLoc = loc.copyWithZeroLength();
                 auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
+                auto csendLoc = recvLoc.copyEndWithZeroLength();
+                if (recvLoc.endPos() + 1 <= dctx.ctx.file.data(dctx.ctx).source().size()) {
+                    auto ampersandLoc = core::LocOffsets{recvLoc.endPos(), recvLoc.endPos() + 1};
+                    // The arg loc for the synthetic variable created for the purpose of this safe navigation
+                    // check is a bit of a hack. It's intentionally one character too short so that for
+                    // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
+                    if (core::Loc(dctx.ctx.file, ampersandLoc).source(dctx.ctx) == "&") {
+                        csendLoc = ampersandLoc;
+                    }
+                }
 
                 auto assgn = MK::Assign(zeroLengthRecvLoc, tempRecv, node2TreeImpl(dctx, std::move(csend->receiver)));
 
@@ -1322,11 +1330,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                               csend->methodLoc, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
-                ExpressionPtr nil = MK::Send1(
-                    zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
-                    core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
+                ExpressionPtr nil =
+                    MK::Send1(recvLoc.copyEndWithZeroLength(), ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
-                auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
+                auto res = MK::InsSeq1(csend->loc, std::move(assgn), std::move(iff));
                 result = std::move(res);
             },
             [&](parser::Self *self) {

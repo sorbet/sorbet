@@ -7,8 +7,15 @@ if [ "${CLEAN_BUILD:-}" != "" ] || [ "${PUBLISH_TO_RUBYGEMS:-}" != "" ]; then
 fi
 
 echo "--- setup"
+
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+echo "deb https://deb.nodesource.com/node_16.x focal main" | tee /etc/apt/sources.list.d/nodesource.list
+echo "deb-src https://deb.nodesource.com/node_16.x focal main" | tee -a /etc/apt/sources.list.d/nodesource.list
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+
 apt-get update
-apt-get install -yy curl jq rubygems file
+apt-get install -yy curl jq rubygems file nodejs yarn
 
 git config --global user.email "sorbet+bot@stripe.com"
 git config --global user.name "Sorbet build farm"
@@ -23,7 +30,7 @@ prefix="0.5"
 release_version="$prefix.${git_commit_count}"
 long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
 
-echo "--- Dowloading artifacts"
+echo "--- Downloading artifacts"
 rm -rf release
 rm -rf _out_
 buildkite-agent artifact download "_out_/**/*" .
@@ -105,13 +112,50 @@ rmdir release/webasm
 pushd release
 files=()
 while IFS='' read -r line; do files+=("$line"); done < <(find . -type f | sed 's#^./##')
+backticks='```' # hack for bad Vim syntax highlighting definition
 release_notes="To use Sorbet add this line to your Gemfile:
-\`\`\`
+$backticks
 gem 'sorbet', '$release_version', :group => :development
 gem 'sorbet-runtime', '$release_version'
-\`\`\`"
+$backticks"
 if [ "$dryrun" = "" ]; then
-    echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
+  echo "$release_notes" | ../.buildkite/tools/gh-release.sh sorbet/sorbet "${long_release_version}" -- "${files[@]}"
 fi
 popd
 
+echo "--- releasing VS Code extension"
+pushd vscode_extension
+
+extension_release_version="$(jq --raw-output '.version' package.json)"
+echo "releasing $extension_release_version"
+
+# (progress bar messes with Buildkite timestamps)
+yarn install --no-progress
+
+if node_modules/.bin/vsce show --json sorbet.sorbet-vscode-extension | \
+    jq --raw-output '.versions[] | .version' | \
+    grep -qFx "$extension_release_version"; then
+  echo "... $extension_release_version is already published"
+  node_modules/.bin/vsce show sorbet.sorbet-vscode-extension
+elif [ "$dryrun" = "" ]; then
+  echo "... starting publish"
+  vsce_publish_output="$(mktemp)"
+  trap 'rm -rf "$vsce_publish_output"' EXIT
+
+  # Reads from the VSCE_PAT variable
+  if ! node_modules/.bin/vsce publish --packagePath "../_out_/vscode_extension/sorbet.vsix" < /dev/null > "$vsce_publish_output" 2>&1; then
+    # It can take 4+ minutes for the marketplace to "verify" our extension
+    # before it shows up as published according to `vsce show`.
+    cat "$vsce_publish_output"
+    if grep -qF 'Version number cannot be the same'; then
+      echo "... $extension_release_version is already published"
+    else
+      exit 1
+    fi
+  else
+    echo "... published version $extension_release_version"
+  fi
+else
+  echo "... skipping extension publish for dryrun."
+fi
+popd

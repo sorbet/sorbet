@@ -77,9 +77,9 @@ bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$16: Sorbet::Private::Sta
 # - bb6(rubyRegionId=1)
 bb9[rubyRegionId=1, firstDead=5](<self>: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test):
     # outerLoops: 1
-    <self>: Test = loadSelf
+    <self>: Test = loadSelf(map)
     <blk>$18: [T.untyped] = load_yield_params(map)
-    e$1: T.untyped = yield_load_arg(0)
+    e$1: T.untyped = yield_load_arg(0, <blk>$18: [T.untyped])
     <blockReturnTemp>$19: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)
     <blockReturnTemp>$22: T.noreturn = blockreturn<map> <blockReturnTemp>$19: T.untyped
     <unconditional> -> bb6

@@ -280,6 +280,10 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
+    // the packages that are imported by the one whose interface is being generated.
+    std::optional<packages::ImportInfo> singlePackageImports;
+
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);

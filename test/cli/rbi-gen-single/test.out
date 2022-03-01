@@ -1,0 +1,56 @@
+-- sanity-checking package with --stripe-packages
+-- ./test/cli/rbi-gen-single/family/__package.rb (Family)
+-- RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+# typed: true
+
+class Family::Simpsons < Object
+  sig {returns(Bart::Character)}
+  def bart; end
+  sig {returns(T.nilable(Bart::Character))}
+  def no_bart; end
+  extend T::Sig
+end
+Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Bart::Character)}
+Family::Simpsons::LocalBart = Bart::Character
+-- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+{"packageRefs":[], "rbiRefs":[]}
+-- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+-- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+# typed: true
+
+class Family::Bart::Character < Object
+  sig {void}
+  def catchphrase; end
+  sig {returns(T.class_of(Family::Simpsons))}
+  def family; end
+  sig {params(msg: Util::GenericMessage[String]).void}
+  def ignore(msg); end
+  extend T::Sig
+end
+Family::Bart::Character::FamilyClass = Family::Simpsons
+-- JSON: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+{"packageRefs":["Family","Util"], "rbiRefs":[]}
+-- ./test/cli/rbi-gen-single/util/__package.rb (Util)
+-- RBI: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+# typed: true
+
+class Util::GenericMessage < Object
+  Elem = type_member()
+  extend T::Generic
+  extend T::Helpers
+end
+class Util::Messages < Object
+  extend T::Sig
+  sig do
+    type_parameters(:T)
+    .params(
+      msg: Util::GenericMessage[T.type_parameter(:T)]
+    )
+    .void
+  end
+  def self.print_message(msg); end
+  sig {params(msg: String).void}
+  def self.say(msg); end
+end
+-- JSON: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+{"packageRefs":[], "rbiRefs":[]}

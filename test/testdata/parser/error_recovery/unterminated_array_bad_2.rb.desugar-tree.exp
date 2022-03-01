@@ -1,0 +1,10 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def bar<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        x = [<emptyTree>::<C <ErrorNode>>]
+      end
+    end
+  end
+end

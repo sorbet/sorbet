@@ -1,5 +1,6 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "common/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
@@ -127,18 +128,16 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
-NameRef PackageDB::lookupPackage(NameRef pkgMangledName) const {
-    ENFORCE(pkgMangledName.exists());
-    auto it = packages_.find(pkgMangledName);
-    if (it == packages_.end()) {
-        return NameRef::noName();
-    }
-    return it->first;
-}
-
 const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
-    auto &fileData = file.data(gs);
+
+    // Note about safety: we're only using the file data for two pieces of information: the file path and the
+    // sourceType. The path is present even on unloaded files, and the sourceType we're interested in is `Package`,
+    // which will have been loaded by a previous step for the packageDB to be valid.
+    //
+    // See https://github.com/sorbet/sorbet/pull/5291 for more information.
+    auto &fileData = file.dataAllowingUnsafe(gs);
+
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
@@ -149,13 +148,32 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
             return pkg;
         }
 
-        if (fileData.sourceType == core::File::Type::Package) {
+        if (fileData.isPackage()) {
             // When looking up a `__package.rb` file do not search parent directories
             break;
         }
         curPrefixPos = path.find_last_of('/', curPrefixPos - 1);
     }
     return NONE_PKG;
+}
+
+const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::string_view nameStr) const {
+    auto mangled = absl::StrCat(absl::StrReplaceAll(nameStr, {{"::", "_"}}), core::PACKAGE_SUFFIX);
+    auto utf8Name = gs.lookupNameUTF8(mangled);
+    if (!utf8Name.exists()) {
+        return NONE_PKG;
+    }
+
+    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    if (!packagerName.exists()) {
+        return NONE_PKG;
+    }
+
+    auto cnst = gs.lookupNameConstant(packagerName);
+    if (!cnst.exists()) {
+        return NONE_PKG;
+    }
+    return getPackageInfo(cnst);
 }
 
 const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {

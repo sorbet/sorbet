@@ -11,7 +11,7 @@ class GlobalState;
 class Context;
 class MutableContext;
 
-constexpr int INVALID_POS_LOC = 0xffffff;
+constexpr int INVALID_POS_LOC = 0xfffffff;
 struct LocOffsets {
     uint32_t beginLoc = INVALID_POS_LOC;
     uint32_t endLoc = INVALID_POS_LOC;
@@ -36,6 +36,10 @@ struct LocOffsets {
     // For a given LocOffsets, returns a zero-length version that starts at the same location.
     LocOffsets copyWithZeroLength() const {
         return LocOffsets{beginPos(), beginPos()};
+    }
+    // As above, but returns a zero-length version that starts at the end of the location.
+    LocOffsets copyEndWithZeroLength() const {
+        return LocOffsets{endPos(), endPos()};
     }
 
     std::string showRaw(const Context ctx) const;
@@ -79,6 +83,10 @@ public:
     // For a given Loc, returns a zero-length version that starts at the same location.
     Loc copyWithZeroLength() const {
         return {this->storage.fileRef, this->storage.offsets.copyWithZeroLength()};
+    }
+    // As above, but returns a zero-length version that starts at the end of the Loc.
+    Loc copyEndWithZeroLength() const {
+        return {this->storage.fileRef, this->storage.offsets.copyEndWithZeroLength()};
     }
 
     uint32_t beginPos() const {

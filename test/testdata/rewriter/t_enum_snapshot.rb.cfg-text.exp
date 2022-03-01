@@ -86,7 +86,7 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$13: Sorbet::Private::Stat
 # - bb2(rubyRegionId=1)
 bb5[rubyRegionId=1, firstDead=49](<self>: T.class_of(MyEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(MyEnum), <C X>$34: MyEnum::X, <C Y>$60: MyEnum::Y, <C Z>$87: MyEnum::Z):
     # outerLoops: 1
-    <self>: T.class_of(MyEnum) = loadSelf
+    <self>: T.class_of(MyEnum) = loadSelf(enums)
     <cfgAlias>$20: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$22: T.class_of(MyEnum::X) = alias <C X$1>
     <statTemp>$18: Sorbet::Private::Static::Void = <cfgAlias>$20: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$22: T.class_of(MyEnum::X))
@@ -214,7 +214,7 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Stati
 # - bb2(rubyRegionId=1)
 bb5[rubyRegionId=1, firstDead=12](<self>: T.class_of(NotAnEnum), <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.class_of(NotAnEnum), <C X>$9: T.untyped, <C Y>$16: NotAnEnum):
     # outerLoops: 1
-    <self>: T.class_of(NotAnEnum) = loadSelf
+    <self>: T.class_of(NotAnEnum) = loadSelf(enums)
     <cfgAlias>$11: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$14: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$12: T.attached_class (of NotAnEnum) = <cfgAlias>$14: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
@@ -287,7 +287,7 @@ bb3[rubyRegionId=0, firstDead=7](<block-pre-call-temp>$13: Sorbet::Private::Stat
 # - bb2(rubyRegionId=1)
 bb5[rubyRegionId=1, firstDead=49](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum), <C X>$34: EnumsDoEnum::X, <C Y>$60: EnumsDoEnum::Y, <C Z>$87: EnumsDoEnum::Z):
     # outerLoops: 1
-    <self>: T.class_of(EnumsDoEnum) = loadSelf
+    <self>: T.class_of(EnumsDoEnum) = loadSelf(enums)
     <cfgAlias>$20: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$22: T.class_of(EnumsDoEnum::X) = alias <C X$1>
     <statTemp>$18: Sorbet::Private::Static::Void = <cfgAlias>$20: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$22: T.class_of(EnumsDoEnum::X))
@@ -461,7 +461,7 @@ bb3[rubyRegionId=0, firstDead=23](<block-pre-call-temp>$41: Sorbet::Private::Sta
 # - bb2(rubyRegionId=1)
 bb5[rubyRegionId=1, firstDead=19](<self>: T.class_of(BadConsts), <block-pre-call-temp>$41: Sorbet::Private::Static::Void, <selfRestore>$42: T.class_of(BadConsts), <C Inside>$62: BadConsts::Inside, <C StaticField2>$72: Integer, <C After>$91: BadConsts::After, <C StaticField3>$101: Integer, <C StaticField4>$103: Integer):
     # outerLoops: 1
-    <self>: T.class_of(BadConsts) = loadSelf
+    <self>: T.class_of(BadConsts) = loadSelf(enums)
     <cfgAlias>$48: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$50: T.class_of(BadConsts::Inside) = alias <C Inside$1>
     <statTemp>$46: Sorbet::Private::Static::Void = <cfgAlias>$48: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$50: T.class_of(BadConsts::Inside))

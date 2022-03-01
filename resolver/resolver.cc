@@ -109,6 +109,7 @@ private:
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
+        bool possibleGenericType = false;
 
         ResolutionItem() = default;
         ResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -302,22 +303,176 @@ private:
 
     static const int MAX_SUGGESTION_COUNT = 10;
 
+    struct ParentPackageStub {
+        core::NameRef packageId;
+        vector<core::NameRef> fullName;
+        vector<core::NameRef> exports;
+
+        // Check that the candidate name is one of the top-level exported names from a parent package.
+        bool exportsSymbol(core::NameRef candidate) const {
+            return absl::c_find(this->exports, candidate) != this->exports.end();
+        }
+
+        // Check that a symbol matches the full name of this parent package.
+        bool matchesOwners(const core::GlobalState &gs, core::ClassOrModuleRef sym) const {
+            for (auto it = this->fullName.rbegin(); it != this->fullName.rend(); ++it) {
+                if (!sym.exists()) {
+                    return false;
+                }
+
+                if (sym.data(gs)->name != *it) {
+                    return false;
+                }
+
+                auto owner = sym.data(gs)->owner;
+                if (!owner.isClassOrModule()) {
+                    return false;
+                }
+
+                sym = owner.asClassOrModuleRef();
+            }
+
+            return sym == core::Symbols::root();
+        }
+    };
+
+    static core::ClassOrModuleRef stubParentNamespace(core::MutableContext ctx, core::NameRef mangledPkg) {
+        auto &db = ctx.state.packageDB();
+        auto &info = db.getPackageInfo(mangledPkg);
+
+        core::ClassOrModuleRef owner = core::Symbols::root();
+        for (auto part : info.fullName()) {
+            owner = ctx.state.enterClassSymbol(core::Loc::none(), owner, part);
+        }
+
+        return owner;
+    }
+
+    static vector<ParentPackageStub> initParentStubs(core::GlobalState &gs) {
+        vector<ParentPackageStub> stubs;
+
+        auto &db = gs.packageDB();
+
+        for (auto parent : gs.singlePackageImports->parentImports) {
+            auto &info = db.getPackageInfo(parent);
+
+            auto &stub = stubs.emplace_back();
+            stub.packageId = parent;
+            stub.fullName = info.fullName();
+
+            auto exportPaths = info.exports();
+            auto prefixLen = info.fullName().size();
+            for (auto &path : exportPaths) {
+                stub.exports.emplace_back(path[prefixLen]);
+            }
+        }
+
+        return stubs;
+    }
+
+    static void ensureTGenericMixin(core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        auto &mixins = klass.data(gs)->mixins();
+        if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
+            mixins.emplace_back(core::Symbols::T_Generic());
+        }
+    }
+
+    static void stubForRbiGeneration(core::MutableContext ctx, const vector<ParentPackageStub> &parentPackageStubs,
+                                     const Nesting *scope, ast::ConstantLit *out, bool possibleGenericType) {
+        if (out->symbol.exists()) {
+            // In single-package RBI generation mode, we might have already
+            // resolved a class that we later identified as generic, and
+            // we need to attempt to fix that up.
+            if (!out->symbol.isClassOrModule()) {
+                return;
+            }
+            if (!possibleGenericType) {
+                return;
+            }
+            auto singletonClass = out->symbol.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
+            ensureTGenericMixin(ctx, singletonClass);
+            return;
+        }
+
+        auto owner = core::Symbols::root();
+
+        // if the scope of the constant lit is non-empty, attempt to resolve that first to help determine the owner.
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
+        if (auto *origScope = ast::cast_tree<ast::ConstantLit>(original.scope)) {
+            // The scope of the original is not a possible generic type.
+            const bool isGenericType = false;
+            stubForRbiGeneration(ctx, parentPackageStubs, scope, origScope, isGenericType);
+            owner = origScope->symbol.asClassOrModuleRef();
+        } else {
+            for (auto *cursor = scope; cursor != nullptr; cursor = cursor->parent.get()) {
+                if (!cursor->scope.isClassOrModule()) {
+                    continue;
+                }
+
+                auto sym = cursor->scope.asClassOrModuleRef();
+                auto name = sym.data(ctx)->name;
+
+                const auto parent =
+                    absl::c_find_if(parentPackageStubs, [name](auto &stub) { return stub.fullName.back() == name; });
+                if (parent == parentPackageStubs.end()) {
+                    continue;
+                }
+
+                if (!parent->exportsSymbol(original.cnst)) {
+                    continue;
+                }
+
+                if (!parent->matchesOwners(ctx, sym)) {
+                    continue;
+                }
+
+                owner = sym;
+                break;
+            }
+        }
+
+        auto symbol = ctx.state.enterClassSymbol(core::Loc{ctx.file, out->loc}, owner,
+                                                 ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
+
+        auto data = symbol.data(ctx);
+        // force a singleton into existence
+        auto singletonClass = data->singletonClass(ctx);
+        if (possibleGenericType) {
+            ensureTGenericMixin(ctx, singletonClass);
+        }
+
+        out->symbol = symbol;
+    }
+
+    // Mark type aliases as TODO items for a later pass, as all constants will have been stubbed out by then.
+    static void stubTypeAliasForRbiGeneration(core::MutableContext ctx, core::SymbolRef sym) {
+        sym.setResultType(ctx, core::make_type<core::ClassType>(core::Symbols::todo()));
+    }
+
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
-    static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job, int &suggestionCount) {
+    static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job,
+                                         const vector<ParentPackageStub> &parentPackageStubs, int &suggestionCount) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
+
+        bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
-                // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
-                auto loc = resolvedField.data(ctx)->loc();
-                if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
-                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
+                if (singlePackageRbiGeneration) {
+                    stubTypeAliasForRbiGeneration(ctx, job.out->symbol);
+                } else {
+                    // This is actually a use-site error, but we limit ourselves to emitting it once by checking
+                    // resultType
+                    auto loc = resolvedField.data(ctx)->loc();
+                    if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
+                        e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
+                        e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
+                    }
+                    resolvedField.data(ctx)->resultType =
+                        core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
                 }
-                resolvedField.data(ctx)->resultType =
-                    core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
             }
             job.out->symbol = resolved;
             return;
@@ -328,6 +483,14 @@ private:
             job.out->symbol = core::Symbols::untyped();
             return;
         }
+
+        // When generating rbis in single-package mode, we may need to invent a symbol at this point
+        if (singlePackageRbiGeneration) {
+            stubForRbiGeneration(ctx.withOwner(job.scope->scope), parentPackageStubs, job.scope.get(), job.out,
+                                 job.possibleGenericType);
+            return;
+        }
+
         ENFORCE(!resolved.exists());
         ENFORCE(!job.out->symbol.exists());
 
@@ -427,6 +590,9 @@ private:
 
     static bool resolveJob(core::Context ctx, ResolutionItem &job) {
         if (isAlreadyResolved(ctx, *job.out)) {
+            if (job.possibleGenericType) {
+                return false;
+            }
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
@@ -579,6 +745,11 @@ private:
             core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
 
         auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+
+        // Add a fake block argument so that this method symbol passes sanity checks
+        auto &arg = ctx.state.enterMethodArgumentSymbol(core::Loc::none(), uaSym, core::Names::blkArg());
+        arg.flags.isBlock = true;
+
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
         if (!resultType) {
             uaSym.data(ctx)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{ancestorType});
@@ -1126,6 +1297,15 @@ public:
             if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
                 send.fun == core::Names::mixesInClassMethods()) {
                 this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
+            } else if (recvAsConstantLit != nullptr && send.fun == core::Names::squareBrackets() &&
+                       ctx.state.singlePackageImports.has_value()) {
+                // In single-package RBI generation mode, we treat Constant[...] as
+                // possible generic types.
+                ResolutionItem job{nesting_, recvAsConstantLit};
+                job.possibleGenericType = true;
+                if (!resolveJob(ctx, job)) {
+                    todo_.emplace_back(std::move(job));
+                }
             }
         }
         return tree;
@@ -1421,12 +1601,29 @@ public:
 
         {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
+
+            // Initialize the stubbed parent namespaces if we're generating an interface for a single package
+            vector<ParentPackageStub> parentPackageStubs;
+            bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
+            if (singlePackageRbiGeneration) {
+                parentPackageStubs = initParentStubs(gs);
+            }
+
             // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
             int suggestionCount = 0;
             for (auto &job : todo) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
-                    constantResolutionFailed(ctx, item, suggestionCount);
+                    constantResolutionFailed(ctx, item, parentPackageStubs, suggestionCount);
+                }
+            }
+
+            if (singlePackageRbiGeneration) {
+                for (auto &job : todoClassAliases) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    for (auto &item : job.items) {
+                        resolveClassAliasJob(ctx, item);
+                    }
                 }
             }
 
@@ -2892,7 +3089,14 @@ private:
             method.data(ctx)->flags.isFinal = true;
         }
         if (sig.seen.bind) {
-            method.data(ctx)->rebind = sig.bind;
+            if (sig.bind == core::Symbols::BindToAttachedClass()) {
+                if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::BindNonBlockParameter)) {
+                    e.setHeader("Using `{}` is not permitted here", "bind");
+                    e.addErrorNote("Only block arguments can use `{}`", "bind");
+                }
+            } else {
+                method.data(ctx)->rebind = sig.bind;
+            }
         }
 
         auto methodInfo = method.data(ctx);
@@ -2947,9 +3151,21 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
+            bool isBlkArg = arg.name == core::Names::blkArg();
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
+
+                // It would be nice to remove the restriction on more than these two specific binds, but that would
+                // raise a lot more errors
+                if (!isBlkArg && (spec->rebind == core::Symbols::BindToAttachedClass() ||
+                                  spec->rebind == core::Symbols::BindToSelfType())) {
+                    if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
+                        e.setHeader("Using `{}` is not permitted here", "bind");
+                        e.addErrorNote("Only block arguments can use `{}`", "bind");
+                    }
+                }
+
                 arg.type = std::move(spec->type);
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
@@ -2960,7 +3176,6 @@ private:
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                bool isBlkArg = arg.name == core::Names::blkArg();
                 if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {

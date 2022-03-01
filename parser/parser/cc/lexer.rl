@@ -183,32 +183,33 @@ int lexer::compare_indent_level(token_t left, token_t right) {
         return 0;
     }
 
-    // attempt to defeat pathological cases (extremely long lines)
-    if ((leftStart - leftLineStart > 100) || (rightStart - rightLineStart > 100)) {
-        // In this case, lie say that the indentation level is the same.
-        // This will basically mean falling back to the indendation-agnostic behavior.
-        // We could alternatively attempt to return some sort of error state here.
-        return 0;
-    }
-
     auto *data = this->source_buffer.data();
     auto *leftPtr = data + leftLineStart;
     const auto * const leftStartPtr = data + leftStart;
     auto *rightPtr = data + rightLineStart;
     const auto * const rightStartPtr = data + rightStart;
 
+    int i = -1;
     while (leftPtr <= leftStartPtr && rightPtr <= rightStartPtr) {
+        i++;
+        if (i > 100) {
+            // Attempt to defeat pathologically long whitespace prefixes.
+            // This will basically mean falling back to the indendation-agnostic behavior.
+            // We could alternatively attempt to return some sort of error state here.
+            return 0;
+        }
+
         auto leftChar = *leftPtr;
         auto rightChar = *rightPtr;
         auto leftIsSpace = leftChar == ' ' || leftChar == '\t';
         auto rightIsSpace = rightChar == ' ' || rightChar == '\t';
 
         if (leftIsSpace && !rightIsSpace) {
-            return -1; // left < right
+            return 1; // left > right
         } else if (!leftIsSpace && !rightIsSpace) {
             return 0; // left == right
         } else if (!leftIsSpace && rightIsSpace) {
-            return 1;  // left > right
+            return -1;  // left < right
         }
 
         if (leftChar != rightChar) {
@@ -2272,7 +2273,7 @@ void lexer::set_state_expr_value() {
           | '@@' %{ tm = p - 2; }
           ) [0-9]*
       => {
-        if (version == ruby_version::RUBY_27) {
+        if (version >= ruby_version::RUBY_27) {
           if (ts[0] == ':' && ts[1] == '@' && ts[2] == '@') {
             diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts + 1, te));
           } else {

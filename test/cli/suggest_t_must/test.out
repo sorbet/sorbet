@@ -12,7 +12,7 @@ suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.ni
 
 suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
-        ^^^^^^^^^^
+               ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
     68 |        arg0: String,
@@ -38,6 +38,18 @@ suggest_t_must.rb:8: Method `even?` does not exist on `NilClass` component of `T
      8 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                             ^^^^^^^^^
 
+suggest_t_must.rb:25: Method `split` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    25 |y.split
+          ^^^^^
+  Got `T.nilable(String)` originating from:
+    suggest_t_must.rb:24:
+    24 |x, y = [1, T.let('', T.nilable(String))]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_must.rb:25: Replaced with `T.must(y)`
+    25 |y.split
+        ^
+
 suggest_t_must.rb:20: Expected `Integer` but found `T.nilable(Integer)` for field https://srb.help/7013
     20 |    @result = xs[i]
                       ^^^^^
@@ -53,7 +65,7 @@ suggest_t_must.rb:20: Expected `Integer` but found `T.nilable(Integer)` for fiel
     suggest_t_must.rb:20: Replaced with `T.must(xs[i])`
     20 |    @result = xs[i]
                       ^^^^^
-Errors: 4
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -79,3 +91,6 @@ class A
     @result = T.must(xs[i])
   end
 end
+
+x, y = [1, T.let('', T.nilable(String))]
+T.must(y).split

@@ -1176,7 +1176,7 @@ module Kernel
     )
     .returns(T.noreturn)
   end
-  def exit!(status); end
+  def exit!(status=T.unsafe(nil)); end
 
   # With no arguments, raises the exception in `$!` or raises a
   # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if

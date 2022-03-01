@@ -54,29 +54,29 @@ void base_driver::rewind_and_reset(size_t newPos) {
 }
 
 void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
-    if ((force || this->indentationAware) && this->lex.compare_indent_level(token, kEND) < 0) {
+    if ((force || this->indentationAware) && this->lex.compare_indent_level(token, kEND) > 0) {
         this->rewind_and_reset(kEND->start());
         const char *token_str_name = this->token_name(token->type());
         this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, token, token_str_name, kEND);
     }
 }
 
-typedruby_release27::typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch,
-                                         const struct builder &builder, bool traceLexer, bool indentationAware)
+typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
+                                     const struct builder &builder, bool traceLexer, bool indentationAware)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
 
-ForeignPtr typedruby_release27::parse(SelfPtr self, bool) {
-    bison::typedruby_release27::parser p(*this, self);
+ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
+    bison::typedruby_release::parser p(*this, self);
     p.parse();
     return ast;
 }
 
-typedruby_debug27::typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch,
-                                     const struct builder &builder, bool traceLexer, bool indentationAware)
+typedruby_debug::typedruby_debug(std::string_view source, sorbet::StableStringStorage<> &scratch,
+                                 const struct builder &builder, bool traceLexer, bool indentationAware)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}
 
-ForeignPtr typedruby_debug27::parse(SelfPtr self, bool traceParser) {
-    bison::typedruby_debug27::parser p(*this, self);
+ForeignPtr typedruby_debug::parse(SelfPtr self, bool traceParser) {
+    bison::typedruby_debug::parser p(*this, self);
     p.set_debug_level(traceParser ? 1 : 0);
     p.parse();
     return ast;

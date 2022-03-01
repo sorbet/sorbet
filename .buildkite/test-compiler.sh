@@ -35,57 +35,43 @@ mkdir -p _out_
 # `-c opt` is required, otherwise the tests are too slow
 # forcedebug is really the ~only thing in `--config=dbg` we care about.
 # must come after `-c opt` because `-c opt` will define NDEBUG on its own
-./bazel test //test:compiler //test/cli/compiler \
-  --experimental_generate_json_trace_profile --profile=_out_/profile.json \
-  -c opt \
-  --config=forcedebug \
+test_args=(
+  "//test:compiler"
+  "//test/cli/compiler"
+  "-c"
+  "opt"
+  "--config=forcedebug"
+  "--spawn_strategy=local"
+)
+
+./bazel test \
+  --experimental_generate_json_trace_profile \
+  --profile=_out_/profile.json \
   --test_summary=terse \
-  --spawn_strategy=local \
-  --test_output=errors || err=$?
-
-echo "--- uploading test results"
-
-rm -rf _tmp_
-mkdir -p _tmp_/log/junit/
-
-./bazel query '(tests(//test:compiler) + tests(//test/cli/compiler)) except attr("tags", "manual", //...)' | \
-  while read -r line; do
-    path="${line/://}"
-    path="${path#//}"
-    cp "bazel-testlogs/$path/test.xml" _tmp_/log/junit/"${path//\//_}-${BUILDKITE_JOB_ID}.xml"
-done
-
-annotation_dir="$(mktemp -d "junit-annotate-plugin-annotation-tmp.XXXXXXXXXX")"
-annotation_path="${annotation_dir}/annotation.md"
-
-function cleanup {
-  rm -rf "${annotation_dir}"
-}
-
-trap cleanup EXIT
-
-rbenv install --skip-existing
-.buildkite/tools/annotate.rb _tmp_/log/junit > "$annotation_path"
-cat "$annotation_path"
-
-if grep -q "<details>" "$annotation_path"; then
-  echo "--- :buildkite: Creating annotation"
-
-  if [[ "linux" == "$platform" ]]; then
-      wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-linux-amd64.gz | gunzip -c > ./terminal-to-html
-  elif [[ "mac" == "$platform" ]]; then
-      wget -O - https://github.com/buildkite/terminal-to-html/releases/download/v3.2.0/terminal-to-html-3.2.0-darwin-amd64.gz | gunzip -c > ./terminal-to-html
-  fi
-  chmod u+x ./terminal-to-html
-
-  # https://buildkite.com/docs/agent/v3/cli-annotate
-  annotation_path_wrapped="${annotation_dir}/annotation_wrapped.md"
-  (echo '<pre class="term"><code>'; ./terminal-to-html < "$annotation_path"; echo '</code></pre>') > "$annotation_path_wrapped"
-
-  # shellcheck disable=SC2002
-  cat "$annotation_path" | buildkite-agent annotate --context junit-${platform} --style error --append
-fi
+  --test_output=errors \
+  "${test_args[@]}" || err=$?
 
 if [ "$err" -ne 0 ]; then
-    exit "$err"
+  echo "--- annotating build result"
+  failing_tests="$(mktemp)"
+
+  echo 'Run this command to run failing tests locally:' >> "$failing_tests"
+  echo >> "$failing_tests"
+  echo '```bash' >> "$failing_tests"
+  echo "./bazel test \\" >> "$failing_tests"
+
+  # Take the lines that start with target labels.
+  # Lines look like "//foo  FAILED in 10s"
+  { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
+    grep '^//' | \
+    sed -e 's/ .*/ \\/' | \
+    sed -e 's/^/  /' >> "$failing_tests"
+
+  # Put this last as an easy way to not have a `\` on the last line.
+  echo '  -c opt --config=forcedebug' >> "$failing_tests"
+  echo '```' >> "$failing_tests"
+
+  buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+
+  exit "$err"
 fi

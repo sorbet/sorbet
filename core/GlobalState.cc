@@ -490,6 +490,13 @@ void GlobalState::initEmpty() {
     klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
 
+    // Magic classes for special proc bindings
+    klass = synthesizeClass(core::Names::Constants::BindToAttachedClass());
+    ENFORCE(klass == Symbols::BindToAttachedClass());
+
+    klass = synthesizeClass(core::Names::Constants::BindToSelfType());
+    ENFORCE(klass == Symbols::BindToSelfType());
+
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
     ENFORCE(typeArgument == Symbols::todoTypeArgument());

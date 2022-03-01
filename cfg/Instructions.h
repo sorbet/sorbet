@@ -98,7 +98,9 @@ INSN(SolveConstraint) : public Instruction {
 public:
     LocalRef send;
     std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : send(send), link(link){};
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : send(send), link(link) {
+        categoryCounterInc("cfg", "solveconstraint");
+    };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -252,7 +254,9 @@ public:
     VariableUseSite value;
     core::TypePtr type;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {
+        categoryCounterInc("cfg", "cast");
+    }
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;

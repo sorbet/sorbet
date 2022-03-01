@@ -140,7 +140,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
                 //      error.
                 cfg::InstructionPtr *unreachableInstruction = nullptr;
-                core::LocOffsets locForUnreachable;
+                core::Loc locForUnreachable;
                 bool dueToSafeNavigation = false;
 
                 if (absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
@@ -154,16 +154,25 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                         auto send = cfg::cast_instruction<cfg::Send>(expr.value);
                         if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
+                            ENFORCE(send->args.size() == 1, "Broken invariant from desugar");
                             unreachableInstruction = &expr.value;
-                            locForUnreachable = expr.loc;
+                            locForUnreachable = core::Loc(ctx.file, send->argLocs[0]);
+
+                            // The arg loc for the synthetic variable created for the purpose of this safe navigation
+                            // check is a bit of a hack. It's intentionally one character too short so that for
+                            // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
+                            auto maybeExpand = locForUnreachable.adjust(ctx, 0, 1);
+                            if (maybeExpand.source(ctx) == "&.") {
+                                locForUnreachable = maybeExpand;
+                            }
                             dueToSafeNavigation = true;
                             break;
                         } else if (unreachableInstruction == nullptr) {
                             unreachableInstruction = &expr.value;
-                            locForUnreachable = expr.loc;
+                            locForUnreachable = core::Loc(ctx.file, expr.loc);
                         } else {
                             // Expand the loc to cover the entire dead basic block
-                            locForUnreachable = locForUnreachable.join(expr.loc);
+                            locForUnreachable = locForUnreachable.join(core::Loc(ctx.file, expr.loc));
                         }
                     }
                 }
@@ -171,15 +180,18 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 if (unreachableInstruction != nullptr) {
                     auto *send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
                     if (dueToSafeNavigation && send != nullptr) {
-                        if (auto e =
-                                ctx.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
-                            ENFORCE(send->args.size() == 1, "Broken invariant from desugar");
+                        if (auto e = ctx.state.beginError(locForUnreachable,
+                                                          core::errors::Infer::UnnecessarySafeNavigation)) {
                             auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
 
                             e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
                             e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
+                            if (locForUnreachable.source(ctx) == "&.") {
+                                e.replaceWith("Replace with `.`", locForUnreachable, ".");
+                            }
                         }
-                    } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
+                    } else if (auto e =
+                                   ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
 
                         for (const auto &prevBasicBlock : bb->backEdges) {

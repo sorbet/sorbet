@@ -76,6 +76,9 @@ test:coverage --spawn_strategy=local
 build --define=versioned=false
 build:versioned --workspace_status_command=tools/buildstamp/get_workspace_status --stamp --define=versioned=true
 
+build:dbg-darwin --config=dbg --platforms=@//tools/config:darwin_x86_64
+build:dbg-linux --config=dbg --platforms=@//tools/config:linux_x86_64
+
 ##
 ## Configurations used for releases
 ##
@@ -93,7 +96,7 @@ build:release-debug-common --config=skipslowenforce
 
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
-build:release-linux --config=lto-linux --config=release-common
+build:release-linux --config=lto-linux --config=release-common --platforms=@//tools/config:linux_x86_64
 
 # This is to turn on vector instructions where available.
 # We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.
@@ -106,7 +109,7 @@ build:release-linux --config=lto-linux --config=release-common
 build:release-linux           --copt=-march=sandybridge
 build:release-sanitized-linux --copt=-march=sandybridge
 
-build:release-mac --config=release-common
+build:release-mac --config=release-common --platforms=@//tools/config:darwin_x86_64
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common

@@ -24,7 +24,7 @@ test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass
 
 test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(String, Integer)` for argument `x` https://srb.help/7002
     27 |  takes_integer(x)
-          ^^^^^^^^^^^^^^^^
+                        ^
   Expected `Integer` for argument `x` of method `Object#takes_integer`:
     test/cli/expected-got/expected-got.rb:15:
     15 |sig {params(x: Integer).void}
@@ -101,11 +101,15 @@ test/cli/expected-got/expected-got.rb:47: Revealed type: `Integer(42)` https://s
 
 test/cli/expected-got/expected-got.rb:57: Used `&.` operator on `Integer(1)`, which can never be nil https://srb.help/7034
     57 |1&.even?
-        ^
+         ^^
   Got `Integer(1)` originating from:
     test/cli/expected-got/expected-got.rb:57:
     57 |1&.even?
         ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/expected-got/expected-got.rb:57: Replace with `.`
+    57 |1&.even?
+         ^^
 
 test/cli/expected-got/expected-got.rb:59: Method `top_level_does_not_exist` does not exist on `T.class_of(<root>)` https://srb.help/7003
     59 |top_level_does_not_exist
@@ -133,7 +137,7 @@ test/cli/expected-got/expected-got.rb:68: Can not call method `foo` on void type
 
 test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found `[Integer(1), Integer(2), T.nilable(Integer)]` for argument `xs` https://srb.help/7002
     73 |takes_int_array(xs)
-        ^^^^^^^^^^^^^^^^^^^
+                        ^^
   Expected `T::Array[Integer]` for argument `xs` of method `Object#takes_int_array`:
     test/cli/expected-got/expected-got.rb:70:
     70 |sig {params(xs: T::Array[Integer]).void}

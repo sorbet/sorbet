@@ -701,7 +701,7 @@ class Array < Object
     params(
         arg0: Integer,
     )
-    .returns(Elem)
+    .returns(T.nilable(Elem))
   end
   def at(arg0); end
 

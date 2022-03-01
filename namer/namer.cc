@@ -784,7 +784,7 @@ class SymbolDefiner {
             auto renamedSymbol =
                 ctx.state.findRenamedSymbol(scope.asClassOrModuleRef().data(ctx)->owner.asClassOrModuleRef(), scope);
             if (renamedSymbol.exists()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
+                if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
                     auto constLitName = name.show(ctx);
                     auto scopeName = scope.show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
@@ -801,7 +801,7 @@ class SymbolDefiner {
             return klassSymbol;
         }
 
-        if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
+        if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
             auto constLitName = name.show(ctx);
             auto newOwnerName = scope.show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
@@ -1233,7 +1233,7 @@ class SymbolDefiner {
         if (fun == core::Names::declareInterface()) {
             symbolData->setClassOrModuleInterface();
             if (!symbolData->isClassOrModuleModule()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, mod.loc), core::errors::Namer::InterfaceClass)) {
+                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
                     e.replaceWith("Change `interface!` to `abstract!`", core::Loc(ctx.file, mod.loc), "abstract!");
                 }
@@ -1245,8 +1245,7 @@ class SymbolDefiner {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.asClassOrModuleRef().data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
-                                              core::errors::Namer::DynamicConstantAssignment)) {
+            if (auto e = ctx.beginError(staticField.asgnLoc, core::errors::Namer::DynamicConstantAssignment)) {
                 e.setHeader("Dynamic constant assignment");
             }
         }
@@ -1317,8 +1316,7 @@ class SymbolDefiner {
             // if we already have a type member but it was constructed in a different file from the one we're
             // looking at, then we need to raise an error
             if (existingTypeMember.data(ctx)->loc().file() != ctx.file) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.asgnLoc),
-                                                  core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.beginError(typeMember.asgnLoc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
@@ -1546,7 +1544,6 @@ class TreeSymbolizer {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
                 }
-                arg = ast::MK::EmptyTree();
             }
         }
     }
@@ -1645,8 +1642,7 @@ public:
                        // Ignore packages, which have 'behavior defined in multiple files'.
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry() &&
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageTests()) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.declLoc),
-                                                  core::errors::Namer::MultipleBehaviorDefs)) {
+                if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
@@ -1747,8 +1743,7 @@ public:
 
         if (send->hasPosArgs() || send->hasKwArgs()) {
             if (send->numPosArgs() > 1) {
-                if (auto e = ctx.state.beginError(core::Loc(ctx.file, send->loc),
-                                                  core::errors::Namer::InvalidTypeDefinition)) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
                 }
                 auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),

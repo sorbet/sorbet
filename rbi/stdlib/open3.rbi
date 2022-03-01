@@ -156,7 +156,7 @@ module Open3
   # ```
   sig do
     params(
-      cmd: T.any(String, T::Array[String]),
+      cmd: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped],
       block: T.nilable(T.proc.params(stdin: IO, stdout: IO, wait_thr: Process::Waiter).void)
     ).returns([IO, IO, Process::Waiter])
@@ -207,7 +207,7 @@ module Open3
   # ```
   sig do
     params(
-      cmd: T.any(String, T::Array[String]),
+      cmd: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped],
       block: T.nilable(T.proc.params(stdin: IO, stdout_and_stderr: IO, wait_thr: Process::Waiter).void)
     ).returns([IO, IO, Process::Waiter])
@@ -262,7 +262,7 @@ module Open3
   # ```
   sig do
     params(
-      cmd: T.any(String, T::Array[String]),
+      cmd: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       stdin_data: T.nilable(String),
       binmode: T.any(FalseClass, TrueClass),
       opts: T::Hash[Symbol, T.untyped]
@@ -308,7 +308,7 @@ module Open3
   # ```
   sig do
     params(
-      cmd: T.any(String, T::Array[String]),
+      cmd: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       stdin_data: T.nilable(String),
       binmode: T.any(FalseClass, TrueClass),
       opts: T::Hash[Symbol, T.untyped]
@@ -341,7 +341,7 @@ module Open3
   # ```
   sig do
     params(
-      cmd: T.any(String, T::Array[String]),
+      cmd: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       stdin_data: T.nilable(String),
       binmode: T.any(FalseClass, TrueClass),
       opts: T::Hash[Symbol, T.untyped]
@@ -402,7 +402,7 @@ module Open3
   # ```
   sig do
     params(
-      cmds: T.any(String, T::Array[String]),
+      cmds: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped],
       block: T.nilable(T.proc.params(first_stdin: IO, last_stdout: IO, wait_threads: T::Array[Process::Waiter]).void)
     ).returns([IO, IO, T::Array[Process::Waiter]])
@@ -456,7 +456,7 @@ module Open3
   # ```
   sig do
     params(
-      cmds: T.any(String, T::Array[String]),
+      cmds: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped],
       block: T.nilable(T.proc.params(last_stdout: IO, wait_threads: T::Array[Process::Waiter]).void)
     ).returns([IO, T::Array[Process::Waiter]])
@@ -500,7 +500,7 @@ module Open3
   # ```
   sig do
     params(
-      cmds: T.any(String, T::Array[String]),
+      cmds: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped],
       block: T.nilable(T.proc.params(first_stdin: IO, wait_threads: T::Array[Process::Waiter]).void)
     ).returns([IO, T::Array[Process::Waiter]])
@@ -559,7 +559,7 @@ module Open3
   # ```
   sig do
     params(
-      cmds: T.any(String, T::Array[String]),
+      cmds: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped],
       block: T.nilable(T.proc.params(wait_threads: T::Array[Process::Waiter]).void)
     ).returns(T::Array[Process::Waiter])
@@ -626,7 +626,7 @@ module Open3
   # ```
   sig do
     params(
-      cmds: T.any(String, T::Array[String]),
+      cmds: T.any(T::Hash[String, T.nilable(String)], String, T::Array[String]),
       opts: T::Hash[Symbol, T.untyped]
     ).returns(T::Array[Process::Status])
   end

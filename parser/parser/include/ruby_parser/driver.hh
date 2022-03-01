@@ -363,20 +363,20 @@ public:
     void rewind_if_dedented(token_t token, token_t kEND, bool force = false);
 };
 
-class typedruby_release27 : public base_driver {
+class typedruby_release : public base_driver {
 public:
-    typedruby_release27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
-                        bool traceLexer, bool indentationAware);
-    virtual ForeignPtr parse(SelfPtr self, bool traceParser);
-    ~typedruby_release27() {}
-};
-
-class typedruby_debug27 : public base_driver {
-public:
-    typedruby_debug27(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+    typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
                       bool traceLexer, bool indentationAware);
     virtual ForeignPtr parse(SelfPtr self, bool traceParser);
-    ~typedruby_debug27() {}
+    ~typedruby_release() {}
+};
+
+class typedruby_debug : public base_driver {
+public:
+    typedruby_debug(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+                    bool traceLexer, bool indentationAware);
+    virtual ForeignPtr parse(SelfPtr self, bool traceParser);
+    ~typedruby_debug() {}
 };
 
 } // namespace ruby_parser

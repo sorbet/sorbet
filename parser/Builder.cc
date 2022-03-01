@@ -605,7 +605,7 @@ public:
             loc = loc.join(tokLoc(dot));
         }
 
-        auto methodLoc = locOffset(loc.endPos(), loc.endPos());
+        auto methodLoc = loc.copyEndWithZeroLength();
 
         auto method = core::Names::methodNameMissing();
         if ((dot != nullptr) && dot->view() == "&.") {
@@ -1279,7 +1279,7 @@ public:
         if (op->view() == "||") {
             return make_unique<OrAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
         }
-        return make_unique<OpAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), gs_.enterNameUTF8(op->view()),
+        return make_unique<OpAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), gs_.enterNameUTF8(op->view()), tokLoc(op),
                                    std::move(rhs));
     }
 

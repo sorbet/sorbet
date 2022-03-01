@@ -1292,7 +1292,7 @@ module Process
     params(
       args: T.any(
         String,
-        T::Hash[T.any(Symbol, String), T.untyped]
+        T::Hash[String, T.untyped]
       )
     ).returns(Integer)
   end

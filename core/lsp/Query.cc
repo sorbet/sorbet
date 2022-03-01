@@ -40,7 +40,7 @@ bool Query::matchesLoc(const core::Loc &loc) const {
     // N.B.: Sorbet inserts zero-length Locs for items that are implicitly inserted during parsing.
     // Example: `foo` may be translated into `self.foo`, where `self.` has a 0-length loc.
     // We disregard these in LSP matches, as they don't correspond to source text that the user is pointing at.
-    return kind == Query::Kind::LOC && (loc.endPos() - loc.beginPos()) > 0 && loc.contains(this->loc);
+    return this->kind == Query::Kind::LOC && loc.exists() && !loc.empty() && loc.contains(this->loc);
 }
 
 bool Query::matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const {

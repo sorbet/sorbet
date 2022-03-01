@@ -452,6 +452,11 @@ class LocalNameInserter {
 
 public:
     ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        for (auto &ancestor : klass.ancestors) {
+            ancestor = ast::TreeMap::apply(ctx, *this, std::move(ancestor));
+        }
+
         enterClass();
         return tree;
     }

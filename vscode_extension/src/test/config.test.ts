@@ -5,7 +5,8 @@ import {
   EventEmitter,
   ConfigurationTarget,
   ConfigurationChangeEvent,
-  Uri
+  Uri,
+  WorkspaceFolder
 } from "vscode";
 
 import {
@@ -13,6 +14,7 @@ import {
   SorbetLspConfig,
   ISorbetWorkspaceContext
 } from "../config";
+import * as fs from "fs";
 
 // Helpers
 
@@ -54,6 +56,10 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
 
   get onDidChangeConfiguration() {
     return this._emitter.event;
+  }
+
+  workspaceFolders() {
+    return [{ uri: { fsPath: "/fake/path/to/project" } }] as WorkspaceFolder[];
   }
 }
 
@@ -224,6 +230,21 @@ suite("SorbetExtensionConfig", async () => {
       });
     });
 
+    suite("when a sorbet/config file exists", async () => {
+      test("sorbet is enabled", async () => {
+        sinon
+          .stub(fs, "existsSync")
+          .withArgs("/fake/path/to/project/sorbet/config")
+          .returns(true);
+
+        const workspaceConfig = new FakeWorkspaceConfiguration();
+        const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+
+        assert.equal(sorbetConfig.enabled, true, "should be enabled");
+        sinon.restore();
+      });
+    });
+
     suite("when workspace has fully-populated sorbet settings", async () => {
       test("populates SorbetExtensionConfig", async () => {
         const workspaceConfig = new FakeWorkspaceConfiguration([
@@ -254,6 +275,11 @@ suite("SorbetExtensionConfig", async () => {
 
     suite("when workspace has *some* sorbet settings", async () => {
       test("when `sorbet.enabled` is missing", async () => {
+        sinon
+          .stub(fs, "existsSync")
+          .withArgs("/fake/path/to/project/sorbet/config")
+          .returns(false);
+
         const workspaceConfig = new FakeWorkspaceConfiguration([
           ["lspConfigs", [fooLspConfig.toJSON(), barLspConfig.toJSON()]],
           ["selectedLspConfigId", barLspConfig.id]
@@ -271,6 +297,8 @@ suite("SorbetExtensionConfig", async () => {
           null,
           "but should not have an active LSP config"
         );
+
+        sinon.restore();
       });
 
       test("when `sorbet.selectedLspConfigId` is missing", async () => {

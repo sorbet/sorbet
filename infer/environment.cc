@@ -1140,7 +1140,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 const auto &main = i.link->result->main;
                 if (main.constr) {
                     if (!main.constr->solve(ctx)) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstraintUnsolved)) {
                             e.setHeader("Could not find valid instantiation of type parameters for `{}`",
                                         main.method.show(ctx));
                             e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here", main.method.show(ctx));
@@ -1188,8 +1188,34 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(insn.link);
                 ENFORCE(insn.link->result);
                 ENFORCE(insn.link->result->main.blockPreType);
+
                 auto &procType = insn.link->result->main.blockPreType;
                 auto params = procType.getCallArguments(ctx, core::Names::call());
+                auto it = insn.link->result->secondary.get();
+                while (it != nullptr) {
+                    auto &secondaryProcType = it->main.blockPreType;
+                    if (secondaryProcType != nullptr) {
+                        auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        switch (insn.link->result->secondaryKind) {
+                            case core::DispatchResult::Combinator::OR:
+                                params = core::Types::any(ctx, params, secondaryParams);
+                                break;
+                            case core::DispatchResult::Combinator::AND:
+                                params = core::Types::all(ctx, params, secondaryParams);
+                                break;
+                        }
+                    } else {
+                        // One of the components doesn't have a blockPreType. An error was already
+                        // reported by calls.cc (like "Method `.map` doesn't exist on `NilClass`")
+                        // Here, we just want to not crash.
+                        //
+                        // We could do something like set `params` to `T.untyped`, but it's probably
+                        // nicer to let it be whatever it would have been. This way they'll get
+                        // completion results as if the previous type error was fixed. So do nothing.
+                    }
+
+                    it = it->secondary.get();
+                }
 
                 // A multi-arg proc, if provided a single arg which is an array,
                 // will implicitly splat it out.
@@ -1364,13 +1390,25 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             },
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
-                if (l.link->result->main.blockSpec.rebind.exists()) {
-                    tp.type = l.link->result->main.blockSpec.rebind.data(ctx)->externalType();
-                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                auto tpo = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
+                auto it = l.link->result->secondary.get();
+                while (it != nullptr) {
+                    auto secondaryTpo = getTypeFromRebind(ctx, it->main, l.fallback);
+                    switch (l.link->result->secondaryKind) {
+                        case core::DispatchResult::Combinator::OR:
+                            tpo.type = core::Types::any(ctx, tpo.type, secondaryTpo.type);
+                            break;
+                        case core::DispatchResult::Combinator::AND:
+                            tpo.type = core::Types::all(ctx, tpo.type, secondaryTpo.type);
+                            break;
+                    }
+                    tpo.origins.insert(tpo.origins.begin(), make_move_iterator(secondaryTpo.origins.begin()),
+                                       make_move_iterator(secondaryTpo.origins.end()));
 
-                } else {
-                    tp = getTypeAndOrigin(ctx, l.fallback);
+                    it = it->secondary.get();
                 }
+
+                tp = tpo;
             },
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
@@ -1569,6 +1607,33 @@ void Environment::cloneFrom(const Environment &rhs) {
     this->bb = rhs.bb;
     this->pinnedTypes = rhs.pinnedTypes;
     this->typeTestsWithVar.cloneFrom(rhs.typeTestsWithVar);
+}
+
+core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
+                                                    cfg::LocalRef fallback) {
+    auto rebind = main.blockSpec.rebind;
+
+    if (rebind.exists()) {
+        core::TypeAndOrigins result;
+        if (rebind == core::Symbols::BindToSelfType()) {
+            result.type = main.receiver;
+        } else if (rebind == core::Symbols::BindToAttachedClass()) {
+            auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
+            auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+
+            auto lambdaParam =
+                core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
+
+            result.type = lambdaParam->upperBound;
+        } else {
+            result.type = rebind.data(ctx)->externalType();
+        }
+
+        result.origins.emplace_back(main.blockSpec.loc);
+        return result;
+    } else {
+        return getTypeAndOrigin(ctx, fallback);
+    }
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
