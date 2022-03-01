@@ -378,8 +378,8 @@ Another exception: for `package-tree` exp tests, the filename is always
 ### CLI tests
 
 Any folder `<name>` that is added to `test/cli/` becomes a test.
-This folder should have a file `<name>.sh` that is executable.
-When run, its output will be compared against `<name>.out` in that folder.
+This folder should have a file `test.sh` that is executable.
+When run, its output will be compared against `test.out` in that folder.
 
 Our bazel setup will produce two targets:
 
