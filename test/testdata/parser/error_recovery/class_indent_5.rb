@@ -5,4 +5,5 @@ class E
   end
 
   class Inner
-end
+# ^^^^^ error: Hint: this "class" token might not be properly closed
+end # error: unexpected token "end of file"

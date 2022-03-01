@@ -5,4 +5,5 @@ class E
   end
 
   def method2
-end
+# ^^^ error: Hint: this "def" token might not be properly closed
+end # error: unexpected token "end of file"

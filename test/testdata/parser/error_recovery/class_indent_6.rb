@@ -5,5 +5,6 @@ class F
   end
 
   class Inner
+# ^^^^^ error: Hint: this "class" token might not be properly closed
     puts 'hello'
-end
+end # error: unexpected token "end of file"

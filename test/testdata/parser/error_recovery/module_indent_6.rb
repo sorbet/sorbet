@@ -5,5 +5,6 @@ class F
   end
 
   module Inner
+# ^^^^^^ error: Hint: this "module" token might not be properly closed
     puts 'hello'
-end
+end # error: unexpected token "end of file"
