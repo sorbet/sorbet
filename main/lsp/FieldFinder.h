@@ -12,7 +12,7 @@ private:
     core::Loc queryLoc;
     ast::UnresolvedIdent::Kind queryKind;
 
-    bool insideSurroundingClass = false;
+    std::vector<core::ClassOrModuleRef> classStack;
 
     std::vector<core::NameRef> result_;
 

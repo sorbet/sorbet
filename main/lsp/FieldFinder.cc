@@ -13,7 +13,9 @@ FieldFinder::FieldFinder(core::ClassOrModuleRef target, core::Loc queryLoc, ast:
 }
 
 ast::ExpressionPtr FieldFinder::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
-    if (!this->insideSurroundingClass) {
+    ENFORCE(!this->classStack.empty());
+
+    if (this->classStack.back() != this->targetClass) {
         return tree;
     }
 
@@ -33,15 +35,13 @@ ast::ExpressionPtr FieldFinder::preTransformClassDef(core::Context ctx, ast::Exp
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
 
-    if (classDef.symbol == this->targetClass) {
-        this->insideSurroundingClass = true;
-    }
+    this->classStack.push_back(classDef.symbol);
 
     return tree;
 }
 
 ast::ExpressionPtr FieldFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
-    this->insideSurroundingClass = false;
+    this->classStack.pop_back();
     return tree;
 }
 

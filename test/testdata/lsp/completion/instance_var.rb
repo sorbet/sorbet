@@ -67,3 +67,24 @@ class OnlyClassVariables
     #   ^ completion: @@my
   end
 end
+
+class NestedClassInstanceVariables
+  def some_method
+    @nciv_ivar = 6
+  end
+
+  class Inside
+    def some_method
+      @ncivi_ivar = 7
+    end
+  end
+
+  def other_method
+    @nciv_ivar2 = 8
+  end
+
+  def more_method
+    @nciv
+    #    ^ completion: @nciv, @nciv_ivar, @nciv_ivar2
+  end
+end
