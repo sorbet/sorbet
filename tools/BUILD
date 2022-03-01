@@ -81,6 +81,7 @@ compilation_database(
         "//main/pipeline:pipeline-orig",
         "//main/pipeline/semantic_extension:interface",
         "//main/pipeline/semantic_extension:none",
+        "//main/sig_finder:sig_finder",
         "//namer:namer",
         "//namer:namer_test",
         "//packager:packager",
