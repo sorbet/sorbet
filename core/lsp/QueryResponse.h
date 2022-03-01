@@ -32,11 +32,11 @@ class IdentResponse final {
 public:
     IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType,
                   core::MethodRef enclosingMethod)
-        : termLoc(termLoc), variable(variable), retType(std::move(retType)), enclosingMethod(enclosingMethod){};
+        : termLoc(termLoc), variable(variable), enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::Loc termLoc;
     const core::LocalVariable variable;
-    const core::TypeAndOrigins retType;
     const core::MethodRef enclosingMethod;
+    const core::TypeAndOrigins retType;
 };
 
 class LiteralResponse final {
@@ -52,7 +52,7 @@ public:
     ConstantResponse(core::SymbolRef symbol, core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes,
                      core::NameRef name, core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
         : symbol(symbol), symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
-          retType(std::move(retType)), enclosingMethod(enclosingMethod){};
+          enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::SymbolRef symbol;
     // You probably don't want this. Almost all of Sorbet's type system operates on dealiased
     // symbols transparently (e.g., for a constant like `X = Integer`, Sorbet reports that `''` is
@@ -65,8 +65,8 @@ public:
     const core::Loc termLoc;
     const Scopes scopes;
     const core::NameRef name;
-    const core::TypeAndOrigins retType;
     const core::MethodRef enclosingMethod;
+    const core::TypeAndOrigins retType;
 };
 
 class FieldResponse final {
