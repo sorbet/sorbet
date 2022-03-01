@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "absl/algorithm/container.h"
 #include "common/Exception.h"
 #include "common/FileOps.h"
 #include "common/sort.h"
@@ -314,6 +315,22 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     v |= v >> 16;
     v++;
     return v;
+}
+
+vector<int> sorbet::findLineBreaks(string_view s) {
+    vector<int> res;
+    int i = -1;
+    res.emplace_back(-1);
+    for (auto c : s) {
+        i++;
+        if (c == '\n') {
+            res.emplace_back(i);
+        }
+    }
+    // We start at -1 so the last character of the file is actually i+1
+    res.emplace_back(i + 1);
+    ENFORCE(i + 1 == s.size());
+    return res;
 }
 
 class SetTerminateHandler {
