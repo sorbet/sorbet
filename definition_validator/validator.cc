@@ -9,6 +9,7 @@
 #include "absl/algorithm/container.h"
 
 #include "definition_validator/variance.h"
+#include "main/sig_finder/sig_finder.h"
 
 using namespace std;
 
@@ -408,97 +409,10 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
         if (auto e = gs.beginError(defLoc, core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
                         errMsgClass.show(gs), sym.name(gs).show(gs));
+            auto sigLoc = sorbet::sig_finder::findSignature(gs, sym);
 
-            // We don't have a direct link to the signature for the method, so we
-            // heuristically look for the matching signature.
-            auto source = defLoc.file().data(gs).source();
-            core::LocOffsets sigLocOffsets;
-
-            // We only care about everything prior to the definition.
-            auto line_end = defLoc.beginPos();
-            auto prev_line_end = source.rfind('\n', line_end);
-            bool startFromDefinition = true;
-            while (prev_line_end != source.npos) {
-                auto line_start = prev_line_end + 1;
-                auto line = source.substr(line_start, line_end - line_start);
-                line = absl::StripAsciiWhitespace(line);
-                // We do not skip empty lines, contra LSP's documentation finder.
-                // But as we are starting from just before the method definition,
-                // the beginning of that line could look like an empty line, and
-                // we want to move to the previous line in that case.
-                if (line.empty()) {
-                    if (!startFromDefinition) {
-                        break;
-                    }
-                    line_end = prev_line_end;
-                    prev_line_end = source.rfind('\n', line_end - 1);
-                    startFromDefinition = false;
-                    continue;
-                }
-
-                const auto singleLineSig = "sig"sv;
-                const uint32_t singleLineSigSize = singleLineSig.size();
-                const auto alreadyFinalSig = "sig(:final)"sv;
-                const auto multiLineSigEnd = "end"sv;
-                const auto multiLineSigStart = "sig do"sv;
-
-                // If something went wrong, we might find ourselves looking at an
-                // existing `sig(:final)`.  Bail instead of suggesting an autocorrect
-                // to an already final sig.
-                if (absl::StartsWith(line, alreadyFinalSig)) {
-                    break;
-                }
-
-                if (absl::StartsWith(line, singleLineSig)) {
-                    uint32_t offset = line.data() - source.data();
-                    sigLocOffsets = core::LocOffsets{offset, offset + singleLineSigSize};
-                    break;
-                }
-
-                if (absl::StartsWith(line, multiLineSigEnd)) {
-                    // Loop backwards searching for the matching `sig do`.  We're
-                    // going to:
-                    // - Find it;
-                    // - Hit an `end` or an already-final sig;
-                    // - Hit the start of the file.
-                    line_end = prev_line_end;
-                    prev_line_end = source.rfind('\n', line_end - 1);
-                    while (prev_line_end != source.npos) {
-                        auto line_start = prev_line_end + 1;
-                        line = source.substr(line_start, line_end - line_start);
-                        line = absl::StripAsciiWhitespace(line);
-
-                        // Found the start of the multi-line sig we were looking for.
-                        if (absl::StartsWith(line, multiLineSigStart)) {
-                            uint32_t offset = line.data() - source.data();
-                            sigLocOffsets = core::LocOffsets{offset, offset + singleLineSigSize};
-                            break;
-                        }
-
-                        if (absl::StartsWith(line, alreadyFinalSig)) {
-                            break;
-                        }
-
-                        // We hit an `end` in a place we didn't expect.  Bail.
-                        if (absl::StartsWith(line, multiLineSigEnd)) {
-                            break;
-                        }
-
-                        line_end = prev_line_end;
-                        prev_line_end = source.rfind('\n', line_end - 1);
-                    }
-
-                    // However we exited the above loop, we are done.
-                    break;
-                }
-
-                // If we find anything else, even a blank line, assume that the heuristic
-                // has failed.
-                break;
-            }
-
-            if (sigLocOffsets.exists()) {
-                e.replaceWith("Mark it as `sig(:final)`", core::Loc{defLoc.file(), sigLocOffsets}, "sig(:final)");
+            if (sigLoc.has_value()) {
+                e.replaceWith("Mark it as `sig(:final)`", core::Loc{defLoc.file(), sigLoc.value().sig}, "sig(:final)");
             }
         }
     }
