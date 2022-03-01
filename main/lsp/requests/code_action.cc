@@ -2,17 +2,13 @@
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
+#include "main/lsp/lsp.h"
 #include "sig_finder/sig_finder.h"
-#include <optional>
-#include <vector>
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
-    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCodeAction), params(move(params)) {}
 
-namespace {
 vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                               const vector<core::AutocorrectSuggestion::Edit> &edits) {
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
@@ -33,7 +29,7 @@ vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, co
     return documentEdits;
 }
 
-std::optional<const ast::MethodDef*> findMethodTree(const ast::ExpressionPtr &tree, const core::SymbolRef &method) {
+std::optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, const core::SymbolRef &method) {
     if (auto seq = ast::cast_tree<ast::InsSeq>(tree)) {
         for (auto &subtree : seq->stats) {
             auto maybeMethod = findMethodTree(subtree, method);
@@ -56,7 +52,37 @@ std::optional<const ast::MethodDef*> findMethodTree(const ast::ExpressionPtr &tr
     return std::nullopt;
 }
 
-std::optional<std::pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs, const ast::ExpressionPtr &rootTree, const core::SymbolRef &method, const core::FileRef &fref) {
+unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets &sigLoc,
+                                    const core::LocOffsets &methodLoc, const core::FileRef &fref) {
+    auto cutSource = [&](core::LocOffsets loc) {
+        return fref.data(gs).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos());
+    };
+
+    auto sigSource = cutSource(sigLoc);
+    auto methodSource = cutSource(methodLoc);
+    return make_unique<string>(absl::StrCat(sigSource, "\n  ", methodSource));
+}
+
+// Follow superClass links until we find the highest class that contains the given method. In other words we find the
+// "root" of the tree of classes that define a method.
+core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
+                                               core::NameRef methodName) {
+    auto root = klass;
+    while (true) {
+        auto tmp = root.data(gs)->superClass();
+        ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type
+        if (!tmp.exists() || !(tmp.data(gs)->findMember(gs, methodName).exists())) {
+            break;
+        }
+        root = tmp;
+    }
+    return root;
+}
+
+std::optional<std::pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
+                                                                        const ast::ExpressionPtr &rootTree,
+                                                                        const core::SymbolRef &method,
+                                                                        const core::FileRef &fref) {
     auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
     if (!maybeTree.has_value()) {
         return std::nullopt;
@@ -72,28 +98,196 @@ std::optional<std::pair<core::LocOffsets, core::LocOffsets>> methodLocs(const co
     return make_pair(sigLoc, methodLoc);
 }
 
-unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets &sigLoc, const core::LocOffsets &methodLoc, const core::FileRef &fref) {
+CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCodeAction), params(move(params)) {}
 
-    auto cutSource = [&](core::LocOffsets loc) { return fref.data(gs).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos()); };
+class UniqueSymbolQueue {
+public:
+    UniqueSymbolQueue() {}
 
+    bool tryEnqueue(core::SymbolRef s) {
+        auto insertResult = set.insert(s);
+        bool isNew = insertResult.second;
+        if (isNew) {
+            symbols.emplace_back(s);
+        }
+        return isNew;
+    }
 
-    auto sigSource = cutSource(sigLoc);
-    auto methodSource = cutSource(methodLoc);
-    return make_unique<string>(absl::StrCat(sigSource, "\n  ",  methodSource));
+    core::SymbolRef pop() {
+        if (!symbols.empty()) {
+            auto s = symbols.front();
+            symbols.pop_front();
+            return s;
+        }
+        return core::Symbols::noSymbol();
+    }
+
+private:
+    deque<core::SymbolRef> symbols;
+    UnorderedSet<core::SymbolRef> set;
+};
+
+void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol, UniqueSymbolQueue &methods) {
+    auto symbolData = symbol.data(gs);
+
+    // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
+    // then find the full tree; then look for methods with the same name as ours; then find all references to all
+    // those methods and rename them.
+    auto symbolClass = symbol.enclosingClass(gs);
+
+    // We have to be careful to follow superclass links only as long as we find a method that `symbol` overrides.
+    // Otherwise we will find unrelated methods and rename them even though they don't need to be (see the
+    // method_class_hierarchy test case for an example).
+    auto root = findRootClassWithMethod(gs, symbolClass, symbolData->name);
+
+    // Scans whole symbol table. This is slow, and we might need to make this faster eventually.
+    auto includeRoot = true;
+    auto subclasses = getSubclassesSlow(gs, root, includeRoot);
+
+    // find the target method definition in each subclass
+    for (auto c : subclasses) {
+        auto classSymbol = c.data(gs);
+        auto member = classSymbol->findMethod(gs, symbolData->name);
+        if (!member.exists()) {
+            continue;
+        }
+        methods.tryEnqueue(member);
+    }
 }
 
-vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                                                        const core::lsp::DefinitionResponse *definition, LSPTypecheckerDelegate &typechecker) {
+// Add methods that are related because of dispatching via secondary components in sends (union types).
+void addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
+                               UniqueSymbolQueue &methods) {
+    for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
+        auto method = dr->main.method;
+        ENFORCE(method.exists());
+        auto isNew = methods.tryEnqueue(method);
+        if (isNew) {
+            addSubclassRelatedMethods(gs, method, methods);
+        }
+    }
+}
+vector<unique_ptr<TextEdit>> CodeActionTask::updateCallSites(const core::GlobalState &gs, const core::SymbolRef symbol,
+                                                             string_view newModuleName,
+                                                             LSPTypecheckerDelegate &typechecker) {
+    const auto originalName = symbol.name(gs).show(gs);
+    UniqueSymbolQueue symbolQueue;
+    addSubclassRelatedMethods(gs, symbol.asMethodRef(), symbolQueue);
 
+    vector<unique_ptr<TextEdit>> res;
+    for (auto sym = symbolQueue.pop(); sym.exists(); sym = symbolQueue.pop()) {
+        auto queryResult = queryBySymbol(typechecker, sym);
+        if (queryResult.error) {
+            return {};
+        }
+
+        // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
+        // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
+        // expression.
+        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
+            const auto loc = response->getLoc();
+            if (loc.file().data(gs).isPayload()) {
+                // We don't support renaming things in payload files.
+                return {};
+            }
+
+            // We may process the same send multiple times in case of union types, but this is ok because the renamer
+            // de-duplicates edits at the same location
+            UnorderedMap<core::Loc, string> edits;
+
+            // If we're renaming the exact same place twice, silently ignore it. We reach this condition when we find
+            // the same method send through multiple definitions (e.g. in the case of union types)
+            auto it = edits.find(loc);
+            if (it != edits.end()) {
+                continue;
+            }
+
+            auto source = loc.source(gs);
+            if (!source.has_value()) {
+                continue;
+            }
+            // put method manipulatuibs here
+            // ref:
+            // main/lsp/requests/rename.cc:228
+            if (auto sendResp = response->isSend()) {
+                if (sendResp->dispatchResult->secondary) {
+                    addDispatchRelatedMethods(gs, sendResp->dispatchResult.get(), symbolQueue);
+                }
+                auto fref = sendResp->receiverLoc.file();
+                auto pos2Loc = [&](const auto &pos) {
+                    auto loc = core::Loc::offset2Pos(fref.data(gs), pos);
+                    return make_unique<Position>(loc.line - 1, loc.column - 1);
+                };
+                auto range2Loc = [&](const auto &pos) {
+                    return make_unique<Range>(pos2Loc(pos.beginPos()), pos2Loc(pos.endPos()));
+                };
+                res.emplace_back(make_unique<TextEdit>(range2Loc(sendResp->receiverLoc), newModuleName.data()));
+            }
+        }
+    }
+
+    return res;
+}
+
+// Turns ruby_function_name__ to RubyFunctionName,
+// so we can use it in a new module name
+string snakeToCamelCase(string_view name) {
+    string res;
+    const auto originalSize = name.size();
+    res.reserve(originalSize);
+    bool shouldCapitalize = true;
+    for (int i = 0; i < originalSize - 1; i++) {
+        if (name.at(i) == '_') {
+            shouldCapitalize = true;
+            continue;
+        }
+        res += shouldCapitalize ? toupper(name[i]) : name[i];
+        shouldCapitalize = false;
+    }
+    return res;
+}
+
+optional<string> getNewModuleName(const core::GlobalState &gs, const core::NameRef name) {
+    const auto moduleName = absl::StrCat(snakeToCamelCase(name.show(gs)), "Module");
+    const auto nameNotExists = [&](auto moduleName) {
+        return gs.lookupNameUTF8(moduleName) == core::NameRef::noName();
+    };
+
+    // if there are no names like that, return the new module name
+    if (nameNotExists(moduleName)) {
+        return moduleName;
+    }
+
+    // otherwise, try to augment it
+    for (int i = 1; i < 42; i++) {
+        const auto newName = absl::StrCat(moduleName, i);
+        if (nameNotExists(newName)) {
+            return newName;
+        }
+    }
+
+    // bail, if we haven't found untaken name in 42 tries
+    return nullopt;
+}
+
+vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LSPConfiguration &config,
+                                                                        const core::GlobalState &gs,
+                                                                        const core::lsp::DefinitionResponse *definition,
+                                                                        LSPTypecheckerDelegate &typechecker) {
     ENFORCE(definition->symbol.isMethod());
 
+    vector<unique_ptr<TextDocumentEdit>> res;
+    auto newModuleName = getNewModuleName(gs, definition->name);
+    if (!newModuleName.has_value()) {
+        return res;
+    }
 
-    auto moduleStart = "module NewModule\n  extend T::Sig\n  ";
+    auto moduleStart = fmt::format("module {}\n  extend T::Sig\n  ", newModuleName.value());
     auto moduleEnd = "\nend";
 
     auto fref = definition->termLoc.file();
     auto &file = fref.data(gs);
-
 
     auto trees = typechecker.getResolved({fref});
     auto &rootTree = trees[0].tree;
@@ -101,7 +295,7 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &
 
     auto pos2Loc = [&](const auto &pos) {
         auto loc = core::Loc::offset2Pos(fref.data(gs), pos);
-        return make_unique<Position>(loc.line-1, loc.column-1);
+        return make_unique<Position>(loc.line - 1, loc.column - 1);
     };
 
     auto range2Loc = [&](const auto &pos) {
@@ -116,26 +310,29 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &
     auto [sigLoc, methodLoc] = sigAndMethodLocs.value();
     auto methodSource = copyMethodSource(gs, sigLoc, methodLoc, fref);
 
-    auto range = make_unique<Range>(make_unique<Position>(beginLoc.line-1, 0), make_unique<Position>(beginLoc.line-1, topOfTheFile.length()));
+    auto range = make_unique<Range>(make_unique<Position>(beginLoc.line - 1, 0),
+                                    make_unique<Position>(beginLoc.line - 1, topOfTheFile.length()));
     auto replacement = fmt::format("{}{}{}\n\n{}", moduleStart, *methodSource, moduleEnd, topOfTheFile);
     auto moveNewMethod = make_unique<TextEdit>(std::move(range), replacement);
-    auto deleteOldSig = make_unique<TextEdit>( range2Loc(sigLoc), "");
-    auto deleteOldMethod = make_unique<TextEdit>( range2Loc(methodLoc), "");
+    auto deleteOldSig = make_unique<TextEdit>(range2Loc(sigLoc), "");
+    auto deleteOldMethod = make_unique<TextEdit>(range2Loc(methodLoc), "");
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(std::move(moveNewMethod));
     edits.emplace_back(std::move(deleteOldSig));
     edits.emplace_back(std::move(deleteOldMethod));
-    auto docEdit = make_unique<TextDocumentEdit>(make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, definition->termLoc.file()), JSONNullObject()), std::move(edits));
 
+    auto callSites = updateCallSites(gs, definition->symbol, newModuleName.value(), typechecker);
+    for (auto &edit : callSites) {
+        edits.emplace_back(std::move(edit));
+    }
+    auto docEdit =
+        make_unique<TextDocumentEdit>(make_unique<VersionedTextDocumentIdentifier>(
+                                          config.fileRef2Uri(gs, definition->termLoc.file()), JSONNullObject()),
+                                      std::move(edits));
 
-
-
-    vector<unique_ptr<TextDocumentEdit>> res;
     res.emplace_back(std::move(docEdit));
     return res;
 }
-} // namespace
-
 unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
