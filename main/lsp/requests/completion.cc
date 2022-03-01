@@ -8,6 +8,7 @@
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/FieldFinder.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
@@ -483,6 +484,38 @@ unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState
     return item;
 }
 
+vector<core::NameRef> fieldsForClass(LSPTypecheckerDelegate &typechecker, const core::ClassOrModuleRef klass,
+                                     const core::Loc queryLoc, ast::UnresolvedIdent::Kind kind) {
+    const auto &gs = typechecker.state();
+    auto files = vector<core::FileRef>{};
+    for (auto loc : klass.data(gs)->locs()) {
+        files.emplace_back(loc.file());
+    }
+    auto resolved = typechecker.getResolved(files);
+
+    // Instantiate fieldFinder outside loop so that result accumualates over every time we TreeMap::apply
+    FieldFinder fieldFinder(klass, queryLoc, kind);
+    for (auto &t : resolved) {
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
+        t.tree = ast::TreeMap::apply(ctx, fieldFinder, move(t.tree));
+    }
+
+    auto result = fieldFinder.result();
+    fast_sort(result, [&gs](const auto &left, const auto &right) {
+        // Sort by actual name, not by NameRef id
+        if (left != right) {
+            return left.shortName(gs) < right.shortName(gs);
+        } else {
+            return left.rawId() < right.rawId();
+        }
+    });
+
+    // Dedup
+    auto it = unique(result.begin(), result.end());
+    result.erase(it, result.end());
+    return result;
+}
+
 vector<core::NameRef> localNamesForMethod(LSPTypecheckerInterface &typechecker, const core::MethodRef method,
                                           const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
@@ -838,9 +871,29 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     // ----- locals -----
 
     vector<core::NameRef> similarLocals;
+    bool localsAreFields = false;
     if (params.enclosingMethod.exists()) {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_locals");
-        auto locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
+        vector<core::NameRef> locals;
+
+        // Slyly reuse `UnresolvedIdent::Kind` to both determine what kind of
+        // thing we're going to find and to determine the search space for
+        // `fieldsForClass`.
+        auto kind = ast::UnresolvedIdent::Kind::Local;
+        if (params.prefix.size() >= 2 && absl::StartsWith(params.prefix, "@@")) {
+            kind = ast::UnresolvedIdent::Kind::Class;
+        } else if (params.prefix.size() >= 1 && absl::StartsWith(params.prefix, "@")) {
+            kind = ast::UnresolvedIdent::Kind::Instance;
+        }
+
+        if (kind == ast::UnresolvedIdent::Kind::Local) {
+            locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
+            localsAreFields = false;
+        } else {
+            auto klass = params.enclosingMethod.data(gs)->owner;
+            locals = fieldsForClass(typechecker, klass, params.queryLoc, kind);
+            localsAreFields = true;
+        }
         similarLocals = allSimilarLocalNames(gs, locals, params.prefix);
     }
 

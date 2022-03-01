@@ -9,15 +9,15 @@ class InstanceVariable
   def other_method
     my = 5
     @my
-    #  ^ completion: @my_ivar
+    #  ^ completion: @my, @my_ivar
   end
 end
 
 class OtherInstanceVariable
   # Don't pick up completion results from `InstanceVariable`
   def some_method
-    @my
-    #  ^ completion: (nothing)
+    @m
+    # ^ completion: @m
   end
 end
 
@@ -28,15 +28,15 @@ class ClassVariable
 
   def other_method
     @@my
-    #   ^ completion: @my_cvar
+    #   ^ completion: @@my, @@my_cvar
   end
 end
 
 class OtherClassVariable
   # Don't pick up completion results from `ClassVariable`
   def some_method
-    @@my
-    #   ^ completion: (nothing)
+    @@m
+    #  ^ completion: @@m
   end
 end
 
@@ -45,12 +45,12 @@ class OnlyInstanceVariables
   def some_method
     @@my_cvar = 5
     @my
-    #  ^ completion: (nothing)
+    #  ^ completion: @my
   end
 
   def other_method
     @my
-    #  ^ completion: (nothing)
+    #  ^ completion: @my
   end
 end
 
@@ -59,11 +59,11 @@ class OnlyClassVariables
   def some_method
     @my_ivar = 6
     @@my
-    #   ^ completion: (nothing)
+    #   ^ completion: @@my
   end
 
   def other_method
     @@my
-    #   ^ completion: (nothing)
+    #   ^ completion: @@my
   end
 end
