@@ -46,8 +46,9 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
     if (isa_type<MetaType>(got) && !isa_type<MetaType>(expected)) {
         e.addErrorNote(
             "It looks like you're using Sorbet type syntax in a runtime value position. If you really mean to reflect "
-            "on runtime types as values, use `{}` to hide the type syntax from the type checker. Otherwise, you've "
-            "done something that the type system doesn't support.",
+            "on runtime types as values, use `{}` to hide the type syntax from the type checker.\n"
+            "If this doesn't sound like what you're trying to do, then you're likely using the type system in a way it "
+            "wasn't meant to be used.",
             "T::Utils.coerce");
         return;
     }
