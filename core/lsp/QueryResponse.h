@@ -27,6 +27,7 @@ public:
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
+CheckSize(SendResponse, 72, 8);
 
 class IdentResponse final {
 public:
@@ -38,6 +39,7 @@ public:
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
+CheckSize(IdentResponse, 64, 8);
 
 class LiteralResponse final {
 public:
@@ -45,6 +47,7 @@ public:
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
+CheckSize(LiteralResponse, 56, 8);
 
 class ConstantResponse final {
 public:
@@ -68,6 +71,7 @@ public:
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
+CheckSize(ConstantResponse, 96, 8);
 
 class FieldResponse final {
 public:
@@ -78,6 +82,7 @@ public:
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
+CheckSize(FieldResponse, 64, 8);
 
 class DefinitionResponse final {
 public:
@@ -88,6 +93,7 @@ public:
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
+CheckSize(DefinitionResponse, 64, 8);
 
 class EditResponse final {
 public:
@@ -95,6 +101,7 @@ public:
     const core::Loc loc;
     const std::string replacement;
 };
+CheckSize(EditResponse, 40, 8);
 
 using QueryResponseVariant = std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse,
                                           DefinitionResponse, EditResponse>;
