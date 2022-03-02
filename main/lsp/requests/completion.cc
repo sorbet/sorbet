@@ -467,11 +467,11 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
 
 unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState &gs, const LSPConfiguration &config,
                                                          const core::NameRef local, const core::Loc queryLoc,
-                                                         string_view prefix, size_t sortIdx) {
+                                                         string_view prefix, const bool localIsField, size_t sortIdx) {
     auto label = string(local.shortName(gs));
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);
-    item->kind = CompletionItemKind::Variable;
+    item->kind = localIsField ? CompletionItemKind::Field : CompletionItemKind::Variable;
 
     auto replacementText = label;
     if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
@@ -978,8 +978,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".local_items");
         for (auto &similarLocal : similarLocals) {
-            items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc,
-                                                          params.prefix, items.size()));
+            items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc, params.prefix,
+                                                          localsAreFields, items.size()));
         }
     }
     {
