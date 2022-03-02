@@ -292,7 +292,7 @@ package(default_visibility = ["//visibility:public"])
 
     native.new_local_repository(
         name = "system_ssl_darwin",
-        path = "/usr/local/opt/openssl",
+        path = "/usr/lib",
         build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
     )
 
