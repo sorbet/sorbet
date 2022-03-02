@@ -465,7 +465,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
 }
 
 unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                         const core::NameRef &local, const core::Loc queryLoc,
+                                                         const core::NameRef local, const core::Loc queryLoc,
                                                          string_view prefix, size_t sortIdx) {
     auto label = string(local.shortName(gs));
     auto item = make_unique<CompletionItem>(label);
