@@ -16,7 +16,17 @@ ast::ExpressionPtr FieldFinder::postTransformUnresolvedIdent(core::Context ctx, 
     ENFORCE(!this->classStack.empty());
 
     if (this->classStack.back() != this->targetClass) {
-        return tree;
+        if (this->queryKind != ast::UnresolvedIdent::Kind::Class) {
+            return tree;
+        }
+
+        auto attached = this->targetClass.data(ctx)->attachedClass(ctx);
+        if (!attached.exists()) {
+            return tree;
+        }
+        if (this->classStack.back() != attached) {
+            return tree;
+        }
     }
 
     auto &ident = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);

@@ -88,3 +88,9 @@ class NestedClassInstanceVariables
     #    ^ completion: @nciv, @nciv_ivar, @nciv_ivar2
   end
 end
+
+class ClassVariablesInStaticInit
+  @@static_init_cvar = 5
+  @@stat
+  #     ^ completion: @@stat, @@static_init_cvar
+end
