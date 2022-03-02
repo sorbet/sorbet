@@ -40,7 +40,6 @@ struct AutoloaderConfig {
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
     std::vector<std::string> stripPrefixes;
-    bool packagedAutoloader = false;
 
     AutoloaderConfig() = default;
     AutoloaderConfig(const AutoloaderConfig &) = delete;
