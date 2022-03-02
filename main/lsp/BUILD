@@ -4,6 +4,8 @@ cc_library(
         "*.cc",
         "requests/*.h",
         "requests/*.cc",
+        "call_sites/*.h",
+        "call_sites/*.cc",
         "notifications/*.h",
         "notifications/*.cc",
         "watchman/*.cc",

@@ -9,9 +9,6 @@ class RenameParams;
 class RenameTask final : public LSPRequestTask {
     std::unique_ptr<RenameParams> params;
 
-    void getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string newName,
-                        std::unique_ptr<ResponseMessage> &response);
-
 public:
     RenameTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<RenameParams> params);
 
