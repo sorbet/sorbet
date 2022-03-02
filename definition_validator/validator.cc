@@ -506,11 +506,26 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrM
 
 void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleFinal()) {
-        if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
-            e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.show(ctx),
-                        klass.show(ctx));
-            e.addErrorLine(superClass.data(ctx)->loc(), "`{}` defined here", superClass.show(ctx));
+    if (superClass.exists()) {
+        auto superClassData = superClass.data(ctx);
+        if (superClassData->isClassOrModuleFinal()) {
+            if (auto e =
+                    ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
+                e.setHeader("`{}` was declared as final and cannot be inherited by `{}`", superClass.show(ctx),
+                            klass.show(ctx));
+                e.addErrorLine(superClassData->loc(), "`{}` defined here", superClass.show(ctx));
+            }
+        } else if (superClass != core::Symbols::T_Enum() && superClassData->derivesFrom(ctx, core::Symbols::T_Enum()) &&
+                   !klass.data(ctx)->name.isTEnumName(ctx)) {
+            // We can't have the T::Enum rewriter pretend that the class with `enums do` is `final!` because it
+            // is actually subclassed (for the sake of making a subclass for each enum value). But the runtime
+            // will raise in this situation, so let's add a matching static error.
+            if (auto e =
+                    ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
+                e.setHeader("`{}` descends from `{}` and thus cannot be subclassed by `{}`", superClass.show(ctx),
+                            "T::Enum", klass.show(ctx));
+                e.addErrorLine(superClassData->loc(), "`{}` defined here", superClass.show(ctx));
+            }
         }
     }
     validateFinalAncestorHelper(ctx, klass, classDef, klass, "included");
