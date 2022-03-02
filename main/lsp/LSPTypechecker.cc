@@ -260,7 +260,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
+    gs->tracer().debug("[Chatter] runFastPath: starting typecheck");
+    gs->tracer().flush();
     pipeline::typecheck(gs, move(sorted), config->opts, workers, /*presorted*/ true);
+    gs->tracer().debug("[Chatter] runFastPath: finished typecheck");
+    gs->tracer().flush();
     gs->lspTypecheckCount++;
 
     return subset;
@@ -345,6 +349,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         Exception::raise("runSlowPath called with an update that lacks an updated global state.");
     }
     logger->debug("Taking slow path");
+    logger->debug("[Chatter] Taking slow path");
+    logger->flush();
 
     auto finalGS = move(updates.updatedGS.value());
     const uint32_t epoch = updates.epoch;
@@ -415,11 +421,22 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         timeit.clone("slow_path.blocking_time");
 
         // [Test only] Wait for a preemption if one is expected.
+        auto expec = updates.preemptionsExpected;
+        if (expec > 0) {
+            gs->tracer().debug("[Chatter] runSlowPath: draining {} preemptions with tryRunScheduledPreemptionTask loop",
+                               expec);
+            gs->tracer().flush();
+        }
         while (updates.preemptionsExpected > 0) {
             while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
                 Timer::timedSleep(1ms, *logger, "slow_path.expected_preemption.sleep");
             }
             updates.preemptionsExpected--;
+        }
+        if (expec > 0) {
+            gs->tracer().debug("[Chatter] runSlowPath: drained {} preemptions with tryRunScheduledPreemptionTask loop",
+                               expec);
+            gs->tracer().flush();
         }
 
         // [Test only] Wait for a cancellation if one is expected.
@@ -431,7 +448,11 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         }
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
+        gs->tracer().debug("[Chatter] runSlowPath: starting typecheck");
+        gs->tracer().flush();
         pipeline::typecheck(gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
+        gs->tracer().debug("[Chatter] runSlowPath: finished typecheck");
+        gs->tracer().flush();
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -542,7 +563,11 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
+    gs->tracer().debug("[Chatter] LSPTypechecker::query: starting typecheck");
+    gs->tracer().flush();
     pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
+    gs->tracer().debug("[Chatter] LSPTypechecker::query: finished typecheck");
+    gs->tracer().flush();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};

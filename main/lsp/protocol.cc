@@ -205,10 +205,19 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         NotifyNotificationOnDestruction notify(initializedNotification);
         // Ensure preprocessor, reader, and watchman threads get unstuck when thread exits.
         NotifyOnDestruction notifyIncoming(messageQueueMutex, messageQueue.terminate);
+
+        logger->debug("[Chatter] Entering the main loop for runLSP");
+        logger->flush();
         while (true) {
             unique_ptr<LSPTask> task;
             {
+                logger->debug("[Chatter] Waiting on task queue mutex");
+                logger->flush();
                 absl::MutexLock lck(taskQueueMutex.get());
+                logger->debug("[Chatter] Got task queue mutex");
+                logger->flush();
+                logger->debug("[Chatter] Awaiting task queue");
+                logger->flush();
                 Timer timeit(logger, "idle");
                 taskQueueMutex->Await(absl::Condition(
                     +[](TaskQueueState *taskQueue) -> bool {
@@ -217,12 +226,18 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     taskQueue.get()));
                 ENFORCE(!taskQueue->paused);
                 if (taskQueue->terminate) {
+                    logger->debug("[Chatter] Terminating");
+                    logger->flush();
                     if (taskQueue->errorCode != 0) {
                         // Abnormal termination. Exit immediately.
+                        logger->debug("[Chatter] Abnormal termination");
+                        logger->flush();
                         typecheckerCoord.shutdown();
                         throw EarlyReturnWithCode(taskQueue->errorCode);
                     } else if (taskQueue->pendingTasks.empty()) {
                         // Normal termination. Wait until all pending requests finish.
+                        logger->debug("[Chatter] Normal termination");
+                        logger->flush();
                         break;
                     }
                 }
@@ -232,15 +247,39 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 // Don't bother scheduling tasks to preempt that only need the indexer.
                 // N.B.: We check `canPreempt` last as it is mildly expensive for edits (it hashes the files)
                 auto &frontTask = taskQueue->pendingTasks.front();
-                if (frontTask->finalPhase() == LSPTask::Phase::RUN && epochManager->getStatus().slowPathRunning &&
-                    frontTask->canPreempt(indexer)) {
+                string methodStr = convertLSPMethodToString(frontTask->method);
+                logger->debug("[Chatter] Front task is {}", methodStr);
+                logger->flush();
+                bool finalIsRun = frontTask->finalPhase() == LSPTask::Phase::RUN;
+                logger->debug("[Chatter] Final phase is{} RUN", finalIsRun ? "" : " not");
+                bool slowPathRunning = epochManager->getStatus().slowPathRunning;
+                logger->flush();
+                logger->debug("[Chatter] Slow path is{} running", slowPathRunning ? "" : " not");
+                bool canPreempt = frontTask->canPreempt(indexer);
+                logger->flush();
+                logger->debug("[Chatter] Task can{} preempt", canPreempt ? "" : "not");
+
+                if (finalIsRun && slowPathRunning && canPreempt) {
+                    logger->debug("[Chatter] Going to try preempting for task {}", methodStr);
+                    logger->flush();
                     absl::Notification finished;
-                    string methodStr = convertLSPMethodToString(frontTask->method);
+
+                    logger->debug("[Chatter] Making the preemption task");
+                    logger->flush();
                     auto preemptTask =
                         make_unique<LSPQueuePreemptionTask>(*config, finished, *taskQueueMutex, *taskQueue, indexer);
+                    logger->debug("[Chatter] Made the preemption task");
+                    logger->flush();
+
+                    logger->debug("[Chatter] Calling trySchedulePreemption");
+                    logger->flush();
                     auto scheduleToken = typecheckerCoord.trySchedulePreemption(move(preemptTask));
+                    logger->debug("[Chatter] Done calling trySchedulePreemption");
+                    logger->flush();
 
                     if (scheduleToken != nullptr) {
+                        logger->debug("[Chatter] Preempting slow path for task {}", methodStr);
+                        logger->flush();
                         logger->debug("[Processing] Preempting slow path for task {}", methodStr);
                         // Preemption scheduling success!
                         // In this if statement **only**, `taskQueueMutex` protects all accesses to LSPIndexer. This is
@@ -254,7 +293,11 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         };
                         // Wait until the head of the queue turns into a non-preemptible task to resume processing the
                         // queue.
+                        logger->debug("[Chatter] Awaiting headOfQueueCanPreempt for task {}", methodStr);
+                        logger->flush();
                         taskQueueMutex->Await(absl::Condition(&headOfQueueCanPreempt));
+                        logger->debug("[Chatter] Done awaiting headOfQueueCanPreempt for task {}", methodStr);
+                        logger->flush();
 
                         // The queue is now empty or has a task that cannot preempt. There are two possibilities here:
                         // 1) The scheduled work is now irrelevant because the task that was scheduled is now gone
@@ -265,11 +308,21 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                             // Cancelation failed: 2) must be the case. Unlock the queue and wait until task finishes to
                             // avoid races.
                             taskQueueMutex->Unlock();
+                            logger->debug("[Chatter] Waiting for done notification for task {}", methodStr);
+                            logger->flush();
                             finished.WaitForNotification();
+                            logger->debug("[Chatter] Got done notification for task {}", methodStr);
+                            logger->flush();
                             taskQueueMutex->Lock();
+                            logger->debug("[Chatter] Preemption for task {} complete", methodStr);
+                            logger->flush();
                             logger->debug("[Processing] Preemption for task {} complete", methodStr);
+                            logger->flush();
                         } else {
+                            logger->debug("[Chatter] Preemption for task {} complete", methodStr);
+                            logger->flush();
                             logger->debug("[Processing] Canceled scheduled preemption for task {}", methodStr);
+                            logger->flush();
                         }
 
                         // At this point, we are guaranteed that the scheduled task has run or has been canceled.
@@ -277,6 +330,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     }
                     // If preemption scheduling failed, then the slow path probably finished just now. Continue as
                     // normal.
+                    logger->debug("[Chatter] Preemption scheduling failed for task {}", methodStr);
+                    logger->flush();
                 }
 
                 task = move(taskQueue->pendingTasks.front());
@@ -288,8 +343,12 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 }
             }
 
+            logger->debug("[Chatter] Running task {} normally", convertLSPMethodToString(task->method));
+            logger->flush();
             logger->trace("[Processing] Running task {} normally", convertLSPMethodToString(task->method));
             runTask(move(task));
+            logger->debug("[Chatter] Finished running task");
+            logger->flush();
 
             if (config->isInitialized() && !initializedNotification.HasBeenNotified()) {
                 initializedNotification.Notify();

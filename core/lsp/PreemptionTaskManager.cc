@@ -41,7 +41,11 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(core::GlobalState &gs)
     if (preemptTask != nullptr &&
         atomic_compare_exchange_strong(&this->preemptTask, &preemptTask, shared_ptr<Task>(nullptr))) {
         // Capture with write lock before running task. Ensures that all worker threads park before we proceed.
+        gs.tracer().debug("[Chatter] tryRunScheduledPreemptionTask waiting for typecheckMutex");
+        gs.tracer().flush();
         absl::MutexLock lock(&typecheckMutex);
+        gs.tracer().debug("[Chatter] tryRunScheduledPreemptionTask got typecheckMutex");
+        gs.tracer().flush();
         // Invariant: Typechecking _cannot_ be canceled before or during a preemption task.
         ENFORCE(!epochManager->wasTypecheckingCanceled());
         // The error queue is where typechecking puts all typechecking errors. For a given edit, Sorbet LSP runs
@@ -58,6 +62,7 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(core::GlobalState &gs)
         ENFORCE(!epochManager->wasTypecheckingCanceled());
         return true;
     }
+    gs.tracer().flush();
     return false;
 }
 

@@ -96,9 +96,13 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch
     }
 
     if (preemptionManager.has_value()) {
+        gs.tracer().debug("[Chatter] tryCommitEpoch: going to tryRunScheduledPreemptionTask");
+        gs.tracer().flush();
         // Now that we are no longer running a slow path, run a preemption task that might have snuck in while we were
         // finishing up. No others can be scheduled.
         (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
+        gs.tracer().debug("[Chatter] tryCommitEpoch: done with tryRunScheduledPreemptionTask");
+        gs.tracer().flush();
     }
     return committed;
 }

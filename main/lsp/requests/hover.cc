@@ -35,6 +35,7 @@ HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_p
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentHover), params(move(params)) {}
 
 unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+    config.logger->debug("[Chatter] begin HoverTask::runRequest");
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
 
     const core::GlobalState &gs = typechecker.state();
@@ -42,6 +43,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
+        config.logger->debug("[Chatter] end HoverTask::runRequest");
         return response;
     }
 
@@ -49,6 +51,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     if (queryResponses.empty()) {
         // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
         response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
+        config.logger->debug("[Chatter] end HoverTask::runRequest");
         return response;
     }
 
@@ -129,6 +132,12 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     }
 
     response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));
+    config.logger->debug("[Chatter] end HoverTask::runRequest");
     return response;
 }
+
+bool HoverTask::canUseStaleData() const {
+    return true;
+}
+
 } // namespace sorbet::realmain::lsp

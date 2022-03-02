@@ -32,6 +32,8 @@ vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, co
 } // namespace
 
 unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+    config.logger->debug("[Chatter] begin CodeActionTask::runRequest");
+    config.logger->flush();
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     vector<unique_ptr<CodeAction>> result;
@@ -43,6 +45,8 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
         // Don't send an error, as it's not the user's fault and isn't actionable. Instead, send an empty list of code
         // actions.
         response->result = move(result);
+        config.logger->debug("[Chatter] end CodeActionTask::runRequest");
+        config.logger->flush();
         return response;
     }
 
@@ -106,6 +110,12 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     }
 
     response->result = move(result);
+    config.logger->debug("[Chatter] end CodeActionTask::runRequest");
+    config.logger->flush();
     return response;
+}
+
+bool CodeActionTask::canUseStaleData() const {
+    return true;
 }
 } // namespace sorbet::realmain::lsp

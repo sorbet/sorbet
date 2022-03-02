@@ -12,6 +12,8 @@ public:
     CodeActionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CodeActionParams> params);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
+
+    bool canUseStaleData() const override;
 };
 
 } // namespace sorbet::realmain::lsp

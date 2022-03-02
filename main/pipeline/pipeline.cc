@@ -1010,8 +1010,12 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
     {
         Timer timeit(gs->tracer(), "typecheck");
         if (preemptionManager) {
+            gs->tracer().debug("[Chatter] pipeline::typecheck: going to tryRunScheduledPreemptionTask at beginning");
+            gs->tracer().flush();
             // Before kicking off typechecking, check if we need to preempt.
             (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
+            gs->tracer().debug("[Chatter] pipeline::typecheck: done with tryRunScheduledPreemptionTask at beginning");
+            gs->tracer().flush();
         }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
@@ -1085,6 +1089,10 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
 
             vector<core::FileRef> files;
             {
+                gs->tracer().debug(
+                    "[Chatter] pipeline::typecheck: entering file loop where we will tryRunScheduledPreemptionTask");
+                gs->tracer().flush();
+
                 for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
                      !result.done();
                      result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
@@ -1102,6 +1110,10 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
                     return;
                 }
+
+                gs->tracer().debug(
+                    "[Chatter] pipeline::typecheck: exiting file loop where we will tryRunScheduledPreemptionTask");
+                gs->tracer().flush();
             }
 
             if (workers.size() > 0) {

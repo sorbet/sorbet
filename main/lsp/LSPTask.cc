@@ -329,6 +329,10 @@ bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
     return !needsMultithreading(indexer);
 }
 
+bool LSPTask::canUseStaleData() const {
+    return false;
+}
+
 // Filter for untyped locations, and dedup responses that are at the same location
 vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::filterAndDedup(const core::GlobalState &gs,
@@ -610,29 +614,55 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
     for (;;) {
         unique_ptr<LSPTask> task;
         {
+            config.logger->debug("[Chatter] LSPQueuePreemptionTask waiting on task queue mutex");
+            config.logger->flush();
             absl::MutexLock lck(&taskQueueMutex);
+            config.logger->debug("[Chatter] LSPQueuePreemptionTask got task queue mutex");
+            config.logger->flush();
             if (taskQueue.pendingTasks.empty() || !taskQueue.pendingTasks.front()->canPreempt(indexer)) {
+                config.logger->debug(
+                    "[Chatter] LSPQueuePreemptionTask exiting because no preemption-capable task at head of queue");
+                config.logger->flush();
                 break;
             }
             task = move(taskQueue.pendingTasks.front());
             taskQueue.pendingTasks.pop_front();
+            config.logger->debug("[Chatter] LSPQueuePreemptionTask popped {}", convertLSPMethodToString(task->method));
+            config.logger->flush();
 
             {
+                config.logger->debug("[Chatter] LSPQueuePreemptionTask starting indexing for {}",
+                                     convertLSPMethodToString(task->method));
+                config.logger->flush();
                 Timer timeit(config.logger, "LSPTask::index");
                 timeit.setTag("method", task->methodString());
                 // Index while holding lock to prevent races with processing thread.
                 task->index(indexer);
+                config.logger->debug("[Chatter] LSPQueuePreemptionTask done indexing for {}",
+                                     convertLSPMethodToString(task->method));
+                config.logger->flush();
             }
         }
         prodCategoryCounterInc("lsp.messages.processed", task->methodString());
 
         if (task->finalPhase() == Phase::INDEX) {
+            config.logger->debug("[Chatter] LSPQueuePreemptionTask exiting after indexing for {}",
+                                 convertLSPMethodToString(task->method));
+            config.logger->flush();
             continue;
         }
+        config.logger->debug("[Chatter] LSPQueuePreemptionTask starting run for {}",
+                             convertLSPMethodToString(task->method));
+        config.logger->flush();
         Timer timeit(config.logger, "LSPTask::run");
         timeit.setTag("method", task->methodString());
         task->run(tc);
+        config.logger->debug("[Chatter] LSPQueuePreemptionTask done with run for {}",
+                             convertLSPMethodToString(task->method));
+        config.logger->flush();
     }
+    config.logger->debug("[Chatter] LSPQueuePreemptionTask finished");
+    config.logger->flush();
     finished.Notify();
 }
 
