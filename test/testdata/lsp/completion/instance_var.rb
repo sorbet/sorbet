@@ -94,3 +94,25 @@ class ClassVariablesInStaticInit
   @@stat
   #     ^ completion: @@stat, @@static_init_cvar
 end
+
+class Superclass
+  @@super_cvar = 5
+
+  def some_method
+    @super_ivar = 6
+  end
+end
+
+class Inheriting < Superclass
+  # Because our completion operates purely syntactically, it misses picking up
+  # class variables from `Superclass`.  If we make the completion algorithm more
+  # aware of the inheritance hierarchy, the tests in this class should start
+  # failing.
+  @@s
+  #  ^ completion: @@s
+
+  def other_method
+    @super
+    #     ^ completion: @super
+  end
+end
