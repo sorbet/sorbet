@@ -2087,10 +2087,10 @@ MethodRef GlobalState::staticInitForFile(Loc loc) {
     return sym;
 }
 
-MethodRef GlobalState::lookupStaticInitForFile(Loc loc) const {
-    auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
+MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
+    auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), file.id());
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
-    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", file.data(*this).path());
     return ref.asMethodRef();
 }
 
