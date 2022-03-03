@@ -3480,7 +3480,7 @@ public:
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         if (original.symbol == core::Symbols::root()) {
-            ENFORCE(ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, original.loc)).exists());
+            ENFORCE(ctx.state.lookupStaticInitForFile(ctx.file).exists());
         } else {
             ENFORCE(ctx.state.lookupStaticInitForClass(original.symbol).exists());
         }

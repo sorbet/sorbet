@@ -77,7 +77,6 @@ public:
         auto inits = extractClassInit(ctx, classDef);
 
         core::MethodRef sym;
-        auto loc = core::Loc(ctx.file, classDef->declLoc);
         ast::ExpressionPtr replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
@@ -85,7 +84,7 @@ public:
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.lookupStaticInitForFile(loc);
+            sym = ctx.state.lookupStaticInitForFile(ctx.file);
 
             // Skip emitting a place-holder for the root object.
             replacement = ast::MK::EmptyTree();
@@ -109,8 +108,9 @@ public:
         ast::MethodDef::ARGS_store args;
         args.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = ast::make_expression<ast::MethodDef>(loc.offsets(), loc.offsets(), sym, core::Names::staticInit(),
-                                                         std::move(args), std::move(inits), ast::MethodDef::Flags());
+        auto init =
+            ast::make_expression<ast::MethodDef>(classDef->declLoc, classDef->declLoc, sym, core::Names::staticInit(),
+                                                 std::move(args), std::move(inits), ast::MethodDef::Flags());
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 

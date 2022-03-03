@@ -1101,7 +1101,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::MethodRef &sym, stri
 
         builder.CreateCall(cs.getFunction("sorbet_globalConstructors"), {realpath});
 
-        core::MethodRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
+        core::MethodRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc().file());
 
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);
