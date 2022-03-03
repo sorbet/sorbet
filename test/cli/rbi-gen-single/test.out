@@ -4,16 +4,18 @@
 # typed: true
 
 class Family::Simpsons < Object
-  sig {returns(Bart::Character)}
+  sig {returns(Family::Bart::Character)}
   def bart; end
-  sig {returns(T.nilable(Bart::Character))}
+  sig {returns(T.nilable(Family::Bart::Character))}
   def no_bart; end
   extend T::Sig
 end
-Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Bart::Character)}
-Family::Simpsons::LocalBart = Bart::Character
+Family::Simpsons::RelativeBart = Family::Bart::Character
+Family::Simpsons::MaybeBartFull = T.type_alias {T.nilable(Family::Bart::Character)}
+Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Family::Bart::Character)}
+Family::Simpsons::FullyQualifiedBart = Family::Bart::Character
 -- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
-{"packageRefs":[], "rbiRefs":[]}
+{"packageRefs":["Family::Bart"], "rbiRefs":[]}
 -- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 -- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 # typed: true
@@ -41,13 +43,7 @@ class Util::GenericMessage < Object
 end
 class Util::Messages < Object
   extend T::Sig
-  sig do
-    type_parameters(:T)
-    .params(
-      msg: Util::GenericMessage[T.type_parameter(:T)]
-    )
-    .void
-  end
+  sig {type_parameters(:T).params(msg: GenericMessage[T.type_parameter(:T)]).void}
   def self.print_message(msg); end
   sig {params(msg: String).void}
   def self.say(msg); end
