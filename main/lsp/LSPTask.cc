@@ -5,7 +5,6 @@
 #include "core/NameHash.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPOutput.h"
-#include "main/lsp/call_sites/call_sites.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 

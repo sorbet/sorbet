@@ -4,8 +4,8 @@
 #include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/AbstractRenamer.h"
 #include "main/lsp/ShowOperation.h"
-#include "main/lsp/call_sites/call_sites.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 #include <stdio.h>
