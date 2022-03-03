@@ -393,8 +393,8 @@ bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-ca
     <cfgAlias>$18: T.class_of(T) = alias <C T>
     <cfgAlias>$20: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$22: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$16: <Type: T.nilable(Integer)> = <cfgAlias>$18: T.class_of(T).any(<cfgAlias>$20: T.class_of(Integer), <cfgAlias>$22: T.class_of(NilClass))
-    <statTemp>$13: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$15: Symbol(:a), <hashTemp>$16: <Type: T.nilable(Integer)>)
+    <hashTemp>$16: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$18: T.class_of(T).any(<cfgAlias>$20: T.class_of(Integer), <cfgAlias>$22: T.class_of(NilClass))
+    <statTemp>$13: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$15: Symbol(:a), <hashTemp>$16: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$24: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$12: T::Private::Methods::DeclBuilder = <statTemp>$13: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$24: T.class_of(Integer))
     <blockReturnTemp>$25: T.noreturn = blockreturn<sig> <blockReturnTemp>$12: T::Private::Methods::DeclBuilder
@@ -460,8 +460,8 @@ bb13[rubyRegionId=3, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$59: T.class_of(T) = alias <C T>
     <cfgAlias>$61: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$63: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$57: <Type: T.nilable(Integer)> = <cfgAlias>$59: T.class_of(T).any(<cfgAlias>$61: T.class_of(Integer), <cfgAlias>$63: T.class_of(NilClass))
-    <statTemp>$54: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$56: Symbol(:a), <hashTemp>$57: <Type: T.nilable(Integer)>)
+    <hashTemp>$57: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$59: T.class_of(T).any(<cfgAlias>$61: T.class_of(Integer), <cfgAlias>$63: T.class_of(NilClass))
+    <statTemp>$54: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$56: Symbol(:a), <hashTemp>$57: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$65: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$53: T::Private::Methods::DeclBuilder = <statTemp>$54: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$65: T.class_of(Integer))
     <blockReturnTemp>$66: T.noreturn = blockreturn<sig> <blockReturnTemp>$53: T::Private::Methods::DeclBuilder
@@ -495,8 +495,8 @@ bb17[rubyRegionId=4, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$82: T.class_of(T) = alias <C T>
     <cfgAlias>$84: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$86: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$80: <Type: T.nilable(Integer)> = <cfgAlias>$82: T.class_of(T).any(<cfgAlias>$84: T.class_of(Integer), <cfgAlias>$86: T.class_of(NilClass))
-    <statTemp>$77: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$79: Symbol(:a), <hashTemp>$80: <Type: T.nilable(Integer)>)
+    <hashTemp>$80: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$82: T.class_of(T).any(<cfgAlias>$84: T.class_of(Integer), <cfgAlias>$86: T.class_of(NilClass))
+    <statTemp>$77: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$79: Symbol(:a), <hashTemp>$80: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$88: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$76: T::Private::Methods::DeclBuilder = <statTemp>$77: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$88: T.class_of(Integer))
     <blockReturnTemp>$89: T.noreturn = blockreturn<sig> <blockReturnTemp>$76: T::Private::Methods::DeclBuilder
@@ -530,8 +530,8 @@ bb21[rubyRegionId=5, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$105: T.class_of(T) = alias <C T>
     <cfgAlias>$107: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$109: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$103: <Type: T.nilable(Integer)> = <cfgAlias>$105: T.class_of(T).any(<cfgAlias>$107: T.class_of(Integer), <cfgAlias>$109: T.class_of(NilClass))
-    <statTemp>$100: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$102: Symbol(:a), <hashTemp>$103: <Type: T.nilable(Integer)>)
+    <hashTemp>$103: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$105: T.class_of(T).any(<cfgAlias>$107: T.class_of(Integer), <cfgAlias>$109: T.class_of(NilClass))
+    <statTemp>$100: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$102: Symbol(:a), <hashTemp>$103: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$111: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$99: T::Private::Methods::DeclBuilder = <statTemp>$100: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$111: T.class_of(Integer))
     <blockReturnTemp>$112: T.noreturn = blockreturn<sig> <blockReturnTemp>$99: T::Private::Methods::DeclBuilder
@@ -565,8 +565,8 @@ bb25[rubyRegionId=6, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$128: T.class_of(T) = alias <C T>
     <cfgAlias>$130: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$132: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$126: <Type: T.nilable(Integer)> = <cfgAlias>$128: T.class_of(T).any(<cfgAlias>$130: T.class_of(Integer), <cfgAlias>$132: T.class_of(NilClass))
-    <statTemp>$123: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$125: Symbol(:a), <hashTemp>$126: <Type: T.nilable(Integer)>)
+    <hashTemp>$126: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$128: T.class_of(T).any(<cfgAlias>$130: T.class_of(Integer), <cfgAlias>$132: T.class_of(NilClass))
+    <statTemp>$123: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$125: Symbol(:a), <hashTemp>$126: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$134: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$122: T::Private::Methods::DeclBuilder = <statTemp>$123: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$134: T.class_of(Integer))
     <blockReturnTemp>$135: T.noreturn = blockreturn<sig> <blockReturnTemp>$122: T::Private::Methods::DeclBuilder
@@ -600,8 +600,8 @@ bb29[rubyRegionId=7, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$151: T.class_of(T) = alias <C T>
     <cfgAlias>$153: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$155: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$149: <Type: T.nilable(Integer)> = <cfgAlias>$151: T.class_of(T).any(<cfgAlias>$153: T.class_of(Integer), <cfgAlias>$155: T.class_of(NilClass))
-    <statTemp>$146: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$148: Symbol(:a), <hashTemp>$149: <Type: T.nilable(Integer)>)
+    <hashTemp>$149: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$151: T.class_of(T).any(<cfgAlias>$153: T.class_of(Integer), <cfgAlias>$155: T.class_of(NilClass))
+    <statTemp>$146: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$148: Symbol(:a), <hashTemp>$149: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$157: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$145: T::Private::Methods::DeclBuilder = <statTemp>$146: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$157: T.class_of(Integer))
     <blockReturnTemp>$158: T.noreturn = blockreturn<sig> <blockReturnTemp>$145: T::Private::Methods::DeclBuilder
@@ -635,8 +635,8 @@ bb33[rubyRegionId=8, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$174: T.class_of(T) = alias <C T>
     <cfgAlias>$176: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$178: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$172: <Type: T.nilable(Integer)> = <cfgAlias>$174: T.class_of(T).any(<cfgAlias>$176: T.class_of(Integer), <cfgAlias>$178: T.class_of(NilClass))
-    <statTemp>$169: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$171: Symbol(:a), <hashTemp>$172: <Type: T.nilable(Integer)>)
+    <hashTemp>$172: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$174: T.class_of(T).any(<cfgAlias>$176: T.class_of(Integer), <cfgAlias>$178: T.class_of(NilClass))
+    <statTemp>$169: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$171: Symbol(:a), <hashTemp>$172: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$180: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$168: T::Private::Methods::DeclBuilder = <statTemp>$169: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$180: T.class_of(Integer))
     <blockReturnTemp>$181: T.noreturn = blockreturn<sig> <blockReturnTemp>$168: T::Private::Methods::DeclBuilder
@@ -705,8 +705,8 @@ bb37[rubyRegionId=9, firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-c
     <cfgAlias>$197: T.class_of(T) = alias <C T>
     <cfgAlias>$199: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$201: T.class_of(NilClass) = alias <C NilClass>
-    <hashTemp>$195: <Type: T.nilable(Integer)> = <cfgAlias>$197: T.class_of(T).any(<cfgAlias>$199: T.class_of(Integer), <cfgAlias>$201: T.class_of(NilClass))
-    <statTemp>$192: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$194: Symbol(:a), <hashTemp>$195: <Type: T.nilable(Integer)>)
+    <hashTemp>$195: Runtime object representing type: T.nilable(Integer) = <cfgAlias>$197: T.class_of(T).any(<cfgAlias>$199: T.class_of(Integer), <cfgAlias>$201: T.class_of(NilClass))
+    <statTemp>$192: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$194: Symbol(:a), <hashTemp>$195: Runtime object representing type: T.nilable(Integer))
     <cfgAlias>$203: T.class_of(Integer) = alias <C Integer>
     <blockReturnTemp>$191: T::Private::Methods::DeclBuilder = <statTemp>$192: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$203: T.class_of(Integer))
     <blockReturnTemp>$204: T.noreturn = blockreturn<sig> <blockReturnTemp>$191: T::Private::Methods::DeclBuilder

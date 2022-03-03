@@ -159,8 +159,8 @@ bb5[rubyRegionId=1, firstDead=9](<self>: T.class_of(<root>), <block-pre-call-tem
     <cfgAlias>$18: T.class_of(T) = alias <C T>
     <cfgAlias>$20: T.class_of(Concrete) = alias <C Concrete>
     <cfgAlias>$22: T.class_of(Other) = alias <C Other>
-    <hashTemp>$16: <Type: T.any(Concrete, Other)> = <cfgAlias>$18: T.class_of(T).any(<cfgAlias>$20: T.class_of(Concrete), <cfgAlias>$22: T.class_of(Other))
-    <statTemp>$13: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$15: Symbol(:x), <hashTemp>$16: <Type: T.any(Concrete, Other)>)
+    <hashTemp>$16: Runtime object representing type: T.any(Concrete, Other) = <cfgAlias>$18: T.class_of(T).any(<cfgAlias>$20: T.class_of(Concrete), <cfgAlias>$22: T.class_of(Other))
+    <statTemp>$13: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$15: Symbol(:x), <hashTemp>$16: Runtime object representing type: T.any(Concrete, Other))
     <blockReturnTemp>$12: T::Private::Methods::DeclBuilder = <statTemp>$13: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$23: T.noreturn = blockreturn<sig> <blockReturnTemp>$12: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
@@ -221,8 +221,8 @@ bb9[rubyRegionId=2, firstDead=9](<self>: T.class_of(<root>), <block-pre-call-tem
     <cfgAlias>$39: T.class_of(T) = alias <C T>
     <cfgAlias>$41: T.class_of(Base)[T.untyped] = alias <C Base>
     <cfgAlias>$43: T.class_of(Other) = alias <C Other>
-    <hashTemp>$37: <Type: T.any(Base, Other)> = <cfgAlias>$39: T.class_of(T).any(<cfgAlias>$41: T.class_of(Base)[T.untyped], <cfgAlias>$43: T.class_of(Other))
-    <statTemp>$34: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$36: Symbol(:x), <hashTemp>$37: <Type: T.any(Base, Other)>)
+    <hashTemp>$37: Runtime object representing type: T.any(Base, Other) = <cfgAlias>$39: T.class_of(T).any(<cfgAlias>$41: T.class_of(Base)[T.untyped], <cfgAlias>$43: T.class_of(Other))
+    <statTemp>$34: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$36: Symbol(:x), <hashTemp>$37: Runtime object representing type: T.any(Base, Other))
     <blockReturnTemp>$33: T::Private::Methods::DeclBuilder = <statTemp>$34: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$44: T.noreturn = blockreturn<sig> <blockReturnTemp>$33: T::Private::Methods::DeclBuilder
     <unconditional> -> bb6
@@ -232,7 +232,7 @@ bb9[rubyRegionId=2, firstDead=9](<self>: T.class_of(<root>), <block-pre-call-tem
 method ::<Class:Base>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=7]():
-    <C Klass>$10: <Type: T.class_of(Base)::Klass> = alias <C Klass>
+    <C Klass>$10: Runtime object representing type: T.class_of(Base)::Klass = alias <C Klass>
     <self>: T.class_of(Base)[T.class_of(Base)::Klass] = cast(<self>: NilClass, T.class_of(Base)[T.class_of(Base)::Klass]);
     <cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
@@ -251,7 +251,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 method ::<Class:Concrete>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=9]():
-    <C Klass>$10: <Type: String> = alias <C Klass>
+    <C Klass>$10: Runtime object representing type: String = alias <C Klass>
     <self>: T.class_of(Concrete) = cast(<self>: NilClass, T.class_of(Concrete));
     <cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
