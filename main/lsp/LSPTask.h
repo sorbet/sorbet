@@ -1,8 +1,10 @@
 #ifndef RUBY_TYPER_LSPTASK_H
 #define RUBY_TYPER_LSPTASK_H
 
+#include "main/lsp/AbstractRenamer.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPTypechecker.h"
+#include "main/lsp/json_types.h"
 
 namespace absl {
 class Notification;
@@ -74,6 +76,9 @@ protected:
     getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
                                   core::SymbolRef fallback,
                                   std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+
+    void getRenameEdits(LSPTypecheckerDelegate &typechecker, std::shared_ptr<AbstractRenamer> renamer,
+                        core::SymbolRef symbol, std::string newName);
 
     LSPTask(const LSPConfiguration &config, LSPMethod method);
 
