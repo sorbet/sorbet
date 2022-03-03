@@ -1,13 +1,10 @@
 # typed: false
-
-class A
-  def test1
+class B
+  def method1(abc, xyz)
 # ^^^ error: Hint: this "def" token might not be properly closed
-    if x.f
-    end
+    puts 'hello'
+    puts 'hello'
 
-  def test2
-    if x.f
-    end
+  def method2
   end
 end # error: unexpected token "end of file"

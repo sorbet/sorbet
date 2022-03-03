@@ -1,13 +1,9 @@
 # typed: false
-
-class A
-  def test1
-# ^^^ error: Hint: this "def" token might not be properly closed
-    if x.f
-    end
-
-  def test2
-    if x.f
-    end
+class E
+  sig {void}
+  def method1
   end
+
+  def method2
+# ^^^ error: Hint: this "def" token might not be properly closed
 end # error: unexpected token "end of file"

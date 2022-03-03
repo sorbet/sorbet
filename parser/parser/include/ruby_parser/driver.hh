@@ -361,6 +361,18 @@ public:
     // you're implementing an "`error` rule in disguise" kind of rule (i.e., reducing tokens
     // manually for the purpose of emitting an error).
     void rewind_if_dedented(token_t token, token_t kEND, bool force = false);
+
+    // Like rewind_if_dedented above, but has special logic for detecting when the decrease in
+    // indentation happens midway through a list of statements. The properly indented statements are
+    // returned, and the lexer is reset to a point where the improperly indented statements will be
+    // re-lexed and re-parsed.
+    //
+    // Most params are self explanatory.
+    //
+    // `headerEndPos` should be the end of the line immediately before the start of the body. It's
+    // what we rewind to if even the first thing in the body is improperly indented.
+    ForeignPtr rewind_and_munge_body_if_dedented(SelfPtr self, token_t defToken, size_t headerEndPos, ForeignPtr body,
+                                                 token_t bodyStartToken, token_t lastTokBeforeDedent, token_t endToken);
 };
 
 class typedruby_release : public base_driver {
