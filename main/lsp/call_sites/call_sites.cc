@@ -4,7 +4,25 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-bool UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
+namespace {
+
+core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
+                                               core::NameRef methodName) {
+    auto root = klass;
+    while (true) {
+        auto tmp = root.data(gs)->superClass();
+        ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type
+        if (!tmp.exists() || !(tmp.data(gs)->findMember(gs, methodName).exists())) {
+            break;
+        }
+        root = tmp;
+    }
+    return root;
+}
+
+} // namespace
+
+bool Renamer::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
     auto insertResult = set.insert(s);
     bool isNew = insertResult.second;
     if (isNew) {
@@ -13,7 +31,7 @@ bool UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
     return isNew;
 }
 
-core::SymbolRef UniqueSymbolQueue::pop() {
+core::SymbolRef Renamer::UniqueSymbolQueue::pop() {
     if (!symbols.empty()) {
         auto s = symbols.front();
         symbols.pop_front();
@@ -58,41 +76,14 @@ std::string Renamer::getError() {
     return error;
 }
 
-std::shared_ptr<UniqueSymbolQueue> Renamer::getQueue() {
+std::shared_ptr<Renamer::UniqueSymbolQueue> Renamer::getQueue() {
     // return symbolQueue;
     return symbolQueue;
 }
 
-core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
-                                               core::NameRef methodName) {
-    auto root = klass;
-    while (true) {
-        auto tmp = root.data(gs)->superClass();
-        ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type
-        if (!tmp.exists() || !(tmp.data(gs)->findMember(gs, methodName).exists())) {
-            break;
-        }
-        root = tmp;
-    }
-    return root;
-}
-
-// Add methods that are related because of dispatching via secondary components in sends (union types).
-void addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
-                               shared_ptr<UniqueSymbolQueue> methods) {
-    for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
-        auto method = dr->main.method;
-        ENFORCE(method.exists());
-        auto isNew = methods->tryEnqueue(method);
-        if (isNew) {
-            addSubclassRelatedMethods(gs, method, methods);
-        }
-    }
-}
-
 // Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
-void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
-                               shared_ptr<UniqueSymbolQueue> methods) {
+void Renamer::addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
+                                        shared_ptr<UniqueSymbolQueue> methods) {
     auto symbolData = symbol.data(gs);
 
     // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
@@ -117,6 +108,19 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symb
             continue;
         }
         methods->tryEnqueue(member);
+    }
+}
+
+// Add methods that are related because of dispatching via secondary components in sends (union types).
+void Renamer::addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
+                                        shared_ptr<UniqueSymbolQueue> methods) {
+    for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
+        auto method = dr->main.method;
+        ENFORCE(method.exists());
+        auto isNew = methods->tryEnqueue(method);
+        if (isNew) {
+            addSubclassRelatedMethods(gs, method, methods);
+        }
     }
 }
 

@@ -6,18 +6,19 @@
 #include "main/lsp/json_types.h"
 
 namespace sorbet::realmain::lsp {
-class UniqueSymbolQueue {
-public:
-    bool tryEnqueue(core::SymbolRef s);
-    core::SymbolRef pop();
-
-private:
-    std::deque<core::SymbolRef> symbols;
-    UnorderedSet<core::SymbolRef> set;
-};
 
 class Renamer {
 public:
+    class UniqueSymbolQueue {
+    public:
+        bool tryEnqueue(core::SymbolRef s);
+        core::SymbolRef pop();
+
+    private:
+        std::deque<core::SymbolRef> symbols;
+        UnorderedSet<core::SymbolRef> set;
+    };
+
     Renamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config,
             const std::string oldName, const std::string newName)
         : gs(gs), config(config), oldName(oldName), newName(newName), invalid(false){};
@@ -40,16 +41,13 @@ protected:
     bool invalid;
     std::shared_ptr<UniqueSymbolQueue> symbolQueue = std::make_shared<UniqueSymbolQueue>();
     std::string error;
+
+    static void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
+                                          std::shared_ptr<UniqueSymbolQueue> methods);
+
+    static void addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
+                                          std::shared_ptr<UniqueSymbolQueue> methods);
 };
-
-core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
-                                               core::NameRef methodName);
-
-void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
-                               std::shared_ptr<UniqueSymbolQueue> methods);
-
-void addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
-                               std::shared_ptr<UniqueSymbolQueue> methods);
 
 } // namespace sorbet::realmain::lsp
 
