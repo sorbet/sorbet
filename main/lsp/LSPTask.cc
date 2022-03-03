@@ -313,8 +313,8 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
     return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
 }
 
-void LSPTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, shared_ptr<Renamer> renamer, core::SymbolRef symbol,
-                             string newName) {
+void LSPTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, shared_ptr<AbstractRenamer> renamer,
+                             core::SymbolRef symbol, string newName) {
     const core::GlobalState &gs = typechecker.state();
     auto originalName = symbol.name(gs).show(gs);
 

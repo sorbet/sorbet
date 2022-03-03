@@ -22,7 +22,7 @@ core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core
 
 } // namespace
 
-bool Renamer::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
+bool AbstractRenamer::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
     auto insertResult = set.insert(s);
     bool isNew = insertResult.second;
     if (isNew) {
@@ -31,7 +31,7 @@ bool Renamer::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
     return isNew;
 }
 
-core::SymbolRef Renamer::UniqueSymbolQueue::pop() {
+core::SymbolRef AbstractRenamer::UniqueSymbolQueue::pop() {
     if (!symbols.empty()) {
         auto s = symbols.front();
         symbols.pop_front();
@@ -40,7 +40,7 @@ core::SymbolRef Renamer::UniqueSymbolQueue::pop() {
     return core::Symbols::noSymbol();
 }
 
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRenamer::buildEdit() {
     if (invalid) {
         return JSONNullObject();
     }
@@ -68,22 +68,22 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
     return we;
 }
 
-bool Renamer::getInvalid() {
+bool AbstractRenamer::getInvalid() {
     return invalid;
 }
 
-std::string Renamer::getError() {
+std::string AbstractRenamer::getError() {
     return error;
 }
 
-std::shared_ptr<Renamer::UniqueSymbolQueue> Renamer::getQueue() {
+std::shared_ptr<AbstractRenamer::UniqueSymbolQueue> AbstractRenamer::getQueue() {
     // return symbolQueue;
     return symbolQueue;
 }
 
 // Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
-void Renamer::addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
-                                        shared_ptr<UniqueSymbolQueue> methods) {
+void AbstractRenamer::addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
+                                                shared_ptr<UniqueSymbolQueue> methods) {
     auto symbolData = symbol.data(gs);
 
     // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
@@ -112,8 +112,8 @@ void Renamer::addSubclassRelatedMethods(const core::GlobalState &gs, core::Metho
 }
 
 // Add methods that are related because of dispatching via secondary components in sends (union types).
-void Renamer::addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
-                                        shared_ptr<UniqueSymbolQueue> methods) {
+void AbstractRenamer::addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
+                                                shared_ptr<UniqueSymbolQueue> methods) {
     for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
         auto method = dr->main.method;
         ENFORCE(method.exists());

@@ -7,7 +7,7 @@
 
 namespace sorbet::realmain::lsp {
 
-class Renamer {
+class AbstractRenamer {
 public:
     class UniqueSymbolQueue {
     public:
@@ -19,11 +19,11 @@ public:
         UnorderedSet<core::SymbolRef> set;
     };
 
-    Renamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config,
-            const std::string oldName, const std::string newName)
+    AbstractRenamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config,
+                    const std::string oldName, const std::string newName)
         : gs(gs), config(config), oldName(oldName), newName(newName), invalid(false){};
 
-    virtual ~Renamer() = default;
+    virtual ~AbstractRenamer() = default;
     virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response) = 0;
     std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildEdit();
     virtual void addSymbol(const core::SymbolRef) = 0;

@@ -37,11 +37,11 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
     return true;
 }
 
-class MethodRenamer : public Renamer {
+class MethodRenamer : public AbstractRenamer {
 public:
     MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                   const string newName)
-        : Renamer(gs, config, oldName, newName) {
+        : AbstractRenamer(gs, config, oldName, newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
             if (oldName == name) {
@@ -156,11 +156,11 @@ private:
     }
 }; // MethodRenamer
 
-class ConstRenamer : public Renamer {
+class ConstRenamer : public AbstractRenamer {
 public:
     ConstRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                  const string newName)
-        : Renamer(gs, config, oldName, newName) {}
+        : AbstractRenamer(gs, config, oldName, newName) {}
     ~ConstRenamer() {}
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
@@ -180,15 +180,16 @@ public:
     }
 };
 
-void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<Renamer> renamer) {
+void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<AbstractRenamer> renamer) {
     responseMsg->result = renamer->buildEdit();
     if (renamer->getInvalid()) {
         responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer->getError());
     }
 }
 
-shared_ptr<Renamer> makeRenamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config,
-                                core::SymbolRef symbol, const std::string newName) {
+shared_ptr<AbstractRenamer> makeRenamer(const core::GlobalState &gs,
+                                        const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
+                                        const std::string newName) {
     auto originalName = symbol.name(gs).show(gs);
     if (symbol.isMethod()) {
         return make_shared<MethodRenamer>(gs, config, originalName, newName);
@@ -232,7 +233,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
     }
 
     auto resp = move(queryResponses[0]);
-    shared_ptr<Renamer> renamer;
+    shared_ptr<AbstractRenamer> renamer;
     if (auto constResp = resp->isConstant()) {
         // Sanity check the text.
         if (islower(params->newName[0])) {
