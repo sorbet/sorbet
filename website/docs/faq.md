@@ -94,8 +94,7 @@ View on sorbet.run</a>
 > Because Sorbet knows what `attr_*` methods define what instance variables, in
 > `typed: strict` there are some gotchas that apply (which are the same for
 > [all other uses](type-annotations.md) of instance variables): in order to use
-> an instance variable, it must be initialized in the constructor, or be marked
-> [nilable](nilable-types.md) (`T.nilable(...)`).
+> an instance variable, it must be initialized in the constructor.
 >
 > (<a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Areader%0A%0A%20%20sig%20%7Bparams(writer%3A%20Integer).returns(Integer)%7D%0A%20%20attr_writer%20%3Awriter%0A%0A%20%20%23%20For%20attr_accessor%2C%20write%20the%20sig%20for%20the%20reader%20portion.%0A%20%20%23%20(Sorbet%20will%20use%20that%20to%20write%20the%20sig%20for%20the%20writer%20portion.)%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_accessor%20%3Aaccessor%0A%0A%20%20sig%20%7Bparams(reader%3A%20Integer%2C%20writer%3A%20Integer%2C%20accessor%3A%20Integer).void%7D%0A%20%20def%20initialize(reader%2C%20writer%2C%20accessor)%0A%20%20%20%20%40reader%20%3D%20reader%0A%20%20%20%20%40writer%20%3D%20writer%0A%20%20%20%20%40accessor%20%3D%20accessor%0A%20%20end%0Aend">→
 > Full example on sorbet.run</a>)
