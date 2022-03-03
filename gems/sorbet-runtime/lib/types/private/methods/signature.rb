@@ -103,6 +103,12 @@ class T::Private::Methods::Signature
         if @arg_types.length > @req_arg_count
           # Note that this is actually is supported by Ruby, but it would add complexity to
           # support it here, and I'm happy to discourage its use anyway.
+          #
+          # If you are seeing this error and surprised by it, it's possible that you have
+          # overridden the method described in the error message. For example, Rails defines
+          # def self.update!(id = :all, attributes)
+          # on AR models. If you have also defined `self.update!` on an AR model you might
+          # see this error. The simplest resolution is to rename your method.
           raise "Required params after optional params are not supported in method declarations. Method: #{method_desc}"
         end
         @arg_types << [param_name, type]
