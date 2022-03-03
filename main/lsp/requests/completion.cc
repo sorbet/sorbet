@@ -775,15 +775,11 @@ vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
     // `ancestors` already includes klass, so we don't have to handle klass specially
     // as we do in allSimilarConstantItems.
     for (auto ancestor : ancestors(gs, klass)) {
-        for (auto [name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
-            if (!sym.isField(gs)) {
-                continue;
-            }
-            if (sym.isStaticField(gs)) {
+        for (auto [name, sym] : ancestor.data(gs)->members()) {
+            if (!sym.isFieldOrStaticField()) {
                 continue;
             }
 
-            auto name = sym.name(gs);
             if (hasSimilarName(gs, name, prefix)) {
                 result.emplace_back(name);
             }
@@ -802,7 +798,7 @@ vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
     auto it = unique(result.begin(), result.end());
     result.erase(it, result.end());
 
-    return result.
+    return result;
 }
 
 } // namespace
