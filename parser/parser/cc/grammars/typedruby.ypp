@@ -488,27 +488,33 @@ namespace TYPEDRUBY {
 // other parser generators which only report a syntax error if the `error`
 // token was NOT consumed, like in Happy for Haskell.)
 void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
-	std::string error_message = msg;
-	if (auto *token_str_name = driver.token_name(driver.last_token->type())) {
-		error_message = token_str_name;
-	}
+  std::string error_message = msg;
+  if (auto *token_str_name = driver.token_name(driver.last_token->type())) {
+    error_message = token_str_name;
+  }
 
-	driver.diagnostics.emplace_back(
-		dlevel::ERROR, dclass::UnexpectedToken,
-		diagnostic::range(lloc.beginPos(), lloc.endPos()),
-		error_message);
+  driver.diagnostics.emplace_back(
+    dlevel::ERROR, dclass::UnexpectedToken,
+    diagnostic::range(lloc.beginPos(), lloc.endPos()),
+    error_message);
 }
 
 int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::TYPEDRUBY &driver) {
-	auto token = driver.lex.advance();
-	driver.last_token = token;
-	int token_type = static_cast<int>(token->type());
-	assert(token_type >= 0);
-	// TODO(jez) What do we still need this for?
-	lval->token = token;
-	lloc->begin = token;
-	lloc->end = token;
-	return token_type;
+  auto token = driver.lex.advance();
+  driver.last_token = token;
+  int token_type = static_cast<int>(token->type());
+  assert(token_type >= 0);
+  // This is a bit redundant. lval is a (C) union type, so lval->token is saying that the semantic
+  // value produced by lexing is a token (not e.g., a node or a list). When things get reduced,
+  // we might not have access to the token anymore.
+  lval->token = token;
+  // meanwhile, these assign into the location, which is always available regardless of the semantic
+  // value's type. So while we could just use @1.begin in all places where we're currently using $1
+  // for tokens, since the semantic_type is a union, there's no memory savings there. So we may as
+  // well have both lval->token and lloc->begin
+  lloc->begin = token;
+  lloc->end = token;
+  return token_type;
 }
 
 }}} // namespace
@@ -610,11 +616,9 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       if (driver.indentationAware) {
                         auto already_found_first_dedent = result->end != nullptr;
                         if (!already_found_first_dedent && driver.lex.compare_indent_level(@1.begin, @3.begin) > 0) {
-                          // TODO(jez) update this comment
-                          // note: compare indent using leading tokens, but store the begin and end of the first
-                          // token, because the tokens for the start of the dedented code aren't needed.
-                          // result->begin = @1.begin;
-                          // TODO(jez) This we only need one token right now I think. True?
+                          // The only offset that's relevant for us right now is the *end* of the stmts, which
+                          // is all properly indented. We want the end of stmts not the begin of stmt_or_begin
+                          // because we're going to need to make sure any terms (tNL's) are re-emitted.
                           result->end = @1.end;
                         }
                       }
@@ -1918,7 +1922,6 @@ array_premature_end: eof
                     }
                 | tLPAREN compstmt tRPAREN
                     {
-                      // TODO(jez) Might be able to use delimited_block stuff here to do some indentation-uaware stuff.
                       $$ = driver.build.begin(self, $1, $2->body, $3);
                     }
                 | primary_value tCOLON2 tCONSTANT
@@ -4148,7 +4151,6 @@ f_opt_paren_args: f_paren_args
                 | assocs tCOMMA tIDENTIFIER error
                     {
                       auto &list = $1;
-                      // TODO(jez) Return a special function call like `<kw__a` so that you can complete kwargs
                       auto err = driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr);
                       list->emplace_back(driver.build.pair_keyword(self, $3, err));
                       $$ = list;
