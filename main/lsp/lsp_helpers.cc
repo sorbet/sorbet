@@ -226,10 +226,10 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     }
 
     if (constant.isTypeAlias(gs)) {
-        // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
-        result = core::make_type<core::MetaType>(result);
+        return fmt::format("T.type_alias {{{}}}", result.show(gs));
+    } else {
+        return result.showWithMoreInfo(gs);
     }
-    return result.showWithMoreInfo(gs);
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
