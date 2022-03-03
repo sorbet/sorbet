@@ -307,7 +307,8 @@ private:
         core::NameRef packageId;
         vector<core::NameRef> fullName;
 
-        PackageStub(const core::packages::PackageInfo &info) : packageId{info.mangledName()}, fullName{info.fullName()} {}
+        PackageStub(const core::packages::PackageInfo &info)
+            : packageId{info.mangledName()}, fullName{info.fullName()} {}
 
         bool couldDefineChildNamespace(const core::GlobalState &gs, const std::vector<core::NameRef> &prefix,
                                        const std::vector<ast::ConstantLit *> &suffix) const {
@@ -338,7 +339,6 @@ private:
 
             return true;
         }
-
     };
 
     struct ParentPackageStub {
