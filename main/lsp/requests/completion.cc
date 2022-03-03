@@ -767,6 +767,44 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
+
+vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
+                                       core::ClassOrModuleRef klass, string_view prefix) {
+    vector<core::NameRef> result;
+
+    // `ancestors` already includes klass, so we don't have to handle klass specially
+    // as we do in allSimilarConstantItems.
+    for (auto ancestor : ancestors(gs, klass)) {
+        for (auto [name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
+            if (!sym.isField(gs)) {
+                continue;
+            }
+            if (sym.isStaticField(gs)) {
+                continue;
+            }
+
+            auto name = sym.name(gs);
+            if (hasSimilarName(gs, name, prefix)) {
+                result.emplace_back(name);
+            }
+        }
+    }
+
+    fast_sort(result, [&gs](const auto &left, const auto &right) {
+        // Sort by actual name, not by NameRef id
+        if (left != right) {
+            return left.shortName(gs) < right.shortName(gs);
+        } else {
+            return left.rawId() < right.rawId();
+        }
+    });
+
+    auto it = unique(result.begin(), result.end());
+    result.erase(it, result.end());
+
+    return result.
+}
+
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
