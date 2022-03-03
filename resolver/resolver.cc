@@ -307,41 +307,10 @@ private:
         core::NameRef packageId;
         vector<core::NameRef> fullName;
 
-        // the exports vector being empty indicates that this is not a parent package import.
-        vector<core::NameRef> exports;
-
-        static PackageStub parentImport(const core::packages::PackageInfo &info) {
-            PackageStub res;
-            res.packageId = info.mangledName();
-            res.fullName = info.fullName();
-            auto exportPaths = info.exports();
-            auto prefixLen = info.fullName().size();
-            for (auto &path : exportPaths) {
-                // We only need the unique part of the export's name. It's safe to assume that the exports are
-                // populated, as the only case we allow a full re-export of the module is for leaf modules, and we
-                // already know this not a leaf.
-                res.exports.emplace_back(path[prefixLen]);
-            }
-            return res;
-        }
-
-        static PackageStub regularImport(const core::packages::PackageInfo &info) {
-            PackageStub res;
-            res.packageId = info.mangledName();
-            res.fullName = info.fullName();
-            return res;
-        }
-
-        // Check that the candidate name is one of the top-level exported names from a parent package.
-        bool exportsSymbol(core::NameRef candidate) const {
-            return absl::c_find(this->exports, candidate) != this->exports.end();
-        }
+        PackageStub(const core::packages::PackageInfo &info) : packageId{info.mangledName()}, fullName{info.fullName()} {}
 
         bool couldDefineChildNamespace(const core::GlobalState &gs, const std::vector<core::NameRef> &prefix,
                                        const std::vector<ast::ConstantLit *> &suffix) const {
-            // This check is only valid for regular exports.
-            ENFORCE(this->exports.empty());
-
             // The reasoning is as follows: the prefix is derived from a nesting scope paired with the symbol being
             // resolved. The nesting scopes could only define a package in the parent namespace, while this check is
             // only applied to packages that are known to not occupy that part of the namespace.
@@ -370,14 +339,30 @@ private:
             return true;
         }
 
-        bool operator<(const PackageStub &other) const {
-            return absl::c_lexicographical_compare(this->fullName, other.fullName,
-                                                   [](auto l, auto r) { return l.rawId() < r.rawId(); });
+    };
+
+    struct ParentPackageStub {
+        PackageStub stub;
+        vector<core::NameRef> exports;
+
+        ParentPackageStub(const core::packages::PackageInfo &info) : stub{info} {
+            auto prefixLen = this->stub.fullName.size();
+            for (auto &path : info.exports()) {
+                // We only need the unique part of the export's name. It's safe to assume that the exports are
+                // populated, as the only case we allow a full re-export of the module is for leaf modules, and we
+                // already know this not a leaf.
+                this->exports.emplace_back(path[prefixLen]);
+            }
+        }
+
+        // Check that the candidate name is one of the top-level exported names from a parent package.
+        bool exportsSymbol(core::NameRef candidate) const {
+            return absl::c_find(this->exports, candidate) != this->exports.end();
         }
     };
 
     struct ImportStubs {
-        std::vector<PackageStub> parents;
+        std::vector<ParentPackageStub> parents;
         std::vector<PackageStub> imports;
 
         static ImportStubs make(core::GlobalState &gs) {
@@ -387,29 +372,25 @@ private:
 
             for (auto parent : gs.singlePackageImports->parentImports) {
                 auto &info = db.getPackageInfo(parent);
-                stubs.parents.emplace_back(PackageStub::parentImport(info));
+                stubs.parents.emplace_back(ParentPackageStub{info});
             }
 
             for (auto parent : gs.singlePackageImports->regularImports) {
                 auto &info = db.getPackageInfo(parent);
-                stubs.imports.emplace_back(PackageStub::regularImport(info));
+                stubs.imports.emplace_back(PackageStub{info});
             }
-
-            fast_sort(stubs.parents);
-            fast_sort(stubs.imports);
 
             return stubs;
         }
 
-        // Determine if a package with the same name as `scope` is known to export the name `cnst`. Returns `scope` as a
-        // ClassOrModuleRef if the package rooted at that point could export `cnst`.
+        // Determine if a package with the same name as `scope` is known to export the name `cnst`.
         bool packageExportsConstant(const std::vector<core::NameRef> &scope, core::NameRef cnst) const {
-            const auto parent = absl::c_find_if(this->parents, [&scope](auto &stub) { return stub.fullName == scope; });
+            const auto parent = absl::c_find_if(this->parents, [&scope](auto &p) { return p.stub.fullName == scope; });
             return parent != this->parents.end() && parent->exportsSymbol(cnst);
         }
 
         // Determine if a package is known to have a prefix that is a combination of the name defined by `scope`, and
-        // some prefix of the suffix vector provided. Returns `scope` as a ClassOrModuleRef if such an import exists.
+        // some prefix of the suffix vector provided.
         bool fromChildNamespace(const core::GlobalState &gs, const std::vector<core::NameRef> &prefix,
                                 const std::vector<ast::ConstantLit *> &suffix) const {
             return absl::c_any_of(this->imports, [&gs, &prefix, &suffix](auto &stub) {
@@ -472,8 +453,8 @@ private:
         return true;
     }
 
-    // Determine if a parent package exports a constant named `base`. If it does, return the symbol from the nesting
-    // scope that
+    // Determine if a parent package exports a constant named `base`. If it does, return the symbol that already exists
+    // for that nesting scope.
     static core::ClassOrModuleRef parentPackageOwner(core::MutableContext ctx, const ImportStubs &importStubs,
                                                      const Nesting *scope, ast::ConstantLit *base) {
         std::vector<core::NameRef> prefix;
@@ -529,21 +510,22 @@ private:
             absl::c_reverse(suffix);
         }
 
+        // If the constant doesn't resolve to something that overlaps with this package's namespace, it will be defined
+        // at the root scope.
         auto owner = core::Symbols::root();
 
         // First, determine if we're already in the context of a parent package by crawling up the nesting scopes.
         auto parentPackage = parentPackageOwner(ctx, importStubs, scope, suffix.front());
         if (parentPackage.exists()) {
             owner = parentPackage;
+        } else {
+            // If we're not in a parent package, check the name suffix to determine if we're inside of a child package.
+            auto childPackage = childPackageOwner(ctx, importStubs, scope, suffix);
+            if (childPackage.exists()) {
+                owner = childPackage;
+            }
         }
 
-        // If we're not in a parent package, check the name suffix to determine if we're inside of a child package.
-        auto childPackage = childPackageOwner(ctx, importStubs, scope, suffix);
-        if (childPackage.exists()) {
-            owner = childPackage;
-        }
-
-        // If both of the previous two checks fail, stub the constant as defined at the root scope.
         stubConstantSuffix(ctx, owner, suffix, possibleGenericType);
     }
 
