@@ -54,7 +54,7 @@ autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected:
     13 |sig {returns(T::Array[foo: Integer])}
                      ^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:13: Unsupported usage of literal type https://srb.help/7009
+autocorrect-kwargs.rb:13: Unexpected bare `Symbol(:foo)` value found in type position https://srb.help/7009
     13 |sig {returns(T::Array[foo: Integer])}
                               ^^^
 
@@ -70,7 +70,7 @@ autocorrect-kwargs.rb:18: Wrong number of type parameters for `Array`. Expected:
     18 |foo = T::Array[foo: Integer, bar: String].new
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:18: Unsupported usage of literal type https://srb.help/7009
+autocorrect-kwargs.rb:18: Unexpected bare `Symbol(:foo)` value found in type position https://srb.help/7009
     18 |foo = T::Array[foo: Integer, bar: String].new
                        ^^^
 Errors: 12
