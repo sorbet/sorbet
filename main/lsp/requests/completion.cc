@@ -489,8 +489,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState
     return item;
 }
 
-vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
-                                       core::ClassOrModuleRef klass, string_view prefix) {
+vector<core::NameRef> allSimilarFields(const core::GlobalState &gs, core::ClassOrModuleRef klass, string_view prefix) {
     vector<core::NameRef> result;
 
     // `ancestors` already includes klass, so we don't have to handle klass specially
@@ -547,10 +546,9 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     // from which source.
     auto result = allSimilarFields(gs, klass, prefix);
 
-    files.erase(remove_if(files.begin(), files.end(), [&gs](auto f) {
-                return f.data(gs).strictLevel >= core::StrictLevel::Strict;
-            }),
-        files.end());
+    files.erase(remove_if(files.begin(), files.end(),
+                          [&gs](auto f) { return f.data(gs).strictLevel >= core::StrictLevel::Strict; }),
+                files.end());
 
     if (!files.empty()) {
         auto resolved = typechecker.getResolved(files);
@@ -565,9 +563,8 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
 
         // TODO: this does prefix matching for instance/class variables, but our
         // completion for locals matches anywhere in the name
-        auto it = remove_if(fields.begin(), fields.end(), [&gs, &prefix](auto name) {
-                return !hasPrefixedName(gs, name, prefix);
-            });
+        auto it = remove_if(fields.begin(), fields.end(),
+                            [&gs, &prefix](auto name) { return !hasPrefixedName(gs, name, prefix); });
         result.insert(result.end(), fields.begin(), it);
     }
 
