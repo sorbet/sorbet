@@ -89,10 +89,13 @@ class NestedClassInstanceVariables
   end
 end
 
+# We don't provide completion for variables in a class's static-init code;
+# they are uncommon, discouraged at Stripe, and require special-casing in
+# the completion code.
 class ClassVariablesInStaticInit
   @@static_init_cvar = 5
   @@stat
-  #     ^ completion: @@stat, @@static_init_cvar
+  #     ^ completion: (nothing)
 end
 
 class Superclass
@@ -103,14 +106,14 @@ class Superclass
   end
 end
 
+# See above comments about completing variables in static-init.
 class Inheriting < Superclass
-  # Because our completion operates purely syntactically, it misses picking up
-  # class variables from `Superclass`.  If we make the completion algorithm more
-  # aware of the inheritance hierarchy, the tests in this class should start
-  # failing.
   @@s
-  #  ^ completion: @@s
+  #  ^ completion: (nothing)
 
+  # Because our completion algorithm operates purely syntactically for
+  # untyped instance variables, it misses picking up instance variables from
+  # `Superclass`.
   def other_method
     @super
     #     ^ completion: @super

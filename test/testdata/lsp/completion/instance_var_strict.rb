@@ -113,10 +113,13 @@ class NestedClassInstanceVariables
   end
 end
 
+# We don't provide completion for variables in a class's static-init code;
+# they are uncommon, discouraged at Stripe, and require special-casing in
+# the completion code.
 class ClassVariablesInStaticInit
   @@static_init_cvar = T.let(5, T.nilable(Integer))
   @@stat # error: Use of undeclared variable
-  #     ^ completion: @@static_init_cvar
+  #     ^ completion: (nothing)
 end
 
 class Superclass
@@ -128,9 +131,10 @@ class Superclass
   end
 end
 
+# See above comments about completing variables in static-init.
 class Inheriting < Superclass
   @@s # error: Use of undeclared variable
-  #  ^ completion: @@super_cvar
+  #  ^ completion: (nothing)
 
   sig {void}
   def other_method
