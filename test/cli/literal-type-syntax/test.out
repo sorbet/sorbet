@@ -70,11 +70,11 @@ literal-type-syntax.rb:11: Unsupported literal in type syntax https://srb.help/5
     11 |T.let(true, T.any(true, false))
                                 ^^^^^
 
-literal-type-syntax.rb:11: Unsupported usage of bare type https://srb.help/7009
+literal-type-syntax.rb:11: Unexpected bare `TrueClass` value found in type position https://srb.help/7009
     11 |T.let(true, T.any(true, false))
                           ^^^^
 
-literal-type-syntax.rb:11: Unsupported usage of bare type https://srb.help/7009
+literal-type-syntax.rb:11: Unexpected bare `FalseClass` value found in type position https://srb.help/7009
     11 |T.let(true, T.any(true, false))
                                 ^^^^^
 Errors: 11
