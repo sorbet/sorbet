@@ -40,11 +40,10 @@ core::SymbolRef AbstractRenamer::UniqueSymbolQueue::pop() {
     return core::Symbols::noSymbol();
 }
 
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRenamer::buildEdit() {
+optional<vector<unique_ptr<TextDocumentEdit>>> AbstractRenamer::buildTextDocumentEdits() {
     if (invalid) {
-        return JSONNullObject();
+        return nullopt;
     }
-
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> tmpEdits;
     vector<unique_ptr<TextDocumentEdit>> textDocEdits;
     // collect changes per file
@@ -63,8 +62,17 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRenamer::buildEdit() 
         textDocEdits.push_back(make_unique<TextDocumentEdit>(
             make_unique<VersionedTextDocumentIdentifier>(item.first, JSONNullObject()), move(item.second)));
     }
+    return textDocEdits;
+}
+
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRenamer::buildWorkspaceEdit() {
+    auto edits = buildTextDocumentEdits();
+    if (!edits.has_value()) {
+        return JSONNullObject();
+    }
+
     auto we = make_unique<WorkspaceEdit>();
-    we->documentChanges = move(textDocEdits);
+    we->documentChanges = move(edits.value());
     return we;
 }
 

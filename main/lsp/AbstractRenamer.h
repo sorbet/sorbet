@@ -25,7 +25,8 @@ public:
 
     virtual ~AbstractRenamer() = default;
     virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response) = 0;
-    std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildEdit();
+    std::optional<std::vector<std::unique_ptr<TextDocumentEdit>>> buildTextDocumentEdits();
+    std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildWorkspaceEdit();
     virtual void addSymbol(const core::SymbolRef) = 0;
 
     bool getInvalid();

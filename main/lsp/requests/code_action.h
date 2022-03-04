@@ -15,13 +15,9 @@ public:
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 
 private:
-    std::vector<std::unique_ptr<TextEdit>> updateCallSites(const core::GlobalState &gs, const core::SymbolRef symbol,
-                                                           std::string_view newModuleName,
-                                                           LSPTypecheckerDelegate &typechecker);
-    std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config,
-                                                                      const core::GlobalState &gs,
-                                                                      const core::lsp::DefinitionResponse *definition,
-                                                                      LSPTypecheckerDelegate &typechecker);
+    std::vector<std::unique_ptr<TextDocumentEdit>>
+    getExtractMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
+                          const core::lsp::DefinitionResponse *definition, LSPTypecheckerDelegate &typechecker);
 };
 } // namespace sorbet::realmain::lsp
 

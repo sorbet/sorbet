@@ -181,7 +181,7 @@ public:
 };
 
 void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<AbstractRenamer> renamer) {
-    responseMsg->result = renamer->buildEdit();
+    responseMsg->result = renamer->buildWorkspaceEdit();
     if (renamer->getInvalid()) {
         responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer->getError());
     }
