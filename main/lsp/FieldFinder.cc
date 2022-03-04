@@ -6,8 +6,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-FieldFinder::FieldFinder(core::ClassOrModuleRef target, core::Loc queryLoc, ast::UnresolvedIdent::Kind queryKind)
-    : targetClass(target), queryLoc(queryLoc), queryKind(queryKind) {
+FieldFinder::FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind)
+    : targetClass(target), queryKind(queryKind) {
     ENFORCE(queryKind != ast::UnresolvedIdent::Kind::Local);
 }
 
