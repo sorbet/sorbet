@@ -43,30 +43,22 @@ class Family::Bart::Character < Object
   extend T::Sig
 end
 Family::Bart::Character::FamilyClass = Family::Simpsons
+-- Test RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+# typed: true
+
+class Test::Family::Bart::BartTest < Object
+  sig {params(x: Test::Family::TestFamily).void}
+  def test1(x); end
+  sig {params(x: Test::Family::Bart::Slingshot::TestSlingshot).void}
+  def test2(x); end
+  extend T::Sig
+end
 -- JSON: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 {"packageRefs":["Family","Util"], "rbiRefs":[]}
--- ./test/cli/rbi-gen-single/util/__package.rb (Util)
--- RBI: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+-- ./test/cli/rbi-gen-single/family/bart/slingshot/__package.rb (Family::Bart::Slingshot)
+-- Test RBI: ./test/cli/rbi-gen-single/family/bart/slingshot/__package.rb (Family::Bart::Slingshot)
 # typed: true
 
-class Util::GenericMessage < Object
-  Elem = type_member()
-  extend T::Generic
-  extend T::Helpers
+class Test::Family::Bart::Slingshot::TestSlingshot < Object
 end
-class Util::Messages < Object
-  extend T::Sig
-  sig {type_parameters(:T).params(msg: GenericMessage[T.type_parameter(:T)]).void}
-  def self.print_message(msg); end
-  sig {params(msg: String).void}
-  def self.say(msg); end
-end
--- JSON: ./test/cli/rbi-gen-single/util/__package.rb (Util)
-{"packageRefs":[], "rbiRefs":[]}
--- ./test/cli/rbi-gen-single/util/testing/__package.rb (Util::Testing)
--- Test RBI: ./test/cli/rbi-gen-single/util/testing/__package.rb (Util::Testing)
-# typed: true
-
-class Test::Util::Testing::TestCase < Object
-end
--- JSON: ./test/cli/rbi-gen-single/util/testing/__package.rb (Util::Testing)
+-- JSON: ./test/cli/rbi-gen-single/family/bart/slingshot/__package.rb (Family::Bart::Slingshot)
