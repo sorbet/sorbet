@@ -978,6 +978,14 @@ public:
         return ClassOrModuleRef::fromRaw(90);
     }
 
+    static ClassOrModuleRef T_Types() {
+        return ClassOrModuleRef::fromRaw(91);
+    }
+
+    static ClassOrModuleRef T_Types_Base() {
+        return ClassOrModuleRef::fromRaw(92);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
@@ -1000,11 +1008,11 @@ public:
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 205;
+    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 207;
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 45;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 102;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 104;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
