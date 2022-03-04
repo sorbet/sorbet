@@ -2,6 +2,7 @@
 
 class InstanceVariable
   def some_method
+    @different_prefix = 10
     @my_ivar = 5
   end
 
@@ -22,6 +23,7 @@ end
 
 class ClassVariable
   def some_method
+    @@different_prefix = 9
     @@my_cvar = 5
   end
 

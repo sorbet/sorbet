@@ -530,7 +530,6 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     for (auto loc : klass.data(gs)->locs()) {
         files.emplace_back(loc.file());
     }
-    auto resolved = typechecker.getResolved(files);
 
     // We have an interesting problem here: the symbol table already stores
     // information about all the fields in a class, but we only populate the
@@ -544,26 +543,30 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     // (people might have declared instance variables as typed in StrictLevel::True
     // files, but that's OK, since we can't know apriori what fields we would get
     // from which source.
-    // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeMap::apply
-    FieldFinder fieldFinder(klass, kind);
-    for (auto &t : resolved) {
-        // These files are guaranteed to have type information per Sorbet's
-        // rules.
-        if (t.file.data(gs).strictLevel >= core::StrictLevel::Strict) {
-            continue;
-        }
+    auto result = allSimilarFields(gs, klass, prefix);
 
-        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        t.tree = ast::TreeMap::apply(ctx, fieldFinder, move(t.tree));
+    files.erase(remove_if(files.begin(), files.end(), [&gs](auto f) {
+                return f.data(gs).strictLevel >= core::StrictLevel::Strict;
+            }),
+        files.end());
+
+    if (!files.empty()) {
+        auto resolved = typechecker.getResolved(files);
+
+        // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeMap::apply
+        FieldFinder fieldFinder(klass, kind);
+        for (auto &t : resolved) {
+            auto ctx = core::Context(gs, core::Symbols::root(), t.file);
+            t.tree = ast::TreeMap::apply(ctx, fieldFinder, move(t.tree));
+        }
+        auto fields = fieldFinder.result();
+
+        auto it = remove_if(fields.begin(), fields.end(), [&gs, &prefix](auto name) {
+                return !hasPrefixedName(gs, name, prefix);
+            });
+        result.insert(result.end(), fields.begin(), it);
     }
 
-    auto result = fieldFinder.result();
-
-    // TODO: make sure prefix determination is done consistently for syntactic
-    // and semantic names.
-    auto semanticNames = allSimilarFields(gs, klass, prefix);
-
-    result.insert(result.end(), semanticNames.begin(), semanticNames.end());
     fast_sort(result, [&gs](const auto &left, const auto &right) {
         // Sort by actual name, not by NameRef id
         if (left != right) {
