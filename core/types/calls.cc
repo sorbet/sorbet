@@ -392,7 +392,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
                     // T::Types::Base is the parent class for runtime type objects.
                     // Give a more helpful error message
                     e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
-                                   "To compute new runtime types, you must explicitly wrap with `{}`",
+                                   "    To compute new runtime types, you must explicitly wrap with `{}`",
                                    "T.unsafe");
                     auto locSource = loc.source(gs);
                     if (locSource.has_value()) {

@@ -45,10 +45,9 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
 
     if (isa_type<MetaType>(got) && !isa_type<MetaType>(expected)) {
         e.addErrorNote(
-            "It looks like you're using Sorbet type syntax in a runtime value position. If you really mean to reflect "
-            "on runtime types as values, use `{}` to hide the type syntax from the type checker.\n"
-            "If this doesn't sound like what you're trying to do, then you're likely using the type system in a way it "
-            "wasn't meant to be used.",
+            "It looks like you're using Sorbet type syntax in a runtime value position.\n"
+            "    If you really mean to use types as values, use `{}` to hide the type syntax from the type checker.\n"
+            "    Otherwise, you're likely using the type system in a way it wasn't meant to be used.",
             "T::Utils.coerce");
         return;
     }
@@ -79,7 +78,10 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
                     e.replaceWith("Prepend `!!`", loc, "!!({})", loc.source(gs).value());
                 }
             }
-        } else if (isa_type<MetaType>(actualType) && !isa_type<MetaType>(expectedType)) {
+        } else if (isa_type<MetaType>(actualType) && !isa_type<MetaType>(expectedType) &&
+                   core::Types::isSubTypeUnderConstraint(gs, constr,
+                                                         core::Symbols::T_Types_Base().data(gs)->externalType(),
+                                                         expectedType, UntypedMode::AlwaysCompatible)) {
             e.replaceWith("Wrap in `T::Utils.coerce`", loc, "T::Utils.coerce({})", loc.source(gs).value());
         }
     }
