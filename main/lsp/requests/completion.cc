@@ -128,6 +128,11 @@ bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view
     return fnd != string_view::npos;
 }
 
+bool hasPrefixedName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
+    string_view view = name.shortName(gs);
+    return absl::StartsWith(view, pattern);
+}
+
 using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // First of pair is "found at this depth in the ancestor hierarchy"
@@ -484,8 +489,42 @@ unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState
     return item;
 }
 
-vector<core::NameRef> fieldsForClass(LSPTypecheckerDelegate &typechecker, const core::ClassOrModuleRef klass,
-                                     const core::Loc queryLoc, ast::UnresolvedIdent::Kind kind) {
+vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
+                                       core::ClassOrModuleRef klass, string_view prefix) {
+    vector<core::NameRef> result;
+
+    // `ancestors` already includes klass, so we don't have to handle klass specially
+    // as we do in allSimilarConstantItems.
+    for (auto ancestor : ancestors(gs, klass)) {
+        for (auto [name, sym] : ancestor.data(gs)->members()) {
+            if (!sym.isFieldOrStaticField()) {
+                continue;
+            }
+
+            if (hasPrefixedName(gs, name, prefix)) {
+                result.emplace_back(name);
+            }
+        }
+    }
+
+    fast_sort(result, [&gs](const auto &left, const auto &right) {
+        // Sort by actual name, not by NameRef id
+        if (left != right) {
+            return left.shortName(gs) < right.shortName(gs);
+        } else {
+            return left.rawId() < right.rawId();
+        }
+    });
+
+    auto it = unique(result.begin(), result.end());
+    result.erase(it, result.end());
+
+    return result;
+}
+
+vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typechecker, const core::ClassOrModuleRef klass,
+                                               const core::Loc queryLoc, ast::UnresolvedIdent::Kind kind,
+                                               string_view prefix) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
     for (auto loc : klass.data(gs)->locs()) {
@@ -493,14 +532,38 @@ vector<core::NameRef> fieldsForClass(LSPTypecheckerDelegate &typechecker, const 
     }
     auto resolved = typechecker.getResolved(files);
 
+    // We have an interesting problem here: the symbol table already stores
+    // information about all the fields in a class, but we only populate the
+    // symbol table with this information when the fields are typed in some
+    // way.  But we would like to provide completion for all fields, typed
+    // or not.
+    //
+    // The compromise we take is this: for each file that is < StrictLevel::Strict,
+    // we walk the AST to discover the fields in that class and we add those
+    // results to the symbol table results.  We might discover duplicate information
+    // (people might have declared instance variables as typed in StrictLevel::True
+    // files, but that's OK, since we can't know apriori what fields we would get
+    // from which source.
     // Instantiate fieldFinder outside loop so that result accumualates over every time we TreeMap::apply
     FieldFinder fieldFinder(klass, queryLoc, kind);
     for (auto &t : resolved) {
+        // These files are guaranteed to have type information per Sorbet's
+        // rules.
+        if (t.file.data(gs).strictLevel >= core::StrictLevel::Strict) {
+            continue;
+        }
+
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         t.tree = ast::TreeMap::apply(ctx, fieldFinder, move(t.tree));
     }
 
     auto result = fieldFinder.result();
+
+    // TODO: make sure prefix determination is done consistently for syntactic
+    // and semantic names.
+    auto semanticNames = allSimilarFields(gs, klass, prefix);
+
+    result.insert(result.end(), semanticNames.begin(), semanticNames.end());
     fast_sort(result, [&gs](const auto &left, const auto &right) {
         // Sort by actual name, not by NameRef id
         if (left != right) {
@@ -767,40 +830,6 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
-
-vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
-                                       core::ClassOrModuleRef klass, string_view prefix) {
-    vector<core::NameRef> result;
-
-    // `ancestors` already includes klass, so we don't have to handle klass specially
-    // as we do in allSimilarConstantItems.
-    for (auto ancestor : ancestors(gs, klass)) {
-        for (auto [name, sym] : ancestor.data(gs)->members()) {
-            if (!sym.isFieldOrStaticField()) {
-                continue;
-            }
-
-            if (hasSimilarName(gs, name, prefix)) {
-                result.emplace_back(name);
-            }
-        }
-    }
-
-    fast_sort(result, [&gs](const auto &left, const auto &right) {
-        // Sort by actual name, not by NameRef id
-        if (left != right) {
-            return left.shortName(gs) < right.shortName(gs);
-        } else {
-            return left.rawId() < right.rawId();
-        }
-    });
-
-    auto it = unique(result.begin(), result.end());
-    result.erase(it, result.end());
-
-    return result;
-}
-
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
@@ -907,11 +936,16 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     vector<core::NameRef> similarLocals;
     if (params.enclosingMethod.exists()) {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_locals");
-        vector<core::NameRef> locals;
 
         // Slyly reuse `UnresolvedIdent::Kind` to both determine what kind of
         // thing we're going to find and to determine the search space for
         // `fieldsForClass`.
+        //
+        // TODO: for empty prefixes, we would like to complete instance/class
+        // variables along with locals.
+        //
+        // TODO: for a prefix of just "@", we should provide class variables
+        // along with instance variables.
         auto kind = ast::UnresolvedIdent::Kind::Local;
         if (params.prefix.size() >= 2 && absl::StartsWith(params.prefix, "@@")) {
             kind = ast::UnresolvedIdent::Kind::Class;
@@ -920,12 +954,13 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         }
 
         if (kind == ast::UnresolvedIdent::Kind::Local) {
-            locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
+            vector<core::NameRef> locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
+            similarLocals = allSimilarLocalNames(gs, locals, params.prefix);
         } else {
             auto klass = params.enclosingMethod.data(gs)->owner;
-            locals = fieldsForClass(typechecker, klass, params.queryLoc, kind);
+            ENFORCE(klass.exists());
+            similarLocals = allSimilarFieldsForClass(typechecker, klass, params.queryLoc, kind, params.prefix);
         }
-        similarLocals = allSimilarLocalNames(gs, locals, params.prefix);
     }
 
     // ----- keywords -----
