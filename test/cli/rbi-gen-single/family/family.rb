@@ -25,4 +25,9 @@ module Family
     end
   end
 
+  class Flanders
+    extend T::Sig
+  end
+
 end
+
