@@ -1,5 +1,4 @@
 # typed: true
-extend T::Sig
 
 class InstanceVariable
   def some_method
