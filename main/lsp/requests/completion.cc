@@ -501,6 +501,8 @@ vector<core::NameRef> allSimilarFields(const core::GlobalState &gs,
                 continue;
             }
 
+            // TODO: this does prefix matching for instance/class variables, but our
+            // completion for locals matches anywhere in the name
             if (hasPrefixedName(gs, name, prefix)) {
                 result.emplace_back(name);
             }
@@ -561,6 +563,8 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
         }
         auto fields = fieldFinder.result();
 
+        // TODO: this does prefix matching for instance/class variables, but our
+        // completion for locals matches anywhere in the name
         auto it = remove_if(fields.begin(), fields.end(), [&gs, &prefix](auto name) {
                 return !hasPrefixedName(gs, name, prefix);
             });
