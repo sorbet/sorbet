@@ -435,7 +435,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return make_type<TupleType>(move(unwrappedElems));
     } else if (isa_type<LiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-            e.setHeader("Unexpected bare `{}` value found in type position");
+            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
         }
         return Types::untypedUntracked();
     }
