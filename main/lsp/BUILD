@@ -15,6 +15,7 @@ cc_library(
         "LSPFileUpdates.h",
         "DefLocSaver.h",
         "watchman/WatchmanProcess.h",
+        "AbstractRenamer.h",
         "NextMethodFinder.h",
         "LocalVarFinder.h",
         "json_enums.h",

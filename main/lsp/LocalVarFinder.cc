@@ -22,7 +22,7 @@ ast::ExpressionPtr LocalVarFinder::preTransformBlock(core::Context ctx, ast::Exp
 
     auto parsedArgs = ast::ArgParsing::parseArgs(block.args);
     for (const auto &parsedArg : parsedArgs) {
-        this->result_.emplace_back(parsedArg.local);
+        this->result_.emplace_back(parsedArg.local._name);
     }
 
     return tree;
@@ -39,7 +39,7 @@ ast::ExpressionPtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::E
     }
 
     if (methodStack.back() == this->targetMethod) {
-        this->result_.emplace_back(local->localVariable);
+        this->result_.emplace_back(local->localVariable._name);
     }
 
     return tree;
@@ -56,7 +56,7 @@ ast::ExpressionPtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast:
     if (currentMethod == this->targetMethod) {
         auto parsedArgs = ast::ArgParsing::parseArgs(methodDef.args);
         for (const auto &parsedArg : parsedArgs) {
-            this->result_.emplace_back(parsedArg.local);
+            this->result_.emplace_back(parsedArg.local._name);
         }
     }
 
@@ -75,9 +75,8 @@ ast::ExpressionPtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
 
-    auto currentMethod = classDef.symbol == core::Symbols::root()
-                             ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, classDef.declLoc))
-                             : ctx.state.lookupStaticInitForClass(classDef.symbol);
+    auto currentMethod = classDef.symbol == core::Symbols::root() ? ctx.state.lookupStaticInitForFile(ctx.file)
+                                                                  : ctx.state.lookupStaticInitForClass(classDef.symbol);
 
     this->methodStack.emplace_back(currentMethod);
 
@@ -89,7 +88,7 @@ ast::ExpressionPtr LocalVarFinder::postTransformClassDef(core::Context ctx, ast:
     return tree;
 }
 
-const vector<core::LocalVariable> &LocalVarFinder::result() const {
+const vector<core::NameRef> &LocalVarFinder::result() const {
     ENFORCE(this->methodStack.empty());
     return this->result_;
 }

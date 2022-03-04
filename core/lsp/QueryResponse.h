@@ -27,17 +27,19 @@ public:
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
+CheckSize(SendResponse, 72, 8);
 
 class IdentResponse final {
 public:
     IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType,
                   core::MethodRef enclosingMethod)
-        : termLoc(termLoc), variable(variable), retType(std::move(retType)), enclosingMethod(enclosingMethod){};
+        : termLoc(termLoc), variable(variable), enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::Loc termLoc;
     const core::LocalVariable variable;
-    const core::TypeAndOrigins retType;
     const core::MethodRef enclosingMethod;
+    const core::TypeAndOrigins retType;
 };
+CheckSize(IdentResponse, 64, 8);
 
 class LiteralResponse final {
 public:
@@ -45,6 +47,7 @@ public:
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
+CheckSize(LiteralResponse, 56, 8);
 
 class ConstantResponse final {
 public:
@@ -52,7 +55,7 @@ public:
     ConstantResponse(core::SymbolRef symbol, core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes,
                      core::NameRef name, core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
         : symbol(symbol), symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
-          retType(std::move(retType)), enclosingMethod(enclosingMethod){};
+          enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::SymbolRef symbol;
     // You probably don't want this. Almost all of Sorbet's type system operates on dealiased
     // symbols transparently (e.g., for a constant like `X = Integer`, Sorbet reports that `''` is
@@ -65,9 +68,10 @@ public:
     const core::Loc termLoc;
     const Scopes scopes;
     const core::NameRef name;
-    const core::TypeAndOrigins retType;
     const core::MethodRef enclosingMethod;
+    const core::TypeAndOrigins retType;
 };
+CheckSize(ConstantResponse, 96, 8);
 
 class FieldResponse final {
 public:
@@ -78,6 +82,7 @@ public:
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
+CheckSize(FieldResponse, 64, 8);
 
 class DefinitionResponse final {
 public:
@@ -88,6 +93,7 @@ public:
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
+CheckSize(DefinitionResponse, 64, 8);
 
 class EditResponse final {
 public:
@@ -95,6 +101,7 @@ public:
     const core::Loc loc;
     const std::string replacement;
 };
+CheckSize(EditResponse, 40, 8);
 
 using QueryResponseVariant = std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse,
                                           DefinitionResponse, EditResponse>;

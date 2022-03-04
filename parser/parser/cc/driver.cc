@@ -61,6 +61,71 @@ void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
     }
 }
 
+// TODO(jez) This can quite easily get out of hand performance-wise. The major selling point of
+// LR parsers is that they admit linear-time implementations.
+//
+// For the time being (read: until we start seeing performance problems in practice), introducing
+// arbitrary-size backtracking like this method does is probably fine, because
+//
+// - It's only when there are syntax errors
+// - Parse results are cached
+// - It substantially improves the editor experience
+//
+// This backtracking makes the parser accidentally quadratic. Consider:
+//
+//     def f1
+//       def f2
+//         def f3
+//     end
+//
+// The lexer and parser will analyze the source substring of f1 once, f2 twice, and f3 three times.
+//
+// A future extension might be to limit the number of bytes allowed to be reprocessed (say: all
+// calls to rewind_and_reset when parsing a given file must move the lexer cursor by less than some
+// multiple of the file size, or even than some magic constant).
+//
+// Most other uses of rewind_and_reset don't currently suffer as acutely from this problem, because
+// they just back up over the last one or two tokens, not potentially back to the top of the file.
+ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t beginToken, size_t headerEndPos,
+                                                          ForeignPtr body, token_t bodyStartToken,
+                                                          token_t lastTokBeforeDedent, token_t endToken) {
+    if (!this->indentationAware || this->lex.compare_indent_level(beginToken, endToken) <= 0) {
+        return body;
+    }
+
+    const char *token_str_name = this->token_name(beginToken->type());
+    this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, beginToken, token_str_name, endToken);
+
+    if (body == nullptr) {
+        // Special case of "entire method was properly indented"
+        // But bodyStartToken is tNL if empty body, which fails the assertion in compare_indent_level
+        this->rewind_and_reset(endToken->start());
+        return body;
+    } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
+        // Not even the very first thing in the body is indented. Treat this like emtpy method.
+        this->rewind_and_reset(headerEndPos);
+        auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
+        return emptyBody;
+    } else if (lastTokBeforeDedent != nullptr) {
+        // Something in the body is dedented. Only put the properly indented stmts in the method.
+        auto truncatedBody = this->build.truncateBodyStmt(self, body, lastTokBeforeDedent);
+        if (truncatedBody != nullptr) {
+            this->rewind_and_reset(lastTokBeforeDedent->end());
+            return truncatedBody;
+        } else {
+            // bodystmt had opt_else and/or opt_rescue; this is unhandled.
+            // give up, and say that the method body was empty
+            this->rewind_and_reset(headerEndPos);
+            auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
+            return emptyBody;
+        }
+    } else {
+        // Entire method body was properly indented, except for final kEND
+        this->rewind_and_reset(endToken->start());
+        return body;
+    }
+}
+
 typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                      const struct builder &builder, bool traceLexer, bool indentationAware)
     : base_driver(ruby_version::RUBY_27, source, scratch, builder, traceLexer, indentationAware) {}

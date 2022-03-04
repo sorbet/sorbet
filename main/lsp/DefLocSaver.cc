@@ -89,7 +89,7 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
         return ctx.owner.asMethodRef();
     } else if (ctx.owner.isClassOrModule()) {
         if (ctx.owner == core::Symbols::root()) {
-            return ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, {0, 0}));
+            return ctx.state.lookupStaticInitForFile(ctx.file);
         } else {
             return ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
         }

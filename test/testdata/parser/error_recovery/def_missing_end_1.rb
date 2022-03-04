@@ -2,6 +2,7 @@
 
 class A
   def test1
+# ^^^ error: Hint: this "def" token might not be properly closed
     if x.f
     end
 

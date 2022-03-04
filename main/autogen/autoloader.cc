@@ -70,7 +70,6 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
-    out.packagedAutoloader = cfg.packagedAutoloader;
     return out;
 }
 
@@ -434,32 +433,15 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
                                                const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    if (!alCfg.packagedAutoloader || !node.root()) {
-        tasks.emplace_back(RenderAutoloadTask{filePath, node});
-    }
+    tasks.emplace_back(RenderAutoloadTask{filePath, node});
+
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
         if (!node.root()) {
             FileOps::ensureDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            if (alCfg.packagedAutoloader && node.root()) {
-                // in a packaged context, we want to make sure that these constants are also put in their packages
-                ENFORCE(child->qname.package);
-                auto namespaceName = child->qname.package->show(gs);
-                // this package name will include the suffix _Package on the end, and we want to remove that
-                constexpr int suffixLen = core::PACKAGE_SUFFIX.size();
-
-                // TODO (ngroman, aadi-stripe) Determine if we need to check _Package_Private here in this autoloader
-                // context.
-                ENFORCE(namespaceName.size() > suffixLen);
-                string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
-                auto pkgSubdir = join(subdir, packageName);
-                FileOps::ensureDir(pkgSubdir);
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, pkgSubdir, *child);
-            } else {
-                populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child);
-            }
+            populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child);
         }
     }
 }
@@ -514,53 +496,6 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         }
         counterConsume(move(out));
     }
-}
-
-namespace {
-string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
-                                const string_view mangledName) {
-    fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
-    fmt::format_to(std::back_inserter(buf), "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule,
-                   mangledName);
-    for (auto expt : pkg.exports) {
-        auto name = expt.join(gs, "::");
-        fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
-    }
-    fmt::format_to(std::back_inserter(buf), "}})\n");
-
-    return to_string(buf);
-}
-} // namespace
-
-void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
-                                           const std::string &path, const vector<Package> &packages) {
-    // we're going to be building up the root package map as we walk all the other packages, so make that first
-    fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
-    fmt::format_to(std::back_inserter(buf), "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
-
-    // walk over all the packages
-    for (auto &pkg : packages) {
-        auto pkgName = fmt::format(
-            "{}", fmt::map_join(pkg.package, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
-        auto mangledName =
-            fmt::format("{}", fmt::map_join(pkg.package, "_", [&](core::NameRef nr) -> string { return nr.show(gs); }));
-        auto source = renderPackageAutoloadSrc(gs, alCfg, pkg, mangledName);
-
-        FileOps::ensureDir(join(path, mangledName));
-        auto targetPath = join(path, join(mangledName, "_root.rb"));
-
-        // write the package autoload into the appropriate file
-        FileOps::writeIfDifferent(targetPath, source);
-
-        // and add the entry for this file to the root autoload
-        fmt::format_to(std::back_inserter(buf), "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
-    }
-
-    fmt::format_to(std::back_inserter(buf), "}})\n");
-    auto rootSrc = to_string(buf);
-    FileOps::writeIfDifferent(join(path, "_root.rb"), rootSrc);
 }
 
 } // namespace sorbet::autogen

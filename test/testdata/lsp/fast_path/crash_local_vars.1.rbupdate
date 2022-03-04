@@ -2,8 +2,8 @@
 
 class Outer
   describe 'client' do
-    #               ^^ error: Hint: this kDO_BLOCK token might not be properly closed
     class Inner <
+  # ^^^^^ error: Hint: this "class" token might not be properly closed
     it 'foo' do # error: Superclasses must only contain constant literals
       1.times {|x| puts(x)}
     end

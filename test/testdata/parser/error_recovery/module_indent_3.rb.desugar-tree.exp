@@ -1,0 +1,15 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C Inner><<C <todo sym>>> < ()
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.void()
+    end
+
+    def method2<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+end
