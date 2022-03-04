@@ -544,7 +544,7 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     // (people might have declared instance variables as typed in StrictLevel::True
     // files, but that's OK, since we can't know apriori what fields we would get
     // from which source.
-    // Instantiate fieldFinder outside loop so that result accumualates over every time we TreeMap::apply
+    // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeMap::apply
     FieldFinder fieldFinder(klass, queryLoc, kind);
     for (auto &t : resolved) {
         // These files are guaranteed to have type information per Sorbet's
