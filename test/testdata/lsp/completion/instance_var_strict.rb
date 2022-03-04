@@ -16,6 +16,12 @@ class InstanceVariable
     @my # error: Use of undeclared variable
     #  ^ completion: @my_ivar
   end
+
+  sig {void}
+  def more_method
+    @ # error: unexpected
+    #^ completion: (nothing)
+  end
 end
 
 class OtherInstanceVariable
@@ -42,6 +48,13 @@ class ClassVariable
   def other_method
     @@my # error: Use of undeclared variable
     #   ^ completion: @@my_cvar
+  end
+
+  sig {void}
+  def more_method
+    # We parse each '@' as its own separate thing.
+    @@ # error-with-dupes: unexpected
+    #^ completion: (nothing)
   end
 end
 

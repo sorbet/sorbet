@@ -11,6 +11,11 @@ class InstanceVariable
     @my
     #  ^ completion: @my, @my_ivar
   end
+
+  def more_method
+    @ # error: unexpected
+    #^ completion: (nothing)
+  end
 end
 
 class OtherInstanceVariable
@@ -30,6 +35,12 @@ class ClassVariable
   def other_method
     @@my
     #   ^ completion: @@my, @@my_cvar
+  end
+
+  def more_method
+    # We parse each '@' as its own separate thing.
+    @@ # error-with-dupes: unexpected
+    #^ completion: (nothing)
   end
 end
 
