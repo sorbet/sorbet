@@ -3,7 +3,7 @@ test.rb:6: Unexpected bare `T::Types::Base` value found in type position https:/
                     ^
   Note:
     Sorbet only allows statically-analyzable types in type positions.
-To compute new runtime types, you must explicitly wrap with `T.unsafe`
+    To compute new runtime types, you must explicitly wrap with `T.unsafe`
   Autocorrect: Done
     test.rb:6: Replaced with `T.unsafe(x)`
      6 |  T.nilable(x)
