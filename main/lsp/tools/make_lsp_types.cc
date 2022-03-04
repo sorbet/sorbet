@@ -1361,7 +1361,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/signatureHelp",
                                      "window/showMessage",
                                      "workspace/symbol",
-                                     "workspace/executeCommand",
                                      "textDocument/implementation",
                                  },
                                  enumTypes);
