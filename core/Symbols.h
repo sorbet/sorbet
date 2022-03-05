@@ -141,6 +141,7 @@ public:
     ClassOrModuleRef owner;
     NameRef name;
     ClassOrModuleRef rebind;
+    Flags flags;
     TypePtr resultType;
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
@@ -150,11 +151,8 @@ public:
 
 private:
     InlinedVector<Loc, 2> locs_;
-
-public:
-    Flags flags;
 };
-CheckSize(Method, 192, 8);
+CheckSize(Method, 184, 8);
 
 // Contains a field or a static field
 class Field final {
