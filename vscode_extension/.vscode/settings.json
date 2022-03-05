@@ -1,0 +1,17 @@
+{
+    // set to false to hide directory from the VS Code Document Sidebar
+    "files.exclude": {
+        "out/**/*": false,
+        "node_modules": false
+    },
+    // set this to false to include "out" folder in search results
+    "search.exclude": {
+        "out": true
+    },
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "typescript.tsc.autoDetect": "off",
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    }
+}
