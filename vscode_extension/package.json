@@ -268,7 +268,9 @@
         {
           "command": "sorbet.showOutput",
           "when": "editorLangId == ruby"
-        },
+        }
+      ],
+      "editor/context": [
         {
           "when": "resourceLangId == ruby",
           "command": "sorbet.copySymbolToClipboard",
