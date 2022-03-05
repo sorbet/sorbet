@@ -8,7 +8,7 @@ export async function stopProcess(p: ChildProcess | null): Promise<void> {
     // Process is already dead.
     return;
   }
-  return new Promise<void>(res => {
+  return new Promise<void>((res) => {
     let hasExited = false;
     console.log(`Stopping process ${p.pid}`);
     function onExit() {

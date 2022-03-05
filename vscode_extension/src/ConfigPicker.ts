@@ -14,25 +14,25 @@ export default class SorbetConfigPicker {
 
   public async show(): Promise<void> {
     const { activeLspConfig, lspConfigs } = this._extensionConfig;
-    const pickOptions: SorbetQuickPickItem[] = lspConfigs.map(c => {
+    const pickOptions: SorbetQuickPickItem[] = lspConfigs.map((c) => {
       return {
         label: `${isEqual(activeLspConfig, c) ? "• " : ""}${c.name}`,
         description: c.description,
         detail: c.command.join(" "),
-        lspConfig: c
+        lspConfig: c,
       };
     });
     pickOptions.push({
       label: `${activeLspConfig ? "" : "• "}Disable Sorbet`,
       description: "Disable the Sorbet extension",
-      lspConfig: null
+      lspConfig: null,
     });
     const selected = await window.showQuickPick<SorbetQuickPickItem>(
       pickOptions,
       {
         placeHolder: "Select a Sorbet configuration",
-        ignoreFocusOut: false
-      }
+        ignoreFocusOut: false,
+      },
     );
     if (selected) {
       const { lspConfig } = selected;

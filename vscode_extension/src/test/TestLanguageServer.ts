@@ -2,7 +2,7 @@ import {
   createConnection,
   ProposedFeatures,
   InitializeParams,
-  TextDocumentSyncKind
+  TextDocumentSyncKind,
 } from "vscode-languageserver";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
 
@@ -16,15 +16,15 @@ connection.onInitialize((_: InitializeParams) => {
       textDocumentSync: TextDocumentSyncKind.Full,
       // Tell the client that the server supports code completion
       completionProvider: {
-        resolveProvider: true
-      }
-    }
+        resolveProvider: true,
+      },
+    },
   };
 });
 
 connection.onInitialized(() => {});
 
-connection.onHover(e => {
+connection.onHover((e) => {
   switch (e.textDocument.uri) {
     case TestLanguageServerSpecialURIs.SUCCESS:
       return { contents: TestLanguageServerSpecialURIs.SUCCESS };

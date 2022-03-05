@@ -2,7 +2,7 @@ import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind
+  TransportKind,
 } from "vscode-languageclient";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
@@ -13,7 +13,7 @@ import { setSorbetMetricsApi, Tags, MetricsEmitter } from "../veneur";
 const enum MetricType {
   Increment,
   Gauge,
-  Timing
+  Timing,
 }
 
 class RecordingMetricsEmitter implements MetricsEmitter {
@@ -28,7 +28,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
   async increment(
     metricName: string,
     count: number = 1,
-    tags: Readonly<{ [metric: string]: string }> = {}
+    tags: Readonly<{ [metric: string]: string }> = {},
   ): Promise<void> {
     this.metrics.push([MetricType.Increment, metricName, count, tags]);
   }
@@ -36,7 +36,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
   async gauge(
     metricName: string,
     value: number,
-    tags: Readonly<{ [metric: string]: string }> = {}
+    tags: Readonly<{ [metric: string]: string }> = {},
   ): Promise<void> {
     this.metrics.push([MetricType.Gauge, metricName, value, tags]);
   }
@@ -44,7 +44,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
   async timing(
     metricName: string,
     value: number | Date,
-    tags: Tags = {}
+    tags: Tags = {},
   ): Promise<void> {
     const rawValue =
       typeof value === "number" ? value : Date.now() - value.valueOf();
@@ -69,15 +69,15 @@ function createLanguageClient(): LanguageClient {
     debug: {
       module: serverModule,
       transport: TransportKind.ipc,
-      options: debugOptions
-    }
+      options: debugOptions,
+    },
   };
 
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
     documentSelector: [{ scheme: "file", language: "plaintext" }],
-    synchronize: {}
+    synchronize: {},
   };
 
   // Create the language client and start the client.
@@ -85,7 +85,7 @@ function createLanguageClient(): LanguageClient {
     "languageServerExample",
     "Language Server Example",
     serverOptions,
-    clientOptions
+    clientOptions,
   );
 
   // Start the client. This will also launch the server
@@ -107,13 +107,13 @@ suite("LanguageClient", () => {
       {
         const successResponse = await client.sendRequest("textDocument/hover", {
           textDocument: {
-            uri: TestLanguageServerSpecialURIs.SUCCESS
+            uri: TestLanguageServerSpecialURIs.SUCCESS,
           },
-          position: { line: 1, character: 1 }
+          position: { line: 1, character: 1 },
         });
         assert.equal(
           (successResponse as any).contents,
-          TestLanguageServerSpecialURIs.SUCCESS
+          TestLanguageServerSpecialURIs.SUCCESS,
         );
         const metrics = metricsEmitter.getAndResetMetrics();
         assert.equal(metrics.length, 1);
@@ -128,14 +128,14 @@ suite("LanguageClient", () => {
           new RequestType("textDocument/hover"),
           {
             textDocument: {
-              uri: TestLanguageServerSpecialURIs.SUCCESS
+              uri: TestLanguageServerSpecialURIs.SUCCESS,
             },
-            position: { line: 1, character: 1 }
-          }
+            position: { line: 1, character: 1 },
+          },
         );
         assert.equal(
           (successResponse as any).contents,
-          TestLanguageServerSpecialURIs.SUCCESS
+          TestLanguageServerSpecialURIs.SUCCESS,
         );
         const metrics = metricsEmitter.getAndResetMetrics();
         assert.equal(metrics.length, 1);
@@ -148,16 +148,16 @@ suite("LanguageClient", () => {
       try {
         await client.sendRequest("textDocument/hover", {
           textDocument: {
-            uri: TestLanguageServerSpecialURIs.FAILURE
+            uri: TestLanguageServerSpecialURIs.FAILURE,
           },
-          position: { line: 1, character: 1 }
+          position: { line: 1, character: 1 },
         });
         assert.fail("Request should have failed.");
       } catch (e) {
         assert(
           ((e as any).message as string).indexOf(
-            TestLanguageServerSpecialURIs.FAILURE
-          ) !== -1
+            TestLanguageServerSpecialURIs.FAILURE,
+          ) !== -1,
         );
         const metrics = metricsEmitter.getAndResetMetrics();
         assert.equal(metrics.length, 1);
@@ -170,9 +170,9 @@ suite("LanguageClient", () => {
       try {
         await client.sendRequest("textDocument/hover", {
           textDocument: {
-            uri: TestLanguageServerSpecialURIs.EXIT
+            uri: TestLanguageServerSpecialURIs.EXIT,
           },
-          position: { line: 1, character: 1 }
+          position: { line: 1, character: 1 },
         });
         assert.fail("Request should have failed.");
       } catch (e) {
