@@ -2030,7 +2030,7 @@ Method Method::deepCopy(const GlobalState &to) const {
         store.name = NameRef(to, mem.name);
     }
     result.rebind = this->rebind;
-    result.intrinsic = this->intrinsic;
+    result.intrinsicOffset = this->intrinsicOffset;
     return result;
 }
 

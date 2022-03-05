@@ -112,12 +112,15 @@ TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
 DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMethod(gs, args.name);
-    if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
-        DispatchResult res{nullptr, std::move(comp)};
-        method.data(gs)->intrinsic->apply(gs, args, res);
-        if (res.returnType != nullptr) {
-            return res;
+    if (method.exists()) {
+        auto *intrinsic = method.data(gs)->getIntrinsic();
+        if (intrinsic != nullptr) {
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchResult res{nullptr, std::move(comp)};
+            intrinsic->apply(gs, args, res);
+            if (res.returnType != nullptr) {
+                return res;
+            }
         }
     }
     return dispatchCallProxyType(gs, underlying(gs), args);
@@ -126,12 +129,15 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
 DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMethod(gs, args.name);
-    if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
-        DispatchResult res{nullptr, std::move(comp)};
-        method.data(gs)->intrinsic->apply(gs, args, res);
-        if (res.returnType != nullptr) {
-            return res;
+    if (method.exists()) {
+        auto *intrinsic = method.data(gs)->getIntrinsic();
+        if (intrinsic != nullptr) {
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchResult res{nullptr, std::move(comp)};
+            intrinsic->apply(gs, args, res);
+            if (res.returnType != nullptr) {
+                return res;
+            }
         }
     }
     return dispatchCallProxyType(gs, underlying(gs), args);
@@ -1381,8 +1387,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     TypePtr &resultType = result.returnType;
 
-    if (method.data(gs)->intrinsic != nullptr) {
-        method.data(gs)->intrinsic->apply(gs, args, result);
+    auto *intrinsic = method.data(gs)->getIntrinsic();
+    if (intrinsic != nullptr) {
+        intrinsic->apply(gs, args, result);
         // the call could have overriden constraint
         if (result.main.constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
             constr = result.main.constr.get();
@@ -3855,6 +3862,18 @@ const vector<Intrinsic> intrinsics{
 
 absl::Span<const Intrinsic> intrinsicMethods() {
     return absl::MakeSpan(intrinsics);
+}
+
+bool Method::hasIntrinsic() const {
+    return this->intrinsicOffset != INVALID_INTRINSIC_OFFSET;
+}
+
+const IntrinsicMethod *Method::getIntrinsic() const {
+    if (this->intrinsicOffset == INVALID_INTRINSIC_OFFSET) {
+        return nullptr;
+    }
+
+    return intrinsics[this->intrinsicOffset - FIRST_VALID_INTRINSIC_OFFSET].impl;
 }
 
 } // namespace sorbet::core

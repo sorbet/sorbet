@@ -138,21 +138,25 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
     bool isPrintable(const GlobalState &gs) const;
 
+    // Equivalent to `getIntrinsic() != nullptr`, but potentially more efficient.
+    bool hasIntrinsic() const;
+    const IntrinsicMethod *getIntrinsic() const;
+
     ClassOrModuleRef owner;
     NameRef name;
     ClassOrModuleRef rebind;
     Flags flags;
+    const static uint16_t INVALID_INTRINSIC_OFFSET = 0;
+    const static uint16_t FIRST_VALID_INTRINSIC_OFFSET = 1;
+    uint16_t intrinsicOffset = INVALID_INTRINSIC_OFFSET;
     TypePtr resultType;
-    // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
-    // why raw pointers are safe.
-    const IntrinsicMethod *intrinsic = nullptr;
     ArgumentsStore arguments;
     InlinedVector<TypeArgumentRef, 4> typeArguments;
 
 private:
     InlinedVector<Loc, 2> locs_;
 };
-CheckSize(Method, 184, 8);
+CheckSize(Method, 176, 8);
 
 // Contains a field or a static field
 class Field final {
