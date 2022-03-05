@@ -861,7 +861,7 @@ void GlobalState::initEmpty() {
 }
 
 void GlobalState::installIntrinsics() {
-    for (auto &entry : intrinsicMethods) {
+    for (auto &entry : intrinsicMethods()) {
         ClassOrModuleRef symbol;
         switch (entry.singleton) {
             case Intrinsic::Kind::Instance:

@@ -3767,9 +3767,7 @@ public:
     }
 } T_Enum_tripleEq;
 
-} // namespace
-
-const vector<Intrinsic> intrinsicMethods{
+const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::must(), &T_must},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::all(), &T_all},
@@ -3852,5 +3850,11 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
     {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
 };
+
+} // namespace
+
+absl::Span<const Intrinsic> intrinsicMethods() {
+    return absl::MakeSpan(intrinsics);
+}
 
 } // namespace sorbet::core
