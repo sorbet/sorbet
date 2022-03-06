@@ -971,16 +971,19 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                                 if (ctxIsSingleton) {
                                     e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
                                     e.addErrorNote("Only a `{}` can be used in a singleton method definition.",
                                                    "type_template");
                                 } else {
                                     e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
                                     e.addErrorNote("Only a `{}` can be used in an instance method definition.",
                                                    "type_member");
                                 }
                             } else {
                                 e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
+                                e.addErrorLine(symData->loc(), "{} defined here", typeStr);
                             }
                         }
                         result.type = core::Types::untypedUntracked();
