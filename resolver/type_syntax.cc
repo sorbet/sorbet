@@ -956,7 +956,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                     } else {
                         if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
-                            string typeStr = sym.show(ctx);
+                            string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 
                             if (usedOnSourceClass) {
                                 // Autocorrects here are awkward, because we want to offer the autocorrect at the
