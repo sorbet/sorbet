@@ -1,12 +1,18 @@
-test/cli/type-member-template/type-member-template.rb:10: `type_template` type `T.class_of(A)::Template` used in an instance method definition https://srb.help/5027
+test/cli/type-member-template/type-member-template.rb:10: `type_template` type `Template` used in an instance method definition https://srb.help/5027
     10 |  sig {returns(Template)}
                        ^^^^^^^^
+    test/cli/type-member-template/type-member-template.rb:8: `Template` defined here
+     8 |  Template = type_template
+          ^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Only a `type_member` can be used in an instance method definition.
 
-test/cli/type-member-template/type-member-template.rb:13: `type_member` type `A::Member` used in a singleton method definition https://srb.help/5027
+test/cli/type-member-template/type-member-template.rb:13: `type_member` type `Member` used in a singleton method definition https://srb.help/5027
     13 |  sig {returns(Member)}
                        ^^^^^^
+    test/cli/type-member-template/type-member-template.rb:7: `Member` defined here
+     7 |  Member = type_member
+          ^^^^^^^^^^^^^^^^^^^^
   Note:
     Only a `type_template` can be used in a singleton method definition.
 Errors: 2

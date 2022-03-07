@@ -956,7 +956,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                     } else {
                         if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
-                            string typeStr = sym.show(ctx);
+                            string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 
                             if (usedOnSourceClass) {
                                 // Autocorrects here are awkward, because we want to offer the autocorrect at the
@@ -971,16 +971,19 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                                 if (ctxIsSingleton) {
                                     e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
                                     e.addErrorNote("Only a `{}` can be used in a singleton method definition.",
                                                    "type_template");
                                 } else {
                                     e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
                                                 typeStr);
+                                    e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
                                     e.addErrorNote("Only a `{}` can be used in an instance method definition.",
                                                    "type_member");
                                 }
                             } else {
                                 e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
+                                e.addErrorLine(symData->loc(), "{} defined here", typeStr);
                             }
                         }
                         result.type = core::Types::untypedUntracked();
