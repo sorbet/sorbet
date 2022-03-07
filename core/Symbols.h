@@ -322,14 +322,14 @@ public:
             : isClass(false), isModule(false), isAbstract(false), isInterface(false),
             isLinearizationComputed(false), isFinal(false), isSealed(false), isPrivate(false), isUndeclared(false) {}
 
-        uint8_t serialize() const {
+        uint16_t serialize() const {
             // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            auto rawBits = *reinterpret_cast<const uint16_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
     };
-    CheckSize(Flags, 1, 1);
+    CheckSize(Flags, 2, 1);
 
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
