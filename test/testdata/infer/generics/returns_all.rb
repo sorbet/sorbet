@@ -23,11 +23,11 @@ class A
 
   def test
     v1 = generic(1017)
-    T.reveal_type(v1) # Revealed type: `Integer(1017)`
+    T.reveal_type(v1) # error: Revealed type: `Integer(1017)`
     T.let(v1, Integer)
 
     v2 = generic("hi")
-    T.reveal_type(v2) # Revealed type: `String("hi")`
+    T.reveal_type(v2) # error: Revealed type: `String("hi")`
     T.let(v2, String)
   end
 end
