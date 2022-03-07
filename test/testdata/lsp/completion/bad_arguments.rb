@@ -25,7 +25,6 @@ def various_bad_commas_in_send(a, b, x, y)
   # don't think it's too bad if the behavior here needs to change in the future.
   foo(a, x: y:)
   #      ^^ error: unexpected token tLABEL
-  #         ^ error: Method `y` does not exist
 
   # Either another positional arg, or the start of a keyword
   foo(a, x y: y)
@@ -42,7 +41,6 @@ def various_bad_commas_in_send(a, b, x, y)
   #            ^ completion: a, b, x, y, ...
 
   foo(a, x: , y: y)
-  #      ^ error: Method `x` does not exist
   #         ^ completion: a, b, x, y, ...
 
 

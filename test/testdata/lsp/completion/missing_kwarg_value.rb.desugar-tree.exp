@@ -1,9 +1,0 @@
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  def takes_keyword_args<<todo method>>(x:, &<blk>)
-    <emptyTree>
-  end
-
-  def calls_with_keyword_args<<todo method>>(x, y, &<blk>)
-    <self>.takes_keyword_args(:x, <self>.x())
-  end
-end
