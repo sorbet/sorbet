@@ -415,6 +415,8 @@ private:
             }
 
             auto scopeSize = std::distance(start, scope.end());
+            ENFORCE(scopeSize > 0);
+
             const auto parent = absl::c_find_if(this->parents, [start, scopeSize, &scope](auto &p) {
                 return scopeSize == p.stub.fullName.size() && std::equal(start, scope.end(), p.stub.fullName.begin());
             });
@@ -484,7 +486,11 @@ private:
             sym = cls.data(gs)->owner;
         }
 
-        // Explicitly consider an empty top-level scope as one to skip.
+        // Explicitly consider an empty top-level scope as one to skip. This arises when the symbol passed in is
+        // `core::Symbols::root()`, which will always be the top-most parent for the `Nesting` linked list present for
+        // the `ResolutionItem` being stubbed. As this doesn't correspond to a prefix of the current package's
+        // namespace, we return false to signal that this scope doesn't need to be considered as either of the
+        // parent/child package special cases.
         if (res.empty()) {
             return false;
         }
