@@ -50,6 +50,26 @@ module GC
   # Returns information about the most recent garbage collection.
   def self.latest_gc_info(*_); end
 
+  #  Returns whether or not automatic compaction has been enabled.
+  #
+  # ```ruby
+  # GC.auto_compact    #=> true or false
+  # ```
+  sig {returns(T::Boolean)}
+  def self.auto_compact(); end
+
+  #
+  #  Updates automatic compaction mode.
+  #
+  #  When enabled, the compactor will execute on every major collection.
+  #
+  #  Enabling compaction will degrade performance on major collections.
+  #
+  # ```ruby
+  # GC.auto_compact = flag
+  # ```
+  def self.auto_compact=(_); end
+
   # Initiates garbage collection, even if manually disabled.
   #
   # This method is defined with keyword arguments that default to true:
