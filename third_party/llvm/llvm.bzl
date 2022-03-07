@@ -141,11 +141,7 @@ def expand_cmake_vars(name, src, dst, cmake_vars):
         srcs = [src],
         tools = [expand_cmake_vars_tool],
         outs = [dst],
-        # Work around this issue: https://github.com/bazelbuild/bazel/issues/8685
-        # TODO(jez) Delete python3 if ^ this issue is resolved.
-        # tl;dr: Bazel hardcodes searching for `python` on the PATH in a py_binary wrapper script.
-        # Ubuntu 20.04 has removed `python` from the PATH in favor of `python3`.
-        cmd = ("python3 $(location {}) ".format(expand_cmake_vars_tool) + cmake_vars +
+        cmd = ("$(location {}) ".format(expand_cmake_vars_tool) + cmake_vars +
                "< $< > $@"),
     )
 
