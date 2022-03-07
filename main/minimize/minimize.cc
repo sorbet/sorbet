@@ -52,7 +52,7 @@ OutputCategory outputCategoryFromClassName(string_view fullName) {
     } else if (absl::StrContains(fullName, "::Mutator")) {
         return OutputCategory::Mutator;
     } else if (absl::StrContains(fullName, "::Model")) {
-        if (absl::StartsWith(fullName, "Plaid")) {
+        if (absl::StartsWith(fullName, "Plaid") || absl::StartsWith(fullName, "Algolia")) {
             return OutputCategory::External;
         } else {
             return OutputCategory::Model;
