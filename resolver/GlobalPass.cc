@@ -206,7 +206,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
 
             // allow us to catch undeclared modules in LSP fast path, so we can report ambiguous
             // definition errors.
-            ref.data(gs)->setClassModuleUndeclared();
+            ref.data(gs)->flags.isUndeclared = true;
         }
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
