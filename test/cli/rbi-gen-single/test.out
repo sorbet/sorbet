@@ -17,14 +17,22 @@ Family::Simpsons::FullyQualifiedBart = Family::Bart::Character
 -- Test RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
 # typed: true
 
-class Family::Flanders < Object
-  extend T::Sig
-end
 class Test::Family::TestFamily < Test::Util::Testing::TestCase
   sig {params(fam: Family::Flanders).void}
   def test_flanders(fam); end
+  sig {returns(Object)}
+  def test_krabappel; end
   sig {params(fam: Family::Simpsons).void}
   def test_simpsons(fam); end
+  extend T::Sig
+end
+class Family::Flanders < Object
+  extend T::Sig
+end
+-- Test Private RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+# typed: true
+
+class Family::Krabappel < Object
   extend T::Sig
 end
 -- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)

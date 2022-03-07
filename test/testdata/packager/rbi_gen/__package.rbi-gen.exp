@@ -283,14 +283,18 @@ end
 # test/testdata/packager/rbi_gen/RBIGen_Package.test.rbi
 # typed: true
 
-class RBIGen::Sealed::TestChild < RBIGen::Sealed::Parent
-end
-class RBIGen::Private::PrivateClassForTests < Object
-end
 module Test::RBIGen
 end
 class Test::RBIGen::MyTestHelper < Object
 end
 class Test::RBIGen::MyTest < Object
+end
+
+# test/testdata/packager/rbi_gen/RBIGen_Package.test.private.package.rbi
+# typed: true
+
+class RBIGen::Sealed::TestChild < RBIGen::Sealed::Parent
+end
+class RBIGen::Private::PrivateClassForTests < Object
 end
 

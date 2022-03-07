@@ -13,9 +13,11 @@ public:
         std::string baseFilePath;
         std::string rbi;
         std::string testRBI;
+        std::string testPrivateRBI;
         // each is a json array of mangled package names
         std::string rbiPackageDependencies;
         std::string testRBIPackageDependencies;
+        std::string testPrivateRBIPackageDependencies;
     };
 
     // Exposed for testing.

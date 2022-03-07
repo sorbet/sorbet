@@ -387,6 +387,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                             return absl::StrCat("# ", test.folder, output.baseFilePath, ".test.rbi\n", output.testRBI);
                         });
                     }
+                    if (!output.testPrivateRBI.empty()) {
+                        handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
+                            return absl::StrCat("# ", test.folder, output.baseFilePath, ".test.private.package.rbi\n",
+                                                output.testPrivateRBI);
+                        });
+                    }
                 }
             }
         }

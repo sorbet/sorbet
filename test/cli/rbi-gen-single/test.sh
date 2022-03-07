@@ -22,7 +22,7 @@ find . -name __package.rb | sort | while read -r package; do
   echo "-- $package ($name)"
 
   "$sorbet" --silence-dev-message \
-    --ignore=__package.rb,"$rbis" \
+    --ignore=__package.rb \
     --package-rbi-output="$rbis" \
     --single-package="$name" "$test_path"
 
@@ -36,6 +36,12 @@ find . -name __package.rb | sort | while read -r package; do
   if [ -f "$test_rbi" ]; then
     echo "-- Test RBI: $package ($name)"
     cat "$test_rbi"
+  fi
+
+  test_private_rbi="$rbis/${name//::/_}_Package.test.private.package.rbi"
+  if [ -f "$test_private_rbi" ]; then
+    echo "-- Test Private RBI: $package ($name)"
+    cat "$test_private_rbi"
   fi
 
   echo "-- JSON: $package ($name)"
