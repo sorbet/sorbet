@@ -149,6 +149,7 @@ struct builder {
     ForeignPtr (*p_ident)(SelfPtr builder, const token *tok);
     ForeignPtr (*pair)(SelfPtr builder, ForeignPtr key, const token *assoc, ForeignPtr value);
     ForeignPtr (*pair_keyword)(SelfPtr builder, const token *key, ForeignPtr value);
+    ForeignPtr (*pair_label)(SelfPtr builder, const token *key);
     ForeignPtr (*pair_quoted)(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                               ForeignPtr value);
     ForeignPtr (*pin)(SelfPtr builder, const token *tok, ForeignPtr var);
