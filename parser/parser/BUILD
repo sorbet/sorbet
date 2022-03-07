@@ -104,7 +104,16 @@ cc_library(
     hdrs = glob(["include/**/*.hh"]),
     copts = [
         "-Wno-unused-const-variable",
-    ],
+    ] + select({
+        # What we really want here is to say "it's never ok to use -Os, because
+        # that will take 2+ minutes to compile." We have to do this to override
+        # the .bazelrc options.
+        "@com_stripe_ruby_typer//tools/config:dbg": ["-O0"],
+        "@com_stripe_ruby_typer//tools/config:opt": ["-O2"],
+        # worse to take too much time to compile in development than to run too
+        # slow in production, so -O2 by default.
+        "//conditions:default": ["-O2"],
+    }),
     includes = [
         "include",
         "include/ruby_parser",
