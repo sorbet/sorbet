@@ -45,12 +45,13 @@ if ! ./tools/scripts/format_website.sh -t &> format_website; then
 fi
 
 pushd vscode_extension
+yarn install
 if ! yarn lint --output-file=yarn_lint; then
     globalErr=$?
     buildkite-agent annotate --context 'yarn lint' --style error --append <<EOF
-There were eslint errors in vscode_extension/. Fix with:"
+There were eslint errors in vscode_extension/. Fix with:
 
-    cd vscode_extension && yarn lint --fix"
+    cd vscode_extension && yarn lint --fix
 
 $(< yarn_lint)
 EOF
