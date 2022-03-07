@@ -33,4 +33,8 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFil
     gs = move(evictedGs);
 }
 
+const core::GlobalState &UndoState::getEvictedGs() const {
+    return *evictedGs;
+}
+
 } // namespace sorbet::realmain::lsp

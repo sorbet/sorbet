@@ -130,6 +130,11 @@ public:
      * Returns the typechecker's internal global state, which effectively destroys the typechecker for further use.
      */
     std::unique_ptr<core::GlobalState> destroy();
+
+    /**
+     * Tries to run the function on the stale undo state, acquiring a lock.
+     */
+    bool tryRunOnStaleState(std::function<void(UndoState &)> func);
 };
 
 /**
@@ -165,6 +170,52 @@ public:
      * Returns the currently active GlobalState.
      */
     virtual const core::GlobalState &state() const = 0;
+
+    /**
+     * Returns `true` if the delegate is processing stale state.
+     *
+     * TODO(aprocter): We may eventually delurk this because we would ideally like the difference
+     * between the interface for stale and fresh state to be opaque, with no special-case logic
+     * inside tasks when running on stale state.
+     */
+    virtual bool isStale() const {
+        return false;
+    }
+};
+
+class LSPStaleTypechecker final : public LSPTypecheckerInterface {
+    UndoState &undoState;
+
+    // Just so we have something to return from the stubbed functions after we ENFORCE(false)
+    ast::ParsedFile *pf;
+
+public:
+    LSPStaleTypechecker(UndoState &undoState) : undoState(undoState), pf(nullptr) {}
+
+    // Delete copy constructor / assignment.
+    LSPStaleTypechecker(LSPStaleTypechecker &) = delete;
+    LSPStaleTypechecker(const LSPStaleTypechecker &) = delete;
+    LSPStaleTypechecker &operator=(LSPStaleTypechecker &&) = delete;
+    LSPStaleTypechecker &operator=(const LSPStaleTypechecker &) = delete;
+
+    virtual ~LSPStaleTypechecker() = default;
+
+    void typecheckOnFastPath(LSPFileUpdates updates,
+                             std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
+
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
+
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
+
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const override;
+
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
+
+    const core::GlobalState &state() const override;
+
+    bool isStale() const override {
+        return true;
+    }
 };
 
 /**

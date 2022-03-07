@@ -360,6 +360,10 @@ bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
     return !needsMultithreading(indexer);
 }
 
+bool LSPTask::canUseStaleData() const {
+    return false;
+}
+
 // Filter for untyped locations, and dedup responses that are at the same location
 vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::filterAndDedup(const core::GlobalState &gs,

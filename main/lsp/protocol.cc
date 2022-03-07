@@ -228,10 +228,40 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 }
 
                 // Before giving up the lock, check if the typechecker is running a slow path and if the task at the
-                // head of the queue can preempt. If it is, we may be able to schedule a preemption.
-                // Don't bother scheduling tasks to preempt that only need the indexer.
-                // N.B.: We check `canPreempt` last as it is mildly expensive for edits (it hashes the files)
+                // head of the queue can either operate on stale data (i.e., the GlobalState just prior to the change
+                // that required the slow path to run) or preempt the currently running slow path. (Note that we don't
+                // bother with either one in cases where we only need the indexer. TODO(aprocter): is that restriction
+                // actually appropriate for stale-data tasks?)
                 auto &frontTask = taskQueue->pendingTasks.front();
+
+                // Note that running on stale data is an experimental feature, so we hide it behind the
+                // --enable-experimental-lsp-stale-state flag.
+                if (opts.lspStaleStateEnabled && frontTask->finalPhase() == LSPTask::Phase::RUN &&
+                    epochManager->getStatus().slowPathRunning && frontTask->canUseStaleData()) {
+                    logger->debug("Trying to run on stale data");
+
+                    frontTask = typecheckerCoord.syncRunOnStaleState(move(frontTask));
+
+                    // If the coordinator has consumed the task, we know it was able to run it on stale state. Pop it
+                    // and move on to the next task.
+                    if (frontTask == nullptr) {
+                        logger->debug("Succeeded in running on stale data");
+                        taskQueue->pendingTasks.pop_front();
+                    }
+                    // If the coordinator has not consumed the task, that means it was not able to run it on stale
+                    // state, because no cancellationUndoState was present. This likely means that the typechecker has
+                    // not yet initialized the cancellationUndoState, so we will try again after a short delay.
+                    else {
+                        logger->debug("Failed to grab the stale state, will try again in 100ms");
+                        Timer::timedSleep(100ms, *logger, "stale_state.sleep");
+                    }
+
+                    continue;
+                }
+
+                // If the task can preempt, we may be able to schedule a preemption. Don't bother scheduling tasks to
+                // preempt that only need the indexer.
+                // N.B.: We check `canPreempt` last as it is mildly expensive for edits (it hashes the files)
                 if (frontTask->finalPhase() == LSPTask::Phase::RUN && epochManager->getStatus().slowPathRunning &&
                     frontTask->canPreempt(indexer)) {
                     absl::Notification finished;
