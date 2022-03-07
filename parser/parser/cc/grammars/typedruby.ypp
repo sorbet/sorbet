@@ -2144,9 +2144,13 @@ array_premature_end: eof
 			                  else_ ? else_->nod : nullptr, $5);
                       driver.rewind_if_dedented($1, $5);
                     }
-                | kFOR for_var kIN expr_value_do compstmt kEND
+                | kFOR for_var kIN
                     {
-                      $$ = driver.build.for_(self, $1, $2, $3, $4->nod, $4->tok, $5->body, $6);
+                      driver.lex.cond.push(true);
+                    }
+                    expr_value_do compstmt kEND
+                    {
+                      $$ = driver.build.for_(self, $1, $2, $3, $5->nod, $5->tok, $6->body, $7);
                     }
                 | kCLASS cpath superclass
                     {
