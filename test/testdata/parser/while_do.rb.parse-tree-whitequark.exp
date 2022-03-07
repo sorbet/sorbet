@@ -1,0 +1,7 @@
+s(:begin,
+  s(:while,
+    s(:begin,
+      s(:false)), nil),
+  s(:until,
+    s(:begin,
+      s(:false)), nil))
