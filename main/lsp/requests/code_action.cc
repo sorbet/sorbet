@@ -36,6 +36,12 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
 
     vector<unique_ptr<CodeAction>> result;
 
+    if (typechecker.isStale()) {
+        config.logger->debug("CodeActionTask running on stale, returning empty result");
+        response->result = move(result);
+        return response;
+    }
+
     const core::GlobalState &gs = typechecker.state();
     core::FileRef file = config.uri2FileRef(gs, params->textDocument->uri);
     if (!file.exists()) {
@@ -107,5 +113,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
 
     response->result = move(result);
     return response;
+}
+
+bool CodeActionTask::canUseStaleData() const {
+    return true;
 }
 } // namespace sorbet::realmain::lsp

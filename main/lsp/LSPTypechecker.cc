@@ -614,6 +614,16 @@ void LSPTypechecker::changeThread() {
     typecheckerThreadId = newId;
 }
 
+bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
+    absl::ReaderMutexLock lock(&cancellationUndoStateRWLock);
+    if (cancellationUndoState == nullptr) {
+        return false;
+    } else {
+        func(*cancellationUndoState);
+        return true;
+    }
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), workers(workers) {}
 
@@ -647,5 +657,35 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
+
+void LSPStaleTypechecker::typecheckOnFastPath(LSPFileUpdates updates,
+                                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) {
+    ENFORCE(false, "typecheckOnFastPath not implemented");
+}
+
+std::vector<std::unique_ptr<core::Error>> LSPStaleTypechecker::retypecheck(std::vector<core::FileRef> frefs) const {
+    ENFORCE(false, "retypecheck not implemented");
+    return {};
+}
+
+LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
+                                          const std::vector<core::FileRef> &filesForQuery) const {
+    ENFORCE(false, "query not implemented");
+    return LSPQueryResult();
+}
+
+const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const {
+    ENFORCE(false, "getIndexed not implemented");
+    return *pf;
+}
+
+std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
+    ENFORCE(false, "getResolved not implemented");
+    return {};
+}
+
+const core::GlobalState &LSPStaleTypechecker::state() const {
+    return undoState.getEvictedGs();
+};
 
 } // namespace sorbet::realmain::lsp
