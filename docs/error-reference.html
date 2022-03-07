@@ -1059,8 +1059,8 @@ different situations where this can happen; one example is given below:</p>
   E = type_member
 end
 
-Box[<span class="hljs-literal">true</span>].new # error: Unsupported usage of bare<span class="hljs-built_in"> type
-</span></code></pre>
+Box[<span class="hljs-literal">true</span>].new # error: Unexpected bare `TrueClass` value found <span class="hljs-keyword">in</span><span class="hljs-built_in"> type </span>position
+</code></pre>
 <p>To fix this error, replace the <code>true</code> value with the type <code>TrueClass</code>:</p>
 <pre><code class="hljs css language-rb">Box[TrueClass].new
 </code></pre>
