@@ -1758,6 +1758,19 @@ void lexer::set_state_expr_value() {
       => { emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
            fhold; fnext expr_labelarg; fbreak; };
 
+      '...' c_nl
+      => {
+        if (version >= ruby_version::RUBY_31) {
+          auto ident = tok_view(ts, te - 2);
+          emit(token_type::tBDOT3, ident, ts, te - 1);
+          emit(token_type::tNL, "", newline_s, newline_s + 1);
+          fnext expr_end; fbreak;
+        } else {
+          p -= 4;
+          fhold; fgoto expr_end;
+        }
+      };
+
       w_space_comment;
 
       c_any
@@ -2473,17 +2486,38 @@ void lexer::set_state_expr_value() {
         fnext expr_beg; fbreak;
       };
 
-      '...'
+      # Here we scan and conditionally emit "\n":
+      # + if it's there
+      #   + and emitted we do nothing
+      #   + and not emitted we return `p` to "\n" to process it on the next scan
+      # + if it's not there we do nothing
+      '...' c_nl?
       => {
+        bool followed_by_nl = te - 1 == newline_s;
+        bool nl_emitted = false;
+        auto dots_te = followed_by_nl ? te - 1 : te;
+
         auto ident = tok_view(ts, te - 2);
-        if (version >= ruby_version::RUBY_27) {
-          emit(token_type::tBDOT3, ident, ts, te);
-        } else {
+        if (version >= ruby_version::RUBY_30) {
           if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
-            emit(token_type::tDOT3, ident, ts, te);
+            emit(token_type::tDOT3, ident, ts, dots_te);
           } else {
-            emit(token_type::tBDOT3, ident, ts, te);
+            emit(token_type::tBDOT3, ident, ts, dots_te);
+
+            if (version >= ruby_version::RUBY_31 && followed_by_nl && context.inDefOpenArgs()) {
+              emit(token_type::tNL, "", newline_s, newline_s + 1);
+              nl_emitted = true;
+            }
           }
+        } else if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tBDOT3, ident, ts, dots_te);
+        } else {
+          emit(token_type::tDOT3, ident, ts, dots_te);
+        }
+
+         if (followed_by_nl && !nl_emitted) {
+          // return "\n" to process it on the next scan
+          fhold;
         }
 
         fnext expr_beg; fbreak;

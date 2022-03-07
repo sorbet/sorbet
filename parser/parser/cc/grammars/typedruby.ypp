@@ -3688,28 +3688,15 @@ f_opt_paren_args: f_paren_args
                       driver.lex.set_state_expr_value();
                       $$ = driver.build.args(self, $1, $2, $3, true);
                     }
-                | tLPAREN2 f_arg tCOMMA args_forward rparen
-                    {
-                      driver.lex.declare_forward_args();
-                      auto forward_arg = driver.build.forward_arg(self, nullptr, $4, nullptr);
-                      $2->emplace_back(forward_arg);
-                      $$ = driver.build.args(self, $1, $2, $5, true);
-                    }
-                | tLPAREN2 args_forward rparen
-                    {
-                      driver.lex.set_state_expr_value();
-                      driver.lex.declare_forward_args();
-                      auto forward_arg = driver.build.forward_arg(self, $1, $2, $3);
-                      auto node_list = driver.alloc.node_list(forward_arg);
-                      $$ = driver.build.args(self, $1, node_list, $3, true);
-                    }
        f_arglist: f_paren_args
                 |   {
                       $<boolean>$ = driver.lex.in_kwarg;
                       driver.lex.in_kwarg = true;
+                      driver.lex.context.push(Context::State::DEF_OPEN_ARGS);
                     }
                   f_args term
                     {
+                      driver.lex.context.pop();
                       driver.lex.in_kwarg = $<boolean>1;
                       $$ = driver.build.args(self, nullptr, $2, nullptr, true);
                       DIAGCHECK();
@@ -3743,6 +3730,21 @@ f_opt_paren_args: f_paren_args
                 | f_block_arg
                     {
                       $$ = $1;
+                    }
+                | args_forward
+                    {
+                      if (driver.lex.context.inLambda()) {
+                        // This is supposed to be caught by the grammar.
+                        // However, we don't generate a `ForwardArgs` node in the builder.cc unlike whitequark parser.
+                        // So, we have to manually raise a parse error to forbid `->(...)` usage
+                        // Last argument adds extra double quotes to circumvent an internal check
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, "\"...\"");
+                      }
+
+                      driver.lex.declare_forward_args();
+                      auto result = driver.alloc.node_list();
+                      result->emplace_back(driver.build.forward_arg(self, nullptr, $1, nullptr));
+                      $$ = result;
                     }
 
    opt_args_tail: tCOMMA args_tail

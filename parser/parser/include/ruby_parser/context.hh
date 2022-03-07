@@ -17,6 +17,7 @@ public:
         DEFS,
         BLOCK,
         LAMBDA,
+        DEF_OPEN_ARGS,
     };
 
     void push(State state);
@@ -26,6 +27,7 @@ public:
     bool inClass();
     bool inDynamicBlock();
     bool inLambda();
+    bool inDefOpenArgs();
     bool indirectlyInDef();
     bool classDefintinionAllowed();
     bool moduleDefintinionAllowed();

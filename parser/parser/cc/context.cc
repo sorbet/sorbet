@@ -59,6 +59,10 @@ bool Context::indirectlyInDef() {
     return contains(State::DEF) || contains(State::DEFS);
 }
 
+bool Context::inDefOpenArgs() {
+    return !stack.empty() && stack[stack.size() - 1] == State::DEF_OPEN_ARGS;
+}
+
 bool Context::classDefintinionAllowed() {
     auto defIndex = std::max(lastIndexOfState(State::DEF), lastIndexOfState(State::DEFS));
     auto sclassIndex = lastIndexOfState(State::SCLASS);
