@@ -6,6 +6,6 @@ end
 module ::Algolia::Recommend
 end
 
-class Algolia::Recommend::Model
+class ::Algolia::Recommend::Model
 end
 
