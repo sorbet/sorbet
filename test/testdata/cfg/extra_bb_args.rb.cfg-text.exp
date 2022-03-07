@@ -5,8 +5,8 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$9: T.class_of(T) = alias <C T>
     <cfgAlias>$11: T.class_of(String) = alias <C String>
-    <statTemp>$7: <Type: T.nilable(String)> = <cfgAlias>$9: T.class_of(T).nilable(<cfgAlias>$11: T.class_of(String))
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: <Type: T.nilable(String)>)
+    <statTemp>$7: Runtime object representing type: T.nilable(String) = <cfgAlias>$9: T.class_of(T).nilable(<cfgAlias>$11: T.class_of(String))
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: Runtime object representing type: T.nilable(String))
     <castTemp>$12: NilClass = nil
     name: T.nilable(String) = cast(<castTemp>$12: NilClass, T.nilable(String));
     <ifTemp>$14: T::Boolean = name: T.nilable(String).nil?()

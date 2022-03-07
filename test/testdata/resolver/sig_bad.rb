@@ -42,7 +42,7 @@ class A
       k: T.class_of(1),
       #  ^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
       #             ^  error: Unsupported literal in type syntax
-      #             ^  error: Unsupported usage of literal type
+      #             ^  error: Unexpected bare `Integer(1)` value found in type position
       l: {[] => String}, # error: Shape keys must be literals
       m: {foo: 0}, # error: Unsupported literal in type syntax
       n: T.all, # error: Not enough arguments provided for method

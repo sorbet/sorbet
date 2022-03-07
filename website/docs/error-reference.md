@@ -1343,7 +1343,7 @@ class Box
   E = type_member
 end
 
-Box[true].new # error: Unsupported usage of bare type
+Box[true].new # error: Unexpected bare `TrueClass` value found in type position
 ```
 
 To fix this error, replace the `true` value with the type `TrueClass`:

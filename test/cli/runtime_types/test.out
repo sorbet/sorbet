@@ -1,0 +1,32 @@
+test/cli/runtime_types/test.rb:11: Expected `T.class_of(A)` but found `Runtime object representing type: A` for method result type https://srb.help/7005
+    11 |  X
+          ^
+  Expected `T.class_of(A)` for result type of method `test1`:
+    test/cli/runtime_types/test.rb:10:
+    10 |def test1
+        ^^^^^^^^^
+  Got `Runtime object representing type: A` originating from:
+    test/cli/runtime_types/test.rb:6:
+     6 |X = T.type_alias {A}
+        ^
+  Note:
+    It looks like you're using Sorbet type syntax in a runtime value position.
+    If you really mean to use types as values, use `T::Utils.coerce` to hide the type syntax from the type checker.
+    Otherwise, you're likely using the type system in a way it wasn't meant to be used.
+
+test/cli/runtime_types/test.rb:16: Expected `T.class_of(A)` but found `Runtime object representing type: T.class_of(A)` for method result type https://srb.help/7005
+    16 |  Y
+          ^
+  Expected `T.class_of(A)` for result type of method `test2`:
+    test/cli/runtime_types/test.rb:15:
+    15 |def test2
+        ^^^^^^^^^
+  Got `Runtime object representing type: T.class_of(A)` originating from:
+    test/cli/runtime_types/test.rb:7:
+     7 |Y = T.type_alias {T.class_of(A)}
+        ^
+  Note:
+    It looks like you're using Sorbet type syntax in a runtime value position.
+    If you really mean to use types as values, use `T::Utils.coerce` to hide the type syntax from the type checker.
+    Otherwise, you're likely using the type system in a way it wasn't meant to be used.
+Errors: 2

@@ -73,8 +73,8 @@ bb0[rubyRegionId=0, firstDead=52]():
     s: Integer = cast(<castTemp>$54: Integer(6), Integer);
     <cfgAlias>$58: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$61: T.class_of(T) = alias <C T>
-    <statTemp>$59: <Type: T.untyped> = <cfgAlias>$61: T.class_of(T).untyped()
-    <statTemp>$56: Sorbet::Private::Static::Void = <cfgAlias>$58: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$59: <Type: T.untyped>)
+    <statTemp>$59: Runtime object representing type: T.untyped = <cfgAlias>$61: T.class_of(T).untyped()
+    <statTemp>$56: Sorbet::Private::Static::Void = <cfgAlias>$58: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$59: Runtime object representing type: T.untyped)
     <castTemp>$62: Integer(6) = 6
     s: T.untyped = cast(<castTemp>$62: Integer(6), T.untyped);
     <cfgAlias>$66: T.class_of(Sorbet::Private::Static) = alias <C Static>
