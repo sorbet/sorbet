@@ -13,13 +13,13 @@ const enum Action {
   ConfigureSorbet = "Configure Sorbet",
   RestartSorbet = "Restart Sorbet",
   DisableSorbet = "Disable Sorbet",
-  ViewOutput = "View Output"
+  ViewOutput = "View Output",
 }
 
 export default class SorbetStatusBarEntry {
   private readonly _statusBarItem = window.createStatusBarItem(
     StatusBarAlignment.Left,
-    10
+    10,
   );
 
   private _operationStack: ShowOperationParams[] = [];
@@ -31,7 +31,7 @@ export default class SorbetStatusBarEntry {
   constructor(
     private readonly _outputChannel: OutputChannel,
     private readonly _sorbetExtensionConfig: SorbetExtensionConfig,
-    private readonly _restartSorbet: (reason: RestartReason) => void
+    private readonly _restartSorbet: (reason: RestartReason) => void,
   ) {
     // Note: Internal command. Not advertised to users in `package.json`.
     const statusBarClickedCommand = "_sorbet.statusBarClicked";
@@ -39,7 +39,7 @@ export default class SorbetStatusBarEntry {
     this._render();
     this._statusBarItem.show();
     commands.registerCommand(statusBarClickedCommand, () =>
-      this.handleStatusBarClicked()
+      this.handleStatusBarClicked(),
     );
     _sorbetExtensionConfig.onLspConfigChange(() => this._render());
   }
@@ -73,11 +73,11 @@ export default class SorbetStatusBarEntry {
         const actions = [
           Action.ViewOutput,
           Action.ConfigureSorbet,
-          Action.RestartSorbet
+          Action.RestartSorbet,
         ];
         const message = await window.showErrorMessage(
           this._lastError,
-          ...actions
+          ...actions,
         );
         return this._runAction(message);
       }
@@ -88,8 +88,8 @@ export default class SorbetStatusBarEntry {
             "Sorbet: Select action...",
             Action.ViewOutput,
             Action.ConfigureSorbet,
-            Action.EnableSorbet
-          )
+            Action.EnableSorbet,
+          ),
         );
       }
       default: {
@@ -99,8 +99,8 @@ export default class SorbetStatusBarEntry {
             Action.ViewOutput,
             Action.ConfigureSorbet,
             Action.RestartSorbet,
-            Action.DisableSorbet
-          )
+            Action.DisableSorbet,
+          ),
         );
       }
     }
@@ -119,7 +119,7 @@ export default class SorbetStatusBarEntry {
   public handleShowOperation(p: ShowOperationParams) {
     if (p.status === "end") {
       this._operationStack = this._operationStack.filter(
-        otherP => otherP.operationName !== p.operationName
+        (otherP) => otherP.operationName !== p.operationName,
       );
     } else {
       this._operationStack.push(p);
@@ -184,7 +184,7 @@ export default class SorbetStatusBarEntry {
           break;
         default:
           this._outputChannel.appendLine(
-            `Invalid ServerStatus: ${this._serverStatus}`
+            `Invalid ServerStatus: ${this._serverStatus}`,
           );
           text = "";
           tooltip = "";

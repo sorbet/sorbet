@@ -33,19 +33,19 @@ class NoOpMetricsEmitter implements MetricsEmitter {
   async increment(
     _metricName: string,
     _count?: number,
-    _tags?: Tags
+    _tags?: Tags,
   ): Promise<void> {} // eslint-disable-line no-empty-function
 
   async gauge(
     _metricName: string,
     _value: number,
-    _tags?: Tags
+    _tags?: Tags,
   ): Promise<void> {} // eslint-disable-line no-empty-function
 
   async timing(
     _metricName: string,
     _value: number | Date,
-    _tags?: Tags
+    _tags?: Tags,
   ): Promise<void> {} // eslint-disable-line no-empty-function
 
   async flush(): Promise<void> {} // eslint-disable-line no-empty-function
@@ -64,26 +64,26 @@ export function setSorbetMetricsApi(api: Api): void {
 
 async function initSorbetMetricsApi(outputChannel: OutputChannel) {
   return commands.executeCommand("sorbet.metrics.getExportedApi").then(
-    api => {
+    (api) => {
       if (api) {
         outputChannel.appendLine("Sorbet metrics-gathering initialized.");
         sorbetMetricsApi = api as Api;
         if (!sorbetMetricsApi.metricsEmitter.timing) {
           outputChannel.appendLine(
-            "Note: Timer metrics will not be reported; metrics extension does not support the timer API."
+            "Note: Timer metrics will not be reported; metrics extension does not support the timer API.",
           );
         }
       } else {
         sorbetMetricsApi = NoOpApi.INSTANCE;
         outputChannel.appendLine(
-          `Sorbet metrics gathering disabled: unrecognized Api object: ${api}`
+          `Sorbet metrics gathering disabled: unrecognized Api object: ${api}`,
         );
       }
     },
-    reason => {
+    (reason) => {
       sorbetMetricsApi = NoOpApi.INSTANCE;
       outputChannel.appendLine(`Sorbet metrics gathering disabled: ${reason}`);
-    }
+    },
   );
 }
 
@@ -98,13 +98,13 @@ export function emitCountMetric(
   sorbetExtensionConfig: SorbetExtensionConfig,
   _outputChannel: OutputChannel,
   metric: string,
-  count: number
+  count: number,
 ) {
   const { activeLspConfig } = sorbetExtensionConfig;
   const fullName = `${METRIC_PREFIX}${metric}`;
   const tags = {
     config_id: activeLspConfig ? activeLspConfig.id : "disabled",
-    sorbet_extension_version: sorbetExtensionVersion
+    sorbet_extension_version: sorbetExtensionVersion,
   };
   if (sorbetMetricsApi) {
     sorbetMetricsApi.metricsEmitter.increment(fullName, count, tags);
@@ -122,14 +122,14 @@ export function emitTimingMetric(
   _outputChannel: OutputChannel,
   metric: string,
   time: number | Date,
-  extraTags: Tags = {}
+  extraTags: Tags = {},
 ) {
   const { activeLspConfig } = sorbetExtensionConfig;
   const fullName = `${METRIC_PREFIX}${metric}`;
   const tags = {
     config_id: activeLspConfig ? activeLspConfig.id : "disabled",
     sorbet_extension_version: sorbetExtensionVersion,
-    ...extraTags
+    ...extraTags,
   };
   if (sorbetMetricsApi) {
     // Ignore timers if metrics extension does not support them.
