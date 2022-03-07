@@ -67,7 +67,7 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
 }
 
 // Since finalPhase is `preprocess`, this method should never be called.
-unique_ptr<ResponseMessage> DocumentFormattingTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> DocumentFormattingTask::runRequest(LSPTypecheckerInterface &typechecker) {
     Exception::raise("Unimplemented and unused");
 }
 

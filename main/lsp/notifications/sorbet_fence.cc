@@ -12,7 +12,7 @@ bool SorbetFenceTask::canPreempt(const LSPIndexer &indexer) const {
     return false;
 }
 
-void SorbetFenceTask::run(LSPTypecheckerDelegate &tc) {
+void SorbetFenceTask::run(LSPTypecheckerInterface &tc) {
     // Send the same fence back to acknowledge the fence.
     // NOTE: Fence is a notification rather than a request so that we don't have to worry about clashes with
     // client-chosen IDs when using fences internally.

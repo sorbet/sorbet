@@ -12,7 +12,7 @@ public:
 
     bool canPreempt(const LSPIndexer &indexer) const override;
 
-    void run(LSPTypecheckerDelegate &tc) override;
+    void run(LSPTypecheckerInterface &tc) override;
 };
 } // namespace sorbet::realmain::lsp
 

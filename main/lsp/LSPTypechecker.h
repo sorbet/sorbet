@@ -135,7 +135,43 @@ public:
 /**
  * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
  */
-class LSPTypecheckerDelegate {
+class LSPTypecheckerInterface {
+public:
+    /**
+     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
+     */
+    virtual void typecheckOnFastPath(LSPFileUpdates updates,
+                                     std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) = 0;
+
+    /**
+     * Re-typechecks the provided files to re-produce error messages.
+     */
+    virtual std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const = 0;
+
+    /** Runs the provided query against the given files, and returns matches. */
+    virtual LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const = 0;
+
+    /**
+     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     */
+    virtual const ast::ParsedFile &getIndexed(core::FileRef fref) const = 0;
+
+    /**
+     * Returns the parsed files for the given files, including resolver.
+     */
+    virtual std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const = 0;
+
+    /**
+     * Returns the currently active GlobalState.
+     */
+    virtual const core::GlobalState &state() const = 0;
+};
+
+/**
+ * An implementation of LSPTypecheckerInterface used for tasks running on the latest GlobalState, in the typechecking
+ * thread.
+ */
+class LSPTypecheckerDelegate final : public LSPTypecheckerInterface {
     LSPTypechecker &typechecker;
 
     /** The WorkerPool on which work will be performed. If the task is multithreaded, the pool will contain multiple
@@ -154,33 +190,15 @@ public:
     LSPTypecheckerDelegate &operator=(LSPTypecheckerDelegate &&) = delete;
     LSPTypecheckerDelegate &operator=(const LSPTypecheckerDelegate &) = delete;
 
-    /**
-     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
-     */
-    void typecheckOnFastPath(LSPFileUpdates updates, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    virtual ~LSPTypecheckerDelegate() = default;
 
-    /**
-     * Re-typechecks the provided files to re-produce error messages.
-     */
-    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const;
-
-    /** Runs the provided query against the given files, and returns matches. */
-    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
-
-    /**
-     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
-     */
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
-
-    /**
-     * Returns the parsed files for the given files, including resolver.
-     */
-    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
-
-    /**
-     * Returns the currently active GlobalState.
-     */
-    const core::GlobalState &state() const;
+    void typecheckOnFastPath(LSPFileUpdates updates,
+                             std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const override;
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
+    const core::GlobalState &state() const override;
 };
 } // namespace sorbet::realmain::lsp
 #endif
