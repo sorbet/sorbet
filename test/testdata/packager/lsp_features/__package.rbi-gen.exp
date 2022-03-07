@@ -9,7 +9,7 @@ class Simpsons::Family < Object
   extend T::Sig
 end
 
-# test/testdata/packager/lsp_features/Simpsons_Package.test.rbi
+# test/testdata/packager/lsp_features/Simpsons_Package.test.private.package.rbi
 # typed: true
 
 class Simpsons::Private < Object
