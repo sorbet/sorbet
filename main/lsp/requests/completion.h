@@ -42,10 +42,10 @@ class CompletionTask final : public LSPRequestTask {
     static SearchParams searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
                                                    core::MethodRef enclosingMethod,
                                                    core::lsp::ConstantResponse::Scopes scopes);
-    std::vector<std::unique_ptr<CompletionItem>> getCompletionItems(LSPTypecheckerDelegate &typechecker,
+    std::vector<std::unique_ptr<CompletionItem>> getCompletionItems(LSPTypecheckerInterface &typechecker,
                                                                     SearchParams &params);
 
-    std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
+    std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerInterface &typechecker,
                                                                core::DispatchResult &dispatchResult,
                                                                core::MethodRef what, const core::TypePtr &receiverType,
                                                                const core::TypeConstraint *constraint,
@@ -55,7 +55,7 @@ class CompletionTask final : public LSPRequestTask {
 public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

@@ -34,7 +34,7 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
 HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentHover), params(move(params)) {}
 
-unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
 
     const core::GlobalState &gs = typechecker.state();
