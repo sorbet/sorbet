@@ -161,6 +161,15 @@ public:
      * Returns the currently active GlobalState.
      */
     virtual const core::GlobalState &state() const = 0;
+
+    /**
+     * Returns `true` if the delegate is processing stale state.
+     *
+     * TODO(aprocter): delurk this once the real implementation of stale state is working.
+     */
+    virtual bool isStale() const {
+        return false;
+    }
 };
 
 class LSPTypecheckerDelegate final : public LSPTypecheckerInterface {
