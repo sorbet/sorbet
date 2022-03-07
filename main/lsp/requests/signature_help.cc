@@ -54,7 +54,7 @@ SignatureHelpTask::SignatureHelpTask(const LSPConfiguration &config, MessageId i
                                      std::unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentSignatureHelp), params(move(params)) {}
 
-unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentSignatureHelp);
     if (!config.opts.lspSignatureHelpEnabled) {
         response->error =

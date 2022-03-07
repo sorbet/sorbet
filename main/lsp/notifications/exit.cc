@@ -16,6 +16,6 @@ void ExitTask::preprocess(LSPPreprocessor &preprocessor) {
     preprocessor.exit(exitCode);
 }
 
-void ExitTask::run(LSPTypecheckerDelegate &tc) {}
+void ExitTask::run(LSPTypecheckerInterface &tc) {}
 
 } // namespace sorbet::realmain::lsp

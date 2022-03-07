@@ -483,7 +483,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocalName(const core::GlobalState
     return item;
 }
 
-vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
+vector<core::NameRef> localNamesForMethod(LSPTypecheckerInterface &typechecker, const core::MethodRef method,
                                           const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
@@ -515,7 +515,7 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
     return result;
 }
 
-core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
+core::MethodRef firstMethodAfterQuery(LSPTypecheckerInterface &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
@@ -556,7 +556,7 @@ constexpr string_view suggestSigDocs =
     "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
     "guess the correct types (or any types at all), but they're usually a good starting point."sv;
 
-unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
+unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
                                          const LSPClientConfiguration &clientConfig, core::SymbolRef what,
                                          core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
                                          size_t sortIdx) {
@@ -740,7 +740,7 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
+CompletionTask::getCompletionItemForMethod(LSPTypecheckerInterface &typechecker, core::DispatchResult &dispatchResult,
                                            core::MethodRef maybeAlias, const core::TypePtr &receiverType,
                                            const core::TypeConstraint *constraint, core::Loc queryLoc,
                                            string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
@@ -831,7 +831,7 @@ CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const co
     };
 }
 
-vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
+vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerInterface &typechecker,
                                                                       SearchParams &params) {
     const auto &gs = typechecker.state();
 
@@ -957,7 +957,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     return items;
 }
 
-unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 

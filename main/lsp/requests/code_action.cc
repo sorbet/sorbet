@@ -31,7 +31,7 @@ vector<unique_ptr<TextDocumentEdit>> getEdits(const LSPConfiguration &config, co
 }
 } // namespace
 
-unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     vector<unique_ptr<CodeAction>> result;
