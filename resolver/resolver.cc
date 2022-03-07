@@ -356,8 +356,8 @@ private:
         PackageStub stub;
         vector<core::NameRef> exports;
 
-        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix.  They are not the names
-        // exported to the implicit test package via `export_for_test`.
+        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix.  They
+        // are not the names exported to the implicit test package via `export_for_test`.
         vector<core::NameRef> testExports;
 
         ParentPackageStub(const core::packages::PackageInfo &info) : stub{info} {
