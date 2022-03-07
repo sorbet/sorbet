@@ -12,6 +12,13 @@ module Test::Family
     sig {params(fam: Family::Simpsons).void}
     def test_simpsons(fam)
     end
+
+    # Avoid leaking Krabappel through the interface, but still rely on it to
+    # typecheck this test file successfully.
+    sig {returns(Object)}
+    def test_krabappel
+      Family::Krabappel.new
+    end
   end
 
 end

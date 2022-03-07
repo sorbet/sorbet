@@ -29,5 +29,9 @@ module Family
     extend T::Sig
   end
 
+  class Krabappel
+    extend T::Sig
+  end
+
 end
 
