@@ -74,6 +74,22 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
 void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const vector<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
                              int &nextId) {
+    auto selectedCodeActions = SelectiveApplyCodeActionAssertions::getValues("selective-apply-code-action", assertions)
+                                   .value_or(vector<string>{});
+    {
+        INFO("No code actions provided for the selective-apply-code-action assertion. Correct usage example "
+             "`selective-apply-code-action: quickfix, quickfix.refactor`");
+        CHECK(!selectedCodeActions.empty());
+    }
+
+    vector<CodeActionKind> selectedCodeActionKinds;
+    transform(selectedCodeActions.begin(), selectedCodeActions.end(), back_inserter(selectedCodeActionKinds),
+              getCodeActionKind);
+
+    auto isSelectedKind = [&selectedCodeActionKinds](auto kind) {
+        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
+    };
+
     UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
     for (auto &assertion : assertions) {
         if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
@@ -81,10 +97,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         }
     }
 
-    bool exhaustiveApplyCodeAction =
-        BooleanPropertyAssertion::getValue("exhaustive-apply-code-action", assertions).value_or(false);
-
-    if (applyCodeActionAssertionsByFilename.empty() && !exhaustiveApplyCodeAction) {
+    if (applyCodeActionAssertionsByFilename.empty() && selectedCodeActions.empty()) {
         return;
     }
 
@@ -101,10 +114,13 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         for (auto &error : errorsByFilename[filename]) {
             vector<unique_ptr<Diagnostic>> diagnostics;
             auto fileUri = testFileUris[filename];
+
+            auto codeActionContext = make_unique<CodeActionContext>(move(diagnostics));
+            codeActionContext->only = selectedCodeActionKinds;
+
             // Unfortunately there's no simpler way to copy the range (yet).
-            auto params =
-                make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), error->range->copy(),
-                                              make_unique<CodeActionContext>(move(diagnostics)));
+            auto params = make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri),
+                                                        error->range->copy(), move(codeActionContext));
             auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
             auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
             {
@@ -151,6 +167,9 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
             }
 
             for (auto &codeAction : receivedCodeActions) {
+                if (!isSelectedKind(codeAction->kind)) {
+                    continue;
+                }
                 // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
                 // Source, the other is a Quickfix. This logic strips out the quickfix.
                 if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
@@ -195,14 +214,18 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                     // Some bookkeeping to make surfacing errors re. extra/insufficient
                     // apply-code-action annotations easier.
                     receivedCodeActionsByTitle.erase(it2);
-                    matchedCodeActionAssertions.emplace_back(*it);
-                    it = applyCodeActionAssertions.erase(it);
+
+                    if (isSelectedKind(codeAction->kind)) {
+                        (*it)->kind = codeAction->kind;
+                        matchedCodeActionAssertions.emplace_back(*it);
+                        it = applyCodeActionAssertions.erase(it);
+                    }
                 } else {
                     ++it;
                 }
             }
 
-            if (exhaustiveApplyCodeAction) {
+            if (!selectedCodeActionKinds.empty()) {
                 if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
                     FAIL_CHECK(fmt::format(
                         "Found apply-code-action assertions without "

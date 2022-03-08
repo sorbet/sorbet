@@ -40,7 +40,7 @@ const UnorderedMap<
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
-        {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
+        {"selective-apply-code-action", SelectiveApplyCodeActionAssertions::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
@@ -1434,7 +1434,7 @@ shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view 
 }
 ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    string_view title, string_view version)
-    : RangeAssertion(filename, range, assertionLine), title(string(title)), version(string(version)) {}
+    : RangeAssertion(filename, range, assertionLine), title(string(title)), version(string(version)), kind(nullopt) {}
 
 string ApplyCodeActionAssertion::toString() const {
     return fmt::format("apply-code-action: [{}] {}", version, title);
@@ -1923,4 +1923,45 @@ string ShowSymbolAssertion::toString() const {
     return fmt::format("show-symbol: {}", message);
 }
 
+string_view trimString(std::string_view s) {
+    const char *whitespace = " \t";
+    size_t begin = s.find_first_not_of(whitespace);
+    if (begin == std::string::npos) {
+        return "";
+    }
+    size_t end = s.find_last_not_of(whitespace);
+    return s.substr(begin, end - begin + 1);
+}
+
+std::shared_ptr<SelectiveApplyCodeActionAssertions>
+SelectiveApplyCodeActionAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                                         std::string_view assertionContents, std::string_view assertionType) {
+    std::vector<std::string> values = absl::StrSplit(assertionContents, ',');
+    transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
+
+    return make_shared<SelectiveApplyCodeActionAssertions>(filename, range, assertionLine, values, assertionType);
+}
+
+SelectiveApplyCodeActionAssertions::SelectiveApplyCodeActionAssertions(std::string_view filename,
+                                                                       std::unique_ptr<Range> &range, int assertionLine,
+                                                                       std::vector<std::string> values,
+                                                                       std::string_view assertionType)
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
+
+std::optional<std::vector<std::string>>
+SelectiveApplyCodeActionAssertions::getValues(std::string_view type,
+                                              const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+    for (auto &assertion : assertions) {
+        if (auto codeActionAssertion = dynamic_pointer_cast<SelectiveApplyCodeActionAssertions>(assertion)) {
+            if (codeActionAssertion->assertionType == type) {
+                return codeActionAssertion->values;
+            }
+        }
+    }
+    return nullopt;
+}
+
+string SelectiveApplyCodeActionAssertions::toString() const {
+    return fmt::format("selective-apply-code-action: {}", fmt::join(values, ", "));
+}
 } // namespace sorbet::test
