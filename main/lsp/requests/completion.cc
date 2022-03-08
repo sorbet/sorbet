@@ -839,6 +839,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     vector<core::NameRef> similarLocals;
     if (params.enclosingMethod.exists()) {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_locals");
         auto locals = localNamesForMethod(typechecker, params.enclosingMethod, params.queryLoc);
         similarLocals = allSimilarLocalNames(gs, locals, params.prefix);
     }
@@ -849,89 +850,105 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     // ----- methods -----
 
-    SimilarMethodsByName similarMethodsByName;
-    if (params.forMethods != nullopt) {
-        similarMethodsByName = allSimilarMethods(gs, *params.forMethods->dispatchResult, params.prefix);
+    vector<SimilarMethod> dedupedSimilarMethods;
+
+    {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
+        SimilarMethodsByName similarMethodsByName;
+        if (params.forMethods != nullopt) {
+            similarMethodsByName = allSimilarMethods(gs, *params.forMethods->dispatchResult, params.prefix);
+            for (auto &[methodName, similarMethods] : similarMethodsByName) {
+                fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+                    if (left.depth != right.depth) {
+                        return left.depth < right.depth;
+                    }
+
+                    return left.method.id() < right.method.id();
+                });
+            }
+        }
+
         for (auto &[methodName, similarMethods] : similarMethodsByName) {
-            fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
-                if (left.depth != right.depth) {
-                    return left.depth < right.depth;
+            if (methodName.kind() == core::NameKind::UNIQUE &&
+                methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
+                // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+                // unique names, because we want each overload to show up but those use unique names.
+                continue;
+            }
+
+            // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+            auto similarMethod = similarMethods[0];
+
+            if (similarMethod.method.data(gs)->flags.isPrivate && !params.forMethods->isPrivateOk) {
+                continue;
+            }
+
+            dedupedSimilarMethods.emplace_back(similarMethod);
+        }
+
+        fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
+            if (left.depth != right.depth) {
+                return left.depth < right.depth;
+            }
+
+            auto leftShortName = left.method.data(gs)->name.shortName(gs);
+            auto rightShortName = right.method.data(gs)->name.shortName(gs);
+            if (leftShortName != rightShortName) {
+                if (absl::StartsWith(leftShortName, params.prefix) &&
+                    !absl::StartsWith(rightShortName, params.prefix)) {
+                    return true;
+                }
+                if (!absl::StartsWith(leftShortName, params.prefix) &&
+                    absl::StartsWith(rightShortName, params.prefix)) {
+                    return false;
                 }
 
-                return left.method.id() < right.method.id();
-            });
-        }
-    }
-
-    auto dedupedSimilarMethods = vector<SimilarMethod>{};
-    for (auto &[methodName, similarMethods] : similarMethodsByName) {
-        if (methodName.kind() == core::NameKind::UNIQUE &&
-            methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
-            // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
-            // unique names, because we want each overload to show up but those use unique names.
-            continue;
-        }
-
-        // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-        auto similarMethod = similarMethods[0];
-
-        if (similarMethod.method.data(gs)->flags.isPrivate && !params.forMethods->isPrivateOk) {
-            continue;
-        }
-
-        dedupedSimilarMethods.emplace_back(similarMethod);
-    }
-
-    fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
-        if (left.depth != right.depth) {
-            return left.depth < right.depth;
-        }
-
-        auto leftShortName = left.method.data(gs)->name.shortName(gs);
-        auto rightShortName = right.method.data(gs)->name.shortName(gs);
-        if (leftShortName != rightShortName) {
-            if (absl::StartsWith(leftShortName, params.prefix) && !absl::StartsWith(rightShortName, params.prefix)) {
-                return true;
-            }
-            if (!absl::StartsWith(leftShortName, params.prefix) && absl::StartsWith(rightShortName, params.prefix)) {
-                return false;
+                return leftShortName < rightShortName;
             }
 
-            return leftShortName < rightShortName;
-        }
-
-        return left.method.id() < right.method.id();
-    });
+            return left.method.id() < right.method.id();
+        });
+    }
 
     // ----- final sort -----
 
     // TODO(jez) Do something smarter here than "all keywords then all locals then all methods then all constants"
 
     vector<unique_ptr<CompletionItem>> items;
-    for (auto &similarKeyword : similarKeywords) {
-        items.push_back(getCompletionItemForKeyword(gs, this->config, similarKeyword, params.queryLoc, params.prefix,
-                                                    items.size()));
+    {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".keyword_items");
+        for (auto &similarKeyword : similarKeywords) {
+            items.push_back(getCompletionItemForKeyword(gs, this->config, similarKeyword, params.queryLoc,
+                                                        params.prefix, items.size()));
+        }
     }
-    for (auto &similarLocal : similarLocals) {
-        items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc, params.prefix,
-                                                      items.size()));
+    {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".local_items");
+        for (auto &similarLocal : similarLocals) {
+            items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc,
+                                                          params.prefix, items.size()));
+        }
     }
-    for (auto &similarMethod : dedupedSimilarMethods) {
-        // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this completion
-        // request, those constraints are the result of solving the current method. These new methods we're about to
-        // suggest are their own methods with their own type variables, so it doesn't make sense to use the old
-        // constraint for the new methods.
-        //
-        // What this means in practice is that the prettified `sig` in the completion documentation will show
-        // `T.type_parameter(:U)` instead of a solved type.
-        auto constr = nullptr;
+    {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".method_items");
+        for (auto &similarMethod : dedupedSimilarMethods) {
+            // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
+            // completion request, those constraints are the result of solving the current method. These new methods
+            // we're about to suggest are their own methods with their own type variables, so it doesn't make sense to
+            // use the old constraint for the new methods.
+            //
+            // What this means in practice is that the prettified `sig` in the completion documentation will show
+            // `T.type_parameter(:U)` instead of a solved type.
+            auto constr = nullptr;
 
-        items.push_back(getCompletionItemForMethod(
-            typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType, constr,
-            params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+            items.push_back(getCompletionItemForMethod(
+                typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
+                constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+        }
     }
 
     if (!params.scopes.empty()) {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".constant_items");
         auto similarConsts =
             allSimilarConstantItems(gs, this->config, params.prefix, params.scopes, params.queryLoc, items.size());
         move(similarConsts.begin(), similarConsts.end(), back_inserter(items));
