@@ -738,7 +738,8 @@ private:
         string superClassString;
         if (klass.data(gs)->superClass().exists()) {
             auto superClass = klass.data(gs)->superClass();
-            if (superClass != core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass()) {
+            if (superClass != core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass() &&
+                superClass != core::Symbols::Object()) {
                 maybeEmit(superClass);
                 superClassString = absl::StrCat(" < ", superClass.show(gs));
             }
