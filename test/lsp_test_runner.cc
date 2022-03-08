@@ -74,8 +74,19 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
 void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const vector<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
                              int &nextId) {
+    UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
+    for (auto &assertion : assertions) {
+        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
+            applyCodeActionAssertionsByFilename[applyCodeActionAssertion->filename].push_back(applyCodeActionAssertion);
+        }
+    }
+
     auto selectedCodeActions = SelectiveApplyCodeActionAssertions::getValues("selective-apply-code-action", assertions)
                                    .value_or(vector<string>{});
+    if (applyCodeActionAssertionsByFilename.empty() && selectedCodeActions.empty()) {
+        return;
+    }
+
     {
         INFO("No code actions provided for the selective-apply-code-action assertion. Correct usage example "
              "`selective-apply-code-action: quickfix, quickfix.refactor`");
@@ -89,18 +100,6 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
     auto isSelectedKind = [&selectedCodeActionKinds](auto kind) {
         return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
     };
-
-    UnorderedMap<string, vector<shared_ptr<ApplyCodeActionAssertion>>> applyCodeActionAssertionsByFilename;
-    for (auto &assertion : assertions) {
-        if (auto applyCodeActionAssertion = dynamic_pointer_cast<ApplyCodeActionAssertion>(assertion)) {
-            applyCodeActionAssertionsByFilename[applyCodeActionAssertion->filename].push_back(applyCodeActionAssertion);
-        }
-    }
-
-    if (applyCodeActionAssertionsByFilename.empty() && selectedCodeActions.empty()) {
-        return;
-    }
-
     auto errors = RangeAssertion::getErrorAssertions(assertions);
     UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
@@ -225,19 +224,17 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                 }
             }
 
-            if (!selectedCodeActionKinds.empty()) {
-                if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
-                    FAIL_CHECK(fmt::format(
-                        "Found apply-code-action assertions without "
-                        "corresponding code actions from the server:\n{}",
-                        fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
-                                      [](const auto &assertion) -> string { return assertion->toString(); })));
-                } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
-                    FAIL_CHECK(fmt::format(
-                        "Received code actions without corresponding apply-code-action assertions:\n{}",
-                        fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
-                                      [](const auto &action) -> string { return action.second->toJSON(); })));
-                }
+            if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
+                FAIL_CHECK(
+                    fmt::format("Found apply-code-action assertions without "
+                                "corresponding code actions from the server:\n{}",
+                                fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                              [](const auto &assertion) -> string { return assertion->toString(); })));
+            } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
+                FAIL_CHECK(fmt::format(
+                    "Received code actions without corresponding apply-code-action assertions:\n{}",
+                    fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                                  [](const auto &action) -> string { return action.second->toJSON(); })));
             }
         }
 

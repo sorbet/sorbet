@@ -90,7 +90,7 @@ string snakeToCamelCase(string_view name) {
     const auto originalSize = name.size();
     res.reserve(originalSize);
     bool shouldCapitalize = true;
-    for (int i = 0; i < originalSize - 1; i++) {
+    for (int i = 0; i < originalSize; i++) {
         if (name.at(i) == '_') {
             shouldCapitalize = true;
             continue;
