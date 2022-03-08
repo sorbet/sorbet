@@ -151,6 +151,10 @@ public:
     bool cancel(const MessageId &id) override;
 };
 
+// Doubles as the `methodString` for a `TextDocumentCompletion` LSPTask and also as
+// the prefix for any metrics collected during completion itself.
+#define LSP_COMPLETION_METRICS_PREFIX "textDocument.completion"
+
 /**
  * A special form of LSPTask that has direct access to the typechecker and controls its own scheduling.
  * Is only used for slow path-related tasks. Do not use for anything else.

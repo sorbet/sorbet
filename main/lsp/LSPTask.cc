@@ -165,7 +165,7 @@ ConstExprStr LSPTask::methodString() const {
         case LSPMethod::TextDocumentCodeAction:
             return "textDocument.codeAction";
         case LSPMethod::TextDocumentCompletion:
-            return "textDocument.completion";
+            return LSP_COMPLETION_METRICS_PREFIX;
         case LSPMethod::TextDocumentDefinition:
             return "textDocument.definition";
         case LSPMethod::TextDocumentDocumentHighlight:
