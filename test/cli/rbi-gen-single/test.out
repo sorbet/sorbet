@@ -3,7 +3,7 @@
 -- RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
 # typed: true
 
-class Family::Simpsons < Object
+class Family::Simpsons
   sig {returns(Family::Bart::Character)}
   def bart; end
   sig {returns(T.nilable(Family::Bart::Character))}
@@ -26,13 +26,13 @@ class Test::Family::TestFamily < Test::Util::Testing::TestCase
   def test_simpsons(fam); end
   extend T::Sig
 end
-class Family::Flanders < Object
+class Family::Flanders
   extend T::Sig
 end
 -- Test Private RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
 # typed: true
 
-class Family::Krabappel < Object
+class Family::Krabappel
   extend T::Sig
 end
 -- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
@@ -41,7 +41,7 @@ end
 -- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 # typed: true
 
-class Family::Bart::Character < Object
+class Family::Bart::Character
   sig {void}
   def catchphrase; end
   sig {returns(T.class_of(Family::Simpsons))}
@@ -54,7 +54,7 @@ Family::Bart::Character::FamilyClass = Family::Simpsons
 -- Test RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
 # typed: true
 
-class Test::Family::Bart::BartTest < Object
+class Test::Family::Bart::BartTest
   sig {params(x: Test::Family::TestFamily).void}
   def test1(x); end
   sig {params(x: Test::Family::Bart::Slingshot::TestSlingshot).void}
@@ -67,6 +67,6 @@ end
 -- Test RBI: ./test/cli/rbi-gen-single/family/bart/slingshot/__package.rb (Family::Bart::Slingshot)
 # typed: true
 
-class Test::Family::Bart::Slingshot::TestSlingshot < Object
+class Test::Family::Bart::Slingshot::TestSlingshot
 end
 -- JSON: ./test/cli/rbi-gen-single/family/bart/slingshot/__package.rb (Family::Bart::Slingshot)
