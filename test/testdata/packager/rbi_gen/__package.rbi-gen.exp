@@ -3,7 +3,7 @@
 
 class RBIGen::Sealed::Child < RBIGen::Sealed::Parent
 end
-class RBIGen::Sealed::Parent < Object
+class RBIGen::Sealed::Parent
   sealed!
   extend T::Helpers
 end
@@ -53,7 +53,7 @@ module RBIGen::Public::VariousMethods
   def self.sample_mod_fcn; end
   module_function :some_mod_fcn
 end
-class RBIGen::Private::PrivateClassPulledInByPrivateMethod < Object
+class RBIGen::Private::PrivateClassPulledInByPrivateMethod
 end
 RBIGen::Public::VariousMethods::MyString = T.type_alias {String}
 class RBIGen::Public::StructWithInitializer < T::Struct
@@ -65,21 +65,21 @@ class RBIGen::Public::StructWithInitializer < T::Struct
   extend T::Sig
 end
 RBIGen::Public::ShapeType = T.type_alias {{:$str => String}}
-class RBIGen::Public::SealedClass < Object
+class RBIGen::Public::SealedClass
   sealed!
   extend T::Helpers
 end
-class RBIGen::Public::RefersToPrivateTypes < Object
+class RBIGen::Public::RefersToPrivateTypes
   sig {params(a: RBIGen::Private::PrivateClass).void}
   def method(a); end
   extend T::Sig
 end
-class RBIGen::Private::PrivateClass < Object
+class RBIGen::Private::PrivateClass
 end
 RBIGen::Public::RefersToPrivateTypes::ClassAlias = RBIGen::Private::PrivateClassPulledInByClassAlias
-class RBIGen::Private::PrivateClassPulledInByClassAlias < Object
+class RBIGen::Private::PrivateClassPulledInByClassAlias
 end
-class RBIGen::Public::Parent < Object
+class RBIGen::Public::Parent
 end
 class RBIGen::Public::MyStruct < T::Struct
   prop :foo, Integer
@@ -96,7 +96,7 @@ class RBIGen::Public::MyStruct < T::Struct
   extend T::Sig
   @field = T.let(T.unsafe(nil), Integer)
 end
-class RBIGen::Private::PrivateClassPulledInByTypeTemplate < Object
+class RBIGen::Private::PrivateClassPulledInByTypeTemplate
 end
 class RBIGen::Public::MyEnum < T::Enum
   abstract!
@@ -156,11 +156,11 @@ class RBIGen::Public::InheritsInitializer < RBIGen::Public::HasInitializer
   end
   extend T::Helpers
 end
-class RBIGen::Public::IncludesMixin < Object
+class RBIGen::Public::IncludesMixin
   include RBIGen::Public::MixesInClassMethods
   extend RBIGen::Public::MixesInClassMethods::ClassMethods
 end
-class RBIGen::Public::HasInitializer < Object
+class RBIGen::Public::HasInitializer
   sig {params(a: Integer).void}
   def initialize(a); end
   extend T::Sig
@@ -178,14 +178,14 @@ class RBIGen::Public::Flatfile < Opus::Flatfiles::Record
   sig {returns(String)}
   def self.get_deprecated?; end
 end
-class RBIGen::Public::FinalClass < Object
+class RBIGen::Public::FinalClass
   final!
   sig(:final) {void}
   def final_method; end
   extend T::Sig
   extend T::Helpers
 end
-class RBIGen::Public::FieldCheck < Object
+class RBIGen::Public::FieldCheck
   @@static_field = T.let(T.unsafe(nil), Integer)
   sig {void}
   def initialize
@@ -222,7 +222,7 @@ module RBIGen::Public::DefDelegator
     def_delegator :@static_field, :method3
   end
 end
-class RBIGen::Public::CustomStruct < Object
+class RBIGen::Public::CustomStruct
   include T::Props
   const :bar, T.nilable(String)
   prop :foo, Integer
@@ -231,7 +231,7 @@ class RBIGen::Public::CustomStruct < Object
   extend T::Props::ClassMethods
   extend T::Sig
 end
-class RBIGen::Public::ClassWithTypeParams < Object
+class RBIGen::Public::ClassWithTypeParams
   C = type_member()
   D = type_member(upper: RBIGen::Public::Parent)
   E = type_member(lower: RBIGen::Public::Child)
@@ -241,19 +241,19 @@ class RBIGen::Public::ClassWithTypeParams < Object
   A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
   B = type_template()
 end
-class RBIGen::Public::ClassWithPrivateMethods < Object
+class RBIGen::Public::ClassWithPrivateMethods
   extend T::Sig
 end
 class RBIGen::Public::Child < RBIGen::Public::Parent
 end
-class RBIGen::Public::AttachedClassType < Object
+class RBIGen::Public::AttachedClassType
   extend T::Sig
   sig {params(a: T.proc.params(arg0: T.attached_class).void).void}
   def self.method(a); end
 end
-class RBIGen::Public::AlsoDefinedInRBIFile < Object
+class RBIGen::Public::AlsoDefinedInRBIFile
 end
-class RBIGen::Public::AliasMethod < Object
+class RBIGen::Public::AliasMethod
   sig {params(other: BasicObject).returns(T::Boolean)}
   def ==(other); end
   def bad_alias(*arg0); end
@@ -265,7 +265,7 @@ class RBIGen::Public::AliasMethod < Object
     alias_method :some_method_alias, :some_method
   end
 end
-class RBIGen::Public::AbstractClass < Object
+class RBIGen::Public::AbstractClass
   abstract!
   sig {abstract.returns(String)}
   def abstract_method; end
@@ -285,9 +285,9 @@ end
 
 module Test::RBIGen
 end
-class Test::RBIGen::MyTestHelper < Object
+class Test::RBIGen::MyTestHelper
 end
-class Test::RBIGen::MyTest < Object
+class Test::RBIGen::MyTest
 end
 
 # test/testdata/packager/rbi_gen/RBIGen_Package.test.private.package.rbi
@@ -295,6 +295,6 @@ end
 
 class RBIGen::Sealed::TestChild < RBIGen::Sealed::Parent
 end
-class RBIGen::Private::PrivateClassForTests < Object
+class RBIGen::Private::PrivateClassForTests
 end
 

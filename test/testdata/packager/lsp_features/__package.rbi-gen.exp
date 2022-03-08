@@ -1,7 +1,7 @@
 # test/testdata/packager/lsp_features/Simpsons_Package.rbi
 # typed: true
 
-class Simpsons::Family < Object
+class Simpsons::Family
   sig {returns(Bart::Character)}
   def son; end
   sig {returns(String)}
@@ -12,14 +12,14 @@ end
 # test/testdata/packager/lsp_features/Simpsons_Package.test.private.package.rbi
 # typed: true
 
-class Simpsons::Private < Object
+class Simpsons::Private
 end
 
 # test/testdata/packager/lsp_features/Bart_Package.rbi
 # typed: true
 
 Bart::CatchPhrase = T.let(T.unsafe(nil), String)
-class Bart::Character < Object
+class Bart::Character
   sig {void}
   def initialize; end
   extend T::Sig
@@ -28,7 +28,7 @@ end
 # test/testdata/packager/lsp_features/Krabappel_Package.test.rbi
 # typed: true
 
-class Test::Krabappel::Popquiz < Object
+class Test::Krabappel::Popquiz
   sig {void}
   def surprise!; end
   extend T::Sig
