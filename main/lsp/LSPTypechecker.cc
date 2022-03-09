@@ -106,9 +106,9 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     if (updates.canceledSlowPath) {
+        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
-        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         ENFORCE(cancellationUndoState != nullptr);
         if (cancellationUndoState != nullptr) {
             // Restore the previous globalState
