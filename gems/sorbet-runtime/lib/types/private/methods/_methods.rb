@@ -28,6 +28,7 @@ module T::Private::Methods
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
+  WRAPPER_METHOD_SOURCE_FILE = __FILE__
 
   DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
 
@@ -205,6 +206,7 @@ module T::Private::Methods
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
+  # If this method is ever moved, make sure to update WRAPPER_METHOD_SOURCE_FILE.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     if T::Private::DeclState.current.skip_on_method_added
       return
@@ -399,7 +401,16 @@ module T::Private::Methods
   end
 
   def self.unwrap_method(mod, signature, original_method)
-    maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
+    method_name = original_method.name
+    maybe_wrapped_method = signature.method.owner.instance_method(method_name)
+    file_path, _line = maybe_wrapped_method.source_location
+
+    # If Sorbet's wrapper was overridden, we don't want to try to unwrap the registered signature
+    unless !@was_ever_final_names[method_name] && original_method != maybe_wrapped_method &&
+           file_path != WRAPPER_METHOD_SOURCE_FILE
+      maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
+    end
+
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
 
