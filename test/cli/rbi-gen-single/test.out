@@ -1,4 +1,5 @@
 -- sanity-checking package with --stripe-packages
+-- ./test/cli/rbi-gen-single/external/__package.rb (External)
 -- ./test/cli/rbi-gen-single/family/__package.rb (Family)
 -- RBI (Family)
 # typed: true
@@ -6,6 +7,8 @@
 class Family::Simpsons
   sig {returns(Family::Bart::Character)}
   def bart; end
+  sig {returns(WhoKnows)}
+  def make_something; end
   sig {returns(T.nilable(Family::Bart::Character))}
   def no_bart; end
   extend T::Sig
