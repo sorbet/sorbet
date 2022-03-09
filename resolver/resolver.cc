@@ -549,12 +549,25 @@ private:
         std::vector<ast::ConstantLit *> suffix;
         {
             auto *cursor = out;
+            bool isRootReference = false;
             while (cursor != nullptr) {
+                auto *original = ast::cast_tree<ast::UnresolvedConstantLit>(cursor->original);
+                if (original == nullptr) {
+                    isRootReference = cursor->symbol == core::Symbols::root();
+                    break;
+                }
+
                 suffix.emplace_back(cursor);
-                auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cursor->original);
-                cursor = ast::cast_tree<ast::ConstantLit>(original.scope);
+                cursor = ast::cast_tree<ast::ConstantLit>(original->scope);
             }
             absl::c_reverse(suffix);
+
+            // If the constant looks like `::Foo::Bar`, we don't need to apply the heuristics below as it's known to be
+            // defined at the root.
+            if (isRootReference) {
+                stubConstantSuffix(ctx, core::Symbols::root(), suffix, possibleGenericType);
+                return;
+            }
         }
 
         // If the constant doesn't resolve to something that overlaps with this package's namespace, it will be defined
