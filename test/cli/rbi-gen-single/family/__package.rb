@@ -2,6 +2,7 @@
 
 class Family < PackageSpec
 
+  import External
   import Family::Bart
   test_import Util::Testing
 
