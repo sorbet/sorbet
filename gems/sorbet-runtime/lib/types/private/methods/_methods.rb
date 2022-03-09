@@ -25,6 +25,9 @@ module T::Private::Methods
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
   @old_hooks = nil
+  # stores methods with signatures that are currently being processed. Used to ensure that we don't execute a DeclarationBlock
+  # after it has been finalized. Resolves the edge case showned in test/types/duplicate_sig_eval.rb
+  @methods_being_processed = {}
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -337,7 +340,7 @@ module T::Private::Methods
   def self.run_sig(hook_mod, method_name, original_method, declaration_block)
     current_declaration =
       begin
-        run_builder(declaration_block)
+        run_builder(declaration_block, method_name)
       rescue DeclBuilder::BuilderError => e
         T::Configuration.sig_builder_error_handler(e, declaration_block.loc)
         nil
@@ -356,11 +359,32 @@ module T::Private::Methods
     signature
   end
 
-  def self.run_builder(declaration_block)
-    declaration_block
-      .decl_builder
-      .run!(&declaration_block.blk)
-      .decl
+  def self.run_builder(declaration_block, method_name)
+    key = method_owner_and_name_to_key(declaration_block.mod, method_name)
+    return if processing_method?(key)
+
+    builder = register_method_being_processed(key, declaration_block)
+    begin
+      builder.run!(&declaration_block.blk)
+    ensure
+      unregister_method_being_processed(key)
+    end
+
+    builder.decl
+  end
+
+  def self.processing_method?(key)
+    @methods_being_processed[key]
+  end
+
+  def self.register_method_being_processed(key, declaration_block)
+    @methods_being_processed[key] = true
+
+    declaration_block.decl_builder
+  end
+
+  def self.unregister_method_being_processed(key)
+    @methods_being_processed.delete(key)
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)

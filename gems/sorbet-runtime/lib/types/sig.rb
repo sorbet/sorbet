@@ -66,7 +66,12 @@ module T::Sig
   # Declares a method with type signatures and/or
   # abstract/override/... helpers. See the documentation URL on
   # {T::Helpers}
-  T::Sig::WithoutRuntime.sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
+  T::Sig::WithoutRuntime.sig do
+    params(
+      arg0: T.nilable(Symbol),
+      blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
+    ).returns(T::Private::Methods::DeclBuilder)
+  end
   def sig(arg0=nil, &blk)
     T::Private::Methods.declare_sig(self, Kernel.caller_locations(1, 1)&.first, arg0, &blk)
   end
