@@ -71,6 +71,140 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
+void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range, int &nextId, vector<CodeActionKind> &selectedCodeActionKinds, vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions, string codeActionDescription, bool assertAllChanges) {
+
+    auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
+        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
+    };
+    vector<unique_ptr<Diagnostic>> diagnostics;
+
+    auto codeActionContext = make_unique<CodeActionContext>(move(diagnostics));
+    codeActionContext->only = selectedCodeActionKinds;
+
+    // Unfortunately there's no simpler way to copy the range (yet).
+    auto params = make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri),
+                                                range->copy(), move(codeActionContext));
+    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+    {
+        INFO("Did not receive exactly one response for a codeAction request.");
+        CHECK_EQ(responses.size(), 1);
+    }
+    if (responses.size() != 1) {
+        return;
+    }
+
+    auto &msg = responses.at(0);
+    CHECK(msg->isResponse());
+    if (!msg->isResponse()) {
+        return;
+    }
+
+    auto &response = msg->asResponse();
+    auto &receivedCodeActionResponse =
+        get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+    CHECK_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
+    if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
+        return;
+    }
+
+    UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
+    auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+    unique_ptr<CodeAction> sourceLevelCodeAction;
+    // One code action should be a 'source' level code action. Remove it.
+    if (!receivedCodeActions.empty() && isSelectedKind(CodeActionKind::Quickfix)) {
+        for (auto it = receivedCodeActions.begin(); it != receivedCodeActions.end();) {
+            if ((*it)->kind == CodeActionKind::SourceFixAllSorbet) {
+                INFO("Received multiple source-level code actions");
+                CHECK_EQ(sourceLevelCodeAction, nullptr);
+                sourceLevelCodeAction = move(*it);
+                // Remove from vector and continue
+                it = receivedCodeActions.erase(it);
+            } else {
+                it++;
+            }
+        }
+        INFO("Expected one source-level code action for code action request");
+        CHECK_NE(sourceLevelCodeAction, nullptr);
+    }
+
+    for (auto &codeAction : receivedCodeActions) {
+        if (!isSelectedKind(codeAction->kind.value())) {
+            continue;
+        }
+        // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
+        // Source, the other is a Quickfix. This logic strips out the quickfix.
+        if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
+            continue;
+        }
+
+        bool codeActionTitleUnique =
+            receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
+        CHECK_MESSAGE(codeActionTitleUnique, "Found code action with duplicate title: " << codeAction->title);
+
+        if (codeActionTitleUnique) {
+            receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
+        }
+    }
+
+    uint32_t receivedCodeActionsCount = receivedCodeActionsByTitle.size();
+    vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
+
+    // Test code action assertions matching the range of this error.
+    auto it = applyCodeActionAssertions.begin();
+    while (it != applyCodeActionAssertions.end()) {
+        auto codeActionAssertion = it->get();
+        if (!(range->start->cmp(*codeActionAssertion->range->start) <= 0 &&
+              range->end->cmp(*codeActionAssertion->range->end) >= 0)) {
+            ++it;
+            continue;
+        }
+
+        // Ensure we received a code action matching the assertion.
+        auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
+        {
+            INFO(fmt::format("Did not receive code action matching assertion `{}` for error or selected code action `{}`...",
+                             codeActionAssertion->toString(), codeActionDescription));
+            CHECK_NE(it2, receivedCodeActionsByTitle.end());
+        }
+
+        // Ensure that the received code action applies correctly.
+        if (it2 != receivedCodeActionsByTitle.end()) {
+            auto codeAction = move(it2->second);
+            if (assertAllChanges) {
+                codeActionAssertion->checkAll(test.sourceFileContents, lspWrapper, *codeAction.get());
+            } else {
+                codeActionAssertion->check(test.sourceFileContents, lspWrapper, *codeAction.get());
+            }
+
+            // Some bookkeeping to make surfacing errors re. extra/insufficient
+            // apply-code-action annotations easier.
+            receivedCodeActionsByTitle.erase(it2);
+
+            if (isSelectedKind(codeAction->kind.value())) {
+                (*it)->kind = codeAction->kind;
+                matchedCodeActionAssertions.emplace_back(*it);
+                it = applyCodeActionAssertions.erase(it);
+            }
+        } else {
+            ++it;
+        }
+    }
+
+    if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
+        FAIL_CHECK(
+            fmt::format("Found apply-code-action assertions without "
+                        "corresponding code actions from the server:\n{}",
+                        fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                      [](const auto &assertion) -> string { return assertion->toString(); })));
+    } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
+        FAIL_CHECK(fmt::format(
+            "Received code actions without corresponding apply-code-action assertions:\n{}",
+            fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                          [](const auto &action) -> string { return action.second->toJSON(); })));
+    }
+}
+
 void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const vector<string> &filenames,
                              vector<shared_ptr<RangeAssertion>> &assertions, UnorderedMap<string, string> &testFileUris,
                              int &nextId) {
@@ -97,9 +231,6 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
     transform(selectedCodeActions.begin(), selectedCodeActions.end(), back_inserter(selectedCodeActionKinds),
               getCodeActionKind);
 
-    auto isSelectedKind = [&selectedCodeActionKinds](auto kind) {
-        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
-    };
     auto errors = RangeAssertion::getErrorAssertions(assertions);
     UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
@@ -108,134 +239,15 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
 
     for (auto &filename : filenames) {
         auto applyCodeActionAssertions = applyCodeActionAssertionsByFilename[filename];
+        auto fileUri = testFileUris[filename];
 
         // Request code actions for each of this file's error.
         for (auto &error : errorsByFilename[filename]) {
-            vector<unique_ptr<Diagnostic>> diagnostics;
-            auto fileUri = testFileUris[filename];
+            validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds, applyCodeActionAssertions, error->toString(), false);
+        }
 
-            auto codeActionContext = make_unique<CodeActionContext>(move(diagnostics));
-            codeActionContext->only = selectedCodeActionKinds;
-
-            // Unfortunately there's no simpler way to copy the range (yet).
-            auto params = make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri),
-                                                        error->range->copy(), move(codeActionContext));
-            auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
-            auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
-            {
-                INFO("Did not receive exactly one response for a codeAction request.");
-                CHECK_EQ(responses.size(), 1);
-            }
-            if (responses.size() != 1) {
-                continue;
-            }
-
-            auto &msg = responses.at(0);
-            CHECK(msg->isResponse());
-            if (!msg->isResponse()) {
-                continue;
-            }
-
-            auto &response = msg->asResponse();
-            REQUIRE_MESSAGE(response.result, "Code action request returned error: " << msg->toJSON());
-            auto &receivedCodeActionResponse =
-                get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
-            CHECK_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
-            if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
-                continue;
-            }
-
-            UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
-            auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
-            unique_ptr<CodeAction> sourceLevelCodeAction;
-            // One code action should be a 'source' level code action. Remove it.
-            if (!receivedCodeActions.empty()) {
-                for (auto it = receivedCodeActions.begin(); it != receivedCodeActions.end();) {
-                    if ((*it)->kind == CodeActionKind::SourceFixAllSorbet) {
-                        INFO("Received multiple source-level code actions");
-                        CHECK_EQ(sourceLevelCodeAction, nullptr);
-                        sourceLevelCodeAction = move(*it);
-                        // Remove from vector and continue
-                        it = receivedCodeActions.erase(it);
-                    } else {
-                        it++;
-                    }
-                }
-                INFO("Expected one source-level code action for code action request");
-                CHECK_NE(sourceLevelCodeAction, nullptr);
-            }
-
-            for (auto &codeAction : receivedCodeActions) {
-                if (!isSelectedKind(codeAction->kind)) {
-                    continue;
-                }
-                // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
-                // Source, the other is a Quickfix. This logic strips out the quickfix.
-                if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
-                    continue;
-                }
-
-                bool codeActionTitleUnique =
-                    receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
-                CHECK_MESSAGE(codeActionTitleUnique, "Found code action with duplicate title: " << codeAction->title);
-
-                if (codeActionTitleUnique) {
-                    receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
-                }
-            }
-
-            uint32_t receivedCodeActionsCount = receivedCodeActionsByTitle.size();
-            vector<shared_ptr<ApplyCodeActionAssertion>> matchedCodeActionAssertions;
-
-            // Test code action assertions matching the range of this error.
-            auto it = applyCodeActionAssertions.begin();
-            while (it != applyCodeActionAssertions.end()) {
-                auto codeActionAssertion = it->get();
-                if (!(error->range->start->cmp(*codeActionAssertion->range->start) <= 0 &&
-                      error->range->end->cmp(*codeActionAssertion->range->end) >= 0)) {
-                    ++it;
-                    continue;
-                }
-
-                // Ensure we received a code action matching the assertion.
-                auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
-                {
-                    INFO(fmt::format("Did not receive code action matching assertion `{}` for error `{}`...",
-                                     codeActionAssertion->toString(), error->toString()));
-                    CHECK_NE(it2, receivedCodeActionsByTitle.end());
-                }
-
-                // Ensure that the received code action applies correctly.
-                if (it2 != receivedCodeActionsByTitle.end()) {
-                    auto codeAction = move(it2->second);
-                    codeActionAssertion->check(test.sourceFileContents, lspWrapper, *codeAction.get());
-
-                    // Some bookkeeping to make surfacing errors re. extra/insufficient
-                    // apply-code-action annotations easier.
-                    receivedCodeActionsByTitle.erase(it2);
-
-                    if (isSelectedKind(codeAction->kind)) {
-                        (*it)->kind = codeAction->kind;
-                        matchedCodeActionAssertions.emplace_back(*it);
-                        it = applyCodeActionAssertions.erase(it);
-                    }
-                } else {
-                    ++it;
-                }
-            }
-
-            if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
-                FAIL_CHECK(
-                    fmt::format("Found apply-code-action assertions without "
-                                "corresponding code actions from the server:\n{}",
-                                fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
-                                              [](const auto &assertion) -> string { return assertion->toString(); })));
-            } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
-                FAIL_CHECK(fmt::format(
-                    "Received code actions without corresponding apply-code-action assertions:\n{}",
-                    fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
-                                  [](const auto &action) -> string { return action.second->toJSON(); })));
-            }
+        for (auto codeActionAssertion : applyCodeActionAssertions) {
+            validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId, selectedCodeActionKinds, applyCodeActionAssertions, codeActionAssertion->toString(), true);
         }
 
         // We've already removed any code action assertions that matches a received code action assertion.

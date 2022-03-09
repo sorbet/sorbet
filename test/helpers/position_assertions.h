@@ -315,11 +315,19 @@ public:
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                const CodeAction &codeAction);
 
+    void checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+                  const CodeAction &codeAction);
+
     const std::string title;
     const std::string version;
     std::optional<CodeActionKind> kind;
 
     std::string toString() const override;
+
+private:
+    std::optional<std::pair<std::string, std::string>> expectedFile();
+    void assertResults(std::string expectedPath, std::string expectedContents, std::string actualContents);
+    std::unique_ptr<TextDocumentEdit> sortChanges(std::unique_ptr<TextDocumentEdit> changes);
 };
 
 // ^ apply-rename: [version] newName

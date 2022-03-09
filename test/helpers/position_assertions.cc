@@ -1439,9 +1439,50 @@ ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_
 string ApplyCodeActionAssertion::toString() const {
     return fmt::format("apply-code-action: [{}] {}", version, title);
 }
+optional<pair<string, string>> ApplyCodeActionAssertion::expectedFile() {
+    auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
+    string expectedEditedFileContents;
+    try {
+        expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
+    } catch (FileNotFoundException e) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), assertionLine + 1,
+                          fmt::format("Missing {} which should contain test file after applying code actions.",
+                                      expectedUpdatedFilePath));
+        return nullopt;
+    }
+    return make_pair(expectedUpdatedFilePath, expectedEditedFileContents);
+}
+
+void ApplyCodeActionAssertion::assertResults(std::string expectedPath, std::string expectedContents,
+                                             std::string actualContents) {
+    INFO(fmt::format(
+        "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
+        expectedPath, expectedContents, actualContents));
+    CHECK_EQ(actualContents, expectedContents);
+}
+
+std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortChanges(std::unique_ptr<TextDocumentEdit> changes) {
+    // First, sort the edits by increasing starting location and verify that none overlap.
+    fast_sort(changes->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
+    for (uint32_t i = 1; i < changes->edits.size(); i++) {
+        INFO(fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
+                         "overlapping autocomplete edits, and it's likely that this is a bug.",
+                         changes->edits[i - 1]->toJSON(), changes->edits[i]->toJSON()));
+        REQUIRE_LT(changes->edits[i - 1]->range->end->cmp(*changes->edits[i]->range->start), 0);
+    }
+
+    // Now, apply the edits in the reverse order so that the indices don't change.
+    reverse(changes->edits.begin(), changes->edits.end());
+    return changes;
+}
 
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, const CodeAction &codeAction) {
+    auto maybeFile = expectedFile();
+    if (!maybeFile.has_value()) {
+        return;
+    }
+    auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
     const auto &config = wrapper.config();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto filename = uriToFilePath(config, c->textDocument->uri);
@@ -1452,40 +1493,53 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         }
         auto &file = it->second;
 
-        auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
-        string expectedEditedFileContents;
-        try {
-            expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
-        } catch (FileNotFoundException e) {
-            ADD_FAIL_CHECK_AT(filename.c_str(), assertionLine + 1,
-                              fmt::format("Missing {} which should contain test file after applying code actions.",
-                                          expectedUpdatedFilePath));
-            return;
-        }
-
         string actualEditedFileContents = string(file->source());
+        c = sortChanges(move(c));
 
-        // First, sort the edits by increasing starting location and verify that none overlap.
-        fast_sort(c->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
-        for (uint32_t i = 1; i < c->edits.size(); i++) {
-            INFO(fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
-                             "overlapping autocomplete edits, and it's likely that this is a bug.",
-                             c->edits[i - 1]->toJSON(), c->edits[i]->toJSON()));
-            REQUIRE_LT(c->edits[i - 1]->range->end->cmp(*c->edits[i]->range->start), 0);
-        }
-
-        // Now, apply the edits in the reverse order so that the indices don't change.
-        reverse(c->edits.begin(), c->edits.end());
         for (auto &e : c->edits) {
             actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText);
         }
-        INFO(fmt::format(
-            "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
-            expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents));
-        CHECK_EQ(actualEditedFileContents, expectedEditedFileContents);
+        assertResults(expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
+    }
+};
+
+void ApplyCodeActionAssertion::checkAll(
+    const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+    const CodeAction &codeAction) {
+    const auto &config = wrapper.config();
+    UnorderedMap<string, string> accumulatedOriginalEditedContents{};
+    string actualEditedFileContents;
+    auto maybeFile = expectedFile();
+    if (!maybeFile.has_value()) {
+        return;
+    }
+    auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
+    for (auto &c : *codeAction.edit.value()->documentChanges) {
+        auto filename = uriToFilePath(config, c->textDocument->uri);
+        auto it = sourceFileContents.find(filename);
+        {
+            INFO(fmt::format("Unable to find referenced source file `{}`", filename));
+            REQUIRE_NE(it, sourceFileContents.end());
+        }
+        auto &file = it->second;
+
+        c = sortChanges(move(c));
+        actualEditedFileContents = string(file->source());
+
+        for (auto &e : c->edits) {
+            string oldSource = accumulatedOriginalEditedContents.contains(actualEditedFileContents)
+                                   ? accumulatedOriginalEditedContents[actualEditedFileContents]
+                                   : actualEditedFileContents;
+
+            auto newSource = applyEdit(oldSource, *file, *e->range, e->newText);
+            accumulatedOriginalEditedContents.insert_or_assign(actualEditedFileContents, newSource);
+        }
+    }
+
+    for (auto pair : accumulatedOriginalEditedContents) {
+        assertResults(expectedUpdatedFilePath, expectedEditedFileContents, pair.second);
     }
 }
-
 SymbolSearchAssertion::SymbolSearchAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                              string_view query, optional<std::string> name, optional<string> container,
                                              std::optional<int> rank, optional<string> uri)
