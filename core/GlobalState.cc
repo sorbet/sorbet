@@ -491,11 +491,11 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
 
     // Magic classes for special proc bindings
-    klass = synthesizeClass(core::Names::Constants::BindToAttachedClass());
-    ENFORCE(klass == Symbols::BindToAttachedClass());
+    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
+    ENFORCE(klass == Symbols::MagicBindToAttachedClass());
 
-    klass = synthesizeClass(core::Names::Constants::BindToSelfType());
-    ENFORCE(klass == Symbols::BindToSelfType());
+    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToSelfType());
+    ENFORCE(klass == Symbols::MagicBindToSelfType());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Types());
     ENFORCE(klass == Symbols::T_Types());

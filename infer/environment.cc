@@ -1615,9 +1615,9 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 
     if (rebind.exists()) {
         core::TypeAndOrigins result;
-        if (rebind == core::Symbols::BindToSelfType()) {
+        if (rebind == core::Symbols::MagicBindToSelfType()) {
             result.type = main.receiver;
-        } else if (rebind == core::Symbols::BindToAttachedClass()) {
+        } else if (rebind == core::Symbols::MagicBindToAttachedClass()) {
             auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
             auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
 

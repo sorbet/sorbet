@@ -294,10 +294,10 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                 } else if (auto arg = ast::cast_tree<ast::Send>(send->getPosArg(0))) {
                     if (arg->fun == core::Names::selfType()) {
-                        sig.bind = core::Symbols::BindToSelfType();
+                        sig.bind = core::Symbols::MagicBindToSelfType();
                         validBind = true;
                     } else if (arg->fun == core::Names::attachedClass()) {
-                        sig.bind = core::Symbols::BindToAttachedClass();
+                        sig.bind = core::Symbols::MagicBindToAttachedClass();
                         validBind = true;
                     }
                 }
