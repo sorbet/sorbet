@@ -39,7 +39,7 @@ public:
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
      *
-     * Resets `fastPathDecision`.
+     * Resets `canTakeFastPath`.
      */
     void mergeOlder(const LSPFileUpdates &older);
 
