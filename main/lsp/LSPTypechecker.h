@@ -46,7 +46,7 @@ class LSPTypechecker final {
     absl::Mutex cancellationUndoStateRWLock;
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
-    std::unique_ptr<UndoState> cancellationUndoState;
+    std::unique_ptr<UndoState> cancellationUndoState ABSL_GUARDED_BY(cancellationUndoStateRWLock);
 
     std::shared_ptr<const LSPConfiguration> config;
     /** Used to preempt running slow paths. */
