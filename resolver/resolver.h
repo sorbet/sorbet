@@ -28,7 +28,7 @@ private:
     static void computeLinearization(core::GlobalState &gs);
     static ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                                    WorkerPool &workers);
-    static void sanityCheck(core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
+    static void sanityCheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 };
 
 } // namespace sorbet::resolver
