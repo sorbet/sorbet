@@ -3619,7 +3619,7 @@ public:
 
 class ResolveSanityCheckWalk {
 public:
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 tree.toString(ctx));
@@ -3630,23 +3630,23 @@ public:
         }
         return tree;
     }
-    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         return tree;
     }
-    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
         return tree;
     }
-    ast::ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 tree.toString(ctx));
         return tree;
     }
-    ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, original));
         return tree;
@@ -3754,12 +3754,12 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     return trees;
 }
 
-void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
+void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
         Timer timeit(gs.tracer(), "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
-            core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
+            core::Context ctx(gs, core::Symbols::root(), tree.file);
             tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));
         }
     }
