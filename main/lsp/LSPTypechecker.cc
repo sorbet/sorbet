@@ -108,6 +108,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     if (updates.canceledSlowPath) {
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
+        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         ENFORCE(cancellationUndoState != nullptr);
         if (cancellationUndoState != nullptr) {
             // Restore the previous globalState
@@ -441,7 +442,10 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         prodCategoryCounterInc("lsp.updates", "slowpath");
         timeit.setTag("canceled", "false");
         // No need to keep around cancelation state!
-        cancellationUndoState = nullptr;
+        {
+            absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
+            cancellationUndoState = nullptr;
+        }
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
@@ -457,29 +461,32 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
     // The fast path cannot be canceled.
     ENFORCE(!(updates.canTakeFastPath && couldBeCanceled));
-    if (couldBeCanceled) {
-        ENFORCE(updates.updatedGS.has_value());
-        cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
-    }
-
-    // Clear out state associated with old finalGS.
-    if (!updates.canTakeFastPath) {
-        indexedFinalGS.clear();
-    }
-
-    int i = -1;
-    ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
-    for (auto &ast : updates.updatedFileIndexes) {
-        i++;
-        const int id = ast.file.id();
-        if (id >= indexed.size()) {
-            indexed.resize(id + 1);
+    {
+        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
+        if (couldBeCanceled) {
+            ENFORCE(updates.updatedGS.has_value());
+            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
         }
-        if (cancellationUndoState != nullptr) {
-            // Move the evicted values before they get replaced.
-            cancellationUndoState->recordEvictedState(move(indexed[id]));
+
+        // Clear out state associated with old finalGS.
+        if (!updates.canTakeFastPath) {
+            indexedFinalGS.clear();
         }
-        indexed[id] = move(ast);
+
+        int i = -1;
+        ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
+        for (auto &ast : updates.updatedFileIndexes) {
+            i++;
+            const int id = ast.file.id();
+            if (id >= indexed.size()) {
+                indexed.resize(id + 1);
+            }
+            if (cancellationUndoState != nullptr) {
+                // Move the evicted values before they get replaced.
+                cancellationUndoState->recordEvictedState(move(indexed[id]));
+            }
+            indexed[id] = move(ast);
+        }
     }
 
     for (auto &ast : updates.updatedFinalGSFileIndexes) {

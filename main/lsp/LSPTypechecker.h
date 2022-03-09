@@ -40,6 +40,10 @@ class LSPTypechecker final {
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
+
+    /** Used to guard access to `cancellationUndoState` and specifically the stale
+     * `GlobalState` residing inside of it. */
+    absl::Mutex cancellationUndoStateRWLock;
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
     std::unique_ptr<UndoState> cancellationUndoState;
