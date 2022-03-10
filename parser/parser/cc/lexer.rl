@@ -1334,7 +1334,6 @@ void lexer::set_state_expr_value() {
   # Interpolations with immediate variable names simply call into
   # the corresponding machine.
 
-  # TODO(jez) What is this for?
   interp_var = '#' ( global_var | class_var_v | instance_var_v );
 
   action extend_interp_var {
