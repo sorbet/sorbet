@@ -1,5 +1,10 @@
 # typed: true
 
+# This file tests that we can produce completion results for instance variables
+# and class variables that have no declared type, with some limitations.  For
+# cases where such variables do have declared types, we can do better;
+# instance_var_strict.rb exists to test such cases.
+
 class InstanceVariable
   def some_method
     @different_prefix = 10
@@ -13,6 +18,8 @@ class InstanceVariable
   end
 
   def more_method
+    # If the parser gets fixed to return some kind of node for bare `@`, we
+    # should be able to start producing completion results here.
     @ # error: unexpected
     #^ completion: (nothing)
   end
@@ -39,6 +46,9 @@ class ClassVariable
 
   def more_method
     # We parse each '@' as its own separate thing.
+    #
+    # If the parser gets fixed to return some kind of node for bare `@@`, we
+    # should be able to start producing completion results here.
     @@ # error-with-dupes: unexpected
     #^ completion: (nothing)
   end
@@ -125,7 +135,7 @@ class Inheriting < Superclass
 
   # Because our completion algorithm operates purely syntactically for
   # untyped instance variables, it misses picking up instance variables from
-  # `Superclass`.
+  # `Superclass`, since those instance variables are not declared with `T.let`.
   def other_method
     @super
     #     ^ completion: @super

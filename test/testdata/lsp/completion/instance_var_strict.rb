@@ -1,5 +1,10 @@
 # typed: strict
 
+# This file tests that we can produce completion results for instance
+# variables and class variables that have declared types.  For cases where
+# such variables do not have declared types, we handle things differently;
+# instance_var.rb exists to test such cases.
+
 class ::Module
   include T::Sig
 end
