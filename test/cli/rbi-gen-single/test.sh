@@ -15,6 +15,17 @@ echo "-- sanity-checking package with --stripe-packages"
   --dump-package-info="$rbis/package-info.json" \
   "$test_path"
 
+show_output() {
+  local name=$1
+  local label=$2
+  local suffix=$3
+  local file="${rbis}/${name}_Package.${suffix}"
+  if [ -f "$file" ]; then
+    echo "-- ${label} (${name})"
+    cat "${file}"
+  fi
+}
+
 # Generate rbis for each package
 find . -name __package.rb | sort | while read -r package; do
   name="$(awk '/class/ {print $2}' "$package")"
@@ -26,26 +37,11 @@ find . -name __package.rb | sort | while read -r package; do
     --package-rbi-output="$rbis" \
     --single-package="$name" "$test_path"
 
-  rbi="$rbis/${name//::/_}_Package.package.rbi"
-  if [ -f "$rbi" ]; then
-    echo "-- RBI: $package ($name)"
-    cat "$rbi"
-  fi
-
-  test_rbi="$rbis/${name//::/_}_Package.test.package.rbi"
-  if [ -f "$test_rbi" ]; then
-    echo "-- Test RBI: $package ($name)"
-    cat "$test_rbi"
-  fi
-
-  test_private_rbi="$rbis/${name//::/_}_Package.test.private.package.rbi"
-  if [ -f "$test_private_rbi" ]; then
-    echo "-- Test Private RBI: $package ($name)"
-    cat "$test_private_rbi"
-  fi
-
-  echo "-- JSON: $package ($name)"
-  cat "$rbis/${name//::/_}_Package.deps.json"
-
+  show_output "$name" "RBI"                   "package.rbi"
+  show_output "$name" "RBI Deps"              "deps.json"
+  show_output "$name" "Test Private RBI"      "test.private.package.rbi"
+  show_output "$name" "Test Private RBI Deps" "test.private.deps.json"
+  show_output "$name" "Test RBI"              "test.package.rbi"
+  show_output "$name" "Test RBI Deps"         "test.deps.json"
 done
 
