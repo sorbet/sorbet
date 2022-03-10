@@ -17,6 +17,8 @@ Family::Simpsons::RelativeBart = Family::Bart::Character
 Family::Simpsons::MaybeBartFull = T.type_alias {T.nilable(Family::Bart::Character)}
 Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Family::Bart::Character)}
 Family::Simpsons::FullyQualifiedBart = Family::Bart::Character
+class Family::Belcher
+end
 -- RBI Deps (Family)
 {"packageRefs":["Family::Bart"], "rbiRefs":[]}
 -- Test Private RBI (Family)
