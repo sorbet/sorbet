@@ -16,6 +16,6 @@ void CancelRequestTask::preprocess(LSPPreprocessor &preprocessor) {
     preprocessor.cancelRequest(*params);
 }
 
-void CancelRequestTask::run(LSPTypecheckerDelegate &tc) {}
+void CancelRequestTask::run(LSPTypecheckerInterface &tc) {}
 
 } // namespace sorbet::realmain::lsp
