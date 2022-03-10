@@ -878,10 +878,6 @@ void readOptions(Options &opts,
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         if (raw.count("extra-package-files-directory-prefix")) {
-            if (!opts.stripePackages) {
-                logger->error("--extra-package-files-directory-prefix can only be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
             for (const string &dirName : raw["extra-package-files-directory-prefix"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
                     logger->error(
