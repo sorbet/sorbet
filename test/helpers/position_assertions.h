@@ -312,13 +312,24 @@ public:
     ApplyCodeActionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                              std::string_view version, std::string_view title);
 
+    // method applies an edit and asserts results after each edit
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                const CodeAction &codeAction);
 
+    // method applies all edits and asserts results after every edit is applied
+    void checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+                  const CodeAction &codeAction);
+
     const std::string title;
     const std::string version;
+    std::optional<CodeActionKind> kind;
 
     std::string toString() const override;
+
+private:
+    std::optional<std::pair<std::string, std::string>> expectedFile();
+    void assertResults(std::string expectedPath, std::string expectedContents, std::string actualContents);
+    std::unique_ptr<TextDocumentEdit> sortEdits(std::unique_ptr<TextDocumentEdit> changes);
 };
 
 // ^ apply-rename: [version] newName
@@ -442,5 +453,23 @@ public:
     std::string toString() const override;
 };
 
+// # selective-apply-code-action: quickfix
+class SelectiveApplyCodeActionAssertions final : public RangeAssertion {
+public:
+    static std::shared_ptr<SelectiveApplyCodeActionAssertions> make(std::string_view filename,
+                                                                    std::unique_ptr<Range> &range, int assertionLine,
+                                                                    std::string_view assertionContents,
+                                                                    std::string_view assertionType);
+
+    const std::string assertionType;
+    const std::vector<std::string> values;
+
+    static std::optional<std::vector<std::string>>
+    getValues(std::string_view type, const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+    SelectiveApplyCodeActionAssertions(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                                       std::vector<std::string> values, std::string_view assertionType);
+
+    std::string toString() const override;
+};
 } // namespace sorbet::test
 #endif // TEST_HELPERS_POSITION_ASSERTIONS_H

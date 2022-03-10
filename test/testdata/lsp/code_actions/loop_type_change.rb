@@ -1,5 +1,5 @@
 # typed: true
-# exhaustive-apply-code-action: true
+# selective-apply-code-action: quickfix
 
 x = nil
 
