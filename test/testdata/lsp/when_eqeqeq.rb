@@ -2,6 +2,7 @@
 extend T::Sig
 
 module A
+     # ^ def: A
   class B
   end
 end
@@ -14,7 +15,10 @@ def foo(x)
     1
   when A::B
      # ^ hover: T.class_of(A)
+     # ^ usage: A
         # ^ hover: T.class_of(A::B)
     2
+  when A
+     # ^ usage: A
   end
 end
