@@ -52,7 +52,7 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
     if (auto *dangerousTask = dynamic_cast<LSPDangerousTypecheckerTask *>(task.get())) {
         if (auto *editTask = dynamic_cast<SorbetWorkspaceEditTask *>(dangerousTask)) {
             unique_ptr<SorbetWorkspaceEditTask> edit(editTask);
-            task.release();
+            (void)task.release();
             if (edit->canTakeFastPath(indexer)) {
                 // Can run on fast path synchronously; it should complete quickly.
                 typecheckerCoord.syncRun(move(edit));
@@ -63,7 +63,7 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
             }
         } else if (auto *initializedTask = dynamic_cast<InitializedTask *>(dangerousTask)) {
             unique_ptr<InitializedTask> initialized(initializedTask);
-            task.release();
+            (void)task.release();
             typecheckerCoord.initialize(move(initialized));
         } else {
             // Must be a new type of dangerous task we don't know about.
