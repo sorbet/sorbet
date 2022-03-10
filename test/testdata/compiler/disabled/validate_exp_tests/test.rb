@@ -8,7 +8,8 @@
 # that case to ensure that it's failing properly.
 
 # The oracle test needs to fail as well, but it's not the failure we're
-# interested in. Since the tests will never be run at the same time and their
-# output will be compared, it's sufficient to print out the current time to
-# guarantee a failure for the oracle test.
-puts Time.new
+# interested in. We used to compare the output of `Time.new`, but empirical
+# evidence says that sometimes the compiled version and the interpreted version
+# can print out the same time. Instead, we'll use this fancy compiler intrinsic
+# which is guaranteed to produce different output in each scenario.
+puts T::Private::Compiler.running_compiled?
