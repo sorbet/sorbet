@@ -6,11 +6,10 @@ end
 
 class MethodCompletion
   def self.test1(x)
-    # TODO(jez) What's up with this completion result?
     puts 'before'
     case x # error: Hint: this "case" token might not be properly closed
     when MethodCompletion.
-    #                     ^ completion: class, ...
+    #                     ^ completion: x, test1, test2, ...
     puts 'hello' # error: unexpected token tSTRING
   end
 
