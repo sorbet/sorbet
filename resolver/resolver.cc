@@ -2903,7 +2903,9 @@ public:
         return tree;
     }
 
-    static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    template <typename StateType>
+    static vector<ast::ParsedFile> run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
