@@ -523,7 +523,7 @@ vector<core::NameRef> allSimilarFields(const core::GlobalState &gs, core::ClassO
     return result;
 }
 
-vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typechecker, const core::ClassOrModuleRef klass,
+vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerInterface &typechecker, const core::ClassOrModuleRef klass,
                                                const core::Loc queryLoc, ast::UnresolvedIdent::Kind kind,
                                                string_view prefix) {
     const auto &gs = typechecker.state();
