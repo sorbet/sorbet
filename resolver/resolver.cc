@@ -3796,15 +3796,21 @@ void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> 
     }
 }
 
-ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
-    auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+namespace {
+void verifyLinearizationComputed(const core::GlobalState &gs) {
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
         core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
         ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
     })
+}
+}
+
+ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+    auto workers = WorkerPool::create(0, gs.tracer());
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+    verifyLinearizationComputed(gs);
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);
     if (!result.hasResult()) {
@@ -3822,11 +3828,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncrementalWithoutStateMutation(const c
     auto workers = WorkerPool::create(0, gs.tracer());
     //trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
-    DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
-        core::ClassOrModuleRef sym(gs, i);
-        // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
-    })
+    verifyLinearizationComputed(gs);
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);
     if (!result.hasResult()) {
