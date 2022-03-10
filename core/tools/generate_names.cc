@@ -59,6 +59,8 @@ NameDef names[] = {
 
     // Used in parser for error recovery
     {"methodNameMissing", "<method-name-missing>"},
+    {"ivarNameMissing", "@<ivar-name-missing>"},
+    {"cvarNameMissing", "@@<cvar-name-missing>"},
     {"ConstantNameMissing", "<ConstantNameMissing>", true},
     {"ErrorNode", "<ErrorNode>", true},
 

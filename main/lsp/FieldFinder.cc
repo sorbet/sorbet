@@ -24,6 +24,10 @@ ast::ExpressionPtr FieldFinder::postTransformUnresolvedIdent(core::Context ctx, 
         return tree;
     }
 
+    if (ident.name == core::Names::ivarNameMissing() || ident.name == core::Names::cvarNameMissing()) {
+        return tree;
+    }
+
     this->result_.emplace_back(ident.name);
     return tree;
 }
