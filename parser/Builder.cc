@@ -751,7 +751,9 @@ public:
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        return make_unique<CVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
+        auto view = tok->view();
+        auto name = view == "@@" ? core::Names::cvarNameMissing() : gs_.enterNameUTF8(view);
+        return make_unique<CVar>(tokLoc(tok), name);
     }
 
     unique_ptr<Node> dedentString(unique_ptr<Node> node, size_t dedentLevel) {
@@ -1002,7 +1004,9 @@ public:
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        return make_unique<IVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
+        auto view = tok->view();
+        auto name = view == "@" ? core::Names::ivarNameMissing() : gs_.enterNameUTF8(view);
+        return make_unique<IVar>(tokLoc(tok), name);
     }
 
     unique_ptr<Node> keywordBreak(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,

@@ -78,7 +78,8 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            if (id.kind != ast::UnresolvedIdent::Kind::Global) {
+            if (id.kind != ast::UnresolvedIdent::Kind::Global && id.name != core::Names::ivarNameMissing() &&
+                id.name != core::Names::cvarNameMissing()) {
                 if (auto e = cctx.ctx.beginError(id.loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id.name.show(cctx.ctx));
                 }

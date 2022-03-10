@@ -919,8 +919,11 @@ void lexer::set_state_expr_value() {
 
   # Ruby accepts (and fails on) variables with leading digit
   # in literal context, but not in unquoted symbol body.
-  class_var_v    = '@@' c_alnum+;
-  instance_var_v = '@' c_alnum+;
+  class_var_v    = '@@' c_alnum*;
+  instance_var_v = '@' c_alnum*;
+
+  class_var_v_nonempty    = '@@' c_alnum+;
+  instance_var_v_nonempty = '@' c_alnum+;
 
   label          = bareword [?!]? ':';
 
@@ -1334,7 +1337,7 @@ void lexer::set_state_expr_value() {
   # Interpolations with immediate variable names simply call into
   # the corresponding machine.
 
-  interp_var = '#' ( global_var | class_var_v | instance_var_v );
+  interp_var = '#' ( global_var | class_var_v_nonempty | instance_var_v_nonempty );
 
   action extend_interp_var {
     auto& current_literal = literal_();
@@ -1670,7 +1673,9 @@ void lexer::set_state_expr_value() {
 
       class_var_v
       => {
-        if (ts[2] >= '0' && ts[2] <= '9') {
+        if (te - ts == 2) {
+          diagnostic_(dlevel::ERROR, dclass::Unexpected, tok());
+        } else if (ts[2] >= '0' && ts[2] <= '9') {
           diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts, te));
         }
 
@@ -1680,7 +1685,9 @@ void lexer::set_state_expr_value() {
 
       instance_var_v
       => {
-        if (ts[1] >= '0' && ts[1] <= '9') {
+        if (te - ts == 1) {
+          diagnostic_(dlevel::ERROR, dclass::Unexpected, tok());
+        } else if (ts[1] >= '0' && ts[1] <= '9') {
           diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts, te));
         }
 

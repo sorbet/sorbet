@@ -18,10 +18,8 @@ class InstanceVariable
   end
 
   def more_method
-    # If the parser gets fixed to return some kind of node for bare `@`, we
-    # should be able to start producing completion results here.
-    @ # error: unexpected
-    #^ completion: (nothing)
+    @ # error: unexpected `@`
+    #^ completion: @different_prefix, @my, @my_ivar
   end
 end
 
@@ -50,7 +48,7 @@ class ClassVariable
     # If the parser gets fixed to return some kind of node for bare `@@`, we
     # should be able to start producing completion results here.
     @@ # error-with-dupes: unexpected
-    #^ completion: (nothing)
+    # ^ completion: @@different_prefix, @@my, @@my_cvar
   end
 end
 

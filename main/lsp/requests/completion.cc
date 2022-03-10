@@ -1193,15 +1193,23 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         }
         items = this->getCompletionItems(typechecker, params);
     } else if (auto identResp = resp->isIdent()) {
-        auto varName = identResp->variable._name.shortName(gs);
-        auto nameLen = static_cast<int32_t>(varName.size());
+        auto varName = identResp->variable._name;
+        auto prefix = varName.shortName(gs);
+        switch (varName.rawId()) {
+            case core::Names::ivarNameMissing().rawId():
+                prefix = "@";
+                break;
+            case core::Names::cvarNameMissing().rawId():
+                prefix = "@@";
+                break;
+        }
+        auto nameLen = static_cast<int32_t>(prefix.size());
 
         auto termLocPrefix = identResp->termLoc.adjustLen(gs, 0, nameLen);
 
-        if (queryLoc.adjustLen(gs, -1 * nameLen, nameLen).source(gs) == varName) {
+        if (queryLoc.adjustLen(gs, -1 * nameLen, nameLen).source(gs) == prefix) {
             // Cursor at end of variable name
             auto suggestKeywords = true;
-            auto prefix = varName;
             auto params = SearchParams{
                 queryLoc,
                 prefix,
@@ -1211,7 +1219,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
                 core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
             };
             items = this->getCompletionItems(typechecker, params);
-        } else if (termLocPrefix.source(gs) == varName && !termLocPrefix.contains(queryLoc)) {
+        } else if (termLocPrefix.source(gs) == prefix && !termLocPrefix.contains(queryLoc)) {
             // This is *probably* (but not definitely necessarily) an IdentResponse for an
             // assignment, with the cursor somewhere on the RHS of the `=` but before having typed
             // anything. This case is super common for code like this (cursor is `|`):

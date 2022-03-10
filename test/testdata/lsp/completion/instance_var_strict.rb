@@ -24,8 +24,8 @@ class InstanceVariable
 
   sig {void}
   def more_method
-    @ # error: unexpected
-    #^ completion: (nothing)
+    @ # error: unexpected `@`
+    #^ completion: @my_ivar
   end
 end
 
@@ -58,8 +58,8 @@ class ClassVariable
   sig {void}
   def more_method
     # We parse each '@' as its own separate thing.
-    @@ # error-with-dupes: unexpected
-    #^ completion: (nothing)
+    @@ # error: unexpected `@@`
+    # ^ completion: @@my_cvar
   end
 end
 
