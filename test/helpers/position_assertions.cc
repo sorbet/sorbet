@@ -2004,7 +2004,7 @@ SelectiveApplyCodeActionAssertions::SelectiveApplyCodeActionAssertions(std::stri
                                                                        std::unique_ptr<Range> &range, int assertionLine,
                                                                        std::vector<std::string> values,
                                                                        std::string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(assertionType), values(values){};
 
 std::optional<std::vector<std::string>>
 SelectiveApplyCodeActionAssertions::getValues(std::string_view type,
