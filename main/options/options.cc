@@ -323,6 +323,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-stale-state", "Enable experimental LSP feature: fast "
+                                                                           "but approximate answers from stale "
+                                                                           "typechecker state");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
 
@@ -722,6 +725,12 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
+
+        // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
+        // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers
+        // until we get some other groundwork in place. Once things stabilize a bit more, we can slap
+        // `enableAllLSPFeatures ||` onto the condition here.
+        opts.lspStaleStateEnabled = raw["enable-experimental-lsp-stale-state"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
