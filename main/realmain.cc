@@ -583,6 +583,13 @@ int realmain(int argc, char *argv[]) {
             // seconds.
             auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
             auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
+            {
+                core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
+                core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
+                gs->setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryPrefixes,
+                                       opts.stripePackagesHint);
+            }
+
             packages = packager::Packager::findPackages(*gs, *workers, move(packages));
 
             if (!opts.singlePackage.empty()) {
