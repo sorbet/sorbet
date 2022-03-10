@@ -13,6 +13,7 @@ echo "-- sanity-checking package with --stripe-packages"
 "$sorbet" --silence-dev-message \
   --stripe-packages \
   --dump-package-info="$rbis/package-info.json" \
+  --extra-package-files-directory-prefix="${test_path}/other/" \
   "$test_path"
 
 show_output() {
@@ -35,6 +36,7 @@ find . -name __package.rb | sort | while read -r package; do
   "$sorbet" --silence-dev-message \
     --ignore=__package.rb \
     --package-rbi-output="$rbis" \
+    --extra-package-files-directory-prefix="${test_path}/other/" \
     --single-package="$name" "$test_path"
 
   show_output "$name" "RBI"                   "package.rbi"

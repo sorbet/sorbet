@@ -6,6 +6,7 @@ class Family < PackageSpec
   import Family::Bart
   test_import Util::Testing
 
+  export Family::Belcher
   export Family::Simpsons
   export Test::Family::TestFamily
 
