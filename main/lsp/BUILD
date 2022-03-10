@@ -18,6 +18,7 @@ cc_library(
         "AbstractRenamer.h",
         "NextMethodFinder.h",
         "LocalVarFinder.h",
+        "FieldFinder.h",
         "json_enums.h",
         "LocalVarSaver.h",
         "ShowOperation.h",
