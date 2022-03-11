@@ -107,7 +107,7 @@ public:
         return false;
     }
 
-    void run(LSPTypecheckerDelegate &_) override {
+    void run(LSPTypecheckerInterface &_) override {
         shouldTerminate = true;
         gs = typechecker.destroy();
     }
@@ -136,6 +136,19 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
     asyncRunInternal(wrappedTask);
     wrappedTask->blockUntilComplete();
+}
+
+unique_ptr<LSPTask> LSPTypecheckerCoordinator::syncRunOnStaleState(unique_ptr<LSPTask> task) {
+    bool success = typechecker.tryRunOnStaleState([&task](UndoState &undoState) {
+        LSPStaleTypechecker typechecker(undoState);
+        task->run(typechecker);
+    });
+
+    if (success) {
+        return nullptr;
+    } else {
+        return task;
+    }
 }
 
 shared_ptr<core::lsp::Task>

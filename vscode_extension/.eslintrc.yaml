@@ -5,7 +5,6 @@ rules:
   # Allow functions with name starting with capital letter for HOC
   import/no-named-as-default-member: 0
   import/no-named-as-default: 0
-  new-cap: 0
   eslint-comments/no-unused-disable: 2
   eslint-comments/no-unused-enable: 2
   prettier/prettier: 2
@@ -27,12 +26,121 @@ rules:
     - 2
     - always
     - exceptAfterSingleLine: true
+
+  # ----- rules from stripe-internal/eslint-config-stripe ---------------------
+
+  # ----- rules/best-practices.js ------
+  # Functions can sometimes return values or sometimes not
+  'consistent-return': 0
+  # If/else blocks must use curly braces.
+  curly: 2
+  # Switch statements must have a default case.
+  'default-case': 2
+  # Require dot notation for property access unless they are snake_cased.
+  'dot-notation': [2, {allowPattern: '^_*[A-Za-z0-9]+(_[A-Za-z0-9]+)+$'}]
+  # Disallow == and != in favor of === and !==
+  eqeqeq: 2
+  # Allow case declarations
+  'no-case-declarations': 0
+  # Allow else after a return in an if/else block
+  'no-else-return': 0
+  # Disallow reassignment of function parameters. Prop assignment is okay.
+  'no-param-reassign': [2, {props: false}]
+  # Disallow unused expressions
+  'no-unused-expressions': [2, {allowShortCircuit: true}]
+  # Disallow unnecessary .call() and .apply()
+  'no-useless-call': 2
+
+  # ----- rules/errors.js -----
+  # Allow empty catch blocks
+  'no-empty': [2, {allowEmptyCatch: true}]
+  'no-mixed-operators': 0
+  'no-prototype-builtins': 0
+
+  # ----- rules/es6.js -----
+  'arrow-parens': [2, 'always']
+  # Allow any usage of braces with arrow functions
+  'arrow-body-style': 0
+  # Require spaces around arrow functions
+  'arrow-spacing': 2
+  # Require object and property shorthand
+  'object-shorthand': [2, 'always']
+  # Don't require arrow functions for callbacks
+  'prefer-arrow-callback': 0
+  # Require consts if there is no reassignment
+  'prefer-const': 2
+
+  # ----- rules/imports.js -----
+  'import/extensions': 0
+  # Require imports before everything else
+  'import/imports-first': 2
+  # Ensure named imports correspond to a named export in the remote file
+  'import/named': 2
+  'import/no-extraneous-dependencies': 0
+  'import/no-restricted-paths': 0
+  'import/no-unresolved': 0
+  'import/prefer-default-export': 0
+
+  # ----- rules/node.js -----
+  'global-require': 0
+
+  # ----- rules/style.js -----
+  # Allow function expressions to not have names
+  'func-names': 0
+  # Require two spaces for indent
+  indent: [2, 2, {SwitchCase: 1}]
+  # Maximum line length
+  'max-len': [2, 150]
+  # Don't require a capital letter for constructors
+  'new-cap': 0
+  # Allow chains up to five deep
+  'newline-per-chained-call': [2, {ignoreChainWithDepth: 5}]
+  # Disallow multiple empty lines
+  'no-multiple-empty-lines': 2
+  # Allow dangling underscores in identifiers
+  'no-underscore-dangle': 0
+  # Allow useless computed keys.
+  # We disable useless computed _string_ keys in a forked version of this
+  # rule, no-useless-computed-string-key. We allow computed number keys
+  # because Flow doesn’t support number keys unless they’re declared using
+  # bracket syntax. Adjusting the rule allows us to use numbers as keys in
+  # Flow’s indexer types.
+  'no-useless-computed-key': 0
+  # Disallow padding inside curly braces
+  # 'object-curly-spacing': [2, 'never']
+  # Diallow unnecessary quotes around property names
+  'quote-props': [2, 'as-needed']
+  # Use single quotes
+  # quotes: [2, 'single']
+  # Disallow spaces before function parens
+  # 'space-before-function-paren': [2, 'never']
+  # Require spaces immediately following a comment
+  'spaced-comment': [2, 'always']
+  # Disallow spacing in template strings
+  'template-curly-spacing': [2, 'never']
+
+  # ----- rules/variables.js -----
+  # Disallow global event and fdescribe
+  'no-restricted-globals': [2, 'event', 'fdescribe']
+  # Disallow use before definition
+  'no-use-before-define': [2, {functions: false, classes: false}]
+
 extends:
+  - 'eslint-config-airbnb/rules/react'
+  - 'eslint-config-airbnb-base'
   - prettier
 plugins:
   - eslint-comments
   - prettier
+  - import
 parser: "@typescript-eslint/parser"
+env:
+  es6: true
+parserOptions:
+  ecmaVersion: 6
+  ecmaFeatures:
+    jsx: true
+  sourceType: 'module'
 settings:
   import/ignore:
     - node_modules

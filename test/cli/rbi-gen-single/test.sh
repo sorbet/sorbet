@@ -13,7 +13,19 @@ echo "-- sanity-checking package with --stripe-packages"
 "$sorbet" --silence-dev-message \
   --stripe-packages \
   --dump-package-info="$rbis/package-info.json" \
+  --extra-package-files-directory-prefix="${test_path}/other/" \
   "$test_path"
+
+show_output() {
+  local name=$1
+  local label=$2
+  local suffix=$3
+  local file="${rbis}/${name}_Package.${suffix}"
+  if [ -f "$file" ]; then
+    echo "-- ${label} (${name})"
+    cat "${file}"
+  fi
+}
 
 # Generate rbis for each package
 find . -name __package.rb | sort | while read -r package; do
@@ -22,24 +34,16 @@ find . -name __package.rb | sort | while read -r package; do
   echo "-- $package ($name)"
 
   "$sorbet" --silence-dev-message \
-    --ignore=__package.rb,"$rbis" \
+    --ignore=__package.rb \
     --package-rbi-output="$rbis" \
+    --extra-package-files-directory-prefix="${test_path}/other/" \
     --single-package="$name" "$test_path"
 
-  rbi="$rbis/${name//::/_}_Package.package.rbi"
-  if [ -f "$rbi" ]; then
-    echo "-- RBI: $package ($name)"
-    cat "$rbi"
-  fi
-
-  test_rbi="$rbis/${name//::/_}_Package.test.package.rbi"
-  if [ -f "$test_rbi" ]; then
-    echo "-- Test RBI: $package ($name)"
-    cat "$test_rbi"
-  fi
-
-  echo "-- JSON: $package ($name)"
-  cat "$rbis/${name//::/_}_Package.deps.json"
-
+  show_output "$name" "RBI"                   "package.rbi"
+  show_output "$name" "RBI Deps"              "deps.json"
+  show_output "$name" "Test Private RBI"      "test.private.package.rbi"
+  show_output "$name" "Test Private RBI Deps" "test.private.deps.json"
+  show_output "$name" "Test RBI"              "test.package.rbi"
+  show_output "$name" "Test RBI Deps"         "test.deps.json"
 done
 

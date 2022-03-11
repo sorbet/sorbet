@@ -6,8 +6,8 @@ class Identity
   Ty = type_member
 
   sig {params(x: Ty).returns(Ty)}
-               # ^^ error: `type_member` type `Identity::Ty` used in a singleton method definition
-                           # ^^ error: `type_member` type `Identity::Ty` used in a singleton method definition
+               # ^^ error: `type_member` type `Ty` used in a singleton method definition
+                           # ^^ error: `type_member` type `Ty` used in a singleton method definition
   def self.call(x)
     x
   end

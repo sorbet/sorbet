@@ -26,11 +26,11 @@ function nop() {}
 const VALID_STATE_TRANSITIONS = new Map<ServerStatus, Set<ServerStatus>>();
 VALID_STATE_TRANSITIONS.set(
   ServerStatus.INITIALIZING,
-  new Set([ServerStatus.ERROR, ServerStatus.RUNNING, ServerStatus.RESTARTING])
+  new Set([ServerStatus.ERROR, ServerStatus.RUNNING, ServerStatus.RESTARTING]),
 );
 VALID_STATE_TRANSITIONS.set(
   ServerStatus.RUNNING,
-  new Set([ServerStatus.ERROR, ServerStatus.RESTARTING])
+  new Set([ServerStatus.ERROR, ServerStatus.RESTARTING]),
 );
 // Restarting is a terminal state. The restart occurs by terminating this LanguageClient and creating a new one.
 VALID_STATE_TRANSITIONS.set(ServerStatus.RESTARTING, new Set([]));
@@ -42,7 +42,7 @@ VALID_STATE_TRANSITIONS.set(ServerStatus.ERROR, new Set([]));
  */
 export function shimLanguageClient(
   lc: LanguageClient,
-  _emitTimingMetric: (metric: string, value: number | Date, tags: Tags) => void
+  _emitTimingMetric: (metric: string, value: number | Date, tags: Tags) => void,
 ) {
   const originalSendRequest = lc.sendRequest;
   lc.sendRequest = function(this: LanguageClient, method: any, ...args: any[]) {
@@ -62,7 +62,7 @@ export function shimLanguageClient(
       () => {
         // This callback is called if the request failed or was canceled.
         _emitTimingMetric(metricName, now, { success: "false" });
-      }
+      },
     );
     return rv;
   };
@@ -96,19 +96,19 @@ export default class SorbetLanguageClient implements ErrorHandler {
   private _emitCountMetric = emitCountMetric.bind(
     null,
     this._sorbetExtensionConfig,
-    this._outputChannel
+    this._outputChannel,
   );
 
   private _emitTimingMetric = emitTimingMetric.bind(
     null,
     this._sorbetExtensionConfig,
-    this._outputChannel
+    this._outputChannel,
   );
 
   constructor(
     private readonly _sorbetExtensionConfig: SorbetExtensionConfig,
     private readonly _outputChannel: OutputChannel,
-    private readonly _restart: (reason: RestartReason) => void
+    private readonly _restart: (reason: RestartReason) => void,
   ) {
     // Create the language client and start the client.
     this._languageClient = new LanguageClient(
@@ -119,20 +119,20 @@ export default class SorbetLanguageClient implements ErrorHandler {
         documentSelector: [
           { language: "ruby", scheme: "file" },
           // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
-          { language: "ruby", scheme: "sorbet" }
+          { language: "ruby", scheme: "sorbet" },
         ],
         outputChannel: this._outputChannel,
         initializationOptions: {
           // Opt in to sorbet/showOperation notifications.
           supportsOperationNotifications: true,
           // Let Sorbet know that we can handle sorbet:// URIs for generated files.
-          supportsSorbetURIs: true
+          supportsSorbetURIs: true,
         },
         errorHandler: this,
         revealOutputChannelOn: this._sorbetExtensionConfig.revealOutputOnError
           ? RevealOutputChannelOn.Error
-          : RevealOutputChannelOn.Never
-      }
+          : RevealOutputChannelOn.Never,
+      },
     );
     shimLanguageClient(this._languageClient, this._emitTimingMetric);
     this._languageClient.onReady().then(() => {
@@ -145,7 +145,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
       const caps: any = this._languageClient.initializeResult?.capabilities;
       if (caps.sorbetShowSymbolProvider) {
         this._subscriptions.push(
-          commands.registerCommand('sorbet.copySymbolToClipboard', async () => {
+          commands.registerCommand("sorbet.copySymbolToClipboard", async () => {
             const editor = vscodeWindow.activeTextEditor;
             if (!editor) {
               return;
@@ -163,7 +163,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
               position,
             };
             const response: SymbolInformation = await this._languageClient.sendRequest(
-              'sorbet/showSymbol',
+              "sorbet/showSymbol",
               params,
             );
 
@@ -182,7 +182,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
    * to keep it alive. Stops the language server and Sorbet processes, and removes UI items.
    */
   public dispose() {
-    this._subscriptions.forEach(s => s.dispose());
+    this._subscriptions.forEach((s) => s.dispose());
     this._subscriptions = [];
 
     let stopped = false;
@@ -229,7 +229,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
     const set = VALID_STATE_TRANSITIONS.get(from);
     if (!set || !set.has(to)) {
       this._outputChannel.appendLine(
-        `Invalid Sorbet server transition: ${from} => ${to}`
+        `Invalid Sorbet server transition: ${from} => ${to}`,
       );
     }
   }
@@ -246,7 +246,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
     ] = this._sorbetExtensionConfig.activeLspConfig!.command;
     this._outputChannel.appendLine(`    ${command} ${args.join(" ")}`);
     this._sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath
+      cwd: workspace.rootPath,
     });
     const onExit = (err?: NodeJS.ErrnoException) => {
       if (
@@ -257,7 +257,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
         this._emitCountMetric("error.enoent", 1);
         // We failed to start the process. The path to Sorbet is likely incorrect.
         this._lastError = `Could not start Sorbet with command: '${command} ${args.join(
-          " "
+          " ",
         )}'. Encountered error '${
           err.message
         }'. Is the path to Sorbet correct?`;

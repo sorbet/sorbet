@@ -4,6 +4,6 @@ class C
   @@foo = T.let(3, Integer)
 
   def bar
-    @@ # error-with-dupes: unexpected `@`
+    @@ # error: unexpected `@@`
   end
 end

@@ -379,6 +379,8 @@ using namespace std::string_literals;
   k_return
   lcurly_block_start
   lbrace_cmd_block_start
+  until
+  while
 
 %type <delimited_list>
   defn_head
@@ -863,14 +865,24 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 
       expr_value: expr
 
-   expr_value_do:   {
+
+           // We have to factor these like this because we need these rules to run before lexing any lookahead tokens,
+           // since we have two rules that read `kWHILE` (and `kUNTIL`), and all tokens that we lex after after such
+           // a token must be lexed assuming this side effect has taken place.
+           while: kWHILE
+                    {
                       driver.lex.cond.push(true);
                     }
-                  expr_value do
+           until: kUNTIL
+                    {
+                      driver.lex.cond.push(true);
+                    }
+
+   expr_value_do: expr_value do
                     {
                       driver.lex.cond.pop();
 
-                      $$ = driver.alloc.node_with_token($3, $2);
+                      $$ = driver.alloc.node_with_token($2, $1);
                     }
 
         def_name: fname
@@ -2057,23 +2069,23 @@ array_premature_end: eof
                       $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
-                | kWHILE expr_value_do compstmt kEND
+                | while expr_value_do compstmt kEND
                     {
                       $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
-                | kWHILE error
+                | while error
                     {
                       auto err = driver.build.error_node(self, @1.endPos(), @2.beginPos());
                       $$ = driver.build.loop_while(self, $1, err, nullptr, nullptr, $1);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
-                | kUNTIL expr_value_do compstmt kEND
+                | until expr_value_do compstmt kEND
                     {
                       $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
-                | kUNTIL error
+                | until error
                     {
                       auto err = driver.build.error_node(self, @1.endPos(), @2.beginPos());
                       $$ = driver.build.loopUntil(self, $1, err, nullptr, nullptr, $1);
@@ -2132,9 +2144,13 @@ array_premature_end: eof
 			                  else_ ? else_->nod : nullptr, $5);
                       driver.rewind_if_dedented($1, $5);
                     }
-                | kFOR for_var kIN expr_value_do compstmt kEND
+                | kFOR for_var kIN
                     {
-                      $$ = driver.build.for_(self, $1, $2, $3, $4->nod, $4->tok, $5->body, $6);
+                      driver.lex.cond.push(true);
+                    }
+                    expr_value_do compstmt kEND
+                    {
+                      $$ = driver.build.for_(self, $1, $2, $3, $5->nod, $5->tok, $6->body, $7);
                     }
                 | kCLASS cpath superclass
                     {
@@ -3250,7 +3266,8 @@ lcurly_block_start:
                     }
       p_variable: tIDENTIFIER
                     {
-                      $$ = driver.build.match_var(self, $1);
+                      auto match = driver.build.match_var(self, $1);
+                      $$ = driver.build.assignable(self, match);
                     }
        p_var_ref: tCARET tIDENTIFIER
                     {
@@ -3688,28 +3705,15 @@ f_opt_paren_args: f_paren_args
                       driver.lex.set_state_expr_value();
                       $$ = driver.build.args(self, $1, $2, $3, true);
                     }
-                | tLPAREN2 f_arg tCOMMA args_forward rparen
-                    {
-                      driver.lex.declare_forward_args();
-                      auto forward_arg = driver.build.forward_arg(self, nullptr, $4, nullptr);
-                      $2->emplace_back(forward_arg);
-                      $$ = driver.build.args(self, $1, $2, $5, true);
-                    }
-                | tLPAREN2 args_forward rparen
-                    {
-                      driver.lex.set_state_expr_value();
-                      driver.lex.declare_forward_args();
-                      auto forward_arg = driver.build.forward_arg(self, $1, $2, $3);
-                      auto node_list = driver.alloc.node_list(forward_arg);
-                      $$ = driver.build.args(self, $1, node_list, $3, true);
-                    }
        f_arglist: f_paren_args
                 |   {
                       $<boolean>$ = driver.lex.in_kwarg;
                       driver.lex.in_kwarg = true;
+                      driver.lex.context.push(Context::State::DEF_OPEN_ARGS);
                     }
                   f_args term
                     {
+                      driver.lex.context.pop();
                       driver.lex.in_kwarg = $<boolean>1;
                       $$ = driver.build.args(self, nullptr, $2, nullptr, true);
                       DIAGCHECK();
@@ -3743,6 +3747,21 @@ f_opt_paren_args: f_paren_args
                 | f_block_arg
                     {
                       $$ = $1;
+                    }
+                | args_forward
+                    {
+                      if (driver.lex.context.inLambda()) {
+                        // This is supposed to be caught by the grammar.
+                        // However, we don't generate a `ForwardArgs` node in the builder.cc unlike whitequark parser.
+                        // So, we have to manually raise a parse error to forbid `->(...)` usage
+                        // Last argument adds extra double quotes to circumvent an internal check
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, "\"...\"");
+                      }
+
+                      driver.lex.declare_forward_args();
+                      auto result = driver.alloc.node_list();
+                      result->emplace_back(driver.build.forward_arg(self, nullptr, $1, nullptr));
+                      $$ = result;
                     }
 
    opt_args_tail: tCOMMA args_tail
@@ -4198,10 +4217,7 @@ f_opt_paren_args: f_paren_args
                     }
                 | tLABEL
                     {
-                      auto *selector = $1;
-                      selector->setEnd(selector->end() - 1);
-                      auto method_call = driver.build.call_method(self, nullptr, nullptr, selector, nullptr, nullptr, nullptr);
-                      $$ = driver.build.pair_keyword(self, $1, method_call);
+                      $$ = driver.build.pair_label(self, $1);
                     }
                 | tSTRING_BEG string_contents tLABEL_END arg_value
                     {

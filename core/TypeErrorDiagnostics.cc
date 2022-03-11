@@ -34,13 +34,22 @@ namespace {
 
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr expected,
                                                const TypePtr got) {
-    auto selfTypeParamExpected = isa_type<SelfTypeParam>(expected);
-    auto classTypeGot = isa_type<ClassType>(got);
-    if (selfTypeParamExpected && classTypeGot) {
+    auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
+    auto gotClassType = isa_type<ClassType>(got);
+    if (expectedSelfTypeParam && gotClassType) {
         if (checkForAttachedClassHint(gs, e, cast_type_nonnull<SelfTypeParam>(expected),
                                       cast_type_nonnull<ClassType>(got))) {
             return;
         }
+    }
+
+    if (isa_type<MetaType>(got) && !isa_type<MetaType>(expected)) {
+        e.addErrorNote(
+            "It looks like you're using Sorbet type syntax in a runtime value position.\n"
+            "    If you really mean to use types as values, use `{}` to hide the type syntax from the type checker.\n"
+            "    Otherwise, you're likely using the type system in a way it wasn't meant to be used.",
+            "T::Utils.coerce");
+        return;
     }
 
     // TODO(jez) Add more cases
@@ -69,6 +78,11 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
                     e.replaceWith("Prepend `!!`", loc, "!!({})", loc.source(gs).value());
                 }
             }
+        } else if (isa_type<MetaType>(actualType) && !isa_type<MetaType>(expectedType) &&
+                   core::Types::isSubTypeUnderConstraint(gs, constr,
+                                                         core::Symbols::T_Types_Base().data(gs)->externalType(),
+                                                         expectedType, UntypedMode::AlwaysCompatible)) {
+            e.replaceWith("Wrap in `T::Utils.coerce`", loc, "T::Utils.coerce({})", loc.source(gs).value());
         }
     }
 }

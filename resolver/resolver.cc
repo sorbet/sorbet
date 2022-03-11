@@ -312,18 +312,29 @@ private:
 
         bool couldDefineChildNamespace(const core::GlobalState &gs, const std::vector<core::NameRef> &prefix,
                                        const std::vector<ast::ConstantLit *> &suffix) const {
+            ENFORCE(!prefix.empty());
+
+            auto start = prefix.begin();
+            if (*start == core::Names::Constants::Test()) {
+                ++start;
+            }
+            auto prefixSize = std::distance(start, prefix.end());
+            if (prefixSize == 0) {
+                return false;
+            }
+
             // The reasoning is as follows: the prefix is derived from a nesting scope paired with the symbol being
             // resolved. The nesting scopes could only define a package in the parent namespace, while this check is
             // only applied to packages that are known to not occupy that part of the namespace.
-            if (this->fullName.size() <= prefix.size()) {
+            if (this->fullName.size() <= prefixSize) {
                 return false;
             }
 
-            if (!std::equal(prefix.begin(), prefix.end(), this->fullName.begin())) {
+            if (!std::equal(start, prefix.end(), this->fullName.begin())) {
                 return false;
             }
 
-            auto it = this->fullName.begin() + prefix.size();
+            auto it = this->fullName.begin() + prefixSize;
             for (auto *cnst : suffix) {
                 if (it == this->fullName.end()) {
                     return true;
@@ -345,19 +356,30 @@ private:
         PackageStub stub;
         vector<core::NameRef> exports;
 
+        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix.  They
+        // are not the names exported to the implicit test package via `export_for_test`.
+        vector<core::NameRef> testExports;
+
         ParentPackageStub(const core::packages::PackageInfo &info) : stub{info} {
             auto prefixLen = this->stub.fullName.size();
+            auto testPrefixLen = prefixLen + 1;
+
             for (auto &path : info.exports()) {
                 // We only need the unique part of the export's name. It's safe to assume that the exports are
                 // populated, as the only case we allow a full re-export of the module is for leaf modules, and we
                 // already know this not a leaf.
-                this->exports.emplace_back(path[prefixLen]);
+                if (path.front() == core::Names::Constants::Test()) {
+                    this->testExports.emplace_back(path[testPrefixLen]);
+                } else {
+                    this->exports.emplace_back(path[prefixLen]);
+                }
             }
         }
 
         // Check that the candidate name is one of the top-level exported names from a parent package.
-        bool exportsSymbol(core::NameRef candidate) const {
-            return absl::c_find(this->exports, candidate) != this->exports.end();
+        bool exportsSymbol(bool inTestNamespace, core::NameRef candidate) const {
+            auto &exportList = inTestNamespace ? this->testExports : this->exports;
+            return absl::c_find(exportList, candidate) != exportList.end();
         }
     };
 
@@ -385,8 +407,22 @@ private:
 
         // Determine if a package with the same name as `scope` is known to export the name `cnst`.
         bool packageExportsConstant(const std::vector<core::NameRef> &scope, core::NameRef cnst) const {
-            const auto parent = absl::c_find_if(this->parents, [&scope](auto &p) { return p.stub.fullName == scope; });
-            return parent != this->parents.end() && parent->exportsSymbol(cnst);
+            ENFORCE(!scope.empty());
+
+            auto start = scope.begin();
+            if (*start == core::Names::Constants::Test()) {
+                ++start;
+            }
+
+            auto scopeSize = std::distance(start, scope.end());
+            ENFORCE(scopeSize > 0);
+
+            const auto parent = absl::c_find_if(this->parents, [start, scopeSize, &scope](auto &p) {
+                return scopeSize == p.stub.fullName.size() && std::equal(start, scope.end(), p.stub.fullName.begin());
+            });
+
+            bool inTestNamespace = start != scope.begin();
+            return parent != this->parents.end() && parent->exportsSymbol(inTestNamespace, cnst);
         }
 
         // Determine if a package is known to have a prefix that is a combination of the name defined by `scope`, and
@@ -435,6 +471,8 @@ private:
         stubConstant(ctx, owner, *last, possibleGenericType);
     }
 
+    // Turn a symbol into a vector of `NameRefs`. Returns true if a non-empty result vector was populated, and false if
+    // the scope was root, or one of the owning symbols in the hierarchy doesn't exist.
     static bool scopeToNames(core::GlobalState &gs, core::SymbolRef sym, std::vector<core::NameRef> &res) {
         res.clear();
         while (sym.exists() && sym != core::Symbols::root()) {
@@ -446,6 +484,15 @@ private:
             auto cls = sym.asClassOrModuleRef();
             res.emplace_back(cls.data(gs)->name);
             sym = cls.data(gs)->owner;
+        }
+
+        // Explicitly consider an empty top-level scope as one to skip. This arises when the symbol passed in is
+        // `core::Symbols::root()`, which will always be the top-most parent for the `Nesting` linked list present for
+        // the `ResolutionItem` being stubbed. As this doesn't correspond to a prefix of the current package's
+        // namespace, we return false to signal that this scope doesn't need to be considered as either of the
+        // parent/child package special cases.
+        if (res.empty()) {
+            return false;
         }
 
         absl::c_reverse(res);
@@ -502,12 +549,25 @@ private:
         std::vector<ast::ConstantLit *> suffix;
         {
             auto *cursor = out;
+            bool isRootReference = false;
             while (cursor != nullptr) {
+                auto *original = ast::cast_tree<ast::UnresolvedConstantLit>(cursor->original);
+                if (original == nullptr) {
+                    isRootReference = cursor->symbol == core::Symbols::root();
+                    break;
+                }
+
                 suffix.emplace_back(cursor);
-                auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cursor->original);
-                cursor = ast::cast_tree<ast::ConstantLit>(original.scope);
+                cursor = ast::cast_tree<ast::ConstantLit>(original->scope);
             }
             absl::c_reverse(suffix);
+
+            // If the constant looks like `::Foo::Bar`, we don't need to apply the heuristics below as it's known to be
+            // defined at the root.
+            if (isRootReference) {
+                stubConstantSuffix(ctx, core::Symbols::root(), suffix, possibleGenericType);
+                return;
+            }
         }
 
         // If the constant doesn't resolve to something that overlaps with this package's namespace, it will be defined
@@ -3174,7 +3234,7 @@ private:
             method.data(ctx)->flags.isFinal = true;
         }
         if (sig.seen.bind) {
-            if (sig.bind == core::Symbols::BindToAttachedClass()) {
+            if (sig.bind == core::Symbols::MagicBindToAttachedClass()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::BindNonBlockParameter)) {
                     e.setHeader("Using `{}` is not permitted here", "bind");
                     e.addErrorNote("Only block arguments can use `{}`", "bind");
@@ -3243,8 +3303,8 @@ private:
 
                 // It would be nice to remove the restriction on more than these two specific binds, but that would
                 // raise a lot more errors
-                if (!isBlkArg && (spec->rebind == core::Symbols::BindToAttachedClass() ||
-                                  spec->rebind == core::Symbols::BindToSelfType())) {
+                if (!isBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
+                                  spec->rebind == core::Symbols::MagicBindToSelfType())) {
                     if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");
@@ -3572,7 +3632,7 @@ public:
 
 class ResolveSanityCheckWalk {
 public:
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 tree.toString(ctx));
@@ -3583,23 +3643,23 @@ public:
         }
         return tree;
     }
-    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         return tree;
     }
-    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
         return tree;
     }
-    ast::ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 tree.toString(ctx));
         return tree;
     }
-    ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, original));
         return tree;
@@ -3707,12 +3767,12 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     return trees;
 }
 
-void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
+void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
         Timer timeit(gs.tracer(), "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
-            core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
+            core::Context ctx(gs, core::Symbols::root(), tree.file);
             tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));
         }
     }

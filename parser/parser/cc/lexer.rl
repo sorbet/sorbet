@@ -919,8 +919,11 @@ void lexer::set_state_expr_value() {
 
   # Ruby accepts (and fails on) variables with leading digit
   # in literal context, but not in unquoted symbol body.
-  class_var_v    = '@@' c_alnum+;
-  instance_var_v = '@' c_alnum+;
+  class_var_v    = '@@' c_alnum*;
+  instance_var_v = '@' c_alnum*;
+
+  class_var_v_nonempty    = '@@' c_alnum+;
+  instance_var_v_nonempty = '@' c_alnum+;
 
   label          = bareword [?!]? ':';
 
@@ -1334,7 +1337,7 @@ void lexer::set_state_expr_value() {
   # Interpolations with immediate variable names simply call into
   # the corresponding machine.
 
-  interp_var = '#' ( global_var | class_var_v | instance_var_v );
+  interp_var = '#' ( global_var | class_var_v_nonempty | instance_var_v_nonempty );
 
   action extend_interp_var {
     auto& current_literal = literal_();
@@ -1670,7 +1673,9 @@ void lexer::set_state_expr_value() {
 
       class_var_v
       => {
-        if (ts[2] >= '0' && ts[2] <= '9') {
+        if (te - ts == 2) {
+          diagnostic_(dlevel::ERROR, dclass::Unexpected, tok());
+        } else if (ts[2] >= '0' && ts[2] <= '9') {
           diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts, te));
         }
 
@@ -1680,7 +1685,9 @@ void lexer::set_state_expr_value() {
 
       instance_var_v
       => {
-        if (ts[1] >= '0' && ts[1] <= '9') {
+        if (te - ts == 1) {
+          diagnostic_(dlevel::ERROR, dclass::Unexpected, tok());
+        } else if (ts[1] >= '0' && ts[1] <= '9') {
           diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts, te));
         }
 
@@ -1757,6 +1764,19 @@ void lexer::set_state_expr_value() {
       label ( any - ':' )
       => { emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
            fhold; fnext expr_labelarg; fbreak; };
+
+      '...' c_nl
+      => {
+        if (version >= ruby_version::RUBY_31) {
+          auto ident = tok_view(ts, te - 2);
+          emit(token_type::tBDOT3, ident, ts, te - 1);
+          emit(token_type::tNL, "", newline_s, newline_s + 1);
+          fnext expr_end; fbreak;
+        } else {
+          p -= 4;
+          fhold; fgoto expr_end;
+        }
+      };
 
       w_space_comment;
 
@@ -2473,17 +2493,38 @@ void lexer::set_state_expr_value() {
         fnext expr_beg; fbreak;
       };
 
-      '...'
+      # Here we scan and conditionally emit "\n":
+      # + if it's there
+      #   + and emitted we do nothing
+      #   + and not emitted we return `p` to "\n" to process it on the next scan
+      # + if it's not there we do nothing
+      '...' c_nl?
       => {
+        bool followed_by_nl = te - 1 == newline_s;
+        bool nl_emitted = false;
+        auto dots_te = followed_by_nl ? te - 1 : te;
+
         auto ident = tok_view(ts, te - 2);
-        if (version >= ruby_version::RUBY_27) {
-          emit(token_type::tBDOT3, ident, ts, te);
-        } else {
+        if (version >= ruby_version::RUBY_30) {
           if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
-            emit(token_type::tDOT3, ident, ts, te);
+            emit(token_type::tDOT3, ident, ts, dots_te);
           } else {
-            emit(token_type::tBDOT3, ident, ts, te);
+            emit(token_type::tBDOT3, ident, ts, dots_te);
+
+            if (version >= ruby_version::RUBY_31 && followed_by_nl && context.inDefOpenArgs()) {
+              emit(token_type::tNL, "", newline_s, newline_s + 1);
+              nl_emitted = true;
+            }
           }
+        } else if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tBDOT3, ident, ts, dots_te);
+        } else {
+          emit(token_type::tDOT3, ident, ts, dots_te);
+        }
+
+         if (followed_by_nl && !nl_emitted) {
+          // return "\n" to process it on the next scan
+          fhold;
         }
 
         fnext expr_beg; fbreak;

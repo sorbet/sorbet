@@ -798,7 +798,7 @@ module Enumerable
   # ```
   sig do
     params(
-        arg0: BasicObject,
+        arg0: Elem,
     )
     .returns(T::Boolean)
   end

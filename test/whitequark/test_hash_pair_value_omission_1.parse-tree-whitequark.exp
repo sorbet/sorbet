@@ -1,0 +1,4 @@
+s(:hash,
+  s(:pair,
+    s(:sym, :puts),
+    s(:send, nil, :puts)))

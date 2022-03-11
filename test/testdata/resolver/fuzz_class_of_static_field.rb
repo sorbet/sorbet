@@ -6,7 +6,7 @@ extend T::Sig
 
 sig {params(a: T.class_of(A1)).void}
 #              ^^^^^^^^^^^^^^ error: T.class_of can't be used with a constant field
-#                         ^^  error: Unsupported usage of bare type
+#                         ^^  error: Unexpected bare `Integer` value found in type position
 def foo(a); end
 
 sig {params(a: T.class_of(A2)).void} # error: T.class_of can't be used with a T.type_alias

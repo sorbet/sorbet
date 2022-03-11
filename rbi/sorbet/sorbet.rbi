@@ -261,6 +261,14 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        key: String
+    )
+    .returns(T::Boolean)
+  end
+  def include?(key); end
+
+  sig do
+    params(
         blk: T.proc.params(name: String, value: String).returns(BasicObject),
     )
     .returns(Sorbet::Private::Static::ENVClass)

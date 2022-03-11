@@ -36,7 +36,7 @@ module Helper5
   requires_ancestor { "Object" } # error: Expected `Module` but found `String("Object")` for block result type
   #                   ^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
 
-  requires_ancestor { T.class_of(Object) } # error: Expected `Module` but found `<Type: T.class_of(Object)>` for block result type
+  requires_ancestor { T.class_of(Object) } # error: Expected `Module` but found `Runtime object representing type: T.class_of(Object)` for block result type
   #                   ^^^^^^^^^^^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
 end
 

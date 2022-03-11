@@ -71,6 +71,8 @@ tuple<string, string> MESSAGES[] = {
     {"MissingOperatorArg", "missing arg to {} operator"},
     {"CurlyBracesAroundBlockPass", "block pass should not be enclosed in curly braces"},
     {"EmptyCase", "{} statement must at least have one \\\"when\\\" clause"},
+    {"ForwardArgAfterRestArg", "... after rest argument"},
+    {"InvalidIdToGet", "identifier {} is not valid to get"},
 
     // Error recovery hints
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},

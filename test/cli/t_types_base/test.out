@@ -1,0 +1,21 @@
+test.rb:6: Unexpected bare `T::Types::Base` value found in type position https://srb.help/7009
+     6 |  T.nilable(x)
+                    ^
+  Note:
+    Sorbet only allows statically-analyzable types in type positions.
+    To compute new runtime types, you must explicitly wrap with `T.unsafe`
+  Autocorrect: Done
+    test.rb:6: Replaced with `T.unsafe(x)`
+     6 |  T.nilable(x)
+                    ^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+sig {params(x: T::Types::Base).void}
+def foo(x)
+  T.nilable(T.unsafe(x))
+end

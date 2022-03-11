@@ -40,9 +40,13 @@ class LSPTypechecker final {
     std::vector<ast::ParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
+
+    /** Used to guard access to `cancellationUndoState` and specifically the stale
+     * `GlobalState` residing inside of it. */
+    absl::Mutex cancellationUndoStateRWLock;
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
-    std::unique_ptr<UndoState> cancellationUndoState;
+    std::unique_ptr<UndoState> cancellationUndoState ABSL_GUARDED_BY(cancellationUndoStateRWLock);
 
     std::shared_ptr<const LSPConfiguration> config;
     /** Used to preempt running slow paths. */
@@ -126,12 +130,99 @@ public:
      * Returns the typechecker's internal global state, which effectively destroys the typechecker for further use.
      */
     std::unique_ptr<core::GlobalState> destroy();
+
+    /**
+     * Tries to run the function on the stale undo state, acquiring a lock.
+     */
+    bool tryRunOnStaleState(std::function<void(UndoState &)> func);
 };
 
 /**
  * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
  */
-class LSPTypecheckerDelegate {
+class LSPTypecheckerInterface {
+public:
+    /**
+     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
+     */
+    virtual void typecheckOnFastPath(LSPFileUpdates updates,
+                                     std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) = 0;
+
+    /**
+     * Re-typechecks the provided files to re-produce error messages.
+     */
+    virtual std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const = 0;
+
+    /** Runs the provided query against the given files, and returns matches. */
+    virtual LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const = 0;
+
+    /**
+     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     */
+    virtual const ast::ParsedFile &getIndexed(core::FileRef fref) const = 0;
+
+    /**
+     * Returns the parsed files for the given files, including resolver.
+     */
+    virtual std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const = 0;
+
+    /**
+     * Returns the currently active GlobalState.
+     */
+    virtual const core::GlobalState &state() const = 0;
+
+    /**
+     * Returns `true` if the delegate is processing stale state.
+     *
+     * TODO(aprocter): We may eventually delurk this because we would ideally like the difference
+     * between the interface for stale and fresh state to be opaque, with no special-case logic
+     * inside tasks when running on stale state.
+     */
+    virtual bool isStale() const {
+        return false;
+    }
+};
+
+class LSPStaleTypechecker final : public LSPTypecheckerInterface {
+    UndoState &undoState;
+
+    // Just so we have something to return from the stubbed functions after we ENFORCE(false)
+    ast::ParsedFile *pf;
+
+public:
+    LSPStaleTypechecker(UndoState &undoState) : undoState(undoState), pf(nullptr) {}
+
+    // Delete copy constructor / assignment.
+    LSPStaleTypechecker(LSPStaleTypechecker &) = delete;
+    LSPStaleTypechecker(const LSPStaleTypechecker &) = delete;
+    LSPStaleTypechecker &operator=(LSPStaleTypechecker &&) = delete;
+    LSPStaleTypechecker &operator=(const LSPStaleTypechecker &) = delete;
+
+    virtual ~LSPStaleTypechecker() = default;
+
+    void typecheckOnFastPath(LSPFileUpdates updates,
+                             std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
+
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
+
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
+
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const override;
+
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
+
+    const core::GlobalState &state() const override;
+
+    bool isStale() const override {
+        return true;
+    }
+};
+
+/**
+ * An implementation of LSPTypecheckerInterface used for tasks running on the latest GlobalState, in the typechecking
+ * thread.
+ */
+class LSPTypecheckerDelegate final : public LSPTypecheckerInterface {
     LSPTypechecker &typechecker;
 
     /** The WorkerPool on which work will be performed. If the task is multithreaded, the pool will contain multiple
@@ -150,33 +241,15 @@ public:
     LSPTypecheckerDelegate &operator=(LSPTypecheckerDelegate &&) = delete;
     LSPTypecheckerDelegate &operator=(const LSPTypecheckerDelegate &) = delete;
 
-    /**
-     * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
-     */
-    void typecheckOnFastPath(LSPFileUpdates updates, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    virtual ~LSPTypecheckerDelegate() = default;
 
-    /**
-     * Re-typechecks the provided files to re-produce error messages.
-     */
-    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const;
-
-    /** Runs the provided query against the given files, and returns matches. */
-    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
-
-    /**
-     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
-     */
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
-
-    /**
-     * Returns the parsed files for the given files, including resolver.
-     */
-    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
-
-    /**
-     * Returns the currently active GlobalState.
-     */
-    const core::GlobalState &state() const;
+    void typecheckOnFastPath(LSPFileUpdates updates,
+                             std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
+    std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
+    LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const override;
+    std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
+    const core::GlobalState &state() const override;
 };
 } // namespace sorbet::realmain::lsp
 #endif

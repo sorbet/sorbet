@@ -1461,7 +1461,7 @@ void ApplyCodeActionAssertion::assertResults(std::string expectedPath, std::stri
     CHECK_EQ(actualContents, expectedContents);
 }
 
-std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortChanges(std::unique_ptr<TextDocumentEdit> changes) {
+std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::unique_ptr<TextDocumentEdit> changes) {
     // First, sort the edits by increasing starting location and verify that none overlap.
     fast_sort(changes->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
     for (uint32_t i = 1; i < changes->edits.size(); i++) {
@@ -1475,6 +1475,20 @@ std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortChanges(std::uni
     reverse(changes->edits.begin(), changes->edits.end());
     return changes;
 }
+
+namespace {
+shared_ptr<sorbet::core::File>
+getFileByUri(const LSPConfiguration &config,
+             const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, string uri) {
+    auto filename = uriToFilePath(config, uri);
+    auto it = sourceFileContents.find(filename);
+    {
+        INFO(fmt::format("Unable to find referenced source file `{}`", filename));
+        REQUIRE_NE(it, sourceFileContents.end());
+    }
+    return it->second;
+}
+} // namespace
 
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, const CodeAction &codeAction) {
@@ -1494,7 +1508,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         auto &file = it->second;
 
         string actualEditedFileContents = string(file->source());
-        c = sortChanges(move(c));
+        c = sortEdits(move(c));
 
         for (auto &e : c->edits) {
             actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText);
@@ -1502,6 +1516,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         assertResults(expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
     }
 };
+
 
 void ApplyCodeActionAssertion::checkAll(
     const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
@@ -1515,15 +1530,9 @@ void ApplyCodeActionAssertion::checkAll(
     }
     auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
-        auto filename = uriToFilePath(config, c->textDocument->uri);
-        auto it = sourceFileContents.find(filename);
-        {
-            INFO(fmt::format("Unable to find referenced source file `{}`", filename));
-            REQUIRE_NE(it, sourceFileContents.end());
-        }
-        auto &file = it->second;
+        auto file = getFileByUri(config, sourceFileContents, c->textDocument->uri);
 
-        c = sortChanges(move(c));
+        c = sortEdits(move(c));
         actualEditedFileContents = string(file->source());
 
         for (auto &e : c->edits) {
@@ -1977,6 +1986,7 @@ string ShowSymbolAssertion::toString() const {
     return fmt::format("show-symbol: {}", message);
 }
 
+namespace {
 string_view trimString(std::string_view s) {
     const char *whitespace = " \t";
     size_t begin = s.find_first_not_of(whitespace);
@@ -1986,6 +1996,7 @@ string_view trimString(std::string_view s) {
     size_t end = s.find_last_not_of(whitespace);
     return s.substr(begin, end - begin + 1);
 }
+} // namespace
 
 std::shared_ptr<SelectiveApplyCodeActionAssertions>
 SelectiveApplyCodeActionAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,

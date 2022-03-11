@@ -757,6 +757,30 @@ class Hash < Object
   end
   def has_value?(arg0); end
 
+  # Returns `true` if the given key is present in *hsh*.
+  #
+  # ```ruby
+  # h = { "a" => 100, "b" => 200 }
+  # h.has_key?("a")   #=> true
+  # h.has_key?("z")   #=> false
+  # ```
+  #
+  # Note that
+  # [`include?`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-include-3F)
+  # and
+  # [`member?`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-member-3F)
+  # do not test member equality using `==` as do other Enumerables.
+  #
+  # See also
+  # [`Enumerable#include?`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-include-3F)
+  sig do
+    params(
+        arg0: K,
+    )
+    .returns(T::Boolean)
+  end
+  def include?(arg0); end
+
   # Compute a hash-code for this hash. Two hashes with the same content will
   # have the same hash code (and will compare using `eql?`).
   #

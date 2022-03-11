@@ -233,6 +233,7 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractMethodEnabled = false;
+    bool lspStaleStateEnabled = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;

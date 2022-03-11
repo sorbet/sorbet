@@ -25,6 +25,6 @@ void GetCountersTask::index(LSPIndexer &indexer) {
     config.output->write(move(response));
 }
 
-void GetCountersTask::run(LSPTypecheckerDelegate &typechecker) {}
+void GetCountersTask::run(LSPTypecheckerInterface &typechecker) {}
 
 } // namespace sorbet::realmain::lsp

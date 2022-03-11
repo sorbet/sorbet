@@ -9,11 +9,10 @@ class ConstantCompletion
   B = nil
 
   def self.test1(x)
-    # TODO(jez) This completion behavior is surprising
     puts 'before'
     case x # error: Hint: this "case" token might not be properly closed
     when ConstantCompletion:: # error: expected constant name following "::"
-    #                        ^ completion: (nothing)
+    #                        ^ completion: A, B
     puts 'hello'
   end
 

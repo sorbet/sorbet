@@ -1044,7 +1044,16 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (send.link || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
-                if (lspQueryMatch) {
+                // For `case x; when X ...`, desugar produces `X.===(x)`, but with
+                // a zero-length funLoc.  We tried producing a zero-length loc for
+                // the entire send so there would never be a match here, but that
+                // interacted poorly with a number of testcases (see discussion in
+                // https://github.com/sorbet/sorbet/pull/5015).  The next-best thing
+                // seemed to be detecting `===` calls that appear to have been produced
+                // by desugar and redacting the `SendResponse` so LSP features work
+                // more like developers expect.
+                const bool isDesugarTripleEqSend = send.fun == core::Names::tripleEq() && send.funLoc.empty();
+                if (lspQueryMatch && !isDesugarTripleEqSend) {
                     auto fun = send.fun;
                     if (fun == core::Names::checkAndAnd() && core::isa_type<core::LiteralType>(args[2]->type)) {
                         auto lit = core::cast_type_nonnull<core::LiteralType>(args[2]->type);
@@ -1615,9 +1624,9 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 
     if (rebind.exists()) {
         core::TypeAndOrigins result;
-        if (rebind == core::Symbols::BindToSelfType()) {
+        if (rebind == core::Symbols::MagicBindToSelfType()) {
             result.type = main.receiver;
-        } else if (rebind == core::Symbols::BindToAttachedClass()) {
+        } else if (rebind == core::Symbols::MagicBindToAttachedClass()) {
             auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
             auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
 

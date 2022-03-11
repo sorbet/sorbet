@@ -1,11 +1,14 @@
 -- sanity-checking package with --stripe-packages
+-- ./test/cli/rbi-gen-single/external/__package.rb (External)
 -- ./test/cli/rbi-gen-single/family/__package.rb (Family)
--- RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+-- RBI (Family)
 # typed: true
 
-class Family::Simpsons < Object
+class Family::Simpsons
   sig {returns(Family::Bart::Character)}
   def bart; end
+  sig {returns(WhoKnows)}
+  def make_something; end
   sig {returns(T.nilable(Family::Bart::Character))}
   def no_bart; end
   extend T::Sig
@@ -14,59 +17,53 @@ Family::Simpsons::RelativeBart = Family::Bart::Character
 Family::Simpsons::MaybeBartFull = T.type_alias {T.nilable(Family::Bart::Character)}
 Family::Simpsons::MaybeBart = T.type_alias {T.nilable(Family::Bart::Character)}
 Family::Simpsons::FullyQualifiedBart = Family::Bart::Character
--- Test RBI: ./test/cli/rbi-gen-single/family/__package.rb (Family)
+class Family::Belcher
+end
+-- RBI Deps (Family)
+{"packageRefs":["Family::Bart"], "rbiRefs":[]}
+-- Test Private RBI (Family)
 # typed: true
 
-class Family::Flanders < Object
+class Family::Krabappel
   extend T::Sig
 end
+-- Test Private RBI Deps (Family)
+{"packageRefs":["Family::Bart","Test::Util::Testing"], "rbiRefs":[]}
+-- Test RBI (Family)
+# typed: true
+
 class Test::Family::TestFamily < Test::Util::Testing::TestCase
   sig {params(fam: Family::Flanders).void}
   def test_flanders(fam); end
+  sig {returns(Object)}
+  def test_krabappel; end
   sig {params(fam: Family::Simpsons).void}
   def test_simpsons(fam); end
   extend T::Sig
 end
--- JSON: ./test/cli/rbi-gen-single/family/__package.rb (Family)
-{"packageRefs":["Family::Bart"], "rbiRefs":[]}
--- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
--- RBI: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
-# typed: true
-
-class Family::Bart::Character < Object
-  sig {void}
-  def catchphrase; end
-  sig {returns(T.class_of(Family::Simpsons))}
-  def family; end
-  sig {params(msg: Util::GenericMessage[String]).void}
-  def ignore(msg); end
+class Family::Flanders
   extend T::Sig
 end
-Family::Bart::Character::FamilyClass = Family::Simpsons
--- JSON: ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
-{"packageRefs":["Family","Util"], "rbiRefs":[]}
+-- Test RBI Deps (Family)
+{"packageRefs":["Family::Bart","Test::Util::Testing"], "rbiRefs":[]}
+-- ./test/cli/rbi-gen-single/family/bart/__package.rb (Family::Bart)
+-- ./test/cli/rbi-gen-single/family/bart/slingshot/__package.rb (Family::Bart::Slingshot)
 -- ./test/cli/rbi-gen-single/util/__package.rb (Util)
--- RBI: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+-- RBI (Util)
 # typed: true
 
-class Util::GenericMessage < Object
+class Util::GenericMessage
   Elem = type_member()
   extend T::Generic
   extend T::Helpers
 end
-class Util::Messages < Object
+class Util::Messages
   extend T::Sig
   sig {type_parameters(:T).params(msg: GenericMessage[T.type_parameter(:T)]).void}
   def self.print_message(msg); end
   sig {params(msg: String).void}
   def self.say(msg); end
 end
--- JSON: ./test/cli/rbi-gen-single/util/__package.rb (Util)
+-- RBI Deps (Util)
 {"packageRefs":[], "rbiRefs":[]}
 -- ./test/cli/rbi-gen-single/util/testing/__package.rb (Util::Testing)
--- Test RBI: ./test/cli/rbi-gen-single/util/testing/__package.rb (Util::Testing)
-# typed: true
-
-class Test::Util::Testing::TestCase < Object
-end
--- JSON: ./test/cli/rbi-gen-single/util/testing/__package.rb (Util::Testing)

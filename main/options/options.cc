@@ -323,6 +323,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
+    options.add_options("advanced")("enable-experimental-lsp-stale-state", "Enable experimental LSP feature: fast "
+                                                                           "but approximate answers from stale "
+                                                                           "typechecker state");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
     options.add_options("advanced")("enable-experimental-lsp-extract-method",
@@ -726,6 +729,12 @@ void readOptions(Options &opts,
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
         opts.lspExtractMethodEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-extract-method"].as<bool>();
 
+        // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
+        // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers
+        // until we get some other groundwork in place. Once things stabilize a bit more, we can slap
+        // `enableAllLSPFeatures ||` onto the condition here.
+        opts.lspStaleStateEnabled = raw["enable-experimental-lsp-stale-state"].as<bool>();
+
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
             // Convert all of these dirs into absolute ignore patterns that begin with '/'.
@@ -881,10 +890,6 @@ void readOptions(Options &opts,
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         if (raw.count("extra-package-files-directory-prefix")) {
-            if (!opts.stripePackages) {
-                logger->error("--extra-package-files-directory-prefix can only be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
             for (const string &dirName : raw["extra-package-files-directory-prefix"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
                     logger->error(

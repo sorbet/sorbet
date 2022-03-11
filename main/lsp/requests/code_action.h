@@ -12,13 +12,16 @@ class CodeActionTask final : public LSPRequestTask {
 public:
     CodeActionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CodeActionParams> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+
+    bool canUseStaleData() const override;
 
 private:
     std::vector<std::unique_ptr<TextDocumentEdit>>
     getExtractMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                          const core::lsp::DefinitionResponse *definition, LSPTypecheckerDelegate &typechecker);
+                          const core::lsp::DefinitionResponse *definition, LSPTypecheckerInterface &typechecker);
 };
+
 } // namespace sorbet::realmain::lsp
 
 #endif

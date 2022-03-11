@@ -178,7 +178,7 @@ public:
 
 vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
                                         const core::lsp::DefinitionResponse *definition,
-                                        LSPTypecheckerDelegate &typechecker, string_view newModuleName) {
+                                        LSPTypecheckerInterface &typechecker, string_view newModuleName) {
     auto moduleStart = fmt::format("module {}\n  extend T::Sig\n  ", newModuleName);
     auto moduleEnd = "\nend";
 
@@ -223,7 +223,7 @@ CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, uni
 vector<unique_ptr<TextDocumentEdit>>
 CodeActionTask::getExtractMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                       const core::lsp::DefinitionResponse *definition,
-                                      LSPTypecheckerDelegate &typechecker) {
+                                      LSPTypecheckerInterface &typechecker) {
     ENFORCE(definition->symbol.isMethod());
 
     vector<unique_ptr<TextDocumentEdit>> res;
@@ -252,10 +252,16 @@ CodeActionTask::getExtractMethodEdits(const LSPConfiguration &config, const core
     return res;
 }
 
-unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     vector<unique_ptr<CodeAction>> result;
+
+    if (typechecker.isStale()) {
+        config.logger->debug("CodeActionTask running on stale, returning empty result");
+        response->result = move(result);
+        return response;
+    }
 
     const core::GlobalState &gs = typechecker.state();
     core::FileRef file = config.uri2FileRef(gs, params->textDocument->uri);
@@ -349,5 +355,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
 
     response->result = move(result);
     return response;
+}
+
+bool CodeActionTask::canUseStaleData() const {
+    return true;
 }
 } // namespace sorbet::realmain::lsp

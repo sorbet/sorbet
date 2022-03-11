@@ -2,60 +2,79 @@
 
 set -euo pipefail
 export JOB_NAME=linters
+
+# shellcheck source=SCRIPTDIR/tools/setup-bazel.sh
 source .buildkite/tools/setup-bazel.sh
 
 set -x
-err=0
 globalErr=0
 
-./tools/scripts/format_build_files.sh -t &> buildifier || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Checking build files"
+if ! ./tools/scripts/format_build_files.sh -t &> buildifier; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_build_files.sh --style error --append < buildifier
-    globalErr=$err
 fi
 
-err=0
-./tools/scripts/format_cxx.sh -t &> format_cxx || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Checking c++ formatting"
+if ! ./tools/scripts/format_cxx.sh -t &> format_cxx; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_cxx.sh --style error --append < format_cxx
-    globalErr=$err
 fi
 
-err=0
-./tools/scripts/build_compilation_db.sh &> compdb || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Checking that the compilation db builds"
+if ! ./tools/scripts/build_compilation_db.sh &> compdb; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/build_compilation_db.sh --style error --append < compdb
-    globalErr=$err
 fi
 
-err=0
-./tools/scripts/generate_compdb_targets.sh -t &> compdb-targets || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Checking compilation db targets"
+if ! ./tools/scripts/generate_compdb_targets.sh -t &> compdb-targets; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/generate_compdb_targets.sh --style error --append < compdb-targets
-    globalErr=$err
 fi
 
-err=0
-./tools/scripts/check_using_namespace_std.sh &> std_check || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Linting uses of \`using namespace std\`"
+if ! ./tools/scripts/check_using_namespace_std.sh &> std_check; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/check_using_namespace_std.sh --style error --append < std_check
-    globalErr=$err
 fi
 
-err=0
-./tools/scripts/lint_sh.sh -t &> lint_sh || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Running shellcheck"
+if ! ./tools/scripts/lint_sh.sh -t &> lint_sh; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/lint_sh.sh --style error --append < lint_sh
-    globalErr=$err
 fi
 
-err=0
-./tools/scripts/format_website.sh -t &> format_website || err=$?
-if [ "$err" -ne 0 ]; then
+echo "~~~ Checking markdown formatting"
+if ! ./tools/scripts/format_website.sh -t &> format_website; then
+    globalErr=$?
+    echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
-    globalErr=$err
 fi
 
+echo "~~~ Checking the vscode extension"
+pushd vscode_extension
+yarn install
+if ! yarn lint --output-file=yarn_lint; then
+    globalErr=$?
+    echo "^^^ +++"
+    buildkite-agent annotate --context 'yarn lint' --style error --append <<EOF
+There were eslint errors in vscode_extension/. Fix with:
+
+    cd vscode_extension && yarn lint --fix
+
+$(< yarn_lint)
+EOF
+fi
+popd
+
+echo "~~~"
 if [ "$globalErr" -ne 0 ]; then
     exit $globalErr
 fi

@@ -37,14 +37,14 @@ protected:
     // Task helper methods.
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
+    getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file, core::SymbolRef symbol,
+    getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef file, core::SymbolRef symbol,
                                 std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<DocumentHighlight>>
-    getHighlights(LSPTypecheckerDelegate &typechecker,
+    getHighlights(LSPTypecheckerInterface &typechecker,
                   const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses) const;
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
@@ -55,11 +55,11 @@ protected:
     filterAndDedup(const core::GlobalState &gs,
                    const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses) const;
 
-    LSPQueryResult queryByLoc(LSPTypecheckerDelegate &typechecker, std::string_view uri, const Position &pos,
+    LSPQueryResult queryByLoc(LSPTypecheckerInterface &typechecker, std::string_view uri, const Position &pos,
                               LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbolInFiles(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
+    LSPQueryResult queryBySymbolInFiles(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
                                         std::vector<core::FileRef> frefs) const;
-    LSPQueryResult queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) const;
+    LSPQueryResult queryBySymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol) const;
 
     // Given a method or field symbol, checks if the symbol belongs to a `prop`, `const`, `attr_reader`, `attr_writer`,
     // etc, and populates an AccessorInfo object.
@@ -67,17 +67,17 @@ protected:
 
     // Get references to the given accessor. If `info.accessorType` is `None`, it returns references to `fallback` only.
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
+    getReferencesToAccessor(LSPTypecheckerInterface &typechecker, const AccessorInfo info, core::SymbolRef fallback,
                             std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     // Get references to the given accessor in the given file. If `info.accessorType` is `None`, it returns highlights
     // to `fallback` only.
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
+    getReferencesToAccessorInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref, const AccessorInfo info,
                                   core::SymbolRef fallback,
                                   std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
-    void getRenameEdits(LSPTypecheckerDelegate &typechecker, std::shared_ptr<AbstractRenamer> renamer,
+    void getRenameEdits(LSPTypecheckerInterface &typechecker, std::shared_ptr<AbstractRenamer> renamer,
                         core::SymbolRef symbol, std::string newName);
 
     LSPTask(const LSPConfiguration &config, LSPMethod method);
@@ -111,6 +111,9 @@ public:
 
     virtual bool canPreempt(const LSPIndexer &) const;
 
+    // Returns true if the task can operate on typechecker stale state.
+    virtual bool canUseStaleData() const;
+
     virtual bool needsMultithreading(const LSPIndexer &) const;
 
     // Returns the phase at which the task is complete. Some tasks only need to interface with the preprocessor or the
@@ -128,7 +131,7 @@ public:
 
     // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to
     // not need to interface with the typechecker, this method must be implemented by all subclasses.
-    virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
+    virtual void run(LSPTypecheckerInterface &typechecker) = 0;
 };
 
 /**
@@ -140,16 +143,20 @@ protected:
 
     LSPRequestTask(const LSPConfiguration &config, MessageId id, LSPMethod method);
 
-    virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) = 0;
+    virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) = 0;
 
 public:
-    void run(LSPTypecheckerDelegate &typechecker) override;
+    void run(LSPTypecheckerInterface &typechecker) override;
 
     // Requests cannot override this method, as runRequest must be run (and it only runs during the RUN phase).
     Phase finalPhase() const override;
 
     bool cancel(const MessageId &id) override;
 };
+
+// Doubles as the `methodString` for a `TextDocumentCompletion` LSPTask and also as
+// the prefix for any metrics collected during completion itself.
+#define LSP_COMPLETION_METRICS_PREFIX "textDocument.completion"
 
 /**
  * A special form of LSPTask that has direct access to the typechecker and controls its own scheduling.
@@ -161,7 +168,7 @@ protected:
 
 public:
     // Should never be called; throws an exception. May be overridden by tasks that can be dangerous or not dangerous.
-    virtual void run(LSPTypecheckerDelegate &typechecker) override;
+    virtual void run(LSPTypecheckerInterface &typechecker) override;
     // Performs the actual work on the task.
     virtual void runSpecial(LSPTypechecker &typechecker, WorkerPool &worker) = 0;
     // Tells the scheduler how long to wait before it can schedule more tasks.
@@ -184,7 +191,7 @@ public:
     LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, absl::Mutex &taskQueueMutex,
                            TaskQueueState &taskQueue, LSPIndexer &indexer);
 
-    void run(LSPTypecheckerDelegate &tc) override;
+    void run(LSPTypecheckerInterface &tc) override;
 };
 
 } // namespace sorbet::realmain::lsp

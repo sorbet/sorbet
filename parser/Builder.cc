@@ -225,6 +225,11 @@ public:
                 driver_->numparam_stack.regis(name_str[1] - 48, std::move(decls));
             }
 
+            auto last_char = name_str.back();
+            if (last_char == '?' || last_char == '!') {
+                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+            }
+
             if (driver_->lex.is_declared(name_str)) {
                 if (!hasCircularArgumentReferences(node.get(), name_str)) {
                     return make_unique<LVar>(node->loc, id->name);
@@ -258,7 +263,24 @@ public:
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
+        validateNoForwardArgAfterRestArg(args);
+
         return make_unique<Args>(collectionLoc(begin, args, end), std::move(args));
+    }
+
+    void validateNoForwardArgAfterRestArg(const sorbet::parser::NodeVec &args) {
+        bool restArg = false;
+        bool forwardArg = false;
+        for (auto &arg : args) {
+            if (parser::isa_node<Restarg>(arg.get())) {
+                restArg = true;
+            } else if (parser::isa_node<ForwardArg>(arg.get())) {
+                forwardArg = true;
+            }
+        }
+        if (forwardArg && restArg) {
+            error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
+        }
     }
 
     unique_ptr<Node> array(const token *begin, sorbet::parser::NodeVec elements, const token *end) {
@@ -314,7 +336,7 @@ public:
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
             auto name = id->name.shortName(gs_);
-            checkReservedForNumberedParameters(name, id->loc);
+            checkAssignmentToNumberedParameters(name, id->loc);
 
             driver_->lex.declare(name);
             return make_unique<LVarLhs>(id->loc, id->name);
@@ -329,6 +351,10 @@ public:
             return make_unique<CVarLhs>(cv->loc, cv->name);
         } else if (auto *gv = parser::cast_node<GVar>(node.get())) {
             return make_unique<GVarLhs>(gv->loc, gv->name);
+        } else if (auto *mv = parser::cast_node<MatchVar>(node.get())) {
+            auto name = mv->name.shortName(gs_);
+            checkAssignmentToNumberedParameters(name, mv->loc);
+            return node;
         } else if (parser::isa_node<Backref>(node.get()) || parser::isa_node<NthRef>(node.get())) {
             error(ruby_parser::dclass::BackrefAssignment, node->loc);
             return make_unique<Nil>(node->loc);
@@ -725,7 +751,9 @@ public:
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        return make_unique<CVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
+        auto view = tok->view();
+        auto name = view == "@@" ? core::Names::cvarNameMissing() : gs_.enterNameUTF8(view);
+        return make_unique<CVar>(tokLoc(tok), name);
     }
 
     unique_ptr<Node> dedentString(unique_ptr<Node> node, size_t dedentLevel) {
@@ -976,7 +1004,9 @@ public:
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        return make_unique<IVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
+        auto view = tok->view();
+        auto name = view == "@" ? core::Names::ivarNameMissing() : gs_.enterNameUTF8(view);
+        return make_unique<IVar>(tokLoc(tok), name);
     }
 
     unique_ptr<Node> keywordBreak(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
@@ -1309,6 +1339,22 @@ public:
 
         return make_unique<Pair>(tokLoc(key).join(maybe_loc(value)),
                                  make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())), std::move(value));
+    }
+
+    unique_ptr<Node> pair_label(const token *key) {
+        unique_ptr<Node> value;
+        if (islower(key->view().at(0))) {
+            value = ident(key);
+        } else {
+            value = const_(key);
+        }
+
+        auto keyLoc =
+            core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
+        auto accessible_value = accessible(std::move(value));
+        return make_unique<Pair>(tokLoc(key).join(maybe_loc(accessible_value)),
+                                 make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
+                                 std::move(accessible_value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
@@ -1742,6 +1788,22 @@ public:
                parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
                parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
                parser::isa_node<Hash>(&node);
+    }
+
+    void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
+        if (driver_->lex.context.inDynamicBlock() && isNumberedParameterName(name) &&
+            driver_->numparam_stack.seen_numparams()) {
+            std::cout << "Assignment error" << std::endl;
+            core::Loc location = core::Loc(file_, loc);
+            if (auto e = gs_.beginError(location, core::errors::Parser::AssignmentToNumparamError)) {
+                e.setHeader("cannot assign to numbered parameter `{}`", name);
+                e.addErrorNote("Reserved numbered parameter names are not allowed starting with Ruby 3.0. Use `{}` to "
+                               "disable this check",
+                               "--suppress-error-code=2004");
+            }
+        } else {
+            checkReservedForNumberedParameters(name, loc);
+        }
     }
 
     void checkReservedForNumberedParameters(std::string_view name, core::LocOffsets loc) {
@@ -2368,6 +2430,11 @@ ForeignPtr pair_keyword(SelfPtr builder, const token *key, ForeignPtr value) {
     return build->toForeign(build->pair_keyword(key, build->cast_node(value)));
 }
 
+ForeignPtr pair_label(SelfPtr builder, const token *key) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->pair_label(key));
+}
+
 ForeignPtr pair_quoted(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                        ForeignPtr value) {
     auto build = cast_builder(builder);
@@ -2664,6 +2731,7 @@ struct ruby_parser::builder Builder::interface = {
     p_ident,
     pair,
     pair_keyword,
+    pair_label,
     pair_quoted,
     pin,
     postexe,

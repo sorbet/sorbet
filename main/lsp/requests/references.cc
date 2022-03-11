@@ -14,7 +14,7 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
     return true;
 }
 
-unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
     ShowOperation op(config, ShowOperation::Kind::References);
 

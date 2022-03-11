@@ -36,6 +36,11 @@ public:
      */
     void restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> &indexed,
                  UnorderedMap<int, ast::ParsedFile> &indexedFinalGS);
+
+    /**
+     * Retrieves the evicted global state.
+     */
+    const core::GlobalState &getEvictedGs() const;
 };
 
 } // namespace sorbet::realmain::lsp

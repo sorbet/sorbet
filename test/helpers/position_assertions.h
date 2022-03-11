@@ -312,9 +312,11 @@ public:
     ApplyCodeActionAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                              std::string_view version, std::string_view title);
 
+    // method applies an edit and asserts results after each edit
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                const CodeAction &codeAction);
 
+    // method applies all edits and asserts results after every edit is applied
     void checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                   const CodeAction &codeAction);
 
@@ -327,7 +329,7 @@ public:
 private:
     std::optional<std::pair<std::string, std::string>> expectedFile();
     void assertResults(std::string expectedPath, std::string expectedContents, std::string actualContents);
-    std::unique_ptr<TextDocumentEdit> sortChanges(std::unique_ptr<TextDocumentEdit> changes);
+    std::unique_ptr<TextDocumentEdit> sortEdits(std::unique_ptr<TextDocumentEdit> changes);
 };
 
 // ^ apply-rename: [version] newName

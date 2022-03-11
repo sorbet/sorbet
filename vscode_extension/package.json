@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -268,7 +268,9 @@
         {
           "command": "sorbet.showOutput",
           "when": "editorLangId == ruby"
-        },
+        }
+      ],
+      "editor/context": [
         {
           "when": "resourceLangId == ruby",
           "command": "sorbet.copySymbolToClipboard",
@@ -311,6 +313,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.16.0",
+    "eslint-config-airbnb": "^17.1.0",
     "glob": "^7.1.4",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "^1.23.1",
@@ -321,5 +324,9 @@
     "vsce": "~1.76",
     "vscode-languageserver": "^6.1.1",
     "vscode-test": "^1.0.2"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "arrowParens": "always"
   }
 }

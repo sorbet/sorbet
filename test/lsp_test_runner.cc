@@ -71,8 +71,10 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
-void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range, int &nextId, vector<CodeActionKind> &selectedCodeActionKinds, vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions, string codeActionDescription, bool assertAllChanges) {
-
+void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range,
+                         int &nextId, vector<CodeActionKind> &selectedCodeActionKinds,
+                         vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
+                         string codeActionDescription, bool assertAllChanges) {
     auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
         return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
     };
@@ -82,8 +84,8 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
     codeActionContext->only = selectedCodeActionKinds;
 
     // Unfortunately there's no simpler way to copy the range (yet).
-    auto params = make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri),
-                                                range->copy(), move(codeActionContext));
+    auto params = make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), range->copy(),
+                                                move(codeActionContext));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
     {
@@ -101,8 +103,7 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
     }
 
     auto &response = msg->asResponse();
-    auto &receivedCodeActionResponse =
-        get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
+    auto &receivedCodeActionResponse = get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
     CHECK_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
     if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
         return;
@@ -163,8 +164,9 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         // Ensure we received a code action matching the assertion.
         auto it2 = receivedCodeActionsByTitle.find(codeActionAssertion->title);
         {
-            INFO(fmt::format("Did not receive code action matching assertion `{}` for error or selected code action `{}`...",
-                             codeActionAssertion->toString(), codeActionDescription));
+            INFO(fmt::format(
+                "Did not receive code action matching assertion `{}` for error or selected code action `{}`...",
+                codeActionAssertion->toString(), codeActionDescription));
             CHECK_NE(it2, receivedCodeActionsByTitle.end());
         }
 
@@ -192,16 +194,14 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
     }
 
     if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
-        FAIL_CHECK(
-            fmt::format("Found apply-code-action assertions without "
-                        "corresponding code actions from the server:\n{}",
-                        fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
-                                      [](const auto &assertion) -> string { return assertion->toString(); })));
+        FAIL_CHECK(fmt::format("Found apply-code-action assertions without "
+                               "corresponding code actions from the server:\n{}",
+                               fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                                             [](const auto &assertion) -> string { return assertion->toString(); })));
     } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
-        FAIL_CHECK(fmt::format(
-            "Received code actions without corresponding apply-code-action assertions:\n{}",
-            fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
-                          [](const auto &action) -> string { return action.second->toJSON(); })));
+        FAIL_CHECK(fmt::format("Received code actions without corresponding apply-code-action assertions:\n{}",
+                               fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                                             [](const auto &action) -> string { return action.second->toJSON(); })));
     }
 }
 
@@ -243,11 +243,14 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
 
         // Request code actions for each of this file's error.
         for (auto &error : errorsByFilename[filename]) {
-            validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds, applyCodeActionAssertions, error->toString(), false);
+            validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds,
+                                applyCodeActionAssertions, error->toString(), false);
         }
 
         for (auto codeActionAssertion : applyCodeActionAssertions) {
-            validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId, selectedCodeActionKinds, applyCodeActionAssertions, codeActionAssertion->toString(), true);
+            validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId,
+                                selectedCodeActionKinds, applyCodeActionAssertions, codeActionAssertion->toString(),
+                                true);
         }
 
         // We've already removed any code action assertions that matches a received code action assertion.

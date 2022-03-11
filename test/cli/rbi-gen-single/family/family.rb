@@ -14,6 +14,15 @@ module Family
       nil
     end
 
+    # `::WhoKnows` is defined in external.rbi, and is not managed by any package.
+    # In the resulting rbi for `family` it prints as just `WhoKnows`, but this
+    # is fine as the enclosing class is not nested at all, and the constant will
+    # resolve at the root.
+    sig {returns(::WhoKnows)}
+    def make_something
+      WhoKnows.new
+    end
+
     # These two constants will have the same RHS in the rbi file that's
     # generated.
     RelativeBart = Bart::Character
@@ -26,6 +35,10 @@ module Family
   end
 
   class Flanders
+    extend T::Sig
+  end
+
+  class Krabappel
     extend T::Sig
   end
 

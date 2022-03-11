@@ -15,13 +15,13 @@ function setupMocha(): Mocha {
       reporter: "mocha-junit-reporter",
       reporterOptions: {
         mochaFile: process.env.XML_OUTPUT_FILE,
-        testsuitesTitle: TEST_SUITE_NAME
+        testsuitesTitle: TEST_SUITE_NAME,
       },
-      ui: "tdd"
+      ui: "tdd",
     });
   } else {
     const mocha = new Mocha({
-      ui: "tdd"
+      ui: "tdd",
     });
     mocha.useColors(true);
     return mocha;
@@ -40,11 +40,11 @@ export function run(): Promise<void> {
       }
 
       // Add files to the test suite
-      files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+      files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
 
       try {
         // Run the mocha test
-        mocha.run(failures => {
+        mocha.run((failures) => {
           if (failures > 0) {
             e(new Error(`${failures} tests failed.`));
           } else {
