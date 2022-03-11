@@ -1155,10 +1155,10 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
             auto wantLocalsAndKeywords = sendResp->isPrivateOk && !explicitSelfReceiver;
             auto suggestKeywords = wantLocalsAndKeywords;
             // `enclosingMethod` existing indicates whether we want local variable completion results.
-            auto enclosingMethod = wantLocalsAndKeywords
-                ? sendResp->enclosingMethod : core::MethodRef{};
+            auto enclosingMethod = wantLocalsAndKeywords ? sendResp->enclosingMethod : core::MethodRef{};
             auto params = SearchParams{
-                queryLoc, prefix,
+                queryLoc,
+                prefix,
                 MethodSearchParams{
                     sendResp->dispatchResult,
                     sendResp->totalArgs,
