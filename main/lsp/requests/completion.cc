@@ -204,6 +204,10 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
 SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
                                        string_view prefix) {
+    if (dispatchResult.main.receiver.isUntyped()) {
+        return SimilarMethodsByName{};
+    }
+
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
     for (auto &[methodName, similarMethods] : result) {
@@ -1115,11 +1119,6 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
     auto resp = move(queryResponses[0]);
 
     if (auto sendResp = resp->isSend()) {
-        if (sendResp->dispatchResult->main.receiver.isUntyped()) {
-            response->result = std::move(emptyResult);
-            return response;
-        }
-
         auto callerSideName = sendResp->callerSideName;
         auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc.contains(queryLoc))
                           ? ""
