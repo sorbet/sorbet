@@ -35,7 +35,8 @@ find . -name __package.rb | sort | while read -r package; do
 
   "$sorbet" --silence-dev-message \
     --ignore=__package.rb \
-    --package-rbi-output="$rbis" \
+    --package-rbi-generation \
+    --package-rbi-dir="$rbis" \
     --extra-package-files-directory-prefix="${test_path}/other/" \
     --single-package="$name" "$test_path"
 
