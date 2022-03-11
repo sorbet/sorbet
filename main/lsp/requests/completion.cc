@@ -1145,9 +1145,19 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
             };
             items = this->getCompletionItems(typechecker, params);
         } else {
-            // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
+            // isPrivateOk means we are calling a method on self. This check prevents completing `x.de` to `x.def`
             // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
+            //
+            // If we are calling a method on self, though, we need to check whether we have a syntactic receiver
+            // or not.  In the latter case, we want to include locals, since we may be completing a
+            // (zero-argument) "send", but the user might have wanted to complete locals.  In the former case, we
+            // know that the user doesn't want locals, since they have already written something prefixed with
+            // `self.`.
             auto suggestKeywords = sendResp->isPrivateOk;
+            auto explicitSelfReceiver = sendResp->receiverLoc.source(gs) == "self";
+            // `enclosingMethod` existing indicates whether we want local variable completion results.
+            auto enclosingMethod = (sendResp->isPrivateOk && !explicitSelfReceiver)
+                ? sendResp->enclosingMethod : core::MethodRef{};
             auto params = SearchParams{
                 queryLoc, prefix,
                 MethodSearchParams{
@@ -1156,8 +1166,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
                     sendResp->isPrivateOk,
                 },
                 suggestKeywords,
-                // No receiver means that local variables are allowed here.
-                sendResp->isPrivateOk ? sendResp->enclosingMethod : core::MethodRef{},
+                enclosingMethod,
                 core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
             };
             items = this->getCompletionItems(typechecker, params);
