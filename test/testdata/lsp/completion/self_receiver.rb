@@ -1,9 +1,11 @@
 # typed: true
 
-def foo(xyz)
-  self.
-  #    ^ completion: CSV, ...
-end # error: unexpected token
+module
+  def foo(xyz)
+    self.
+    #    ^ completion: (nothing)
+  end # error: unexpected token
+end
 
 class A
   def foo
