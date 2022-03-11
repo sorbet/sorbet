@@ -249,8 +249,26 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         taskQueue->pendingTasks.pop_front();
                     }
                     // If the coordinator has not consumed the task, that means it was not able to run it on stale
-                    // state, because no cancellationUndoState was present. This likely means that the typechecker has
-                    // not yet initialized the cancellationUndoState, so we will try again after a short delay.
+                    // state, because no cancellationUndoState was present. There are (we think! see below) two
+                    // possibilities here:
+                    //
+                    //   1. by the time we acquired the cancellationUndoState lock, the typechecker had already
+                    //      finished the slow path and nulled out the cancellationUndoState; or
+                    //   2. (not sure if this case is actually possible!) we acquired the lock between the time
+                    //      slowPathRunning became true and the time that the typechecker actually initialized the
+                    //      cancellationUndoState.
+                    //
+                    // In case 1, we should be able to process the task as normal shortly, since slowPathRunning has
+                    // become (or is about to become) false.
+                    //
+                    // In case 2, we should be able to process the task on stale state once the typechecker initializes
+                    // cancellationUndoState.
+                    //
+                    // To handle both of these cases, we insert a short sleep before heading around for another turn of
+                    // the loop.
+                    //
+                    // TODO(aprocter): Investigate whether case 2 is actually possible, and consider if there's a
+                    // better way to handle all of this than sleep-and-retry.
                     else {
                         logger->debug("Failed to grab the stale state, will try again in 100ms");
                         Timer::timedSleep(100ms, *logger, "stale_state.sleep");
