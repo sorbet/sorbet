@@ -970,11 +970,11 @@ public:
         return ClassOrModuleRef::fromRaw(88);
     }
 
-    static ClassOrModuleRef BindToAttachedClass() {
+    static ClassOrModuleRef MagicBindToAttachedClass() {
         return ClassOrModuleRef::fromRaw(89);
     }
 
-    static ClassOrModuleRef BindToSelfType() {
+    static ClassOrModuleRef MagicBindToSelfType() {
         return ClassOrModuleRef::fromRaw(90);
     }
 
