@@ -204,6 +204,10 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
 SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
                                        string_view prefix) {
+    if (dispatchResult.main.receiver.isUntyped()) {
+        return SimilarMethodsByName{};
+    }
+
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
     for (auto &[methodName, similarMethods] : result) {
