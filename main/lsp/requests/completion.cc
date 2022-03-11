@@ -1145,18 +1145,17 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
             };
             items = this->getCompletionItems(typechecker, params);
         } else {
-            // isPrivateOk means we are calling a method on self. This check prevents completing `x.de` to `x.def`
-            // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
-            //
-            // If we are calling a method on self, though, we need to check whether we have a syntactic receiver
-            // or not.  In the latter case, we want to include locals, since we may be completing a
-            // (zero-argument) "send", but the user might have wanted to complete locals.  In the former case, we
-            // know that the user doesn't want locals, since they have already written something prefixed with
-            // `self.`.
-            auto suggestKeywords = sendResp->isPrivateOk;
+            // isPrivateOk indicates that we are calling (and therefore completing) a method on `self`.  In such a
+            // case, it matters whether or not there is a syntactic receiver involved in the call.  In the latter
+            // case, we want to include locals and keywords, since we may be completing a (zero-argument) "send"
+            // and the user's intent might have been to complete a local or a keyword.  In the former case, we
+            // know that the user doesn't want such completion results, since they have already written something
+            // prefixed with `self.`.
             auto explicitSelfReceiver = sendResp->receiverLoc.source(gs) == "self";
+            auto wantLocalsAndKeywords = sendResp->isPrivateOk && !explicitSelfReceiver;
+            auto suggestKeywords = wantLocalsAndKeywords;
             // `enclosingMethod` existing indicates whether we want local variable completion results.
-            auto enclosingMethod = (sendResp->isPrivateOk && !explicitSelfReceiver)
+            auto enclosingMethod = wantLocalsAndKeywords
                 ? sendResp->enclosingMethod : core::MethodRef{};
             auto params = SearchParams{
                 queryLoc, prefix,
