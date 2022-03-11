@@ -1511,7 +1511,6 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     }
 };
 
-
 void ApplyCodeActionAssertion::checkAll(
     const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
     const CodeAction &codeAction) {
