@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # typed: true
-# exhaustive-apply-code-action: true
+# selective-apply-code-action: quickfix
 
 class Foo
   def bar(n); end

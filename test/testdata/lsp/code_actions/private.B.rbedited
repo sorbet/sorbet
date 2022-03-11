@@ -1,5 +1,5 @@
 # typed: false
-# exhaustive-apply-code-action: true
+# selective-apply-code-action: quickfix
 
 class A
   private def foo; end

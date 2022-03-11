@@ -5,6 +5,8 @@
 # specially whitelisted.
 # !!!!
 
+# selective-apply-code-action: quickfix
+
 class Hello
   def something(x)
 

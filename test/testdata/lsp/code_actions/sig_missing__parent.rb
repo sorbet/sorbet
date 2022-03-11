@@ -1,5 +1,5 @@
 # typed: strict
-# exhaustive-apply-code-action: true
+# selective-apply-code-action: quickfix
 
 class Foo
   extend T::Sig
