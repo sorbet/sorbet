@@ -111,6 +111,9 @@ public:
 
     virtual bool canPreempt(const LSPIndexer &) const;
 
+    // Returns true if the task can operate on typechecker stale state.
+    virtual bool canUseStaleData() const;
+
     virtual bool needsMultithreading(const LSPIndexer &) const;
 
     // Returns the phase at which the task is complete. Some tasks only need to interface with the preprocessor or the
