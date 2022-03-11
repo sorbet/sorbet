@@ -1115,6 +1115,11 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
     auto resp = move(queryResponses[0]);
 
     if (auto sendResp = resp->isSend()) {
+        if (sendResp->dispatchResult->main.receiver.isUntyped()) {
+            response->result = std::move(emptyResult);
+            return response;
+        }
+
         auto callerSideName = sendResp->callerSideName;
         auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc.contains(queryLoc))
                           ? ""
