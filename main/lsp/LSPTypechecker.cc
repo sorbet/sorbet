@@ -20,6 +20,7 @@
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
 #include "main/pipeline/pipeline.h"
+#include "packager/rbi_gen.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
@@ -433,6 +434,11 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
         pipeline::typecheck(gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
+
+        if (!config->opts.packageRBIDir.empty()) {
+            auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*gs, workers);
+            packager::RBIGenerator::run(*gs, packageNamespaces, config->opts.packageRBIDir, workers);
+        }
     });
 
     // Note: `gs` now holds the value of `finalGS`.

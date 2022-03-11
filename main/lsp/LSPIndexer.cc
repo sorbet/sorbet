@@ -1,16 +1,20 @@
 #include "main/lsp/LSPIndexer.h"
+#include "absl/strings/match.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
 #include "core/NameHash.h"
 #include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/packages/PackageDB.h"
 #include "hashing/hashing.h"
 #include "main/cache/cache.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/pipeline/pipeline.h"
+#include "packager/packager.h"
+#include "packager/rbi_gen.h"
 #include "payload/payload.h"
 
 using namespace std;
@@ -60,6 +64,41 @@ LSPIndexer::~LSPIndexer() {
     for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
         timer->cancel();
     }
+}
+
+// Generates RBI files in `--package-rbi-dir` during initialization and the slow path.
+void LSPIndexer::buildPackageDB(WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &ownedKvstore) {
+    auto &opts = this->config->opts;
+
+    // TODO: enforce expectations about `opts`
+    auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
+    auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
+    if (it == relativeIgnorePatterns.end()) {
+        Exception::raise("--ignore=__package.rb must be passed in single-package mode");
+    }
+
+    relativeIgnorePatterns.erase(it);
+    auto packageFiles = opts.fs->listFilesInDir(opts.rawInputDirNames[0], opts.allowedExtensions, true,
+                                                opts.absoluteIgnorePatterns, relativeIgnorePatterns);
+
+    packageFiles.erase(remove_if(packageFiles.begin(), packageFiles.end(),
+                                 [](const auto &packageFile) { return !absl::EndsWith(packageFile, "__package.rb"); }),
+                       packageFiles.end());
+
+    // Index the package files and build the package db
+    auto packageFileRefs = pipeline::reserveFiles(this->initialGS, packageFiles);
+    auto packages = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger,
+                                                                packageFileRefs, workers, ownedKvstore);
+
+    // this configuration is usually done every time the packager pass runs
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackageOptionsGS(*this->initialGS);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = this->initialGS->unfreezePackages();
+        this->initialGS->setPackagerOptions(opts.secondaryTestPackageNamespaces,
+                                            opts.extraPackageFilesDirectoryPrefixes, opts.stripePackagesHint);
+    }
+
+    packages = packager::Packager::findPackages(*this->initialGS, workers, move(packages));
 }
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, WorkerPool &workers) const {
@@ -181,6 +220,16 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     ShowOperation op(*config, ShowOperation::Kind::Indexing);
     vector<core::FileRef> inputFiles;
     unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
+
+    // We're running in single-package mode, generate rbi files from the package db.
+    if (!config->opts.packageRBIDir.empty()) {
+        if (config->opts.stripePackages) {
+            Exception::raise("Cannot run in single-package mode with --stripe-packages enabled");
+        }
+
+        this->buildPackageDB(workers, ownedKvstore);
+    }
+
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
         inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);

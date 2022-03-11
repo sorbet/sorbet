@@ -8,6 +8,7 @@
 namespace sorbet {
 class WorkerPool;
 class KeyValueStore;
+class OwnedKeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::realmain::lsp {
@@ -39,6 +40,11 @@ class LSPIndexer final {
     UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
+
+    /**
+     * Build the package DB in preparation for package rbi generation.
+     */
+    void buildPackageDB(WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &ownedKvstore);
 
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
