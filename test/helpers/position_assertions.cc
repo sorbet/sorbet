@@ -1499,13 +1499,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
     auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
     const auto &config = wrapper.config();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
-        auto filename = uriToFilePath(config, c->textDocument->uri);
-        auto it = sourceFileContents.find(filename);
-        {
-            INFO(fmt::format("Unable to find referenced source file `{}`", filename));
-            REQUIRE_NE(it, sourceFileContents.end());
-        }
-        auto &file = it->second;
+        auto file = getFileByUri(config, sourceFileContents, c->textDocument->uri);
 
         string actualEditedFileContents = string(file->source());
         c = sortEdits(move(c));
