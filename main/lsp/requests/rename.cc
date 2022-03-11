@@ -316,10 +316,9 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
                                                          "Constant names must begin with an uppercase letter.");
             return response;
         }
-        if (isValidRenameLocation(constResp->symbol, gs, response)) {
-            auto originalName = constResp->symbol.name(gs).show(gs);
-            renamer = makeRenamer(gs, config, constResp->symbol, params->newName);
-            renamer->getRenameEdits(typechecker, constResp->symbol, params->newName);
+        if (isValidRenameLocation(constResp->symbolBeforeDealias, gs, response)) {
+            renamer = makeRenamer(gs, config, constResp->symbolBeforeDealias, params->newName);
+            renamer->getRenameEdits(typechecker, constResp->symbolBeforeDealias, params->newName);
             enrichResponse(response, renamer);
         }
     } else if (auto defResp = resp->isMethodDef()) {

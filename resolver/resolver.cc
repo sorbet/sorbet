@@ -236,7 +236,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitive(ctx, name);
+        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
