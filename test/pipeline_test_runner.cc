@@ -740,10 +740,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     errorQueue->flushAllErrors(*gs);
     errorCollector->drainErrors();
 
-    {
-        INFO("the incremental resolver should not add new symbols");
-        CHECK_EQ(symbolsBefore, gs->symbolsUsedTotal());
-    }
+    CHECK_EQ(symbolsBefore, gs->symbolsUsedTotal(), "the incremental resolver should not add new symbols");
 }
 } // namespace sorbet::test
 
