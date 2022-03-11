@@ -537,7 +537,7 @@ int realmain(int argc, char *argv[]) {
 
         { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
 
-        if (!opts.packageRBIOutput.empty()) {
+        if (opts.packageRBIGeneration) {
 #ifdef SORBET_REALMAIN_MIN
             logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
             return 1;
@@ -549,13 +549,18 @@ int realmain(int argc, char *argv[]) {
                 return 1;
             }
 
+            if (opts.packageRBIDir.empty()) {
+                logger->error("Rbi generation requires --package-rbi-dir to be present");
+                return 1;
+            }
+
             if (opts.rawInputDirNames.size() != 1) {
                 logger->error("Serializing package RBIs requires one input folder.");
                 return 1;
             }
 
-            if (!FileOps::dirExists(opts.packageRBIOutput)) {
-                logger->error("Directory {} for serialized package RBIs does not exist.", opts.packageRBIOutput);
+            if (!FileOps::dirExists(opts.packageRBIDir)) {
+                logger->error("Directory {} for serialized package RBIs does not exist.", opts.packageRBIDir);
                 return 1;
             }
 
@@ -679,8 +684,8 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
 
-            if (opts.packageRBIOutput.empty()) {
-                // we don't need to typecheck under packageRBIOutput
+            if (!opts.packageRBIGeneration) {
+                // we don't need to typecheck when generating rbis
                 pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
                                     /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
             }
@@ -761,7 +766,7 @@ int realmain(int argc, char *argv[]) {
 #endif
         }
 
-        if (!opts.packageRBIOutput.empty()) {
+        if (opts.packageRBIGeneration) {
 #ifdef SORBET_REALMAIN_MIN
             logger->warn("Package rbi generation is disabled in sorbet-orig for faster builds");
             return 1;
@@ -771,9 +776,9 @@ int realmain(int argc, char *argv[]) {
 
             if (!opts.singlePackage.empty()) {
                 packager::RBIGenerator::runSinglePackage(*gs, packageNamespaces, gs->singlePackageImports->package,
-                                                         opts.packageRBIOutput, *workers);
+                                                         opts.packageRBIDir, *workers);
             } else {
-                packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIOutput, *workers);
+                packager::RBIGenerator::run(*gs, packageNamespaces, opts.packageRBIDir, *workers);
             }
 #endif
         }
