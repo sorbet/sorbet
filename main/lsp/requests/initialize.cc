@@ -50,6 +50,9 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerInterface &
     completionProvider->triggerCharacters = TRIGGER_CHARACTERS;
     serverCap->completionProvider = move(completionProvider);
 
+    auto commandProvider = make_unique<ExecuteCommandOptions>(vector<string>{});
+    serverCap->executeCommandProvider = move(commandProvider);
+
     response->result = make_unique<InitializeResult>(move(serverCap));
     return response;
 }

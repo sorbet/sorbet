@@ -211,6 +211,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::TextDocumentRename:
                 return make_unique<RenameTask>(*config, id, move(get<unique_ptr<RenameParams>>(rawParams)));
+            case LSPMethod::WorkspaceExecuteCommand:
+                return make_unique<ExecuteCommandTask>(*config, id,
+                                                       move(get<unique_ptr<ExecuteCommandParams>>(rawParams)));
             default:
                 return make_unique<SorbetErrorTask>(
                     *config,
