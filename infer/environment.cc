@@ -494,8 +494,7 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
     }
 
     // attachedClass on untyped symbol is defined to return itself
-    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() &&
-        sym.data(ctx)->flags.isFinal) {
+    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() && sym.data(ctx)->flags.isFinal) {
         // This is a Ruby singleton class object
         return true;
     }

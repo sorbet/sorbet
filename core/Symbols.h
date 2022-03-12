@@ -319,8 +319,8 @@ public:
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
-            : isClass(false), isModule(false), isAbstract(false), isInterface(false),
-            isLinearizationComputed(false), isFinal(false), isSealed(false), isPrivate(false), isUndeclared(false) {}
+            : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
+              isFinal(false), isSealed(false), isPrivate(false), isUndeclared(false) {}
 
         uint16_t serialize() const {
             // Can replace this with std::bit_cast in C++20
