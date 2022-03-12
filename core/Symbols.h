@@ -416,6 +416,13 @@ public:
         }
     }
 
+    inline bool isUndeclared() const {
+        if (!flags.isModule && !flags.isClass) {
+            return true;
+        }
+        return flags.isUndeclared;
+    }
+
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     MethodRef findMethod(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
