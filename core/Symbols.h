@@ -296,6 +296,7 @@ public:
 private:
     InlinedVector<Loc, 2> locs_;
 };
+CheckSize(TypeParameter, 64, 8);
 
 class ClassOrModule final {
 public:
@@ -561,7 +562,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-// CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
+CheckSize(ClassOrModule, 152, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H
