@@ -139,8 +139,9 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 }
 
 unique_ptr<LSPTask> LSPTypecheckerCoordinator::syncRunOnStaleState(unique_ptr<LSPTask> task) {
-    bool success = typechecker.tryRunOnStaleState([&task](UndoState &undoState) {
-        LSPStaleTypechecker typechecker(undoState);
+    auto config = this->config;
+    bool success = typechecker.tryRunOnStaleState([&task, &config](UndoState &undoState) {
+        LSPStaleTypechecker typechecker(config, undoState);
         task->run(typechecker);
     });
 

@@ -50,6 +50,10 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
 
     vector<unique_ptr<CodeAction>> result;
 
+    // TODO: In stale-state mode, we're returning an empty result here. The reason is that `hover` requests in vscode
+    // seem typically to be preceded by a `codeAction` request, and if we let that into the queue ahead of the `hover`
+    // request it would block otherwise; so we just stub out the result from `codeAction` for now. Eventually we will
+    // want to have proper support for this.
     if (typechecker.isStale()) {
         config.logger->debug("CodeActionTask running on stale, returning empty result");
         response->result = move(result);

@@ -39,14 +39,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
 
     if (typechecker.isStale()) {
-        config.logger->debug("HoverTask running on stale, returning stub result");
-
-        auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
-        string typeString = "stub_answer_for_hover";
-        string docString = "We would have tried to answer this hover request with stale data\n\n";
-
-        response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));
-        return response;
+        config.logger->debug("HoverTask running on stale data");
     }
 
     const core::GlobalState &gs = typechecker.state();
@@ -139,6 +132,13 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     optional<string> docString;
     if (!documentation.empty()) {
         docString = absl::StrJoin(documentation, "\n\n");
+    }
+
+    // If we've served this request from stale state, add a little indicator to that effect. (TODO(aprocter): This is
+    // debugging aid for an experimental feature. We probably don't actually want to surface this to users, so delete
+    // this when stale state stuff goes "GA".)
+    if (typechecker.isStale()) {
+        typeString = "# note: information may be stale\n" + typeString;
     }
 
     response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));
