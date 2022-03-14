@@ -61,6 +61,8 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
   workspaceFolders() {
     return [{ uri: { fsPath: "/fake/path/to/project" } }] as WorkspaceFolder[];
   }
+
+  initializeEnabled(_enabled: boolean): void {}
 }
 
 const fooLspConfig = new SorbetLspConfig({
