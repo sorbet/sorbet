@@ -31,6 +31,11 @@ module A
       m.greeting
       print((Foo if true).greeting)
     end
+
+    sig {params(m: T.class_of(Foo)).void}
+    def example3(m)
+      m.greeting
+    end
   end
 end
 Foo.greeting
