@@ -33,8 +33,19 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFil
     gs = move(evictedGs);
 }
 
-const core::GlobalState &UndoState::getEvictedGs() const {
-    return *evictedGs;
+const std::unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
+    return evictedGs;
+}
+
+const ast::ParsedFile &UndoState::getIndexed(core::FileRef fref) const {
+    const auto id = fref.id();
+
+    auto treeEvictedIndexed = evictedIndexed.find(id);
+    if (treeEvictedIndexed != evictedIndexed.end()) {
+        return treeEvictedIndexed->second;
+    }
+
+    return dummyParsedFile;
 }
 
 } // namespace sorbet::realmain::lsp
