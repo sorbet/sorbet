@@ -134,6 +134,9 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
         docString = absl::StrJoin(documentation, "\n\n");
     }
 
+    // If we've served this request from stale state, add a little indicator to that effect. (TODO(aprocter): This is
+    // debugging aid for an experimental feature. We probably don't actually want to surface this to users, so delete
+    // this when stale state stuff goes "GA".)
     if (typechecker.isStale()) {
         typeString = "[stale] " + typeString;
     }
