@@ -247,7 +247,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                                 applyCodeActionAssertions, error->toString(), false);
         }
 
-        // This weird loop is here because `validateCodeActions` erases the elements from `applyCodeActionAssertions` and we are iterating over that container
+        // This weird loop is here because `validateCodeActions` erases the elements from `applyCodeActionAssertions`
+        // and we are iterating over that container
         auto applyCodeActionAssertionsSize = applyCodeActionAssertions.size();
         for (int i = 0; i < applyCodeActionAssertionsSize; i++) {
             if (applyCodeActionAssertions.empty()) {

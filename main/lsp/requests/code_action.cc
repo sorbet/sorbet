@@ -220,10 +220,10 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
 CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCodeAction), params(move(params)) {}
 
-vector<unique_ptr<TextDocumentEdit>>
-CodeActionTask::getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                                      const core::lsp::DefinitionResponse *definition,
-                                      LSPTypecheckerInterface &typechecker) {
+vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LSPConfiguration &config,
+                                                                        const core::GlobalState &gs,
+                                                                        const core::lsp::DefinitionResponse *definition,
+                                                                        LSPTypecheckerInterface &typechecker) {
     ENFORCE(definition->symbol.isMethod());
 
     vector<unique_ptr<TextDocumentEdit>> res;

@@ -17,9 +17,10 @@ public:
     bool canUseStaleData() const override;
 
 private:
-    std::vector<std::unique_ptr<TextDocumentEdit>>
-    getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                          const core::lsp::DefinitionResponse *definition, LSPTypecheckerInterface &typechecker);
+    std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config,
+                                                                      const core::GlobalState &gs,
+                                                                      const core::lsp::DefinitionResponse *definition,
+                                                                      LSPTypecheckerInterface &typechecker);
 };
 
 } // namespace sorbet::realmain::lsp
