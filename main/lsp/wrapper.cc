@@ -162,7 +162,7 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentFormat);
-    enableExperimentalFeature(LSPExperimentalFeature::ExtractMethod);
+    enableExperimentalFeature(LSPExperimentalFeature::MoveMethod);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
@@ -179,8 +179,8 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
         case LSPExperimentalFeature::DocumentFormat:
             opts->lspDocumentFormatRubyfmtEnabled = true;
             break;
-        case LSPExperimentalFeature::ExtractMethod:
-            opts->lspExtractMethodEnabled = true;
+        case LSPExperimentalFeature::MoveMethod:
+            opts->lspMoveMethodEnabled = true;
             break;
     }
 }

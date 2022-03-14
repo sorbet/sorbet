@@ -133,13 +133,13 @@ public:
         for (auto name : invalidNames) {
             if (oldName == name) {
                 invalid = true;
-                error = fmt::format("The `{}` method cannot be extracted to a module.", oldName);
+                error = fmt::format("The `{}` method cannot be moved to a module.", oldName);
                 return;
             }
         }
         // block any method not starting with /[a-zA-Z0-9_]+/. This blocks operator overloads.
         if (!isalnum(oldName[0]) && oldName[0] != '_') {
-            error = fmt::format("The `{}` method cannot be extracted to a module.", oldName);
+            error = fmt::format("The `{}` method cannot be moved to a module.", oldName);
             invalid = true;
         }
     }
@@ -221,7 +221,7 @@ CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCodeAction), params(move(params)) {}
 
 vector<unique_ptr<TextDocumentEdit>>
-CodeActionTask::getExtractMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
+CodeActionTask::getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                       const core::lsp::DefinitionResponse *definition,
                                       LSPTypecheckerInterface &typechecker) {
     ENFORCE(definition->symbol.isMethod());
@@ -332,19 +332,19 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
         }
     }
 
-    if (config.opts.lspExtractMethodEnabled) {
+    if (config.opts.lspMoveMethodEnabled) {
         auto queryResult = queryByLoc(typechecker, params->textDocument->uri, *params->range->start,
                                       LSPMethod::TextDocumentCodeAction, false);
 
-        // Generate "Extract method" code actions only for method definitions
+        // Generate "Move method" code actions only for method definitions
         if (queryResult.error == nullptr) {
             for (auto &resp : queryResult.responses) {
                 if (auto def = resp->isDefinition()) {
                     if (def->symbol.isMethod()) {
-                        auto action = make_unique<CodeAction>("Extract method to module");
+                        auto action = make_unique<CodeAction>("Move method to a new module");
                         action->kind = CodeActionKind::RefactorExtract;
                         auto workspaceEdit = make_unique<WorkspaceEdit>();
-                        workspaceEdit->documentChanges = getExtractMethodEdits(config, gs, def, typechecker);
+                        workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, def, typechecker);
                         action->edit = move(workspaceEdit);
                         result.emplace_back(move(action));
                     }

@@ -232,7 +232,7 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspExtractMethodEnabled = false;
+    bool lspMoveMethodEnabled = false;
     bool lspStaleStateEnabled = false;
 
     // Experimental feature `requires_ancestor`
