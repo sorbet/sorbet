@@ -75,6 +75,47 @@ module Opus::Types::Test
       assert_equal(1, klass.new.good_double_definition)
     end
 
+    it "prevents unwrapping for abstract methods if they have been overridden" do
+      klass = Class.new do
+        extend T::Sig
+        extend T::Helpers
+
+        def initialize
+          @double_definition = 1
+        end
+
+        sig {abstract.returns(Integer)}
+        def double_definition; end
+
+        attr_reader :double_definition
+      end
+
+      unwrap_signature("double_definition")
+      assert_equal(1, klass.new.double_definition)
+    end
+
+    it "does not prevent re-declaring a method as abstract" do
+      mod = Module.new do
+        attr_reader :double_definition
+      end
+
+      klass = Class.new do
+        extend T::Sig
+        extend T::Helpers
+        include mod
+
+        def initialize
+          @double_definition = 1
+        end
+
+        sig {abstract.returns(Integer)}
+        def double_definition; end
+      end
+
+      unwrap_signature("double_definition")
+      assert_equal(1, klass.new.double_definition)
+    end
+
     private
 
     def unwrap_signature(method_name)
