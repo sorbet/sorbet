@@ -9,8 +9,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-                     uint32_t epoch)
-    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)), epoch(epoch) {}
+                     const UnorderedMap<int, ast::ParsedFile> &newIndexedFinalGS,
+                     const std::vector<ast::ParsedFile> &newIndexed, uint32_t epoch)
+    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
+      newIndexedFinalGS(newIndexedFinalGS), newIndexed(newIndexed), epoch(epoch) {}
 
 void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
     const auto id = evictedIndexTree.file.id();
@@ -33,8 +35,30 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFil
     gs = move(evictedGs);
 }
 
-const core::GlobalState &UndoState::getEvictedGs() const {
-    return *evictedGs;
+const std::unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
+    return evictedGs;
+}
+
+const ast::ParsedFile &UndoState::getIndexed(core::FileRef fref) const {
+    const auto id = fref.id();
+
+    auto treeEvictedIndexed = evictedIndexed.find(id);
+    if (treeEvictedIndexed != evictedIndexed.end()) {
+        return treeEvictedIndexed->second;
+    }
+
+    auto treeEvictedIndexedFinalGS = evictedIndexedFinalGS.find(id);
+    if (treeEvictedIndexedFinalGS != evictedIndexedFinalGS.end()) {
+        return treeEvictedIndexedFinalGS->second;
+    }
+
+    auto treeNewIndexedFinalGS = newIndexedFinalGS.find(id);
+    if (treeNewIndexedFinalGS != newIndexedFinalGS.end()) {
+        return treeNewIndexedFinalGS->second;
+    }
+
+    ENFORCE(id < newIndexed.size());
+    return newIndexed[id];
 }
 
 } // namespace sorbet::realmain::lsp

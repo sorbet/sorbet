@@ -37,18 +37,13 @@ HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_p
 unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
 
+    const core::GlobalState &gs = typechecker.state();
+
     if (typechecker.isStale()) {
         config.logger->debug("HoverTask running on stale, returning stub result");
-
-        auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
-        string typeString = "stub_answer_for_hover";
-        string docString = "We would have tried to answer this hover request with stale data\n\n";
-
-        response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));
-        return response;
+        config.logger->debug("Address of GlobalState is {}", (void *)&gs);
     }
 
-    const core::GlobalState &gs = typechecker.state();
     auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentHover);
     if (result.error) {
         // An error happened while setting up the query.
@@ -137,6 +132,10 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     optional<string> docString;
     if (!documentation.empty()) {
         docString = absl::StrJoin(documentation, "\n\n");
+    }
+
+    if (typechecker.isStale()) {
+        typeString = "[stale] " + typeString;
     }
 
     response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));

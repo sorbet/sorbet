@@ -200,13 +200,12 @@ public:
 };
 
 class LSPStaleTypechecker final : public LSPTypecheckerInterface {
+    std::shared_ptr<const LSPConfiguration> config;
     UndoState &undoState;
-
-    // Just so we have something to return from the stubbed functions after we ENFORCE(false)
-    ast::ParsedFile *pf;
+    std::unique_ptr<WorkerPool> emptyWorkers;
 
 public:
-    LSPStaleTypechecker(UndoState &undoState) : undoState(undoState), pf(nullptr) {}
+    LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState);
 
     // Delete copy constructor / assignment.
     LSPStaleTypechecker(LSPStaleTypechecker &) = delete;
