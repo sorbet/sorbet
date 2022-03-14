@@ -149,6 +149,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
+            // TODO: package-only slow path
             committed = runSlowPath(move(updates), workers, /* cancelable */ true);
         }
         epoch.committed = committed;
@@ -159,6 +160,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     return committed;
 }
 
+// TODO: modify the fast path to use the current package to gather rbis
 vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
                                                   shared_ptr<core::ErrorFlusher> errorFlusher) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
