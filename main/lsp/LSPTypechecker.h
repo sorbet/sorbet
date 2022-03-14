@@ -7,6 +7,7 @@
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPFileUpdates.h"
+#include "main/lsp/LSPIndexedFileStore.h"
 
 namespace sorbet {
 class WorkerPool;
@@ -39,8 +40,12 @@ class LSPTypechecker final {
     std::thread::id typecheckerThreadId;
     /** GlobalState used for typechecking. */
     std::unique_ptr<core::GlobalState> gs;
+
+    /** Used to guard access to `indexed`, which can be shared by stale-state tasks. */
+    mutable absl::Mutex indexedRWLock;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
-    std::vector<ast::ParsedFile> indexed;
+    LSPIndexedFileStore indexed ABSL_GUARDED_BY(indexedRWLock);
+
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
 
@@ -78,7 +83,7 @@ class LSPTypechecker final {
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
      * doesn't actually change anything.
      */
-    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
+    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const ABSL_SHARED_LOCKS_REQUIRED(indexedRWLock);
 
     /** Deep copy all entries in `indexed` that contain ASTs, except for those with IDs in the ignore set. Returns true
      * on success, false if the operation was canceled. */
@@ -115,9 +120,17 @@ public:
                          WorkerPool &workers) const;
 
     /**
-     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
+     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes). Caller
+     * must hold the lock returned by getIndexedRWLock.
      */
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const ABSL_SHARED_LOCKS_REQUIRED(indexedRWLock);
+
+    /**
+     * Returns the lock used to guard accessed to the indexed files.
+     */
+    absl::Mutex *getIndexedRWLock() const ABSL_LOCK_RETURNED(indexedRWLock) {
+        return &indexedRWLock;
+    }
 
     /**
      * Returns the parsed files for the given files, including resolver.
@@ -142,7 +155,9 @@ public:
     /**
      * Tries to run the function on the stale undo state, acquiring a lock.
      */
-    bool tryRunOnStaleState(std::function<void(UndoState &)> func);
+    bool tryRunOnStaleState(std::function<void(const std::unique_ptr<core::GlobalState> &,
+                                               const UnorderedMap<int, ast::ParsedFile> &, const LSPIndexedFileStore &)>
+                                func);
 
     /**
      * (For tests only) Set a flag that forces the slow path to block indefinitely after saving undo state. Setting
@@ -183,7 +198,7 @@ public:
     /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
      */
-    virtual const ast::ParsedFile &getIndexed(core::FileRef fref) const = 0;
+    // virtual const ast::ParsedFile &getIndexed(core::FileRef fref) const = 0;
 
     /**
      * Returns the parsed files for the given files, including resolver.
@@ -209,13 +224,22 @@ public:
 
 class LSPStaleTypechecker final : public LSPTypecheckerInterface {
     std::shared_ptr<const LSPConfiguration> config;
-    UndoState &undoState;
+
+    const std::unique_ptr<core::GlobalState> &evictedGs;
+    const UnorderedMap<int, ast::ParsedFile> &evictedIndexed;
+    const LSPIndexedFileStore &indexed;
+
     // Using an WorkerPool with size 0 for all typechecker operations causes the work to run on the
     // current thread (usually: the indexer thread).
     std::unique_ptr<WorkerPool> emptyWorkers;
 
+private:
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
+
 public:
-    LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState);
+    LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config,
+                        const std::unique_ptr<core::GlobalState> &evictedGs,
+                        const UnorderedMap<int, ast::ParsedFile> &evictedIndexed, const LSPIndexedFileStore &indexed);
 
     // Delete copy constructor / assignment.
     LSPStaleTypechecker(LSPStaleTypechecker &) = delete;
@@ -234,8 +258,6 @@ public:
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
 
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
-
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const override;
 
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
 
@@ -259,6 +281,10 @@ class LSPTypecheckerDelegate final : public LSPTypecheckerInterface {
      * worker threads. */
     WorkerPool &workers;
 
+private:
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const
+        ABSL_SHARED_LOCKS_REQUIRED(typechecker.getIndexedRWLock());
+
 public:
     /**
      * Creates a new delegate that runs LSPTypechecker operations on the WorkerPool threads.
@@ -278,10 +304,11 @@ public:
 
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
+
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const override;
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
+
     const core::GlobalState &state() const override;
 };
 } // namespace sorbet::realmain::lsp

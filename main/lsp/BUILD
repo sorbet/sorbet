@@ -34,6 +34,7 @@ cc_library(
     ],
     hdrs = [
         "LSPConfiguration.h",
+        "LSPIndexedFileStore.h",
         "LSPInput.h",
         "LSPMessage.h",
         "LSPOutput.h",

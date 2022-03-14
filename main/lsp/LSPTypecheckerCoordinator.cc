@@ -140,10 +140,12 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
 unique_ptr<LSPTask> LSPTypecheckerCoordinator::syncRunOnStaleState(unique_ptr<LSPTask> task) {
     auto config = this->config;
-    bool success = typechecker.tryRunOnStaleState([&task, &config](UndoState &undoState) {
-        LSPStaleTypechecker typechecker(config, undoState);
-        task->run(typechecker);
-    });
+    bool success = typechecker.tryRunOnStaleState(
+        [&task, &config](const std::unique_ptr<core::GlobalState> &evictedGs,
+                         const UnorderedMap<int, ast::ParsedFile> &evictedIndexed, const LSPIndexedFileStore &indexed) {
+            LSPStaleTypechecker typechecker(config, evictedGs, evictedIndexed, indexed);
+            task->run(typechecker);
+        });
 
     if (success) {
         return nullptr;
