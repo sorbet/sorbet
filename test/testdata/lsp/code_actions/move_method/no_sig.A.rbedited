@@ -7,7 +7,7 @@ module Foo
   extend T::Sig
 
   def self.bar
-# ^^^^^^^^^^^^ error: This function does not have a `sig` (fix available)
+# ^^^^^^^^^^^^ error: This function does not have a `sig`
          # ^^^ apply-code-action: [A] Move method to a new module
     'Hello'
   end
