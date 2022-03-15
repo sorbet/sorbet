@@ -1962,6 +1962,24 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 
 } // namespace
 
+// Designed to be "run as much of namer as is possible with a const GlobalState".
+//
+// The whole point of `defineSymbols` is to mutate GlobalState, so it clearly makes no sense to run.
+// And the whole point of `findSymbols` is to create the FoundDefinition vector that feeds into
+// defineSymbols, so that becomes not useful to run either.
+//
+// That leaves just symbolizeTrees.
+//
+// The "best effort" indicates that this is currently only used for the sake of serving LSP requests
+// with a potentially-stale GlobalState.
+ast::ParsedFilesOrCancelled Namer::symbolizeTreesBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                                            WorkerPool &workers) {
+    // At the moment, we don't actually have to do anything more than symbolizeTrees.
+    // But symbolizeTrees is a "private" API, so we expose it in a function with a different name to
+    // make the interface clear.
+    return symbolizeTrees(gs, move(trees), workers);
+}
+
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
