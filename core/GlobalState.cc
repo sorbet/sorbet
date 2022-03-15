@@ -822,7 +822,8 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 
 MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
                                                   const vector<uint32_t> &methodHash, bool stubIfMissing) const {
-    ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
+    // TODO: commented out
+    // ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
@@ -856,7 +857,8 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
 // If no such symbol exists, then it will return defaultReturnValue.
 SymbolRef GlobalState::lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                             SymbolRef defaultReturnValue, bool ignoreKind) const {
-    ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
+    // TODO: commented out
+    // ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());

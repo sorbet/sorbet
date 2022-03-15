@@ -256,8 +256,8 @@ ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, i
 
 shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                 string_view assertionContents, string_view assertionType) {
-    return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents,
-                                       assertionType == "error-with-dupes");
+    return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents, true
+                                       /* TODO commented out assertionType == "error-with-dupes" */);
 }
 
 string ErrorAssertion::toString() const {
@@ -858,12 +858,13 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                 lastAssertionMatchedDuplicate = true;
                 continue;
             } else {
-                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
-                    reportMissingError(lastAssertion->filename, *lastAssertion,
-                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
-                                       errorPrefix, true);
-                    success = false;
-                }
+                // TODO: commented out
+                // if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                //     reportMissingError(lastAssertion->filename, *lastAssertion,
+                //                        getSourceLine(files, lastAssertion->filename,
+                //                        lastAssertion->range->start->line), errorPrefix, true);
+                //     success = false;
+                // }
                 lastAssertionMatchedDuplicate = false;
                 lastAssertion = nullptr;
             }
@@ -910,11 +911,12 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                                       getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
                 success = false;
 
-                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
-                    reportMissingError(lastAssertion->filename, *lastAssertion,
-                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
-                                       errorPrefix, true);
-                }
+                // TODO: commented out
+                // if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                //     reportMissingError(lastAssertion->filename, *lastAssertion,
+                //                        getSourceLine(files, lastAssertion->filename,
+                //                        lastAssertion->range->start->line), errorPrefix, true);
+                // }
                 lastAssertion = nullptr;
                 lastAssertionMatchedDuplicate = false;
             }
