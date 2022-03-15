@@ -2906,6 +2906,7 @@ public:
     template <typename StateType>
     static vector<ast::ParsedFile> run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
         static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+        constexpr bool isConstStateType = is_const_v<StateType>;
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -2980,7 +2981,7 @@ public:
         // Put files into a consistent order for subsequent passes.
         fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file < b.file; });
 
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             for (auto &threadTodo : combinedTodoUntypedResultTypes) {
                 for (auto sym : threadTodo) {
                     sym.setResultType(gs, core::Types::untypedUntracked());
@@ -2989,7 +2990,7 @@ public:
         }
 
         vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             for (auto &threadTodo : combinedTodoAttachedClassItems) {
                 for (auto &job : threadTodo) {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
@@ -3001,7 +3002,7 @@ public:
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
         // (which is a static field). This is stronger than we need (we really only need the enum types)
         // but there's no particular reason to delay here.
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
                 for (auto &job : threadTodo) {
                     job.sym.data(gs)->resultType = job.resultType;
@@ -3010,7 +3011,7 @@ public:
         }
 
         // loop over any out-of-order type_member/type_alias references
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             bool progress = true;
             while (progress && !combinedTodoAssigns.empty()) {
                 progress = false;
@@ -3054,7 +3055,7 @@ public:
         }
 
         // Compute the resultType of all classes.
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             computeExternalTypes(gs);
         }
 
@@ -3065,7 +3066,7 @@ public:
                 resolveCastItem(ctx, job);
             }
         }
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             for (auto &threadTodos : combinedTodoResolveFieldItems) {
                 for (auto &job : threadTodos) {
                     core::MutableContext ctx(gs, job.owner, job.file);
@@ -3073,7 +3074,7 @@ public:
                 }
             }
         }
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
                 for (auto &job : threadTodos) {
                     core::Context ctx(gs, job.sym, job.file);
@@ -3083,7 +3084,7 @@ public:
                 }
             }
         }
-        if constexpr (!is_const_v<StateType>) {
+        if constexpr (!isConstStateType) {
             for (auto &threadTodos : combinedTodoMethodAliasItems) {
                 for (auto &job : threadTodos) {
                     core::MutableContext ctx(gs, job.owner, job.file);
