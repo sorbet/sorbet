@@ -86,9 +86,9 @@ CheckSize(FieldResponse, 64, 8);
 
 class DefinitionResponse final {
 public:
-    DefinitionResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
+    DefinitionResponse(core::MethodRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
         : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
-    const core::SymbolRef symbol;
+    const core::MethodRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
     const core::TypeAndOrigins retType;

@@ -74,11 +74,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
     if (auto constResp = resp->isConstant()) {
         response->result = getPrepareRenameResult(gs, constResp->symbol);
     } else if (auto defResp = resp->isDefinition()) {
-        if (defResp->symbol.isClassOrModule()) {
-            response->result = getPrepareRenameResult(gs, defResp->symbol);
-        } else if (defResp->symbol.isMethod()) {
-            response->result = getPrepareRenameResult(gs, defResp->symbol);
-        }
+        response->result = getPrepareRenameResult(gs, defResp->symbol);
     } else if (auto sendResp = resp->isSend()) {
         response->result = getPrepareRenameResultForSend(gs, sendResp);
     }

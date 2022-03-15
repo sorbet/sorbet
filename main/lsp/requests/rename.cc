@@ -248,24 +248,16 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
             enrichResponse(response, renamer);
         }
     } else if (auto defResp = resp->isDefinition()) {
-        if (defResp->symbol.isClassOrModule() && islower(params->newName[0])) {
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                         "Class and Module names must begin with an uppercase letter.");
-            return response;
-        }
-
-        if (defResp->symbol.isMethod() && isupper(params->newName[0])) {
+        if (isupper(params->newName[0])) {
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                                          "Method names must begin with an lowercase letter.");
             return response;
         }
 
-        if (defResp->symbol.isClassOrModule() || defResp->symbol.isMethod()) {
-            if (isValidRenameLocation(defResp->symbol, gs, response)) {
-                renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
-                getRenameEdits(typechecker, renamer, defResp->symbol, params->newName);
-                enrichResponse(response, renamer);
-            }
+        if (isValidRenameLocation(defResp->symbol, gs, response)) {
+            renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
+            getRenameEdits(typechecker, renamer, defResp->symbol, params->newName);
+            enrichResponse(response, renamer);
         }
     } else if (auto sendResp = resp->isSend()) {
         // We don't need to handle dispatchResult->secondary here, because it will be checked in getRenameEdits.

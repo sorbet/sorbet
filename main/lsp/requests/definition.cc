@@ -40,7 +40,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
             }
         } else if (fileIsTyped && resp->isDefinition()) {
             auto sym = resp->isDefinition()->symbol;
-            for (auto loc : sym.locs(gs)) {
+            for (auto loc : sym.data(gs)->locs()) {
                 addLocIfExists(gs, locations, loc);
             }
         } else if (fileIsTyped && resp->isSend()) {
