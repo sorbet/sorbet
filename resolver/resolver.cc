@@ -3688,38 +3688,9 @@ public:
         return tree;
     }
 };
-}; // namespace
 
-ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    const auto &epochManager = *gs.epochManager;
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-    finalizeAncestors(gs);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-    finalizeSymbols(gs);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-
-    auto result = resolveSigs(gs, std::move(trees), workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
-
-    return result;
-}
-
-ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                  WorkerPool &workers) {
+ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
@@ -3788,6 +3759,35 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     }
 
     return trees;
+}
+}; // namespace
+
+ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    const auto &epochManager = *gs.epochManager;
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+    finalizeAncestors(gs);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+    finalizeSymbols(gs);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+
+    auto result = resolveSigs(gs, std::move(trees), workers);
+    if (!result.hasResult()) {
+        return result;
+    }
+    sanityCheck(gs, result.result());
+
+    return result;
 }
 
 void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {

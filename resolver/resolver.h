@@ -29,8 +29,6 @@ private:
     static void finalizeAncestors(core::GlobalState &gs);
     static void finalizeSymbols(core::GlobalState &gs);
     static void computeLinearization(core::GlobalState &gs);
-    static ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                                                   WorkerPool &workers);
     static void sanityCheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 };
 
