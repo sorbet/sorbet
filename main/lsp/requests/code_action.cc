@@ -70,9 +70,8 @@ unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::Loc
 }
 
 optional<pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
-                                                                        const ast::ExpressionPtr &rootTree,
-                                                                        const core::SymbolRef method,
-                                                                        const core::FileRef fref) {
+                                                              const ast::ExpressionPtr &rootTree,
+                                                              const core::SymbolRef method, const core::FileRef fref) {
     auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
     if (!maybeTree.has_value()) {
         return nullopt;
@@ -209,10 +208,8 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
 
     vector<unique_ptr<TextEdit>> res;
     res.emplace_back(make_unique<TextEdit>(move(range), newModuleSource));
-    res.emplace_back(
-        make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, sigLoc)), ""));
-    res.emplace_back(
-        make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, methodLoc)), ""));
+    res.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, sigLoc)), ""));
+    res.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, methodLoc)), ""));
     return res;
 }
 } // namespace
