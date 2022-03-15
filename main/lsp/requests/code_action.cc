@@ -221,7 +221,6 @@ vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LS
                                                                         const core::GlobalState &gs,
                                                                         const core::lsp::MethodDefResponse *definition,
                                                                         LSPTypecheckerInterface &typechecker) {
-
     vector<unique_ptr<TextDocumentEdit>> res;
     auto newModuleName = getNewModuleName(gs, definition->name);
     if (!newModuleName.has_value()) {
