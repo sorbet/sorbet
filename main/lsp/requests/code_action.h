@@ -19,7 +19,7 @@ public:
 private:
     std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config,
                                                                       const core::GlobalState &gs,
-                                                                      const core::lsp::DefinitionResponse *definition,
+                                                                      const core::lsp::MethodDefResponse *definition,
                                                                       LSPTypecheckerInterface &typechecker);
 };
 

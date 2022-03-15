@@ -185,7 +185,7 @@ public:
 }; // CallSiteRenamer
 
 vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
-                                        const core::lsp::DefinitionResponse *definition,
+                                        const core::lsp::MethodDefResponse *definition,
                                         LSPTypecheckerInterface &typechecker, string_view newModuleName) {
     auto moduleStart = fmt::format("module {}{}\n  ", newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
     auto moduleEnd = "\nend";
@@ -219,9 +219,8 @@ CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, uni
 
 vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LSPConfiguration &config,
                                                                         const core::GlobalState &gs,
-                                                                        const core::lsp::DefinitionResponse *definition,
+                                                                        const core::lsp::MethodDefResponse *definition,
                                                                         LSPTypecheckerInterface &typechecker) {
-    ENFORCE(definition->symbol.isMethod());
 
     vector<unique_ptr<TextDocumentEdit>> res;
     auto newModuleName = getNewModuleName(gs, definition->name);
@@ -336,15 +335,13 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
         // Generate "Move method" code actions only for method definitions
         if (queryResult.error == nullptr) {
             for (auto &resp : queryResult.responses) {
-                if (auto def = resp->isDefinition()) {
-                    if (def->symbol.isMethod()) {
-                        auto action = make_unique<CodeAction>("Move method to a new module");
-                        action->kind = CodeActionKind::RefactorExtract;
-                        auto workspaceEdit = make_unique<WorkspaceEdit>();
-                        workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, def, typechecker);
-                        action->edit = move(workspaceEdit);
-                        result.emplace_back(move(action));
-                    }
+                if (auto def = resp->isMethodDef()) {
+                    auto action = make_unique<CodeAction>("Move method to a new module");
+                    action->kind = CodeActionKind::RefactorExtract;
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, def, typechecker);
+                    action->edit = move(workspaceEdit);
+                    result.emplace_back(move(action));
                 }
             }
         }
