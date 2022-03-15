@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "main/lsp/json_enums.h"
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
 #include <variant>
 
 namespace sorbet::realmain::lsp {
@@ -131,6 +132,8 @@ public:
      * Returns the message in JSON form.
      */
     std::string toJSON(bool prettyPrint = false) const;
+
+    rapidjson::StringBuffer toJSONBuffer(bool prettyPrint = false) const;
 };
 } // namespace sorbet::realmain::lsp
 

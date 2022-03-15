@@ -222,4 +222,16 @@ string LSPMessage::toJSON(bool prettyPrint) const {
         Exception::raise("LSPMessage is not a request, notification, or a response.");
     }
 }
+
+rapidjson::StringBuffer LSPMessage::toJSONBuffer(bool prettyPrint) const {
+    if (isRequest()) {
+        return asRequest().toJSONBuffer(prettyPrint);
+    } else if (isNotification()) {
+        return asNotification().toJSONBuffer(prettyPrint);
+    } else if (isResponse()) {
+        return asResponse().toJSONBuffer(prettyPrint);
+    } else {
+        Exception::raise("LSPMessage is not a request, notification, or a response.");
+    }
+}
 } // namespace sorbet::realmain::lsp
