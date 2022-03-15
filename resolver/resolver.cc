@@ -3857,7 +3857,9 @@ ast::ParsedFilesOrCancelled Resolver::runIncrementalWithoutStateMutation(const c
     if (!result.hasResult()) {
         return result;
     }
-    sanityCheck(gs, result.result());
+    // The non-mutating resolver isn't ready for this check to be run yet, because e.g.
+    // it doesn't resolve UnresolvedConstantLit nodes.
+    // sanityCheck(gs, result.result());
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();
