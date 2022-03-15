@@ -3693,8 +3693,8 @@ public:
 
 template <typename StateType>
 ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
-    constexpr bool isConstStateType = is_const_v<StateType>;
+    static_assert(std::is_same_v<remove_const_t<StateType>, core::GlobalState>);
+    constexpr bool isConstStateType = std::is_const_v<StateType>;
 
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
