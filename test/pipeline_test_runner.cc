@@ -398,6 +398,19 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    {
+        // Non-mutating namer, before entering symbols into GlobalState
+        vector<ast::ParsedFile> treesCopy;
+        for (auto &tree : trees) {
+            treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+        }
+
+        move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
+        ENFORCE(!gs->hadCriticalError());
+
+        // If no ENFORCE fired, then non-mutating namer is working fine.
+    }
+
     for (auto &tree : trees) {
         // Namer
         ast::ParsedFile namedTree;
@@ -456,6 +469,19 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
+    }
+
+    {
+        // Non-mutating namer, after entering symbols into GlobalState
+        vector<ast::ParsedFile> treesCopy;
+        for (auto &tree : trees) {
+            treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+        }
+
+        move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
+        ENFORCE(!gs->hadCriticalError());
+
+        // If no ENFORCE fired, then non-mutating namer is working fine.
     }
 
     if (!test.minimizeRBI.empty()) {
