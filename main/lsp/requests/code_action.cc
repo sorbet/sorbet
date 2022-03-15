@@ -22,7 +22,7 @@ vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &co
         auto range = Range::fromLoc(gs, edit.loc);
         if (range != nullptr) {
             editsByFile[config.fileRef2Uri(gs, edit.loc.file())].emplace_back(
-                make_unique<TextEdit>(std::move(range), edit.replacement));
+                make_unique<TextEdit>(move(range), edit.replacement));
         }
     }
 
@@ -35,7 +35,7 @@ vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &co
     return documentEdits;
 }
 
-std::optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, const core::SymbolRef &method) {
+optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, const core::SymbolRef method) {
     if (auto seq = ast::cast_tree<ast::InsSeq>(tree)) {
         for (auto &subtree : seq->stats) {
             auto maybeMethod = findMethodTree(subtree, method);
@@ -55,11 +55,11 @@ std::optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &t
             return methodDef;
         }
     }
-    return std::nullopt;
+    return nullopt;
 }
 
-unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets &sigLoc,
-                                    const core::LocOffsets &methodLoc, const core::FileRef &fref) {
+unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets sigLoc,
+                                    const core::LocOffsets methodLoc, const core::FileRef fref) {
     auto cutSource = [&](core::LocOffsets loc) {
         return fref.data(gs).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos());
     };
@@ -69,19 +69,19 @@ unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::Loc
     return make_unique<string>(absl::StrCat(sigSource, "\n  ", methodSource));
 }
 
-std::optional<std::pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
+optional<pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
                                                                         const ast::ExpressionPtr &rootTree,
-                                                                        const core::SymbolRef &method,
-                                                                        const core::FileRef &fref) {
+                                                                        const core::SymbolRef method,
+                                                                        const core::FileRef fref) {
     auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
     if (!maybeTree.has_value()) {
-        return std::nullopt;
+        return nullopt;
     }
     auto methodLoc = maybeTree.value()->loc;
 
     auto maybeSig = sorbet::sig_finder::findSignature(gs, method);
     if (!maybeSig.has_value()) {
-        return std::nullopt;
+        return nullopt;
     }
     core::LocOffsets sigLoc = {maybeSig->sig.beginPos(), maybeSig->body.endPos()};
 
@@ -194,6 +194,7 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     auto fref = definition->termLoc.file();
 
     auto trees = typechecker.getResolved({fref});
+    ENFORCE(!trees.empty());
     auto &rootTree = trees[0].tree;
 
     auto sigAndMethodLocs = methodLocs(gs, rootTree, definition->symbol, fref);
@@ -207,7 +208,7 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     auto newModuleSource = fmt::format("{}{}{}\n\n", moduleStart, *methodSource, moduleEnd);
 
     vector<unique_ptr<TextEdit>> res;
-    res.emplace_back(make_unique<TextEdit>(std::move(range), newModuleSource));
+    res.emplace_back(make_unique<TextEdit>(move(range), newModuleSource));
     res.emplace_back(
         make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, sigLoc)), ""));
     res.emplace_back(
@@ -239,15 +240,15 @@ vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LS
 
     if (callSiteEdits.has_value()) {
         for (auto &edit : callSiteEdits.value()) {
-            res.emplace_back(std::move(edit));
+            res.emplace_back(move(edit));
         }
     }
     auto docEdit =
         make_unique<TextDocumentEdit>(make_unique<VersionedTextDocumentIdentifier>(
                                           config.fileRef2Uri(gs, definition->termLoc.file()), JSONNullObject()),
-                                      std::move(edits));
+                                      move(edits));
 
-    res.emplace_back(std::move(docEdit));
+    res.emplace_back(move(docEdit));
     return res;
 }
 
