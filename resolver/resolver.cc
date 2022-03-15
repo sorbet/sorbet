@@ -3208,6 +3208,36 @@ private:
         }
     }
 
+    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig, const ast::MethodDef &mdef) {
+        // Later passes are going to separate the sig and the method definition.
+        // Record some information in the sig call itself so that we can reassociate
+        // them later.
+        //
+        // Note that the sig still needs to send to a method called "sig" so that
+        // code completion in LSP works.  We change the receiver, below, so that
+        // sigs that don't pass through here still reflect the user's intent.
+        auto *send = sig.origSend;
+        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
+        if (self == nullptr) {
+            return;
+        }
+
+        // We distinguish "user-written" sends by checking for self.
+        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
+        // to record later.
+        if (self->localVariable != core::LocalVariable::selfVariable()) {
+            return;
+        }
+
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
+        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
+
+        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
+
+        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+    }
+
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
                                   ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
@@ -3383,33 +3413,7 @@ private:
             }
         }
 
-        // Later passes are going to separate the sig and the method definition.
-        // Record some information in the sig call itself so that we can reassociate
-        // them later.
-        //
-        // Note that the sig still needs to send to a method called "sig" so that
-        // code completion in LSP works.  We change the receiver, below, so that
-        // sigs that don't pass through here still reflect the user's intent.
-        auto *send = sig.origSend;
-        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
-        if (self == nullptr) {
-            return;
-        }
-
-        // We distinguish "user-written" sends by checking for self.
-        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
-        // to record later.
-        if (self->localVariable != core::LocalVariable::selfVariable()) {
-            return;
-        }
-
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
-        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
-
-        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
-
-        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
-        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+        recordMethodInfoInSig(ctx, method, sig, mdef);
     }
 
     // Force errors from any signatures that didn't attach to methods.
