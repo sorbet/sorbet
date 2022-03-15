@@ -1494,7 +1494,7 @@ class TreeSymbolizer {
         return squashNamesInner(ctx, owner, node, firstName);
     }
 
-    ast::ExpressionPtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
+    ast::ExpressionPtr arg2Symbol(int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
@@ -1661,8 +1661,7 @@ public:
         return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(core::Context ctx, vector<ast::ParsedArg> parsedArgs,
-                                          ast::MethodDef::ARGS_store oldArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(vector<ast::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
         ast::MethodDef::ARGS_store args;
         int i = -1;
         for (auto &arg : parsedArgs) {
@@ -1674,7 +1673,7 @@ public:
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(i < oldArgs.size());
-                auto expr = arg2Symbol(ctx, i, move(arg), move(oldArgs[i]));
+                auto expr = arg2Symbol(i, move(arg), move(oldArgs[i]));
                 args.emplace_back(move(expr));
             }
         }
@@ -1690,7 +1689,7 @@ public:
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         ENFORCE(sym.exists());
         method.symbol = sym;
-        method.args = fillInArgs(ctx.withOwner(method.symbol), move(parsedArgs), std::move(method.args));
+        method.args = fillInArgs(move(parsedArgs), std::move(method.args));
 
         return tree;
     }
