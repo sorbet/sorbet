@@ -3574,14 +3574,14 @@ public:
             }
             fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
         }
-        handleAbstractMethod(ctx, mdef);
+        // handleAbstractMethod called elsewhere
     }
     static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
-        handleAbstractMethod(ctx, mdef);
+        // handleAbstractMethod called elsewhere
     }
 
     static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
@@ -3689,8 +3689,12 @@ public:
     }
 };
 
-ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
+template <typename StateType>
+ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees,
                                         WorkerPool &workers) {
+    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+    constexpr bool isConstStateType = is_const_v<StateType>;
+
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
@@ -3748,12 +3752,24 @@ ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, vector<ast::Parse
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
         for (auto &file : combinedFileJobs) {
             for (auto &job : file.sigs) {
-                core::MutableContext ctx(gs, job.owner, file.file);
-                ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+                if constexpr (!isConstStateType) {
+                    core::MutableContext ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+                }
+                {
+                    core::Context ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::handleAbstractMethod(ctx, *job.mdef);
+                }
             }
             for (auto &job : file.multiSigs) {
-                core::MutableContext ctx(gs, job.owner, file.file);
-                ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+                if constexpr (!isConstStateType) {
+                    core::MutableContext ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+                }
+                {
+                    core::Context ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::handleAbstractMethod(ctx, *job.mdef);
+                }
             }
         }
     }
