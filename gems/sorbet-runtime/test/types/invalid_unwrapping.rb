@@ -3,98 +3,98 @@ require_relative '../test_helper'
 
 module Opus::Types::Test
   class InvalidUnwrappingTest < Critic::Unit::UnitTest
-    it "prevents re-declaring the same method without a signature" do
+    it "respects the latest override of a method if it does not have a signature" do
       klass = Class.new do
         extend T::Sig
 
         def initialize
-          @double_definition = 1
+          @double_definition = "OK"
         end
 
-        sig {returns(Integer)}
+        sig {returns(String)}
         def double_definition
-          5
+          "FAIL"
         end
 
         attr_reader :double_definition
       end
 
       unwrap_signature("double_definition")
-      assert_equal(1, klass.new.double_definition)
+      assert_equal("OK", klass.new.double_definition)
     end
 
-    it "does not prevent re-declaring if both definitions have signatures" do
+    it "respects the latest override of a method if it has a signature" do
       klass = Class.new do
         extend T::Sig
 
-        sig {returns(Integer)}
+        sig {returns(String)}
         def good_double_definition
-          5
+          "FAIL"
         end
 
-        sig {returns(Integer)}
+        sig {returns(String)}
         def good_double_definition
-          1
+          "OK"
         end
       end
 
       unwrap_signature("good_double_definition")
-      assert_equal(1, klass.new.good_double_definition)
+      assert_equal("OK", klass.new.good_double_definition)
     end
 
-    it "does not prevent re-declaring if not using signatures" do
+    it "respects the latest override of a method if none of them have signatures" do
       klass = Class.new do
         def good_double_definition
-          5
+          "FAIL"
         end
 
         def good_double_definition
-          1
+          "OK"
         end
       end
 
       unwrap_signature("good_double_definition")
-      assert_equal(1, klass.new.good_double_definition)
+      assert_equal("OK", klass.new.good_double_definition)
     end
 
-    it "does not prevent re-declaring if only the latest definition has a signature" do
+    it "respects the latest override of a method if only the last one has a signature" do
       klass = Class.new do
         extend T::Sig
 
         def good_double_definition
-          5
+          "FAIL"
         end
 
-        sig {returns(Integer)}
+        sig {returns(String)}
         def good_double_definition
-          1
+          "OK"
         end
       end
 
       unwrap_signature("good_double_definition")
-      assert_equal(1, klass.new.good_double_definition)
+      assert_equal("OK", klass.new.good_double_definition)
     end
 
-    it "prevents unwrapping for abstract methods if they have been overridden" do
+    it "respects the latest override of an abstract method if it does not have a signature" do
       klass = Class.new do
         extend T::Sig
         extend T::Helpers
 
         def initialize
-          @double_definition = 1
+          @double_definition = "OK"
         end
 
-        sig {abstract.returns(Integer)}
+        sig {abstract.returns(String)}
         def double_definition; end
 
         attr_reader :double_definition
       end
 
       unwrap_signature("double_definition")
-      assert_equal(1, klass.new.double_definition)
+      assert_equal("OK", klass.new.double_definition)
     end
 
-    it "does not prevent re-declaring a method as abstract" do
+    it "respects the latest override of a method if the latest one is abstract" do
       mod = Module.new do
         attr_reader :double_definition
       end
@@ -105,15 +105,15 @@ module Opus::Types::Test
         include mod
 
         def initialize
-          @double_definition = 1
+          @double_definition = "OK"
         end
 
-        sig {abstract.returns(Integer)}
+        sig {abstract.returns(String)}
         def double_definition; end
       end
 
       unwrap_signature("double_definition")
-      assert_equal(1, klass.new.double_definition)
+      assert_equal("OK", klass.new.double_definition)
     end
 
     private
