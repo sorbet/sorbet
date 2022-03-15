@@ -14,7 +14,7 @@ string stringify(const rapidjson::Value &value) {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     value.Accept(writer);
-    return buffer.GetString();
+    return string(buffer.GetString(), buffer.GetLength());
 }
 
 DeserializationError::DeserializationError(string_view message)
@@ -91,7 +91,7 @@ string JSONBaseType::toJSON(bool prettyPrint) const {
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
         v->Accept(writer);
     }
-    return buffer.GetString();
+    return string(buffer.GetString(), buffer.GetLength());
 }
 
 // Object-specific helpers
