@@ -192,13 +192,10 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     auto moduleEnd = "\nend";
 
     auto fref = definition->termLoc.file();
-    auto &file = fref.data(gs);
 
     auto trees = typechecker.getResolved({fref});
     auto &rootTree = trees[0].tree;
-    auto beginLoc = core::Loc::offset2Pos(fref.data(gs), rootTree.loc().beginPos());
 
-    auto topOfTheFile = file.getLine(beginLoc.line);
     auto sigAndMethodLocs = methodLocs(gs, rootTree, definition->symbol, fref);
     if (!sigAndMethodLocs.has_value()) {
         return {};
@@ -206,15 +203,15 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     auto [sigLoc, methodLoc] = sigAndMethodLocs.value();
     auto methodSource = copyMethodSource(gs, sigLoc, methodLoc, fref);
 
-    auto range = make_unique<Range>(make_unique<Position>(beginLoc.line - 1, 0),
-                                    make_unique<Position>(beginLoc.line - 1, topOfTheFile.length()));
-    auto replacement = fmt::format("{}{}{}\n\n{}", moduleStart, *methodSource, moduleEnd, topOfTheFile);
+    auto range = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
+    auto newModuleSource = fmt::format("{}{}{}\n\n", moduleStart, *methodSource, moduleEnd);
+
     vector<unique_ptr<TextEdit>> res;
-    res.emplace_back(make_unique<TextEdit>(std::move(range), replacement));
+    res.emplace_back(make_unique<TextEdit>(std::move(range), newModuleSource));
     res.emplace_back(
-        make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, sigLoc.beginPos(), sigLoc.endPos())), ""));
+        make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, sigLoc)), ""));
     res.emplace_back(
-        make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, methodLoc.beginPos(), methodLoc.endPos())), ""));
+        make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, methodLoc)), ""));
     return res;
 }
 } // namespace
