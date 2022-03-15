@@ -78,7 +78,7 @@ public:
         string newsrc;
         if (auto sendResp = response->isSend()) {
             newsrc = replaceMethodNameInSend(string(source.value()), sendResp);
-        } else if (auto defResp = response->isDefinition()) {
+        } else if (auto defResp = response->isMethodDef()) {
             newsrc = replaceMethodNameInDef(string(source.value()));
         } else {
             ENFORCE(0, "Unexpected query response type while renaming method");
@@ -247,7 +247,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
             getRenameEdits(typechecker, renamer, constResp->symbol, params->newName);
             enrichResponse(response, renamer);
         }
-    } else if (auto defResp = resp->isDefinition()) {
+    } else if (auto defResp = resp->isMethodDef()) {
         if (isupper(params->newName[0])) {
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                                          "Method names must begin with an lowercase letter.");

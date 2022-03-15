@@ -82,7 +82,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
                 documentationLocations.emplace_back(loc);
             }
         }
-    } else if (auto d = resp->isDefinition()) {
+    } else if (auto d = resp->isMethodDef()) {
         for (auto loc : d->symbol.data(gs)->locs()) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
@@ -111,7 +111,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
         } else {
             typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
         }
-    } else if (auto defResp = resp->isDefinition()) {
+    } else if (auto defResp = resp->isMethodDef()) {
         typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
     } else if (auto constResp = resp->isConstant()) {
         typeString = prettyTypeForConstant(gs, constResp->symbol);

@@ -149,7 +149,7 @@ public:
     /**
      * Returns nullptr unless this is a Definition.
      */
-    const MethodDefResponse *isDefinition() const;
+    const MethodDefResponse *isMethodDef() const;
 
     /**
      * Returns nullptr unless this is an Edit.

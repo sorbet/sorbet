@@ -377,7 +377,7 @@ LSPTask::filterAndDedup(const core::GlobalState &gs,
         if (loc.exists() && loc.file().exists()) {
             auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
             // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
+            if (fileIsTyped || q->isConstant() || q->isField() || q->isMethodDef()) {
                 responses.push_back(make_unique<core::lsp::QueryResponse>(*q));
             }
         }
