@@ -51,10 +51,13 @@ void LSPOutput::write(unique_ptr<NotificationMessage> msg) {
 LSPStdout::LSPStdout(shared_ptr<spdlog::logger> &logger) : logger(logger) {}
 
 void LSPStdout::rawWrite(unique_ptr<LSPMessage> msg) {
-    auto json = msg->toJSON();
-    string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
-    logger->debug("Write: {}\n", json);
-    cout << outResult << flush;
+    auto buffer = msg->toJSONBuffer();
+    auto length = buffer.GetLength();
+    auto view = string_view(buffer.GetString(), length);
+
+    string header = fmt::format("Content-Length: {}\r\n\r\n", length);
+    logger->debug("Write: {}\n", view);
+    cout << header << view << flush;
 }
 
 void LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
