@@ -30,6 +30,7 @@
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
 #include "main/minimize/minimize.h"
+#include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "packager/rbi_gen.h"
@@ -159,6 +160,44 @@ public:
     }
 };
 
+// Tests for non-mutating versions of namer/resolver.
+//
+// These pieces of the pipeline only run in service of LSP queries, so the errors that they
+// generate are useless. We will test stale hover/definition requests individually. These tests
+// just ensure that the non-mutating namer & resolver don't violate any ENFORCEs.
+//
+// This is a separate function instead of inline in the PerPhaseTest helper below because this makes
+// it easier to avoid accidentally referencing the main GlobalState.
+void testNonmutatingNamer(Expectations &test, spdlog::logger &logger, const realmain::options::Options &opts,
+                          WorkerPool &workers) {
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto errorQueue = make_shared<core::ErrorQueue>(logger, logger, errorCollector);
+    auto gs = make_unique<core::GlobalState>(errorQueue);
+    if (opts.noStdlib) {
+        gs->initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
+    }
+
+    // We're using the realmain::pipeline functions here instead of recreating the pipeline
+    // manually, because we don't actually need to add expectation assertions at various points.
+
+    auto inputFiles = realmain::pipeline::reserveFiles(gs, test.sourceFiles);
+
+    auto kvstore = nullptr;
+    auto parsedFiles = realmain::pipeline::index(*gs, inputFiles, opts, workers, kvstore);
+    if (gs->hadCriticalError()) {
+        gs->errorQueue->flushAllErrors(*gs);
+    }
+
+    parsedFiles = move(realmain::pipeline::nameBestEffortConst(*gs, move(parsedFiles), opts, workers).result());
+    if (gs->hadCriticalError()) {
+        gs->errorQueue->flushAllErrors(*gs);
+    }
+
+    // If no ENFORCE fired, then the test passed.
+}
+
 TEST_CASE("PerPhaseTest") { // NOLINT
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -180,22 +219,26 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->semanticExtensions.emplace_back(provider->defaultInstance());
     }
 
-    gs->censorForSnapshotTests = true;
+    auto opts = realmain::options::Options{};
+
+    opts.censorForSnapshotTests = gs->censorForSnapshotTests = true;
+
     auto workers = WorkerPool::create(0, gs->tracer());
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
-    gs->requiresAncestorEnabled =
+    opts.requiresAncestorEnabled = gs->requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
 
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+    opts.noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+    if (opts.noStdlib) {
         gs->initEmpty();
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
     }
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        gs->suggestUnsafe = "T.unsafe";
+        opts.suggestUnsafe = gs->suggestUnsafe = "T.unsafe";
     }
 
     unique_ptr<core::GlobalState> emptyGs;
@@ -744,6 +787,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         INFO("the incremental resolver should not add new symbols");
         CHECK_EQ(symbolsBefore, gs->symbolsUsedTotal());
     }
+
+    testNonmutatingNamer(test, *logger, opts, *workers);
 }
 } // namespace sorbet::test
 
