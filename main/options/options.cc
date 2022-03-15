@@ -437,7 +437,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("single-package", "Run in single-package mode",
                                cxxopts::value<string>()->default_value(""));
-    options.add_options("dev")("package-rbi-output", "Serialize package RBIs to folder.",
+    options.add_options("dev")("package-rbi-generation", "Enable rbi generation for stripe packages",
+                               cxxopts::value<bool>());
+    options.add_options("dev")("package-rbi-dir", "The location of generated package rbis",
                                cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("dump-package-info", "Dump package info in JSON form to the given file.",
                                cxxopts::value<string>()->default_value(""));
@@ -919,10 +921,12 @@ void readOptions(Options &opts,
             }
         }
 
-        opts.packageRBIOutput = raw["package-rbi-output"].as<string>();
-        if (!opts.packageRBIOutput.empty()) {
+        opts.packageRBIGeneration = raw["package-rbi-generation"].as<bool>();
+
+        opts.packageRBIDir = raw["package-rbi-dir"].as<string>();
+        if (!opts.packageRBIDir.empty()) {
             if (opts.stripePackages) {
-                logger->error("--package-rbi-output must not be specified in --stripe-packages mode");
+                logger->error("--package-rbi-dir must not be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
         }
@@ -934,8 +938,13 @@ void readOptions(Options &opts,
                 throw EarlyReturnWithCode(1);
             }
 
-            if (opts.packageRBIOutput.empty()) {
-                logger->error("--single-package requires --package-rbi-output also be provided");
+            if (opts.packageRBIDir.empty()) {
+                logger->error("--single-package requires --package-rbi-dir also be provided");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (!opts.packageRBIGeneration) {
+                logger->error("--single-package can only be specified in --package-rbi-generation mode");
                 throw EarlyReturnWithCode(1);
             }
         }
