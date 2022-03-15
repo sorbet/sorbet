@@ -150,7 +150,6 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         } else {
             receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
         }
-
     }
 
     uint32_t receivedCodeActionsCount = receivedCodeActionsByTitle.size();
