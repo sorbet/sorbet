@@ -295,6 +295,12 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::Sorbet_Private_StaticSingleton());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(klass == Symbols::StubModule());
+
+    // TODO(jez) This is weird. Is this the first member on noClassOrModule?
+    typeMember = enterTypeMember(Loc::none(), Symbols::noClassOrModule(), core::Names::Constants::StubTypeMember(),
+                                 Variance::CoVariant);
+    ENFORCE(typeMember == Symbols::StubTypeMember());
+
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     ENFORCE(klass == Symbols::StubMixin());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
@@ -352,6 +358,9 @@ void GlobalState::initEmpty() {
     // A magic non user-creatable class with methods to keep state between passes
     field = enterFieldSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UndeclaredFieldStub());
     ENFORCE(field == Symbols::Magic_undeclaredFieldStub());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::StubModule(), core::Names::Constants::StubField());
+    ENFORCE(field == Symbols::StubField());
 
     // Sorbet::Private::Static#badAliasMethodStub(*arg0 : T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::badAliasMethodStub())
@@ -479,6 +488,9 @@ void GlobalState::initEmpty() {
     method = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::TodoMethod());
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
+
+    method = enterMethod(*this, Symbols::StubModule(), core::Names::Constants::StubMethod()).build();
+    ENFORCE(method == Symbols::StubMethod());
 
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
@@ -809,7 +821,7 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
-                                                  const vector<uint32_t> &methodHash) const {
+                                                  const vector<uint32_t> &methodHash, bool stubIfMissing) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -835,7 +847,8 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noMethod();
+    // TODO(jez) Why aren't we just handling this at the call site, instead of threading a boolean down here?
+    return stubIfMissing ? Symbols::StubMethod() : Symbols::noMethod();
 }
 
 // look up a symbol whose flags match the desired kind (or ignores the kind filter if `ignoreKind` is `true`).
@@ -938,7 +951,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     uint32_t flags;
-    ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember() || name == Names::Constants::StubTypeMember());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;

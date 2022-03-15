@@ -780,6 +780,10 @@ public:
         return TypeMemberRef::fromRaw(0);
     }
 
+    static TypeMemberRef StubTypeMember() {
+        return TypeMemberRef::fromRaw(4);
+    }
+
     static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return MethodRef::fromRaw(1);
     }
@@ -804,6 +808,10 @@ public:
 
     static FieldRef Magic_undeclaredFieldStub() {
         return FieldRef::fromRaw(1);
+    }
+
+    static FieldRef StubField() {
+        return FieldRef::fromRaw(2);
     }
 
     static MethodRef Sorbet_Private_Static_badAliasMethodStub() {
@@ -954,6 +962,10 @@ public:
         return MethodRef::fromRaw(12);
     }
 
+    static MethodRef StubMethod() {
+        return MethodRef::fromRaw(13);
+    }
+
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
         return ClassOrModuleRef::fromRaw(85);
     }
@@ -1009,10 +1021,10 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 207;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 45;
-    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 46;
+    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 5;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 104;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 105;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
