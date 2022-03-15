@@ -3015,18 +3015,19 @@ public:
             bool progress = true;
             while (progress && !combinedTodoAssigns.empty()) {
                 progress = false;
-                auto it = std::remove_if(
-                    combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
-                        auto origSize = threadTodos.size();
-                        auto threadTodoIt =
-                            std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
-                                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                return resolveJob(ctx, job, resolvedAttachedClasses);
-                            });
-                        threadTodos.erase(threadTodoIt, threadTodos.end());
-                        progress = progress || threadTodos.size() != origSize;
-                        return threadTodos.empty();
-                    });
+                auto it =
+                    std::remove_if(combinedTodoAssigns.begin(), combinedTodoAssigns.end(),
+                                   [&](vector<ResolveAssignItem> &threadTodos) {
+                                       auto origSize = threadTodos.size();
+                                       auto threadTodoIt = std::remove_if(
+                                           threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
+                                               core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                                               return resolveJob(ctx, job, resolvedAttachedClasses);
+                                           });
+                                       threadTodos.erase(threadTodoIt, threadTodos.end());
+                                       progress = progress || threadTodos.size() != origSize;
+                                       return threadTodos.empty();
+                                   });
                 combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
             }
 
@@ -3038,9 +3039,9 @@ public:
                 for (auto &threadTodos : combinedTodoAssigns) {
                     for (auto &job : threadTodos) {
                         if (job.lhs.isTypeMember()) {
-                            job.lhs.setResultType(gs, core::make_type<core::LambdaParam>(job.lhs.asTypeMemberRef(),
-                                                                                         core::Types::untypedUntracked(),
-                                                                                         core::Types::untypedUntracked()));
+                            job.lhs.setResultType(gs, core::make_type<core::LambdaParam>(
+                                                          job.lhs.asTypeMemberRef(), core::Types::untypedUntracked(),
+                                                          core::Types::untypedUntracked()));
                         } else {
                             job.lhs.setResultType(gs, core::Types::untypedUntracked());
                         }
@@ -3151,7 +3152,8 @@ private:
         }
     }
 
-    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig, const ast::MethodDef &mdef) {
+    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
+                                      const ast::MethodDef &mdef) {
         // Later passes are going to separate the sig and the method definition.
         // Record some information in the sig call itself so that we can reassociate
         // them later.
@@ -3690,8 +3692,7 @@ public:
 };
 
 template <typename StateType>
-ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees,
-                                        WorkerPool &workers) {
+ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
     constexpr bool isConstStateType = is_const_v<StateType>;
 
@@ -3825,7 +3826,7 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
         ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
     })
 }
-}
+} // namespace
 
 ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     auto workers = WorkerPool::create(0, gs.tracer());
@@ -3845,9 +3846,10 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     return result;
 }
 
-ast::ParsedFilesOrCancelled Resolver::runIncrementalWithoutStateMutation(const core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+ast::ParsedFilesOrCancelled Resolver::runIncrementalWithoutStateMutation(const core::GlobalState &gs,
+                                                                         vector<ast::ParsedFile> trees) {
     auto workers = WorkerPool::create(0, gs.tracer());
-    //trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+    // trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);

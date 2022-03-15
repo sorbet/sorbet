@@ -19,7 +19,8 @@ public:
     static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
 
     // Like the above, only skip all the steps that would require mutating global state.
-    static ast::ParsedFilesOrCancelled runIncrementalWithoutStateMutation(const core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
+    static ast::ParsedFilesOrCancelled runIncrementalWithoutStateMutation(const core::GlobalState &gs,
+                                                                          std::vector<ast::ParsedFile> trees);
 
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
