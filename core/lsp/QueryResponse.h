@@ -84,16 +84,16 @@ public:
 };
 CheckSize(FieldResponse, 64, 8);
 
-class DefinitionResponse final {
+class MethodDefResponse final {
 public:
-    DefinitionResponse(core::MethodRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
+    MethodDefResponse(core::MethodRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
         : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
     const core::MethodRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
-CheckSize(DefinitionResponse, 64, 8);
+CheckSize(MethodDefResponse, 64, 8);
 
 class EditResponse final {
 public:
@@ -104,7 +104,7 @@ public:
 CheckSize(EditResponse, 40, 8);
 
 using QueryResponseVariant = std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse,
-                                          DefinitionResponse, EditResponse>;
+                                          MethodDefResponse, EditResponse>;
 
 /**
  * Represents a response to a LSP query. Wraps a variant that contains one of several response types.
@@ -149,7 +149,7 @@ public:
     /**
      * Returns nullptr unless this is a Definition.
      */
-    const DefinitionResponse *isDefinition() const;
+    const MethodDefResponse *isDefinition() const;
 
     /**
      * Returns nullptr unless this is an Edit.

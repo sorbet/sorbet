@@ -37,8 +37,8 @@ const FieldResponse *QueryResponse::isField() const {
     return get_if<FieldResponse>(&response);
 }
 
-const DefinitionResponse *QueryResponse::isDefinition() const {
-    return get_if<DefinitionResponse>(&response);
+const MethodDefResponse *QueryResponse::isDefinition() const {
+    return get_if<MethodDefResponse>(&response);
 }
 
 const EditResponse *QueryResponse::isEdit() const {
