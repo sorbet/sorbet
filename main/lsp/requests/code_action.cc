@@ -104,7 +104,11 @@ string snakeToCamelCase(string_view name) {
 optional<string> getNewModuleName(const core::GlobalState &gs, const core::NameRef name) {
     const auto moduleName = absl::StrCat(snakeToCamelCase(name.show(gs)), "Module");
     const auto nameNotExists = [&](auto moduleName) {
-        return gs.lookupNameUTF8(moduleName) == core::NameRef::noName();
+        if (auto nameRef = gs.lookupNameUTF8(moduleName); !nameRef.exists()) {
+            // We're using root here, because newely defined module would be at the top level
+            return !core::Symbols::root().data(gs)->findMember(gs, nameRef).exists();
+        }
+        return false;
     };
 
     // if there are no names like that, return the new module name
