@@ -10,6 +10,11 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
+
+bool isTSigRequired(const core::GlobalState &gs) {
+    return !core::Symbols::Module().data(gs)->derivesFrom(gs, core::Symbols::T_Sig());
+}
+
 vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                                       const vector<core::AutocorrectSuggestion::Edit> &edits) {
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
@@ -183,7 +188,7 @@ public:
 vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
                                         const core::lsp::DefinitionResponse *definition,
                                         LSPTypecheckerInterface &typechecker, string_view newModuleName) {
-    auto moduleStart = fmt::format("module {}\n  extend T::Sig\n  ", newModuleName);
+    auto moduleStart = fmt::format("module {}{}\n  ", newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
     auto moduleEnd = "\nend";
 
     auto fref = definition->termLoc.file();
