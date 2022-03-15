@@ -401,13 +401,12 @@ module T::Private::Methods
   end
 
   def self.unwrap_method(mod, signature, original_method)
-    method_name = original_method.name
-    maybe_wrapped_method = signature.method.owner.instance_method(method_name)
-    file_path, _line = maybe_wrapped_method.source_location
+    method_name = signature.method_name
+    maybe_wrapped_method = mod.instance_method(method_name)
 
     # If Sorbet's wrapper was overridden, we don't want to try to unwrap the registered signature
     unless !@was_ever_final_names[method_name] && original_method != maybe_wrapped_method &&
-           file_path != WRAPPER_METHOD_SOURCE_FILE
+           maybe_wrapped_method.source_location.first != WRAPPER_METHOD_SOURCE_FILE
       maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     end
 
