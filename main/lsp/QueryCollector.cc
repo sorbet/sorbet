@@ -9,7 +9,7 @@ uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
     if (q.isEdit()) {
         // Only reported for autocomplete, and should take precedence over anything else reported
         return 8;
-    } else if (q.isDefinition()) {
+    } else if (q.isMethodDef()) {
         return 7;
     } else if (auto send = q.isSend()) {
         return 6;

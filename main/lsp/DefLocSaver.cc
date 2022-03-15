@@ -42,8 +42,8 @@ ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::E
         tp.type = symbolData->resultType;
         tp.origins.emplace_back(core::Loc(ctx.file, methodDef.declLoc));
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::DefinitionResponse(methodDef.symbol, core::Loc(ctx.file, methodDef.declLoc), methodDef.name,
-                                               tp));
+            ctx,
+            core::lsp::MethodDefResponse(methodDef.symbol, core::Loc(ctx.file, methodDef.declLoc), methodDef.name, tp));
     }
 
     return tree;
