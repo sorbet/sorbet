@@ -18,7 +18,8 @@ std::optional<SigLoc> findSignature(const core::GlobalState &gs, const core::Sym
 
     // We only care about everything prior to the definition.
     auto line_end = defLoc.beginPos();
-    auto prev_line_end = source.rfind('\n', line_end);
+    auto method_def_line = source.rfind('\n', line_end);
+    auto prev_line_end = source.rfind('\n', method_def_line - 1);
     while (prev_line_end != source.npos) {
         auto line_start = prev_line_end + 1;
         auto line = source.substr(line_start, line_end - line_start);
