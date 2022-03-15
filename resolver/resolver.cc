@@ -3151,63 +3151,6 @@ private:
         }
     }
 
-    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
-        if (mdef.symbol.data(ctx)->flags.isAbstract) {
-            if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
-                if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
-                    e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
-                }
-
-                mdef.rhs = ast::MK::EmptyTree();
-            }
-            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
-                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
-                    e.setHeader("Before declaring an abstract method, you must mark your class/module "
-                                "as abstract using `abstract!` or `interface!`");
-                }
-            }
-
-            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
-            // behavior of the runtime.
-            ast::Send::ARGS_store args;
-
-            auto argIdx = -1;
-            auto numPosArgs = 0;
-            for (auto &arg : mdef.args) {
-                ++argIdx;
-
-                const ast::Local *local = nullptr;
-                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
-                    local = ast::cast_tree<ast::Local>(opt->expr);
-                } else {
-                    local = ast::cast_tree<ast::Local>(arg);
-                }
-
-                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
-                if (info.flags.isKeyword) {
-                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                    args.emplace_back(local->deepCopy());
-                } else if (info.flags.isRepeated || info.flags.isBlock) {
-                    // Explicitly skip for now.
-                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
-                    // callWithSplatAndBlock
-                } else {
-                    args.emplace_back(local->deepCopy());
-                    ++numPosArgs;
-                }
-            }
-
-            auto self = ast::MK::Self(mdef.loc);
-            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
-                                     numPosArgs, std::move(args));
-        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
-            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
-                e.setHeader("All methods in an interface must be declared abstract");
-            }
-        }
-    }
-
     static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig, const ast::MethodDef &mdef) {
         // Later passes are going to separate the sig and the method definition.
         // Record some information in the sig call itself so that we can reassociate
@@ -3639,6 +3582,63 @@ public:
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
         handleAbstractMethod(ctx, mdef);
+    }
+
+    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
+        if (mdef.symbol.data(ctx)->flags.isAbstract) {
+            if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
+                if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
+                    e.setHeader("Abstract methods must not contain any code in their body");
+                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
+                }
+
+                mdef.rhs = ast::MK::EmptyTree();
+            }
+            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                    e.setHeader("Before declaring an abstract method, you must mark your class/module "
+                                "as abstract using `abstract!` or `interface!`");
+                }
+            }
+
+            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
+            // behavior of the runtime.
+            ast::Send::ARGS_store args;
+
+            auto argIdx = -1;
+            auto numPosArgs = 0;
+            for (auto &arg : mdef.args) {
+                ++argIdx;
+
+                const ast::Local *local = nullptr;
+                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
+                    local = ast::cast_tree<ast::Local>(opt->expr);
+                } else {
+                    local = ast::cast_tree<ast::Local>(arg);
+                }
+
+                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
+                if (info.flags.isKeyword) {
+                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                    args.emplace_back(local->deepCopy());
+                } else if (info.flags.isRepeated || info.flags.isBlock) {
+                    // Explicitly skip for now.
+                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                    // callWithSplatAndBlock
+                } else {
+                    args.emplace_back(local->deepCopy());
+                    ++numPosArgs;
+                }
+            }
+
+            auto self = ast::MK::Self(mdef.loc);
+            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
+                                     numPosArgs, std::move(args));
+        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+                e.setHeader("All methods in an interface must be declared abstract");
+            }
+        }
     }
 
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
