@@ -70,8 +70,8 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerInte
                 typechecker, getReferencesToAccessorInFile(typechecker, fref,
                                                            getAccessorInfo(typechecker.state(), fieldResp->symbol),
                                                            fieldResp->symbol));
-        } else if (auto defResp = resp->isDefinition()) {
-            if (fileIsTyped || defResp->symbol.isClassOrModule()) {
+        } else if (auto defResp = resp->isMethodDef()) {
+            if (fileIsTyped) {
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                 response->result = getHighlights(
                     typechecker, getReferencesToAccessorInFile(typechecker, fref,

@@ -59,4 +59,52 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <emptyTree>::<C T>.let(<emptyTree>::<C E>.new(), <emptyTree>::<C Top>::<C Parent>)
+
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    def self.foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C C1><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C T>.reveal_type(<self>)
+  end
+
+  class <emptyTree>::<C C2><<C <todo sym>>> < (<emptyTree>::<C Foo>)
+    <emptyTree>::<C T>.reveal_type(<self>)
+
+    <self>.foo()
+  end
+
+  c1 = <emptyTree>::<C Class>.new() do ||
+    begin
+      ::T.bind(<self>, ::Class)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  c2 = <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+    begin
+      ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+      <emptyTree>::<C T>.reveal_type(<self>)
+      <self>.foo()
+    end
+  end
+
+  <emptyTree>::<C Class>.new() do ||
+    begin
+      ::T.bind(<self>, ::Class)
+      <emptyTree>::<C T>.reveal_type(<self>)
+    end
+  end
+
+  <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+    begin
+      ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+      <emptyTree>::<C T>.reveal_type(<self>)
+      <self>.foo()
+    end
+  end
 end

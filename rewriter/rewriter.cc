@@ -137,6 +137,12 @@ public:
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
+
+                    nodes = ClassNew::run(ctx, &send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
                 },
 
                 [&](ast::MethodDef &mdef) { Initializer::run(ctx, &mdef, prevStat); },

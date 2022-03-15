@@ -204,6 +204,10 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
 SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
                                        string_view prefix) {
+    if (dispatchResult.main.receiver.isUntyped()) {
+        return SimilarMethodsByName{};
+    }
+
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
     for (auto &[methodName, similarMethods] : result) {
@@ -1145,19 +1149,27 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
             };
             items = this->getCompletionItems(typechecker, params);
         } else {
-            // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
-            // (If there is a method whose name overlaps with a keyword, it will still show up as a _method_ item.)
-            auto suggestKeywords = sendResp->isPrivateOk;
+            // isPrivateOk indicates that we are calling (and therefore completing) a method on `self`.  In such a
+            // case, it matters whether or not there is a syntactic receiver involved in the call.  In the latter
+            // case, we want to include locals and keywords, since we may be completing a (zero-argument) "send"
+            // and the user's intent might have been to complete a local or a keyword.  In the former case, we
+            // know that the user doesn't want such completion results, since they have already written something
+            // prefixed with `self.`.
+            auto explicitSelfReceiver = sendResp->receiverLoc.source(gs) == "self";
+            auto wantLocalsAndKeywords = sendResp->isPrivateOk && !explicitSelfReceiver;
+            auto suggestKeywords = wantLocalsAndKeywords;
+            // `enclosingMethod` existing indicates whether we want local variable completion results.
+            auto enclosingMethod = wantLocalsAndKeywords ? sendResp->enclosingMethod : core::MethodRef{};
             auto params = SearchParams{
-                queryLoc, prefix,
+                queryLoc,
+                prefix,
                 MethodSearchParams{
                     sendResp->dispatchResult,
                     sendResp->totalArgs,
                     sendResp->isPrivateOk,
                 },
                 suggestKeywords,
-                // No receiver means that local variables are allowed here.
-                sendResp->isPrivateOk ? sendResp->enclosingMethod : core::MethodRef{},
+                enclosingMethod,
                 core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
             };
             items = this->getCompletionItems(typechecker, params);

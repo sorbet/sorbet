@@ -357,6 +357,14 @@ public:
         return Constant(loc, core::Symbols::T());
     }
 
+    static ExpressionPtr Bind(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+        return Send2(loc, T(loc), core::Names::bind(), loc, std::move(value), std::move(type));
+    }
+
+    static ExpressionPtr ClassOf(core::LocOffsets loc, ExpressionPtr value) {
+        return Send1(loc, T(loc), core::Names::classOf(), loc, std::move(value));
+    }
+
     static ExpressionPtr Let(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return Send2(loc, T(loc), core::Names::let(), loc, std::move(value), std::move(type));
     }

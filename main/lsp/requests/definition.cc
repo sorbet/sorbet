@@ -38,9 +38,9 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
             for (auto &originLoc : retType.origins) {
                 addLocIfExists(gs, locations, originLoc);
             }
-        } else if (fileIsTyped && resp->isDefinition()) {
-            auto sym = resp->isDefinition()->symbol;
-            for (auto loc : sym.locs(gs)) {
+        } else if (fileIsTyped && resp->isMethodDef()) {
+            auto sym = resp->isMethodDef()->symbol;
+            for (auto loc : sym.data(gs)->locs()) {
                 addLocIfExists(gs, locations, loc);
             }
         } else if (fileIsTyped && resp->isSend()) {
