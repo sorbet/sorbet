@@ -735,7 +735,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
 
         move(resolver::Resolver::runIncrementalWithoutStateMutation(*gs, move(treesCopy)).result());
-        ENFORCE(!gs->hadCriticalError());
         errorQueue->flushAllErrors(*gs);
         errorCollector->drainErrors();
     }
