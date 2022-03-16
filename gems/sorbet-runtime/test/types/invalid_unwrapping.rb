@@ -94,7 +94,7 @@ module Opus::Types::Test
       assert_equal("OK", klass.new.double_definition)
     end
 
-    it "respects the latest override of a method if the latest one is abstract" do
+    it "respects the latest abstract override and goes up the hierarchy chain" do
       mod = Module.new do
         attr_reader :double_definition
       end
