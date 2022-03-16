@@ -641,21 +641,19 @@ void LSPTask::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Loca
 }
 
 LSPQueuePreemptionTask::LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished,
-                                               absl::Mutex &taskQueueMutex, TaskQueueState &taskQueue,
-                                               LSPIndexer &indexer)
-    : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueueMutex(taskQueueMutex), taskQueue(taskQueue),
-      indexer(indexer) {}
+                                               TaskQueue &taskQueue, LSPIndexer &indexer)
+    : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueue(taskQueue), indexer(indexer) {}
 
 void LSPQueuePreemptionTask::run(LSPTypecheckerInterface &tc) {
     for (;;) {
         unique_ptr<LSPTask> task;
         {
-            absl::MutexLock lck(&taskQueueMutex);
-            if (taskQueue.pendingTasks.empty() || !taskQueue.pendingTasks.front()->canPreempt(indexer)) {
+            absl::MutexLock lck(taskQueue.getMutex());
+            if (taskQueue.tasks().empty() || !taskQueue.tasks().front()->canPreempt(indexer)) {
                 break;
             }
-            task = move(taskQueue.pendingTasks.front());
-            taskQueue.pendingTasks.pop_front();
+            task = move(taskQueue.tasks().front());
+            taskQueue.tasks().pop_front();
 
             {
                 Timer timeit(config.logger, "LSPTask::index");
