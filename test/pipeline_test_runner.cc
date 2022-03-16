@@ -726,6 +726,19 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    {
+        // Non-mutating resolver.  Note that non-mutating resolver leaves GlobalState
+        // alone, but modifies trees with abandon, so we need to copy here.
+        vector<ast::ParsedFile> treesCopy;
+        for (auto &tree : trees) {
+            treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+        }
+
+        move(resolver::Resolver::runIncrementalWithoutStateMutation(*gs, move(treesCopy)).result());
+        errorQueue->flushAllErrors(*gs);
+        errorCollector->drainErrors();
+    }
+
     // resolver
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees)).result());
 
