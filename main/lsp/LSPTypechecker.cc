@@ -18,11 +18,14 @@
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/QueryCollector.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
+#include "main/lsp/notifications/indexer_initialized.h"
+#include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
 
 namespace sorbet::realmain::lsp {
@@ -86,10 +89,12 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
 
 LSPTypechecker::~LSPTypechecker() {}
 
-void LSPTypechecker::initialize(LSPFileUpdates updates, std::unique_ptr<core::GlobalState> initialGS,
+void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> initialGS,
                                 std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
+
+    LSPFileUpdates updates;
 
     // Initialize the global state for the indexer
     {
@@ -132,8 +137,6 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, std::unique_ptr<core::Gl
 
         // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
         initialGS->errorQueue = move(savedErrorQueue);
-
-        // TODO: enqueue the result in the task queue, and unpause it
     }
     // We should always initialize with epoch 0.
     ENFORCE(updates.epoch == 0);
@@ -149,6 +152,17 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, std::unique_ptr<core::Gl
         epoch.committed = committed;
     }
     ENFORCE(committed);
+
+    {
+        absl::MutexLock lck{queue.getMutex()};
+
+        // push the tasks in reverse order to the front of the queue
+        auto initTask = std::make_unique<IndexerInitializedTask>(*config);
+        initTask->setIndexerState(std::move(initialGS), std::move(kvstore));
+        queue.tasks().push_front(std::move(initTask));
+
+        queue.tasks().push_front(std::make_unique<SorbetResumeTask>(*config));
+    }
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
@@ -674,12 +688,12 @@ bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
     }
 }
 
-LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
-    : typechecker(typechecker), workers(workers) {}
+LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
+    : typechecker(typechecker), queue{queue}, workers(workers) {}
 
-void LSPTypecheckerDelegate::initialize(InitializedTask &task, LSPFileUpdates updates,
-                                        std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore) {
-    return typechecker.initialize(std::move(updates), std::move(gs), std::move(kvstore), this->workers);
+void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
+                                        std::unique_ptr<KeyValueStore> kvstore) {
+    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers);
 }
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
@@ -713,8 +727,7 @@ const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
 
-void LSPStaleTypechecker::initialize(InitializedTask &task, LSPFileUpdates updates,
-                                     std::unique_ptr<core::GlobalState> initialGS,
+void LSPStaleTypechecker::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
                                      std::unique_ptr<KeyValueStore> kvstore) {
     ENFORCE(false, "initialize not supported");
 }

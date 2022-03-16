@@ -5,6 +5,7 @@
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
+#include "main/lsp/notifications/indexer_initialized.h"
 #include "main/lsp/notifications/initialized.h"
 
 namespace sorbet {
@@ -99,6 +100,12 @@ public:
      * out in a context that's not the InitializedTask's index function.
      */
     void transferInitializeState(InitializedTask &task);
+
+    /**
+     * Take ownership of the initialized state returned by the tyepchecker thread.
+     */
+    void takeInitializedState(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
+                              std::unique_ptr<KeyValueStore> kvstore);
 };
 
 } // namespace sorbet::realmain::lsp

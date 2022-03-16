@@ -21,6 +21,7 @@ class QueryResponse;
 namespace sorbet::realmain::lsp {
 class ResponseError;
 class InitializedTask;
+class TaskQueue;
 
 struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
@@ -90,8 +91,8 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
-                    std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers);
+    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore,
+                    WorkerPool &workers);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -149,7 +150,7 @@ public:
      * Special case handling for the initialized task, which coordinates global state initialization with the
      * typechecker and indexer threads.
      */
-    virtual void initialize(InitializedTask &task, LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+    virtual void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                             std::unique_ptr<KeyValueStore> kvstore) = 0;
 
     /**
@@ -210,7 +211,7 @@ public:
 
     virtual ~LSPStaleTypechecker() = default;
 
-    void initialize(InitializedTask &task, LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+    void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                     std::unique_ptr<KeyValueStore> kvstore) override;
 
     void typecheckOnFastPath(LSPFileUpdates updates,
@@ -238,6 +239,8 @@ public:
 class LSPTypecheckerDelegate final : public LSPTypecheckerInterface {
     LSPTypechecker &typechecker;
 
+    TaskQueue &queue;
+
     /** The WorkerPool on which work will be performed. If the task is multithreaded, the pool will contain multiple
      * worker threads. */
     WorkerPool &workers;
@@ -246,7 +249,7 @@ public:
     /**
      * Creates a new delegate that runs LSPTypechecker operations on the WorkerPool threads.
      */
-    LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker);
+    LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker);
 
     // Delete copy constructor / assignment.
     LSPTypecheckerDelegate(LSPTypecheckerDelegate &) = delete;
@@ -256,7 +259,7 @@ public:
 
     virtual ~LSPTypecheckerDelegate() = default;
 
-    void initialize(InitializedTask &task, LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+    void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                     std::unique_ptr<KeyValueStore> kvstore) override;
 
     void typecheckOnFastPath(LSPFileUpdates updates,
