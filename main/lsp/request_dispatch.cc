@@ -42,7 +42,7 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
     {
         Timer timeit(config->logger, "LSPTask::index");
         timeit.setTag("method", task->methodString());
-        task->index(indexer);
+        task->index(this->indexer);
     }
     if (task->finalPhase() == LSPTask::Phase::INDEX) {
         // Task doesn't need the typechecker.
@@ -62,10 +62,6 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
                 // single threaded environments.
                 typecheckerCoord.typecheckOnSlowPath(move(edit));
             }
-        } else if (auto *initializedTask = dynamic_cast<InitializedTask *>(dangerousTask)) {
-            unique_ptr<InitializedTask> initialized(initializedTask);
-            (void)task.release();
-            typecheckerCoord.initialize(move(initialized));
         } else {
             // Must be a new type of dangerous task we don't know about.
             // Please do not add new dangerous tasks to the codebase. Try to surface whatever functionality you

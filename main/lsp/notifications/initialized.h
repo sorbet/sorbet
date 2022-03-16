@@ -5,20 +5,26 @@
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPTask.h"
 
+namespace sorbet {
+class KeyValueStore;
+}
+
 namespace sorbet::realmain::lsp {
-class InitializedTask final : public LSPDangerousTypecheckerTask {
+class InitializedTask final : public LSPTask {
     LSPConfiguration &mutableConfig;
     LSPFileUpdates updates;
-    absl::Notification complete;
-    LSPIndexer *indexer;
+    std::unique_ptr<core::GlobalState> gs;
+    std::unique_ptr<KeyValueStore> kvstore;
 
 public:
     InitializedTask(LSPConfiguration &config);
 
     void preprocess(LSPPreprocessor &preprocessor) override;
     void index(LSPIndexer &indexer) override;
-    void runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) override;
-    void schedulerWaitUntilReady() override;
+    void run(LSPTypecheckerInterface &typechecker) override;
+
+    void setGlobalState(std::unique_ptr<core::GlobalState> gs);
+    void setKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
 
     bool needsMultithreading(const LSPIndexer &indexer) const override;
 };

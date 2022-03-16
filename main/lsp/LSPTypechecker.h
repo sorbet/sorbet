@@ -10,6 +10,7 @@
 
 namespace sorbet {
 class WorkerPool;
+class KeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::core::lsp {
@@ -19,6 +20,7 @@ class QueryResponse;
 
 namespace sorbet::realmain::lsp {
 class ResponseError;
+class InitializedTask;
 
 struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
@@ -88,7 +90,8 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(LSPFileUpdates updates, WorkerPool &workers);
+    void initialize(LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+                    std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -142,6 +145,13 @@ public:
  */
 class LSPTypecheckerInterface {
 public:
+    /**
+     * Special case handling for the initialized task, which coordinates global state initialization with the
+     * typechecker and indexer threads.
+     */
+    virtual void initialize(InitializedTask &task, LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+                            std::unique_ptr<KeyValueStore> kvstore) = 0;
+
     /**
      * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
      */
@@ -200,6 +210,9 @@ public:
 
     virtual ~LSPStaleTypechecker() = default;
 
+    void initialize(InitializedTask &task, LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+                    std::unique_ptr<KeyValueStore> kvstore) override;
+
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
 
@@ -242,6 +255,9 @@ public:
     LSPTypecheckerDelegate &operator=(const LSPTypecheckerDelegate &) = delete;
 
     virtual ~LSPTypecheckerDelegate() = default;
+
+    void initialize(InitializedTask &task, LSPFileUpdates updates, std::unique_ptr<core::GlobalState> gs,
+                    std::unique_ptr<KeyValueStore> kvstore) override;
 
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;

@@ -1,3 +1,4 @@
+#include "common/kvstore/KeyValueStore.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"

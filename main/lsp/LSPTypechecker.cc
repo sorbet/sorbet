@@ -1,4 +1,5 @@
 #include "main/lsp/LSPTypechecker.h"
+#include "LSPFileUpdates.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
@@ -6,9 +7,12 @@
 #include "common/sort.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
+#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "hashing/hashing.h"
+#include "main/cache/cache.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/ErrorFlusherLSP.h"
 #include "main/lsp/ErrorReporter.h"
@@ -82,9 +86,55 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
 
 LSPTypechecker::~LSPTypechecker() {}
 
-void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
+void LSPTypechecker::initialize(LSPFileUpdates updates, std::unique_ptr<core::GlobalState> initialGS,
+                                std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
+
+    // Initialize the global state for the indexer
+    {
+        // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
+        // going to use it on typechecker thread for this one operation.
+        auto savedErrorQueue = initialGS->errorQueue;
+        initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
+                                                              make_shared<core::NullFlusher>());
+
+        vector<ast::ParsedFile> indexed;
+        Timer timeit(config->logger, "initial_index");
+        ShowOperation op(*config, ShowOperation::Kind::Indexing);
+        vector<core::FileRef> inputFiles;
+        unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
+        {
+            Timer timeit(config->logger, "reIndexFromFileSystem");
+            inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
+            indexed.resize(initialGS->filesUsed());
+
+            auto asts = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger,
+                                                                    inputFiles, workers, ownedKvstore);
+            // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
+            // vector index != FileRef ID. Fix that by slotting them into `indexed`.
+            for (auto &ast : asts) {
+                int id = ast.file.id();
+                ENFORCE_NO_TIMER(id < indexed.size());
+                indexed[id] = move(ast);
+            }
+        }
+
+        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
+                                             workers, indexed);
+
+        ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
+
+        updates.epoch = 0;
+        updates.canTakeFastPath = false;
+        updates.updatedFileIndexes = move(indexed);
+        updates.updatedGS = initialGS->deepCopy();
+
+        // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
+        initialGS->errorQueue = move(savedErrorQueue);
+
+        // TODO: enqueue the result in the task queue, and unpause it
+    }
     // We should always initialize with epoch 0.
     ENFORCE(updates.epoch == 0);
     this->initialized = true;
@@ -627,6 +677,11 @@ bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), workers(workers) {}
 
+void LSPTypecheckerDelegate::initialize(InitializedTask &task, LSPFileUpdates updates,
+                                        std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore) {
+    return typechecker.initialize(std::move(updates), std::move(gs), std::move(kvstore), this->workers);
+}
+
 void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     if (!updates.canTakeFastPath) {
@@ -656,6 +711,12 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
+}
+
+void LSPStaleTypechecker::initialize(InitializedTask &task, LSPFileUpdates updates,
+                                     std::unique_ptr<core::GlobalState> initialGS,
+                                     std::unique_ptr<KeyValueStore> kvstore) {
+    ENFORCE(false, "initialize not supported");
 }
 
 void LSPStaleTypechecker::typecheckOnFastPath(LSPFileUpdates updates,

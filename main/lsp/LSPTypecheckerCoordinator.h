@@ -54,12 +54,6 @@ public:
                               WorkerPool &workers, std::shared_ptr<TaskQueue> taskQueue);
 
     /**
-     * Initializes typechecker and runs typechecking for the first time.
-     * TODO(jvilk): Make non-blocking when we implement preemption.
-     */
-    void initialize(std::unique_ptr<InitializedTask> initializedTask);
-
-    /**
      * Runs the given typecheck task asynchronously on the slow path.
      */
     void typecheckOnSlowPath(std::unique_ptr<SorbetWorkspaceEditTask> typecheckTask);

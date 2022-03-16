@@ -165,6 +165,11 @@ bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFi
     return canTakeFastPathInternal(changedFiles, emptyMap);
 }
 
+void LSPIndexer::transferInitializeState(InitializedTask &task) {
+    task.setGlobalState(std::move(this->initialGS));
+    task.setKeyValueStore(std::move(this->kvstore));
+}
+
 void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");

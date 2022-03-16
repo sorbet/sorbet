@@ -172,12 +172,6 @@ bool LSPTypecheckerCoordinator::tryCancelPreemption(shared_ptr<core::lsp::Task> 
     return preemptionTaskManager->tryCancelScheduledPreemptionTask(preemptTask);
 }
 
-void LSPTypecheckerCoordinator::initialize(unique_ptr<InitializedTask> initializedTask) {
-    auto dangerousTask = make_shared<DangerousTypecheckerTask>(*config, move(initializedTask), typechecker, workers);
-    asyncRunInternal(dangerousTask);
-    dangerousTask->blockUntilReady();
-}
-
 void LSPTypecheckerCoordinator::typecheckOnSlowPath(unique_ptr<SorbetWorkspaceEditTask> editTask) {
     auto dangerousTask = make_shared<DangerousTypecheckerTask>(*config, move(editTask), typechecker, workers);
     asyncRunInternal(dangerousTask);
