@@ -4,7 +4,7 @@
 # A marking class for when methods return void.
 # Should never appear in types directly.
 class T::Private::Types::Void < T::Types::Base
-  ERROR_MESSAGE = "Validation is being done on an `Void`. Please report to #dev-productivity."
+  ERROR_MESSAGE = "Validation is being done on an `Void`. Please report this bug at https://github.com/sorbet/sorbet/issues"
 
   # The actual return value of `.void` methods.
   #
