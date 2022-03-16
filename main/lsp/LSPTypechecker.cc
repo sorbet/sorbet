@@ -130,6 +130,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
         ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
 
+        // TODO: we can inline all of this as we're already in the typechecker thread.
         updates.epoch = 0;
         updates.canTakeFastPath = false;
         updates.updatedFileIndexes = move(indexed);
@@ -156,12 +157,11 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     {
         absl::MutexLock lck{queue.getMutex()};
 
-        // push the tasks in reverse order to the front of the queue
+        // ensure that the next task we process initializes the indexer
         auto initTask = std::make_unique<IndexerInitializedTask>(*config);
         initTask->setIndexerState(std::move(initialGS), std::move(kvstore));
         queue.tasks().push_front(std::move(initTask));
 
-        queue.tasks().push_front(std::make_unique<SorbetResumeTask>(*config));
     }
 }
 
