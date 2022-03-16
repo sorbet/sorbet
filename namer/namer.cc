@@ -1587,7 +1587,8 @@ public:
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                ENFORCE(symbol == core::Symbols::root());
+                ENFORCE(stubNewSymbols || symbol == core::Symbols::root(), "Symbol should be root but is {}",
+                        symbol.show(ctx));
             }
         }
         return tree;
@@ -1610,7 +1611,8 @@ public:
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // NameDefiner should have forced this class's singleton class into existence.
-        ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
+        ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists(), "No singleton class for {}",
+                klass.symbol.show(ctx));
 
         for (auto &exp : klass.rhs) {
             addAncestor(ctx, klass, exp);
@@ -1643,7 +1645,7 @@ public:
             auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
                 classBehaviorLocs[klass.symbol] = core::Loc(ctx.file, klass.declLoc);
-            } else if (prevLoc->second.file() != ctx.file &&
+            } else if (!stubNewSymbols && prevLoc->second.file() != ctx.file &&
                        // Ignore packages, which have 'behavior defined in multiple files'.
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry() &&
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageTests()) {
@@ -1698,8 +1700,10 @@ public:
 
     ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
-                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
+        if (!stubNewSymbols) {
+            ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
+                    method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
+        }
         return tree;
     }
 
