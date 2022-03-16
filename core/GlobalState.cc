@@ -295,11 +295,20 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::Sorbet_Private_StaticSingleton());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE(klass == Symbols::StubModule());
+    klass = core::Symbols::StubModule().data(*this)->singletonClass(*this);
+    ENFORCE(klass == Symbols::StubModuleSingleton());
 
-    // TODO(jez) This is weird. Is this the first member on noClassOrModule?
-    typeMember = enterTypeMember(Loc::none(), Symbols::noClassOrModule(), core::Names::Constants::StubTypeMember(),
+    typeMember = enterTypeMember(Loc::none(), Symbols::StubModule(), core::Names::Constants::StubTypeMember(),
                                  Variance::CoVariant);
     ENFORCE(typeMember == Symbols::StubTypeMember());
+    auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+    typeMember.data(*this)->resultType = core::make_type<core::LambdaParam>(typeMember, todo, todo);
+
+    typeMember = enterTypeMember(Loc::none(), Symbols::StubModuleSingleton(),
+                                 core::Names::Constants::StubTypeTemplate(), Variance::Invariant);
+    ENFORCE(typeMember == Symbols::StubTypeTemplate());
+    todo = core::make_type<core::ClassType>(core::Symbols::todo());
+    typeMember.data(*this)->resultType = core::make_type<core::LambdaParam>(typeMember, todo, todo);
 
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     ENFORCE(klass == Symbols::StubMixin());
