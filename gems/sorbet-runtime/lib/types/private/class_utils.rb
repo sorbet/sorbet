@@ -89,8 +89,7 @@ module T::Private::ClassUtils
         #
         # That's not necessarily a deal breaker, but for now, we're keeping it as unsupported.
         raise "You're trying to replace `#{name}` on `#{mod}`, but that method exists in a " \
-              "prepended module (#{ancestor}), which we don't currently support. Talk to " \
-              "#dev-productivity for help."
+              "prepended module (#{ancestor}), which we don't currently support."
       end
     end
 
