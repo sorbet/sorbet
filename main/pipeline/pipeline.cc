@@ -686,7 +686,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
 }
 
 ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                                const options::Options &opts, WorkerPool &workers) {
+                                                WorkerPool &workers) {
     Timer timeit(gs.tracer(), "nameBestEffortConst");
     auto result = namer::Namer::symbolizeTreesBestEffort(gs, move(what), workers);
 
