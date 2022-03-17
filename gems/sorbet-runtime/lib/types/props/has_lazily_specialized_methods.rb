@@ -37,7 +37,7 @@ module T::Props
 
     sig {returns(T::Boolean)}
     def self.lazy_evaluation_enabled?
-      !@lazy_evaluation_disabled
+      !defined?(@lazy_evaluation_disabled) || !@lazy_evaluation_disabled
     end
 
     module DecoratorMethods
@@ -84,7 +84,7 @@ module T::Props
 
         cls = decorated_class
         if cls.method_defined?(name)
-          # Ruby doesn not emit "method redefined" warnings for aliased methods
+          # Ruby does not emit "method redefined" warnings for aliased methods
           # (more robust than undef_method that would create a small window in which the method doesn't exist)
           cls.send(:alias_method, name, name)
         end
