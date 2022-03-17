@@ -23,7 +23,6 @@ public:
     void index(LSPIndexer &indexer) override;
 
     void run(LSPTypecheckerInterface &typechecker) override;
-
 };
 
 } // namespace sorbet::realmain::lsp

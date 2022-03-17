@@ -1,5 +1,5 @@
-#include "common/kvstore/KeyValueStore.h"
 #include "main/lsp/notifications/initialized.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "main/lsp/LSPIndexer.h"
 
 using namespace std;

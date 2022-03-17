@@ -171,7 +171,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
 }
 
 void LSPIndexer::takeInitializedState(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
-                          std::unique_ptr<KeyValueStore> kvstore) {
+                                      std::unique_ptr<KeyValueStore> kvstore) {
     this->initialGS = std::move(initialGS);
     this->kvstore = std::move(kvstore);
 }

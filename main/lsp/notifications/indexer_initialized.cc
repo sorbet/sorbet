@@ -11,7 +11,8 @@ LSPTask::Phase IndexerInitializedTask::finalPhase() const {
     return LSPTask::Phase::INDEX;
 }
 
-void IndexerInitializedTask::setIndexerState(std::unique_ptr<core::GlobalState> initialGS, std::unique_ptr<KeyValueStore> kvstore) {
+void IndexerInitializedTask::setIndexerState(std::unique_ptr<core::GlobalState> initialGS,
+                                             std::unique_ptr<KeyValueStore> kvstore) {
     this->initialGS = std::move(initialGS);
     this->kvstore = std::move(kvstore);
 }
