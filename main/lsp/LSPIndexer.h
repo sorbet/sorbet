@@ -72,9 +72,11 @@ public:
      */
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
-    /** Initializes the indexer by indexing and hashing all files in the workspace. Mutates the LSPFileUpdates so it can
-     * be passed to the typechecker to initialize it. */
-    void initialize(LSPFileUpdates &updates, WorkerPool &workers);
+    /**
+     * Initializes the indexer with the state produced on the typechecking thread.
+     */
+    void initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
+                    std::unique_ptr<KeyValueStore> kvstore);
 
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
@@ -99,12 +101,6 @@ public:
      * out in a context that's not the InitializedTask's index function.
      */
     void transferInitializeState(InitializedTask &task);
-
-    /**
-     * Take ownership of the initialized state returned by the tyepchecker thread.
-     */
-    void takeInitializedState(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
-                              std::unique_ptr<KeyValueStore> kvstore);
 };
 
 } // namespace sorbet::realmain::lsp
