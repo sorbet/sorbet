@@ -529,8 +529,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
         absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         if (couldBeCanceled) {
             ENFORCE(updates.updatedGS.has_value());
-            cancellationUndoState =
-                make_unique<UndoState>(move(gs), std::move(indexedFinalGS), indexedFinalGS, indexed, updates.epoch);
+            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
         }
 
         // Clear out state associated with old finalGS.

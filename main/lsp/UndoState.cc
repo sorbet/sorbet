@@ -9,10 +9,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-                     const UnorderedMap<int, ast::ParsedFile> &newIndexedFinalGS,
-                     const std::vector<ast::ParsedFile> &newIndexed, uint32_t epoch)
-    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
-      newIndexedFinalGS(newIndexedFinalGS), newIndexed(newIndexed), epoch(epoch) {}
+                     uint32_t epoch)
+    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)), epoch(epoch) {}
 
 void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
     const auto id = evictedIndexTree.file.id();
@@ -52,13 +50,7 @@ const ast::ParsedFile &UndoState::getIndexed(core::FileRef fref) const {
         return treeEvictedIndexedFinalGS->second;
     }
 
-    auto treeNewIndexedFinalGS = newIndexedFinalGS.find(id);
-    if (treeNewIndexedFinalGS != newIndexedFinalGS.end()) {
-        return treeNewIndexedFinalGS->second;
-    }
-
-    ENFORCE(id < newIndexed.size());
-    return newIndexed[id];
+    return dummyParsedFile;
 }
 
 } // namespace sorbet::realmain::lsp

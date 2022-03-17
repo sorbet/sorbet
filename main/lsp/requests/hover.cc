@@ -40,8 +40,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     const core::GlobalState &gs = typechecker.state();
 
     if (typechecker.isStale()) {
-        config.logger->debug("HoverTask running on stale, returning stub result");
-        config.logger->debug("Address of GlobalState is {}", (void *)&gs);
+        config.logger->debug("HoverTask running on stale data");
     }
 
     auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentHover);
@@ -138,7 +137,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     // debugging aid for an experimental feature. We probably don't actually want to surface this to users, so delete
     // this when stale state stuff goes "GA".)
     if (typechecker.isStale()) {
-        typeString = "[stale] " + typeString;
+        typeString = "# note: information may be stale\n" + typeString;
     }
 
     response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));

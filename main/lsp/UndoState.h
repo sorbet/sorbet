@@ -19,23 +19,15 @@ class UndoState final {
     // Stores the index trees stored in `gs` that were evicted because the slow path operation replaced `gs`.
     UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS;
 
-    // Reference to the `indexedFinalGS` from the running slow path. Used in stale-state tasks to look up indexed files
-    // that were not modified as part of the triggering edits. TODO(aprocter): I'm not sure if we want to store this
-    // here, and the synchronization is almost certainly not correct yet.
-    const UnorderedMap<int, ast::ParsedFile> &newIndexedFinalGS;
-
-    // Reference to the `indexed vector from the running slow path. Used in stale-state tasks to look up indexed files
-    // that were not modified as part of the triggering edits. TODO(aprocter): I'm not sure if we want to store this
-    // here, and the synchronization is almost certainly not correct yet.
-    const std::vector<ast::ParsedFile> &newIndexed;
+    // Dummy ParsedFile that we return when the file requested by getIndexed is not available.
+    ast::ParsedFile dummyParsedFile{nullptr, core::FileRef()};
 
 public:
     // Epoch of the running slow path
     const uint32_t epoch;
 
     UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-              const UnorderedMap<int, ast::ParsedFile> &newIndexedFinalGS,
-              const std::vector<ast::ParsedFile> &newIndexed, uint32_t epoch);
+              uint32_t epoch);
 
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.
