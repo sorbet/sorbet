@@ -162,7 +162,12 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         initTask->setIndexerState(std::move(initialGS), std::move(kvstore));
         queue.tasks().push_front(std::move(initTask));
 
+        // Manually resume task processing, as we're skipping the preprocessor.
+        ENFORCE(queue.isPaused());
+        queue.resume();
     }
+
+    config->logger->error("Resuming");
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,

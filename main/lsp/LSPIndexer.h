@@ -11,7 +11,6 @@
 namespace sorbet {
 class WorkerPool;
 class KeyValueStore;
-class InitializedTask;
 } // namespace sorbet
 
 namespace sorbet::realmain::lsp {

@@ -1,5 +1,6 @@
 #include "main/lsp/notifications/indexer_initialized.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "main/lsp/LSPIndexer.h"
 
 namespace sorbet::realmain::lsp {
 
@@ -16,7 +17,7 @@ void IndexerInitializedTask::setIndexerState(std::unique_ptr<core::GlobalState> 
 }
 
 void IndexerInitializedTask::index(LSPIndexer &indexer) {
-    // TODO
+    indexer.takeInitializedState(*this, std::move(this->initialGS), std::move(this->kvstore));
 }
 
 void IndexerInitializedTask::run(LSPTypecheckerInterface &typechecker) {}

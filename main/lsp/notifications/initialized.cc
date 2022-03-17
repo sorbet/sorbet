@@ -11,13 +11,14 @@ InitializedTask::InitializedTask(LSPConfiguration &config)
 
 void InitializedTask::preprocess(LSPPreprocessor &preprocessor) {
     mutableConfig.markInitialized();
-
-    // The task queue needs to be paused so that no other tasks that might require indexing/typechecking will be
-    // run while initialization is happening.
-    preprocessor.pause();
+    this->preprocessor = &preprocessor;
 }
 
 void InitializedTask::index(LSPIndexer &indexer) {
+    // We need to pause during indexing so that nothing else will try to give work to the index thread while its state
+    // is being initialized in the typechecker.
+    preprocessor->pause();
+
     indexer.transferInitializeState(*this);
 }
 
