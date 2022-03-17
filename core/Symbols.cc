@@ -1577,10 +1577,9 @@ string ArgInfo::toString(const GlobalState &gs) const {
 }
 
 string_view ArgInfo::argumentName(const GlobalState &gs) const {
-    if (flags.isKeyword) {
+    if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);
     } else {
-        // positional arg
         if (auto source = loc.source(gs)) {
             return source.value();
         } else {

@@ -77,7 +77,12 @@ std::vector<uint32_t> ArgParsing::hashArgs(core::Context ctx, const std::vector<
         uint32_t arg = 0;
         uint8_t flags = 0;
         if (e.flags.isKeyword) {
-            arg = core::mix(arg, core::_hash(e.local._name.shortName(ctx)));
+            if (e.flags.isRepeated && e.local._name != core::Names::fwdKwargs()) {
+                auto name = core::Names::kwargs();
+                arg = core::mix(arg, core::_hash(name.shortName(ctx)));
+            } else {
+                arg = core::mix(arg, core::_hash(e.local._name.shortName(ctx)));
+            }
             flags += 1;
         }
         if (e.flags.isRepeated) {
