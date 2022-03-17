@@ -1081,7 +1081,7 @@ public:
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        core::LocOffsets loc = tokLoc(dstar);
+        core::LocOffsets loc;
         core::NameRef nm;
 
         if (name != nullptr) {
@@ -1089,6 +1089,7 @@ public:
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
+            loc = tokLoc(dstar);
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
 
