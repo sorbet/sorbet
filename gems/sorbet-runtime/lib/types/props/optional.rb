@@ -49,13 +49,13 @@ module T::Props::Optional::DecoratorMethods
     if default_setter
       @props_with_defaults ||= {}
       @props_with_defaults[prop] = default_setter
-      @props_without_defaults&.delete(prop) # Handle potential override
+      props_without_defaults&.delete(prop) # Handle potential override
 
       rules[DEFAULT_SETTER_RULE_KEY] = default_setter
     else
       @props_without_defaults ||= {}
       @props_without_defaults[prop] = rules.fetch(:setter_proc)
-      @props_with_defaults&.delete(prop) # Handle potential override
+      props_with_defaults&.delete(prop) # Handle potential override
     end
 
     super
