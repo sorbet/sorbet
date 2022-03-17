@@ -31,9 +31,7 @@ class LSPLoop {
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
     /** Protects outgoingQueue. */
-    const std::shared_ptr<absl::Mutex> taskQueueMutex;
-    /** Contains the output of LSPPreprocessor -- messages that have been converted into tasks. */
-    const std::shared_ptr<TaskQueueState> taskQueue GUARDED_BY(taskQueueMutex);
+    const std::shared_ptr<TaskQueue> taskQueue;
     const std::shared_ptr<core::lsp::TypecheckEpochManager> epochManager;
 
     /** The LSP preprocessor standardizes incoming messages and combines edits. */

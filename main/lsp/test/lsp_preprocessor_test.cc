@@ -67,9 +67,9 @@ unique_ptr<core::GlobalState> makeGS(shared_ptr<core::ErrorFlusher> errorFlusher
 
 auto nullConfig = makeConfig();
 
-LSPPreprocessor makePreprocessor(shared_ptr<absl::Mutex> taskQueueMutex, shared_ptr<TaskQueueState> queueState,
-                                 const shared_ptr<LSPConfiguration> &config = nullConfig, uint32_t initialVersion = 0) {
-    return LSPPreprocessor(config, std::move(taskQueueMutex), move(queueState), initialVersion);
+LSPPreprocessor makePreprocessor(shared_ptr<TaskQueue> queue, const shared_ptr<LSPConfiguration> &config = nullConfig,
+                                 uint32_t initialVersion = 0) {
+    return LSPPreprocessor(config, move(queue), initialVersion);
 }
 
 unique_ptr<LSPMessage> makeWatchman(vector<string> files) {
@@ -79,12 +79,13 @@ unique_ptr<LSPMessage> makeWatchman(vector<string> files) {
     return msg;
 }
 
-optional<const SorbetWorkspaceEditParams *> getUpdates(TaskQueueState &state, int i) {
-    CHECK_LT(i, state.pendingTasks.size());
-    if (i >= state.pendingTasks.size()) {
+optional<const SorbetWorkspaceEditParams *> getUpdates(TaskQueue &state, int i) {
+    absl::MutexLock lck{state.getMutex()};
+    CHECK_LT(i, state.tasks().size());
+    if (i >= state.tasks().size()) {
         return nullopt;
     }
-    auto &task = state.pendingTasks[i];
+    auto &task = state.tasks()[i];
     CHECK(task->method == LSPMethod::SorbetWorkspaceEdit);
     if (auto *editTask = dynamic_cast<SorbetWorkspaceEditTask *>(task.get())) {
         return &editTask->getParams();
@@ -127,16 +128,18 @@ public:
 
 TEST_CASE("IgnoresWatchmanUpdatesFromOpenFiles") {
     auto opts = makeOptions("");
-    auto mtx = make_shared<absl::Mutex>();
-    auto state = make_shared<TaskQueueState>();
-    auto preprocessor = makePreprocessor(mtx, state, makeConfig(opts));
+    auto state = make_shared<TaskQueue>();
+    auto preprocessor = makePreprocessor(state, makeConfig(opts));
 
     string fileContents = "# typed: true\n1+1";
     opts.fs->writeFile("foo.rb", "");
     preprocessor.preprocessAndEnqueue(makeOpen("foo.rb", fileContents, 1));
     preprocessor.preprocessAndEnqueue(makeWatchman({"foo.rb"}));
 
-    REQUIRE_EQ(1, state->pendingTasks.size());
+    {
+        absl::MutexLock lck{state->getMutex()};
+        REQUIRE_EQ(1, state->tasks().size());
+    }
 
     const auto updates = getUpdates(*state, 0).value();
     // Version didn't change because it ignored the watchman update.
@@ -154,14 +157,16 @@ TEST_CASE("ClonesTypecheckingGSAtCorrectLogicalTime") {
     string fileV3 = "# typed: true\ndef foo; 1 + 1; end";
     // V3 => V4: Slow path
     string fileV4 = "# typed: true\ndef foo; 1 + 1; end; def bar; end";
-    auto mtx = make_shared<absl::Mutex>();
-    auto state = make_shared<TaskQueueState>();
-    auto preprocessor = makePreprocessor(mtx, state);
+    auto state = make_shared<TaskQueue>();
+    auto preprocessor = makePreprocessor(state);
 
     // Apply one update, slow path.
     preprocessor.preprocessAndEnqueue(makeOpen("foo.rb", fileV1, 1));
     // Pop it off the queue to prevent a merge.
-    state->pendingTasks.clear();
+    {
+        absl::MutexLock lck{state->getMutex()};
+        state->tasks().clear();
+    }
     preprocessor.preprocessAndEnqueue(makeChange("foo.rb", fileV2, 2));
     {
         const auto updates = getUpdates(*state, 0).value();
@@ -189,39 +194,46 @@ TEST_CASE("ClonesTypecheckingGSAtCorrectLogicalTime") {
 }
 
 TEST_CASE("PauseAndResume") {
-    auto mtx = make_shared<absl::Mutex>();
-    auto state = make_shared<TaskQueueState>();
-    auto preprocessor = makePreprocessor(mtx, state);
+    auto state = make_shared<TaskQueue>();
+    auto preprocessor = makePreprocessor(state);
 
     {
         auto msg = make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, JSONNullObject()));
         preprocessor.preprocessAndEnqueue(move(msg));
     }
-    CHECK(state->paused);
+    {
+        absl::MutexLock lck{state->getMutex()};
+        CHECK(state->isPaused());
+    }
     {
         auto msg =
             make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, JSONNullObject()));
         preprocessor.preprocessAndEnqueue(move(msg));
     }
-    CHECK_FALSE(state->paused);
+
+    {
+        absl::MutexLock lck{state->getMutex()};
+        CHECK_FALSE(state->isPaused());
+    }
 }
 
 TEST_CASE("Exit") {
-    auto mtx = make_shared<absl::Mutex>();
-    auto state = make_shared<TaskQueueState>();
-    auto preprocessor = makePreprocessor(mtx, state);
+    auto state = make_shared<TaskQueue>();
+    auto preprocessor = makePreprocessor(state);
     auto msg = make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()));
     preprocessor.preprocessAndEnqueue(move(msg));
-    CHECK(state->terminate);
-    CHECK_EQ(state->errorCode, 0);
+    {
+        absl::MutexLock lck{state->getMutex()};
+        CHECK(state->isTerminated());
+        CHECK_EQ(state->getErrorCode(), 0);
+    }
 }
 
 TEST_CASE("Initialized") {
-    auto mtx = make_shared<absl::Mutex>();
-    auto state = make_shared<TaskQueueState>();
+    auto state = make_shared<TaskQueue>();
     auto options = makeOptions("");
     auto config = makeConfig(options, true, false);
-    auto preprocessor = makePreprocessor(mtx, state, config);
+    auto preprocessor = makePreprocessor(state, config);
     auto output = dynamic_pointer_cast<LSPOutputToVector>(config->output);
 
     // Sending a request prior to initialization should cause an error.
@@ -237,16 +249,18 @@ TEST_CASE("Initialized") {
     preprocessor.preprocessAndEnqueue(move(msg));
     CHECK(config->isInitialized());
 
-    REQUIRE_EQ(1, state->pendingTasks.size());
-    CHECK_EQ(state->pendingTasks[0]->method, LSPMethod::Initialized);
+    {
+        absl::MutexLock lck{state->getMutex()};
+        REQUIRE_EQ(1, state->tasks().size());
+        CHECK_EQ(state->tasks()[0]->method, LSPMethod::Initialized);
+    }
 }
 
 // When a request in the queue is canceled, the preprocessor should merge any edits that happen immediately before and
 // after the canceled request.
 TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
-    auto mtx = make_shared<absl::Mutex>();
-    auto state = make_shared<TaskQueueState>();
-    auto preprocessor = makePreprocessor(mtx, state);
+    auto state = make_shared<TaskQueue>();
+    auto preprocessor = makePreprocessor(state);
     // V1: Slow path.
     string fileV1 = "# typed: true\ndef foo; end";
     // V1 => V2: Fast path
@@ -289,7 +303,10 @@ TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
         // Cancel a hover.
         preprocessor.preprocessAndEnqueue(makeCancel(hoverId));
         // Check that the next edit was merged into the first edit.
-        REQUIRE_EQ(state->pendingTasks[0]->method, LSPMethod::SorbetWorkspaceEdit);
+        {
+            absl::MutexLock lck{state->getMutex()};
+            REQUIRE_EQ(state->tasks()[0]->method, LSPMethod::SorbetWorkspaceEdit);
+        }
         auto updates = getUpdates(*state, 0).value();
         CHECK_EQ(updates->mergeCount, i);
         CHECK_EQ(fooContents, updates->updates[0]->source());
@@ -298,8 +315,14 @@ TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
     // Push a new edit that takes the slow path.
     preprocessor.preprocessAndEnqueue(makeChange("foo.rb", fileV5, 5));
     {
+        int len;
+        {
+            absl::MutexLock lck{state->getMutex()};
+            len = state->tasks().size();
+        }
+
         // Ensure GS for new edit has all previous edits, including the contents of bar.rb.
-        auto updates = getUpdates(*state, state->pendingTasks.size() - 1).value();
+        auto updates = getUpdates(*state, len - 1).value();
         // updates is const, so copy the vector.
         vector<shared_ptr<core::File>> updatesCopy = updates->updates;
         fast_sort(updatesCopy, [](auto &a, auto &b) -> bool { return a->path().compare(b->path()) < 0; });

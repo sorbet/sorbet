@@ -27,12 +27,13 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
         preprocessor.preprocessAndEnqueue(move(message));
     }
     {
-        absl::MutexLock lck(taskQueueMutex.get());
-        ENFORCE(taskQueue->paused == false, "__PAUSE__ not supported in single-threaded mode.");
-        for (auto &task : taskQueue->pendingTasks) {
+        absl::MutexLock lck(taskQueue->getMutex());
+        ENFORCE(!taskQueue->isPaused(), "__PAUSE__ not supported in single-threaded mode.");
+        auto &tasks = taskQueue->tasks();
+        for (auto &task : taskQueue->tasks()) {
             runTask(move(task));
         }
-        taskQueue->pendingTasks.clear();
+        tasks.clear();
     }
 }
 

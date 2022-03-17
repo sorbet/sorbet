@@ -26,10 +26,60 @@ string readFile(string_view path, const FileSystem &fs) {
 
 } // namespace
 
-LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr<absl::Mutex> taskQueueMutex,
-                                 shared_ptr<TaskQueueState> taskQueue, uint32_t initialVersion)
-    : config(move(config)), taskQueueMutex(std::move(taskQueueMutex)), taskQueue(move(taskQueue)),
-      owner(this_thread::get_id()), nextVersion(initialVersion + 1) {}
+TaskQueue::TaskQueue() : stateMutex{}, pendingTasks{}, terminated{false}, paused{false}, errorCode{0} {}
+
+bool TaskQueue::isTerminated() const {
+    return this->terminated;
+}
+
+void TaskQueue::terminate() {
+    this->terminated = true;
+}
+
+bool TaskQueue::isPaused() const {
+    return this->paused;
+}
+
+void TaskQueue::pause() {
+    this->paused = true;
+}
+
+void TaskQueue::resume() {
+    this->paused = false;
+}
+
+int TaskQueue::getErrorCode() const {
+    return this->errorCode;
+}
+
+void TaskQueue::setErrorCode(int code) {
+    this->errorCode = code;
+}
+
+CounterState &TaskQueue::getCounters() {
+    return this->counters;
+}
+
+const std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() const {
+    return this->pendingTasks;
+}
+
+std::deque<std::unique_ptr<LSPTask>> &TaskQueue::tasks() {
+    return this->pendingTasks;
+}
+
+absl::Mutex *TaskQueue::getMutex() {
+    return &this->stateMutex;
+}
+
+bool TaskQueue::ready() const {
+    return this->terminated || (!this->paused && !this->pendingTasks.empty());
+}
+
+LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr<TaskQueue> taskQueue,
+                                 uint32_t initialVersion)
+    : config(move(config)), taskQueue(std::move(taskQueue)), owner(this_thread::get_id()),
+      nextVersion(initialVersion + 1) {}
 
 string_view LSPPreprocessor::getFileContents(string_view path) const {
     auto it = openFiles.find(path);
@@ -41,11 +91,11 @@ string_view LSPPreprocessor::getFileContents(string_view path) const {
 }
 
 void LSPPreprocessor::mergeFileChanges() {
-    taskQueueMutex->AssertHeld();
+    taskQueue->getMutex()->AssertHeld();
     auto &logger = config->logger;
     // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
     Timer timeit(logger, "lsp.mergeFileChanges");
-    auto &pendingRequests = taskQueue->pendingTasks;
+    auto &pendingRequests = taskQueue->tasks();
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
 
@@ -226,8 +276,8 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
 }
 
 bool LSPPreprocessor::cancelRequest(const CancelParams &params) {
-    absl::MutexLock lock(taskQueueMutex.get());
-    auto &pendingTasks = taskQueue->pendingTasks;
+    absl::MutexLock lock(taskQueue->getMutex());
+    auto &pendingTasks = taskQueue->tasks();
     for (auto it = pendingTasks.begin(); it != pendingTasks.end(); ++it) {
         auto &current = **it;
         if (current.cancel(params.id)) {
@@ -243,24 +293,24 @@ bool LSPPreprocessor::cancelRequest(const CancelParams &params) {
 }
 
 void LSPPreprocessor::pause() {
-    absl::MutexLock lock(taskQueueMutex.get());
-    ENFORCE(!taskQueue->paused);
+    absl::MutexLock lock(taskQueue->getMutex());
+    ENFORCE(!taskQueue->isPaused());
     config->logger->error("Pausing");
-    taskQueue->paused = true;
+    taskQueue->pause();
 }
 
 void LSPPreprocessor::resume() {
-    absl::MutexLock lock(taskQueueMutex.get());
-    ENFORCE(taskQueue->paused);
+    absl::MutexLock lock(taskQueue->getMutex());
+    ENFORCE(taskQueue->isPaused());
     config->logger->error("Resuming");
-    taskQueue->paused = false;
+    taskQueue->resume();
 }
 
 void LSPPreprocessor::exit(int exitCode) {
-    absl::MutexLock lock(taskQueueMutex.get());
-    if (!taskQueue->terminate) {
-        taskQueue->terminate = true;
-        taskQueue->errorCode = exitCode;
+    absl::MutexLock lock(taskQueue->getMutex());
+    if (!taskQueue->isTerminated()) {
+        taskQueue->terminate();
+        taskQueue->setErrorCode(exitCode);
     }
 }
 
@@ -287,9 +337,9 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
     }
     if (task->finalPhase() != LSPTask::Phase::PREPROCESS) {
         // Enqueue task to be processed on processing thread.
-        absl::MutexLock lock(taskQueueMutex.get());
+        absl::MutexLock lock(taskQueue->getMutex());
         const bool isEdit = task->method == LSPMethod::SorbetWorkspaceEdit;
-        taskQueue->pendingTasks.push_back(move(task));
+        taskQueue->tasks().push_back(move(task));
         if (isEdit) {
             // Only edits can be merged; avoid looping over the queue on every request.
             mergeFileChanges();

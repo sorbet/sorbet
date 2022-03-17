@@ -23,7 +23,6 @@ struct MessageQueueState {
     CounterState counters;
 };
 
-/** Used to store the state of LSP's internal request queue.  */
 struct TaskQueueState {
     std::deque<std::unique_ptr<LSPTask>> pendingTasks;
     bool terminate = false;
@@ -31,6 +30,46 @@ struct TaskQueueState {
     int errorCode = 0;
     // Counters collected from preprocessor thread
     CounterState counters;
+};
+
+class TaskQueue final {
+    absl::Mutex stateMutex;
+
+    std::deque<std::unique_ptr<LSPTask>> pendingTasks GUARDED_BY(stateMutex);
+    bool terminated GUARDED_BY(stateMutex) = false;
+    bool paused GUARDED_BY(stateMutex) = false;
+    int errorCode GUARDED_BY(stateMutex) = 0;
+
+    // Counters collected from preprocessor thread
+    CounterState counters GUARDED_BY(stateMutex);
+
+public:
+    TaskQueue();
+
+    TaskQueue(const TaskQueue &other) = delete;
+    TaskQueue(TaskQueue &&other) = delete;
+
+    TaskQueue &operator=(const TaskQueue &other) = delete;
+    TaskQueue &operator=(TaskQueue &&other) = delete;
+
+    bool isTerminated() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    void terminate() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+
+    bool isPaused() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    void pause() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+    void resume() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+
+    int getErrorCode() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    void setErrorCode(int code) ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+
+    CounterState &getCounters() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+
+    const std::deque<std::unique_ptr<LSPTask>> &tasks() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    std::deque<std::unique_ptr<LSPTask>> &tasks() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+
+    absl::Mutex *getMutex() ABSL_LOCK_RETURNED(stateMutex);
+
+    bool ready() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
 };
 
 /**
@@ -44,8 +83,7 @@ struct TaskQueueState {
  */
 class LSPPreprocessor final {
     const std::shared_ptr<LSPConfiguration> config;
-    const std::shared_ptr<absl::Mutex> taskQueueMutex;
-    const std::shared_ptr<TaskQueueState> taskQueue GUARDED_BY(taskQueueMutex);
+    const std::shared_ptr<TaskQueue> taskQueue;
     /** ID of the thread that owns the preprocessor and is allowed to invoke methods on it. */
     std::thread::id owner;
 
@@ -63,7 +101,7 @@ class LSPPreprocessor final {
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
      */
-    void mergeFileChanges() EXCLUSIVE_LOCKS_REQUIRED(taskQueueMutex);
+    void mergeFileChanges() EXCLUSIVE_LOCKS_REQUIRED(taskQueue->getMutex());
 
     /* The following methods convert edits into SorbetWorkspaceEditParams. */
 
@@ -87,8 +125,8 @@ class LSPPreprocessor final {
     std::unique_ptr<LSPTask> getTaskForMessage(LSPMessage &msg);
 
 public:
-    LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<absl::Mutex> taskQueueMutex,
-                    std::shared_ptr<TaskQueueState> taskQueue, uint32_t initialVersion = 0);
+    LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<TaskQueue> taskQueue,
+                    uint32_t initialVersion = 0);
 
     /**
      * Performs pre-processing on the incoming LSP request and appends it to the queue.
