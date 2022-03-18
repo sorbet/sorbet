@@ -1581,6 +1581,7 @@ public:
             if (symbol == core::Symbols::todo()) {
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
                 if (!squashedSymbol.isClassOrModule()) {
+                    Exception::raise("file={}, tree={}", ctx.file.data(ctx).path(), klass.name.toString(ctx));
                     klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
                                                                klass.symbol.data(ctx)->name);
                     ENFORCE(klass.symbol.exists());
