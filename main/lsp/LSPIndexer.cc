@@ -170,15 +170,13 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     task.setKeyValueStore(std::move(this->kvstore));
 }
 
-void LSPIndexer::initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
-                            std::unique_ptr<KeyValueStore> kvstore) {
+void LSPIndexer::initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }
     initialized = true;
 
     this->initialGS = std::move(initialGS);
-    this->kvstore = std::move(kvstore);
 }
 
 LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {

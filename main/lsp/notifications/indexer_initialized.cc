@@ -1,24 +1,21 @@
 #include "main/lsp/notifications/indexer_initialized.h"
-#include "common/kvstore/KeyValueStore.h"
 #include "main/lsp/LSPIndexer.h"
 
 namespace sorbet::realmain::lsp {
 
 IndexerInitializedTask::IndexerInitializedTask(const LSPConfiguration &config)
-    : LSPTask(config, LSPMethod::SorbetIndexerInitialized), initialGS{}, kvstore{} {}
+    : LSPTask(config, LSPMethod::SorbetIndexerInitialized), initialGS{} {}
 
 LSPTask::Phase IndexerInitializedTask::finalPhase() const {
     return LSPTask::Phase::INDEX;
 }
 
-void IndexerInitializedTask::setIndexerState(std::unique_ptr<core::GlobalState> initialGS,
-                                             std::unique_ptr<KeyValueStore> kvstore) {
+void IndexerInitializedTask::setIndexerState(std::unique_ptr<core::GlobalState> initialGS) {
     this->initialGS = std::move(initialGS);
-    this->kvstore = std::move(kvstore);
 }
 
 void IndexerInitializedTask::index(LSPIndexer &indexer) {
-    indexer.initialize(*this, std::move(this->initialGS), std::move(this->kvstore));
+    indexer.initialize(*this, std::move(this->initialGS));
 }
 
 void IndexerInitializedTask::run(LSPTypecheckerInterface &typechecker) {}

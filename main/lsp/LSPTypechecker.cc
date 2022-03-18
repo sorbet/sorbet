@@ -130,7 +130,6 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
         ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
 
-        // TODO: we can inline all of this as we're already in the typechecker thread.
         updates.epoch = 0;
         updates.canTakeFastPath = false;
         updates.updatedFileIndexes = move(indexed);
@@ -139,10 +138,10 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
         initialGS->errorQueue = move(savedErrorQueue);
     }
+
     // We should always initialize with epoch 0.
-    ENFORCE(updates.epoch == 0);
     this->initialized = true;
-    indexed = move(updates.updatedFileIndexes);
+    this->indexed = move(updates.updatedFileIndexes);
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
     auto committed = false;
@@ -154,12 +153,13 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     }
     ENFORCE(committed);
 
+    // Unblock the indexer now that its state is fully initialized.
     {
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
         auto initTask = std::make_unique<IndexerInitializedTask>(*config);
-        initTask->setIndexerState(std::move(initialGS), std::move(kvstore));
+        initTask->setIndexerState(std::move(initialGS));
         queue.tasks().push_front(std::move(initTask));
 
         // Manually resume task processing, as we're skipping the preprocessor.

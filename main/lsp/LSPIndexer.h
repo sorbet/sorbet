@@ -75,8 +75,7 @@ public:
     /**
      * Initializes the indexer with the state produced on the typechecking thread.
      */
-    void initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
-                    std::unique_ptr<KeyValueStore> kvstore);
+    void initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS);
 
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees

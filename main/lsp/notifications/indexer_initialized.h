@@ -3,20 +3,15 @@
 
 #include "main/lsp/LSPTask.h"
 
-namespace sorbet {
-class KeyValueStore;
-}
-
 namespace sorbet::realmain::lsp {
 
 class IndexerInitializedTask final : public LSPTask {
     std::unique_ptr<core::GlobalState> initialGS;
-    std::unique_ptr<KeyValueStore> kvstore;
 
 public:
     IndexerInitializedTask(const LSPConfiguration &config);
 
-    void setIndexerState(std::unique_ptr<core::GlobalState> initialGS, std::unique_ptr<KeyValueStore> kvstore);
+    void setIndexerState(std::unique_ptr<core::GlobalState> initialGS);
 
     Phase finalPhase() const override;
 
