@@ -1580,13 +1580,7 @@ public:
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
-                if (!squashedSymbol.isClassOrModule()) {
-                    klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
-                                                               klass.symbol.data(ctx)->name);
-                    ENFORCE(klass.symbol.exists());
-                } else {
-                    klass.symbol = squashedSymbol.asClassOrModuleRef();
-                }
+                klass.symbol = squashedSymbol.asClassOrModuleRef();
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
