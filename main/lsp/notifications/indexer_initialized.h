@@ -9,9 +9,7 @@ class IndexerInitializedTask final : public LSPTask {
     std::unique_ptr<core::GlobalState> initialGS;
 
 public:
-    IndexerInitializedTask(const LSPConfiguration &config);
-
-    void setIndexerState(std::unique_ptr<core::GlobalState> initialGS);
+    IndexerInitializedTask(const LSPConfiguration &config, std::unique_ptr<core::GlobalState> initialGS);
 
     Phase finalPhase() const override;
 

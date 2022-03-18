@@ -158,8 +158,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializedTask>(*config);
-        initTask->setIndexerState(std::move(initialGS));
+        auto initTask = std::make_unique<IndexerInitializedTask>(*config, std::move(initialGS));
         queue.tasks().push_front(std::move(initTask));
 
         // Manually resume task processing, as we're skipping the preprocessor.
