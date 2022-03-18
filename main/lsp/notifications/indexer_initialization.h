@@ -1,15 +1,15 @@
-#ifndef RUBY_TYPER_LSP_NOTIFICATIONS_INDEXER_INITIALIZED_H
-#define RUBY_TYPER_LSP_NOTIFICATIONS_INDEXER_INITIALIZED_H
+#ifndef RUBY_TYPER_LSP_NOTIFICATIONS_INDEXER_INITIALIZATION_H
+#define RUBY_TYPER_LSP_NOTIFICATIONS_INDEXER_INITIALIZATION_H
 
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
 
-class IndexerInitializedTask final : public LSPTask {
+class IndexerInitializationTask final : public LSPTask {
     std::unique_ptr<core::GlobalState> initialGS;
 
 public:
-    IndexerInitializedTask(const LSPConfiguration &config, std::unique_ptr<core::GlobalState> initialGS);
+    IndexerInitializationTask(const LSPConfiguration &config, std::unique_ptr<core::GlobalState> initialGS);
 
     Phase finalPhase() const override;
 

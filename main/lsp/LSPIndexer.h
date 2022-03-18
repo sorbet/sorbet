@@ -5,7 +5,7 @@
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
-#include "main/lsp/notifications/indexer_initialized.h"
+#include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/initialized.h"
 
 namespace sorbet {
@@ -75,7 +75,7 @@ public:
     /**
      * Initializes the indexer with the state produced on the typechecking thread.
      */
-    void initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS);
+    void initialize(IndexerInitializationTask &task, std::unique_ptr<core::GlobalState> initialGS);
 
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees

@@ -24,7 +24,7 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/notifications/indexer_initialized.h"
+#include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
 
@@ -158,7 +158,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         absl::MutexLock lck{queue.getMutex()};
 
         // ensure that the next task we process initializes the indexer
-        auto initTask = std::make_unique<IndexerInitializedTask>(*config, std::move(initialGS));
+        auto initTask = std::make_unique<IndexerInitializationTask>(*config, std::move(initialGS));
         queue.tasks().push_front(std::move(initTask));
     }
 

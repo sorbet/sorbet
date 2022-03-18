@@ -170,7 +170,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     task.setKeyValueStore(std::move(this->kvstore));
 }
 
-void LSPIndexer::initialize(IndexerInitializedTask &task, std::unique_ptr<core::GlobalState> initialGS) {
+void LSPIndexer::initialize(IndexerInitializationTask &task, std::unique_ptr<core::GlobalState> initialGS) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }
