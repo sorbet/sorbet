@@ -19,7 +19,8 @@ LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &worke
                  const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore)
     : config(config), taskQueue(make_shared<TaskQueue>()), epochManager(initialGS->epochManager),
       preprocessor(config, taskQueue),
-      typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers),
+      typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,
+                       taskQueue),
       indexer(config, move(initialGS), move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 

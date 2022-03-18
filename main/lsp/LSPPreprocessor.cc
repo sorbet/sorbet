@@ -1,6 +1,7 @@
 #include "main/lsp/LSPPreprocessor.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/notifications.h"

@@ -153,6 +153,8 @@ ConstExprStr LSPTask::methodString() const {
             return "initialized";
         case LSPMethod::SorbetReadFile:
             return "sorbet.readFile";
+        case LSPMethod::SorbetIndexerInitialization:
+            return "sorbet.indexerInitialization";
         case LSPMethod::SorbetShowSymbol:
             return "sorbet.showSymbol";
         case LSPMethod::SorbetWatchmanFileChange:

@@ -165,50 +165,18 @@ bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFi
     return canTakeFastPathInternal(changedFiles, emptyMap);
 }
 
-void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
+void LSPIndexer::transferInitializeState(InitializedTask &task) {
+    task.setGlobalState(std::move(this->initialGS));
+    task.setKeyValueStore(std::move(this->kvstore));
+}
+
+void LSPIndexer::initialize(IndexerInitializationTask &task, std::unique_ptr<core::GlobalState> initialGS) {
     if (initialized) {
         Exception::raise("Indexer is already initialized; cannot initialize a second time.");
     }
     initialized = true;
-    // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
-    // going to use it on typechecker thread for this one operation.
-    auto savedErrorQueue = initialGS->errorQueue;
-    initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
-                                                          make_shared<core::NullFlusher>());
 
-    vector<ast::ParsedFile> indexed;
-    Timer timeit(config->logger, "initial_index");
-    ShowOperation op(*config, ShowOperation::Kind::Indexing);
-    vector<core::FileRef> inputFiles;
-    unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
-    {
-        Timer timeit(config->logger, "reIndexFromFileSystem");
-        inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-        indexed.resize(initialGS->filesUsed());
-
-        auto asts = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, inputFiles,
-                                                                workers, ownedKvstore);
-        // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so vector
-        // index != FileRef ID. Fix that by slotting them into `indexed`.
-        for (auto &ast : asts) {
-            int id = ast.file.id();
-            ENFORCE_NO_TIMER(id < indexed.size());
-            indexed[id] = move(ast);
-        }
-    }
-
-    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
-                                         workers, indexed);
-
-    ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
-
-    updates.epoch = 0;
-    updates.canTakeFastPath = false;
-    updates.updatedFileIndexes = move(indexed);
-    updates.updatedGS = initialGS->deepCopy();
-
-    // Restore error queue, as initialGS will be used on the LSPLoop thread from now on.
-    initialGS->errorQueue = move(savedErrorQueue);
+    this->initialGS = std::move(initialGS);
 }
 
 LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {

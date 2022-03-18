@@ -4,6 +4,9 @@
 #include "core/core.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LSPPreprocessor.h"
+#include "main/lsp/notifications/indexer_initialization.h"
+#include "main/lsp/notifications/initialized.h"
 
 namespace sorbet {
 class WorkerPool;
@@ -69,9 +72,10 @@ public:
      */
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
-    /** Initializes the indexer by indexing and hashing all files in the workspace. Mutates the LSPFileUpdates so it can
-     * be passed to the typechecker to initialize it. */
-    void initialize(LSPFileUpdates &updates, WorkerPool &workers);
+    /**
+     * Initializes the indexer with the state produced on the typechecking thread.
+     */
+    void initialize(IndexerInitializationTask &task, std::unique_ptr<core::GlobalState> initialGS);
 
     /**
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
@@ -89,6 +93,13 @@ public:
      * Given a file ref _that exists_, return the underlying file.
      */
     const core::File &getFile(core::FileRef fref) const;
+
+    /**
+     * Given a reference to the InitializedTask, transfer ownership of the global state out for initialization in the
+     * typechecker thread. The task argument is unused, and is present only to make it difficult to get the global state
+     * out in a context that's not the InitializedTask's index function.
+     */
+    void transferInitializeState(InitializedTask &task);
 };
 
 } // namespace sorbet::realmain::lsp
