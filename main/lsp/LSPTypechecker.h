@@ -154,6 +154,11 @@ public:
                             std::unique_ptr<KeyValueStore> kvstore) = 0;
 
     /**
+     * Resume processing of the task queue
+     */
+    virtual void resumeTaskQueue(InitializedTask &task) = 0;
+
+    /**
      * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
      */
     virtual void typecheckOnFastPath(LSPFileUpdates updates,
@@ -214,6 +219,8 @@ public:
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                     std::unique_ptr<KeyValueStore> kvstore) override;
 
+    void resumeTaskQueue(InitializedTask &task) override;
+
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
 
@@ -261,6 +268,8 @@ public:
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                     std::unique_ptr<KeyValueStore> kvstore) override;
+
+    void resumeTaskQueue(InitializedTask &task) override;
 
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
