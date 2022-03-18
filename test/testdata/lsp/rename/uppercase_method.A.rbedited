@@ -1,0 +1,15 @@
+# typed: true
+
+def ORIGIN(x = nil); end
+#   ^ apply-rename: [A] newName: ORIGIN
+
+ORIGIN()
+
+# This will technically turn into an error about "could not resolve constant"
+# but it seems easy enough for the user to look at those errors and add the
+# required parens on their own.
+ORIGIN
+
+# Crazily enough it doesn't even require parens to parse as a method name, it
+# just needs parens or any argument.
+ORIGIN 'foo'
