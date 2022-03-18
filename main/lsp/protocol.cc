@@ -234,12 +234,21 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     }
                 }
 
+                // Find the first task that the indexer is able to handle
+                auto &tasks = taskQueue->tasks();
+                auto it = absl::c_find_if(
+                    tasks, [&indexer = this->indexer](auto &task) { return indexer.canHandleTask(*task); });
+
+                if (it == tasks.end()) {
+                    continue;
+                }
+
                 // Before giving up the lock, check if the typechecker is running a slow path and if the task at the
                 // head of the queue can either operate on stale data (i.e., the GlobalState just prior to the change
                 // that required the slow path to run) or preempt the currently running slow path. (Note that we don't
                 // bother with either one in cases where we only need the indexer. TODO(aprocter): is that restriction
                 // actually appropriate for stale-data tasks?)
-                auto &frontTask = taskQueue->tasks().front();
+                auto &frontTask = *it;
 
                 // Note that running on stale data is an experimental feature, so we hide it behind the
                 // --enable-experimental-lsp-stale-state flag.
@@ -332,8 +341,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     // normal.
                 }
 
-                task = move(taskQueue->tasks().front());
-                taskQueue->tasks().pop_front();
+                task = move(frontTask);
+                taskQueue->tasks().erase(it);
 
                 // Test only: Collect counters from other threads into this thread for reporting.
                 if (task->method == LSPMethod::GETCOUNTERS && !taskQueue->getCounters().hasNullCounters()) {

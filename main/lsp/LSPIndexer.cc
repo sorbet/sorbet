@@ -179,6 +179,11 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, std::unique_ptr<cor
     this->initialGS = std::move(initialGS);
 }
 
+bool LSPIndexer::canHandleTask(const LSPTask &task) const {
+    return this->initialized || task.method == LSPMethod::Initialize || task.method == LSPMethod::Initialized ||
+           task.method == LSPMethod::SorbetIndexerInitialization;
+}
+
 LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
     LSPFileUpdates update;
