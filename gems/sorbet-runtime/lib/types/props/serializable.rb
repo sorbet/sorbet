@@ -122,7 +122,7 @@ module T::Props::Serializable
     serialized = existing_hash
     new_val = self.class.from_hash(serialized.merge(recursive_stringify_keys(changed_props)))
     old_extra = self.instance_variable_get(:@_extra_props) if self.instance_variable_defined?(:@_extra_props)
-    new_extra = new_val.instance_variable_get(:@_extra_props) if self.instance_variable_defined?(:@_extra_props)
+    new_extra = new_val.instance_variable_get(:@_extra_props) if new_val.instance_variable_defined?(:@_extra_props)
     if old_extra != new_extra
       difference =
         if old_extra
