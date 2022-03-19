@@ -6,5 +6,5 @@ namespace sorbet::realmain {
 int realmain(int argc, char *argv[]);
 
 extern std::shared_ptr<spdlog::logger> logger;
-       } // namespace sorbet::realmain
+} // namespace sorbet::realmain
 #endif // RUBY_TYPER_REAL_MAIN_H
