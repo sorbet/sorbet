@@ -426,6 +426,10 @@ struct RenderAutoloadTask {
     const DefTree &node;
 };
 
+struct ModificationState {
+    bool modified;
+};
+
 // This function has two duties:
 // * It creates autoload rendering tasks which will occur in a later parallel phase.
 // * It creates subdirectories when needed, as they are required to write the autoloader output.
@@ -452,6 +456,9 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
     vector<RenderAutoloadTask> tasks;
     populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
 
+    auto modificationState = ModificationState{false};
+    std::mutex modificationMutex;
+
     if (FileOps::exists(path)) {
         // Clear out files that we do not plan to write.
         vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
@@ -472,21 +479,32 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         inputq->push(i, 1);
     }
 
-    workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
-        int n = 0;
-        {
-            Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
-            int idx = 0;
+    workers.multiplexJob(
+        "runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq, &modificationState, &modificationMutex]() {
+            int n = 0;
+            {
+                Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
+                int idx = 0;
 
-            for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
-                ++n;
-                auto &task = tasks[idx];
-                FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
+                for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
+                    ++n;
+                    auto &task = tasks[idx];
+                    bool rewritten = FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
+
+                    // Initial read should be cheap, read outside mutex
+                    if (rewritten && !modificationState.modified) {
+                        modificationMutex.lock();
+                        // Re-test inside mutex
+                        if (!modificationState.modified) {
+                            modificationState.modified = true;
+                        }
+                        modificationMutex.unlock();
+                    }
+                }
             }
-        }
 
-        outputq->push(getAndClearThreadCounters(), n);
-    });
+            outputq->push(getAndClearThreadCounters(), n);
+        });
 
     CounterState out;
     for (auto res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !res.done();
@@ -495,6 +513,11 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             continue;
         }
         counterConsume(move(out));
+    }
+
+    const std::string mtimeFile = join(path, "_mtime_stamp");
+    if (!FileOps::exists(mtimeFile) || modificationState.modified) {
+        FileOps::write(mtimeFile, to_string(std::time(0)));
     }
 }
 
