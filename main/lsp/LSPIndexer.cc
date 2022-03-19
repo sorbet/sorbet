@@ -180,8 +180,20 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, std::unique_ptr<cor
 }
 
 bool LSPIndexer::canHandleTask(const LSPTask &task) const {
-    return this->initialized || task.method == LSPMethod::Initialize || task.method == LSPMethod::Initialized ||
-           task.method == LSPMethod::SorbetIndexerInitialization;
+    if (this->initialized) {
+        return true;
+    }
+
+    switch (task.method) {
+        case LSPMethod::Initialize:
+        case LSPMethod::Initialized:
+        case LSPMethod::SorbetIndexerInitialization:
+        case LSPMethod::SorbetFence:
+            return true;
+
+        default:
+            return false;
+    }
 }
 
 LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
