@@ -25,7 +25,7 @@ mkdir output
   test/cli/autogen-pkg-autoloader/nested/*.rb \
   test/cli/autogen-pkg-autoloader/scripts/baz.rb 2>&1
 
-for file in $(find output -type f | sort); do
+for file in $(find output -type f | sort | grep -v "_mtime_stamp"); do
   printf "\n--- %s\n" "$file"
   cat "$file"
 done
