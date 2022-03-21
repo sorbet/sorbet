@@ -1,13 +1,12 @@
 # typed: strict
 # selective-apply-code-action: refactor.extract
 #
-# Test asserts comments between a sig and a method def are not moved,
-# because we cut out only a signature and a method body without touching anything in between
+# Test asserts comments and whitespaces between a sig and a method def stay in place after the refactoring
 
 module BarModule
   extend T::Sig
   sig {void}
-# comment between sig and def should stay in place
+# comment between sig and def should move with the method
 def bar; end
 end
 
@@ -18,7 +17,7 @@ class Foo
 
 sig do
   void
-end # comment after sig should stay in place
+end # comment after sig should move with the method
 def baz; end
 # ^ apply-code-action: [B] Move method to a new module
 
