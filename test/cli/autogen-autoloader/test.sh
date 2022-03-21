@@ -16,7 +16,7 @@ main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader:outpu
   test/cli/autogen-autoloader/{foo,bar,bar2,errors}.rb \
   test/cli/autogen-autoloader/scripts/baz.rb 2>&1
 
-for file in $(find output -type f | sort); do
+for file in $(find output -type f | sort | grep -v "_mtime_stamp"); do
   printf "\n--- %s\n" "$file"
   cat "$file"
 done
@@ -41,7 +41,7 @@ main/sorbet --silence-dev-message --stop-after=namer \
   --autogen-autoloader-modules=Foo \
   test/cli/autogen-autoloader/inplace.rb
 
-find inplace-output | sort
+find inplace-output | sort | grep -v "_mtime_stamp"
 
 echo
 echo "--- strip-prefixes and root rename"
