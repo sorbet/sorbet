@@ -9,7 +9,7 @@ module Foo
          # ^^^^^^^^ apply-code-action: [A] Move method to a new module
     'Hello'
   end
-  
+
   sig do
     params(x: String)
     .returns(String)

@@ -13,9 +13,7 @@ end
 module Foo
   extend T::Sig
 
-  
-  
-  
+
   sig do
     params(x: String)
     .returns(String)

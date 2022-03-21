@@ -60,13 +60,7 @@ optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, 
 
 unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets sigLoc,
                                     const core::LocOffsets methodLoc, const core::FileRef fref) {
-    auto cutSource = [&](core::LocOffsets loc) {
-        return fref.data(gs).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos());
-    };
-
-    auto sigSource = cutSource(sigLoc);
-    auto methodSource = cutSource(methodLoc);
-    return make_unique<string>(absl::StrCat(sigSource, "\n  ", methodSource));
+    return make_unique<string>(fref.data(gs).source().substr(sigLoc.beginPos(), methodLoc.endPos() - sigLoc.beginPos()));
 }
 
 optional<pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
@@ -203,13 +197,17 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     auto [sigLoc, methodLoc] = sigAndMethodLocs.value();
     auto methodSource = copyMethodSource(gs, sigLoc, methodLoc, fref);
 
-    auto range = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
+    auto newModuleRange = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
     auto newModuleSource = fmt::format("{}{}{}\n\n", moduleStart, *methodSource, moduleEnd);
 
+    // This manipulations with the positions are required to remove leading tabs and whitespaces at the original method position
+    auto [oldMethodStart, oldMethodEnd] = core::Loc(fref, sigLoc.beginPos(), methodLoc.endPos()).position(gs);
+    auto oldMethodLoc = core::Loc::fromDetails(gs, fref, {oldMethodStart.line, 0}, oldMethodEnd);
+    ENFORCE(oldMethodLoc.has_value());
+
     vector<unique_ptr<TextEdit>> res;
-    res.emplace_back(make_unique<TextEdit>(move(range), newModuleSource));
-    res.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, sigLoc)), ""));
-    res.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, core::Loc(fref, methodLoc)), ""));
+    res.emplace_back(make_unique<TextEdit>(move(newModuleRange), newModuleSource));
+    res.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, oldMethodLoc.value()), ""));
     return res;
 }
 } // namespace

@@ -17,8 +17,6 @@ module Foo
 # ^ apply-code-action: [A] Move method to a new module
   end
 
-  
-  
 
   sig {void}
   def self.c

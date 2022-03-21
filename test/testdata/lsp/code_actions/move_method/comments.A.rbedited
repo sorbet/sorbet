@@ -7,14 +7,12 @@
 module BarModule
   extend T::Sig
   sig {void}
-  def bar; end
+# comment between sig and def should stay in place
+def bar; end
 end
 
 class Foo
   extend T::Sig
-
-
-# comment between sig and def should stay in place
 
    # ^ apply-code-action: [A] Move method to a new module
 

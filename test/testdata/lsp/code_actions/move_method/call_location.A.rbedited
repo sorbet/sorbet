@@ -12,8 +12,6 @@ end
 module Foo
   extend T::Sig
 
-  
-  
 
   sig {void}
   def self.b

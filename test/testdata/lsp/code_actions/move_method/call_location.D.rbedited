@@ -27,6 +27,4 @@ module Foo
         # ^ apply-code-action: [C] Move method to a new module
   end
 
-  
-  
 end

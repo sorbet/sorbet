@@ -19,6 +19,4 @@ module GreetingModule; end
 module Foo
   extend T::Sig
 
-  
-  
 end

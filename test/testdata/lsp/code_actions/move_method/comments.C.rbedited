@@ -9,7 +9,9 @@ module QuxModule
   sig do
   void
 end
-  def qux
+
+
+def qux
 # ^ apply-code-action: [C] Move method to a new module
 end
 end
@@ -27,9 +29,5 @@ sig do
 end # comment after sig should stay in place
 def baz; end
 # ^ apply-code-action: [B] Move method to a new module
-
-
-
-
 
 end

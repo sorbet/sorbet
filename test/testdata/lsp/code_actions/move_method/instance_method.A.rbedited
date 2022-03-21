@@ -13,8 +13,6 @@ end
 class Inc
   extend T::Sig
 
-  
-  
 end
 
 foo = Inc.new

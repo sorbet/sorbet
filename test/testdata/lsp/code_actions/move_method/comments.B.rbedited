@@ -8,8 +8,8 @@ module BazModule
   extend T::Sig
   sig do
   void
-end
-  def baz; end
+end # comment after sig should stay in place
+def baz; end
 end
 
 class Foo
@@ -19,8 +19,6 @@ sig {void}
 # comment between sig and def should stay in place
 def bar; end
    # ^ apply-code-action: [A] Move method to a new module
-
- # comment after sig should stay in place
 
 # ^ apply-code-action: [B] Move method to a new module
 

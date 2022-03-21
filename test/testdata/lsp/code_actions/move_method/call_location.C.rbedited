@@ -22,8 +22,6 @@ module Foo
     # ^ apply-code-action: [B] Move method to a new module
   end
 
-  
-  
 
   sig {void}
   def self.d
