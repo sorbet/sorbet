@@ -202,6 +202,8 @@ public:
 class LSPStaleTypechecker final : public LSPTypecheckerInterface {
     std::shared_ptr<const LSPConfiguration> config;
     UndoState &undoState;
+    // Using an WorkerPool with size 0 for all typechecker operations causes the work to run on the
+    // current thread (usually: the indexer thread).
     std::unique_ptr<WorkerPool> emptyWorkers;
 
 public:
