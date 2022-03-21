@@ -61,15 +61,18 @@ optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, 
 unique_ptr<string> copyMethodSource(const core::GlobalState &gs, optional<core::LocOffsets> maybeSigLoc,
                                     const core::LocOffsets methodLoc, const core::FileRef fref) {
     if (maybeSigLoc.has_value()) {
-        return make_unique<string>(fref.data(gs).source().substr(maybeSigLoc.value().beginPos(), methodLoc.endPos() - maybeSigLoc.value().beginPos()));
+        return make_unique<string>(fref.data(gs).source().substr(maybeSigLoc.value().beginPos(),
+                                                                 methodLoc.endPos() - maybeSigLoc.value().beginPos()));
     } else {
-        return make_unique<string>(fref.data(gs).source().substr(methodLoc.beginPos(), methodLoc.endPos() - methodLoc.beginPos()));
+        return make_unique<string>(
+            fref.data(gs).source().substr(methodLoc.beginPos(), methodLoc.endPos() - methodLoc.beginPos()));
     }
 }
 
 optional<pair<optional<core::LocOffsets>, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
-                                                              const ast::ExpressionPtr &rootTree,
-                                                              const core::SymbolRef method, const core::FileRef fref) {
+                                                                        const ast::ExpressionPtr &rootTree,
+                                                                        const core::SymbolRef method,
+                                                                        const core::FileRef fref) {
     auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
     if (!maybeTree.has_value()) {
         return nullopt;
@@ -172,7 +175,8 @@ public:
         if (auto sendResp = response->isSend()) {
             // if the call site is not trivial, don't attempt to rename
             // the typecheck error will guide user how to fix it
-            if (sendResp->dispatchResult->main.method == originalSymbol.asMethodRef() && sendResp->dispatchResult->secondary == nullptr) {
+            if (sendResp->dispatchResult->main.method == originalSymbol.asMethodRef() &&
+                sendResp->dispatchResult->secondary == nullptr) {
                 edits[sendResp->receiverLoc] = newName;
             }
         }
@@ -208,7 +212,8 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     auto newModuleRange = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
     auto newModuleSource = fmt::format("{}{}{}\n\n", moduleStart, *methodSource, moduleEnd);
 
-    // This manipulations with the positions are required to remove leading tabs and whitespaces at the original method position
+    // This manipulations with the positions are required to remove leading tabs and whitespaces at the original method
+    // position
     auto methodBeginPos = maybeSigLoc.has_value() ? maybeSigLoc.value().beginPos() : methodLoc.beginPos();
     auto [oldMethodStart, oldMethodEnd] = core::Loc(fref, methodBeginPos, methodLoc.endPos()).position(gs);
     auto oldMethodLoc = core::Loc::fromDetails(gs, fref, {oldMethodStart.line, 0}, oldMethodEnd);
