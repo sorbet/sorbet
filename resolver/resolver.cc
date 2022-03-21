@@ -2090,7 +2090,9 @@ class ResolveTypeMembersAndFieldsWalk {
                                                core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
             }
             return resultType;
-        } else if (!core::isa_type<core::AliasType>(data->resultType)) {
+        }
+
+        if (!core::isa_type<core::AliasType>(data->resultType)) {
             // If we've already resolved a temporary constant, we still want to run resolveConstantType to
             // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
             // typechecking runs) but we only want to run this on constants that are value-level and not class
