@@ -151,7 +151,7 @@ public:
     }
 
     ~MethodCallSiteRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         if (invalid) {
             return;
         }
@@ -170,7 +170,11 @@ public:
         }
         string newsrc;
         if (auto sendResp = response->isSend()) {
-            edits[sendResp->receiverLoc] = newName;
+            // if the call site is not trivial, don't attempt to rename
+            // the typecheck error will guide user how to fix it
+            if (sendResp->dispatchResult->main.method == originalSymbol.asMethodRef() && sendResp->dispatchResult->secondary == nullptr) {
+                edits[sendResp->receiverLoc] = newName;
+            }
         }
     }
     void addSymbol(const core::SymbolRef symbol) override {

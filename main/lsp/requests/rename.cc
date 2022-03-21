@@ -58,7 +58,7 @@ public:
     }
 
     ~MethodRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         if (invalid) {
             return;
         }
@@ -162,7 +162,7 @@ public:
                  const string newName)
         : AbstractRenamer(gs, config, oldName, newName) {}
     ~ConstRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         if (!source.has_value()) {
