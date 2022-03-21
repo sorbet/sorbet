@@ -334,10 +334,13 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
         auto queryResult = queryByLoc(typechecker, params->textDocument->uri, *params->range->start,
                                       LSPMethod::TextDocumentCodeAction, false);
 
-        // Generate "Move method" code actions only for method definitions
+        // Generate "Move method" code actions only for class method definitions
         if (queryResult.error == nullptr) {
             for (auto &resp : queryResult.responses) {
                 if (auto def = resp->isMethodDef()) {
+                    if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
+                        continue;
+                    }
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
                     auto workspaceEdit = make_unique<WorkspaceEdit>();

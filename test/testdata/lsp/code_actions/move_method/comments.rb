@@ -8,13 +8,13 @@ class Foo
 
 sig {void}
 # comment between sig and def should move with the method
-def bar; end
+def self.bar; end
    # ^ apply-code-action: [A] Move method to a new module
 
 sig do
   void
 end # comment after sig should move with the method
-def baz; end
+def self.baz; end
 # ^ apply-code-action: [B] Move method to a new module
 
 sig do
@@ -22,7 +22,7 @@ sig do
 end
 
 
-def qux
+def self.qux
 # ^ apply-code-action: [C] Move method to a new module
 end
 end
