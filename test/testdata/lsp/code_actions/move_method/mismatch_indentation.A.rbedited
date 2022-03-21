@@ -1,0 +1,18 @@
+# typed: strict
+# selective-apply-code-action: refactor.extract
+
+module GreetingModule
+  extend T::Sig
+  sig {void}
+      def self.greeting; end
+end
+
+module Foo
+  module Bar
+    module Qux
+      extend T::Sig
+         # ^ apply-code-action: [A] Move method to a new module
+    end
+  end
+end
+
