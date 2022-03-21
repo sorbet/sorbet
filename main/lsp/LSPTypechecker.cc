@@ -757,7 +757,6 @@ std::vector<std::unique_ptr<core::Error>> LSPStaleTypechecker::retypecheck(std::
 
 LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
                                           const std::vector<core::FileRef> &filesForQuery) const {
-    // TODO: ENFORCE that we are on the indexing thread.
     auto &gs = undoState.getEvictedGs();
 
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
@@ -788,8 +787,6 @@ const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const
 }
 
 std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
-    // ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker
-    // thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
     for (auto fref : frefs) {
