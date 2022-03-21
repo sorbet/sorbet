@@ -139,15 +139,10 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
             continue;
         }
 
-        // "Move method" refactorings always have the same title
-        if (codeAction->kind != CodeActionKind::RefactorExtract) {
-            bool codeActionTitleUnique =
-                receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
-            CHECK_MESSAGE(codeActionTitleUnique, "Found code action with duplicate title: " << codeAction->title);
-            if (codeActionTitleUnique) {
-                receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
-            }
-        } else {
+        bool codeActionTitleUnique =
+            receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
+        CHECK_MESSAGE(codeActionTitleUnique, "Found code action with duplicate title: " << codeAction->title);
+        if (codeActionTitleUnique) {
             receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
         }
     }
