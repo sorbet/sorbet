@@ -268,7 +268,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
                 // deduped later.
                 set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
-                               newMethodHashes.end(), inserter(changedMethodHashes, changedMethodHashes.begin()));
+                               newMethodHashes.end(), std::back_inserter(changedMethodHashes));
 
                 gs->replaceFile(fref, f);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
