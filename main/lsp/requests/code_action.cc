@@ -175,10 +175,13 @@ public:
         if (auto sendResp = response->isSend()) {
             // if the call site is not trivial, don't attempt to rename
             // the typecheck error will guide user how to fix it
-            if (sendResp->dispatchResult->main.method == originalSymbol.asMethodRef() &&
-                sendResp->dispatchResult->secondary == nullptr) {
-                edits[sendResp->receiverLoc] = newName;
+            for (auto dr = sendResp->dispatchResult.get(); dr != nullptr; dr = dr->secondary.get()) {
+                if (dr->main.method != originalSymbol.asMethodRef()) {
+                    return;
+                }
             }
+
+            edits[sendResp->receiverLoc] = newName;
         }
     }
     void addSymbol(const core::SymbolRef symbol) override {
