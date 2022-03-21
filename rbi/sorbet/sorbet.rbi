@@ -348,6 +348,11 @@ class Sorbet::Private::Static::ENVClass
   def select!(&blk); end
 
   sig do
+    returns(T::Hash[String, T.nilable(String)])
+  end
+  def to_hash; end
+
+  sig do
     params(
         key: T::Hash[String, T.nilable(String)],
     )
