@@ -230,9 +230,8 @@ private:
         }
         if (sym.isTypeAlias(ctx)) {
             return sym.asFieldRef().data(ctx)->resultType != nullptr;
-        } else {
-            return true;
         }
+        return true;
     }
 
     class ResolutionChecker {
@@ -290,15 +289,15 @@ private:
                 }
             }
             return result;
-        } else {
-            if (!resolutionFailed) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
-                    e.setHeader("Dynamic constant references are unsupported");
-                }
-            }
-            resolutionFailed = true;
-            return core::Symbols::noSymbol();
         }
+
+        if (!resolutionFailed) {
+            if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
+                e.setHeader("Dynamic constant references are unsupported");
+            }
+        }
+        resolutionFailed = true;
+        return core::Symbols::noSymbol();
     }
 
     static const int MAX_SUGGESTION_COUNT = 10;
@@ -864,17 +863,17 @@ private:
             }
             it.lhs.setResultType(ctx, core::Types::untypedUntracked());
             return true;
-        } else {
-            if (rhsSym.dealias(ctx) != it.lhs) {
-                it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
-            } else {
-                if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
-                    e.setHeader("Class alias aliases to itself");
-                }
-                it.lhs.setResultType(ctx, core::Types::untypedUntracked());
-            }
-            return true;
         }
+
+        if (rhsSym.dealias(ctx) != it.lhs) {
+            it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
+        } else {
+            if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
+                e.setHeader("Class alias aliases to itself");
+            }
+            it.lhs.setResultType(ctx, core::Types::untypedUntracked());
+        }
+        return true;
     }
 
     static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
@@ -908,9 +907,8 @@ private:
     static core::ClassOrModuleRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
-        } else {
-            return core::Symbols::StubMixin();
         }
+        return core::Symbols::StubMixin();
     }
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
@@ -1232,13 +1230,14 @@ private:
                 todo_.emplace_back(std::move(job));
             }
             return out;
-        } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            return tree;
-        } else {
-            // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-            // Still want to do our best to recover (for e.g., LSP queries)
-            return ast::TreeMap::apply(ctx, *this, std::move(tree));
         }
+        if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
+            return tree;
+        }
+
+        // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+        // Still want to do our best to recover (for e.g., LSP queries)
+        return ast::TreeMap::apply(ctx, *this, std::move(tree));
     }
 
 public:
@@ -1901,18 +1900,18 @@ class ResolveTypeMembersAndFieldsWalk {
             // both bounds are set to todo in the namer, so it's sufficient to
             // just check one here.
             return !isTodo(lambdaParam->lowerBound);
-        } else {
-            return !isTodo(sym.resultType(ctx));
         }
+
+        return !isTodo(sym.resultType(ctx));
     }
 
     static bool isGenericResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.isClassOrModule()) {
             return absl::c_all_of(sym.asClassOrModuleRef().data(ctx)->typeMembers(),
                                   [&](core::SymbolRef tm) { return isLHSResolved(ctx, tm); });
-        } else {
-            return isLHSResolved(ctx, sym);
         }
+
+        return isLHSResolved(ctx, sym);
     }
 
     // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
@@ -2366,7 +2365,9 @@ class ResolveTypeMembersAndFieldsWalk {
         auto *cast = ast::cast_tree<ast::Cast>(*recur);
         if (cast == nullptr) {
             return false;
-        } else if (cast->cast != core::Names::let()) {
+        }
+
+        if (cast->cast != core::Names::let()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                 e.setHeader("Use `{}` to specify the type of constants", "T.let");
                 auto rhsLoc = core::Loc(ctx.file, asgn.rhs.loc());
@@ -3140,16 +3141,16 @@ private:
                                          int pos, bool isOverloaded) {
         if (!isOverloaded) {
             return ast::MK::arg2Local(mdef.args[pos]);
-        } else {
-            // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
-            // we roundtrip through original symbol that is stored in mdef.
-            auto internalNameToLookFor = argSym.name;
-            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
-                                                 [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
-            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
-            return ast::MK::arg2Local(mdef.args[realPos]);
         }
+
+        // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
+        // we roundtrip through original symbol that is stored in mdef.
+        auto internalNameToLookFor = argSym.name;
+        auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
+                                             [&](const auto &arg) { return arg.name == internalNameToLookFor; });
+        ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
+        auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
+        return ast::MK::arg2Local(mdef.args[realPos]);
     }
 
     static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
