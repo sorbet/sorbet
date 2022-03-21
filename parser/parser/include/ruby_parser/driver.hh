@@ -80,6 +80,22 @@ struct node_with_token {
     ForeignPtr nod = nullptr;
 };
 
+struct node_with_context {
+    node_with_context() = default;
+    node_with_context(ForeignPtr node, Context context) : node(node), context(context) {}
+
+    ForeignPtr node = nullptr;
+    Context context;
+};
+
+struct token_with_context {
+    token_with_context() = default;
+    token_with_context(const token_t &token, Context context) : token(token), context(context) {}
+
+    token_t token = nullptr;
+    Context context;
+};
+
 struct case_body {
     case_body() = default;
     case_body(node_with_token *else_) : els(else_) {}
@@ -92,6 +108,8 @@ class mempool {
     pool<ruby_parser::delimited_node_list, 32> _delimited_node_list;
     pool<ruby_parser::delimited_block, 32> _delimited_block;
     pool<ruby_parser::node_with_token, 32> _node_with_token;
+    pool<ruby_parser::node_with_context, 32> _node_with_context;
+    pool<ruby_parser::token_with_context, 32> _token_with_context;
     pool<ruby_parser::case_body, 32> _case_body;
     pool<ruby_parser::state_stack, 8> _stacks;
     friend class base_driver;
@@ -113,6 +131,14 @@ public:
 
     template <typename... Args> ruby_parser::node_with_token *node_with_token(Args &&...args) {
         return _node_with_token.alloc(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args> ruby_parser::node_with_context *node_with_context(Args &&...args) {
+        return _node_with_context.alloc(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args> ruby_parser::token_with_context *token_with_context(Args &&...args) {
+        return _token_with_context.alloc(std::forward<Args>(args)...);
     }
 
     template <typename... Args> ruby_parser::case_body *case_body(Args &&...args) {
@@ -168,11 +194,12 @@ public:
 // The stack has 3 states:
 //  * `top = 0`: no parameter (ordinary or numbered) in this scope
 //  * `top < 0`: ordinary parameter(s) in this scope
-//  * `top > 0`: at leat one numbered parameter in this scope (top being the highest one found)
+//  * `top > 0`: at least one numbered parameter in this scope (top being the highest one found)
 class max_numparam_stack {
     struct NumparamScope {
         int max;
         ruby_parser::node_list *decls;
+        bool staticContext = false;
     };
 
     std::vector<NumparamScope> stack;
@@ -202,7 +229,7 @@ public:
     // Register a numparam in the current scope
     void regis(int numparam, ruby_parser::node_list *decls) {
         if (stack.empty()) {
-            push(decls);
+            push(decls, false);
         } else {
             top()->decls->concat(decls);
         }
@@ -217,8 +244,8 @@ public:
     }
 
     // Push a new scope on the stack (top = 0)
-    void push(ruby_parser::node_list *decls) {
-        stack.push_back(NumparamScope{0, decls});
+    void push(ruby_parser::node_list *decls, bool staticContext) {
+        stack.push_back(NumparamScope{0, decls, staticContext});
     }
 
     // Pop the current scope
@@ -384,6 +411,9 @@ public:
     // what we rewind to if even the first thing in the body is improperly indented.
     ForeignPtr rewind_and_munge_body_if_dedented(SelfPtr self, token_t defToken, size_t headerEndPos, ForeignPtr body,
                                                  token_t bodyStartToken, token_t lastTokBeforeDedent, token_t endToken);
+
+    void local_push();
+    void local_pop();
 
 private:
     void rewind_for_end_token(token_t endToken);

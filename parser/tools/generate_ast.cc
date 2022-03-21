@@ -204,6 +204,8 @@ NodeDef nodes[] = {
         "defined?",
         vector<FieldDef>({{"value", FieldType::Node}}),
     },
+    // def name, instance method def
+    {"DefnHead", "defnhead", vector<FieldDef>({{"name", FieldType::Name}})},
     // def <expr>.name singleton-class method def
     {
         "DefS",

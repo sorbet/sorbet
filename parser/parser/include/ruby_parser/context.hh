@@ -9,37 +9,29 @@ namespace ruby_parser {
 
 class Context {
 public:
-    enum class State {
-        CLASS,
-        MODULE,
-        SCLASS,
-        DEF,
-        DEFS,
-        BLOCK,
-        LAMBDA,
-        DEF_OPEN_ARGS,
-    };
+    bool inDefined = false;
+    bool inKwarg = false;
+    bool inArgDef = false;
+    bool inDef = false;
+    bool inClass = false;
+    bool inBlock = false;
+    bool inLambda = false;
 
-    void push(State state);
-    void pop();
-    void reset();
-    bool inBlock();
-    bool inClass();
-    bool inDynamicBlock();
-    bool inLambda();
-    bool inDefOpenArgs();
-    bool indirectlyInDef();
-    bool classDefintinionAllowed();
-    bool moduleDefintinionAllowed();
-    bool dynamicConstDefintinionAllowed();
-    std::vector<State> stackCopy();
+    bool inDynamicBlock() {
+        return inBlock || inLambda;
+    }
 
-private:
-    std::vector<State> stack;
-
-    std::optional<int> firstIndexOfState(State state);
-    std::optional<int> lastIndexOfState(State state);
-    bool contains(State state);
+    Context dup() const {
+        Context ctx;
+        ctx.inDefined = inDefined;
+        ctx.inKwarg = inKwarg;
+        ctx.inArgDef = inArgDef;
+        ctx.inDef = inDef;
+        ctx.inClass = inClass;
+        ctx.inBlock = inBlock;
+        ctx.inLambda = inLambda;
+        return ctx;
+    }
 };
 
 } // namespace ruby_parser

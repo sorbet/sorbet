@@ -61,13 +61,13 @@ struct builder {
     ForeignPtr (*dedentString)(SelfPtr builder, ForeignPtr node, size_t dedentLevel);
     ForeignPtr (*def_class)(SelfPtr builder, const token *class_, ForeignPtr name, const token *lt_,
                             ForeignPtr superclass, ForeignPtr body, const token *end_);
-    ForeignPtr (*defEndlessMethod)(SelfPtr builder, const token *def, const token *name, ForeignPtr args,
-                                   const token *equal, ForeignPtr body);
+    ForeignPtr (*defEndlessMethod)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal,
+                                   ForeignPtr body);
     ForeignPtr (*defEndlessSingleton)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal,
                                       ForeignPtr body);
-    ForeignPtr (*defMethod)(SelfPtr builder, const token *def, const token *name, ForeignPtr args, ForeignPtr body,
-                            const token *end);
+    ForeignPtr (*defMethod)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end);
     ForeignPtr (*defModule)(SelfPtr builder, const token *module, ForeignPtr name, ForeignPtr body, const token *end_);
+    ForeignPtr (*defnHead)(SelfPtr builder, const token *def, const token *name);
     ForeignPtr (*def_sclass)(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr,
                              ForeignPtr body, const token *end_);
     ForeignPtr (*defsHead)(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name);
