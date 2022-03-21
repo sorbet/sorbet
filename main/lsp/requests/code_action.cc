@@ -58,12 +58,16 @@ optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, 
     return nullopt;
 }
 
-unique_ptr<string> copyMethodSource(const core::GlobalState &gs, const core::LocOffsets sigLoc,
+unique_ptr<string> copyMethodSource(const core::GlobalState &gs, optional<core::LocOffsets> maybeSigLoc,
                                     const core::LocOffsets methodLoc, const core::FileRef fref) {
-    return make_unique<string>(fref.data(gs).source().substr(sigLoc.beginPos(), methodLoc.endPos() - sigLoc.beginPos()));
+    if (maybeSigLoc.has_value()) {
+        return make_unique<string>(fref.data(gs).source().substr(maybeSigLoc.value().beginPos(), methodLoc.endPos() - maybeSigLoc.value().beginPos()));
+    } else {
+        return make_unique<string>(fref.data(gs).source().substr(methodLoc.beginPos(), methodLoc.endPos() - methodLoc.beginPos()));
+    }
 }
 
-optional<pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
+optional<pair<optional<core::LocOffsets>, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
                                                               const ast::ExpressionPtr &rootTree,
                                                               const core::SymbolRef method, const core::FileRef fref) {
     auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
@@ -74,7 +78,7 @@ optional<pair<core::LocOffsets, core::LocOffsets>> methodLocs(const core::Global
 
     auto maybeSig = sorbet::sig_finder::findSignature(gs, method);
     if (!maybeSig.has_value()) {
-        return nullopt;
+        return make_pair(nullopt, methodLoc);
     }
     core::LocOffsets sigLoc = {maybeSig->sig.beginPos(), maybeSig->body.endPos()};
 
@@ -194,14 +198,15 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     if (!sigAndMethodLocs.has_value()) {
         return {};
     }
-    auto [sigLoc, methodLoc] = sigAndMethodLocs.value();
-    auto methodSource = copyMethodSource(gs, sigLoc, methodLoc, fref);
+    auto [maybeSigLoc, methodLoc] = sigAndMethodLocs.value();
+    auto methodSource = copyMethodSource(gs, maybeSigLoc, methodLoc, fref);
 
     auto newModuleRange = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
     auto newModuleSource = fmt::format("{}{}{}\n\n", moduleStart, *methodSource, moduleEnd);
 
     // This manipulations with the positions are required to remove leading tabs and whitespaces at the original method position
-    auto [oldMethodStart, oldMethodEnd] = core::Loc(fref, sigLoc.beginPos(), methodLoc.endPos()).position(gs);
+    auto methodBeginPos = maybeSigLoc.has_value() ? maybeSigLoc.value().beginPos() : methodLoc.beginPos();
+    auto [oldMethodStart, oldMethodEnd] = core::Loc(fref, methodBeginPos, methodLoc.endPos()).position(gs);
     auto oldMethodLoc = core::Loc::fromDetails(gs, fref, {oldMethodStart.line, 0}, oldMethodEnd);
     ENFORCE(oldMethodLoc.has_value());
 
