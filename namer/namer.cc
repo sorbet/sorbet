@@ -1446,6 +1446,9 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
+    // TODO(jez) Might want to rename this to something like "mungeTreeToPassForcePassAssertions" or something
+    bool bestEffort;
+
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
@@ -1569,6 +1572,8 @@ class TreeSymbolizer {
     }
 
 public:
+    TreeSymbolizer(bool bestEffort) : bestEffort(bestEffort) {}
+
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -1917,8 +1922,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
-vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                       WorkerPool &workers) {
+vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
+                                       bool bestEffort) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -1926,9 +1931,9 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, bestEffort]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
-        TreeSymbolizer inserter;
+        TreeSymbolizer inserter(bestEffort);
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1974,10 +1979,8 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 // with a potentially-stale GlobalState.
 ast::ParsedFilesOrCancelled Namer::symbolizeTreesBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                             WorkerPool &workers) {
-    // At the moment, we don't actually have to do anything more than symbolizeTrees.
-    // But symbolizeTrees is a "private" API, so we expose it in a function with a different name to
-    // make the interface clear.
-    return symbolizeTrees(gs, move(trees), workers);
+    auto bestEffort = true;
+    return symbolizeTrees(gs, move(trees), workers, bestEffort);
 }
 
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
@@ -1993,7 +1996,8 @@ ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::Parsed
     if (!result.hasResult()) {
         return result;
     }
-    trees = symbolizeTrees(gs, move(result.result()), workers);
+    auto bestEffort = false;
+    trees = symbolizeTrees(gs, move(result.result()), workers, bestEffort);
     return trees;
 }
 
