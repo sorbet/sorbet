@@ -40,7 +40,8 @@ const UnorderedMap<
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
-        {"selective-apply-code-action", SelectiveApplyCodeActionAssertions::make},
+        {"selective-apply-code-action", StringPropertyAssertions::make},
+        {"assert-no-code-action", StringPropertyAssertions::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
@@ -1992,26 +1993,25 @@ string_view trimString(std::string_view s) {
 }
 } // namespace
 
-std::shared_ptr<SelectiveApplyCodeActionAssertions>
-SelectiveApplyCodeActionAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                                         std::string_view assertionContents, std::string_view assertionType) {
+std::shared_ptr<StringPropertyAssertions>
+StringPropertyAssertions::make(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                               std::string_view assertionContents, std::string_view assertionType) {
     std::vector<std::string> values = absl::StrSplit(assertionContents, ',');
     transform(values.begin(), values.end(), values.begin(), [](auto val) { return trimString(val); });
 
-    return make_shared<SelectiveApplyCodeActionAssertions>(filename, range, assertionLine, values, assertionType);
+    return make_shared<StringPropertyAssertions>(filename, range, assertionLine, values, assertionType);
 }
 
-SelectiveApplyCodeActionAssertions::SelectiveApplyCodeActionAssertions(std::string_view filename,
-                                                                       std::unique_ptr<Range> &range, int assertionLine,
-                                                                       std::vector<std::string> values,
-                                                                       std::string_view assertionType)
+StringPropertyAssertions::StringPropertyAssertions(std::string_view filename, std::unique_ptr<Range> &range,
+                                                   int assertionLine, std::vector<std::string> values,
+                                                   std::string_view assertionType)
     : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
 
 std::optional<std::vector<std::string>>
-SelectiveApplyCodeActionAssertions::getValues(std::string_view type,
-                                              const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+StringPropertyAssertions::getValues(std::string_view type,
+                                    const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
     for (auto &assertion : assertions) {
-        if (auto codeActionAssertion = dynamic_pointer_cast<SelectiveApplyCodeActionAssertions>(assertion)) {
+        if (auto codeActionAssertion = dynamic_pointer_cast<StringPropertyAssertions>(assertion)) {
             if (codeActionAssertion->assertionType == type) {
                 return codeActionAssertion->values;
             }
@@ -2020,7 +2020,7 @@ SelectiveApplyCodeActionAssertions::getValues(std::string_view type,
     return nullopt;
 }
 
-string SelectiveApplyCodeActionAssertions::toString() const {
+string StringPropertyAssertions::toString() const {
     return fmt::format("selective-apply-code-action: {}", fmt::join(values, ", "));
 }
 } // namespace sorbet::test
