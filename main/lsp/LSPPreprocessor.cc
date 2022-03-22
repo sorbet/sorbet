@@ -364,6 +364,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
+            file->setIsOpenInClient(true);
             edit->updates.push_back(file);
             slot = move(file);
         }
@@ -382,6 +383,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidOpenTextDocumentPar
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(openParams->textDocument->text), fileType, v);
+            file->setIsOpenInClient(true);
             edit->updates.push_back(file);
             slot = move(file);
         }
