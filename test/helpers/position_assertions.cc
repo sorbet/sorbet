@@ -1455,10 +1455,11 @@ optional<pair<string, string>> ApplyCodeActionAssertion::expectedFile() {
 
 void ApplyCodeActionAssertion::assertResults(std::string expectedPath, std::string expectedContents,
                                              std::string actualContents) {
-    INFO(fmt::format(
-        "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
-        expectedPath, expectedContents, actualContents));
-    CHECK_EQ(actualContents, expectedContents);
+    CHECK_EQ_DIFF(
+        expectedContents, actualContents,
+        fmt::format(
+            "Invalid quick fix result. Expected edited result ({}) to be:\n{}\n...but actually resulted in:\n{}",
+            expectedPath, expectedContents, actualContents));
 }
 
 std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::unique_ptr<TextDocumentEdit> changes) {
