@@ -35,7 +35,7 @@ module T::Props::Serializable
       end
     end
 
-    h.merge!(@_extra_props) if @_extra_props
+    h.merge!(@_extra_props) if defined?(@_extra_props)
     h
   end
 
@@ -121,8 +121,8 @@ module T::Props::Serializable
   private def with_existing_hash(changed_props, existing_hash:)
     serialized = existing_hash
     new_val = self.class.from_hash(serialized.merge(recursive_stringify_keys(changed_props)))
-    old_extra = self.instance_variable_get(:@_extra_props)
-    new_extra = new_val.instance_variable_get(:@_extra_props)
+    old_extra = self.instance_variable_get(:@_extra_props) if self.instance_variable_defined?(:@_extra_props)
+    new_extra = new_val.instance_variable_get(:@_extra_props) if new_val.instance_variable_defined?(:@_extra_props)
     if old_extra != new_extra
       difference =
         if old_extra
@@ -137,7 +137,8 @@ module T::Props::Serializable
 
   # Asserts if this property is missing during strict serialize
   private def required_prop_missing_from_serialize(prop)
-    if @_required_props_missing_from_deserialize&.include?(prop)
+    if defined?(@_required_props_missing_from_deserialize) &&
+       @_required_props_missing_from_deserialize&.include?(prop)
       # If the prop was already missing during deserialization, that means the application
       # code already had to deal with a nil value, which means we wouldn't be accomplishing
       # much by raising here (other than causing an unnecessary breakage).
@@ -322,7 +323,11 @@ module T::Props::Serializable::DecoratorMethods
   private_constant :EMPTY_EXTRA_PROPS
 
   def extra_props(instance)
-    instance.instance_variable_get(:@_extra_props) || EMPTY_EXTRA_PROPS
+    if instance.instance_variable_defined?(:@_extra_props)
+      instance.instance_variable_get(:@_extra_props)
+    else
+      instance.instance_variable_set(:@_extra_props, EMPTY_EXTRA_PROPS)
+    end
   end
 
   # overrides T::Props::PrettyPrintable

@@ -80,6 +80,7 @@ module T::Configuration
     T::Props::Private::DeserializerGenerator.respond_to?(:generate2)
   end
 
+  @use_vm_prop_serde = false
   # Whether to use VM-defined prop serialization/deserialization routines.
   #
   # The default is to use runtime codegen inside sorbet-runtime itself.
@@ -117,6 +118,7 @@ module T::Configuration
     T::Private::RuntimeLevels.default_checked_level = default_checked_level
   end
 
+  @inline_type_error_handler = nil
   # Set a handler to handle `TypeError`s raised by any in-line type assertions,
   # including `T.must`, `T.let`, `T.cast`, and `T.assert_type!`.
   #
@@ -164,6 +166,7 @@ module T::Configuration
     nil
   end
 
+  @sig_builder_error_handler = nil
   # Set a handler to handle errors that occur when the builder methods in the
   # body of a sig are executed. The sig builder methods are inside a proc so
   # that they can be lazily evaluated the first time the method being sig'd is
@@ -204,6 +207,7 @@ module T::Configuration
     nil
   end
 
+  @sig_validation_error_handler = nil
   # Set a handler to handle sig validation errors.
   #
   # Sig validation errors include things like abstract checks, override checks,
@@ -254,6 +258,7 @@ module T::Configuration
     nil
   end
 
+  @call_validation_error_handler = nil
   # Set a handler for type errors that result from calling a method.
   #
   # By default, errors from calling a method cause an exception to be raised.
@@ -300,6 +305,7 @@ module T::Configuration
     nil
   end
 
+  @log_info_handler = nil
   # Set a handler for logging
   #
   # @param [Lambda, Proc, Object, nil] value Proc that handles the error
@@ -331,6 +337,7 @@ module T::Configuration
     end
   end
 
+  @soft_assert_handler = nil
   # Set a handler for soft assertions
   #
   # These generally shouldn't stop execution of the program, but rather inform
@@ -365,6 +372,7 @@ module T::Configuration
     end
   end
 
+  @hard_assert_handler = nil
   # Set a handler for hard assertions
   #
   # These generally should stop execution of the program, and optionally inform
@@ -399,6 +407,7 @@ module T::Configuration
     end
   end
 
+  @scalar_types = nil
   # Set a list of class strings that are to be considered scalar.
   #   (pass nil to reset to default behavior)
   #
@@ -461,6 +470,7 @@ module T::Configuration
     @module_name_mangler = handler
   end
 
+  @sensitivity_and_pii_handler = nil
   # Set to a PII handler function. This will be called with the `sensitivity:`
   # annotations on things that use `T::Props` and can modify them ahead-of-time.
   #
@@ -490,6 +500,7 @@ module T::Configuration
     @redaction_handler
   end
 
+  @class_owner_finder = nil
   # Set to a function which can get the 'owner' of a class. This is
   # used in reporting deserialization errors
   #
@@ -523,6 +534,7 @@ module T::Configuration
     end
   end
 
+  @legacy_t_enum_migration_mode = false
   def self.enable_legacy_t_enum_migration_mode
     @legacy_t_enum_migration_mode = true
   end
@@ -543,6 +555,7 @@ module T::Configuration
     @prop_freeze_handler
   end
 
+  @sealed_violation_whitelist = nil
   # @param [Array] sealed_violation_whitelist An array of Regexp to validate
   #   whether inheriting /including a sealed module outside the defining module
   #   should be allowed. Useful to whitelist benign violations, like shim files

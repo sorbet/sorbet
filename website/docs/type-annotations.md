@@ -126,8 +126,10 @@ variables:
 module B
   sig {returns(String)}
   def current_user
-    @user = T.let(@user, T.nilable(String))
-    @user ||= ENV.fetch('USER')
+    unless defined?(@user)
+      @user = T.let(ENV.fetch('USER'), T.nilable(String))
+    end
+    T.must(@user)
   end
 end
 ```
