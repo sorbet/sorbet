@@ -155,8 +155,10 @@ variables:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
   sig {returns(String)}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">current_user</span></span>
-    @user = T.let(@user, T.nilable(String))
-    @user <span class="hljs-params">||</span>= ENV.fetch(<span class="hljs-string">'USER'</span>)
+    <span class="hljs-keyword">unless</span> <span class="hljs-keyword">defined</span>?(@user)
+      @user = T.let(ENV.fetch(<span class="hljs-string">'USER'</span>), T.nilable(String))
+    <span class="hljs-keyword">end</span>
+    T.must(@user)
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
