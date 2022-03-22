@@ -44,6 +44,10 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     typeErrorsConsoleOut->set_pattern("%v");
     auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsoleOut, *loggerOut));
 
+    if (options.sleepInSlowPath) {
+        gs->sleepInSlowPath = true;
+    }
+
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(options);
     payload::createInitialGlobalState(gs, options, kvstore);
     setRequiredLSPOptions(*gs, options);

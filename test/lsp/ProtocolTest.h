@@ -47,7 +47,7 @@ protected:
     ~ProtocolTest();
 
     /** Reset lspWrapper and other internal state. */
-    void resetState();
+    void resetState(std::shared_ptr<sorbet::realmain::options::Options> opts = nullptr);
 
     /** Get an absolute file URI for the given relative file path. */
     std::string getUri(std::string_view filePath);
