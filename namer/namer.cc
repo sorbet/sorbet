@@ -301,6 +301,7 @@ struct SymbolFinderResult {
 };
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
+    ENFORCE(ctx.owner.exists() && ctx.owner != core::Symbols::todo());
     auto owner = ctx.owner.enclosingClass(ctx);
     if (owner == core::Symbols::root()) {
         // Root methods end up going on object
@@ -317,6 +318,7 @@ core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flag
 // Returns the SymbolRef corresponding to the class `self.class`, unless the
 // context is a class, in which case return it.
 core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat) {
+    ENFORCE(ofWhat.exists() && ofWhat != core::Symbols::todo());
     core::SymbolRef owner = ofWhat;
     while (true) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
