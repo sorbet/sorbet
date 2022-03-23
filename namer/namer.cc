@@ -1478,6 +1478,11 @@ class TreeSymbolizer {
 
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        if (!newOwner.exists()) {
+            ENFORCE(this->bestEffort);
+            return core::Symbols::noSymbol();
+        }
+
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
@@ -1485,16 +1490,25 @@ class TreeSymbolizer {
                 existing = existing.dealias(ctx.state);
             }
         }
-        // NameInserter should have created this symbol.
-        ENFORCE(existing.exists());
+
+        // NameInserter should have created this symbol, unless we're running in bestEffort mode (stale GlobalState).
+        if (!existing.exists()) {
+            ENFORCE(this->bestEffort);
+            return core::Symbols::noSymbol();
+        }
 
         node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, std::move(node));
         return existing;
     }
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
+    optional<core::SymbolRef> squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
         const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName);
+        auto result = squashNamesInner(ctx, owner, node, firstName);
+
+        // Explicitly convert to optional (unlikely what we usually do with SymbolRef's), because
+        // the bestEffort mode is subtle, and can easily break invariants that old code used to
+        // assume, so hopefully the type system catches them more easily.
+        return result.exists() ? make_optional<core::SymbolRef>(result) : nullopt;
     }
 
     ast::ExpressionPtr arg2Symbol(int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
@@ -1579,6 +1593,12 @@ public:
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
+        if (ctx.owner == core::Symbols::todo()) {
+            ENFORCE(this->bestEffort);
+            // TODO(jez) Add rationale
+            return tree;
+        }
+
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
             klass.symbol = ctx.owner.enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
@@ -1587,10 +1607,13 @@ public:
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
-                klass.symbol = squashedSymbol.asClassOrModuleRef();
+                if (squashedSymbol.has_value()) {
+                    klass.symbol = squashedSymbol.value().asClassOrModuleRef();
+                }
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
+                // ENFORCE(this->bestEffort || symbol == core::Symbols::root());
                 ENFORCE(symbol == core::Symbols::root());
             }
         }
@@ -1612,6 +1635,12 @@ public:
 
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        if (klass.symbol == core::Symbols::todo()) {
+            ENFORCE(this->bestEffort);
+            // TODO(jez) Document rationale
+            return ast::MK::EmptyTree();
+        }
 
         // NameDefiner should have forced this class's singleton class into existence.
         ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
@@ -1689,10 +1718,22 @@ public:
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
+        if (ctx.owner == core::Symbols::todo()) {
+            ENFORCE(this->bestEffort);
+            // TODO(jez) Add rationale
+            return tree;
+        }
+
         auto owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
-        ENFORCE(sym.exists());
+        if (!sym.exists()) {
+            ENFORCE(this->bestEffort);
+            // We're going to delete this tree when we get to the postTransformMethodDef.
+            // Drop the RHS to make it get there faster.
+            method.rhs = ast::MK::EmptyTree();
+            return tree;
+        }
         method.symbol = sym;
         method.args = fillInArgs(move(parsedArgs), std::move(method.args));
 
@@ -1701,6 +1742,11 @@ public:
 
     ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (method.symbol == core::Symbols::todoMethod() && this->bestEffort) {
+            // TODO(jez) rationale
+            return ast::MK::EmptyTree();
+        }
+
         ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
                 method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
         return tree;
@@ -1710,7 +1756,16 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        core::SymbolRef maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        auto maybeMaybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        if (!maybeMaybeScope.has_value()) {
+            ENFORCE(this->bestEffort);
+            // SymbolDefiner will define a name that squashNames will find in all cases except when
+            // we're running in non-mutating mode (LSP) and thus couldn't define new symbols.
+            // In that case, just delete this assignment.
+            return ast::MK::EmptyTree();
+        }
+        auto maybeScope = maybeMaybeScope.value();
+
         if (!maybeScope.isClassOrModule()) {
             auto scopeName = maybeScope.name(ctx);
             maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
@@ -1718,7 +1773,10 @@ public:
         auto scope = maybeScope.asClassOrModuleRef();
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
-        ENFORCE(cnst.exists());
+        if (!cnst.exists()) {
+            ENFORCE(this->bestEffort);
+            return ast::MK::EmptyTree();
+        }
         auto loc = lhs.loc;
         asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
 
@@ -1763,9 +1821,15 @@ public:
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
             auto onSymbol =
                 isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
-            ENFORCE(onSymbol.exists());
+            if (!onSymbol.exists()) {
+                ENFORCE(this->bestEffort);
+                return ast::MK::EmptyTree();
+            }
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
-            ENFORCE(sym.exists());
+            if (!sym.exists()) {
+                ENFORCE(this->bestEffort);
+                return ast::MK::EmptyTree();
+            }
 
             if (send->hasKwArgs()) {
                 bool fixed = false;
@@ -1825,6 +1889,13 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
             return tree;
+        }
+
+        if (ctx.owner == core::Symbols::todo()) {
+            ENFORCE(this->bestEffort);
+            // Once we get back up to the enclosing postTransformX, we're goign to delete not only
+            // this but the whole surrounding context, so just return anything for the time being.
+            return ast::MK::EmptyTree();
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
