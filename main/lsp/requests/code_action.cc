@@ -12,7 +12,10 @@ namespace sorbet::realmain::lsp {
 namespace {
 
 bool isOperator(string_view name) {
-    const vector<string> operators = { "+", "−", "*", "/", "%", "**", "==", "!=", ">", "<", ">=", "<=", "<=>", "===", ".eql?", "equal?", "=", "+=", "-=", "*=", "/=", "%=", "**=", "&", "|", "^", "~", "<<", ">>", "and", "or", "&&", "||", "!", "not", ".." };
+    const vector<string> operators = {"+",  "−",  "*",   "/",   "%",   "**",    "==",     "!=",  ">",
+                                      "<",  ">=", "<=",  "<=>", "===", ".eql?", "equal?", "=",   "+=",
+                                      "-=", "*=", "/=",  "%=",  "**=", "&",     "|",      "^",   "~",
+                                      "<<", ">>", "and", "or",  "&&",  "||",    "!",      "not", ".."};
     return std::find(operators.begin(), operators.end(), name) != operators.end();
 }
 
