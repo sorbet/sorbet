@@ -159,7 +159,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                               {
                                   makeField("title", JSONString),
                                   makeField("command", JSONString),
-                                  // Unused in Sorbet.
                                   makeField("arguments", makeOptional(makeArray(JSONAny))),
                               },
                               classTypes);
