@@ -3,7 +3,8 @@ InsSeq{
     EmptyTree
     ClassDef{
       kind = class
-      name = EmptyTree<<C <U <root>>>>
+      name = EmptyTree
+      symbol = <C <U <root>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
