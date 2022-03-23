@@ -675,7 +675,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ReturnsStaleInfo") {
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
     // Reset the options to enable stale state and sleep-in-slow-path.
     auto opts = make_shared<realmain::options::Options>();
     opts->lspStaleStateEnabled = true;
@@ -692,7 +692,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ReturnsStaleInfo") {
                        "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\n1\nend\nend")),
         {});
 
-    // Send a hover to request the documentation string.
+    // Send a hover.
     sendAsync(*hover("foo.rb", 4, 4));
 
     // First response should be hover, and we do not expect the information to be stale.
@@ -736,6 +736,124 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ReturnsStaleInfo") {
 
     // Send a hover.
     sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a no-op to clear out the pipeline.
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
+    // Reset the options to enable stale state and sleep-in-slow-path.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspStaleStateEnabled = true;
+    opts->sleepInSlowPath = true;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Set initial file contents for foo.rb and bar.rb.
+    assertDiagnostics(
+        send(*openFile("foo.rb",
+                       "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\n1\nend\nend")),
+        {});
+    assertDiagnostics(
+        send(*openFile("bar.rb",
+                       "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend")),
+        {});
+
+    // Send a hover in foo.rb.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a hover in bar.rb.
+    sendAsync(*hover("bar.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Make an edit, renaming Foo::foo to Foo::bar.
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
+
+    // Wait for typechecking to begin.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Send a hover to foo.rb.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a hover to bar.rb.
+    sendAsync(*hover("bar.rb", 4, 4));
+
+    // We expect a null response from our hover on bar.rb. (NOTE: This is not ideal behavior, just what's expected with
+    // the current partial implementation.)
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+
+        auto hoverResult = get_if<variant<JSONNullObject, unique_ptr<Hover>>>(&(*response->asResponse().result));
+        REQUIRE(hoverResult != nullptr);
+
+        REQUIRE(holds_alternative<JSONNullObject>(*hoverResult));
+    }
+
+    // Wait for typechecking to finish.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Send a hover to foo.rb.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a hover to bar.rb.
+    sendAsync(*hover("bar.rb", 4, 4));
 
     // First response should be hover, and we do not expect the information to be stale.
     {
