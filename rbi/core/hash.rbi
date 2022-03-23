@@ -1401,6 +1401,21 @@ class Hash < Object
   end
   def transform_values!(&blk); end
 
+  # Attempts to convert a given object to a `Hash``. If *obj* is a `Hash``,
+  # *obj* is returned. If *obj* reponds to `to_hash`, the return of
+  # *obj.to_hash* is returned. Otherwise, `nil` is returned.
+  #
+  # ```ruby
+  # Hash.try_convert({ a: :b }) #=> { a: :b }
+  # Hash.try_convert(Object.new) #=> nil
+  # ```
+  #
+  # An exception is raised when `obj.to_hash` doesn't return a Hash.
+  sig do
+    params(obj: T.untyped).returns(T.nilable(T::Hash[T.untyped, T.untyped]))
+  end
+  def self.try_convert(obj); end
+
   # Adds the contents of the given hashes to the receiver.
   #
   # If no block is given, entries with duplicate keys are overwritten with the
