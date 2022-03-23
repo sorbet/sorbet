@@ -174,11 +174,10 @@ public:
         }
     }
     void addSymbol(const core::SymbolRef symbol) override {
-        if (symbol.isMethod()) {
-            addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
-        } else {
-            getQueue()->tryEnqueue(symbol);
+        if (!symbol.isMethod()) {
+            return;
         }
+        addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
     }
 }; // CallSiteRenamer
 
