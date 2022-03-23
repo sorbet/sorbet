@@ -182,18 +182,18 @@ public:
 }; // CallSiteRenamer
 
 vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
-                                        const core::lsp::MethodDefResponse *definition,
+                                        const core::lsp::MethodDefResponse &definition,
                                         LSPTypecheckerInterface &typechecker, string_view newModuleName) {
     auto moduleStart = fmt::format("module {}{}\n  ", newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
     auto moduleEnd = "\nend";
 
-    auto fref = definition->termLoc.file();
+    auto fref = definition.termLoc.file();
 
     auto trees = typechecker.getResolved({fref});
     ENFORCE(!trees.empty());
     auto &rootTree = trees[0].tree;
 
-    auto sigAndMethodLocs = methodLocs(gs, rootTree, definition->symbol, fref);
+    auto sigAndMethodLocs = methodLocs(gs, rootTree, definition.symbol, fref);
     if (!sigAndMethodLocs.has_value()) {
         return {};
     }
@@ -226,18 +226,18 @@ CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, uni
 
 vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LSPConfiguration &config,
                                                                         const core::GlobalState &gs,
-                                                                        const core::lsp::MethodDefResponse *definition,
+                                                                        const core::lsp::MethodDefResponse &definition,
                                                                         LSPTypecheckerInterface &typechecker) {
     vector<unique_ptr<TextDocumentEdit>> res;
-    auto newModuleName = getNewModuleName(gs, definition->name);
+    auto newModuleName = getNewModuleName(gs, definition.name);
     if (!newModuleName.has_value()) {
         return res;
     }
 
     vector<unique_ptr<TextEdit>> edits = moveMethod(config, gs, definition, typechecker, newModuleName.value());
 
-    auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition->name.show(gs), newModuleName.value());
-    getRenameEdits(typechecker, renamer, definition->symbol, newModuleName.value());
+    auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
+    getRenameEdits(typechecker, renamer, definition.symbol, newModuleName.value());
     auto callSiteEdits = renamer->buildTextDocumentEdits();
 
     if (callSiteEdits.has_value()) {
@@ -247,7 +247,7 @@ vector<unique_ptr<TextDocumentEdit>> CodeActionTask::getMoveMethodEdits(const LS
     }
     auto docEdit =
         make_unique<TextDocumentEdit>(make_unique<VersionedTextDocumentIdentifier>(
-                                          config.fileRef2Uri(gs, definition->termLoc.file()), JSONNullObject()),
+                                          config.fileRef2Uri(gs, definition.termLoc.file()), JSONNullObject()),
                                       move(edits));
 
     res.emplace_back(move(docEdit));
@@ -348,7 +348,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
                     auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, def, typechecker);
+                    workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, *def, typechecker);
                     action->edit = move(workspaceEdit);
                     result.emplace_back(move(action));
                 }
