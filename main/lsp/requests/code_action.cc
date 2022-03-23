@@ -11,6 +11,11 @@ namespace sorbet::realmain::lsp {
 
 namespace {
 
+bool isOperator(string_view name) {
+    const vector<string> operators = { "+", "−", "*", "/", "%", "**", "==", "!=", ">", "<", ">=", "<=", "<=>", "===", ".eql?", "equal?", "=", "+=", "-=", "*=", "/=", "%=", "**=", "&", "|", "^", "~", "<<", ">>", "and", "or", "&&", "||", "!", "not", ".." };
+    return std::find(operators.begin(), operators.end(), name) != operators.end();
+}
+
 bool isTSigRequired(const core::GlobalState &gs) {
     return !core::Symbols::Module().data(gs)->derivesFrom(gs, core::Symbols::T_Sig());
 }
@@ -134,11 +139,6 @@ public:
                 error = fmt::format("The `{}` method cannot be moved to a module.", oldName);
                 return;
             }
-        }
-        // block any method not starting with /[a-zA-Z0-9_]+/. This blocks operator overloads.
-        if (!isalnum(oldName[0]) && oldName[0] != '_') {
-            error = fmt::format("The `{}` method cannot be moved to a module.", oldName);
-            invalid = true;
         }
     }
 
@@ -343,7 +343,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
         if (queryResult.error == nullptr) {
             for (auto &resp : queryResult.responses) {
                 if (auto def = resp->isMethodDef()) {
-                    if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
+                    if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs) || isOperator(def->name.show(gs))) {
                         continue;
                     }
                     auto action = make_unique<CodeAction>("Move method to a new module");
