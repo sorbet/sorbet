@@ -1,6 +1,7 @@
 // has to go first because it violates our poisons
 #include "mpack/mpack.h"
 
+#include "core/GlobalState.h"
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/msgpack.h"
 
@@ -141,7 +142,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
-    packString(pf.path);
+    packString(ctx.state.getPrintablePath(pf.path));
     mpack_write_u32(&writer, pf.cksum);
 
     // requires
