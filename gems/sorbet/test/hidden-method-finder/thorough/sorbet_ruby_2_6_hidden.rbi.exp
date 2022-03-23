@@ -2717,10 +2717,6 @@ class Hash
   include ::JSON::Ext::Generator::GeneratorMethods::Hash
 end
 
-class Hash
-  def self.try_convert(arg); end
-end
-
 class IO
   def nread(); end
 
