@@ -25,4 +25,5 @@ end
 def self.qux
 # ^ apply-code-action: [C] Move method to a new module
 end
+
 end

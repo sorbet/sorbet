@@ -29,4 +29,5 @@ end # comment after sig should move with the method
 def self.baz; end
 # ^ apply-code-action: [B] Move method to a new module
 
+
 end

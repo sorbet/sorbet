@@ -12,6 +12,16 @@ class Inc
     # ^ apply-code-action: [A] Move method to a new module
     x + 1
   end
+
+  sig {void}
+  def initialize; end
+    # ^ apply-code-action: [B] Move method to a new module
+
+  sig {params(x: String).void}
+  def call(x)
+    # ^ apply-code-action: [C] Move method to a new module
+     puts x
+  end
 end
 
 foo = Inc.new

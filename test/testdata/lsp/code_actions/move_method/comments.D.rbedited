@@ -3,16 +3,24 @@
 #
 # Test asserts comments and whitespaces between a sig and a method def stay in place after the refactoring
 
-module BarModule
+
+module QuuxModule
   extend T::Sig
-  sig {void}
-# comment between sig and def should move with the method
-def self.bar; end
+  sig do
+    void
+  end
+      # This comment has leading whitespaces, but should also be moved
+  def self.quux
+# ^ apply-code-action: [D] Move method to a new module
+  end
 end
 
 class Foo
   extend T::Sig
 
+sig {void}
+# comment between sig and def should move with the method
+def self.bar; end
    # ^ apply-code-action: [A] Move method to a new module
 
 sig do
