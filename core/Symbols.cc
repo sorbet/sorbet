@@ -2138,7 +2138,10 @@ void Field::sanityCheck(const GlobalState &gs) const {
 
 ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
     // Methods can only be owned by classes or modules.
-    return data(gs)->owner;
+    auto result = data(gs)->owner;
+    ENFORCE(result != core::Symbols::todo(),
+            "Namer hasn't populated the information required to provide an enclosing class yet");
+    return result;
 }
 
 ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
@@ -2164,7 +2167,8 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
             break;
     }
 
-    ENFORCE(result != core::Symbols::todo());
+    ENFORCE(result != core::Symbols::todo(),
+            "Namer hasn't populated the information required to provide an enclosing class yet");
     return result;
 }
 
