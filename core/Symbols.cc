@@ -2142,21 +2142,30 @@ ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
 }
 
 ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
+    core::ClassOrModuleRef result;
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
-            return asClassOrModuleRef();
+            result = asClassOrModuleRef();
+            break;
         case SymbolRef::Kind::Method:
-            return asMethodRef().enclosingClass(gs);
+            result = asMethodRef().enclosingClass(gs);
+            break;
         case SymbolRef::Kind::FieldOrStaticField:
             // Fields can only be owned by classes or modules.
-            return asFieldRef().data(gs)->owner;
+            result = asFieldRef().data(gs)->owner;
+            break;
         case SymbolRef::Kind::TypeArgument:
             // Typeargs are owned by methods.
-            return asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+            result = asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+            break;
         case SymbolRef::Kind::TypeMember:
             // TypeMembers are only owned by classes or modules.
-            return asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
+            result = asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
+            break;
     }
+
+    ENFORCE(result != core::Symbols::todo());
+    return result;
 }
 
 uint32_t Symbol::hash(const GlobalState &gs) const {
