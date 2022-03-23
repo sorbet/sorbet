@@ -45,11 +45,6 @@ const ast::ParsedFile &UndoState::getIndexed(core::FileRef fref) const {
         return treeEvictedIndexed->second;
     }
 
-    auto treeEvictedIndexedFinalGS = evictedIndexedFinalGS.find(id);
-    if (treeEvictedIndexedFinalGS != evictedIndexedFinalGS.end()) {
-        return treeEvictedIndexedFinalGS->second;
-    }
-
     return dummyParsedFile;
 }
 
