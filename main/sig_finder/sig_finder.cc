@@ -24,7 +24,7 @@ std::optional<SigLoc> findSignature(const core::GlobalState &gs, const core::Sym
         auto line_start = prev_line_end + 1;
         auto line = source.substr(line_start, line_end - line_start);
         line = absl::StripAsciiWhitespace(line);
-        // We do skip empty lines between signature and deefinition
+        // We do skip empty lines between signature and definition
         // Also we are starting from just before the method definition,
         // the beginning of that line could look like an empty line, and
         // we want to move to the previous line in that case.

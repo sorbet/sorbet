@@ -179,7 +179,7 @@ public:
         }
         addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
     }
-}; // CallSiteRenamer
+}; // MethodCallSiteRenamer
 
 vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
                                         const core::lsp::MethodDefResponse &definition,

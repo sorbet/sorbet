@@ -1,7 +1,7 @@
 # typed: strict
 # selective-apply-code-action: refactor.extract
 #
-# The test is asserting we can't move a method without a sig
+# The test is asserting we can move a method without a sig
 
 module BarModule
   extend T::Sig
