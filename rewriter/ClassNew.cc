@@ -10,9 +10,34 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<ast::ExpressionPtr> rewriteAsClassDef(core::MutableContext ctx, ast::Assign *asgn) {
+// Is this expression a synthetic `T.bind` call we added from the `ClassNew` rewriter on sends?
+bool isRewrittenBind(ast::ExpressionPtr &expr) {
+    auto send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr) {
+        return false;
+    }
+
+    if (send->fun != core::Names::bind()) {
+        return false;
+    }
+
+    return send->flags.isRewriterSynthesized;
+}
+
+vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
-    auto loc = asgn->loc;
+
+    if (ctx.state.runningUnderAutogen) {
+        // This is not safe to run under autogen, because we'd be outputing
+        // autoloader files that predeclare the class and cause "warning:
+        // already initialized constant" errors
+        return empty;
+    }
+
+    auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs);
+    if (lhs == nullptr) {
+        return empty;
+    }
 
     auto send = ast::cast_tree<ast::Send>(asgn->rhs);
     if (send == nullptr) {
@@ -50,6 +75,10 @@ vector<ast::ExpressionPtr> rewriteAsClassDef(core::MutableContext ctx, ast::Assi
         // Steal the trees, because the run is going to remove the original send node from the tree anyway.
         if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
             for (auto &&stat : insSeq->stats) {
+                if (isRewrittenBind(stat)) {
+                    // Remove synthetic `T.bind` statements we added during the ClassNew rewriter on sends.
+                    continue;
+                }
                 body.emplace_back(move(stat));
             }
             body.emplace_back(move(insSeq->expr));
@@ -65,36 +94,36 @@ vector<ast::ExpressionPtr> rewriteAsClassDef(core::MutableContext ctx, ast::Assi
         ancestors.emplace_back(ast::MK::Constant(send->loc, core::Symbols::todo()));
     }
 
+    auto loc = asgn->loc;
+
     vector<ast::ExpressionPtr> stats;
     stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 
-vector<ast::ExpressionPtr> rewriteWithBind(core::MutableContext ctx, ast::Send *send) {
-    vector<ast::ExpressionPtr> empty;
-
+bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
     auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
     if (recv == nullptr) {
-        return empty;
+        return false;
     }
 
     if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Names::Constants::Class() ||
         send->fun != core::Names::new_()) {
-        return empty;
+        return false;
     }
 
     auto argc = send->numPosArgs();
     if (argc > 1 || send->hasKwArgs()) {
-        return empty;
+        return false;
     }
 
     if (argc == 1 && !ast::isa_tree<ast::UnresolvedConstantLit>(send->getPosArg(0))) {
-        return empty;
+        return false;
     }
 
     auto *block = send->block();
     if (block == nullptr) {
-        return empty;
+        return false;
     }
 
     ast::ExpressionPtr type;
@@ -108,6 +137,9 @@ vector<ast::ExpressionPtr> rewriteWithBind(core::MutableContext ctx, ast::Send *
 
     auto bind = ast::MK::Bind(send->loc, ast::MK::Self(send->loc), std::move(type));
 
+    // Mark the bind as synthetic so we can spot it from the `ClassNew` rewriter on assigns and remove it from the tree.
+    ast::cast_tree<ast::Send>(bind)->flags.isRewriterSynthesized = true;
+
     ast::InsSeq::STATS_store blockStats;
     blockStats.emplace_back(std::move(bind));
 
@@ -120,38 +152,7 @@ vector<ast::ExpressionPtr> rewriteWithBind(core::MutableContext ctx, ast::Send *
         block->body = ast::MK::InsSeq(block->loc, std::move(blockStats), std::move(block->body));
     }
 
-    return empty;
-}
-
-vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
-    vector<ast::ExpressionPtr> empty;
-
-    if (ctx.state.runningUnderAutogen) {
-        // This is not safe to run under autogen, because we'd be outputing
-        // autoloader files that predeclare the class and cause "warning:
-        // already initialized constant" errors
-        return empty;
-    }
-
-    auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs);
-    if (lhs == nullptr) {
-        // Case for a non-constant literal such as `c = Class.new(Parent) do ... end`
-
-        auto send = ast::cast_tree<ast::Send>(asgn->rhs);
-        if (send == nullptr) {
-            return empty;
-        }
-
-        return rewriteWithBind(ctx, send);
-    } else {
-        // Case for a constant literal such as `C = Class.new(Parent) do ... end`
-        return rewriteAsClassDef(ctx, asgn);
-    }
-}
-
-vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Send *send) {
-    // Case for a send such as `Class.new(Parent) do ... end`
-    return rewriteWithBind(ctx, send);
+    return true;
 }
 
 }; // namespace sorbet::rewriter

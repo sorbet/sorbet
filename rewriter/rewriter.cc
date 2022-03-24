@@ -137,12 +137,6 @@ public:
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
-
-                    nodes = ClassNew::run(ctx, &send);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
                 },
 
                 [&](ast::MethodDef &mdef) { Initializer::run(ctx, &mdef, prevStat); },
@@ -179,6 +173,10 @@ public:
     // sends, not just those that are present in the RHS of a `ClassDef`.
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
+
+        if (ClassNew::run(ctx, send)) {
+            return tree;
+        }
 
         if (auto expr = InterfaceWrapper::run(ctx, send)) {
             return expr;

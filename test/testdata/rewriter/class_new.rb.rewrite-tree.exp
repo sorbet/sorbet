@@ -107,4 +107,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.foo()
     end
   end
+
+  class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+        begin
+          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+          <emptyTree>::<C T>.reveal_type(<self>)
+        end
+      end
+    end
+
+    def self.bar<<todo method>>(&<blk>)
+      <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+        begin
+          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+          <emptyTree>::<C T>.reveal_type(<self>)
+        end
+      end
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :bar, :normal)
+  end
 end
