@@ -64,5 +64,40 @@ module Opus::Types::Test
         assert_equal('Integer', sfm.return_type.name)
       end
     end
+
+    class ForHasSigBlockForMethod
+      extend T::Sig
+
+      sig {void}
+      def test1; end
+
+      sig {void}
+      def test2; end
+
+      T::Sig::WithoutRuntime.sig {void}
+      def test3; end
+    end
+
+    describe 'T::Utils.has_sig_block_for_method' do
+      it 'returns true if the method has a sig block pending' do
+        assert(T::Utils.has_sig_block_for_method(ForHasSigBlockForMethod.instance_method(:test1)))
+      end
+
+      it 'returns false if the method has already had its sig block forced' do
+        assert(T::Utils.has_sig_block_for_method(ForHasSigBlockForMethod.instance_method(:test2)))
+
+        # Another time, to assert that has_sig_block_for_method itself doesn't force it.
+        assert(T::Utils.has_sig_block_for_method(ForHasSigBlockForMethod.instance_method(:test2)))
+
+        # Force the sig block
+        ForHasSigBlockForMethod.new.test2
+
+        refute(T::Utils.has_sig_block_for_method(ForHasSigBlockForMethod.instance_method(:test2)))
+      end
+
+      it 'returns false if the method has no runtime sig wrapper' do
+        refute(T::Utils.has_sig_block_for_method(ForHasSigBlockForMethod.instance_method(:test3)))
+      end
+    end
   end
 end

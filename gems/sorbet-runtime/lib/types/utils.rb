@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Utils
-  # Used to convert from a type specification to a `T::Types::Base`.
+  # Documented in rbi/sorbet/t.rbi
   def self.coerce(val)
     if val.is_a?(T::Private::Types::TypeAlias)
       val.aliased_type
@@ -27,10 +27,7 @@ module T::Utils
     end
   end
 
-  # Dynamically confirm that `value` is recursively a valid value of
-  # type `type`, including recursively through collections. Note that
-  # in some cases this runtime check can be very expensive, especially
-  # with large collections of objects.
+  # Documented in rbi/sorbet/t.rbi
   def self.check_type_recursive!(value, type)
     T::Private::Casts.cast_recursive(value, type, cast_method: "T.check_type_recursive!")
   end
@@ -48,18 +45,19 @@ module T::Utils
     end.uniq
   end
 
-  # Returns the signature for the `UnboundMethod`, or nil if it's not sig'd
-  #
-  # @example T::Utils.signature_for_method(x.method(:foo))
+  # Documented in rbi/sorbet/t.rbi
   def self.signature_for_method(method)
     T::Private::Methods.signature_for_method(method)
   end
 
-  # Returns the signature for the instance method on the supplied module, or nil if it's not found or not typed.
-  #
-  # @example T::Utils.signature_for_instance_method(MyClass, :my_method)
+  # Documented in rbi/sorbet/t.rbi
   def self.signature_for_instance_method(mod, method_name)
     T::Private::Methods.signature_for_method(mod.instance_method(method_name))
+  end
+
+  # Documented in rbi/sorbet/t.rbi
+  def self.has_sig_block_for_method(method)
+    T::Private::Methods.has_sig_block_for_method(method)
   end
 
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method)

@@ -189,11 +189,52 @@ module T::Utils
   def self.coerce(val); end
 
   def self.resolve_alias(type); end
+
+  # Runs all not-yet-evaluated signature blocks in a program.
+  #
+  # Useful to run before forking multiple Ruby worker processes, so that more
+  # memory can be shared between child processes.
+  sig {void}
   def self.run_all_sig_blocks; end
+
+  # Get the `Signature` object representing the input and output types for this method.
+  #
+  # Note that this method will cause any pending signature block for the method
+  # to be evaluated, which can sometimes introduce circular load time
+  # dependencies. To guard against these, you can first call
+  # has_sig_block_for_method. It is impossible to both produce the runtime
+  # `Signature` object without also running the sig block.
+  sig {params(method: UnboundMethod).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_method(method); end
+
+  # Returns the signature for the instance method on the supplied module, or nil if it's not found or not typed.
+  #
+  # ```ruby
+  # T::Utils.signature_for_instance_method(MyClass, :my_method)
+  # ```
+  sig {params(mod: Module, method_name: Symbol).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_instance_method(mod, method_name); end
+
+  # Returns whether there is a pending sig block that needs to be run to
+  # produce a signature for the given method. Does NOT say whether a method has
+  # runtime type checking, because the first time a method with runtime type
+  # checking runs, the sig block for the method will be evaluated and discarded.
+  #
+  # Calling this method will not run the signature block, which mean that it
+  # will never introduce load time cycles.
+  #
+  # If you want to check whether a method has a signature, check whether
+  # signature_for_method returns `nil`.
+  sig {params(method: UnboundMethod).returns(T::Boolean)}
+  def self.has_sig_block_for_method(method); end
+
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
+
+  # Dynamically confirm that `value` is recursively a valid value of
+  # type `type`, including recursively through collections. Note that
+  # in some cases this runtime check can be very expensive, especially
+  # with large collections of objects.
   def self.check_type_recursive!(value, type); end
 
   # only one caller; delete
