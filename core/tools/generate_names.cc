@@ -334,6 +334,7 @@ NameDef names[] = {
     {"blockCall", "<block-call>"},
     {"blockBreakAssign", "<block-break-assign>"},
     {"arg", "<arg>"},
+    {"kwargs", "<kwargs>"},
     {"blkArg", "<blk>"},
     {"blockGiven_p", "block_given?"},
 

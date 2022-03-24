@@ -74,6 +74,7 @@ cc_library(
         "//main/cache",
         "//main/options",
         "//main/pipeline",
+        "//main/sig_finder",
         "//payload:interface",
         "//payload/binary",
         "//payload/text",

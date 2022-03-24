@@ -162,14 +162,14 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "compdb",
-        urls = _github_public_urls("grailbio/bazel-compilation-database/archive/0ae6349c52700f060c9a87c5ed2b04b75f94a26f.zip"),
-        sha256 = "40ad122fedbf2d8b23e70e16b5f49c1a316f02db3ed29ce1af8650dad6ccc1a9",
+        urls = _github_public_urls("grailbio/bazel-compilation-database/archive/2cd8ed39ef726645615ba94fcd265d54b0f0de33.zip"),
+        sha256 = "94ae67d2047c8b57e0e569c3c21ff29e24934a795c8c7fa4b6397cbb9c106691",
         build_file_content = (
             """
 package(default_visibility = ["//visibility:public"])
 """
         ),
-        strip_prefix = "bazel-compilation-database-0ae6349c52700f060c9a87c5ed2b04b75f94a26f",
+        strip_prefix = "bazel-compilation-database-2cd8ed39ef726645615ba94fcd265d54b0f0de33",
     )
 
     # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain

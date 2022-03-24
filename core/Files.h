@@ -93,6 +93,12 @@ public:
     bool isPackage() const;
     void setIsPackage(bool isPackage);
 
+    // Whether the file is open in the LSP client. (Always false if not running under LSP.)
+    bool isOpenInClient() const;
+    // Set whether the file is open in the LSP client. Should only be used by LSPPreprocessor when
+    // creating files using the set of openFiles.
+    void setIsOpenInClient(bool isOpenInClient);
+
     // flag accessors
     bool isPackagedTest() const;
 
@@ -112,7 +118,7 @@ public:
     StrictLevel minErrorLevel() const;
 
     /** Given a 1-based line number, returns a string view of the line. */
-    std::string_view getLine(int i);
+    std::string_view getLine(int i) const;
 
     void setFileHash(std::unique_ptr<const FileHash> hash);
     const std::shared_ptr<const FileHash> &getFileHash() const;
@@ -132,6 +138,8 @@ private:
         bool isPackageRBI : 1;
         // if true, the file is a stripe package file
         bool isPackage : 1;
+        // Documented on public accessors
+        bool isOpenInClient : 1;
 
         Flags(std::string_view path);
     };

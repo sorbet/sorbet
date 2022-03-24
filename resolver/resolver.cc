@@ -230,9 +230,8 @@ private:
         }
         if (sym.isTypeAlias(ctx)) {
             return sym.asFieldRef().data(ctx)->resultType != nullptr;
-        } else {
-            return true;
         }
+        return true;
     }
 
     class ResolutionChecker {
@@ -290,15 +289,15 @@ private:
                 }
             }
             return result;
-        } else {
-            if (!resolutionFailed) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
-                    e.setHeader("Dynamic constant references are unsupported");
-                }
-            }
-            resolutionFailed = true;
-            return core::Symbols::noSymbol();
         }
+
+        if (!resolutionFailed) {
+            if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
+                e.setHeader("Dynamic constant references are unsupported");
+            }
+        }
+        resolutionFailed = true;
+        return core::Symbols::noSymbol();
     }
 
     static const int MAX_SUGGESTION_COUNT = 10;
@@ -864,17 +863,17 @@ private:
             }
             it.lhs.setResultType(ctx, core::Types::untypedUntracked());
             return true;
-        } else {
-            if (rhsSym.dealias(ctx) != it.lhs) {
-                it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
-            } else {
-                if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
-                    e.setHeader("Class alias aliases to itself");
-                }
-                it.lhs.setResultType(ctx, core::Types::untypedUntracked());
-            }
-            return true;
         }
+
+        if (rhsSym.dealias(ctx) != it.lhs) {
+            it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
+        } else {
+            if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
+                e.setHeader("Class alias aliases to itself");
+            }
+            it.lhs.setResultType(ctx, core::Types::untypedUntracked());
+        }
+        return true;
     }
 
     static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
@@ -908,9 +907,8 @@ private:
     static core::ClassOrModuleRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
-        } else {
-            return core::Symbols::StubMixin();
         }
+        return core::Symbols::StubMixin();
     }
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
@@ -1232,13 +1230,14 @@ private:
                 todo_.emplace_back(std::move(job));
             }
             return out;
-        } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            return tree;
-        } else {
-            // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-            // Still want to do our best to recover (for e.g., LSP queries)
-            return ast::TreeMap::apply(ctx, *this, std::move(tree));
         }
+        if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
+            return tree;
+        }
+
+        // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+        // Still want to do our best to recover (for e.g., LSP queries)
+        return ast::TreeMap::apply(ctx, *this, std::move(tree));
     }
 
 public:
@@ -1901,18 +1900,18 @@ class ResolveTypeMembersAndFieldsWalk {
             // both bounds are set to todo in the namer, so it's sufficient to
             // just check one here.
             return !isTodo(lambdaParam->lowerBound);
-        } else {
-            return !isTodo(sym.resultType(ctx));
         }
+
+        return !isTodo(sym.resultType(ctx));
     }
 
     static bool isGenericResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.isClassOrModule()) {
             return absl::c_all_of(sym.asClassOrModuleRef().data(ctx)->typeMembers(),
                                   [&](core::SymbolRef tm) { return isLHSResolved(ctx, tm); });
-        } else {
-            return isLHSResolved(ctx, sym);
         }
+
+        return isLHSResolved(ctx, sym);
     }
 
     // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
@@ -2091,7 +2090,9 @@ class ResolveTypeMembersAndFieldsWalk {
                                                core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
             }
             return resultType;
-        } else if (!core::isa_type<core::AliasType>(data->resultType)) {
+        }
+
+        if (!core::isa_type<core::AliasType>(data->resultType)) {
             // If we've already resolved a temporary constant, we still want to run resolveConstantType to
             // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
             // typechecking runs) but we only want to run this on constants that are value-level and not class
@@ -2366,7 +2367,9 @@ class ResolveTypeMembersAndFieldsWalk {
         auto *cast = ast::cast_tree<ast::Cast>(*recur);
         if (cast == nullptr) {
             return false;
-        } else if (cast->cast != core::Names::let()) {
+        }
+
+        if (cast->cast != core::Names::let()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                 e.setHeader("Use `{}` to specify the type of constants", "T.let");
                 auto rhsLoc = core::Loc(ctx.file, asgn.rhs.loc());
@@ -2903,7 +2906,10 @@ public:
         return tree;
     }
 
-    static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    template <typename StateType>
+    static vector<ast::ParsedFile> run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+        constexpr bool isConstStateType = is_const_v<StateType>;
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -2978,73 +2984,84 @@ public:
         // Put files into a consistent order for subsequent passes.
         fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file < b.file; });
 
-        for (auto &threadTodo : combinedTodoUntypedResultTypes) {
-            for (auto sym : threadTodo) {
-                sym.setResultType(gs, core::Types::untypedUntracked());
+        if constexpr (!isConstStateType) {
+            for (auto &threadTodo : combinedTodoUntypedResultTypes) {
+                for (auto sym : threadTodo) {
+                    sym.setResultType(gs, core::Types::untypedUntracked());
+                }
             }
         }
 
         vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
-        for (auto &threadTodo : combinedTodoAttachedClassItems) {
-            for (auto &job : threadTodo) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+        if constexpr (!isConstStateType) {
+            for (auto &threadTodo : combinedTodoAttachedClassItems) {
+                for (auto &job : threadTodo) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+                }
             }
         }
 
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
         // (which is a static field). This is stronger than we need (we really only need the enum types)
         // but there's no particular reason to delay here.
-        for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
-            for (auto &job : threadTodo) {
-                job.sym.data(gs)->resultType = job.resultType;
+        if constexpr (!isConstStateType) {
+            for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
+                for (auto &job : threadTodo) {
+                    job.sym.data(gs)->resultType = job.resultType;
+                }
             }
         }
 
         // loop over any out-of-order type_member/type_alias references
-        bool progress = true;
-        while (progress && !combinedTodoAssigns.empty()) {
-            progress = false;
-            auto it = std::remove_if(
-                combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
-                    auto origSize = threadTodos.size();
-                    auto threadTodoIt =
-                        std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
-                            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                            return resolveJob(ctx, job, resolvedAttachedClasses);
-                        });
-                    threadTodos.erase(threadTodoIt, threadTodos.end());
-                    progress = progress || threadTodos.size() != origSize;
-                    return threadTodos.empty();
-                });
-            combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
-        }
+        if constexpr (!isConstStateType) {
+            bool progress = true;
+            while (progress && !combinedTodoAssigns.empty()) {
+                progress = false;
+                auto it =
+                    std::remove_if(combinedTodoAssigns.begin(), combinedTodoAssigns.end(),
+                                   [&](vector<ResolveAssignItem> &threadTodos) {
+                                       auto origSize = threadTodos.size();
+                                       auto threadTodoIt = std::remove_if(
+                                           threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
+                                               core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                                               return resolveJob(ctx, job, resolvedAttachedClasses);
+                                           });
+                                       threadTodos.erase(threadTodoIt, threadTodos.end());
+                                       progress = progress || threadTodos.size() != origSize;
+                                       return threadTodos.empty();
+                                   });
+                combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
+            }
 
-        // If there was a step with no progress, there's a cycle in the
-        // type member/alias declarations. This is handled by reporting an error
-        // at `typed: false`, and marking all of the involved type
-        // members/aliases as T.untyped.
-        if (!combinedTodoAssigns.empty()) {
-            for (auto &threadTodos : combinedTodoAssigns) {
-                for (auto &job : threadTodos) {
-                    if (job.lhs.isTypeMember()) {
-                        job.lhs.setResultType(gs, core::make_type<core::LambdaParam>(job.lhs.asTypeMemberRef(),
-                                                                                     core::Types::untypedUntracked(),
-                                                                                     core::Types::untypedUntracked()));
-                    } else {
-                        job.lhs.setResultType(gs, core::Types::untypedUntracked());
-                    }
+            // If there was a step with no progress, there's a cycle in the
+            // type member/alias declarations. This is handled by reporting an error
+            // at `typed: false`, and marking all of the involved type
+            // members/aliases as T.untyped.
+            if (!combinedTodoAssigns.empty()) {
+                for (auto &threadTodos : combinedTodoAssigns) {
+                    for (auto &job : threadTodos) {
+                        if (job.lhs.isTypeMember()) {
+                            job.lhs.setResultType(gs, core::make_type<core::LambdaParam>(
+                                                          job.lhs.asTypeMemberRef(), core::Types::untypedUntracked(),
+                                                          core::Types::untypedUntracked()));
+                        } else {
+                            job.lhs.setResultType(gs, core::Types::untypedUntracked());
+                        }
 
-                    if (auto e = gs.beginError(job.lhs.loc(gs), core::errors::Resolver::TypeMemberCycle)) {
-                        auto flavor = job.lhs.isTypeAlias(gs) ? "alias" : "member";
-                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, job.lhs.show(gs));
+                        if (auto e = gs.beginError(job.lhs.loc(gs), core::errors::Resolver::TypeMemberCycle)) {
+                            auto flavor = job.lhs.isTypeAlias(gs) ? "alias" : "member";
+                            e.setHeader("Type {} `{}` is involved in a cycle", flavor, job.lhs.show(gs));
+                        }
                     }
                 }
             }
         }
 
         // Compute the resultType of all classes.
-        computeExternalTypes(gs);
+        if constexpr (!isConstStateType) {
+            computeExternalTypes(gs);
+        }
 
         // Resolve the remaining casts and fields.
         for (auto &threadTodos : combinedTodoResolveCastItems) {
@@ -3053,24 +3070,30 @@ public:
                 resolveCastItem(ctx, job);
             }
         }
-        for (auto &threadTodos : combinedTodoResolveFieldItems) {
-            for (auto &job : threadTodos) {
-                core::MutableContext ctx(gs, job.owner, job.file);
-                resolveField(ctx, job);
-            }
-        }
-        for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
-            for (auto &job : threadTodos) {
-                core::Context ctx(gs, job.sym, job.file);
-                if (auto resultType = resolveStaticField(ctx, job)) {
-                    job.sym.data(gs)->resultType = resultType;
+        if constexpr (!isConstStateType) {
+            for (auto &threadTodos : combinedTodoResolveFieldItems) {
+                for (auto &job : threadTodos) {
+                    core::MutableContext ctx(gs, job.owner, job.file);
+                    resolveField(ctx, job);
                 }
             }
         }
-        for (auto &threadTodos : combinedTodoMethodAliasItems) {
-            for (auto &job : threadTodos) {
-                core::MutableContext ctx(gs, job.owner, job.file);
-                resolveMethodAlias(ctx, job);
+        if constexpr (!isConstStateType) {
+            for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
+                for (auto &job : threadTodos) {
+                    core::Context ctx(gs, job.sym, job.file);
+                    if (auto resultType = resolveStaticField(ctx, job)) {
+                        job.sym.data(gs)->resultType = resultType;
+                    }
+                }
+            }
+        }
+        if constexpr (!isConstStateType) {
+            for (auto &threadTodos : combinedTodoMethodAliasItems) {
+                for (auto &job : threadTodos) {
+                    core::MutableContext ctx(gs, job.owner, job.file);
+                    resolveMethodAlias(ctx, job);
+                }
             }
         }
 
@@ -3120,73 +3143,47 @@ private:
                                          int pos, bool isOverloaded) {
         if (!isOverloaded) {
             return ast::MK::arg2Local(mdef.args[pos]);
-        } else {
-            // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
-            // we roundtrip through original symbol that is stored in mdef.
-            auto internalNameToLookFor = argSym.name;
-            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
-                                                 [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
-            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
-            return ast::MK::arg2Local(mdef.args[realPos]);
         }
+
+        // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
+        // we roundtrip through original symbol that is stored in mdef.
+        auto internalNameToLookFor = argSym.name;
+        auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
+                                             [&](const auto &arg) { return arg.name == internalNameToLookFor; });
+        ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
+        auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
+        return ast::MK::arg2Local(mdef.args[realPos]);
     }
 
-    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
-        if (mdef.symbol.data(ctx)->flags.isAbstract) {
-            if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
-                if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
-                    e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
-                }
-
-                mdef.rhs = ast::MK::EmptyTree();
-            }
-            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
-                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
-                    e.setHeader("Before declaring an abstract method, you must mark your class/module "
-                                "as abstract using `abstract!` or `interface!`");
-                }
-            }
-
-            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
-            // behavior of the runtime.
-            ast::Send::ARGS_store args;
-
-            auto argIdx = -1;
-            auto numPosArgs = 0;
-            for (auto &arg : mdef.args) {
-                ++argIdx;
-
-                const ast::Local *local = nullptr;
-                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
-                    local = ast::cast_tree<ast::Local>(opt->expr);
-                } else {
-                    local = ast::cast_tree<ast::Local>(arg);
-                }
-
-                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
-                if (info.flags.isKeyword) {
-                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                    args.emplace_back(local->deepCopy());
-                } else if (info.flags.isRepeated || info.flags.isBlock) {
-                    // Explicitly skip for now.
-                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
-                    // callWithSplatAndBlock
-                } else {
-                    args.emplace_back(local->deepCopy());
-                    ++numPosArgs;
-                }
-            }
-
-            auto self = ast::MK::Self(mdef.loc);
-            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
-                                     numPosArgs, std::move(args));
-        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
-            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
-                e.setHeader("All methods in an interface must be declared abstract");
-            }
+    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
+                                      const ast::MethodDef &mdef) {
+        // Later passes are going to separate the sig and the method definition.
+        // Record some information in the sig call itself so that we can reassociate
+        // them later.
+        //
+        // Note that the sig still needs to send to a method called "sig" so that
+        // code completion in LSP works.  We change the receiver, below, so that
+        // sigs that don't pass through here still reflect the user's intent.
+        auto *send = sig.origSend;
+        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
+        if (self == nullptr) {
+            return;
         }
+
+        // We distinguish "user-written" sends by checking for self.
+        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
+        // to record later.
+        if (self->localVariable != core::LocalVariable::selfVariable()) {
+            return;
+        }
+
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
+        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
+
+        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
+
+        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
@@ -3364,33 +3361,7 @@ private:
             }
         }
 
-        // Later passes are going to separate the sig and the method definition.
-        // Record some information in the sig call itself so that we can reassociate
-        // them later.
-        //
-        // Note that the sig still needs to send to a method called "sig" so that
-        // code completion in LSP works.  We change the receiver, below, so that
-        // sigs that don't pass through here still reflect the user's intent.
-        auto *send = sig.origSend;
-        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
-        if (self == nullptr) {
-            return;
-        }
-
-        // We distinguish "user-written" sends by checking for self.
-        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
-        // to record later.
-        if (self->localVariable != core::LocalVariable::selfVariable()) {
-            return;
-        }
-
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
-        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
-
-        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
-
-        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
-        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+        recordMethodInfoInSig(ctx, method, sig, mdef);
     }
 
     // Force errors from any signatures that didn't attach to methods.
@@ -3608,14 +3579,71 @@ public:
             }
             fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
         }
-        handleAbstractMethod(ctx, mdef);
+        // handleAbstractMethod called elsewhere
     }
     static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
-        handleAbstractMethod(ctx, mdef);
+        // handleAbstractMethod called elsewhere
+    }
+
+    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
+        if (mdef.symbol.data(ctx)->flags.isAbstract) {
+            if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
+                if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
+                    e.setHeader("Abstract methods must not contain any code in their body");
+                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
+                }
+
+                mdef.rhs = ast::MK::EmptyTree();
+            }
+            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                    e.setHeader("Before declaring an abstract method, you must mark your class/module "
+                                "as abstract using `abstract!` or `interface!`");
+                }
+            }
+
+            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
+            // behavior of the runtime.
+            ast::Send::ARGS_store args;
+
+            auto argIdx = -1;
+            auto numPosArgs = 0;
+            for (auto &arg : mdef.args) {
+                ++argIdx;
+
+                const ast::Local *local = nullptr;
+                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
+                    local = ast::cast_tree<ast::Local>(opt->expr);
+                } else {
+                    local = ast::cast_tree<ast::Local>(arg);
+                }
+
+                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
+                if (info.flags.isKeyword) {
+                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                    args.emplace_back(local->deepCopy());
+                } else if (info.flags.isRepeated || info.flags.isBlock) {
+                    // Explicitly skip for now.
+                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                    // callWithSplatAndBlock
+                } else {
+                    args.emplace_back(local->deepCopy());
+                    ++numPosArgs;
+                }
+            }
+
+            auto self = ast::MK::Self(mdef.loc);
+            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
+                                     numPosArgs, std::move(args));
+        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+                e.setHeader("All methods in an interface must be declared abstract");
+            }
+        }
     }
 
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
@@ -3665,38 +3693,12 @@ public:
         return tree;
     }
 };
-}; // namespace
 
-ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-    const auto &epochManager = *gs.epochManager;
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-    finalizeAncestors(gs);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-    finalizeSymbols(gs);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
+template <typename StateType>
+ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    static_assert(std::is_same_v<remove_const_t<StateType>, core::GlobalState>);
+    constexpr bool isConstStateType = std::is_const_v<StateType>;
 
-    auto result = resolveSigs(gs, std::move(trees), workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
-
-    return result;
-}
-
-ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                  WorkerPool &workers) {
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
@@ -3754,17 +3756,58 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
         for (auto &file : combinedFileJobs) {
             for (auto &job : file.sigs) {
-                core::MutableContext ctx(gs, job.owner, file.file);
-                ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+                if constexpr (!isConstStateType) {
+                    core::MutableContext ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+                }
+                {
+                    core::Context ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::handleAbstractMethod(ctx, *job.mdef);
+                }
             }
             for (auto &job : file.multiSigs) {
-                core::MutableContext ctx(gs, job.owner, file.file);
-                ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+                if constexpr (!isConstStateType) {
+                    core::MutableContext ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+                }
+                {
+                    core::Context ctx(gs, job.owner, file.file);
+                    ResolveSignaturesWalk::handleAbstractMethod(ctx, *job.mdef);
+                }
             }
         }
     }
 
     return trees;
+}
+}; // namespace
+
+ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    const auto &epochManager = *gs.epochManager;
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+    finalizeAncestors(gs);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+    finalizeSymbols(gs);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    if (epochManager.wasTypecheckingCanceled()) {
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+
+    auto result = resolveSigs(gs, std::move(trees), workers);
+    if (!result.hasResult()) {
+        return result;
+    }
+    sanityCheck(gs, result.result());
+
+    return result;
 }
 
 void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
@@ -3778,21 +3821,48 @@ void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> 
     }
 }
 
-ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
-    auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+namespace {
+void verifyLinearizationComputed(const core::GlobalState &gs) {
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
         core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
         ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
     })
+}
+} // namespace
+
+ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+    auto workers = WorkerPool::create(0, gs.tracer());
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+    verifyLinearizationComputed(gs);
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);
     if (!result.hasResult()) {
         return result;
     }
     sanityCheck(gs, result.result());
+    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
+    // But it can be super useful to uncomment when debugging certain issues.
+    // ctx.state.sanityCheck();
+
+    return result;
+}
+
+ast::ParsedFilesOrCancelled Resolver::runIncrementalWithoutStateMutation(const core::GlobalState &gs,
+                                                                         vector<ast::ParsedFile> trees) {
+    auto workers = WorkerPool::create(0, gs.tracer());
+    // trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+    verifyLinearizationComputed(gs);
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
+    auto result = resolveSigs(gs, std::move(trees), *workers);
+    if (!result.hasResult()) {
+        return result;
+    }
+    // The non-mutating resolver isn't ready for this check to be run yet, because e.g.
+    // it doesn't resolve UnresolvedConstantLit nodes.
+    // sanityCheck(gs, result.result());
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();

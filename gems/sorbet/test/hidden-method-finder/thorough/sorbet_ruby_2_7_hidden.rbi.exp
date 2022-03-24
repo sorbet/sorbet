@@ -2795,8 +2795,6 @@ class Hash
   def self.ruby2_keywords_hash(arg); end
 
   def self.ruby2_keywords_hash?(arg); end
-
-  def self.try_convert(arg); end
 end
 
 class IO

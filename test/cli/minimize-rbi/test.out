@@ -64,11 +64,11 @@ class ::<root> < ::Object ()
       argument x5<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:24 end=13:26}
       argument x3<keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:28 end=13:31}
       argument x4<optional, keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:33 end=13:36}
-      argument x6<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:42 end=13:46}
+      argument x6<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:44 end=13:46}
       argument x7<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:49 end=13:51}
-    method ::OnlyInSecond#fwd_args (..., <fwd-kwargs>, ...) @ test/cli/minimize-rbi/unknown.rbi:15
+    method ::OnlyInSecond#fwd_args (..., ..., ...) @ test/cli/minimize-rbi/unknown.rbi:15
       argument ...<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
-      argument <fwd-kwargs><keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
+      argument ...<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
       argument ...<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
   class ::<Class:OnlyInSecond>[<AttachedClass>] < ::<Class:Object> (ModuleOnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:9
     type-member(+) ::<Class:OnlyInSecond>::<AttachedClass> -> T.attached_class (of OnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:9

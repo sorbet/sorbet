@@ -58,7 +58,7 @@ public:
     }
 
     ~MethodRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         if (invalid) {
             return;
         }
@@ -78,7 +78,7 @@ public:
         string newsrc;
         if (auto sendResp = response->isSend()) {
             newsrc = replaceMethodNameInSend(string(source.value()), sendResp);
-        } else if (auto defResp = response->isDefinition()) {
+        } else if (auto defResp = response->isMethodDef()) {
             newsrc = replaceMethodNameInDef(string(source.value()));
         } else {
             ENFORCE(0, "Unexpected query response type while renaming method");
@@ -162,7 +162,7 @@ public:
                  const string newName)
         : AbstractRenamer(gs, config, oldName, newName) {}
     ~ConstRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         if (!source.has_value()) {
@@ -181,7 +181,7 @@ public:
 };
 
 void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<AbstractRenamer> renamer) {
-    responseMsg->result = renamer->buildEdit();
+    responseMsg->result = renamer->buildWorkspaceEdit();
     if (renamer->getInvalid()) {
         responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer->getError());
     }
@@ -247,25 +247,11 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
             getRenameEdits(typechecker, renamer, constResp->symbol, params->newName);
             enrichResponse(response, renamer);
         }
-    } else if (auto defResp = resp->isDefinition()) {
-        if (defResp->symbol.isClassOrModule() && islower(params->newName[0])) {
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                         "Class and Module names must begin with an uppercase letter.");
-            return response;
-        }
-
-        if (defResp->symbol.isMethod() && isupper(params->newName[0])) {
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                         "Method names must begin with an lowercase letter.");
-            return response;
-        }
-
-        if (defResp->symbol.isClassOrModule() || defResp->symbol.isMethod()) {
-            if (isValidRenameLocation(defResp->symbol, gs, response)) {
-                renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
-                getRenameEdits(typechecker, renamer, defResp->symbol, params->newName);
-                enrichResponse(response, renamer);
-            }
+    } else if (auto defResp = resp->isMethodDef()) {
+        if (isValidRenameLocation(defResp->symbol, gs, response)) {
+            renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
+            getRenameEdits(typechecker, renamer, defResp->symbol, params->newName);
+            enrichResponse(response, renamer);
         }
     } else if (auto sendResp = resp->isSend()) {
         // We don't need to handle dispatchResult->secondary here, because it will be checked in getRenameEdits.

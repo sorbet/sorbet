@@ -520,6 +520,20 @@ module Opus::Types::Test
         assert_match(/\AParameter 'bar': Expected type String, got type Integer with value 2/, err.message)
       end
 
+      it 'handles splats with optional params' do
+        @mod.sig {params(bar: String, args: Integer).void}
+        def @mod.foo(bar='', *args); end
+
+        @mod.foo('hello')
+        @mod.foo('hello', 1, 2, 3)
+        @mod.foo
+
+        err = assert_raises(TypeError) do
+          @mod.foo(1)
+        end
+        assert_match(/\AParameter 'bar': Expected type String, got type Integer with value 1/, err.message)
+      end
+
       it 'handles keyrest' do
         @mod.sig {params(opts: Integer).void}
         def @mod.foo(**opts); end

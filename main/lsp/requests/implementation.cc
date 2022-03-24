@@ -79,7 +79,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerInterfa
 
     vector<unique_ptr<Location>> result;
     auto queryResponse = move(queryResult.responses[0]);
-    if (auto def = queryResponse->isDefinition()) {
+    if (auto def = queryResponse->isMethodDef()) {
         // User called "Go to Implementation" from the abstract function definition
         core::SymbolRef maybeMethod = def->symbol;
         if (!maybeMethod.isMethod()) {

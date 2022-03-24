@@ -169,7 +169,7 @@ bool isPackagePath(string_view path) {
 
 File::Flags::Flags(string_view path)
     : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
-      isPackage(isPackagePath(path)) {}
+      isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(File::Flags(path_)), path_(move(path_)), source_(move(source_)),
@@ -259,6 +259,14 @@ void File::setIsPackage(bool isPackage) {
     this->flags.isPackage = isPackage;
 }
 
+bool File::isOpenInClient() const {
+    return this->flags.isOpenInClient;
+}
+
+void File::setIsOpenInClient(bool isOpenInClient) {
+    this->flags.isOpenInClient = isOpenInClient;
+}
+
 vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
@@ -276,7 +284,7 @@ int File::lineCount() const {
     return lineBreaks().size() - 1;
 }
 
-string_view File::getLine(int i) {
+string_view File::getLine(int i) const {
     auto &lineBreaks = this->lineBreaks();
     ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);

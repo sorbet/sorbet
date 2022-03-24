@@ -1,6 +1,7 @@
 ClassDef{
   kind = class
-  name = EmptyTree<<C <U <root>>>>
+  name = EmptyTree
+  symbol = <C <U <root>>>
   ancestors = [ConstantLit{
       symbol = (class ::<todo sym>)
       orig = nullptr
@@ -1065,7 +1066,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U NotAODM>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -1353,7 +1355,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U SomeODM>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -1872,7 +1875,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U ForeignClass>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -1886,7 +1890,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U AdvancedODM>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -6856,7 +6861,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U PropHelpers>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -7472,7 +7478,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U PropHelpers2>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -7974,7 +7981,8 @@ ClassDef{
             scope = EmptyTree
           }
         }
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -8003,7 +8011,8 @@ ClassDef{
             }
           }
         }
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [UnresolvedConstantLit{
           cnst = <C <U Document>>
           scope = UnresolvedConstantLit{
@@ -8023,7 +8032,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U EncryptedProp>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr

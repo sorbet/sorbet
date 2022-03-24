@@ -1,6 +1,7 @@
 ClassDef{
   kind = class
-  name = EmptyTree<<C <U <root>>>>
+  name = EmptyTree
+  symbol = <C <U <root>>>
   ancestors = [ConstantLit{
       symbol = (class ::<todo sym>)
       orig = nullptr
@@ -11,7 +12,8 @@ ClassDef{
       name = UnresolvedConstantLit{
         cnst = <C <U A>>
         scope = EmptyTree
-      }<<C <U <todo sym>>>>
+      }
+      symbol = <C <U <todo sym>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr

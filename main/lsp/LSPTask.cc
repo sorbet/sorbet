@@ -156,6 +156,8 @@ ConstExprStr LSPTask::methodString() const {
             return "initialized";
         case LSPMethod::SorbetReadFile:
             return "sorbet.readFile";
+        case LSPMethod::SorbetIndexerInitialization:
+            return "sorbet.indexerInitialization";
         case LSPMethod::SorbetShowSymbol:
             return "sorbet.showSymbol";
         case LSPMethod::SorbetWatchmanFileChange:
@@ -343,7 +345,7 @@ void LSPTask::getRenameEdits(LSPTypecheckerInterface &typechecker, shared_ptr<Ab
 
             // We may process the same send multiple times in case of union types, but this is ok because the renamer
             // de-duplicates edits at the same location
-            renamer->rename(response);
+            renamer->rename(response, sym);
         }
     }
 }
@@ -382,7 +384,7 @@ LSPTask::filterAndDedup(const core::GlobalState &gs,
         if (loc.exists() && loc.file().exists()) {
             auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
             // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
+            if (fileIsTyped || q->isConstant() || q->isField() || q->isMethodDef()) {
                 responses.push_back(make_unique<core::lsp::QueryResponse>(*q));
             }
         }
@@ -646,21 +648,19 @@ void LSPTask::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Loca
 }
 
 LSPQueuePreemptionTask::LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished,
-                                               absl::Mutex &taskQueueMutex, TaskQueueState &taskQueue,
-                                               LSPIndexer &indexer)
-    : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueueMutex(taskQueueMutex), taskQueue(taskQueue),
-      indexer(indexer) {}
+                                               TaskQueue &taskQueue, LSPIndexer &indexer)
+    : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueue(taskQueue), indexer(indexer) {}
 
 void LSPQueuePreemptionTask::run(LSPTypecheckerInterface &tc) {
     for (;;) {
         unique_ptr<LSPTask> task;
         {
-            absl::MutexLock lck(&taskQueueMutex);
-            if (taskQueue.pendingTasks.empty() || !taskQueue.pendingTasks.front()->canPreempt(indexer)) {
+            absl::MutexLock lck(taskQueue.getMutex());
+            if (taskQueue.tasks().empty() || !taskQueue.tasks().front()->canPreempt(indexer)) {
                 break;
             }
-            task = move(taskQueue.pendingTasks.front());
-            taskQueue.pendingTasks.pop_front();
+            task = move(taskQueue.tasks().front());
+            taskQueue.tasks().pop_front();
 
             {
                 Timer timeit(config.logger, "LSPTask::index");

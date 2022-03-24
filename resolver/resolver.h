@@ -18,6 +18,10 @@ public:
      * to find this) */
     static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
 
+    // Like the above, only skip all the steps that would require mutating global state.
+    static ast::ParsedFilesOrCancelled runIncrementalWithoutStateMutation(const core::GlobalState &gs,
+                                                                          std::vector<ast::ParsedFile> trees);
+
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                                               WorkerPool &workers);
@@ -26,8 +30,6 @@ private:
     static void finalizeAncestors(core::GlobalState &gs);
     static void finalizeSymbols(core::GlobalState &gs);
     static void computeLinearization(core::GlobalState &gs);
-    static ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                                                   WorkerPool &workers);
     static void sanityCheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 };
 

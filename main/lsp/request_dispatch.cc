@@ -26,13 +26,28 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
     for (auto &message : messages) {
         preprocessor.preprocessAndEnqueue(move(message));
     }
-    {
-        absl::MutexLock lck(taskQueueMutex.get());
-        ENFORCE(taskQueue->paused == false, "__PAUSE__ not supported in single-threaded mode.");
-        for (auto &task : taskQueue->pendingTasks) {
-            runTask(move(task));
+
+    std::vector<std::unique_ptr<LSPTask>> tasks;
+    while (true) {
+        {
+            absl::MutexLock lck(taskQueue->getMutex());
+            ENFORCE(!taskQueue->isPaused(), "__PAUSE__ not supported in single-threaded mode.");
+            auto &queuedTasks = taskQueue->tasks();
+            tasks.reserve(queuedTasks.size());
+            for (auto &task : queuedTasks) {
+                tasks.emplace_back(move(task));
+            }
+            queuedTasks.clear();
         }
-        taskQueue->pendingTasks.clear();
+
+        if (tasks.empty()) {
+            break;
+        }
+
+        for (auto &task : tasks) {
+            runTask(std::move(task));
+        }
+        tasks.clear();
     }
 }
 
@@ -41,7 +56,7 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
     {
         Timer timeit(config->logger, "LSPTask::index");
         timeit.setTag("method", task->methodString());
-        task->index(indexer);
+        task->index(this->indexer);
     }
     if (task->finalPhase() == LSPTask::Phase::INDEX) {
         // Task doesn't need the typechecker.
@@ -61,10 +76,6 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
                 // single threaded environments.
                 typecheckerCoord.typecheckOnSlowPath(move(edit));
             }
-        } else if (auto *initializedTask = dynamic_cast<InitializedTask *>(dangerousTask)) {
-            unique_ptr<InitializedTask> initialized(initializedTask);
-            (void)task.release();
-            typecheckerCoord.initialize(move(initialized));
         } else {
             // Must be a new type of dangerous task we don't know about.
             // Please do not add new dangerous tasks to the codebase. Try to surface whatever functionality you

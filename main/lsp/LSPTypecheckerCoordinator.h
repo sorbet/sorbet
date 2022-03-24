@@ -14,6 +14,7 @@ class LSPTask;
 class LSPQueuePreemptionTask;
 class InitializedTask;
 class SorbetWorkspaceEditTask;
+class TaskQueue;
 /**
  * Handles typechecking and other queries. Can either operate in single-threaded mode (in which lambdas passed to
  * syncRun/asyncRun run-to-completion immediately) or dedicated-thread mode (in which lambdas are enqueued to execute on
@@ -35,6 +36,10 @@ class LSPTypecheckerCoordinator final {
     // A worker pool with typically as many threads as cores. Can only be used during synchronous blocking operations.
     WorkerPool &workers;
 
+    // A handle to the task pool that the preprocessor reads from, to enable feedback to the indexer when initializing
+    // the global state for the first time.
+    std::shared_ptr<TaskQueue> taskQueue;
+
     // An empty workerpool with 0 threads. Runs all work on the thread using it.
     std::unique_ptr<WorkerPool> emptyWorkers;
 
@@ -46,13 +51,7 @@ class LSPTypecheckerCoordinator final {
 public:
     LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config,
                               std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
-                              WorkerPool &workers);
-
-    /**
-     * Initializes typechecker and runs typechecking for the first time.
-     * TODO(jvilk): Make non-blocking when we implement preemption.
-     */
-    void initialize(std::unique_ptr<InitializedTask> initializedTask);
+                              WorkerPool &workers, std::shared_ptr<TaskQueue> taskQueue);
 
     /**
      * Runs the given typecheck task asynchronously on the slow path.

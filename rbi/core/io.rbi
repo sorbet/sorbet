@@ -1844,7 +1844,7 @@ class IO < Object
   # (`"wb:ASCII-8BIT"`).
   sig do
     params(
-        name: String,
+        name: T.any(String, Pathname),
         arg0: String,
         offset: Integer,
         external_encoding: T.any(String, Encoding),

@@ -182,7 +182,10 @@ class T::Private::Methods::Signature
     arg_types = @arg_types
 
     if @has_rest
-      arg_types += [[@rest_name, @rest_type]] * (args_length - @arg_types.length)
+      rest_count = args_length - @arg_types.length
+      rest_count = 0 if rest_count.negative?
+
+      arg_types += [[@rest_name, @rest_type]] * rest_count
 
     elsif (args_length < @req_arg_count) || (args_length > @arg_types.length)
       expected_str = @req_arg_count.to_s

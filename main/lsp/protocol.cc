@@ -31,6 +31,17 @@ public:
     }
 };
 
+class TerminateOnDestruction final {
+    TaskQueue &queue;
+
+public:
+    TerminateOnDestruction(TaskQueue &queue) : queue{queue} {}
+    ~TerminateOnDestruction() {
+        absl::MutexLock lck(queue.getMutex());
+        queue.terminate();
+    }
+};
+
 class NotifyNotificationOnDestruction {
     absl::Notification &notification;
 
@@ -61,7 +72,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
     return runInAThread("lspPreprocess", [this, &messageQueue, &messageQueueMutex] {
         // Propagate the termination flag across the two queues.
         NotifyOnDestruction notifyIncoming(messageQueueMutex, messageQueue.terminate);
-        NotifyOnDestruction notifyProcessing(*taskQueueMutex, ABSL_TS_UNCHECKED_READ(taskQueue)->terminate);
+        TerminateOnDestruction notifyProcessing(*taskQueue);
         owner = this_thread::get_id();
         while (true) {
             unique_ptr<LSPMessage> msg;
@@ -88,11 +99,11 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
             preprocessAndEnqueue(move(msg));
 
             {
-                absl::MutexLock lck(taskQueueMutex.get());
+                absl::MutexLock lck(taskQueue->getMutex());
                 // Merge the counters from all of the worker threads with those stored in
                 // taskQueue.
-                taskQueue->counters = mergeCounters(move(taskQueue->counters));
-                if (taskQueue->terminate) {
+                taskQueue->getCounters() = mergeCounters(move(taskQueue->getCounters()));
+                if (taskQueue->isTerminated()) {
                     // We must have processed an exit notification, or one of the downstream threads exited.
                     return;
                 }
@@ -208,20 +219,16 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         while (true) {
             unique_ptr<LSPTask> task;
             {
-                absl::MutexLock lck(taskQueueMutex.get());
+                absl::MutexLock lck(taskQueue->getMutex());
                 Timer timeit(logger, "idle");
-                taskQueueMutex->Await(absl::Condition(
-                    +[](TaskQueueState *taskQueue) -> bool {
-                        return taskQueue->terminate || (!taskQueue->paused && !taskQueue->pendingTasks.empty());
-                    },
-                    taskQueue.get()));
-                ENFORCE(!taskQueue->paused);
-                if (taskQueue->terminate) {
-                    if (taskQueue->errorCode != 0) {
+                taskQueue->getMutex()->Await(absl::Condition(taskQueue.get(), &TaskQueue::ready));
+                ENFORCE(!taskQueue->isPaused());
+                if (taskQueue->isTerminated()) {
+                    if (taskQueue->getErrorCode() != 0) {
                         // Abnormal termination. Exit immediately.
                         typecheckerCoord.shutdown();
-                        throw EarlyReturnWithCode(taskQueue->errorCode);
-                    } else if (taskQueue->pendingTasks.empty()) {
+                        throw EarlyReturnWithCode(taskQueue->getErrorCode());
+                    } else if (taskQueue->tasks().empty()) {
                         // Normal termination. Wait until all pending requests finish.
                         break;
                     }
@@ -232,7 +239,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 // that required the slow path to run) or preempt the currently running slow path. (Note that we don't
                 // bother with either one in cases where we only need the indexer. TODO(aprocter): is that restriction
                 // actually appropriate for stale-data tasks?)
-                auto &frontTask = taskQueue->pendingTasks.front();
+                auto &frontTask = taskQueue->tasks().front();
 
                 // Note that running on stale data is an experimental feature, so we hide it behind the
                 // --enable-experimental-lsp-stale-state flag.
@@ -246,7 +253,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     // and move on to the next task.
                     if (frontTask == nullptr) {
                         logger->debug("Succeeded in running on stale data");
-                        taskQueue->pendingTasks.pop_front();
+                        taskQueue->tasks().pop_front();
                     }
                     // If the coordinator has not consumed the task, that means it was not able to run it on stale
                     // state, because no cancellationUndoState was present. There are (we think! see below) two
@@ -284,8 +291,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     frontTask->canPreempt(indexer)) {
                     absl::Notification finished;
                     string methodStr = convertLSPMethodToString(frontTask->method);
-                    auto preemptTask =
-                        make_unique<LSPQueuePreemptionTask>(*config, finished, *taskQueueMutex, *taskQueue, indexer);
+                    auto preemptTask = make_unique<LSPQueuePreemptionTask>(*config, finished, *taskQueue, indexer);
                     auto scheduleToken = typecheckerCoord.trySchedulePreemption(move(preemptTask));
 
                     if (scheduleToken != nullptr) {
@@ -295,14 +301,13 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         // needed to linearize the indexing of edits, which may happen in the typechecking thread if a
                         // fast path edit preempts, with the `canPreempt` checks of edits in this thread.
                         auto headOfQueueCanPreempt = [&indexer = this->indexer,
-                                                      &taskQueue = this->taskQueue]() -> bool {
+                                                      &tasks = this->taskQueue->tasks()]() -> bool {
                             // Await always holds taskQueueMutex when calling this function, but absl doesn't know that.
-                            return ABSL_TS_UNCHECKED_READ(taskQueue)->pendingTasks.empty() ||
-                                   !ABSL_TS_UNCHECKED_READ(taskQueue)->pendingTasks.front()->canPreempt(indexer);
+                            return tasks.empty() || !tasks.front()->canPreempt(indexer);
                         };
                         // Wait until the head of the queue turns into a non-preemptible task to resume processing the
                         // queue.
-                        taskQueueMutex->Await(absl::Condition(&headOfQueueCanPreempt));
+                        taskQueue->getMutex()->Await(absl::Condition(&headOfQueueCanPreempt));
 
                         // The queue is now empty or has a task that cannot preempt. There are two possibilities here:
                         // 1) The scheduled work is now irrelevant because the task that was scheduled is now gone
@@ -312,9 +317,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         if (!typecheckerCoord.tryCancelPreemption(scheduleToken)) {
                             // Cancelation failed: 2) must be the case. Unlock the queue and wait until task finishes to
                             // avoid races.
-                            taskQueueMutex->Unlock();
+                            taskQueue->getMutex()->Unlock();
                             finished.WaitForNotification();
-                            taskQueueMutex->Lock();
+                            taskQueue->getMutex()->Lock();
                             logger->debug("[Processing] Preemption for task {} complete", methodStr);
                         } else {
                             logger->debug("[Processing] Canceled scheduled preemption for task {}", methodStr);
@@ -327,12 +332,12 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     // normal.
                 }
 
-                task = move(taskQueue->pendingTasks.front());
-                taskQueue->pendingTasks.pop_front();
+                task = move(taskQueue->tasks().front());
+                taskQueue->tasks().pop_front();
 
                 // Test only: Collect counters from other threads into this thread for reporting.
-                if (task->method == LSPMethod::GETCOUNTERS && !taskQueue->counters.hasNullCounters()) {
-                    counterConsume(move(taskQueue->counters));
+                if (task->method == LSPMethod::GETCOUNTERS && !taskQueue->getCounters().hasNullCounters()) {
+                    counterConsume(move(taskQueue->getCounters()));
                 }
             }
 
@@ -347,9 +352,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             if (shouldSendCountersToStatsd(currentTime)) {
                 {
                     // Merge counters from worker threads.
-                    absl::MutexLock counterLck(taskQueueMutex.get());
-                    if (!taskQueue->counters.hasNullCounters()) {
-                        counterConsume(move(taskQueue->counters));
+                    absl::MutexLock counterLck(taskQueue->getMutex());
+                    if (!taskQueue->getCounters().hasNullCounters()) {
+                        counterConsume(move(taskQueue->getCounters()));
                     }
                 }
                 sendCountersToStatsd(currentTime);

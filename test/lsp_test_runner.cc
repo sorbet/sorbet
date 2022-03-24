@@ -71,13 +71,9 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
-void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range,
-                         int &nextId, vector<CodeActionKind> &selectedCodeActionKinds,
-                         vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
-                         string codeActionDescription, bool assertAllChanges) {
-    auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
-        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
-    };
+optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapper, string fileUri,
+                                                            unique_ptr<Range> range, int &nextId,
+                                                            vector<CodeActionKind> &selectedCodeActionKinds) {
     vector<unique_ptr<Diagnostic>> diagnostics;
 
     auto codeActionContext = make_unique<CodeActionContext>(move(diagnostics));
@@ -93,25 +89,69 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         CHECK_EQ(responses.size(), 1);
     }
     if (responses.size() != 1) {
-        return;
+        return nullopt;
     }
 
     auto &msg = responses.at(0);
     CHECK(msg->isResponse());
     if (!msg->isResponse()) {
-        return;
+        return nullopt;
     }
 
     auto &response = msg->asResponse();
     auto &receivedCodeActionResponse = get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response.result);
     CHECK_FALSE(get_if<JSONNullObject>(&receivedCodeActionResponse));
     if (get_if<JSONNullObject>(&receivedCodeActionResponse)) {
+        return nullopt;
+    }
+    return move(get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse));
+}
+
+void validateCodeActionAbsence(LSPWrapper &lspWrapper, string fileUri, unique_ptr<Range> range, int &nextId,
+                               vector<CodeActionKind> &selectedCodeActionKinds,
+                               vector<CodeActionKind> &ignoredCodeActionKinds) {
+    auto maybeReceivedCodeActions =
+        requestCodeActions(lspWrapper, fileUri, range->copy(), nextId, selectedCodeActionKinds);
+    if (!maybeReceivedCodeActions.has_value()) {
         return;
     }
+    auto receivedCodeActions = move(maybeReceivedCodeActions.value());
+    if (!ignoredCodeActionKinds.empty()) {
+        vector<CodeActionKind> receivedCodeActionKinds;
+        for (const auto &ca : receivedCodeActions) {
+            if (!ca->kind.has_value()) {
+                continue;
+            }
+            receivedCodeActionKinds.push_back(ca->kind.value());
+        }
+
+        vector<CodeActionKind> ignoredCodeActionsDiff;
+        set_intersection(receivedCodeActionKinds.begin(), receivedCodeActionKinds.end(), ignoredCodeActionKinds.begin(),
+                         ignoredCodeActionKinds.end(), back_inserter(ignoredCodeActionsDiff));
+
+        REQUIRE_MESSAGE(ignoredCodeActionsDiff.empty(),
+                        fmt::format("Received unexpected code actions with kinds: {}",
+                                    fmt::map_join(ignoredCodeActionsDiff, ", ", [](auto codeAction) {
+                                        return convertCodeActionKindToString(codeAction);
+                                    })));
+    }
+}
+
+void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string fileUri, unique_ptr<Range> range,
+                         int &nextId, vector<CodeActionKind> &selectedCodeActionKinds,
+                         vector<CodeActionKind> &ignoredCodeActionKinds,
+                         vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
+                         string codeActionDescription, bool assertAllChanges) {
+    auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
+        return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(), kind) != 0;
+    };
 
     UnorderedMap<string, unique_ptr<CodeAction>> receivedCodeActionsByTitle;
-    auto &receivedCodeActions = get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse);
+
+    auto receivedCodeActions =
+        requestCodeActions(lspWrapper, fileUri, range->copy(), nextId, selectedCodeActionKinds).value();
     unique_ptr<CodeAction> sourceLevelCodeAction;
+
     // One code action should be a 'source' level code action. Remove it.
     if (!receivedCodeActions.empty() && isSelectedKind(CodeActionKind::Quickfix)) {
         for (auto it = receivedCodeActions.begin(); it != receivedCodeActions.end();) {
@@ -142,7 +182,6 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         bool codeActionTitleUnique =
             receivedCodeActionsByTitle.find(codeAction->title) == receivedCodeActionsByTitle.end();
         CHECK_MESSAGE(codeActionTitleUnique, "Found code action with duplicate title: " << codeAction->title);
-
         if (codeActionTitleUnique) {
             receivedCodeActionsByTitle[codeAction->title] = move(codeAction);
         }
@@ -215,8 +254,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         }
     }
 
-    auto selectedCodeActions = SelectiveApplyCodeActionAssertions::getValues("selective-apply-code-action", assertions)
-                                   .value_or(vector<string>{});
+    auto selectedCodeActions =
+        StringPropertyAssertions::getValues("selective-apply-code-action", assertions).value_or(vector<string>{});
     if (applyCodeActionAssertionsByFilename.empty() && selectedCodeActions.empty()) {
         return;
     }
@@ -231,6 +270,12 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
     transform(selectedCodeActions.begin(), selectedCodeActions.end(), back_inserter(selectedCodeActionKinds),
               getCodeActionKind);
 
+    auto ignoredCodeActionAssertions =
+        StringPropertyAssertions::getValues("assert-no-code-action", assertions).value_or(vector<string>{});
+    vector<CodeActionKind> ignoredCodeActionKinds;
+    transform(ignoredCodeActionAssertions.begin(), ignoredCodeActionAssertions.end(),
+              back_inserter(ignoredCodeActionKinds), getCodeActionKind);
+
     auto errors = RangeAssertion::getErrorAssertions(assertions);
     UnorderedMap<string, std::vector<std::shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
@@ -241,24 +286,39 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         auto applyCodeActionAssertions = applyCodeActionAssertionsByFilename[filename];
         auto fileUri = testFileUris[filename];
 
-        // Request code actions for each of this file's error.
-        for (auto &error : errorsByFilename[filename]) {
-            validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds,
-                                applyCodeActionAssertions, error->toString(), false);
-        }
+        if (ignoredCodeActionKinds.empty()) {
+            // Request code actions for each of this file's error.
+            for (auto &error : errorsByFilename[filename]) {
+                validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds,
+                                    ignoredCodeActionKinds, applyCodeActionAssertions, error->toString(), false);
+            }
 
-        for (auto codeActionAssertion : applyCodeActionAssertions) {
-            validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId,
-                                selectedCodeActionKinds, applyCodeActionAssertions, codeActionAssertion->toString(),
-                                true);
-        }
+            // This weird loop is here because `validateCodeActions` erases the elements from
+            // `applyCodeActionAssertions` and we are iterating over that container
+            while (!applyCodeActionAssertions.empty()) {
+                auto initialSize = applyCodeActionAssertions.size();
+                if (applyCodeActionAssertions.empty()) {
+                    break;
+                }
+                auto codeActionAssertion = applyCodeActionAssertions.at(0);
+                validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId,
+                                    selectedCodeActionKinds, ignoredCodeActionKinds, applyCodeActionAssertions,
+                                    codeActionAssertion->toString(), true);
+                ENFORCE(applyCodeActionAssertions.size() < initialSize);
+            }
 
-        // We've already removed any code action assertions that matches a received code action assertion.
-        // Any remaining are therefore extraneous.
-        INFO(fmt::format("Found extraneous apply-code-action assertions:\n{}",
-                         fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
-                                       [](const auto &assertion) -> string { return assertion->toString(); })));
-        CHECK_EQ(applyCodeActionAssertions.size(), 0);
+            // We've already removed any code action assertions that matches a received code action assertion.
+            // Any remaining are therefore extraneous.
+            INFO(fmt::format("Found extraneous apply-code-action assertions:\n{}",
+                             fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
+                                           [](const auto &assertion) -> string { return assertion->toString(); })));
+            CHECK_EQ(applyCodeActionAssertions.size(), 0);
+        } else {
+            for (auto assertion : applyCodeActionAssertions) {
+                validateCodeActionAbsence(lspWrapper, fileUri, assertion->range->copy(), nextId,
+                                          selectedCodeActionKinds, ignoredCodeActionKinds);
+            }
+        }
     }
 }
 

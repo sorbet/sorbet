@@ -72,7 +72,7 @@ module T::Private::Methods::SignatureValidation
               "  Child definition:  #{method_loc_str(signature.method)}\n"
       end
     else
-      raise "Unexpected mode: #{signature.mode}. Please report to #dev-productivity."
+      raise "Unexpected mode: #{signature.mode}. Please report this bug at https://github.com/sorbet/sorbet/issues"
     end
   end
 
@@ -97,7 +97,7 @@ module T::Private::Methods::SignatureValidation
       # Peaceful
       nil
     else
-      raise "Unexpected mode: #{signature.mode}. Please report to #dev-productivity."
+      raise "Unexpected mode: #{signature.mode}. Please report this bug at https://github.com/sorbet/sorbet/issues"
     end
 
     # Given a singleton class, we can check if it belongs to a

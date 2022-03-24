@@ -301,6 +301,7 @@ struct SymbolFinderResult {
 };
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
+    ENFORCE(ctx.owner.exists() && ctx.owner != core::Symbols::todo());
     auto owner = ctx.owner.enclosingClass(ctx);
     if (owner == core::Symbols::root()) {
         // Root methods end up going on object
@@ -317,6 +318,7 @@ core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flag
 // Returns the SymbolRef corresponding to the class `self.class`, unless the
 // context is a class, in which case return it.
 core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat) {
+    ENFORCE(ofWhat.exists() && ofWhat != core::Symbols::todo());
     core::SymbolRef owner = ofWhat;
     while (true) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
@@ -844,7 +846,15 @@ class SymbolDefiner {
 
         core::NameRef name;
         if (parsedArg.flags.isKeyword) {
-            name = parsedArg.local._name;
+            if (parsedArg.flags.isRepeated) {
+                if (parsedArg.local._name == core::Names::fwdKwargs()) {
+                    name = core::Names::fwdKwargs();
+                } else {
+                    name = core::Names::kwargs();
+                }
+            } else {
+                name = parsedArg.local._name;
+            }
         } else if (parsedArg.flags.isBlock) {
             name = core::Names::blkArg();
         } else {
@@ -1572,13 +1582,7 @@ public:
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
-                if (!squashedSymbol.isClassOrModule()) {
-                    klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
-                                                               klass.symbol.data(ctx)->name);
-                    ENFORCE(klass.symbol.exists());
-                } else {
-                    klass.symbol = squashedSymbol.asClassOrModuleRef();
-                }
+                klass.symbol = squashedSymbol.asClassOrModuleRef();
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.

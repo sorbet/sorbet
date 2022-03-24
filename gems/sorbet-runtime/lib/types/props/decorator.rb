@@ -155,7 +155,7 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_get(instance, prop, rules=prop_rules(prop))
-    val = instance.instance_variable_get(rules[:accessor_key])
+    val = instance.instance_variable_get(rules[:accessor_key]) if instance.instance_variable_defined?(rules[:accessor_key])
     if !val.nil?
       val
     elsif (d = rules[:ifunset])
@@ -175,7 +175,7 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_get_if_set(instance, prop, rules=prop_rules(prop))
-    instance.instance_variable_get(rules[:accessor_key])
+    instance.instance_variable_get(rules[:accessor_key]) if instance.instance_variable_defined?(rules[:accessor_key])
   end
   alias_method :get, :prop_get_if_set # Alias for backwards compatibility
 

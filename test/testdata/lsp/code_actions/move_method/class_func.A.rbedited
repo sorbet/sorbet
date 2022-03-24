@@ -1,0 +1,45 @@
+# typed: strict
+# selective-apply-code-action: refactor.extract
+
+module GreetingModule
+  extend T::Sig
+  sig {returns(String)}
+  def self.greeting
+         # ^^^^^^^^ apply-code-action: [A] Move method to a new module
+    'Hello'
+  end
+end
+
+module Foo
+  extend T::Sig
+
+
+  sig do
+    params(x: String)
+    .returns(String)
+  end
+  def name(x)
+    "#{GreetingModule.greeting} #{x}"
+  end
+end
+
+module A
+  class B
+    extend T::Sig
+
+    sig {void}
+    def bar
+      m = Foo
+      GreetingModule.greeting
+
+      GreetingModule.greeting
+      print((GreetingModule).greeting)
+    end
+
+    sig {params(m: T.class_of(Foo)).void}
+    def example3(m)
+      GreetingModule.greeting
+    end
+  end
+end
+GreetingModule.greeting

@@ -4,7 +4,7 @@
 # A placeholder for when an untyped thing must provide a type.
 # Raises an exception if it is ever used for validation.
 class T::Private::Types::NotTyped < T::Types::Base
-  ERROR_MESSAGE = "Validation is being done on a `NotTyped`. Please report to #dev-productivity."
+  ERROR_MESSAGE = "Validation is being done on a `NotTyped`. Please report this bug at https://github.com/sorbet/sorbet/issues"
 
   # overrides Base
   def name

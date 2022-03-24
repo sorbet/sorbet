@@ -438,8 +438,9 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "kind = {}\n", kind == ClassDef::Kind::Module ? "module" : "class");
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "name = {}<{}>\n", name.showRaw(gs, tabs + 1),
-                   this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "name = {}\n", name.showRaw(gs, tabs + 1));
+    printTabs(buf, tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "symbol = {}\n", this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "ancestors = [");
     bool first = true;

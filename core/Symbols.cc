@@ -1577,10 +1577,9 @@ string ArgInfo::toString(const GlobalState &gs) const {
 }
 
 string_view ArgInfo::argumentName(const GlobalState &gs) const {
-    if (flags.isKeyword) {
+    if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);
     } else {
-        // positional arg
         if (auto source = loc.source(gs)) {
             return source.value();
         } else {
@@ -2139,25 +2138,38 @@ void Field::sanityCheck(const GlobalState &gs) const {
 
 ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
     // Methods can only be owned by classes or modules.
-    return data(gs)->owner;
+    auto result = data(gs)->owner;
+    ENFORCE(result != core::Symbols::todo(),
+            "Namer hasn't populated the information required to provide an enclosing class yet");
+    return result;
 }
 
 ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
+    core::ClassOrModuleRef result;
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
-            return asClassOrModuleRef();
+            result = asClassOrModuleRef();
+            break;
         case SymbolRef::Kind::Method:
-            return asMethodRef().enclosingClass(gs);
+            result = asMethodRef().enclosingClass(gs);
+            break;
         case SymbolRef::Kind::FieldOrStaticField:
             // Fields can only be owned by classes or modules.
-            return asFieldRef().data(gs)->owner;
+            result = asFieldRef().data(gs)->owner;
+            break;
         case SymbolRef::Kind::TypeArgument:
             // Typeargs are owned by methods.
-            return asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+            result = asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+            break;
         case SymbolRef::Kind::TypeMember:
             // TypeMembers are only owned by classes or modules.
-            return asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
+            result = asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
+            break;
     }
+
+    ENFORCE(result != core::Symbols::todo(),
+            "Namer hasn't populated the information required to provide an enclosing class yet");
+    return result;
 }
 
 uint32_t Symbol::hash(const GlobalState &gs) const {

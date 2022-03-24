@@ -37,8 +37,8 @@ const FieldResponse *QueryResponse::isField() const {
     return get_if<FieldResponse>(&response);
 }
 
-const DefinitionResponse *QueryResponse::isDefinition() const {
-    return get_if<DefinitionResponse>(&response);
+const MethodDefResponse *QueryResponse::isMethodDef() const {
+    return get_if<MethodDefResponse>(&response);
 }
 
 const EditResponse *QueryResponse::isEdit() const {
@@ -56,7 +56,7 @@ core::Loc QueryResponse::getLoc() const {
         return constant->termLoc;
     } else if (auto field = isField()) {
         return field->termLoc;
-    } else if (auto def = isDefinition()) {
+    } else if (auto def = isMethodDef()) {
         return def->termLoc;
     } else if (auto edit = isEdit()) {
         return edit->loc;
@@ -76,7 +76,7 @@ core::TypePtr QueryResponse::getRetType() const {
         return constant->retType.type;
     } else if (auto field = isField()) {
         return field->retType.type;
-    } else if (auto def = isDefinition()) {
+    } else if (auto def = isMethodDef()) {
         return def->retType.type;
     } else {
         // Should never happen, as the above checks should be exhaustive.
@@ -93,7 +93,7 @@ const core::TypeAndOrigins &QueryResponse::getTypeAndOrigins() const {
         return constant->retType;
     } else if (auto field = isField()) {
         return field->retType;
-    } else if (auto def = isDefinition()) {
+    } else if (auto def = isMethodDef()) {
         return def->retType;
     } else {
         Exception::raise("QueryResponse is of type that does not have TypeAndOrigins.");

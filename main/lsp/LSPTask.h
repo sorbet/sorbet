@@ -176,20 +176,19 @@ public:
 };
 
 class LSPIndexer;
-struct TaskQueueState;
+class TaskQueue;
 
 /**
  * Represents a preemption task. When run, it will run all tasks at the head of TaskQueueState that can preempt.
  */
 class LSPQueuePreemptionTask final : public LSPTask {
     absl::Notification &finished;
-    absl::Mutex &taskQueueMutex;
-    TaskQueueState &taskQueue GUARDED_BY(taskQueueMutex);
+    TaskQueue &taskQueue;
     LSPIndexer &indexer;
 
 public:
-    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, absl::Mutex &taskQueueMutex,
-                           TaskQueueState &taskQueue, LSPIndexer &indexer);
+    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
+                           LSPIndexer &indexer);
 
     void run(LSPTypecheckerInterface &tc) override;
 };

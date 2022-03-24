@@ -200,9 +200,10 @@ struct Options {
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
 
+    bool packageRBIGeneration = false;
     std::string dumpPackageInfo = "";
     std::string singlePackage = "";
-    std::string packageRBIOutput = "";
+    std::string packageRBIDir = "";
 
     // Contains the allowed extensions Sorbet can parse.
     UnorderedSet<std::string> allowedExtensions;
@@ -232,6 +233,7 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
+    bool lspMoveMethodEnabled = false;
     bool lspStaleStateEnabled = false;
 
     // Experimental feature `requires_ancestor`
