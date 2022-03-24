@@ -328,6 +328,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                                                            "typechecker state");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
+    options.add_options("advanced")("enable-experimental-lsp-move-method",
+                                    "Enable experimental LSP feature: Move Method");
 
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
@@ -727,6 +729,7 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
+        opts.lspMoveMethodEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-move-method"].as<bool>();
 
         // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
         // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers

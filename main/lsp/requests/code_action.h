@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_REQUESTS_CODE_ACTION_H
 
 #include "main/lsp/LSPTask.h"
+#include "main/lsp/json_types.h"
 
 namespace sorbet::realmain::lsp {
 class CodeActionParams;
@@ -14,6 +15,12 @@ public:
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
 
     bool canUseStaleData() const override;
+
+private:
+    std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config,
+                                                                      const core::GlobalState &gs,
+                                                                      const core::lsp::MethodDefResponse &definition,
+                                                                      LSPTypecheckerInterface &typechecker);
 };
 
 } // namespace sorbet::realmain::lsp

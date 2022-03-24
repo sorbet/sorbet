@@ -1,0 +1,15 @@
+# typed: strict
+# selective-apply-code-action: refactor.extract
+
+module BarModule
+  sig {void}
+  def self.bar; end
+end
+
+class Module
+  include T::Sig
+end
+
+module Foo
+         # ^ apply-code-action: [A] Move method to a new module
+end

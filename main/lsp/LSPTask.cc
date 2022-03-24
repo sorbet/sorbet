@@ -340,7 +340,7 @@ void LSPTask::getRenameEdits(LSPTypecheckerInterface &typechecker, shared_ptr<Ab
 
             // We may process the same send multiple times in case of union types, but this is ok because the renamer
             // de-duplicates edits at the same location
-            renamer->rename(response);
+            renamer->rename(response, sym);
         }
     }
 }

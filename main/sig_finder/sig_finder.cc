@@ -18,23 +18,19 @@ std::optional<SigLoc> findSignature(const core::GlobalState &gs, const core::Sym
 
     // We only care about everything prior to the definition.
     auto line_end = defLoc.beginPos();
-    auto prev_line_end = source.rfind('\n', line_end);
-    bool startFromDefinition = true;
+    auto method_def_line = source.rfind('\n', line_end);
+    auto prev_line_end = source.rfind('\n', method_def_line - 1);
     while (prev_line_end != source.npos) {
         auto line_start = prev_line_end + 1;
         auto line = source.substr(line_start, line_end - line_start);
         line = absl::StripAsciiWhitespace(line);
-        // We do not skip empty lines, contra LSP's documentation finder.
-        // But as we are starting from just before the method definition,
+        // We do skip empty lines between signature and definition
+        // Also we are starting from just before the method definition,
         // the beginning of that line could look like an empty line, and
         // we want to move to the previous line in that case.
         if (line.empty()) {
-            if (!startFromDefinition) {
-                break;
-            }
             line_end = prev_line_end;
             prev_line_end = source.rfind('\n', line_end - 1);
-            startFromDefinition = false;
             continue;
         }
 
@@ -44,6 +40,7 @@ std::optional<SigLoc> findSignature(const core::GlobalState &gs, const core::Sym
         const auto multiLineSigEnd = "end"sv;
         const uint32_t multiLineSigEndSize = multiLineSigEnd.size();
         const auto multiLineSigStart = "sig do"sv;
+        const auto commentLineStart = "#"sv;
 
         // If something went wrong, we might find ourselves looking at an
         // existing `sig(:final)`.  Bail instead of suggesting an autocorrect
@@ -100,7 +97,14 @@ std::optional<SigLoc> findSignature(const core::GlobalState &gs, const core::Sym
             break;
         }
 
-        // If we find anything else, even a blank line, assume that the heuristic
+        // We found a comment between a sig and a method def, look one line higher
+        if (absl::StartsWith(line, commentLineStart)) {
+            line_end = prev_line_end;
+            prev_line_end = source.rfind('\n', line_end - 1);
+            continue;
+        }
+
+        // If we find anything else assume that the heuristic
         // has failed.
         break;
     }

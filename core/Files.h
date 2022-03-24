@@ -118,7 +118,7 @@ public:
     StrictLevel minErrorLevel() const;
 
     /** Given a 1-based line number, returns a string view of the line. */
-    std::string_view getLine(int i);
+    std::string_view getLine(int i) const;
 
     void setFileHash(std::unique_ptr<const FileHash> hash);
     const std::shared_ptr<const FileHash> &getFileHash() const;
