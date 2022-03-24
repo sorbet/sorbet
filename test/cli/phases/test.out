@@ -17,7 +17,8 @@ end
 --- desugar-tree-raw start ---
 ClassDef{
   kind = class
-  name = EmptyTree<<C <U <root>>>>
+  name = EmptyTree
+  symbol = <C <U <root>>>
   ancestors = [ConstantLit{
       symbol = (class ::<todo sym>)
       orig = nullptr
@@ -35,7 +36,8 @@ end
 --- rewrite-tree-raw start ---
 ClassDef{
   kind = class
-  name = EmptyTree<<C <U <root>>>>
+  name = EmptyTree
+  symbol = <C <U <root>>>
   ancestors = [ConstantLit{
       symbol = (class ::<todo sym>)
       orig = nullptr
@@ -53,7 +55,8 @@ end
 --- index-tree-raw start ---
 ClassDef{
   kind = class
-  name = EmptyTree<<C <U <root>>>>
+  name = EmptyTree
+  symbol = <C <U <root>>>
   ancestors = [ConstantLit{
       symbol = (class ::<todo sym>)
       orig = nullptr
@@ -76,7 +79,8 @@ InsSeq{
   stats = [
     ClassDef{
       kind = class
-      name = EmptyTree<<C <U <root>>>>
+      name = EmptyTree
+      symbol = <C <U <root>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -102,7 +106,8 @@ InsSeq{
   stats = [
     ClassDef{
       kind = class
-      name = EmptyTree<<C <U <root>>>>
+      name = EmptyTree
+      symbol = <C <U <root>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -132,7 +137,8 @@ InsSeq{
     EmptyTree
     ClassDef{
       kind = class
-      name = EmptyTree<<C <U <root>>>>
+      name = EmptyTree
+      symbol = <C <U <root>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -169,7 +175,8 @@ InsSeq{
     EmptyTree
     ClassDef{
       kind = class
-      name = EmptyTree<<C <U <root>>>>
+      name = EmptyTree
+      symbol = <C <U <root>>>
       ancestors = [ConstantLit{
           symbol = (class ::<todo sym>)
           orig = nullptr
@@ -275,7 +282,7 @@ class <C <U <root>>> < <C <U Object>> ()
 --- symbol-table-raw end ---
 --- checking diff ---
 1,15d0
-1,24d0
+1,25d0
 1,9d0
 < 
 < 
@@ -296,8 +303,9 @@ class <C <U <root>>> < <C <U Object>> ()
 <       ]
 <       ancestors = [ConstantLit{
 <       kind = class
-<       name = EmptyTree<<C <U <root>>>>
+<       name = EmptyTree
 <       rhs = [
+<       symbol = <C <U <root>>>
 <     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
 <     <returnMethodTemp>$2: Integer(1) = 1
 <     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
