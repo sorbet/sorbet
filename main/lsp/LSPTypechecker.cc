@@ -16,6 +16,7 @@
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/ErrorFlusherLSP.h"
 #include "main/lsp/ErrorReporter.h"
+#include "main/lsp/LSPIndexedFileStore.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPPreprocessor.h"
@@ -141,7 +142,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // We should always initialize with epoch 0.
     this->initialized = true;
-    this->indexed = move(updates.updatedFileIndexes);
+    this->indexed.overwrite(move(updates.updatedFileIndexes));
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
     auto committed = false;
@@ -349,14 +350,14 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                                  vector<ast::ParsedFile> &out) const {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.copy_indexes");
-    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
-    for (int i = 0; i < indexed.size(); i++) {
+    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.getSize());
+    for (int i = 0; i < indexed.getSize(); i++) {
         fileq->push(i, 1);
     }
 
     const auto &epochManager = *gs->epochManager;
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
+        make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.getSize());
     workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
         vector<ast::ParsedFile> threadResult;
         int processedByThread = 0;
@@ -368,7 +369,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
 
                     // Stop if typechecking was canceled.
                     if (!epochManager.wasTypecheckingCanceled()) {
-                        const auto &tree = indexed[job];
+                        const auto &tree = indexed.getIndexedFile(job);
                         // Note: indexed entries for payload files don't have any contents.
                         if (tree.tree && !ignore.contains(tree.file.id())) {
                             threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
@@ -384,7 +385,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     });
     {
         vector<ast::ParsedFile> threadResult;
-        out.reserve(indexed.size());
+        out.reserve(indexed.getSize());
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
@@ -529,7 +530,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
         absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         if (couldBeCanceled) {
             ENFORCE(updates.updatedGS.has_value());
-            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
+            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), indexed, updates.epoch);
         }
 
         // Clear out state associated with old finalGS.
@@ -537,19 +538,15 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
             indexedFinalGS.clear();
         }
 
-        int i = -1;
         ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
+
         for (auto &ast : updates.updatedFileIndexes) {
-            i++;
             const int id = ast.file.id();
-            if (id >= indexed.size()) {
-                indexed.resize(id + 1);
-            }
-            if (cancellationUndoState != nullptr) {
+            if (id < indexed.getSize() && cancellationUndoState != nullptr) {
                 // Move the evicted values before they get replaced.
-                cancellationUndoState->recordEvictedState(move(indexed[id]));
+                cancellationUndoState->recordEvictedState(move(indexed.getIndexedFileMutable(id)));
             }
-            indexed[id] = move(ast);
+            indexed.putIndexedFile(move(ast));
         }
     }
 
@@ -626,8 +623,8 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
     noop.epoch = 0;
     for (auto fref : frefs) {
         ENFORCE(fref.exists());
-        ENFORCE(fref.id() < indexed.size());
-        auto &index = indexed[fref.id()];
+        ENFORCE(fref.id() < indexed.getSize());
+        auto &index = indexed.getIndexedFile(fref.id());
         // Note: `index.tree` can be null if the file is a stdlib file.
         noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
@@ -650,8 +647,8 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     if (treeFinalGS != indexedFinalGS.end()) {
         return treeFinalGS->second;
     }
-    ENFORCE(id < indexed.size());
-    return indexed[id];
+    ENFORCE(id < indexed.getSize());
+    return indexed.getIndexedFile(id);
 }
 
 vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {

@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "core/NameHash.h"
 #include "core/core.h"
+#include "main/lsp/LSPIndexedFileStore.h"
 
 namespace sorbet::realmain::lsp {
 class LSPConfiguration;
@@ -19,6 +20,9 @@ class UndoState final {
     // Stores the index trees stored in `gs` that were evicted because the slow path operation replaced `gs`.
     UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS;
 
+    // Reference to the live "indexed" vector in LSPTypechecker.
+    const LSPIndexedFileStore &indexed;
+
     // Dummy ParsedFile that we return when the file requested by getIndexed is not available.
     ast::ParsedFile dummyParsedFile{nullptr, core::FileRef()};
 
@@ -27,7 +31,7 @@ public:
     const uint32_t epoch;
 
     UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-              uint32_t epoch);
+              const LSPIndexedFileStore &indexed, uint32_t epoch);
 
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.
@@ -37,7 +41,7 @@ public:
     /**
      * Undoes the slow path changes represented by this class.
      */
-    void restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> &indexed,
+    void restore(std::unique_ptr<core::GlobalState> &gs, LSPIndexedFileStore &indexed,
                  UnorderedMap<int, ast::ParsedFile> &indexedFinalGS);
 
     /**

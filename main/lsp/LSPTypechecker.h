@@ -7,6 +7,7 @@
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPFileUpdates.h"
+#include "main/lsp/LSPIndexedFileStore.h"
 
 namespace sorbet {
 class WorkerPool;
@@ -40,7 +41,7 @@ class LSPTypechecker final {
     /** GlobalState used for typechecking. */
     std::unique_ptr<core::GlobalState> gs;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
-    std::vector<ast::ParsedFile> indexed;
+    LSPIndexedFileStore indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
 
