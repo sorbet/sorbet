@@ -1446,6 +1446,8 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
+    bool bestEffort;
+
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
@@ -1475,6 +1477,11 @@ class TreeSymbolizer {
 
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        if (!newOwner.exists()) {
+            ENFORCE(this->bestEffort);
+            return core::Symbols::noSymbol();
+        }
+
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
@@ -1482,19 +1489,28 @@ class TreeSymbolizer {
                 existing = existing.dealias(ctx.state);
             }
         }
-        // NameInserter should have created this symbol.
-        ENFORCE(existing.exists());
+
+        // NameInserter should have created this symbol, unless we're running in bestEffort mode (stale GlobalState).
+        if (!existing.exists()) {
+            ENFORCE(this->bestEffort);
+            return core::Symbols::noSymbol();
+        }
 
         node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, std::move(node));
         return existing;
     }
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
+    optional<core::SymbolRef> squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
         const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName);
+        auto result = squashNamesInner(ctx, owner, node, firstName);
+
+        // Explicitly convert to optional (unlike what we usually do with SymbolRef's), because
+        // the bestEffort mode is subtle, and can easily break invariants that old code used to
+        // assume, so hopefully the type system catches them more easily.
+        return result.exists() ? make_optional<core::SymbolRef>(result) : nullopt;
     }
 
-    ast::ExpressionPtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
+    ast::ExpressionPtr arg2Symbol(int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
@@ -1569,6 +1585,8 @@ class TreeSymbolizer {
     }
 
 public:
+    TreeSymbolizer(bool bestEffort) : bestEffort(bestEffort) {}
+
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -1582,7 +1600,16 @@ public:
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
-                klass.symbol = squashedSymbol.asClassOrModuleRef();
+                if (squashedSymbol.has_value()) {
+                    klass.symbol = squashedSymbol.value().asClassOrModuleRef();
+                } else {
+                    ENFORCE(this->bestEffort);
+                    // In bestEffort mode, we allow symbols to not exist because we attempted to run
+                    // only the non-mutating namer passes (e.g., no SymbolDefiner). We'll delete
+                    // this whole node once we get to postTransformClassDef, but in the mean time
+                    // delete the RHS so we get there faster.
+                    klass.rhs.clear();
+                }
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
@@ -1607,6 +1634,16 @@ public:
 
     ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        if (klass.symbol == core::Symbols::todo()) {
+            ENFORCE(this->bestEffort);
+            // bestEffort mode runs with a constant GlobalState and does not first run SymbolDefiner
+            // (useful for serving LSP queries quickly on stale data). This class wasn't given a
+            // symbol in preTransformClassDef. Now that we're in postTransformClassDef, we're
+            // allowed to return something that's not a ClassDef node, which we can use to delete
+            // the tree.
+            return ast::MK::EmptyTree();
+        }
 
         // NameDefiner should have forced this class's singleton class into existence.
         ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
@@ -1661,8 +1698,7 @@ public:
         return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(core::Context ctx, vector<ast::ParsedArg> parsedArgs,
-                                          ast::MethodDef::ARGS_store oldArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(vector<ast::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
         ast::MethodDef::ARGS_store args;
         int i = -1;
         for (auto &arg : parsedArgs) {
@@ -1674,7 +1710,7 @@ public:
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(i < oldArgs.size());
-                auto expr = arg2Symbol(ctx, i, move(arg), move(oldArgs[i]));
+                auto expr = arg2Symbol(i, move(arg), move(oldArgs[i]));
                 args.emplace_back(move(expr));
             }
         }
@@ -1688,15 +1724,26 @@ public:
         auto owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
-        ENFORCE(sym.exists());
+        if (!sym.exists()) {
+            ENFORCE(this->bestEffort);
+            // We're going to delete this tree when we get to the postTransformMethodDef.
+            // Drop the RHS to make it get there faster.
+            method.rhs = ast::MK::EmptyTree();
+            return tree;
+        }
         method.symbol = sym;
-        method.args = fillInArgs(ctx.withOwner(method.symbol), move(parsedArgs), std::move(method.args));
+        method.args = fillInArgs(move(parsedArgs), std::move(method.args));
 
         return tree;
     }
 
     ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (method.symbol == core::Symbols::todoMethod() && this->bestEffort) {
+            // See the similar code in postTransformClassDef for an explanation.
+            return ast::MK::EmptyTree();
+        }
+
         ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
                 method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
         return tree;
@@ -1706,7 +1753,16 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        core::SymbolRef maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        auto maybeMaybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        if (!maybeMaybeScope.has_value()) {
+            ENFORCE(this->bestEffort);
+            // SymbolDefiner will define a name that squashNames will find in all cases except when
+            // we're running in non-mutating mode (LSP) and thus couldn't define new symbols.
+            // In that case, just delete this assignment.
+            return ast::MK::EmptyTree();
+        }
+        auto maybeScope = maybeMaybeScope.value();
+
         if (!maybeScope.isClassOrModule()) {
             auto scopeName = maybeScope.name(ctx);
             maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
@@ -1714,7 +1770,10 @@ public:
         auto scope = maybeScope.asClassOrModuleRef();
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
-        ENFORCE(cnst.exists());
+        if (!cnst.exists()) {
+            ENFORCE(this->bestEffort);
+            return ast::MK::EmptyTree();
+        }
         auto loc = lhs.loc;
         asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
 
@@ -1759,9 +1818,15 @@ public:
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
             auto onSymbol =
                 isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
-            ENFORCE(onSymbol.exists());
+            if (!onSymbol.exists()) {
+                ENFORCE(this->bestEffort);
+                return ast::MK::EmptyTree();
+            }
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
-            ENFORCE(sym.exists());
+            if (!sym.exists()) {
+                ENFORCE(this->bestEffort);
+                return ast::MK::EmptyTree();
+            }
 
             if (send->hasKwArgs()) {
                 bool fixed = false;
@@ -1918,8 +1983,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
-vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                       WorkerPool &workers) {
+vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
+                                       bool bestEffort) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -1927,9 +1992,9 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, bestEffort]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
-        TreeSymbolizer inserter;
+        TreeSymbolizer inserter(bestEffort);
         vector<ast::ParsedFile> output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1963,6 +2028,22 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
 
 } // namespace
 
+// Designed to be "run as much of namer as is possible with a const GlobalState".
+//
+// The whole point of `defineSymbols` is to mutate GlobalState, so it clearly makes no sense to run.
+// And the whole point of `findSymbols` is to create the FoundDefinition vector that feeds into
+// defineSymbols, so that becomes not useful to run either.
+//
+// That leaves just symbolizeTrees.
+//
+// The "best effort" indicates that this is currently only used for the sake of serving LSP requests
+// with a potentially-stale GlobalState.
+ast::ParsedFilesOrCancelled Namer::symbolizeTreesBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                                            WorkerPool &workers) {
+    auto bestEffort = true;
+    return symbolizeTrees(gs, move(trees), workers, bestEffort);
+}
+
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
@@ -1976,7 +2057,8 @@ ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::Parsed
     if (!result.hasResult()) {
         return result;
     }
-    trees = symbolizeTrees(gs, move(result.result()), workers);
+    auto bestEffort = false;
+    trees = symbolizeTrees(gs, move(result.result()), workers, bestEffort);
     return trees;
 }
 

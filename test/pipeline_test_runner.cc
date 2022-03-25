@@ -147,9 +147,23 @@ public:
     }
 
     void drainErrors(const core::GlobalState &gs) {
+        // Moves errors from being owned by GlobalState to having been flushed by the flusher
+        // In our case, errorCollector is our error flusher (accumulates a vector, instead of
+        // printing to stdout).
         errorQueue->flushAllErrors(gs);
+        // Retrieves the collected errors, and sets it to empty again
         auto newErrors = errorCollector->drainErrors();
+        // Stores them in ourself, for use with ErrorAssertion::checkAll at a later point.
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+    }
+
+    void dropErrors(const core::GlobalState &gs) {
+        // Moves errors from being owned by GlobalState to having been flushed by the flusher
+        // In our case, errorCollector is our error flusher (accumulates a vector, instead of
+        // printing to stdout).
+        errorQueue->flushAllErrors(gs);
+        // Retrieves the collected errors, sets it to empty again, and then drops those errors.
+        auto _newErrors = errorCollector->drainErrors();
     }
 
     void clear(const core::GlobalState &gs) {
@@ -396,6 +410,26 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 }
             }
         }
+    }
+
+    {
+        handler.drainErrors(*gs);
+
+        // Non-mutating namer, before entering symbols into GlobalState
+        vector<ast::ParsedFile> treesCopy;
+        for (auto &tree : trees) {
+            treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+        }
+
+        move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
+        ENFORCE(!gs->hadCriticalError());
+
+        // If no ENFORCE fired, then non-mutating namer is working fine.
+
+        // Drop the errors that were produced as a result of this process.
+        // It's good to have the error-reporting code run (ensure that it doesn't ENFORCE), but we
+        // don't actually care what the errors are here, because LSP will never show them.
+        handler.dropErrors(*gs);
     }
 
     for (auto &tree : trees) {
