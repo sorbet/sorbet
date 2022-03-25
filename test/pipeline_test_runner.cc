@@ -147,9 +147,23 @@ public:
     }
 
     void drainErrors(const core::GlobalState &gs) {
+        // Moves errors from being owned by GlobalState to having been flushed by the flusher
+        // In our case, errorCollector is our error flusher (accumulates a vector, instead of
+        // printing to stdout).
         errorQueue->flushAllErrors(gs);
+        // Retrieves the collected errors, and sets it to empty again
         auto newErrors = errorCollector->drainErrors();
+        // Stores them in ourself, for use with ErrorAssertion::checkAll at a later point.
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+    }
+
+    void dropErrors(const core::GlobalState &gs) {
+        // Moves errors from being owned by GlobalState to having been flushed by the flusher
+        // In our case, errorCollector is our error flusher (accumulates a vector, instead of
+        // printing to stdout).
+        errorQueue->flushAllErrors(gs);
+        // Retrieves the collected errors, sets it to empty again, and then drops those errors.
+        auto _newErrors = errorCollector->drainErrors();
     }
 
     void clear(const core::GlobalState &gs) {
@@ -399,6 +413,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     {
+        handler.drainErrors(*gs);
+
         // Non-mutating namer, before entering symbols into GlobalState
         vector<ast::ParsedFile> treesCopy;
         for (auto &tree : trees) {
@@ -410,11 +426,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // If no ENFORCE fired, then non-mutating namer is working fine.
 
-        // TODO(jez) Some tests fail because we're getting the non-mutating namer errors twice
-        // I think we should
-        // - still run all the code to generate errors, just in case we would have violated any ENFORCEs
-        // - not actually check those assertions. Every single one of them is just going to show up
-        //   as an "error-with-dupes" assertion which is not useful.
+        // Drop the errors that were produced as a result of this process.
+        // It's good to have the error-reporting code run (ensure that it doesn't ENFORCE), but we
+        // don't actually care what the errors are here, because LSP will never show them.
+        handler.dropErrors(*gs);
     }
 
     for (auto &tree : trees) {
