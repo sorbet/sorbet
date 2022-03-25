@@ -821,16 +821,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
     // Send a hover to bar.rb.
     sendAsync(*hover("bar.rb", 4, 4));
 
-    // We expect a null response from our hover on bar.rb. (NOTE: This is not ideal behavior, just what's expected with
-    // the current partial implementation.)
+    // First response should be hover, and we do expect the information to be stale.
     {
         auto response = readAsync();
         REQUIRE(response->isResponse());
-
-        auto hoverResult = get_if<variant<JSONNullObject, unique_ptr<Hover>>>(&(*response->asResponse().result));
-        REQUIRE(hoverResult != nullptr);
-
-        REQUIRE(holds_alternative<JSONNullObject>(*hoverResult));
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(absl::StrContains(hoverText->contents->value, "note: information may be stale"));
     }
 
     // Wait for typechecking to finish.
