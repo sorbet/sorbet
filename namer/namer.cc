@@ -1504,7 +1504,7 @@ class TreeSymbolizer {
         const bool firstName = true;
         auto result = squashNamesInner(ctx, owner, node, firstName);
 
-        // Explicitly convert to optional (unlikely what we usually do with SymbolRef's), because
+        // Explicitly convert to optional (unlike what we usually do with SymbolRef's), because
         // the bestEffort mode is subtle, and can easily break invariants that old code used to
         // assume, so hopefully the type system catches them more easily.
         return result.exists() ? make_optional<core::SymbolRef>(result) : nullopt;
