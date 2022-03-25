@@ -142,7 +142,10 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // We should always initialize with epoch 0.
     this->initialized = true;
-    this->indexed.overwrite(move(updates.updatedFileIndexes));
+    {
+        absl::WriterMutexLock lck(&indexedRWLock);
+        this->indexed.overwrite(move(updates.updatedFileIndexes));
+    }
     // Initialization typecheck is not cancelable.
     // TODO(jvilk): Make it preemptible.
     auto committed = false;
@@ -171,7 +174,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     if (updates.canceledSlowPath) {
-        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
+        absl::WriterMutexLock undoStateLock(&this->cancellationUndoStateRWLock);
+        absl::WriterMutexLock indexedLock(&this->indexedRWLock);
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
         ENFORCE(cancellationUndoState != nullptr);
@@ -369,7 +373,9 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
 
                     // Stop if typechecking was canceled.
                     if (!epochManager.wasTypecheckingCanceled()) {
-                        const auto &tree = indexed.getIndexedFile(job);
+                        // The read of `indexed` should be safe because `copyIndexed` itself is required to hold the
+                        // `indexedRWLock`.
+                        const auto &tree = ABSL_TS_UNCHECKED_READ(indexed).getIndexedFile(job);
                         // Note: indexed entries for payload files don't have any contents.
                         if (tree.tree && !ignore.contains(tree.file.id())) {
                             threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
@@ -446,9 +452,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // We use `gs` rather than the moved `finalGS` from this point forward.
 
         // Copy the indexes of unchanged files.
-        if (!copyIndexed(workers, updatedFiles, indexedCopies)) {
-            // Canceled.
-            return;
+        {
+            absl::ReaderMutexLock lck(&indexedRWLock);
+            if (!copyIndexed(workers, updatedFiles, indexedCopies)) {
+                // Canceled.
+                return;
+            }
         }
 
         ENFORCE(gs->lspQuery.isEmpty());
@@ -527,10 +536,11 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     // The fast path cannot be canceled.
     ENFORCE(!(updates.canTakeFastPath && couldBeCanceled));
     {
-        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
+        absl::WriterMutexLock undoStateLock(&this->cancellationUndoStateRWLock);
+        absl::WriterMutexLock indexedLock(&this->indexedRWLock);
         if (couldBeCanceled) {
             ENFORCE(updates.updatedGS.has_value());
-            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), indexed, updates.epoch);
+            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
         }
 
         // Clear out state associated with old finalGS.
@@ -675,12 +685,14 @@ void LSPTypechecker::changeThread() {
     typecheckerThreadId = newId;
 }
 
-bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
-    absl::ReaderMutexLock lock(&cancellationUndoStateRWLock);
+bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &, const LSPIndexedFileStore &)> func) {
+    absl::ReaderMutexLock lockUndoState(&cancellationUndoStateRWLock);
+    absl::ReaderMutexLock lockIndexed(&indexedRWLock);
+
     if (cancellationUndoState == nullptr) {
         return false;
     } else {
-        func(*cancellationUndoState);
+        func(*cancellationUndoState, indexed);
         return true;
     }
 }
@@ -710,19 +722,23 @@ void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
 }
 
 std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(std::vector<core::FileRef> frefs) const {
+    typechecker.getIndexedRWLock()->AssertReaderHeld();
     return typechecker.retypecheck(frefs, workers);
 }
 
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
                                              const std::vector<core::FileRef> &filesForQuery) const {
+    typechecker.getIndexedRWLock()->AssertReaderHeld();
     return typechecker.query(q, filesForQuery, workers);
 }
 
 const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) const {
+    typechecker.getIndexedRWLock()->AssertReaderHeld();
     return typechecker.getIndexed(fref);
 }
 
 std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
+    typechecker.getIndexedRWLock()->AssertReaderHeld();
     return typechecker.getResolved(frefs);
 }
 
@@ -730,8 +746,10 @@ const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
 
-LSPStaleTypechecker::LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState)
-    : config(config), undoState(undoState), emptyWorkers(WorkerPool::create(0, undoState.getEvictedGs()->tracer())) {}
+LSPStaleTypechecker::LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState,
+                                         const LSPIndexedFileStore &indexed)
+    : config(config), undoState(undoState), indexed(indexed),
+      emptyWorkers(WorkerPool::create(0, undoState.getEvictedGs()->tracer())) {}
 
 void LSPStaleTypechecker::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
                                      std::unique_ptr<KeyValueStore> kvstore) {
@@ -780,7 +798,15 @@ LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
 }
 
 const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const {
-    return undoState.getIndexed(fref);
+    const auto id = fref.id();
+
+    auto treeEvictedIndexed = undoState.getEvictedIndexed().find(id);
+    if (treeEvictedIndexed != undoState.getEvictedIndexed().end()) {
+        return treeEvictedIndexed->second;
+    }
+
+    ENFORCE(id < indexed.getSize());
+    return indexed.getIndexedFile(id);
 }
 
 std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
