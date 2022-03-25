@@ -956,6 +956,13 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
         typecase(
             bind.value,
             [&](cfg::Send &send) {
+                // Overwrite lspQueryMatch for send nodes, so that we only produce a result when
+                // hovering over the method or arguments (not the block)
+                auto locWithoutBlock = send.locWithoutBlock(bind.loc);
+                if (lspQueryMatch && locWithoutBlock.exists() && !locWithoutBlock.empty()) {
+                    lspQueryMatch = lspQuery.matchesLoc(core::Loc(ctx.file, locWithoutBlock));
+                }
+
                 InlinedVector<const core::TypeAndOrigins *, 2> args;
 
                 args.reserve(send.args.size());
