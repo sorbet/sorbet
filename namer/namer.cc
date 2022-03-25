@@ -1592,14 +1592,6 @@ public:
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
-        if (ctx.owner == core::Symbols::todo()) {
-            ENFORCE(this->bestEffort);
-            // The class we're nested in wasn't defined and we're in best effort mode, which means
-            // once we get back to the postTransformClassDef for our owner, the enclosing class def
-            // is going to be deleted, so just short circuit here.
-            return tree;
-        }
-
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
             klass.symbol = ctx.owner.enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
@@ -1614,12 +1606,13 @@ public:
                     ENFORCE(this->bestEffort);
                     // In bestEffort mode, we allow symbols to not exist because we attempted to run
                     // only the non-mutating namer passes (e.g., no SymbolDefiner). We'll delete
-                    // this whole node once we get to postTransformClassDef.
+                    // this whole node once we get to postTransformClassDef, but in the mean time
+                    // delete the RHS so we get there faster.
+                    klass.rhs.clear();
                 }
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                // ENFORCE(this->bestEffort || symbol == core::Symbols::root());
                 ENFORCE(symbol == core::Symbols::root());
             }
         }
@@ -1727,12 +1720,6 @@ public:
 
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-
-        if (ctx.owner == core::Symbols::todo()) {
-            ENFORCE(this->bestEffort);
-            // See the similar code in preTransformClassDef for an explanation.
-            return tree;
-        }
 
         auto owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
@@ -1899,13 +1886,6 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
             return tree;
-        }
-
-        if (ctx.owner == core::Symbols::todo()) {
-            ENFORCE(this->bestEffort);
-            // Once we get back up to the enclosing postTransformX, we're goign to delete not only
-            // this but the whole surrounding context, so just return anything for the time being.
-            return ast::MK::EmptyTree();
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
