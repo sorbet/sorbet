@@ -1446,7 +1446,6 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
-    // TODO(jez) Might want to rename this to something like "mungeTreeToPassForcePassAssertions" or something
     bool bestEffort;
 
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
@@ -1595,7 +1594,9 @@ public:
 
         if (ctx.owner == core::Symbols::todo()) {
             ENFORCE(this->bestEffort);
-            // TODO(jez) Add rationale
+            // The class we're nested in wasn't defined and we're in best effort mode, which means
+            // once we get back to the postTransformClassDef for our owner, the enclosing class def
+            // is going to be deleted, so just short circuit here.
             return tree;
         }
 
@@ -1609,6 +1610,11 @@ public:
                 auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
                 if (squashedSymbol.has_value()) {
                     klass.symbol = squashedSymbol.value().asClassOrModuleRef();
+                } else {
+                    ENFORCE(this->bestEffort);
+                    // In bestEffort mode, we allow symbols to not exist because we attempted to run
+                    // only the non-mutating namer passes (e.g., no SymbolDefiner). We'll delete
+                    // this whole node once we get to postTransformClassDef.
                 }
             } else {
                 // Desugar populates a top-level root() ClassDef.
@@ -1638,7 +1644,11 @@ public:
 
         if (klass.symbol == core::Symbols::todo()) {
             ENFORCE(this->bestEffort);
-            // TODO(jez) Document rationale
+            // bestEffort mode runs with a constant GlobalState and does not first run SymbolDefiner
+            // (useful for serving LSP queries quickly on stale data). This class wasn't given a
+            // symbol in preTransformClassDef. Now that we're in postTransformClassDef, we're
+            // allowed to return something that's not a ClassDef node, which we can use to delete
+            // the tree.
             return ast::MK::EmptyTree();
         }
 
@@ -1720,7 +1730,7 @@ public:
 
         if (ctx.owner == core::Symbols::todo()) {
             ENFORCE(this->bestEffort);
-            // TODO(jez) Add rationale
+            // See the similar code in preTransformClassDef for an explanation.
             return tree;
         }
 
@@ -1743,7 +1753,7 @@ public:
     ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (method.symbol == core::Symbols::todoMethod() && this->bestEffort) {
-            // TODO(jez) rationale
+            // See the similar code in postTransformClassDef for an explanation.
             return ast::MK::EmptyTree();
         }
 
