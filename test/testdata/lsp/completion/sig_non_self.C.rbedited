@@ -24,8 +24,8 @@ class Outer
     # scope, so no suggested sig.
 
     T::Sig::WithoutRuntime.sig do
-  ${1}
-end${0} # error: no block
+      ${1}
+    end${0} # error: no block
     #                         ^ apply-completion: [C] item: 0
 
     Sorbet::Private::Static.sig # error: Not enough arguments

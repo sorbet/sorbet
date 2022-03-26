@@ -7,8 +7,8 @@
 
 class A
   T::Sig::WithoutRuntime.sig do
-  ${1}
-end${0} # error: no block
+    ${1}
+  end${0} # error: no block
   #                         ^ apply-completion: [A] item: 0
   def without_runtime; ''; end
 
