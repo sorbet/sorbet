@@ -731,6 +731,86 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
     return item;
 }
 
+unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerInterface &typechecker,
+                                                 const LSPClientConfiguration &clientConfig, core::Loc queryLoc) {
+    const auto &gs = typechecker.state();
+
+    auto method = firstMethodAfterQuery(typechecker, queryLoc);
+    if (!method.exists()) {
+        return nullptr;
+    }
+
+    auto item = make_unique<CompletionItem>("##");
+    item->kind = CompletionItemKind::Snippet;
+    item->detail = fmt::format("YARD doc snippet for {}", method.data(gs)->name.shortName(gs));
+    auto insertRange = Range::fromLoc(gs, queryLoc);
+
+    const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
+    if (supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+    }
+
+    string yardSnippetText = "\n";
+
+    if (supportSnippets) {
+        yardSnippetText += "# ${1:Summary}";
+    } else {
+        yardSnippetText += "# Summary";
+    }
+    bool firstAfterSummary = true;
+
+    const auto &arguments = method.data(gs)->arguments;
+    auto resultType = method.data(gs)->resultType;
+
+    // 0 is final tabstop. 1 is initial tabstop (for summary)
+    auto tabStop = 1;
+    for (const auto &arg : arguments) {
+        auto argumentName = arg.argumentName(gs);
+        if (hasAngleBrackets(argumentName)) {
+            continue;
+        }
+
+        tabStop++;
+
+        if (firstAfterSummary) {
+            firstAfterSummary = false;
+            yardSnippetText += "\n#";
+        }
+
+        // TODO(jez) Might be nice to use @yieldparam / @yieldreturn for the block arg.
+        if (supportSnippets) {
+            yardSnippetText += fmt::format("\n# @param {} ${{{}:TODO}}", argumentName, tabStop);
+        } else {
+            yardSnippetText += fmt::format("\n# @param {} TODO", argumentName);
+        }
+    }
+
+    if (resultType != core::Types::void_()) {
+        if (firstAfterSummary) {
+            firstAfterSummary = false;
+            yardSnippetText += "\n#";
+        }
+
+        tabStop++;
+
+        if (supportSnippets) {
+            yardSnippetText += fmt::format("\n# @return ${{{}:TODO}}", tabStop);
+        } else {
+            yardSnippetText += fmt::format("\n# @return TODO");
+        }
+    }
+
+    if (insertRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(insertRange), string(yardSnippetText));
+    } else {
+        item->insertText = yardSnippetText;
+    }
+
+    return item;
+}
+
 bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::SymbolRef sym) {
     if (!sym.exists()) {
         return false;
@@ -1090,6 +1170,16 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
     auto &queryResponses = result.responses;
     vector<unique_ptr<CompletionItem>> items;
     if (queryResponses.empty()) {
+        auto prevTwoChars = queryLoc.adjust(gs, -2, 0);
+        if (prevTwoChars.source(gs) == "##") {
+            auto item = trySuggestYardSnippet(typechecker, config.getClientConfig(), queryLoc);
+            if (item != nullptr) {
+                items.emplace_back(std::move(item));
+                response->result = make_unique<CompletionList>(false, move(items));
+                return response;
+            }
+        }
+
         response->result = std::move(emptyResult);
         return response;
     }
