@@ -681,28 +681,6 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
         return nullptr;
     }
 
-    core::ClassOrModuleRef receiverSym;
-    if (core::isa_type<core::ClassType>(receiverType)) {
-        auto classType = core::cast_type_nonnull<core::ClassType>(receiverType);
-        receiverSym = classType.symbol;
-    } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType)) {
-        receiverSym = appliedType->klass;
-    } else {
-        // receiverType is not a simple type. This can happen for any number of strange and uncommon reasons, like:
-        // x = T.let(self, T.nilable(T::Sig));  x.sig {void}
-        return nullptr;
-    }
-
-    if (receiverSym == core::Symbols::rootSingleton()) {
-        receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
-    }
-    auto methodOwner = targetMethod.data(gs)->owner;
-
-    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
-        // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
-        return nullptr;
-    }
-
     auto queryFiles = vector<core::FileRef>{queryLoc.file()};
     auto queryResult = typechecker.query(core::lsp::Query::createSuggestSigQuery(targetMethod), queryFiles);
     if (queryResult.error) {
