@@ -7,11 +7,11 @@ class A
   module Inner
     extend T::Sig
     ##
-# ${1:Summary}
-#
-# @param x ${2:TODO}
-# @param blk ${3:TODO}
-# @return ${4:TODO}
+    # ${1:Summary}
+    #
+    # @param x ${2:TODO}
+    # @param blk ${3:TODO}
+    # @return ${4:TODO}
     # ^ completion: ##
     # ^ apply-completion: [A] item: 0
     sig {params(x: Integer, blk: T.proc.params(arg0: Integer).void).returns(NilClass)}

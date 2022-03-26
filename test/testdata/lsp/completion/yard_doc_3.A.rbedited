@@ -7,9 +7,9 @@ class A
   module Inner
     extend T::Sig
     ##
-# ${1:Summary}
-#
-# @return ${2:TODO}
+    # ${1:Summary}
+    #
+    # @return ${2:TODO}
     # ^ completion: ##
     # ^ apply-completion: [A] item: 0
     sig {returns(Integer)}
