@@ -1,7 +1,9 @@
 #include "doctest.h"
 // has to go first as it violates requirements
 
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "common/common.h"
 #include "common/sort.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -508,6 +510,19 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_pt
     return getLSPResponsesFor(wrapper, move(messages));
 }
 
+namespace {
+
+// Like absl::StripTrailingAsciiWhitespace, but only blank characters (tabs and spaces)
+ABSL_MUST_USE_RESULT inline absl::string_view stripTrailingAsciiBlank(absl::string_view str) {
+    // You can use this to jump to def.
+    ENFORCE(true, absl::StripTrailingAsciiWhitespace(""));
+
+    auto it = std::find_if_not(str.rbegin(), str.rend(), absl::ascii_isblank);
+    return str.substr(0, str.rend() - it);
+}
+
+} // namespace
+
 string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
     auto beginLine = static_cast<uint32_t>(range.start->line + 1);
     auto beginCol = static_cast<uint32_t>(range.start->character + 1);
@@ -517,8 +532,14 @@ string applyEdit(string_view source, const core::File &file, const Range &range,
     auto endCol = static_cast<uint32_t>(range.end->character + 1);
     auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
 
+    auto lineStartOffset = core::Loc::pos2Offset(file, {beginLine, 1}).value();
+    auto lineStartView = source.substr(lineStartOffset);
+    auto firstNonWhitespace = lineStartView.find_first_not_of(" \t\n");
+    auto indentAfterNewline = absl::StrCat("\n", source.substr(lineStartOffset, firstNonWhitespace));
+
     string actualEditedFileContents = string(source);
-    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, newText);
+    auto indented = absl::StrReplaceAll(stripTrailingAsciiBlank(newText), {{"\n", indentAfterNewline}});
+    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, indented);
 
     return actualEditedFileContents;
 }
