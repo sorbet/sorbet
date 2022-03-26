@@ -15,9 +15,9 @@ end
 # things get suggested there right now, even if it's not everything.
 
 sig {params(m: M, a: Integer, b: Integer).void}
-def aaa_example1(m, a, b)
-  aaa_example1() # error: Not enough arguments
-  #            ^ completion: a, b, m, aaa_example1, ...
+def AAA_example1(m, a, b)
+  AAA_example1() # error: Not enough arguments
+  #            ^ completion: a, b, m, AAA_example1, ...
 
   # No locals here because !isPrivateOk 🙃
   m.aaa_only_on_m() # error: Not enough arguments
@@ -27,7 +27,7 @@ def aaa_example1(m, a, b)
   # how we attempt to not show nonsensical completion request inside a method's
   # block.
 
-  aaa_example1() {} # error: Not enough arguments
+  AAA_example1() {} # error: Not enough arguments
   #            ^ completion: (nothing)
   #               ^ completion: (nothing)
 
