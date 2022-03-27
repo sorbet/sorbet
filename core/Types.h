@@ -142,8 +142,8 @@ public:
                                                              const std::vector<TypePtr> &targs, ClassOrModuleRef asIf);
     // Extract the return value type from a proc.
     static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
-    static TypePtr instantiate(const GlobalState &gs, const TypePtr &what,
-                               absl::Span<const TypeMemberRef> params, const std::vector<TypePtr> &targs);
+    static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, absl::Span<const TypeMemberRef> params,
+                               const std::vector<TypePtr> &targs);
     /** Replace all type variables in `what` with their instantiations.
      * Requires that `tc` has already been solved.
      */
