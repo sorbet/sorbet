@@ -8,7 +8,7 @@
 using namespace std;
 namespace sorbet::core {
 
-TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, absl::Span<const TypeMemberRef> params,
                            const vector<TypePtr> &targs) {
     ENFORCE(what != nullptr);
     auto t = what._instantiate(gs, params, targs);
@@ -119,7 +119,7 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
 }
 } // anonymous namespace
 
-TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr TupleType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                 const vector<TypePtr> &targs) const {
     optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, params, targs);
     if (!newElems) {
@@ -144,7 +144,7 @@ TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc)
     return make_type<TupleType>(move(*newElems));
 };
 
-TypePtr ShapeType::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr ShapeType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                 const vector<TypePtr> &targs) const {
     optional<vector<TypePtr>> newValues = instantiateElems(this->values, gs, params, targs);
     if (!newValues) {
@@ -169,7 +169,7 @@ TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc)
     return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr OrType::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr OrType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                              const vector<TypePtr> &targs) const {
     auto left = this->left._instantiate(gs, params, targs);
     auto right = this->right._instantiate(gs, params, targs);
@@ -215,7 +215,7 @@ TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc) co
     return nullptr;
 }
 
-TypePtr AndType::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr AndType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                               const vector<TypePtr> &targs) const {
     auto left = this->left._instantiate(gs, params, targs);
     auto right = this->right._instantiate(gs, params, targs);
@@ -261,7 +261,7 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
     return nullptr;
 }
 
-TypePtr AppliedType::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr AppliedType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                   const vector<TypePtr> &targs) const {
     optional<vector<TypePtr>> newTargs = instantiateElems(this->targs, gs, params, targs);
     if (!newTargs) {
@@ -286,7 +286,7 @@ TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &t
     return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr LambdaParam::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr LambdaParam::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                   const vector<TypePtr> &targs) const {
     ENFORCE(params.size() == targs.size());
     for (auto &el : params) {

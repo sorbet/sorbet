@@ -2,6 +2,7 @@
 #define SORBET_TYPES_H
 
 #include "absl/base/casts.h"
+#include "absl/types/span.h"
 #include "common/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
@@ -142,7 +143,7 @@ public:
     // Extract the return value type from a proc.
     static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
     static TypePtr instantiate(const GlobalState &gs, const TypePtr &what,
-                               const InlinedVector<TypeMemberRef, 4> &params, const std::vector<TypePtr> &targs);
+                               absl::Span<const TypeMemberRef> params, const std::vector<TypePtr> &targs);
     /** Replace all type variables in `what` with their instantiations.
      * Requires that `tc` has already been solved.
      */
@@ -391,7 +392,7 @@ public:
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
 };
 CheckSize(LambdaParam, 40, 8);
@@ -609,7 +610,7 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -664,7 +665,7 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -708,7 +709,7 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -734,7 +735,7 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -761,7 +762,7 @@ public:
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;

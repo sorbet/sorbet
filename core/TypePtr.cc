@@ -279,7 +279,7 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) c
 #undef _INSTANTIATE
 }
 
-TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                               const std::vector<TypePtr> &targs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
