@@ -11,7 +11,7 @@ bool TypeConstraint::isEmpty() const {
     return upperBounds.empty() && lowerBounds.empty();
 }
 
-void TypeConstraint::defineDomain(const GlobalState &gs, const InlinedVector<TypeArgumentRef, 4> &typeParams) {
+void TypeConstraint::defineDomain(const GlobalState &gs, absl::Span<const TypeArgumentRef> typeParams) {
     // ENFORCE(isEmpty()); // unfortunately this is false. See
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &ta : typeParams) {
