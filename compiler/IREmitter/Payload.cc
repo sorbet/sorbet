@@ -834,7 +834,8 @@ llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBa
 
             auto *numLines = llvm::ConstantInt::get(cs, llvm::APInt(32, file.data(cs).lineCount(), true));
             globalInitBuilder.CreateCall(
-                iseqEncodedInitFn, {fileLineNumberInfo, globalInitBuilder.CreateConstGEP2_32(nullptr, iseqEncoded, 0, 0), numLines});
+                iseqEncodedInitFn,
+                {fileLineNumberInfo, globalInitBuilder.CreateConstGEP2_32(nullptr, iseqEncoded, 0, 0), numLines});
 
             return fileLineNumberInfo;
         });

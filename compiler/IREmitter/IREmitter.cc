@@ -492,7 +492,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                     auto name = a.data(cfg)._name.shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
-                    auto rawValue = builder.CreateLoad(builder.CreateConstGEP1_32(argArrayRaw, i), {"rawArg_", nameRef});
+                    auto rawValue =
+                        builder.CreateLoad(builder.CreateConstGEP1_32(argArrayRaw, i), {"rawArg_", nameRef});
                     Payload::varSet(cs, a, rawValue, builder, irctx, rubyRegionId);
                     if (i >= minPositionalArgCount) {
                         // check if we need to fill in the next variable from the arg
