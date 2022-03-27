@@ -31,6 +31,11 @@ module T::Private::Methods
 
   DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
 
+  @metaprogrammed_methods = {}
+  class << self
+    attr_reader :metaprogrammed_methods
+  end
+
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
 
@@ -222,6 +227,28 @@ module T::Private::Methods
       # We need to fetch the active declaration again, as _check_final_ancestors
       # may have reset it (see the comment in that method for details).
       current_declaration = T::Private::DeclState.current.active_declaration
+    end
+
+    if T::Configuration.metaprogramming_location_tracking?
+      expected_label =
+        case mod
+        when Class
+          "<class:#{hook_mod}>"
+        when Module
+          "<module:#{hook_mod}>"
+        else
+          raise "Unexpected mod: #{mod.class}"
+        end
+
+      loc = caller_locations
+        .filter {|entry| entry.base_label.end_with?(expected_label)}
+        .first
+      if !loc.nil?
+        line = File.readlines(loc.absolute_path)[loc.lineno - 1]
+        if /\A\s*def\b/ !~ line
+          @metaprogrammed_methods[[mod, method_name]] = loc
+        end
+      end
     end
 
     if current_declaration.nil?

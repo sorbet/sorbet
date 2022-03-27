@@ -555,6 +555,15 @@ module T::Configuration
     @prop_freeze_handler
   end
 
+  @metaprogramming_location_tracking = false
+  def self.toggle_metaprogramming_location_tracking
+    @metaprogramming_location_tracking ^= true
+  end
+
+  def self.metaprogramming_location_tracking?
+    @metaprogramming_location_tracking
+  end
+
   @sealed_violation_whitelist = nil
   # @param [Array] sealed_violation_whitelist An array of Regexp to validate
   #   whether inheriting /including a sealed module outside the defining module
