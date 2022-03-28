@@ -1,5 +1,6 @@
 load("//tools:clang.bzl", "clang_tool")
-load("@compdb//:aspects.bzl", "compilation_database")
+load("@com_grail_bazel_compdb//:defs.bzl", "compilation_database")
+load("@com_grail_bazel_output_base_util//:defs.bzl", "OUTPUT_BASE")
 
 clang_tool("clang-format")
 
@@ -10,6 +11,7 @@ clang_tool("opt")
 compilation_database(
     name = "compdb",
     testonly = True,
+    output_base = OUTPUT_BASE,
     targets = [
         # BEGIN compile_commands targets
         "//ast:ast",
