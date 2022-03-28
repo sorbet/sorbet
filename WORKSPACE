@@ -4,6 +4,10 @@ load("//third_party:externals.bzl", "register_sorbet_dependencies")
 
 register_sorbet_dependencies()
 
+load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
+
+bazel_compdb_deps()
+
 load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
