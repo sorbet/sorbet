@@ -235,16 +235,15 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                 }
 
                 // Find the first task that the indexer is able to handle
-                auto &tasks = taskQueue->tasks();
                 bool frontOfQueue = true;
-                auto it = absl::c_find_if(tasks, [&frontOfQueue, &indexer = this->indexer](auto &task) {
+                auto it = absl::c_find_if(taskQueue->tasks(), [&frontOfQueue, &indexer = this->indexer](auto &task) {
                     bool canHandle = indexer.canHandleTask(frontOfQueue, *task);
                     frontOfQueue = false;
                     return canHandle;
                 });
 
                 // taskQueue->waitReady ensures that there is a task to run if the queue isn't terminated.
-                ENFORCE(it != tasks.end());
+                ENFORCE(it != taskQueue->tasks().end());
 
                 // Before giving up the lock, check if the typechecker is running a slow path and if the task at the
                 // head of the queue can either operate on stale data (i.e., the GlobalState just prior to the change
@@ -265,7 +264,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     // and move on to the next task.
                     if (frontTask == nullptr) {
                         logger->debug("Succeeded in running on stale data");
-                        taskQueue->tasks().pop_front();
+                        taskQueue->tasks().erase(it);
                     }
                     // If the coordinator has not consumed the task, that means it was not able to run it on stale
                     // state, because no cancellationUndoState was present. There are (we think! see below) two
@@ -312,8 +311,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         // In this if statement **only**, `taskQueueMutex` protects all accesses to LSPIndexer. This is
                         // needed to linearize the indexing of edits, which may happen in the typechecking thread if a
                         // fast path edit preempts, with the `canPreempt` checks of edits in this thread.
-                        auto headOfQueueCanPreempt = [&indexer = this->indexer,
-                                                      &tasks = this->taskQueue->tasks()]() -> bool {
+                        auto headOfQueueCanPreempt = [&indexer = this->indexer, &tasks = taskQueue->tasks()]() -> bool {
                             // Await always holds taskQueueMutex when calling this function, but absl doesn't know that.
                             return tasks.empty() || !tasks.front()->canPreempt(indexer);
                         };
