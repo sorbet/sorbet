@@ -1,5 +1,6 @@
 #ifndef SORBET_TYPEPTR_H
 #define SORBET_TYPEPTR_H
+#include "absl/types/span.h"
 #include "common/common.h"
 #include "core/NameRef.h"
 #include "core/ShowOptions.h"
@@ -306,7 +307,7 @@ public:
 
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 
-    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<TypeMemberRef, 4> &params,
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.

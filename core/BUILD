@@ -36,6 +36,7 @@ cc_library(
         "//main/pipeline/semantic_extension:interface",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/types:span",
         "@rang",
     ],
 )

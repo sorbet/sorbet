@@ -1,6 +1,7 @@
 #ifndef SORBET_TYPECONSTRAINT_H
 #define SORBET_TYPECONSTRAINT_H
 
+#include "absl/types/span.h"
 #include "core/Context.h"
 #include "core/SymbolRef.h"
 #include "core/TypePtr.h"
@@ -23,7 +24,7 @@ public:
     TypeConstraint() = default;
     TypeConstraint(const TypeConstraint &) = delete;
     TypeConstraint(TypeConstraint &&) = default;
-    void defineDomain(const GlobalState &gs, const InlinedVector<TypeArgumentRef, 4> &typeParams);
+    void defineDomain(const GlobalState &gs, absl::Span<const TypeArgumentRef> typeParams);
     bool hasUpperBound(TypeArgumentRef forWhat) const;
     bool hasLowerBound(TypeArgumentRef forWhat) const;
     TypePtr findSolution(TypeArgumentRef forWhat) const;
