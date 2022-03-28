@@ -387,9 +387,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     builder.CreateCondBr(argSizeForExpansionCheck, arrayTestBlock, afterArgArrayExpandBlock);
                     auto sizeTestEnd = builder.GetInsertBlock();
                     builder.SetInsertPoint(arrayTestBlock);
-                    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true))};
                     auto rawArg1Value =
-                        builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), "arg1_maybeExpandToFullArgs");
+                        builder.CreateLoad(builder.CreateConstGEP1_32(argArrayRaw, 0), "arg1_maybeExpandToFullArgs");
                     auto isArray = Payload::typeTest(cs, builder, rawArg1Value, core::Symbols::Array());
                     auto typeTestEnd = builder.GetInsertBlock();
 
@@ -491,10 +490,10 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         Payload::varSet(cs, argPresent, Payload::rubyTrue(cs, builder), builder, irctx, rubyRegionId);
                     }
 
-                    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
                     auto name = a.data(cfg)._name.shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
-                    auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
+                    auto rawValue =
+                        builder.CreateLoad(builder.CreateConstGEP1_32(argArrayRaw, i), {"rawArg_", nameRef});
                     Payload::varSet(cs, a, rawValue, builder, irctx, rubyRegionId);
                     if (i >= minPositionalArgCount) {
                         // check if we need to fill in the next variable from the arg

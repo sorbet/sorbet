@@ -332,19 +332,15 @@ public:
                 int i = -1;
                 for (auto &v : mcctx.send->args) {
                     i++;
-                    llvm::Value *argIndices[] = {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, 0, true)),
-                                                 llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, i, true))};
                     llvm::Value *val = IREmitterHelpers::emitLiteralish(mcctx.cs, globalInitBuilder, v.type);
                     globalInitBuilder.CreateStore(
-                        val, globalInitBuilder.CreateGEP(argArray, argIndices, fmt::format("hashArgs{}Addr", i)));
+                        val, globalInitBuilder.CreateConstGEP2_64(argArray, 0, i, fmt::format("hashArgs{}Addr", i)));
                 }
 
-                llvm::Value *argIndices[] = {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true)),
-                                             llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true))};
                 auto hashValue = globalInitBuilder.CreateCall(
                     mcctx.cs.getFunction("sorbet_literalHashBuild"),
                     {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)),
-                     globalInitBuilder.CreateGEP(argArray, argIndices)},
+                     globalInitBuilder.CreateConstGEP2_64(argArray, 0, 0)},
                     "builtHash");
 
                 globalInitBuilder.CreateStore(

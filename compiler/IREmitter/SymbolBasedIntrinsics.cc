@@ -398,9 +398,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
         for (auto info : nonKeywordArgInfo) {
             ++i;
             auto *id = Payload::idIntern(cs, builder, info->argumentName(cs));
-            auto *offset = IREmitterHelpers::buildU4(cs, i);
-            llvm::Value *indices[] = {offset};
-            builder.CreateStore(id, builder.CreateGEP(table, indices));
+            builder.CreateStore(id, builder.CreateConstGEP1_32(table, i));
         }
 
         auto *tableSize = IREmitterHelpers::buildS4(cs, nonKeywordArgInfo.size());
@@ -420,9 +418,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
         for (auto info : keywordArgInfo) {
             ++i;
             auto *id = Payload::idIntern(cs, builder, info->argumentName(cs));
-            auto *offset = IREmitterHelpers::buildU4(cs, i);
-            llvm::Value *indices[] = {offset};
-            builder.CreateStore(id, builder.CreateGEP(table, indices));
+            builder.CreateStore(id, builder.CreateConstGEP1_32(table, i));
         }
 
         auto *kw_num = IREmitterHelpers::buildS4(cs, kwNum);

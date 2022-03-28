@@ -566,9 +566,7 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitter
 
     for (auto &entry : escapedVariables) {
         auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
-        auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second.localIndex, false));
-        llvm::Value *indices[] = {offset};
-        builder.CreateStore(id, builder.CreateGEP(locals, indices));
+        builder.CreateStore(id, builder.CreateConstGEP1_32(locals, baseOffset + entry.second.localIndex));
     }
 }
 
@@ -835,10 +833,9 @@ llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBa
             globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
 
             auto *numLines = llvm::ConstantInt::get(cs, llvm::APInt(32, file.data(cs).lineCount(), true));
-            auto *intzero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0));
-            llvm::Value *indices[] = {intzero, intzero};
             globalInitBuilder.CreateCall(
-                iseqEncodedInitFn, {fileLineNumberInfo, globalInitBuilder.CreateGEP(iseqEncoded, indices), numLines});
+                iseqEncodedInitFn,
+                {fileLineNumberInfo, globalInitBuilder.CreateConstGEP2_32(nullptr, iseqEncoded, 0, 0), numLines});
 
             return fileLineNumberInfo;
         });
@@ -883,10 +880,8 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder
     auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, lineno - 1));
 
     auto *encoded = Payload::getIseqEncodedPointer(cs, builder, loc.file());
-    auto *intzero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0));
-    llvm::Value *indices[] = {intzero, intzero};
     builder.CreateCall(cs.getFunction("sorbet_setLineNumber"),
-                       {offset, builder.CreateGEP(encoded, indices), builder.CreateLoad(lineNumberPtr)});
+                       {offset, builder.CreateConstGEP2_32(nullptr, encoded, 0, 0), builder.CreateLoad(lineNumberPtr)});
     return loc;
 }
 
