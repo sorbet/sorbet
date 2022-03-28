@@ -40,7 +40,7 @@ module Sorbet::Private
       end
 
       FileUtils.rm_r(output_dir) if Dir.exist?(output_dir)
-      TracepointSerializer.new(trace_results).serialize(output_dir)
+      TracepointSerializer.new(**trace_results).serialize(output_dir)
     end
 
     def self.output_file
