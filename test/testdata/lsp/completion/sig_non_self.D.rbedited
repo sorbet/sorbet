@@ -27,8 +27,8 @@ class Outer
     #                         ^ apply-completion: [C] item: 0
 
     Sorbet::Private::Static.sig(${1:T.untyped}) do
-  ${2}
-end${0} # error: Not enough arguments
+      ${2}
+    end${0} # error: Not enough arguments
   # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: no block
     #                          ^ apply-completion: [D] item: 0
   end
