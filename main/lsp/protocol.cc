@@ -221,7 +221,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             {
                 absl::MutexLock lck(taskQueue->getMutex());
                 Timer timeit(logger, "idle");
-                taskQueue->getMutex()->Await(absl::Condition(taskQueue.get(), &TaskQueue::ready));
+                taskQueue->waitReady(indexer);
                 ENFORCE(!taskQueue->isPaused());
                 if (taskQueue->isTerminated()) {
                     if (taskQueue->getErrorCode() != 0) {
@@ -243,9 +243,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     return canHandle;
                 });
 
-                if (it == tasks.end()) {
-                    continue;
-                }
+                // taskQueue->waitReady ensures that there is a task to run if the queue isn't terminated.
+                ENFORCE(it != tasks.end());
 
                 // Before giving up the lock, check if the typechecker is running a slow path and if the task at the
                 // head of the queue can either operate on stale data (i.e., the GlobalState just prior to the change
