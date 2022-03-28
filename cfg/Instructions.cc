@@ -135,6 +135,25 @@ Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core:
     histogramInc("cfg.send.args", this->args.size());
 }
 
+core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
+    if (this->link == nullptr) {
+        // This location is slightly better, because it will include the last `)` if that exists,
+        // which means that queries for things like
+        //
+        //     foo()
+        //     #   ^ completion: ...
+        //
+        // will match.
+        return bindLoc;
+    }
+
+    if (!this->argLocs.empty()) {
+        return this->receiverLoc.join(this->argLocs.back());
+    }
+
+    return this->receiverLoc.join(this->funLoc);
+}
+
 Literal::Literal(const core::TypePtr &value) : value(move(value)) {
     categoryCounterInc("cfg", "literal");
 }
