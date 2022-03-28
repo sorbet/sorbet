@@ -1,4 +1,4 @@
-Content-Length: 574
+Content-Length: 578
 
 {"jsonrpc":"2.0","id":0,"requestMethod":"initialize","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"triggerCharacters":[".",":","@","#"]},"definitionProvider":true,"typeDefinitionProvider":true,"implementationProvider":true,"referencesProvider":true,"documentHighlightProvider":false,"documentSymbolProvider":false,"workspaceSymbolProvider":true,"codeActionProvider":{"codeActionKinds":["quickfix","source.fixAll.sorbet"]},"documentFormattingProvider":false,"renameProvider":{"prepareProvider":true},"sorbetShowSymbolProvider":true}}}Content-Length: 65
 
