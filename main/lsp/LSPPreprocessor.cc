@@ -72,6 +72,8 @@ absl::Mutex *TaskQueue::getMutex() {
 }
 
 bool TaskQueue::ready() const {
+    // TODO: this will busy wait when there are tasks that can't be processed. Add a mechanism to signal changes to the
+    // non-empty queue.
     return this->terminated || (!this->paused && !this->pendingTasks.empty());
 }
 

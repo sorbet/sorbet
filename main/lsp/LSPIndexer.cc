@@ -179,7 +179,7 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, std::unique_ptr<cor
     this->initialGS = std::move(initialGS);
 }
 
-bool LSPIndexer::canHandleTask(const LSPTask &task) const {
+bool LSPIndexer::canHandleTask(bool frontOfQueue, const LSPTask &task) const {
     if (this->initialized) {
         return true;
     }
@@ -188,8 +188,10 @@ bool LSPIndexer::canHandleTask(const LSPTask &task) const {
         case LSPMethod::Initialize:
         case LSPMethod::Initialized:
         case LSPMethod::SorbetIndexerInitialization:
-        case LSPMethod::SorbetFence:
             return true;
+
+        case LSPMethod::SorbetFence:
+            return frontOfQueue;
 
         default:
             return false;

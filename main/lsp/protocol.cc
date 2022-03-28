@@ -236,8 +236,12 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
                 // Find the first task that the indexer is able to handle
                 auto &tasks = taskQueue->tasks();
-                auto it = absl::c_find_if(
-                    tasks, [&indexer = this->indexer](auto &task) { return indexer.canHandleTask(*task); });
+                bool frontOfQueue = true;
+                auto it = absl::c_find_if(tasks, [&frontOfQueue, &indexer = this->indexer](auto &task) {
+                    bool canHandle = indexer.canHandleTask(frontOfQueue, *task);
+                    frontOfQueue = false;
+                    return canHandle;
+                });
 
                 if (it == tasks.end()) {
                     continue;
