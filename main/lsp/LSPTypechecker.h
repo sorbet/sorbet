@@ -119,7 +119,7 @@ public:
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
-                         WorkerPool &workers) const ABSL_SHARED_LOCKS_REQUIRED(indexedRWLock);
+                         WorkerPool &workers) const;
 
     /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).

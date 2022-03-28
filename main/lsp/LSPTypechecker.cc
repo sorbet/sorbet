@@ -616,7 +616,13 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     ENFORCE(gs->errorQueue->isEmpty());
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
-    auto resolved = getResolved(filesForQuery);
+
+    vector<ast::ParsedFile> resolved;
+    {
+        absl::ReaderMutexLock lck(&indexedRWLock);
+        resolved = getResolved(filesForQuery);
+    }
+
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
@@ -728,7 +734,7 @@ std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(st
 
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
                                              const std::vector<core::FileRef> &filesForQuery) const {
-    typechecker.getIndexedRWLock()->AssertReaderHeld();
+    //typechecker.getIndexedRWLock()->AssertReaderHeld();
     return typechecker.query(q, filesForQuery, workers);
 }
 
