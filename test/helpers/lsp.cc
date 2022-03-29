@@ -513,7 +513,7 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_pt
 namespace {
 
 // Like absl::StripTrailingAsciiWhitespace, but only blank characters (tabs and spaces)
-ABSL_MUST_USE_RESULT inline absl::string_view stripTrailingAsciiBlank(absl::string_view str) {
+[[nodiscard]] inline absl::string_view stripTrailingAsciiBlank(absl::string_view str) {
     // You can use this to jump to def.
     ENFORCE(true, absl::StripTrailingAsciiWhitespace(""));
 
