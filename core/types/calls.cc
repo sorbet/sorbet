@@ -2226,7 +2226,7 @@ private:
                 dispatched.returnType = Types::instantiate(gs, dispatched.returnType, *(constr));
             }
         }
-        res.returnType = dispatched.returnType;
+        res = std::move(dispatched);
     }
 
 public:
