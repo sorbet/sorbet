@@ -7,7 +7,7 @@ cc_import(
 cc_library(
     name = "ssl",
     hdrs = glob(["include/openssl/**/*.h"]),
-    includes = ["include"],
+    includes = ["include/openssl"],
     visibility = ["//visibility:public"],
     deps = [":ssl-import"],
 )
@@ -21,7 +21,7 @@ cc_import(
 cc_library(
     name = "crypto",
     hdrs = glob(["include/openssl/**/*.h"]),
-    includes = ["include"],
+    includes = ["include/openssl"],
     visibility = ["//visibility:public"],
     deps = [":crypto-import"],
 )
