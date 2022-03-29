@@ -27,6 +27,8 @@ sh_binary(
         "@sorbet_ruby_2_6//:ruby",
         "@sorbet_ruby_2_7//:bundle",
         "@sorbet_ruby_2_7//:ruby",
+        "@sorbet_ruby_3_0//:bundle",
+        "@sorbet_ruby_3_0//:ruby",
     ],
     # NOTE: ensure that this rule isn't caught in //...
     tags = ["manual"],
@@ -63,6 +65,19 @@ snapshot_tests(
     ),
 )
 
+snapshot_tests(
+    ruby = "sorbet_ruby_3_0",
+    tests = glob(
+        [
+            "partial/*",
+            "total/*",
+        ],
+
+        # We only want to match directories with this glob
+        exclude_directories = 0,
+    ),
+)
+
 test_suite(
     name = "snapshot",
 
@@ -71,6 +86,7 @@ test_suite(
     tests = [
         ":snapshot-sorbet_ruby_2_6",
         ":snapshot-sorbet_ruby_2_7",
+        ":snapshot-sorbet_ruby_3_0",
     ],
 )
 
@@ -82,5 +98,6 @@ test_suite(
     tests = [
         ":update-sorbet_ruby_2_6",
         ":update-sorbet_ruby_2_7",
+        ":update-sorbet_ruby_3_0",
     ],
 )
