@@ -17,6 +17,7 @@ require 'json'
 require 'set'
 require 'tmpdir'
 require 'rubygems'
+require 'stringio'
 
 class Sorbet::Private::HiddenMethodFinder
   PATH = "sorbet/rbi/hidden-definitions/"
