@@ -70,6 +70,14 @@ MutableContext MutableContext::withOwner(SymbolRef sym) const {
     return MutableContext(state, sym, file);
 }
 
+Loc Context::locAt(LocOffsets offsets) const {
+    return Loc{this->file, offsets};
+}
+
+Loc MutableContext::locAt(LocOffsets offsets) const {
+    return Loc{this->file, offsets};
+}
+
 ErrorBuilder MutableContext::beginError(LocOffsets loc, ErrorClass what) const {
     return state.beginError(Loc(file, loc), what);
 }

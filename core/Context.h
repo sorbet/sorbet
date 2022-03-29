@@ -36,6 +36,8 @@ public:
     Context withOwner(SymbolRef sym) const;
     Context withFile(FileRef file) const;
 
+    Loc locAt(LocOffsets offset) const;
+
     void trace(std::string_view msg) const;
 };
 CheckSize(Context, 16, 8);
@@ -69,6 +71,8 @@ public:
     MutableContext withOwner(SymbolRef sym) const;
     MutableContext withFile(FileRef file) const;
     ErrorBuilder beginError(LocOffsets loc, ErrorClass what) const;
+
+    Loc locAt(LocOffsets offset) const;
 
     void trace(std::string_view msg) const;
 };
