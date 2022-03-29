@@ -7,7 +7,8 @@ cc_import(
 cc_library(
     name = "ssl",
     hdrs = glob(["include/openssl/**/*.h"]),
-    includes = ["include/openssl"],
+    # "include" is added to the includes as openssl is installed in /usr/local/opt/openssl on darwin.
+    includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [":ssl-import"],
 )
@@ -21,7 +22,8 @@ cc_import(
 cc_library(
     name = "crypto",
     hdrs = glob(["include/openssl/**/*.h"]),
-    includes = ["include/openssl"],
+    # "include" is added to the includes as openssl is installed in /usr/local/opt/openssl on darwin.
+    includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [":crypto-import"],
 )
