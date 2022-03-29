@@ -61,6 +61,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     shared_ptr<JSONType> JSONInt = make_shared<JSONIntType>();
     shared_ptr<JSONType> JSONDouble = make_shared<JSONDoubleType>();
     shared_ptr<JSONType> JSONString = make_shared<JSONStringType>();
+    // In the LSP specification JSONAny defined as
+    // `export type LSPAny = LSPObject | LSPArray | string | integer | uinteger | decimal | boolean | null;`
+    // https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#number
+    //
+    // We don't support LSPObject and LSPArray options yet
+    shared_ptr<JSONType> JSONAny = makeVariant({JSONNull, JSONBool, JSONInt, JSONDouble, JSONString});
 
     // Converted from https://microsoft.github.io/language-server-protocol/specification
     // Last updated on 11/14/18.
@@ -151,9 +157,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto Command = makeObject("Command",
                               {
-                                  makeField("title", JSONString), makeField("command", JSONString),
-                                  // Unused in Sorbet.
-                                  // makeField("arguments", makeOptional(makeArray(JSONAny))),
+                                  makeField("title", JSONString),
+                                  makeField("command", JSONString),
+                                  makeField("arguments", makeOptional(makeArray(JSONAny))),
                               },
                               classTypes);
 
@@ -779,8 +785,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto ExecuteCommandParams = makeObject("ExecuteCommandParams",
                                            {
                                                makeField("command", JSONString),
-                                               // Unused in Sorbet.
-                                               // makeField("arguments", makeOptional(makeArray(JSONAny))),
+                                               makeField("arguments", makeOptional(makeArray(JSONAny))),
                                            },
                                            classTypes);
 
@@ -1363,6 +1368,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "window/showMessage",
                                      "workspace/symbol",
                                      "textDocument/implementation",
+                                     "workspace/executeCommand",
                                  },
                                  enumTypes);
 
@@ -1389,7 +1395,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
                                                 {"sorbet/showSymbol", TextDocumentPositionParams},
+                                                {"workspace/executeCommand", ExecuteCommandParams},
                                             });
+
+    auto ExecuteCommandResponse =
+        makeObject("ExecuteCommandResponse",
+                   {makeField("result", JSONAny), makeField("error", makeOptional(ResponseError))}, classTypes);
+
     auto RequestMessage =
         makeObject("RequestMessage",
                    {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
@@ -1425,6 +1437,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // Sorbet only sends CodeAction[].
             {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
             // TODO: the following are more correct but I can only get the above to work.
+            //
+            // Workaround: the CodeAction interface has a command property,
+            // we can return empty list of edits and a command. In that case only the command would be executed
+            // If we would need more precise distinction between a Command and a CodeAction,
+            // we could introduce a discriminated union CodeActionOrCommand
+            //
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
             {"textDocument/implementation", makeVariant({JSONNull, makeArray(Location)})},
@@ -1432,6 +1450,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"sorbet/error", SorbetErrorParams},
             {"sorbet/readFile", TextDocumentItem},
             {"sorbet/showSymbol", makeVariant({JSONNull, SymbolInformation})},
+            {"workspace/executeCommand", makeVariant({JSONNull, ExecuteCommandResponse})},
         });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.

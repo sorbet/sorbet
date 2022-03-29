@@ -101,6 +101,9 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     // sorbet/showSymbol
                     return holds_alternative<JSONNullObject>(res) ? ResponseMessageStatus::EmptyResult
                                                                   : ResponseMessageStatus::Succeeded;
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, std::unique_ptr<ExecuteCommandResponse>>>) {
+                    // workspace/executeCommand
+                    return ResponseMessageStatus::Unknown;
                 } else {
                     static_assert(always_false_v<T>, "non-exhaustive visitor!");
                 }
@@ -192,6 +195,8 @@ ConstExprStr LSPTask::methodString() const {
             return "workspace.symbol";
         case LSPMethod::TextDocumentImplementation:
             return "textDocument.implementation";
+        case LSPMethod::WorkspaceExecuteCommand:
+            return "workspace.executeCommand";
     }
 }
 
