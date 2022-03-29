@@ -140,6 +140,10 @@ class Sorbet::Private::HiddenMethodFinder
         # Invalid nesting is ok because we don't generate all the intermediate
         # namespaces for aliases
         '--suppress-error-code=4015',
+        # The `Random` class has a super class of `Object` in ruby-2.7 and
+        # `Random::Base` in ruby-2. We can remove this once we no longer support
+        # ruby-2.7.
+        '--suppress-error-code=5012',
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
