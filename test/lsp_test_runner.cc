@@ -17,6 +17,7 @@ namespace spd = spdlog;
 using namespace std;
 
 string singleTest;
+bool updateExpectations;
 string webTraceFile;
 
 bool isTestMessage(const LSPMessage &msg) {
@@ -350,8 +351,13 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
         get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
 
     // Simple string comparison, just like other *.exp files.
-    CHECK_EQ_DIFF(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse),
-                  "Mismatch on: " + expectedSymbolsPath);
+    auto receivedStringResponse = documentSymbolsToString(receivedSymbolResponse);
+    if (!updateExpectations) {
+        CHECK_EQ_DIFF(documentSymbolsToString(expectedSymbolResponse), receivedStringResponse,
+                      "Mismatch on: " + expectedSymbolsPath);
+    } else {
+        FileOps::write(expectedSymbolsPath, receivedStringResponse);
+    }
 }
 
 void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
@@ -389,7 +395,11 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
     auto expectedFormattedText = FileOps::read(expectedFormattingPath);
 
     // Simple string comparison, just like other *.exp files.
-    CHECK_EQ_DIFF(expectedFormattedText, formattedText, "Mismatch on: " + expectedFormattingPath);
+    if (!updateExpectations) {
+        CHECK_EQ_DIFF(expectedFormattedText, formattedText, "Mismatch on: " + expectedFormattingPath);
+    } else {
+        FileOps::write(expectedFormattingPath, formattedText);
+    }
 }
 
 TEST_CASE("LSPTest") {
@@ -766,6 +776,8 @@ int main(int argc, char *argv[]) {
                                                        cxxopts::value<std::string>()->default_value(""), "testpath");
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
                                     cxxopts::value<std::string>()->default_value(""), "file");
+    options.add_options()("update_exp", "update expectations");
+
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -774,6 +786,7 @@ int main(int argc, char *argv[]) {
     }
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
+    sorbet::test::updateExpectations = res["update_exp"].as<bool>();
     sorbet::test::webTraceFile = res["web-trace-file"].as<std::string>();
 
     doctest::Context context(argc, argv);
