@@ -612,7 +612,7 @@ private:
                     auto loc = resolvedField.data(ctx)->loc();
                     if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                         e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                        e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
+                        e.addErrorLine(ctx.locAt(job.out->original.loc()), "Type alias used here");
                     }
                     resolvedField.data(ctx)->resultType =
                         core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
@@ -2372,8 +2372,8 @@ class ResolveTypeMembersAndFieldsWalk {
         if (cast->cast != core::Names::let()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                 e.setHeader("Use `{}` to specify the type of constants", "T.let");
-                auto rhsLoc = core::Loc(ctx.file, asgn.rhs.loc());
-                auto argSource = core::Loc(ctx.file, cast->arg.loc()).source(ctx).value();
+                auto rhsLoc = ctx.locAt(asgn.rhs.loc());
+                auto argSource = ctx.locAt(cast->arg.loc()).source(ctx).value();
                 e.replaceWith("Replace with `T.let`", rhsLoc, "T.let({}, {})", argSource, cast->type.show(ctx));
                 if (cast->cast == core::Names::cast()) {
                     e.addErrorNote("If you really want to use `{}`, assign to an intermediate variable first and then "
@@ -3594,7 +3594,7 @@ public:
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
+                    e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
                 }
 
                 mdef.rhs = ast::MK::EmptyTree();

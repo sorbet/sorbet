@@ -220,7 +220,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             }
                         }
                         typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
-                        typeArgSpec.loc = core::Loc(ctx.file, arg.loc());
+                        typeArgSpec.loc = ctx.locAt(arg.loc());
                     } else {
                         if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
@@ -381,7 +381,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                 getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
                         }
 
-                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{core::Loc(ctx.file, key.loc()), name,
+                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{ctx.locAt(key.loc()), name,
                                                                      resultAndBind.type, resultAndBind.rebind});
                     }
                 }
