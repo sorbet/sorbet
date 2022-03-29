@@ -1,6 +1,5 @@
 import { ChildProcess, spawn } from "child_process";
 import {
-  workspace,
   commands,
   OutputChannel,
   window as vscodeWindow,
