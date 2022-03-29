@@ -743,7 +743,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         argnodes.erase(fwdIt);
                     }
 
-                    auto array = make_unique<parser::Array>(loc, std::move(argnodes));
+                    auto array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
                     auto args = node2TreeImpl(dctx, std::move(array));
 
                     if (hasFwdArgs) {
