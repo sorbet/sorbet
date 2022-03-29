@@ -21,5 +21,6 @@ module Foo
   def call_splat_fun(x)
     splat_fun(*[x, x])
   # ^ hover: sig {params(args: Integer).void}
+  # ^ hover: def splat_fun(*args); end
   end
 end
