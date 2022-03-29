@@ -57,8 +57,8 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         if (ctx.locAt(send->loc).position(ctx).second.line == endLoc.position(ctx).second.line) {
             argSrc = indented(argSrc);
         }
-        e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias do\n{}\n{}end",
-                      argSrc, getIndent(ctx, ctx.locAt(send->loc)));
+        e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias do\n{}\n{}end", argSrc,
+                      getIndent(ctx, ctx.locAt(send->loc)));
     }
 }
 

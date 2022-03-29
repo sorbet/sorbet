@@ -23,8 +23,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
             res = lit->asSymbol(ctx);
             loc = lit->loc;
             ENFORCE(ctx.locAt(loc).exists());
-            ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 &&
-                    ctx.locAt(loc).source(ctx).value()[0] == ':');
+            ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 && ctx.locAt(loc).source(ctx).value()[0] == ':');
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString(ctx)) {
             core::NameRef nameRef = lit->asString(ctx);

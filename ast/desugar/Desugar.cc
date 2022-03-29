@@ -598,8 +598,7 @@ public:
                 }
 
                 e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(dctx.ctx.locAt(originalLoc), "First occurrence of `{}` hash key",
-                               nameRef.toString(gs));
+                e.addErrorLine(dctx.ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
             }
         }
     }
@@ -1892,8 +1891,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                                          core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.show(dctx.ctx), "yield");
-                            e.addErrorLine(dctx.ctx.locAt(loc), "Arising from use of `{}` in method body",
-                                           "yield");
+                            e.addErrorLine(dctx.ctx.locAt(loc), "Arising from use of `{}` in method body", "yield");
                         }
                     }
 

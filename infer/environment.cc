@@ -1069,10 +1069,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::SendResponse(ctx.locAt(bind.loc), retainedResult, fun, send.isPrivateOk,
-                                                ctx.owner.asMethodRef(), ctx.locAt(send.receiverLoc),
-                                                ctx.locAt(send.funLoc), send.args.size()));
+                        ctx, core::lsp::SendResponse(ctx.locAt(bind.loc), retainedResult, fun, send.isPrivateOk,
+                                                     ctx.owner.asMethodRef(), ctx.locAt(send.receiverLoc),
+                                                     ctx.locAt(send.funLoc), send.args.size()));
                 }
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
@@ -1094,9 +1093,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch && !bind.value->isSynthetic) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), i.what.data(inWhat), tp,
-                                                      ctx.owner.asMethodRef()));
+                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc),
+                                                                                              i.what.data(inWhat), tp,
+                                                                                              ctx.owner.asMethodRef()));
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
@@ -1309,8 +1308,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), bind.bind.variable.data(inWhat),
-                                                      tp, ctx.owner.asMethodRef()));
+                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), bind.bind.variable.data(inWhat), tp,
+                                                      ctx.owner.asMethodRef()));
                 }
             },
             [&](cfg::Return &i) {
@@ -1380,8 +1379,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::LiteralResponse(ctx.locAt(bind.loc), tp));
+                    core::lsp::QueryResponse::pushQueryResponse(ctx,
+                                                                core::lsp::LiteralResponse(ctx.locAt(bind.loc), tp));
                 }
             },
             [&](cfg::TAbsurd &i) {
@@ -1470,8 +1469,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 (core::Loc{ctx.file, endPos, bind.loc.endPos()}.source(ctx) == suffix)) {
                                 const auto locWithoutTCast = core::Loc{ctx.file, beginPos, endPos};
                                 if (locWithoutTCast.exists()) {
-                                    e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc),
-                                                  "T.unsafe({})", locWithoutTCast.source(ctx).value());
+                                    e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc), "T.unsafe({})",
+                                                  locWithoutTCast.source(ctx).value());
                                 }
                             }
                         }

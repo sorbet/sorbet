@@ -10,8 +10,7 @@ ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::E
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    bool lspQueryMatch =
-        lspQuery.matchesLoc(ctx.locAt(methodDef.declLoc)) || lspQuery.matchesSymbol(methodDef.symbol);
+    bool lspQueryMatch = lspQuery.matchesLoc(ctx.locAt(methodDef.declLoc)) || lspQuery.matchesSymbol(methodDef.symbol);
 
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
@@ -33,8 +32,8 @@ ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::E
                 tp.type = argType.type;
                 tp.origins.emplace_back(ctx.locAt(localExp->loc));
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp,
-                                                  methodDef.symbol));
+                    ctx,
+                    core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, methodDef.symbol));
                 return tree;
             }
         }
@@ -42,8 +41,7 @@ ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::E
         tp.type = symbolData->resultType;
         tp.origins.emplace_back(ctx.locAt(methodDef.declLoc));
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx,
-            core::lsp::MethodDefResponse(methodDef.symbol, ctx.locAt(methodDef.declLoc), methodDef.name, tp));
+            ctx, core::lsp::MethodDefResponse(methodDef.symbol, ctx.locAt(methodDef.declLoc), methodDef.name, tp));
     }
 
     return tree;

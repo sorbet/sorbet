@@ -706,8 +706,8 @@ private:
                             const auto replacement = suggestion.symbol.show(ctx);
                             lines.emplace_back(
                                 core::ErrorLine::from(suggestion.symbol.loc(ctx), "Did you mean: `{}`?", replacement));
-                            e.replaceWith(fmt::format("Replace with `{}`", replacement),
-                                          ctx.locAt(job.out->loc), "{}", replacement);
+                            e.replaceWith(fmt::format("Replace with `{}`", replacement), ctx.locAt(job.out->loc), "{}",
+                                          replacement);
                         }
                         e.addErrorSection(core::ErrorSection(lines));
                     }
@@ -3439,8 +3439,7 @@ private:
                         if (!ctx.permitOverloadDefinitions(ctx.file)) {
                             if (auto e = ctx.beginError(lastSigs[0]->loc, core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
-                                e.addErrorLine(ctx.locAt(send.loc),
-                                               "Type annotation that will be used instead");
+                                e.addErrorLine(ctx.locAt(send.loc), "Type annotation that will be used instead");
                             }
                         }
                     }
@@ -3568,8 +3567,8 @@ public:
             i++;
             core::MethodRef overloadSym;
             if (isOverloaded) {
-                overloadSym = ctx.state.enterNewMethodOverload(ctx.locAt(sig.loc), mdef.symbol, originalName,
-                                                               i, sig.argsToKeep);
+                overloadSym =
+                    ctx.state.enterNewMethodOverload(ctx.locAt(sig.loc), mdef.symbol, originalName, i, sig.argsToKeep);
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 if (i != sigs.size() - 1) {
                     overloadSym.data(ctx)->flags.isOverloaded = true;

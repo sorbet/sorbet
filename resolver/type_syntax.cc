@@ -381,8 +381,8 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                 getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, args.withRebind());
                         }
 
-                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{ctx.locAt(key.loc()), name,
-                                                                     resultAndBind.type, resultAndBind.rebind});
+                        sig.argTypes.emplace_back(
+                            ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, resultAndBind.type, resultAndBind.rebind});
                     }
                 }
                 break;
@@ -503,8 +503,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                     reportedInvalidMethod = true;
                     e.setHeader("Malformed `{}`: `{}` is invalid in this context", "sig", send->fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(send->loc),
-                                   "Consult https://sorbet.org/docs/sigs for signature syntax");
+                    e.addErrorLine(ctx.locAt(send->loc), "Consult https://sorbet.org/docs/sigs for signature syntax");
                 }
         }
         auto recv = ast::cast_tree<ast::Send>(send->recv);

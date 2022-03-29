@@ -31,8 +31,7 @@ ast::ExpressionPtr LocalVarSaver::postTransformBlock(core::Context ctx, ast::Exp
             if (lspQueryMatch) {
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx,
-                    core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, method));
+                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, method));
             }
         }
     }
@@ -68,8 +67,8 @@ ast::ExpressionPtr LocalVarSaver::postTransformMethodDef(core::Context ctx, ast:
                 // (Ditto)
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp,
-                                                  methodDef.symbol));
+                    ctx,
+                    core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, methodDef.symbol));
             }
         }
     }

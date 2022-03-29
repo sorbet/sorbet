@@ -813,8 +813,7 @@ class SymbolDefiner {
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.name(ctx);
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        auto scopeKlass =
-            ctx.state.enterClassSymbol(ctx.locAt(loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
+        auto scopeKlass = ctx.state.enterClassSymbol(ctx.locAt(loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
         scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
         return scopeKlass;
     }
@@ -862,8 +861,7 @@ class SymbolDefiner {
         }
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo =
-            ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
+        auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
         // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
@@ -1224,8 +1222,8 @@ class SymbolDefiner {
             symbolData->setClassOrModuleSealed();
 
             auto classOfKlass = symbolData->singletonClass(ctx);
-            auto sealedSubclasses = ctx.state.enterMethodSymbol(ctx.locAt(mod.loc), classOfKlass,
-                                                                core::Names::sealedSubclasses());
+            auto sealedSubclasses =
+                ctx.state.enterMethodSymbol(ctx.locAt(mod.loc), classOfKlass, core::Names::sealedSubclasses());
             auto &blkArg =
                 ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
@@ -1274,8 +1272,8 @@ class SymbolDefiner {
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                emitRedefinedConstantError(ctx, ctx.locAt(staticField.asgnLoc),
-                                           renamedSym.name(ctx).show(ctx), renamedSym.loc(ctx));
+                emitRedefinedConstantError(ctx, ctx.locAt(staticField.asgnLoc), renamedSym.name(ctx).show(ctx),
+                                           renamedSym.loc(ctx));
             }
         }
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
@@ -1352,12 +1350,10 @@ class SymbolDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), oldSym.show(ctx),
-                                           oldSym.loc(ctx));
+                emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), oldSym.show(ctx), oldSym.loc(ctx));
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
-            sym =
-                ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMember.name, variance);
+            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMember.name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -1366,14 +1362,13 @@ class SymbolDefiner {
             if (isTypeTemplate) {
                 auto context = ctx.owner.enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
-                if (oldSym.exists() && !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) ||
-                                         oldSym.loc(ctx).isTombStoned(ctx))) {
+                if (oldSym.exists() &&
+                    !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
                     emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), typeMember.name.show(ctx),
                                                oldSym.loc(ctx));
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
-                auto alias =
-                    ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
+                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }
