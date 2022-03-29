@@ -10,7 +10,7 @@ ast::ExpressionPtr LocalVarFinder::preTransformBlock(core::Context ctx, ast::Exp
     ENFORCE(!methodStack.empty());
 
     auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
-    auto loc = core::Loc{ctx.file, block.loc};
+    auto loc = ctx.locAt(block.loc);
 
     if (methodStack.back() != this->targetMethod) {
         return tree;

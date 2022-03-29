@@ -159,7 +159,7 @@ void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, c
         first = false;
     }
 
-    e.replaceWith("Use a chained sig builder", core::Loc{ctx.file, insseq->loc}, "{}", replacement);
+    e.replaceWith("Use a chained sig builder", ctx.locAt(insseq->loc), "{}", replacement);
 }
 
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
@@ -585,7 +585,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 if (arg != nullptr && arg->fun == core::Names::untyped() && !arg->hasPosArgs() && !arg->hasKwArgs()) {
                     if (auto e = ctx.beginError(send.loc, core::errors::Resolver::NilableUntyped)) {
                         e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
-                        e.replaceWith("Replace with `T.untyped`", core::Loc{ctx.file, send.loc}, "T.untyped");
+                        e.replaceWith("Replace with `T.untyped`", ctx.locAt(send.loc), "T.untyped");
                     }
                 }
                 return result;
@@ -888,7 +888,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         // if we're already looking at `T::Array` instead.
                         auto typePrefix = isBuiltinGeneric ? "" : "T::";
 
-                        auto loc = core::Loc{ctx.file, i.loc};
+                        auto loc = ctx.locAt(i.loc);
                         if (auto locSource = loc.source(ctx)) {
                             if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
                                 // Hash is special because it has arity 3 but you're only supposed to write the first 2

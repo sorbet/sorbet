@@ -443,7 +443,7 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(core::Loc{ctx.file, out->loc}, owner,
+        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc), owner,
                                                  ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
 
         auto data = symbol.data(ctx);
@@ -856,7 +856,7 @@ private:
                     e.setHeader("Reassigning a type alias is not allowed");
                 }
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
-                auto rhsLoc = core::Loc{ctx.file, it.rhs->loc};
+                auto rhsLoc = ctx.locAt(it.rhs->loc);
                 if (rhsLoc.exists()) {
                     e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
                 }

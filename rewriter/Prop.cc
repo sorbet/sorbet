@@ -253,7 +253,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         auto loc = ret.type.loc();
         if (auto e = ctx.beginError(loc, core::errors::Rewriter::NilableUntyped)) {
             e.setHeader("`{}` is the same as `{}`", "T.nilable(T.untyped)", "T.untyped");
-            e.replaceWith("Use `T.untyped`", core::Loc{ctx.file, loc}, "T.untyped");
+            e.replaceWith("Use `T.untyped`", ctx.locAt(loc), "T.untyped");
 
             bool addDefault = true;
             if (rulesTree != nullptr) {
