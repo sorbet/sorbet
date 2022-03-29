@@ -283,7 +283,7 @@
     "compile": "tsc -p ./",
     "integrity": "yarn-integrity",
     "watch": "tsc -w -p ./",
-    "lint": "eslint --ext .ts ./src",
+    "lint": "eslint -c package.json --ext .ts ./src",
     "prettier": "prettier --write 'src/**/*.ts'",
     "test": "yarn compile && ./scripts/run_tests.sh .",
     "test:ci": "node --preserve-symlinks-main ./out/scripts/runTests.js .",
@@ -305,22 +305,22 @@
     "@types/node": "^10.11.7",
     "@types/sinon": "^7.5.0",
     "@types/vscode": "~1.65",
-    "@typescript-eslint/parser": "^2.7.0",
-    "eslint": "^5.9.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-eslint-comments": "^3.1.2",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.16.0",
-    "eslint-config-airbnb": "^17.1.0",
     "glob": "^7.1.4",
     "mocha": "^6.2.0",
     "mocha-junit-reporter": "^1.23.1",
     "power-assert": "^1.2.0",
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",
-    "typescript": "4.6.3",
+    "typescript": "^4.6.3",
     "vsce": "~1.76",
     "vscode-languageserver": "7.0.0",
     "vscode-test": "^1.0.2"
@@ -328,5 +328,10 @@
   "prettier": {
     "trailingComma": "all",
     "arrowParens": "always"
+  },
+  "eslintConfig": {
+    "rules": {
+      "no-shadow": "off"
+    }
   }
 }
