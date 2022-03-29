@@ -127,7 +127,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
 
         // TODO(jez) Use Loc::adjust here
-        if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx).value(), ":")) {
+        if (symLoc.exists() && absl::StartsWith(ctx.locAt(symLoc).source(ctx).value(), ":")) {
             symLoc = core::LocOffsets{symLoc.beginPos() + 1, symLoc.endPos()};
         }
 

@@ -813,8 +813,7 @@ class SymbolDefiner {
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.name(ctx);
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        auto scopeKlass =
-            ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
+        auto scopeKlass = ctx.state.enterClassSymbol(ctx.locAt(loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
         scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
         return scopeKlass;
     }
@@ -828,7 +827,7 @@ class SymbolDefiner {
         auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
-            existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
+            existing = ctx.state.enterClassSymbol(ctx.locAt(loc), scope, name);
             existing.asClassOrModuleRef().data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
@@ -839,7 +838,7 @@ class SymbolDefiner {
         if (pos < methodData->arguments.size()) {
             // TODO: check that flags match;
             if (parsedArg.loc.exists()) {
-                methodData->arguments[pos].loc = core::Loc(ctx.file, parsedArg.loc);
+                methodData->arguments[pos].loc = ctx.locAt(parsedArg.loc);
             }
             return;
         }
@@ -862,8 +861,7 @@ class SymbolDefiner {
         }
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo =
-            ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner.asMethodRef(), name);
+        auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
         // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
@@ -1029,7 +1027,7 @@ class SymbolDefiner {
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
         auto symTableSize = ctx.state.methodsUsed();
-        auto declLoc = core::Loc(ctx.file, method.declLoc);
+        auto declLoc = ctx.locAt(method.declLoc);
         auto sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
         const bool isNewSymbol = symTableSize != ctx.state.methodsUsed();
         if (!isNewSymbol) {
@@ -1135,7 +1133,7 @@ class SymbolDefiner {
         ENFORCE(symbol.exists());
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
-        auto declLoc = core::Loc(ctx.file, klass.declLoc);
+        auto declLoc = ctx.locAt(klass.declLoc);
         if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
             auto klassSymbol = ctx.state.lookupClassSymbol(symbol.owner(ctx).asClassOrModuleRef(), symbol.name(ctx));
@@ -1143,7 +1141,7 @@ class SymbolDefiner {
                 return klassSymbol;
             }
 
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.show(ctx), symbol.loc(ctx));
+            emitRedefinedConstantError(ctx, ctx.locAt(klass.loc), symbol.show(ctx), symbol.loc(ctx));
 
             auto origName = symbol.name(ctx);
             ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
@@ -1173,7 +1171,7 @@ class SymbolDefiner {
             klassSymbol.data(ctx)->setIsModule(isModule);
             auto renamed = ctx.state.findRenamedSymbol(klassSymbol.data(ctx)->owner.asClassOrModuleRef(), symbol);
             if (renamed.exists()) {
-                emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
+                emitRedefinedConstantError(ctx, ctx.locAt(klass.loc), symbol, renamed);
             }
         }
         return klassSymbol;
@@ -1198,15 +1196,15 @@ class SymbolDefiner {
         // project) locs!
         if (symbol != core::Symbols::root() && symbol != core::Symbols::PackageRegistry() &&
             symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
-            symbol.data(ctx)->addLoc(ctx, core::Loc(ctx.file, klass.declLoc));
+            symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
-            ctx.state.staticInitForFile(core::Loc(ctx.file, klass.loc));
+            ctx.state.staticInitForFile(ctx.locAt(klass.loc));
         } else {
-            ctx.state.staticInitForClass(symbol, core::Loc(ctx.file, klass.loc));
+            ctx.state.staticInitForClass(symbol, ctx.locAt(klass.loc));
         }
 
         return symbol;
@@ -1224,8 +1222,8 @@ class SymbolDefiner {
             symbolData->setClassOrModuleSealed();
 
             auto classOfKlass = symbolData->singletonClass(ctx);
-            auto sealedSubclasses = ctx.state.enterMethodSymbol(core::Loc(ctx.file, mod.loc), classOfKlass,
-                                                                core::Names::sealedSubclasses());
+            auto sealedSubclasses =
+                ctx.state.enterMethodSymbol(ctx.locAt(mod.loc), classOfKlass, core::Names::sealedSubclasses());
             auto &blkArg =
                 ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
@@ -1245,7 +1243,7 @@ class SymbolDefiner {
             if (!symbolData->isClassOrModuleModule()) {
                 if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
                     e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
-                    e.replaceWith("Change `interface!` to `abstract!`", core::Loc(ctx.file, mod.loc), "abstract!");
+                    e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
                 }
             }
         }
@@ -1266,7 +1264,7 @@ class SymbolDefiner {
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc), staticField.name.show(ctx),
+            emitRedefinedConstantError(ctx, ctx.locAt(staticField.asgnLoc), staticField.name.show(ctx),
                                        currSym.loc(ctx));
             ctx.state.mangleRenameSymbol(currSym, currSym.name(ctx));
         }
@@ -1274,11 +1272,11 @@ class SymbolDefiner {
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
-                                           renamedSym.name(ctx).show(ctx), renamedSym.loc(ctx));
+                emitRedefinedConstantError(ctx, ctx.locAt(staticField.asgnLoc), renamedSym.name(ctx).show(ctx),
+                                           renamedSym.loc(ctx));
             }
         }
-        sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
+        sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
 
         if (staticField.isTypeAlias) {
             sym.data(ctx)->flags.isStaticFieldTypeAlias = true;
@@ -1333,7 +1331,7 @@ class SymbolDefiner {
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, typeMember.asgnLoc), "Also defined here");
+                    e.addErrorLine(ctx.locAt(typeMember.asgnLoc), "Also defined here");
                 }
             }
 
@@ -1342,7 +1340,7 @@ class SymbolDefiner {
             // same error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym, existingTypeMember);
+                emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), oldSym, existingTypeMember);
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
             ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
@@ -1352,12 +1350,10 @@ class SymbolDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym.show(ctx),
-                                           oldSym.loc(ctx));
+                emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), oldSym.show(ctx), oldSym.loc(ctx));
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
-            sym =
-                ctx.state.enterTypeMember(core::Loc(ctx.file, typeMember.asgnLoc), onSymbol, typeMember.name, variance);
+            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMember.name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -1366,14 +1362,13 @@ class SymbolDefiner {
             if (isTypeTemplate) {
                 auto context = ctx.owner.enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
-                if (oldSym.exists() && !(oldSym.loc(ctx) == core::Loc(ctx.file, typeMember.asgnLoc) ||
-                                         oldSym.loc(ctx).isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), typeMember.name.show(ctx),
+                if (oldSym.exists() &&
+                    !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
+                    emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), typeMember.name.show(ctx),
                                                oldSym.loc(ctx));
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
-                auto alias =
-                    ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, typeMember.asgnLoc), context, typeMember.name);
+                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }
@@ -1678,7 +1673,7 @@ public:
             // TODO(dmitry) This won't find errors in fast-incremental mode.
             auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
-                classBehaviorLocs[klass.symbol] = core::Loc(ctx.file, klass.declLoc);
+                classBehaviorLocs[klass.symbol] = ctx.locAt(klass.declLoc);
             } else if (prevLoc->second.file() != ctx.file &&
                        // Ignore packages, which have 'behavior defined in multiple files'.
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry() &&

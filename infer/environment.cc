@@ -702,7 +702,7 @@ const Environment &Environment::withCond(core::Context ctx, const Environment &e
         return env;
     }
     copy.cloneFrom(env);
-    copy.assumeKnowledge(ctx, isTrue, env.bb->bexit.cond.variable, core::Loc(ctx.file, env.bb->bexit.loc), filter);
+    copy.assumeKnowledge(ctx, isTrue, env.bb->bexit.cond.variable, ctx.locAt(env.bb->bexit.loc), filter);
     return copy;
 }
 
@@ -951,7 +951,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
         bool checkFullyDefined = true;
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-        bool lspQueryMatch = lspQuery.matchesLoc(core::Loc(ctx.file, bind.loc));
+        bool lspQueryMatch = lspQuery.matchesLoc(ctx.locAt(bind.loc));
 
         typecase(
             bind.value,
@@ -960,7 +960,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 // hovering over the method or arguments (not the block)
                 auto locWithoutBlock = send.locWithoutBlock(bind.loc);
                 if (lspQueryMatch && locWithoutBlock.exists() && !locWithoutBlock.empty()) {
-                    lspQueryMatch = lspQuery.matchesLoc(core::Loc(ctx.file, locWithoutBlock));
+                    lspQueryMatch = lspQuery.matchesLoc(ctx.locAt(locWithoutBlock));
                 }
 
                 InlinedVector<const core::TypeAndOrigins *, 2> args;
@@ -1069,10 +1069,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, fun, send.isPrivateOk,
-                                                ctx.owner.asMethodRef(), core::Loc(ctx.file, send.receiverLoc),
-                                                core::Loc(ctx.file, send.funLoc), send.args.size()));
+                        ctx, core::lsp::SendResponse(ctx.locAt(bind.loc), retainedResult, fun, send.isPrivateOk,
+                                                     ctx.owner.asMethodRef(), ctx.locAt(send.receiverLoc),
+                                                     ctx.locAt(send.funLoc), send.args.size()));
                 }
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
@@ -1086,7 +1085,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                     send.link->result = move(retainedResult);
                 }
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::Ident &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i.what);
@@ -1094,9 +1093,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch && !bind.value->isSynthetic) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i.what.data(inWhat), tp,
-                                                      ctx.owner.asMethodRef()));
+                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc),
+                                                                                              i.what.data(inWhat), tp,
+                                                                                              ctx.owner.asMethodRef()));
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
@@ -1108,7 +1107,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     auto singletonClass = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType();
-                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
                 } else if (symbol.isField(ctx) ||
                            (symbol.isStaticField(ctx) &&
                             !symbol.asFieldRef().data(ctx)->flags.isStaticFieldTypeAlias) ||
@@ -1169,7 +1168,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 } else {
                     type = i.link->result->returnType;
                 }
-                auto loc = core::Loc(ctx.file, bind.loc);
+                auto loc = ctx.locAt(bind.loc);
                 type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(loc);
@@ -1190,7 +1189,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 auto argType = i.argument(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
                 tp.type = std::move(argType);
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::ArgPresent &i) {
                 // Return an unanalyzable boolean value that indicates whether or not arg was provided
@@ -1198,7 +1197,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(ctx.owner == i.method);
 
                 tp.type = core::Types::Boolean();
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadYieldParams &insn) {
                 ENFORCE(insn.link);
@@ -1249,13 +1248,13 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 } else {
                     tp.type = params;
                 }
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::YieldParamPresent &i) {
                 // Return an unanalyzable boolean value that indicates whether or not arg was provided
                 // It's unanalyzable because it varies by each individual call site.
                 tp.type = core::Types::Boolean();
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::YieldLoadArg &i) {
                 // Mixing positional and rest args in blocks is not well supported.
@@ -1268,7 +1267,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     } else {
                         tp.type = core::Types::untypedUntracked();
                     }
-                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
                     return;
                 }
 
@@ -1301,21 +1300,21 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                                 recvType,
                                                 recvType.type,
                                                 block,
-                                                core::Loc(ctx.file, bind.loc),
+                                                ctx.locAt(bind.loc),
                                                 isPrivateOk,
                                                 suppressErrors};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                 tp.type = dispatched.returnType;
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), bind.bind.variable.data(inWhat),
-                                                      tp, ctx.owner.asMethodRef()));
+                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), bind.bind.variable.data(inWhat), tp,
+                                                      ctx.owner.asMethodRef()));
                 }
             },
             [&](cfg::Return &i) {
                 tp.type = core::Types::bottom();
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
@@ -1333,7 +1332,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
-                            auto replaceLoc = core::Loc(ctx.file, i.whatLoc);
+                            auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
                                                                          typeAndOrigin.type);
                         }
@@ -1373,15 +1372,15 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
 
                 tp.type = core::Types::bottom();
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::Literal &i) {
                 tp.type = i.value;
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 if (lspQueryMatch) {
-                    core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::LiteralResponse(core::Loc(ctx.file, bind.loc), tp));
+                    core::lsp::QueryResponse::pushQueryResponse(ctx,
+                                                                core::lsp::LiteralResponse(ctx.locAt(bind.loc), tp));
                 }
             },
             [&](cfg::TAbsurd &i) {
@@ -1398,11 +1397,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
 
                 tp.type = core::Types::bottom();
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
                 tp.type = core::Types::untypedUntracked();
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {
                 ENFORCE(l.link);
@@ -1432,7 +1431,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                                          klass.data(ctx)->selfTypeArgs(ctx));
 
                 tp.type = castType;
-                tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 if (!hasType(ctx, bind.bind.variable)) {
                     noLoopChecking = true;
@@ -1470,8 +1469,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 (core::Loc{ctx.file, endPos, bind.loc.endPos()}.source(ctx) == suffix)) {
                                 const auto locWithoutTCast = core::Loc{ctx.file, beginPos, endPos};
                                 if (locWithoutTCast.exists()) {
-                                    e.replaceWith("Replace with `T.unsafe`", core::Loc(ctx.file, bind.loc),
-                                                  "T.unsafe({})", locWithoutTCast.source(ctx).value());
+                                    e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc), "T.unsafe({})",
+                                                  locWithoutTCast.source(ctx).value());
                                 }
                             }
                         }
@@ -1521,7 +1520,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
                                 core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, cur.type, tp.type);
-                                auto replaceLoc = core::Loc(ctx.file, bind.loc);
+                                auto replaceLoc = ctx.locAt(bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
                                 core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
@@ -1602,7 +1601,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
         clearKnowledge(ctx, bind.bind.variable, knowledgeFilter);
         if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value)) {
-            updateKnowledge(ctx, bind.bind.variable, core::Loc(ctx.file, bind.loc), send, knowledgeFilter);
+            updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), send, knowledgeFilter);
         } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value)) {
             propagateKnowledge(ctx, bind.bind.variable, i->what, knowledgeFilter);
         }

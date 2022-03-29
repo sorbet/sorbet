@@ -490,7 +490,7 @@ void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
 
                 e.addAutocorrect(core::AutocorrectSuggestion{
                     fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
-                    {core::AutocorrectSuggestion::Edit{core::Loc(ctx.file, nameLoc), replacement}}});
+                    {core::AutocorrectSuggestion::Edit{ctx.locAt(nameLoc), replacement}}});
             }
         }
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
@@ -499,7 +499,7 @@ void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
-    fqn.loc = core::Loc(ctx.file, constantLit->loc);
+    fqn.loc = ctx.locAt(constantLit->loc);
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
         constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
@@ -1108,7 +1108,7 @@ struct PackageInfoFinder {
                 ctx.state.freshNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
             info->privateMangledName = ctx.state.enterNameConstant(packagerPrivateName);
 
-            info->loc = core::Loc(ctx.file, classDef.loc);
+            info->loc = ctx.locAt(classDef.loc);
         } else {
             if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
@@ -1652,7 +1652,7 @@ private:
             // and the file processing order is consistent.
             e.setHeader("Conflicting import sources for `{}`",
                         fmt::map_join(nameParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
-            e.addErrorLine(core::Loc(ctx.file, otherLoc), "Conflict from");
+            e.addErrorLine(ctx.locAt(otherLoc), "Conflict from");
         }
     }
 
