@@ -13,4 +13,13 @@ module Foo
     foo {}
   # ^ hover: sig {params(blk: T.proc.void).void}
   end
+
+  sig {params(args: Integer).void}
+  def splat_fun(*args); end
+
+  sig {params(x: Integer).void}
+  def call_splat_fun(x)
+    splat_fun(*[x, x])
+  # ^ hover: sig {params(args: Integer).void}
+  end
 end
