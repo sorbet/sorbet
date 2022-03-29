@@ -265,7 +265,7 @@ public:
         if (ctx.file.data(ctx).isPackagedTest()) {
             // In a test file first look to see in our own package to see if it's missing an `export_for_test`
             core::SymbolRef sym = findPrivateSymbol(ctx, scope, /* test */ false);
-            if (sym.exists() && sym.isClassOrModule() && !sym.loc(ctx).file().isPackage()) {
+            if (sym.exists() && sym.isClassOrModule() && !sym.loc(ctx).file().data(ctx).isPackage()) {
                 res.emplace_back(MissingExportMatch{sym, this->mangledName()});
                 return res;
             }
