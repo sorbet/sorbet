@@ -3,7 +3,7 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
-} from "vscode-languageclient";
+} from "vscode-languageclient/node";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
 import { shimLanguageClient } from "../LanguageClient";
