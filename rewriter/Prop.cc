@@ -217,9 +217,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return nullopt;
         }
         ret.name = sym->asSymbol(ctx);
-        ENFORCE(core::Loc(ctx.file, sym->loc).exists());
-        ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).value().empty() &&
-                core::Loc(ctx.file, sym->loc).source(ctx).value()[0] == ':');
+        ENFORCE(ctx.locAt(sym->loc).exists());
+        ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() &&
+                ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     }
 

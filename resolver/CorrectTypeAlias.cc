@@ -37,14 +37,14 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         return;
     }
 
-    auto [start, end] = core::Loc(ctx.file, send->loc).position(ctx);
+    auto [start, end] = ctx.locAt(send->loc).position(ctx);
 
     if (start.line == end.line) {
         if (wrapHash) {
-            e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{{{}}}}}",
+            e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias {{{{{}}}}}",
                           argsLoc.source(ctx).value());
         } else {
-            e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{}}}",
+            e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias {{{}}}",
                           argsLoc.source(ctx).value());
         }
     } else {
@@ -54,11 +54,11 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         if (wrapHash) {
             argSrc = fmt::format("{}{{\n{}\n{}}}", argIndent, indented(argSrc), argIndent);
         }
-        if (core::Loc(ctx.file, send->loc).position(ctx).second.line == endLoc.position(ctx).second.line) {
+        if (ctx.locAt(send->loc).position(ctx).second.line == endLoc.position(ctx).second.line) {
             argSrc = indented(argSrc);
         }
-        e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias do\n{}\n{}end",
-                      argSrc, getIndent(ctx, core::Loc(ctx.file, send->loc)));
+        e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias do\n{}\n{}end",
+                      argSrc, getIndent(ctx, ctx.locAt(send->loc)));
     }
 }
 

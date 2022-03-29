@@ -707,7 +707,7 @@ private:
                             lines.emplace_back(
                                 core::ErrorLine::from(suggestion.symbol.loc(ctx), "Did you mean: `{}`?", replacement));
                             e.replaceWith(fmt::format("Replace with `{}`", replacement),
-                                          core::Loc(ctx.file, job.out->loc), "{}", replacement);
+                                          ctx.locAt(job.out->loc), "{}", replacement);
                         }
                         e.addErrorSection(core::ErrorSection(lines));
                     }
@@ -2344,7 +2344,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
+        auto alias = ctx.state.enterMethodSymbol(ctx.locAt(job.loc), job.owner, job.fromName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
     }
 
@@ -3286,7 +3286,7 @@ private:
                 if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
                     e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
                                 "sig", treeArgName.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, exprLoc), "Signature");
+                    e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                 }
             }
 
@@ -3323,7 +3323,7 @@ private:
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     treeArgName.show(ctx));
-                        e.addErrorLine(core::Loc(ctx.file, exprLoc), "Signature");
+                        e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }
                 }
             }
@@ -3439,7 +3439,7 @@ private:
                         if (!ctx.permitOverloadDefinitions(ctx.file)) {
                             if (auto e = ctx.beginError(lastSigs[0]->loc, core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
-                                e.addErrorLine(core::Loc(ctx.file, send.loc),
+                                e.addErrorLine(ctx.locAt(send.loc),
                                                "Type annotation that will be used instead");
                             }
                         }
@@ -3568,7 +3568,7 @@ public:
             i++;
             core::MethodRef overloadSym;
             if (isOverloaded) {
-                overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, sig.loc), mdef.symbol, originalName,
+                overloadSym = ctx.state.enterNewMethodOverload(ctx.locAt(sig.loc), mdef.symbol, originalName,
                                                                i, sig.argsToKeep);
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 if (i != sigs.size() - 1) {

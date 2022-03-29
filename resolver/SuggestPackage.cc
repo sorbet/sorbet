@@ -252,7 +252,7 @@ private:
         for (auto suggestion : matches) {
             const auto replacement = suggestion.symbol.show(ctx);
             lines.emplace_back(core::ErrorLine::from(suggestion.symbol.loc(ctx), "Did you mean: `{}`?", replacement));
-            e.replaceWith(fmt::format("Replace with `{}`", replacement), core::Loc(ctx.file, unresolved.loc), "{}",
+            e.replaceWith(fmt::format("Replace with `{}`", replacement), ctx.locAt(unresolved.loc), "{}",
                           replacement);
         }
         e.addErrorSection(core::ErrorSection(lines));

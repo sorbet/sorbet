@@ -440,7 +440,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
             case core::Names::implementation().rawId():
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                     e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
-                    auto loc = core::Loc(ctx.file, send->funLoc);
+                    auto loc = ctx.locAt(send->funLoc);
                     e.replaceWith("Replace with `override`", loc, "override");
                 }
                 break;
@@ -503,7 +503,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                     reportedInvalidMethod = true;
                     e.setHeader("Malformed `{}`: `{}` is invalid in this context", "sig", send->fun.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, send->loc),
+                    e.addErrorLine(ctx.locAt(send->loc),
                                    "Consult https://sorbet.org/docs/sigs for signature syntax");
                 }
         }
@@ -654,13 +654,13 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                     e.setHeader("`{}` has been renamed to `{}`", "T.enum", "T.deprecated_enum");
 
                     auto prefix = 0;
-                    auto sendSource = core::Loc(ctx.file, send.loc).source(ctx);
+                    auto sendSource = ctx.locAt(send.loc).source(ctx);
                     if (sendSource.has_value() && absl::StartsWith(sendSource.value(), "::")) {
                         prefix += 2;
                     }
 
                     if (send.funLoc.exists() && !send.funLoc.empty()) {
-                        e.replaceWith("Replace with `deprecated_enum`", core::Loc(ctx.file, send.funLoc), "{}",
+                        e.replaceWith("Replace with `deprecated_enum`", ctx.locAt(send.funLoc), "{}",
                                       "deprecated_enum");
                     }
                 }
@@ -705,7 +705,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                         auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
                         e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of",
                                     "T.any");
-                        e.replaceWith("Distribute `T.class_of`", core::Loc(ctx.file, send.loc), "{}", autocorrect);
+                        e.replaceWith("Distribute `T.class_of`", ctx.locAt(send.loc), "{}", autocorrect);
                     } else {
                         e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
                     }
@@ -759,7 +759,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::ExperimentalAttachedClass)) {
                     e.setHeader("`{}` has been stabilized and is no longer experimental",
                                 "T.experimental_attached_class");
-                    e.replaceWith("Replace with `T.attached_class`", core::Loc(ctx.file, send.loc), "T.attached_class");
+                    e.replaceWith("Replace with `T.attached_class`", ctx.locAt(send.loc), "T.attached_class");
                 }
             }
 
@@ -796,7 +796,7 @@ core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::Expr
 
 unique_ptr<core::TypeAndOrigins> makeTypeAndOrigins(core::Context ctx, core::LocOffsets origin, core::TypePtr type) {
     auto ty = make_unique<core::TypeAndOrigins>();
-    ty->origins.emplace_back(core::Loc(ctx.file, origin));
+    ty->origins.emplace_back(ctx.locAt(origin));
     ty->type = move(type);
     return ty;
 }
@@ -1149,7 +1149,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         "`{}` will raise at runtime because this generic was defined in the standard library",
                         recvi->symbol.show(ctx) + "[...]");
                     e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.show(ctx), corrected.show(ctx)),
-                                  core::Loc(ctx.file, recvi->loc), "{}", corrected.show(ctx));
+                                  ctx.locAt(recvi->loc), "{}", corrected.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
                 return;
@@ -1169,7 +1169,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto correctedSingleton = corrected.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
             ENFORCE_NO_TIMER(correctedSingleton.exists());
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
-            auto ctypeAndOrigins = core::TypeAndOrigins{ctype, {core::Loc(ctx.file, s.loc)}};
+            auto ctypeAndOrigins = core::TypeAndOrigins{ctype, {ctx.locAt(s.loc)}};
             // In `dispatchArgs` this is ordinarily used to specify the origin tag for
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();
@@ -1227,7 +1227,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto underlying = core::isa_type<core::LiteralType>(lit.value) ? lit.value.underlying(ctx) : lit.value;
             if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported literal in type syntax", lit.value.show(ctx));
-                e.replaceWith("Replace with underlying type", core::Loc(ctx.file, lit.loc), "{}", underlying.show(ctx));
+                e.replaceWith("Replace with underlying type", ctx.locAt(lit.loc), "{}", underlying.show(ctx));
             }
             result.type = underlying;
         },

@@ -169,10 +169,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             break;
                         } else if (unreachableInstruction == nullptr) {
                             unreachableInstruction = &expr.value;
-                            locForUnreachable = core::Loc(ctx.file, expr.loc);
+                            locForUnreachable = ctx.locAt(expr.loc);
                         } else {
                             // Expand the loc to cover the entire dead basic block
-                            locForUnreachable = locForUnreachable.join(core::Loc(ctx.file, expr.loc));
+                            locForUnreachable = locForUnreachable.join(ctx.locAt(expr.loc));
                         }
                     }
                 }
@@ -213,7 +213,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             }
 
                             auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
-                            auto bexitLoc = core::Loc(ctx.file, prevBasicBlock->bexit.loc);
+                            auto bexitLoc = ctx.locAt(prevBasicBlock->bexit.loc);
                             e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
                                            cond.type.show(ctx));
 
@@ -257,7 +257,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 bind.bind.type.sanityCheck(ctx);
                 if (bind.bind.type.isBottom()) {
                     current.isDead = true;
-                    madeBlockDead = core::Loc(ctx.file, bind.loc);
+                    madeBlockDead = ctx.locAt(bind.loc);
                 }
                 if (current.isDead && bb->firstDeadInstructionIdx == -1) {
                     // this can also be result of evaluating an instruction, e.g. an always false hard_assert
