@@ -85,6 +85,7 @@ struct Printers {
     PrinterConfig AutogenSubclasses;
     PrinterConfig Packager;
     PrinterConfig MinimizeRBI;
+    PrinterConfig PayloadSources;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();

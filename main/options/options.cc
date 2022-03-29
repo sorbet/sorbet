@@ -78,6 +78,7 @@ const vector<PrintOptions> print_options({
     {"autogen-subclasses", &Printers::AutogenSubclasses},
     {"package-tree", &Printers::Packager, false},
     {"minimized-rbi", &Printers::MinimizeRBI},
+    {"payload-sources", &Printers::PayloadSources},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -148,6 +149,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenSubclasses,
         Packager,
         MinimizeRBI,
+        PayloadSources,
     });
 }
 
@@ -994,10 +996,23 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
-            opts.storeState.empty()) {
+            opts.storeState.empty() && !opts.print.PayloadSources.enabled) {
             logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
                           options.help({""}));
             throw EarlyReturnWithCode(1);
+        }
+
+        if (opts.print.PayloadSources.enabled) {
+            if (opts.noStdlib) {
+                logger->error("You can't pass both `{}` and `{}`.", "--print=payload-sources", "--no-stdlib");
+                throw EarlyReturnWithCode(1);
+            } else if (raw.count("e") > 0) {
+                logger->error("You can't pass both `{}` and `{}`.", "--print=payload-sources", "-e");
+                throw EarlyReturnWithCode(1);
+            } else if (!opts.inputFileNames.empty()) {
+                logger->error("You can't pass both `{}` and paths to typecheck.", "--print=payload-sources");
+                throw EarlyReturnWithCode(1);
+            }
         }
 
         if ((raw["color"].as<string>() == "never") || opts.runLSP) {
