@@ -9,7 +9,8 @@ namespace sorbet::realmain::lsp {
 
 // Filter for untyped locations, and dedup responses that are at the same location
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPQuery::filterAndDedup(const core::GlobalState &gs, const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+LSPQuery::filterAndDedup(const core::GlobalState &gs,
+                         const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     vector<unique_ptr<core::lsp::QueryResponse>> responses;
     // Filter for responses with a loc that exists and points to a typed file, unless it's a const, field or
     // definition in which case we're ok with untyped files (because we know where those things are even in untyped
@@ -52,7 +53,7 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs, const vector<unique_ptr<co
 }
 
 LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, string_view uri,
-                          const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
+                               const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
@@ -82,14 +83,14 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
 }
 
 LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
-                                    core::SymbolRef symbol, vector<core::FileRef> frefs) {
+                                                   core::SymbolRef symbol, vector<core::FileRef> frefs) {
     Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
     ENFORCE(symbol.exists());
     return typechecker.query(core::lsp::Query::createSymbolQuery(symbol), frefs);
 }
 
 LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
-                             core::SymbolRef symbol) {
+                                  core::SymbolRef symbol) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");
     ENFORCE(symbol.exists());
     vector<core::FileRef> frefs;

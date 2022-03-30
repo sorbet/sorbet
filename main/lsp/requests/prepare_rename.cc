@@ -56,7 +56,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.prepareRename");
     auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                             LSPMethod::TextDocumentPrepareRename, false);
+                                  LSPMethod::TextDocumentPrepareRename, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

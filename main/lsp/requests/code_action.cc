@@ -2,9 +2,9 @@
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPQuery.h"
+#include "main/lsp/MoveMethod.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include "main/lsp/MoveMethod.h"
 #include "main/sig_finder/sig_finder.h"
 
 using namespace std;
@@ -127,7 +127,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
 
     if (config.opts.lspMoveMethodEnabled) {
         auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
-                                      LSPMethod::TextDocumentCodeAction, false);
+                                           LSPMethod::TextDocumentCodeAction, false);
 
         // Generate "Move method" code actions only for class method definitions
         if (queryResult.error == nullptr) {

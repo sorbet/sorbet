@@ -50,8 +50,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     }
 
     const core::GlobalState &gs = typechecker.state();
-    auto result =
-        LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentHover);
+    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+                                  LSPMethod::TextDocumentHover);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
