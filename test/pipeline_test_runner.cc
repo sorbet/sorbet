@@ -413,7 +413,27 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     {
+        // Immutable namer + resolver mode, which is used by things like serving LSP requests from stale GlobalStates
+
+        // Stashes any already-reported errors so we can check them later (we're going to toss all
+        // errors created at the end of this mode).
         handler.drainErrors(*gs);
+
+        // This mode is not designed to run on files that Sorbet did not already know about. In LSP
+        // mode this constraint is satisfied naturally by way of the implementation. Here, we have
+        // to satisfy it by forcing the file-level `<static-init>` methods into existence first.
+        // This would mutate the rest of the pipeline, so for the sake of not polluting things
+        // downstream from us, we do it on a copy of GlobalState.
+        auto staleGS = gs->deepCopy();
+        {
+            core::UnfreezeNameTable nameTableAccess(*staleGS);
+            core::UnfreezeSymbolTable symbolTableAccess(*staleGS);
+            for (auto &tree : trees) {
+                staleGS->staticInitForFile(core::Loc(tree.file, tree.tree.loc()));
+            }
+        }
+
+        const core::GlobalState &immutableGS = *staleGS;
 
         // Non-mutating namer, before entering symbols into GlobalState
         vector<ast::ParsedFile> treesCopy;
@@ -421,14 +441,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
         }
 
-        treesCopy = move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
+        treesCopy = move(namer::Namer::symbolizeTreesBestEffort(immutableGS, move(treesCopy), *workers).result());
         ENFORCE(!gs->hadCriticalError());
 
-        // Non-mutating resolver.  Note that non-mutating resolver leaves GlobalState
-        // alone, but modifies trees with abandon, so we need to copy here.
-        treesCopy = move(resolver::Resolver::runIncrementalBestEffort(*gs, move(treesCopy)).result());
+        treesCopy = move(resolver::Resolver::runIncremental(immutableGS, move(treesCopy)).result());
 
-        // If no ENFORCE fired, then non-mutating namer is working fine.
+        // If no ENFORCE fired, then immutatable namer + resolver is working fine.
 
         // Drop the errors that were produced as a result of this process.
         // It's good to have the error-reporting code run (ensure that it doesn't ENFORCE), but we

@@ -13,14 +13,18 @@ public:
                                            WorkerPool &workers);
     Resolver() = delete;
 
-    /** Only runs tree passes, used for incremental changes that do not affect global state. Assumes that `run` was
-     * called on a tree that contains same definitions before (LSP uses heuristics that should only have false negatives
-     * to find this) */
-    static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
-
-    // Like the above, only skip all the steps that would require mutating global state.
-    static ast::ParsedFilesOrCancelled runIncrementalBestEffort(const core::GlobalState &gs,
-                                                                std::vector<ast::ParsedFile> trees);
+    /**
+     * Only runs tree passes, used for incremental changes that do not affect global state. Assumes
+     * that `run` was called on a tree that contains same definitions before (LSP uses heuristics
+     * that should only have false negatives to find this)
+     *
+     * Has two versions: one that requires a mutable GlobalState, and one that does a "best effort"
+     * mode with a constant GlobalState (for, e.g., serving stale LSP requests)
+     *
+     * These two versions are explicitly instantiated in resolver.cc
+     */
+    template <typename StateType>
+    static ast::ParsedFilesOrCancelled runIncremental(StateType &gs, std::vector<ast::ParsedFile> trees);
 
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,

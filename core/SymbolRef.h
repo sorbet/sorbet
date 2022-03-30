@@ -954,6 +954,10 @@ public:
         return MethodRef::fromRaw(12);
     }
 
+    static MethodRef rootStaticInit() {
+        return MethodRef::fromRaw(13);
+    }
+
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
         return ClassOrModuleRef::fromRaw(85);
     }
@@ -1009,7 +1013,7 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 207;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 45;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 46;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 104;

@@ -139,7 +139,7 @@ public:
     MethodRef staticInitForClass(ClassOrModuleRef klass, Loc loc);
 
     MethodRef lookupStaticInitForFile(FileRef file) const;
-    MethodRef lookupStaticInitForClass(ClassOrModuleRef klass) const;
+    MethodRef lookupStaticInitForClass(ClassOrModuleRef klass, bool allowMissing = false) const;
 
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;

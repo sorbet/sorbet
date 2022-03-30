@@ -3873,7 +3873,10 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
 }
 } // namespace
 
-ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+template <typename StateType>
+ast::ParsedFilesOrCancelled Resolver::runIncremental(StateType &gs, vector<ast::ParsedFile> trees) {
+    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
@@ -3891,27 +3894,9 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     return result;
 }
 
-// TODO(jez) This is dupliicated with Resolver::runIncremental. Can we make them share more code?
-ast::ParsedFilesOrCancelled Resolver::runIncrementalBestEffort(const core::GlobalState &gs,
-                                                               vector<ast::ParsedFile> trees) {
-    auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
-    verifyLinearizationComputed(gs);
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(trees), *workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    // The non-mutating resolver isn't ready for this check to be run yet, because e.g.
-    // it doesn't resolve UnresolvedConstantLit nodes.
-    // sanityCheck(gs, result.result());
-    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
-    // But it can be super useful to uncomment when debugging certain issues.
-    // ctx.state.sanityCheck();
-
-    return result;
-}
+template ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees);
+template ast::ParsedFilesOrCancelled Resolver::runIncremental(const core::GlobalState &gs,
+                                                              vector<ast::ParsedFile> trees);
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {

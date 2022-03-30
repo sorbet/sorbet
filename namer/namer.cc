@@ -1648,6 +1648,14 @@ public:
         // NameDefiner should have forced this class's singleton class into existence.
         ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
 
+        auto allowMissing = true;
+        if (!ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists()) {
+            ENFORCE(this->bestEffort);
+            // Even though we found a symbol for this, we don't have a <static-init> for it, which is
+            // an invariant that namer must introduce (all ClassDef's have `<static-init>` methods).
+            return ast::MK::EmptyTree();
+        }
+
         for (auto &exp : klass.rhs) {
             addAncestor(ctx, klass, exp);
         }

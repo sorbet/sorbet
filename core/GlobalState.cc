@@ -585,6 +585,9 @@ void GlobalState::initEmpty() {
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
 
+    method = this->staticInitForClass(core::Symbols::root(), Loc::none());
+    ENFORCE(method == Symbols::rootStaticInit());
+
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
@@ -2190,10 +2193,10 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     return sym;
 }
 
-MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
+MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass, bool allowMissing) const {
     auto classData = klass.data(*this);
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMethod(*this, core::Names::staticInit());
-    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
+    ENFORCE(ref.exists() || allowMissing, "looking up non-existent <static-init> for {}", klass.toString(*this));
     return ref;
 }
 
