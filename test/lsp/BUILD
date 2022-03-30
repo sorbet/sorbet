@@ -1,4 +1,4 @@
-load(":lsp_test.bzl", "lsp_test", "update_test", "protocol_tests")
+load(":lsp_test.bzl", "lsp_test", "protocol_tests", "update_test")
 
 sh_binary(
     name = "lsp_test_runner",
