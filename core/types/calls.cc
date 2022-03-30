@@ -1126,13 +1126,25 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (ait != aend) {
-        if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+        auto extraArgsLoc = args.argLoc(ait - args.args.begin()).join(core::Loc(args.locs.file, args.locs.args.back()));
+        if (auto e = gs.beginError(extraArgsLoc, errors::Infer::MethodArgumentCountMismatch)) {
             auto hashCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
             auto numArgsGiven = args.numPosArgs + hashCount;
             if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+
+                auto deleteLoc = extraArgsLoc;
+                // Heuristic to try to find leading commas. Not actually required for correctness
+                // (will still parse even if we delete something but don't find the comma) which is
+                // why we're fine with this just hard-coding two common cases (easiest to implement).
+                if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == ",") {
+                    deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+                } else if (extraArgsLoc.adjustLen(gs, -2, 2).source(gs) == ", ") {
+                    deleteLoc = extraArgsLoc.adjust(gs, -2, 0);
+                }
+                e.replaceWith("Delete extra args", deleteLoc, "");
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
                 // people some slightly confusing error messages.
