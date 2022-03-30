@@ -1,0 +1,8 @@
+big-any.rb:16: Argument does not have asserted type `T::Set[T.class_of(BaseClass)]` https://srb.help/7007
+    16 |  x = T.let([A, B, C, D, E, F, G, H, Not].to_set.freeze, T::Set[T.class_of(BaseClass)])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T::Set[T.any(T.class_of(A), T.class_of(B), T.class_of(C), T.class_of(D), T.class_of(E), T.class_of(F), T.class_of(G), T.class_of(H), T.class_of(Not))]` originating from:
+    big-any.rb:16:
+    16 |  x = T.let([A, B, C, D, E, F, G, H, Not].to_set.freeze, T::Set[T.class_of(BaseClass)])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1
