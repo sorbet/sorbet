@@ -74,8 +74,7 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
         }
         // We could extend this to multiple args, but the common cases are `T::Set`
         // and `T::Array`, so go with the simple code for now.
-        if (gotRef.targs.size() != expectedRef.targs.size() ||
-            gotRef.targs.size() != 1) {
+        if (gotRef.targs.size() != expectedRef.targs.size() || gotRef.targs.size() != 1) {
             return;
         }
 
@@ -94,9 +93,8 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
         // TODO: should we just limit this to `T.class_of`-style types?
         vector<TypePtr> parts;
         flattenOrType(parts, cast_type_nonnull<OrType>(innerGot));
-        auto it = std::remove_if(parts.begin(), parts.end(), [&](auto &part) -> bool {
-                return core::Types::isSubType(gs, part, innerExpected);
-            });
+        auto it = std::remove_if(parts.begin(), parts.end(),
+                                 [&](auto &part) -> bool { return core::Types::isSubType(gs, part, innerExpected); });
         parts.erase(it, parts.end());
 
         for (auto &part : parts) {
