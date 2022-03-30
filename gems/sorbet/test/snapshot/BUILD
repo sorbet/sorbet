@@ -23,8 +23,6 @@ sh_binary(
         "sorbet-typed.rev",
         "//main:sorbet",
         "@gems//gems",
-        "@sorbet_ruby_2_6//:bundle",
-        "@sorbet_ruby_2_6//:ruby",
         "@sorbet_ruby_2_7//:bundle",
         "@sorbet_ruby_2_7//:ruby",
         "@sorbet_ruby_3_0//:bundle",
@@ -37,19 +35,6 @@ sh_binary(
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],
-)
-
-snapshot_tests(
-    ruby = "sorbet_ruby_2_6",
-    tests = glob(
-        [
-            "partial/*",
-            "total/*",
-        ],
-
-        # We only want to match directories with this glob
-        exclude_directories = 0,
-    ),
 )
 
 snapshot_tests(
@@ -84,7 +69,6 @@ test_suite(
     # NOTE: this is manual to avoid being caught with `//...`
     tags = ["manual"],
     tests = [
-        ":snapshot-sorbet_ruby_2_6",
         ":snapshot-sorbet_ruby_2_7",
         ":snapshot-sorbet_ruby_3_0",
     ],
@@ -96,7 +80,6 @@ test_suite(
     # NOTE: this is manual to avoid being caught with `//...`
     tags = ["manual"],
     tests = [
-        ":update-sorbet_ruby_2_6",
         ":update-sorbet_ruby_2_7",
         ":update-sorbet_ruby_3_0",
     ],
