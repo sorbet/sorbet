@@ -729,10 +729,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
-    // Reset the options to enable stale state and sleep-in-slow-path.
+    // Reset the options to enable stale state.
     auto opts = make_shared<realmain::options::Options>();
     opts->lspStaleStateEnabled = true;
-    opts->sleepInSlowPath = true;
     resetState(opts);
 
     auto initOptions = make_unique<SorbetInitializationOptions>();
@@ -804,10 +803,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
-    // Reset the options to enable stale state and sleep-in-slow-path.
+    // Reset the options to enable stale state.
     auto opts = make_shared<realmain::options::Options>();
     opts->lspStaleStateEnabled = true;
-    opts->sleepInSlowPath = true;
     resetState(opts);
 
     auto initOptions = make_unique<SorbetInitializationOptions>();
