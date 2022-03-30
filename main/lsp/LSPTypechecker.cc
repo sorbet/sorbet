@@ -450,6 +450,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             return;
         }
 
+        ENFORCE(gs->lspQuery.isEmpty());
+
         // Test-only hook: Stall for as long as `slowPathBlocked` is set.
         {
             absl::MutexLock lck(&slowPathBlockedMutex);
@@ -457,7 +459,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 +[](bool *slowPathBlocked) -> bool { return !*slowPathBlocked; }, &slowPathBlocked));
         }
 
-        ENFORCE(gs->lspQuery.isEmpty());
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
