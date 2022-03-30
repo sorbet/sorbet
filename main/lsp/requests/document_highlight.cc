@@ -1,6 +1,7 @@
 #include "main/lsp/requests/document_highlight.h"
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
@@ -36,8 +37,8 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerInte
 
     const core::GlobalState &gs = typechecker.state();
     auto uri = params->textDocument->uri;
-    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position,
-                             LSPMethod::TextDocumentDocumentHighlight, false);
+    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+                                  LSPMethod::TextDocumentDocumentHighlight, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

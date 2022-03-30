@@ -3,6 +3,7 @@
 
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "main/lsp/LSPTypechecker.h"
 #include "main/lsp/json_types.h"
 
 namespace sorbet::realmain::lsp {
@@ -28,6 +29,8 @@ public:
     std::optional<std::vector<std::unique_ptr<TextDocumentEdit>>> buildTextDocumentEdits();
     std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildWorkspaceEdit();
     virtual void addSymbol(const core::SymbolRef) = 0;
+
+    void getRenameEdits(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol, std::string newName);
 
     bool getInvalid();
     std::string getError();
