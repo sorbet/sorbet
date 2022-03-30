@@ -55,7 +55,8 @@ void flattenOrType(vector<TypePtr> &results, const OrType &type) {
         [&results](const TypePtr &def) { results.emplace_back(def); });
 }
 
-void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const OrType &composite, const TypePtr &expected) {
+void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const OrType &composite,
+                                      const TypePtr &expected) {
     vector<TypePtr> parts;
     flattenOrType(parts, composite);
 
@@ -74,7 +75,8 @@ void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, co
     }
 }
 
-void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const TypePtr &got, const AndType &expected) {
+void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const TypePtr &got,
+                                      const AndType &expected) {
     vector<TypePtr> parts;
     flattenAndType(parts, expected);
 
