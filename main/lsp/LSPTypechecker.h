@@ -196,11 +196,6 @@ public:
     virtual LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const = 0;
 
     /**
-     * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
-     */
-    // virtual const ast::ParsedFile &getIndexed(core::FileRef fref) const = 0;
-
-    /**
      * Returns the parsed files for the given files, including resolver.
      */
     virtual std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const = 0;
@@ -304,11 +299,9 @@ public:
 
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
-
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs) const override;
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const override;
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const override;
-
     const core::GlobalState &state() const override;
 };
 } // namespace sorbet::realmain::lsp
