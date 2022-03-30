@@ -421,8 +421,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
         }
 
-        move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
+        treesCopy = move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
         ENFORCE(!gs->hadCriticalError());
+
+        // Non-mutating resolver.  Note that non-mutating resolver leaves GlobalState
+        // alone, but modifies trees with abandon, so we need to copy here.
+        treesCopy = move(resolver::Resolver::runIncrementalBestEffort(*gs, move(treesCopy)).result());
 
         // If no ENFORCE fired, then non-mutating namer is working fine.
 
@@ -758,19 +762,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
             handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
         }
-    }
-
-    {
-        // Non-mutating resolver.  Note that non-mutating resolver leaves GlobalState
-        // alone, but modifies trees with abandon, so we need to copy here.
-        vector<ast::ParsedFile> treesCopy;
-        for (auto &tree : trees) {
-            treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
-        }
-
-        move(resolver::Resolver::runIncrementalWithoutStateMutation(*gs, move(treesCopy)).result());
-        errorQueue->flushAllErrors(*gs);
-        errorCollector->drainErrors();
     }
 
     // resolver
