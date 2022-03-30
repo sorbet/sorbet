@@ -419,11 +419,15 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                },
                                                classTypes);
 
+    auto CodeActionResolveSupport =
+        makeObject("CodeActionResolveSupport", {makeField("properties", makeArray(JSONString))}, classTypes);
     auto CodeActionCapabilities =
         makeObject("CodeActionCapabilities",
                    {
                        makeField("dynamicRegistration", makeOptional(JSONBool)),
                        makeField("codeActionLiteralSupport", makeOptional(CodeActionLiteralSupport)),
+                       makeField("dataSupport", makeOptional(JSONBool)),
+                       makeField("resolveSupport", makeOptional(CodeActionResolveSupport)),
                    },
                    classTypes);
 
@@ -496,6 +500,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto CodeActionOptions = makeObject("CodeActionOptions",
                                         {
                                             makeField("codeActionKinds", makeOptional(makeArray(CodeActionKind))),
+                                            makeField("resolveProvider", makeOptional(JSONBool)),
                                         },
                                         classTypes);
 
@@ -1061,6 +1066,19 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
+    auto SorbetErrorParams = makeObject("SorbetErrorParams",
+                                        {
+                                            makeField("code", JSONInt),
+                                            makeField("message", JSONString),
+                                        },
+                                        classTypes);
+    auto CodeActionResolveResponse = makeObject("CodeActionResolveResponse",
+                                                {
+                                                    makeField("result", makeOptional(CodeAction)),
+                                                    makeField("error", makeOptional(SorbetErrorParams)),
+                                                },
+                                                classTypes);
+
     auto CodeActionRegistrationOptions =
         makeObject("CodeActionRegistrationOptions",
                    {
@@ -1274,12 +1292,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                     makeField("status", SorbetOperationStatus),
                                                 },
                                                 classTypes);
-    auto SorbetErrorParams = makeObject("SorbetErrorParams",
-                                        {
-                                            makeField("code", JSONInt),
-                                            makeField("message", JSONString),
-                                        },
-                                        classTypes);
 
     /* Watchman JSON response objects */
     auto WatchmanQueryResponse = makeObject("WatchmanQueryResponse",
@@ -1345,6 +1357,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "sorbet/watchmanFileChange",
                                      "sorbet/workspaceEdit",
                                      "textDocument/codeAction",
+                                     "codeAction/resolve",
                                      "textDocument/completion",
                                      "textDocument/definition",
                                      "textDocument/typeDefinition",
@@ -1383,6 +1396,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/rename", RenameParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
                                                 {"textDocument/codeAction", CodeActionParams},
+                                                {"codeAction/resolve", CodeAction},
                                                 {"textDocument/implementation", ImplementationParams},
                                                 {"textDocument/formatting", DocumentFormattingParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
@@ -1427,6 +1441,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // TODO: the following are more correct but I can only get the above to work.
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(makeVariant({CodeAction, Command}))})},
             // {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction), makeArray(Command)})},
+            {"codeAction/resolve", makeOptional(CodeAction)},
             {"textDocument/implementation", makeVariant({JSONNull, makeArray(Location)})},
             {"workspace/symbol", makeVariant({JSONNull, makeArray(SymbolInformation)})},
             {"sorbet/error", SorbetErrorParams},

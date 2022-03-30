@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_REQUESTS_REQUESTS_H
 
 #include "main/lsp/requests/code_action.h"
+#include "main/lsp/requests/code_action_resolve.h"
 #include "main/lsp/requests/completion.h"
 #include "main/lsp/requests/definition.h"
 #include "main/lsp/requests/document_formatting.h"

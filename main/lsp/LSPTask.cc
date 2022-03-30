@@ -89,6 +89,9 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>) {
                     // textDocument/codeAction
                     return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, optional<unique_ptr<CodeAction>>>) {
+                    //  codeAction/resolve
+                    return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>) {
                     // workspace/symbol
                     return ResponseMessageStatus::Unknown;
@@ -193,6 +196,8 @@ ConstExprStr LSPTask::methodString() const {
             return "workspace.symbol";
         case LSPMethod::TextDocumentImplementation:
             return "textDocument.implementation";
+        case LSPMethod::CodeActionResolve:
+            return "codeAction.resolve";
     }
 }
 
