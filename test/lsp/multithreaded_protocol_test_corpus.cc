@@ -675,4 +675,57 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Create a simple file.
+    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\n  def foo\n  end\nend\n", 2));
+
+    // Wait for initial typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Wait for initial typechecking to finish.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Turn on slow path blocking, and send an edit that is going to cause a slow path.
+    // setSlowPathBlocked(true);
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\n  def bar\n  end\nend\n", 3, false, 0, true));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive a message within a
+    // reasonable time frame---let's say 2000ms.
+    {
+        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+        auto msg = wrapper.read(2000);
+        REQUIRE(msg == nullptr);
+    }
+
+    // Unblock the slow path.
+    setSlowPathBlocked(false);
+
+    // The slow path should now be unblocked. Wait for typechecking to end.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
 } // namespace sorbet::test::lsp

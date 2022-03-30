@@ -826,6 +826,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        // Used in tests only.
                        makeField("sorbetCancellationExpected", makeOptional(JSONBool)),
                        makeField("sorbetPreemptionsExpected", makeOptional(JSONInt)),
+                       makeField("sorbetStallInSlowPath", makeOptional(JSONBool)),
                    },
                    classTypes, {"std::string getSource(std::string_view oldFileContents) const;"});
 
@@ -1291,23 +1292,25 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
-    auto SorbetWorkspaceEditParams =
-        makeObject("SorbetWorkspaceEditParams", {}, classTypes,
-                   {
-                       "uint32_t epoch = 0;",
-                       "// Contains the number of individual edit messages merged into this edit.",
-                       "uint32_t mergeCount = 0;",
-                       "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
-                       "bool sorbetCancellationExpected = false;",
-                       "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",
-                       "int sorbetPreemptionsExpected = 0;",
-                       "// For each edit rolled up into update, contains a timer used to report diagnostic latency.",
-                       "std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers;",
-                       "// File updates contained in this edit.",
-                       "std::vector<std::shared_ptr<core::File>> updates;",
-                       "// Merge newerParams into this object, which mutates `epoch` and `updates`",
-                       "void merge(SorbetWorkspaceEditParams &newerParams);",
-                   });
+    auto SorbetWorkspaceEditParams = makeObject(
+        "SorbetWorkspaceEditParams", {}, classTypes,
+        {
+            "uint32_t epoch = 0;",
+            "// Contains the number of individual edit messages merged into this edit.",
+            "uint32_t mergeCount = 0;",
+            "// Used in multithreaded tests to wait for a cancellation to occur when processing this edit.",
+            "bool sorbetCancellationExpected = false;",
+            "// Used in multithreaded tests to wait for a preemption to occur when processing this edit.",
+            "int sorbetPreemptionsExpected = 0;",
+            "// Used in multithreaded tests to force the slow path to stall indefinitely when processing this edit.",
+            "bool sorbetStallInSlowPath = false;",
+            "// For each edit rolled up into update, contains a timer used to report diagnostic latency.",
+            "std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers;",
+            "// File updates contained in this edit.",
+            "std::vector<std::shared_ptr<core::File>> updates;",
+            "// Merge newerParams into this object, which mutates `epoch` and `updates`",
+            "void merge(SorbetWorkspaceEditParams &newerParams);",
+        });
 
     auto SorbetTypecheckRunStatus =
         makeIntEnum("SorbetTypecheckRunStatus", {{"Started", 0}, {"Cancelled", 1}, {"Ended", 2}}, enumTypes);

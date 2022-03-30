@@ -88,10 +88,11 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
 }
 
 unique_ptr<LSPMessage> ProtocolTest::changeFile(string_view path, string_view newContents, int version,
-                                                bool cancellationExpected, int preemptionsExpected) {
+                                                bool cancellationExpected, int preemptionsExpected,
+                                                bool stallInSlowPath) {
     sourceFileContents[string(path)] =
         make_shared<core::File>(string(path), string(newContents), core::File::Type::Normal);
-    return makeChange(getUri(path), newContents, version, cancellationExpected, preemptionsExpected);
+    return makeChange(getUri(path), newContents, version, cancellationExpected, preemptionsExpected, stallInSlowPath);
 }
 
 unique_ptr<LSPMessage> ProtocolTest::documentSymbol(string_view path) {

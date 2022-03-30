@@ -148,7 +148,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
-        committed = runSlowPath(move(updates), workers, /* cancelable */ false);
+        committed = runSlowPath(move(updates), workers, /* cancelable */ false, /* stallInSlowPath */ false);
         epoch.committed = committed;
     }
     ENFORCE(committed);
@@ -166,7 +166,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
-                               vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
+                               vector<unique_ptr<Timer>> diagnosticLatencyTimers, bool stallInSlowPath) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     if (updates.canceledSlowPath) {
@@ -212,7 +212,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            committed = runSlowPath(move(updates), workers, /* cancelable */ true);
+            committed = runSlowPath(move(updates), workers, /* cancelable */ true, stallInSlowPath);
         }
         epoch.committed = committed;
     }
@@ -397,7 +397,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return !epochManager.wasTypecheckingCanceled();
 }
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable, bool stallInSlowPath) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -448,6 +448,13 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         if (!copyIndexed(workers, updatedFiles, indexedCopies)) {
             // Canceled.
             return;
+        }
+
+        if (stallInSlowPath) {
+            Timer timeit(logger, "slow_path.debug_stall");
+            while (std::atomic_load(&slowPathBlocked)) {
+                ;
+            }
         }
 
         ENFORCE(gs->lspQuery.isEmpty());
@@ -707,7 +714,8 @@ void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
     if (!updates.canTakeFastPath) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
-    auto committed = typechecker.typecheck(move(updates), workers, move(diagnosticLatencyTimers));
+    auto committed =
+        typechecker.typecheck(move(updates), workers, move(diagnosticLatencyTimers), /* stallInSlowPath */ false);
     // Fast path edits can't be canceled.
     ENFORCE(committed);
 }

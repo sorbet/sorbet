@@ -356,6 +356,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     edit->epoch = v;
     edit->sorbetCancellationExpected = changeParams->sorbetCancellationExpected.value_or(false);
     edit->sorbetPreemptionsExpected = changeParams->sorbetPreemptionsExpected.value_or(0);
+    edit->sorbetStallInSlowPath = changeParams->sorbetStallInSlowPath.value_or(false);
     string_view uri = changeParams->textDocument->uri;
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);

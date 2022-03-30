@@ -79,6 +79,9 @@ public:
      * (For tests only) Retrieve the number of times typechecking has run.
      */
     int getTypecheckCount();
+    void setSlowPathBlocked(bool blocked) {
+        typecheckerCoord.setSlowPathBlocked(blocked);
+    }
 };
 
 // TODO(jvilk): Move to LSPTask.

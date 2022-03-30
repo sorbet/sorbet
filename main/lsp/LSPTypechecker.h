@@ -59,9 +59,11 @@ class LSPTypechecker final {
 
     std::shared_ptr<ErrorReporter> errorReporter;
 
+    std::atomic<bool> slowPathBlocked{false};
+
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
+    bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable, bool stallInSlowPath);
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
     std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
@@ -99,7 +101,7 @@ public:
      * canceled. Distributes work across the given worker pool.
      */
     bool typecheck(LSPFileUpdates updates, WorkerPool &workers,
-                   std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+                   std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers, bool stallInSlowPath);
 
     /**
      * Re-typechecks the provided files to re-produce error messages.
@@ -139,6 +141,13 @@ public:
      * Tries to run the function on the stale undo state, acquiring a lock.
      */
     bool tryRunOnStaleState(std::function<void(UndoState &)> func);
+
+    /**
+     * Sets the slow path to block...
+     */
+    void setSlowPathBlocked(bool blocked) {
+        slowPathBlocked = blocked;
+    }
 };
 
 /**

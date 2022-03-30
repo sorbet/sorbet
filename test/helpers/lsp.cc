@@ -445,7 +445,7 @@ unique_ptr<LSPMessage> makeOpen(string_view uri, string_view contents, int versi
 }
 
 unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int version, bool cancellationExpected,
-                                  int preemptionsExpected) {
+                                  int preemptionsExpected, bool stallInSlowPath) {
     auto textDoc = make_unique<VersionedTextDocumentIdentifier>(string(uri), static_cast<double>(version));
     auto textDocChange = make_unique<TextDocumentContentChangeEvent>(string(contents));
     vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
@@ -454,6 +454,7 @@ unique_ptr<LSPMessage> makeChange(string_view uri, string_view contents, int ver
     auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
     didChangeParams->sorbetCancellationExpected = cancellationExpected;
     didChangeParams->sorbetPreemptionsExpected = preemptionsExpected;
+    didChangeParams->sorbetStallInSlowPath = stallInSlowPath;
     auto didChangeNotif =
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(didChangeParams));
     return make_unique<LSPMessage>(move(didChangeNotif));

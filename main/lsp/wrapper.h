@@ -78,6 +78,8 @@ public:
      * (For tests only) Retrieve the number of times typechecking has run.
      */
     int getTypecheckCount();
+
+    void setSlowPathBlocked(bool blocked);
 };
 
 class SingleThreadedLSPWrapper final : public LSPWrapper {

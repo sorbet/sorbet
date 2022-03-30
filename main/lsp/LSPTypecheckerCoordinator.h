@@ -93,6 +93,10 @@ public:
 
     /** Runs the typechecker in a dedicated thread. */
     std::unique_ptr<Joinable> startTypecheckerThread();
+
+    void setSlowPathBlocked(bool blocked) {
+        typechecker.setSlowPathBlocked(blocked);
+    }
 };
 } // namespace sorbet::realmain::lsp
 

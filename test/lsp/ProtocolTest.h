@@ -61,7 +61,8 @@ protected:
     std::unique_ptr<LSPMessage> closeFile(std::string_view path);
 
     std::unique_ptr<LSPMessage> changeFile(std::string_view path, std::string_view newContents, int version,
-                                           bool cancellationExpected = false, int preemptionsExpected = 0);
+                                           bool cancellationExpected = false, int preemptionsExpected = 0,
+                                           bool stallInSlowPath = false);
 
     std::unique_ptr<LSPMessage> documentSymbol(std::string_view path);
 
@@ -111,6 +112,10 @@ protected:
      * Request all counter metrics from the server. Used to assert that metrics are reporting correctly.
      */
     const CounterStateDatabase getCounters();
+
+    void setSlowPathBlocked(bool blocked) {
+        lspWrapper->setSlowPathBlocked(blocked);
+    }
 };
 
 } // namespace sorbet::test::lsp

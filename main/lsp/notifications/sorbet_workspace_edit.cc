@@ -120,7 +120,8 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());
 
     // Only report stats if the edit was committed.
-    if (typechecker.typecheck(move(*updates), workers, move(params->diagnosticLatencyTimers))) {
+    if (typechecker.typecheck(move(*updates), workers, move(params->diagnosticLatencyTimers),
+                              /* stallInSlowPath */ params->sorbetStallInSlowPath)) {
         prodCategoryCounterAdd("lsp.messages.processed", "sorbet.mergedEdits", newEditCount - 1);
     } else if (latencyTimer != nullptr) {
         // Don't report a latency value for canceled slow paths.
