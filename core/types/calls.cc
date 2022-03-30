@@ -442,7 +442,13 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     return tp;
 }
 
-string prettyArity(const GlobalState &gs, MethodRef method) {
+struct ArityComponents {
+    int required;
+    int optional;
+    bool repeated;
+};
+
+ArityComponents arityComponents(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
     for (const auto &arg : method.data(gs)->arguments) {
@@ -456,6 +462,11 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
             ++required;
         }
     }
+    return {required, optional, repeated};
+}
+
+string prettyArity(const GlobalState &gs, MethodRef method) {
+    auto [required, optional, repeated] = arityComponents(gs, method);
     if (repeated) {
         return absl::StrCat(required, "+");
     } else if (optional > 0) {
@@ -1126,24 +1137,36 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (ait != aend) {
-        auto extraArgsLoc = args.argLoc(ait - args.args.begin()).join(core::Loc(args.locs.file, args.locs.args.back()));
+        auto arity = arityComponents(gs, method);
+        auto maxPossiblePositional = arity.required + arity.optional;
+
+        // TODO(jez) check if you can move this back inside the `if`
+        auto hashArgsCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
+        auto numArgsGiven = args.numPosArgs + hashArgsCount;
+        ENFORCE(maxPossiblePositional < numArgsGiven);
+
+        // It's only the end of this loc that matters, because we're going to join it with maxPossiblePositional.
+        auto lastPositionalArg = hashArgsCount == 0 || !consumed.empty() ? args.argLoc(args.numPosArgs - 1)
+                                                                         : args.argLoc(args.locs.args.size() - 1);
+
+        auto extraArgsLoc = args.argLoc(maxPossiblePositional).join(lastPositionalArg);
         if (auto e = gs.beginError(extraArgsLoc, errors::Infer::MethodArgumentCountMismatch)) {
-            auto hashCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
-            auto numArgsGiven = args.numPosArgs + hashCount;
+            auto deleteLoc = extraArgsLoc;
+            // Heuristic to try to find leading commas. Not actually required for correctness
+            // (will still parse even if we delete something but don't find the comma) which is
+            // why we're fine with this just hard-coding two common cases (easiest to implement).
+            if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == ",") {
+                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+            } else if (extraArgsLoc.adjustLen(gs, -2, 2).source(gs) == ", ") {
+                deleteLoc = extraArgsLoc.adjust(gs, -2, 0);
+            } else if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == " ") {
+                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+            }
+
             if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
-
-                auto deleteLoc = extraArgsLoc;
-                // Heuristic to try to find leading commas. Not actually required for correctness
-                // (will still parse even if we delete something but don't find the comma) which is
-                // why we're fine with this just hard-coding two common cases (easiest to implement).
-                if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == ",") {
-                    deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
-                } else if (extraArgsLoc.adjustLen(gs, -2, 2).source(gs) == ", ") {
-                    deleteLoc = extraArgsLoc.adjust(gs, -2, 0);
-                }
                 e.replaceWith("Delete extra args", deleteLoc, "");
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
@@ -1160,9 +1183,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
                 if (firstKeyword != data->arguments.end()) {
-                    e.addErrorLine(args.callLoc(),
+                    auto possibleArg = firstKeyword->argumentName(gs);
+                    e.addErrorLine(args.argLoc(maxPossiblePositional),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   method.show(gs), firstKeyword->argumentName(gs));
+                                   method.show(gs), possibleArg);
+                    auto howManyExtra = numArgsGiven - hashArgsCount - maxPossiblePositional;
+                    if (howManyExtra == 1) {
+                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
+                                      "{}: ", possibleArg);
+                    }
+                } else {
+                    e.replaceWith("Delete extra args", deleteLoc, "");
                 }
             }
             result.main.errors.emplace_back(e.build());
