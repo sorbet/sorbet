@@ -283,7 +283,7 @@
     "compile": "tsc -p ./",
     "integrity": "yarn-integrity",
     "watch": "tsc -w -p ./",
-    "lint": "eslint -c package.json --ext .ts ./src",
+    "lint": "eslint --ext .ts ./src",
     "prettier": "prettier --write 'src/**/*.ts'",
     "test": "yarn compile && ./scripts/run_tests.sh .",
     "test:ci": "node --preserve-symlinks-main ./out/scripts/runTests.js .",
@@ -328,10 +328,5 @@
   "prettier": {
     "trailingComma": "all",
     "arrowParens": "always"
-  },
-  "eslintConfig": {
-    "rules": {
-      "no-shadow": "off"
-    }
   }
 }
