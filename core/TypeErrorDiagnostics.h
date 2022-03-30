@@ -19,7 +19,8 @@ public:
     static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
                                  const TypePtr &expectedType, const TypePtr &actualType);
 
-    static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected, const TypePtr &got);
+    static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
+                                    const TypePtr &got);
 };
 
 } // namespace sorbet::core
