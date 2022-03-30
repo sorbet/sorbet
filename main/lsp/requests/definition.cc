@@ -1,5 +1,6 @@
 #include "main/lsp/requests/definition.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
@@ -12,8 +13,8 @@ DefinitionTask::DefinitionTask(const LSPConfiguration &config, MessageId id,
 unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
     const core::GlobalState &gs = typechecker.state();
-    auto result =
-        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentDefinition, false);
+    auto result = queryByLoc(config, typechecker, params->textDocument->uri, *params->position,
+                             LSPMethod::TextDocumentDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

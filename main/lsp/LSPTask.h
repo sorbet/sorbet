@@ -51,15 +51,6 @@ protected:
     extractLocations(const core::GlobalState &gs,
                      const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
-    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    filterAndDedup(const core::GlobalState &gs,
-                   const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses) const;
-
-    LSPQueryResult queryByLoc(LSPTypecheckerInterface &typechecker, std::string_view uri, const Position &pos,
-                              LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;
-    LSPQueryResult queryBySymbolInFiles(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
-                                        std::vector<core::FileRef> frefs) const;
-    LSPQueryResult queryBySymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol) const;
 
     // Given a method or field symbol, checks if the symbol belongs to a `prop`, `const`, `attr_reader`, `attr_writer`,
     // etc, and populates an AccessorInfo object.

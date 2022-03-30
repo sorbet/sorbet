@@ -1,5 +1,6 @@
 #include "main/lsp/requests/references.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 
@@ -19,8 +20,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
     ShowOperation op(config, ShowOperation::Kind::References);
 
     const core::GlobalState &gs = typechecker.state();
-    auto result =
-        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentReferences, false);
+    auto result = queryByLoc(config, typechecker, params->textDocument->uri, *params->position,
+                             LSPMethod::TextDocumentReferences, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

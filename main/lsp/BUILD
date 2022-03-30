@@ -38,6 +38,7 @@ cc_library(
         "LSPMessage.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
+        "LSPQuery.h",
         "json_types.h",
         "lsp.h",
         "wrapper.h",

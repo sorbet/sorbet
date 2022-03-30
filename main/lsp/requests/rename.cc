@@ -5,6 +5,7 @@
 #include "absl/strings/str_split.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/AbstractRenamer.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
@@ -217,7 +218,8 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
 
     ShowOperation op(config, ShowOperation::Kind::Rename);
 
-    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
+    auto result =
+        queryByLoc(config, typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

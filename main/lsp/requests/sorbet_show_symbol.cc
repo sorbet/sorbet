@@ -1,4 +1,5 @@
 #include "main/lsp/requests/sorbet_show_symbol.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
@@ -17,8 +18,8 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerInter
     // To match the behavior of Go To Definition, we don't error in an untyped file, but instead
     // be okay with returning an empty result for certain queries.
     auto errorIfFileIsUntyped = false;
-    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::SorbetShowSymbol,
-                             errorIfFileIsUntyped);
+    auto result = queryByLoc(config, typechecker, params->textDocument->uri, *params->position,
+                             LSPMethod::SorbetShowSymbol, errorIfFileIsUntyped);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

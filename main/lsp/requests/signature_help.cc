@@ -1,5 +1,6 @@
 #include "main/lsp/requests/signature_help.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
@@ -64,8 +65,8 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerInterfac
     }
 
     const core::GlobalState &gs = typechecker.state();
-    auto result =
-        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentSignatureHelp);
+    auto result = queryByLoc(config, typechecker, params->textDocument->uri, *params->position,
+                             LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

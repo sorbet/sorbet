@@ -9,6 +9,7 @@
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/FieldFinder.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
@@ -1159,7 +1160,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         response->result = std::move(emptyResult);
         return response;
     }
-    auto result = queryByLoc(typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
+    auto result = queryByLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
         // An error happened while setting up the query.

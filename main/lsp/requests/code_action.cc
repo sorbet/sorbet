@@ -1,6 +1,7 @@
 #include "main/lsp/requests/code_action.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 #include "main/sig_finder/sig_finder.h"
@@ -338,7 +339,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
     }
 
     if (config.opts.lspMoveMethodEnabled) {
-        auto queryResult = queryByLoc(typechecker, params->textDocument->uri, *params->range->start,
+        auto queryResult = queryByLoc(config, typechecker, params->textDocument->uri, *params->range->start,
                                       LSPMethod::TextDocumentCodeAction, false);
 
         // Generate "Move method" code actions only for class method definitions

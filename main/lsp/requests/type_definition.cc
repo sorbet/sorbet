@@ -1,6 +1,7 @@
 #include "main/lsp/requests/type_definition.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
@@ -89,7 +90,7 @@ TypeDefinitionTask::TypeDefinitionTask(const LSPConfiguration &config, MessageId
 unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentTypeDefinition);
     const core::GlobalState &gs = typechecker.state();
-    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position,
+    auto result = queryByLoc(config, typechecker, params->textDocument->uri, *params->position,
                              LSPMethod::TextDocumentTypeDefinition, false);
     if (result.error) {
         // An error happened while setting up the query.
