@@ -1063,6 +1063,9 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      makeField("diagnostics", makeOptional(makeArray(Diagnostic))),
                                      makeField("edit", makeOptional(WorkspaceEdit)),
                                      makeField("command", makeOptional(Command)),
+                                     // The LSP spec defines the `data` field as `LSPAny`,
+                                     // but we use it only to transfer `CodeActionParams`
+                                     makeField("data", makeOptional(CodeActionParams)),
                                  },
                                  classTypes);
 
