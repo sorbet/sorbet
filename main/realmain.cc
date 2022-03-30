@@ -511,8 +511,10 @@ int realmain(int argc, char *argv[]) {
                 continue;
             }
 
+            auto payloadVersion = sorbet_is_release_build ? sorbet_build_scm_revision : "master";
             auto payloadPath = payloadFile->path();
-            auto payloadPrefix = absl::StrCat(core::File::URL_PREFIX, "rbi/");
+            auto payloadPrefix = absl::StrCat("https://github.com/sorbet/sorbet/tree/", payloadVersion, "/rbi/");
+
             if (!absl::StartsWith(payloadPath, payloadPrefix)) {
                 // Skip files from `bazel-out/`
                 continue;
