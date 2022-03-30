@@ -1,4 +1,4 @@
-#include "main/lsp/requests/move_method.h"
+#include "main/lsp/MoveMethod.h"
 #include "main/lsp/AbstractRenamer.h"
 #include "main/sig_finder/sig_finder.h"
 using namespace std;
