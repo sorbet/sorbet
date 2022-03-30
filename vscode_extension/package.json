@@ -12,7 +12,7 @@
     "url": "https://github.com/sorbet/sorbet"
   },
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.65.0"
   },
   "categories": [
     "Programming Languages"
