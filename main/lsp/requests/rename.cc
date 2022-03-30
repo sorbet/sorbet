@@ -219,7 +219,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
     ShowOperation op(config, ShowOperation::Kind::Rename);
 
     auto result =
-        queryByLoc(config, typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
+        LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

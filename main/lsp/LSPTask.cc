@@ -272,7 +272,7 @@ vector<unique_ptr<Location>>
 LSPTask::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                           vector<unique_ptr<Location>> locations) const {
-    auto queryResponsesFiltered = filterAndDedup(gs, queryResponses);
+    auto queryResponsesFiltered = LSPQuery::filterAndDedup(gs, queryResponses);
     for (auto &q : queryResponsesFiltered) {
         if (auto *send = q->isSend()) {
             addLocIfExists(gs, locations, send->funLoc);
@@ -287,7 +287,7 @@ vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
-        auto run2 = queryBySymbol(config, typechecker, symbol);
+        auto run2 = LSPQuery::bySymbol(config, typechecker, symbol);
         absl::c_move(run2.responses, back_inserter(priorRefs));
     }
     return move(priorRefs);
@@ -297,7 +297,7 @@ vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref, core::SymbolRef symbol,
                                      vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists() && fref.exists()) {
-        auto run2 = queryBySymbolInFiles(config, typechecker, symbol, {fref});
+        auto run2 = LSPQuery::bySymbolInFiles(config, typechecker, symbol, {fref});
         for (auto &resp : run2.responses) {
             // Ignore results in other files (which may have been picked up for typechecking purposes)
             if (resp->getLoc().file() == fref) {

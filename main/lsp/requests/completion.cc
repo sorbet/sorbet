@@ -1160,7 +1160,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         response->result = std::move(emptyResult);
         return response;
     }
-    auto result = queryByLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
+    auto result = LSPQuery::byLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
         // An error happened while setting up the query.

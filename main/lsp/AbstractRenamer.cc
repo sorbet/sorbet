@@ -142,7 +142,7 @@ void AbstractRenamer::getRenameEdits(LSPTypecheckerInterface &typechecker, core:
 
     auto symbolQueue = getQueue();
     for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
-        auto queryResult = queryBySymbol(config, typechecker, sym);
+        auto queryResult = LSPQuery::bySymbol(config, typechecker, sym);
         if (queryResult.error) {
             return;
         }
@@ -150,7 +150,7 @@ void AbstractRenamer::getRenameEdits(LSPTypecheckerInterface &typechecker, core:
         // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
         // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
         // expression.
-        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
+        for (auto &response : LSPQuery::filterAndDedup(gs, queryResult.responses)) {
             auto loc = response->getLoc();
             if (loc.file().data(gs).isPayload()) {
                 // We don't support renaming things in payload files.

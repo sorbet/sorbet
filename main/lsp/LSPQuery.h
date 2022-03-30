@@ -5,16 +5,20 @@
 
 namespace sorbet::realmain::lsp {
 
-std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+class LSPQuery {
+    public:
+        static std::vector<std::unique_ptr<core::lsp::QueryResponse>>
 filterAndDedup(const core::GlobalState &gs,
                const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
-LSPQueryResult queryByLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, std::string_view uri,
+static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, std::string_view uri,
                           const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped = true);
-LSPQueryResult queryBySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
                                     core::SymbolRef symbol, std::vector<core::FileRef> frefs);
-LSPQueryResult queryBySymbol(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
                              core::SymbolRef symbol);
+
+};
 
 } // namespace sorbet::realmain::lsp
 

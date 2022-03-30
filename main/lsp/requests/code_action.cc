@@ -126,7 +126,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
     }
 
     if (config.opts.lspMoveMethodEnabled) {
-        auto queryResult = queryByLoc(config, typechecker, params->textDocument->uri, *params->range->start,
+        auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
                                       LSPMethod::TextDocumentCodeAction, false);
 
         // Generate "Move method" code actions only for class method definitions
