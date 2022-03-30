@@ -35,6 +35,16 @@ namespace {
     return true;
 }
 
+void flattenAndType(vector<TypePtr> &results, const AndType &type) {
+    typecase(
+        type.left, [&results](const AndType &type) { flattenAndType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+
+    typecase(
+        type.right, [&results](const AndType &type) { flattenAndType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+}
+
 void flattenOrType(vector<TypePtr> &results, const OrType &type) {
     typecase(
         type.left, [&results](const OrType &type) { flattenOrType(results, type); },
@@ -44,6 +54,45 @@ void flattenOrType(vector<TypePtr> &results, const OrType &type) {
         type.right, [&results](const OrType &type) { flattenOrType(results, type); },
         [&results](const TypePtr &def) { results.emplace_back(def); });
 }
+
+void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const OrType &composite, const TypePtr &expected) {
+    vector<TypePtr> parts;
+    flattenOrType(parts, composite);
+
+    const auto numParts = parts.size();
+    auto it = std::remove_if(parts.begin(), parts.end(),
+                             [&](auto &part) -> bool { return core::Types::isSubType(gs, part, expected); });
+    parts.erase(it, parts.end());
+
+    // All the types are not subtypes, maybe the user doesn't need any help here?
+    if (parts.size() == numParts) {
+        return;
+    }
+
+    for (auto &part : parts) {
+        e.addErrorNote("`{}` is not a subtype of `{}`", part.show(gs), expected.show(gs));
+    }
+}
+
+void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const TypePtr &got, const AndType &expected) {
+    vector<TypePtr> parts;
+    flattenAndType(parts, expected);
+
+    const auto numParts = parts.size();
+    auto it = std::remove_if(parts.begin(), parts.end(),
+                             [&](auto &part) -> bool { return core::Types::isSubType(gs, got, part); });
+    parts.erase(it, parts.end());
+
+    // All the types are not subtypes, maybe the user doesn't need any help here?
+    if (parts.size() == numParts) {
+        return;
+    }
+
+    for (auto &part : parts) {
+        e.addErrorNote("`{}` is not a subtype of `{}`", got.show(gs), part.show(gs));
+    }
+}
+
 } // namespace
 
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
@@ -91,15 +140,16 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
         // the user exactly which ones are incorrect.
         //
         // TODO: should we just limit this to `T.class_of`-style types?
-        vector<TypePtr> parts;
-        flattenOrType(parts, cast_type_nonnull<OrType>(innerGot));
-        auto it = std::remove_if(parts.begin(), parts.end(),
-                                 [&](auto &part) -> bool { return core::Types::isSubType(gs, part, innerExpected); });
-        parts.erase(it, parts.end());
+        explainCompositeSubtypingFailure(gs, e, cast_type_nonnull<OrType>(innerGot), innerExpected);
+        return;
+    }
 
-        for (auto &part : parts) {
-            e.addErrorNote("`{}` is not a subtype of `{}`", part.show(gs), innerExpected.show(gs));
-        }
+    if (isa_type<OrType>(got)) {
+        explainCompositeSubtypingFailure(gs, e, cast_type_nonnull<OrType>(got), expected);
+        return;
+    }
+    if (isa_type<AndType>(expected)) {
+        explainCompositeSubtypingFailure(gs, e, got, cast_type_nonnull<AndType>(expected));
         return;
     }
 
