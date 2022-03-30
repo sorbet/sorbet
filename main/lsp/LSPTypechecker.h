@@ -59,6 +59,10 @@ class LSPTypechecker final {
 
     std::shared_ptr<ErrorReporter> errorReporter;
 
+    /** Used in tests to force the slow path to block just after cancellation state has been set. */
+    bool slowPathBlocked ABSL_GUARDED_BY(slowPathBlockedMutex) = false;
+    absl::Mutex slowPathBlockedMutex;
+
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
     bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
@@ -139,6 +143,12 @@ public:
      * Tries to run the function on the stale undo state, acquiring a lock.
      */
     bool tryRunOnStaleState(std::function<void(UndoState &)> func);
+
+    /**
+     * (For tests only) Set a flag that forces the slow path to block indefinitely after saving undo state. Setting
+     * this flag to `false` will immediately unblock any currently blocked slow paths.
+     */
+    void setSlowPathBlocked(bool blocked);
 };
 
 /**

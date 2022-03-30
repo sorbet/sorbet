@@ -450,6 +450,13 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             return;
         }
 
+        // Test-only hook: Stall for as long as `slowPathBlocked` is set.
+        {
+            absl::MutexLock lck(&slowPathBlockedMutex);
+            slowPathBlockedMutex.Await(absl::Condition(
+                +[](bool *slowPathBlocked) -> bool { return !*slowPathBlocked; }, &slowPathBlocked));
+        }
+
         ENFORCE(gs->lspQuery.isEmpty());
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
@@ -686,6 +693,11 @@ bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
         func(*cancellationUndoState);
         return true;
     }
+}
+
+void LSPTypechecker::setSlowPathBlocked(bool blocked) {
+    absl::MutexLock lck(&slowPathBlockedMutex);
+    slowPathBlocked = blocked;
 }
 
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)

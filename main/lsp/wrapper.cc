@@ -189,6 +189,10 @@ int LSPWrapper::getTypecheckCount() {
     return lspLoop->getTypecheckCount();
 }
 
+void LSPWrapper::setSlowPathBlocked(bool blocked) {
+    lspLoop->setSlowPathBlocked(blocked);
+}
+
 const LSPConfiguration &LSPWrapper::config() const {
     return *config_;
 }
