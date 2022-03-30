@@ -130,6 +130,111 @@ MethodBuilder enterMethod(GlobalState &gs, ClassOrModuleRef klass, NameRef name)
     return MethodBuilder{gs, gs.enterMethodSymbol(Loc::none(), klass, name)};
 }
 
+struct ParentLinearizationInformation {
+    const InlinedVector<core::ClassOrModuleRef, 4> &mixins;
+    core::ClassOrModuleRef superClass;
+    core::ClassOrModuleRef klass;
+    InlinedVector<core::ClassOrModuleRef, 4> fullLinearizationSlow(core::GlobalState &gs);
+};
+
+int maybeAddMixin(core::GlobalState &gs, core::ClassOrModuleRef forSym,
+                  InlinedVector<core::ClassOrModuleRef, 4> &mixinList, core::ClassOrModuleRef mixin,
+                  core::ClassOrModuleRef parent, int pos) {
+    if (forSym == mixin) {
+        Exception::raise("Loop in mixins");
+    }
+    if (parent.data(gs)->derivesFrom(gs, mixin)) {
+        return pos;
+    }
+    auto fnd = find(mixinList.begin(), mixinList.end(), mixin);
+    if (fnd != mixinList.end()) {
+        auto newPos = fnd - mixinList.begin();
+        if (newPos >= pos) {
+            return newPos + 1;
+        }
+        return pos;
+    } else {
+        mixinList.insert(mixinList.begin() + pos, mixin);
+        return pos + 1;
+    }
+}
+
+// ** This implements Dmitry's understanding of Ruby linerarization with an optimization that common
+// tails of class linearization aren't copied around.
+// In order to obtain Ruby-side ancestors, one would need to walk superclass chain and concatenate `mixins`.
+// The algorithm is harder to explain than to code, so just follow code & tests if `testdata/resolver/linearization`
+ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::ClassOrModuleRef ofClass) {
+    ENFORCE_NO_TIMER(ofClass.exists());
+    auto data = ofClass.data(gs);
+    if (!data->isClassOrModuleLinearizationComputed()) {
+        if (data->superClass().exists()) {
+            computeClassLinearization(gs, data->superClass());
+        }
+        InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
+        InlinedVector<core::ClassOrModuleRef, 4> newMixins;
+        for (auto mixin : currentMixins) {
+            ENFORCE(mixin != core::Symbols::PlaceholderMixin(), "Resolver failed to replace all placeholders");
+            if (mixin == data->superClass()) {
+                continue;
+            }
+            if (mixin.data(gs)->superClass() == core::Symbols::StubSuperClass() ||
+                mixin.data(gs)->superClass() == core::Symbols::StubModule()) {
+                newMixins.emplace_back(mixin);
+                continue;
+            }
+            ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
+
+            if (!mixin.data(gs)->isClassOrModuleModule()) {
+                // insert all transitive parents of class to bring methods back.
+                auto allMixins = mixinLinearization.fullLinearizationSlow(gs);
+                newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
+            } else {
+                int pos = 0;
+                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass(), pos);
+                for (auto &mixinLinearizationComponent : mixinLinearization.mixins) {
+                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data->superClass(), pos);
+                }
+            }
+        }
+        data->mixins() = std::move(newMixins);
+        data->setClassOrModuleLinearizationComputed();
+        if (debug_mode) {
+            for (auto oldMixin : currentMixins) {
+                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
+                        ofClass.showFullName(gs), oldMixin.showFullName(gs));
+            }
+        }
+    }
+    ENFORCE_NO_TIMER(data->isClassOrModuleLinearizationComputed());
+    return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
+}
+
+void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationInformation &info,
+                               InlinedVector<core::ClassOrModuleRef, 4> &acc) {
+    ENFORCE(!absl::c_linear_search(acc, info.klass));
+    acc.emplace_back(info.klass);
+
+    for (auto m : info.mixins) {
+        if (!absl::c_linear_search(acc, m)) {
+            if (m.data(gs)->isClassOrModuleModule()) {
+                acc.emplace_back(m);
+            } else {
+                fullLinearizationSlowImpl(gs, computeClassLinearization(gs, m), acc);
+            }
+        }
+    }
+    if (info.superClass.exists()) {
+        if (!absl::c_linear_search(acc, info.superClass)) {
+            fullLinearizationSlowImpl(gs, computeClassLinearization(gs, info.superClass), acc);
+        }
+    }
+};
+InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLinearizationSlow(core::GlobalState &gs) {
+    InlinedVector<core::ClassOrModuleRef, 4> res;
+    fullLinearizationSlowImpl(gs, *this, res);
+    return res;
+}
+
 } // namespace
 
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, uint32_t superclass, bool isModule) {
@@ -770,6 +875,16 @@ void GlobalState::installIntrinsics() {
             auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
             blkArg.flags.isBlock = true;
         }
+    }
+}
+
+void GlobalState::computeLinearization() {
+    Timer timer(this->tracer(), "resolver.compute_linearization");
+
+    // TODO: this does not support `prepend`
+    for (int i = 1; i < this->classAndModulesUsed(); ++i) {
+        const auto &ref = core::ClassOrModuleRef(*this, i);
+        computeClassLinearization(*this, ref);
     }
 }
 

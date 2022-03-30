@@ -86,6 +86,7 @@ public:
 
     void initEmpty();
     void installIntrinsics();
+    void computeLinearization();
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
