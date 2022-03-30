@@ -3000,14 +3000,6 @@ module Socket::Constants
   IPV6_RECVPATHMTU = ::T.let(nil, ::T.untyped)
 end
 
-class SortedSet
-  def initialize(*args, &block); end
-end
-
-class SortedSet
-  def self.setup(); end
-end
-
 class String
   include ::JSON::Ext::Generator::GeneratorMethods::String
   def shellescape(); end
@@ -3017,6 +3009,11 @@ end
 
 class String
   extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
+end
+
+class StringIO
+  def set_encoding_by_bom(); end
+  VERSION = ::T.let(nil, ::T.untyped)
 end
 
 class Struct

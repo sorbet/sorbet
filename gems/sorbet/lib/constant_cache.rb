@@ -22,6 +22,7 @@ class Sorbet::Private::ConstantLookupCache
     '::NIL',
     '::TRUE',
     '::TimeoutError',
+    '::SortedSet',
     'ERB::Compiler::SimpleScanner2',
     'Net::OpenSSL',
     'Object::Bignum',

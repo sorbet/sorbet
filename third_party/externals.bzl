@@ -401,6 +401,14 @@ def register_sorbet_dependencies():
         patch_args = ["-p1"],
     )
 
+    http_archive(
+        name = "sorbet_ruby_3_0",
+        urls = _ruby_urls("3.0/ruby-3.0.3.tar.gz"),
+        sha256 = "3586861cb2df56970287f0fd83f274bd92058872d830d15570b36def7f1a92ac",
+        strip_prefix = "ruby-3.0.3",
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
+    )
+
     raze_fetch_remote_crates()
 
 def _github_public_urls(path):
