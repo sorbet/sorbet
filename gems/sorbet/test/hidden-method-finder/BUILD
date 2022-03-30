@@ -12,6 +12,7 @@ sh_binary(
         "//main:sorbet",
         "@sorbet_ruby_2_6//:ruby",
         "@sorbet_ruby_2_7//:ruby",
+        "@sorbet_ruby_3_0//:ruby",
     ],
     deps = [
         ":logging",
@@ -35,10 +36,19 @@ hidden_methods_tests(
     ],
 )
 
+hidden_methods_tests(
+    ruby = "sorbet_ruby_3_0",
+    tests = [
+        "simple",
+        "thorough",
+    ],
+)
+
 test_suite(
     name = "hidden-method-finder",
     tests = [
         ":hidden-methods-sorbet_ruby_2_6",
         ":hidden-methods-sorbet_ruby_2_7",
+        ":hidden-methods-sorbet_ruby_3_0",
     ],
 )

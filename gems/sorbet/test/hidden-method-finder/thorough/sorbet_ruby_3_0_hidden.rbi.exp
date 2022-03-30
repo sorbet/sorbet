@@ -5,6 +5,8 @@
 
 class Array
   include ::JSON::Ext::Generator::GeneratorMethods::Array
+  def deconstruct(); end
+
   def shelljoin(); end
 
   def to_h(); end
@@ -18,12 +20,16 @@ BasicObject::BasicObject = BasicObject
 
 class BigDecimal
   def clone(); end
+
+  def n_significant_digits(); end
+
+  def precision(); end
   EXCEPTION_NaN = ::T.let(nil, ::T.untyped)
   VERSION = ::T.let(nil, ::T.untyped)
 end
 
 class BigDecimal
-  def self.new(*args, **kwargs); end
+  def self.interpret_loosely(arg); end
 end
 
 class Binding
@@ -1876,12 +1882,32 @@ module Bundler
   def self.unbundled_system(*args); end
 end
 
-class Class
-  def json_creatable?(); end
+class C1
+  def m_three(); end
 end
 
-class Delegator
-  RUBYGEMS_ACTIVATION_MONITOR = ::T.let(nil, ::T.untyped)
+class C2
+  def self.m_four(); end
+end
+
+class C3
+  X = ::T.let(nil, ::T.untyped)
+end
+
+class C4
+  def m_five(); end
+
+  def m_six(); end
+end
+
+class C5
+  def self.m_eight(); end
+
+  def self.m_seven(); end
+end
+
+class Class
+  def json_creatable?(); end
 end
 
 class DidYouMean::ClassNameChecker
@@ -1938,6 +1964,8 @@ class DidYouMean::MethodNameChecker
 
   def method_names(); end
 
+  def names_to_exclude(); end
+
   def receiver(); end
   RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
 end
@@ -1953,6 +1981,45 @@ class DidYouMean::PlainFormatter
 end
 
 class DidYouMean::PlainFormatter
+end
+
+class DidYouMean::RequirePathChecker
+  def corrections(); end
+
+  def initialize(exception); end
+
+  def path(); end
+end
+
+class DidYouMean::RequirePathChecker
+  def self.requireables(); end
+end
+
+class DidYouMean::TreeSpellChecker
+  def augment(); end
+
+  def correct(input); end
+
+  def dictionary(); end
+
+  def dictionary_without_leaves(); end
+
+  def dimensions(); end
+
+  def find_leaves(path); end
+
+  def initialize(dictionary:, separator: T.unsafe(nil), augment: T.unsafe(nil)); end
+
+  def plausible_dimensions(input); end
+
+  def possible_paths(states); end
+
+  def separator(); end
+
+  def tree_depth(); end
+end
+
+class DidYouMean::TreeSpellChecker
 end
 
 class DidYouMean::VariableNameChecker
@@ -1973,6 +2040,8 @@ class DidYouMean::VariableNameChecker
 end
 
 module DidYouMean
+  def self.correct_error(error_class, spell_checker); end
+
   def self.formatter(); end
 
   def self.formatter=(formatter); end
@@ -1982,6 +2051,10 @@ class Dir
   def children(); end
 
   def each_child(); end
+end
+
+module Dir::Tmpname
+  UNUSABLE_CHARS = ::T.let(nil, ::T.untyped)
 end
 
 class Dir
@@ -1996,6 +2069,9 @@ end
 
 class Encoding
   def _dump(*arg); end
+  CESU_8 = ::T.let(nil, ::T.untyped)
+  CP720 = ::T.let(nil, ::T.untyped)
+  IBM720 = ::T.let(nil, ::T.untyped)
 end
 
 class Encoding::Converter
@@ -2045,6 +2121,25 @@ class Enumerator::Generator
   def initialize(*arg); end
 end
 
+class Enumerator::Lazy
+  def eager(); end
+end
+
+class Enumerator::Producer
+  def each(&blk); end
+end
+
+class Enumerator::Producer
+end
+
+class Enumerator::Yielder
+  def to_proc(); end
+end
+
+class Enumerator
+  def self.produce(*arg); end
+end
+
 Errno::ECAPMODE = Errno::NOERROR
 
 Errno::EDOOFUS = Errno::NOERROR
@@ -2052,6 +2147,10 @@ Errno::EDOOFUS = Errno::NOERROR
 Errno::EIPSEC = Errno::NOERROR
 
 Errno::ENOTCAPABLE = Errno::NOERROR
+
+module Etc
+  VERSION = ::T.let(nil, ::T.untyped)
+end
 
 class Etc::Group
   def gid(); end
@@ -2117,7 +2216,29 @@ class FalseClass
   include ::JSON::Ext::Generator::GeneratorMethods::FalseClass
 end
 
+class Fiber
+  def backtrace(*arg); end
+
+  def backtrace_locations(*arg); end
+
+  def blocking?(); end
+
+  def initialize(*arg); end
+end
+
+class Fiber
+  def self.blocking?(); end
+
+  def self.schedule(*arg); end
+
+  def self.scheduler(); end
+
+  def self.set_scheduler(arg); end
+end
+
 class File
+  def self.absolute_path?(arg); end
+
   def self.exists?(arg); end
 end
 
@@ -2170,17 +2291,17 @@ class Float
   include ::JSON::Ext::Generator::GeneratorMethods::Float
 end
 
-class Foo
-  def bar(); end
-
-  def baz(); end
+class FrozenError
+  def receiver(); end
 end
 
 module GC
-  def garbage_collect(*arg); end
+  def garbage_collect(full_mark: T.unsafe(nil), immediate_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 end
 
 module GC
+  def self.latest_compact_info(); end
+
   def self.verify_transient_heap_internal_consistency(); end
 end
 
@@ -2697,6 +2818,13 @@ Gem::Version::Requirement = Gem::Requirement
 
 class Hash
   include ::JSON::Ext::Generator::GeneratorMethods::Hash
+  def deconstruct_keys(arg); end
+end
+
+class Hash
+  def self.ruby2_keywords_hash(arg); end
+
+  def self.ruby2_keywords_hash?(arg); end
 end
 
 class IO
@@ -2706,11 +2834,18 @@ class IO
 
   def ready?(); end
 
+  def set_encoding_by_bom(); end
+
   def wait(*arg); end
+
+  def wait_priority(*arg); end
 
   def wait_readable(*arg); end
 
   def wait_writable(*arg); end
+  PRIORITY = ::T.let(nil, ::T.untyped)
+  READABLE = ::T.let(nil, ::T.untyped)
+  WRITABLE = ::T.let(nil, ::T.untyped)
 end
 
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
@@ -2719,6 +2854,14 @@ IO::EWOULDBLOCKWaitWritable = IO::EAGAINWaitWritable
 
 class Integer
   include ::JSON::Ext::Generator::GeneratorMethods::Integer
+end
+
+class JSON::Ext::Generator::State
+  def escape_slash(); end
+
+  def escape_slash=(escape_slash); end
+
+  def escape_slash?(); end
 end
 
 class JSON::Ext::Generator::State
@@ -2734,6 +2877,16 @@ JSON::Parser = JSON::Ext::Parser
 JSON::State = JSON::Ext::Generator::State
 
 JSON::UnparserError = JSON::GeneratorError
+
+module JSON
+  def self.create_fast_state(); end
+
+  def self.create_pretty_state(); end
+
+  def self.load_file(filespec, opts=T.unsafe(nil)); end
+
+  def self.load_file!(filespec, opts=T.unsafe(nil)); end
+end
 
 module Kernel
   def itself(); end
@@ -2753,18 +2906,42 @@ class KeyError
   include ::DidYouMean::Correctable
 end
 
+class LoadError
+  include ::DidYouMean::Correctable
+end
+
 class Monitor
   def enter(); end
 
   def exit(); end
 
+  def mon_check_owner(); end
+
+  def mon_enter(); end
+
+  def mon_exit(); end
+
+  def mon_locked?(); end
+
+  def mon_owned?(); end
+
+  def mon_synchronize(); end
+
+  def mon_try_enter(); end
+
+  def new_cond(); end
+
+  def synchronize(); end
+
   def try_enter(); end
+
+  def try_mon_enter(); end
+
+  def wait_for_cond(arg, arg1); end
 end
 
 module MonitorMixin
-  def initialize(*args); end
-  EXCEPTION_IMMEDIATE = ::T.let(nil, ::T.untyped)
-  EXCEPTION_NEVER = ::T.let(nil, ::T.untyped)
+  def initialize(*arg, &arg1); end
 end
 
 class MonitorMixin::ConditionVariable
@@ -2777,6 +2954,12 @@ end
 
 class NilClass
   include ::JSON::Ext::Generator::GeneratorMethods::NilClass
+end
+
+class NoMatchingPatternError
+end
+
+class NoMatchingPatternError
 end
 
 class Object
@@ -2800,6 +2983,127 @@ class Object
   TOPLEVEL_BINDING = ::T.let(nil, ::T.untyped)
 end
 
+module OpenSSL::Marshal
+  def _dump(_level); end
+end
+
+module OpenSSL::Marshal
+  def self.included(base); end
+end
+
+class OpenSSL::PKey::PKey
+  def oid(); end
+
+  def private_to_der(*arg); end
+
+  def private_to_pem(*arg); end
+
+  def public_to_der(); end
+
+  def public_to_pem(); end
+end
+
+class OpenStruct
+  def __id__!(); end
+
+  def __send__!(*arg); end
+
+  def class!(); end
+
+  def clone!(freeze: T.unsafe(nil)); end
+
+  def define_singleton_method!(*arg); end
+
+  def delete_field!(name); end
+
+  def dig!(name, *names); end
+
+  def display!(*arg); end
+
+  def dup!(); end
+
+  def each_pair!(); end
+
+  def encode_with(coder); end
+
+  def encode_with!(coder); end
+
+  def enum_for!(*arg); end
+
+  def extend!(*arg); end
+
+  def freeze!(); end
+
+  def hash!(); end
+
+  def init_with(coder); end
+
+  def init_with!(coder); end
+
+  def inspect!(); end
+
+  def instance_eval!(*arg); end
+
+  def instance_exec!(*arg); end
+
+  def instance_variable_get!(arg); end
+
+  def instance_variable_set!(arg, arg1); end
+
+  def instance_variables!(); end
+
+  def itself!(); end
+
+  def marshal_dump!(); end
+
+  def method!(arg); end
+
+  def methods!(*arg); end
+
+  def object_id!(); end
+
+  def private_methods!(*arg); end
+
+  def protected_methods!(*arg); end
+
+  def public_method!(arg); end
+
+  def public_methods!(*arg); end
+
+  def public_send!(*arg); end
+
+  def remove_instance_variable!(arg); end
+
+  def send!(*arg); end
+
+  def singleton_class!(); end
+
+  def singleton_method!(arg); end
+
+  def singleton_methods!(*arg); end
+
+  def taint!(); end
+
+  def tap!(); end
+
+  def then!(); end
+
+  def to_enum!(*arg); end
+
+  def to_h!(&block); end
+
+  def to_s!(); end
+
+  def trust!(); end
+
+  def untaint!(); end
+
+  def untrust!(); end
+
+  def yield_self!(); end
+  VERSION = ::T.let(nil, ::T.untyped)
+end
+
 class Proc
   def <<(arg); end
 
@@ -2808,8 +3112,83 @@ class Proc
   def clone(); end
 end
 
+class Process::Status
+  def self.wait(*arg); end
+end
+
+class Ractor::ClosedError
+end
+
+class Ractor::ClosedError
+end
+
+class Ractor::Error
+end
+
+class Ractor::Error
+end
+
+class Ractor::IsolationError
+end
+
+class Ractor::IsolationError
+end
+
+class Ractor::MovedError
+end
+
+class Ractor::MovedError
+end
+
+class Ractor::MovedObject
+  def !(*arg); end
+
+  def !=(*arg); end
+
+  def ==(*arg); end
+
+  def __id__(*arg); end
+
+  def equal?(*arg); end
+end
+
+class Ractor::MovedObject
+end
+
+class Ractor::RemoteError
+  def ractor(); end
+end
+
+class Ractor::RemoteError
+end
+
+class Ractor::UnsafeError
+end
+
+class Ractor::UnsafeError
+end
+
+class Ractor
+  def self.new(*args, name: T.unsafe(nil), &block); end
+end
+
+class Random::Base
+  include ::Random::Formatter
+  def bytes(arg); end
+
+  def initialize(*arg); end
+
+  def seed(); end
+end
+
+class Random::Base
+  extend ::Random::Formatter
+end
+
 class Random
   def self.bytes(arg); end
+
+  def self.seed(); end
 end
 
 class Range
@@ -2839,10 +3218,6 @@ module RubyVM::MJIT
   def self.resume(); end
 end
 
-class RubyVM
-  def self.resolve_feature_path(arg); end
-end
-
 class Set
   def ==(other); end
 
@@ -2860,10 +3235,6 @@ class Set
 
   def reset(); end
   InspectKey = ::T.let(nil, ::T.untyped)
-end
-
-class SimpleDelegator
-  RUBYGEMS_ACTIVATION_MONITOR = ::T.let(nil, ::T.untyped)
 end
 
 class Socket
@@ -2889,7 +3260,16 @@ class String
   extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
 end
 
+class StringIO
+  def set_encoding_by_bom(); end
+  VERSION = ::T.let(nil, ::T.untyped)
+end
+
 class Struct
+  def deconstruct(); end
+
+  def deconstruct_keys(arg); end
+
   def filter(*arg); end
 end
 
@@ -2897,16 +3277,26 @@ Struct::Group = Etc::Group
 
 Struct::Passwd = Etc::Passwd
 
-Struct::Tms = Process::Tms
+class Symbol
+  def name(); end
+end
+
+class Thread
+  def self.ignore_deadlock(); end
+
+  def self.ignore_deadlock=(ignore_deadlock); end
+end
 
 class TracePoint
-  def __enable(arg, arg1); end
-
   def eval_script(); end
 
   def instruction_sequence(); end
 
   def parameters(); end
+end
+
+class TracePoint
+  def self.new(*events); end
 end
 
 class TrueClass
