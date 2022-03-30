@@ -7,10 +7,10 @@ sh_binary(
 )
 
 protocol_tests([
-  "protocol_test_corpus.cc",
-  "cache_protocol_test_corpus.cc",
-  "multithreaded_protocol_test_corpus.cc",
-  "watchman_test_corpus.cc",
+    "cache_protocol_test_corpus.cc",
+    "multithreaded_protocol_test_corpus.cc",
+    "protocol_test_corpus.cc",
+    "watchman_test_corpus.cc",
 ])
 
 test_suite(
