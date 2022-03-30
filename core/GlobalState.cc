@@ -835,6 +835,7 @@ void GlobalState::initEmpty() {
             Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
 
     installIntrinsics();
+    computeLinearization();
 
     Symbols::top().data(*this)->resultType = Types::top();
     Symbols::bottom().data(*this)->resultType = Types::bottom();
