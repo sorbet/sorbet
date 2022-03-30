@@ -3,7 +3,7 @@ import {
   ProposedFeatures,
   InitializeParams,
   TextDocumentSyncKind,
-} from "vscode-languageserver";
+} from "vscode-languageserver/node";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
