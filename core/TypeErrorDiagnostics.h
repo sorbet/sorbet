@@ -17,9 +17,9 @@ public:
     //
     // Statefully accumulates the autocorrect directly onto the provided `ErrorBuilder`.
     static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
-                                 TypePtr expectedType, TypePtr actualType);
+                                 const TypePtr &expectedType, const TypePtr &actualType);
 
-    static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr expected, const TypePtr got);
+    static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected, const TypePtr &got);
 };
 
 } // namespace sorbet::core
