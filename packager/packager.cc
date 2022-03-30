@@ -145,8 +145,8 @@ struct Import {
 };
 
 enum class ExportType {
-    Public,
-    PrivateTest,
+    Public = 0,
+    PrivateTest = 1,
 };
 
 struct Export {
@@ -157,6 +157,12 @@ struct Export {
 
     const vector<core::NameRef> &parts() const {
         return fqn.parts;
+    }
+
+    static bool lexCmp(const Export &a, const Export &b) {
+        // Lex sort by name. If they're equal ensure the `export` (type == Public) is less than
+        // `export_for_test` (type == PrivateTest)
+        return core::packages::PackageInfo::lexCmp(a.parts(), b.parts()) || (a.type < b.type && a.parts() == b.parts());
     }
 };
 
@@ -1141,23 +1147,39 @@ struct PackageInfoFinder {
         if (exported.empty()) {
             return;
         }
-        fast_sort(exported, [](const auto &a, const auto &b) -> bool {
-            return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
-        });
-        for (auto it = exported.begin(); it != exported.end();) {
+
+        fast_sort(exported, Export::lexCmp);
+        vector<size_t> dupInds;
+        for (auto it = exported.begin(); it != exported.end(); ++it) {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (!allowedExportPrefix(ctx, *it, *longer)) {
-                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                if (allowedExportPrefix(ctx, *it, *longer)) {
+                    continue;
+                }
+
+                if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                    if (it->parts() == longer->parts()) {
+                        e.setHeader("Duplicate export of `{}`",
+                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    } else {
                         e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
                                     fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                        e.addErrorLine(it->fqn.loc, "Prefix exported here");
                     }
+                    e.addErrorLine(it->fqn.loc, "Prefix exported here");
                 }
+
+                dupInds.emplace_back(distance(exported.begin(), longer));
             }
-            it = longer;
+        }
+
+        // Remove duplicates we found (in reverse order)
+        fast_sort(dupInds);
+        dupInds.erase(unique(dupInds.begin(), dupInds.end()), dupInds.end());
+        for (auto indIt = dupInds.rbegin(); indIt != dupInds.rend(); ++indIt) {
+            // Yes this is quadratic, but this only happens in an error condition.
+            exported.erase(exported.begin() + *indIt);
         }
 
         ENFORCE(info->exports_.empty());
