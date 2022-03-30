@@ -1607,23 +1607,22 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
                 // everything else.
                 long retries = 0;
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(),
-                                    [&gs, &retries](ResolveItems<AncestorResolutionItem> &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        const auto origSize = job.items.size();
-                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                                [&](AncestorResolutionItem &item) -> bool {
-                                                                    auto resolved =
-                                                                        resolveAncestorJob(ctx, item, false);
-                                                                    if (resolved) {
-                                                                        tryRegisterSealedSubclass(ctx, item);
-                                                                    }
-                                                                    return resolved;
-                                                                });
-                                        job.items.erase(fileIt, job.items.end());
-                                        retries += origSize - job.items.size();
-                                        return job.items.empty();
-                                    });
+                auto f = [&gs, &retries](ResolveItems<AncestorResolutionItem> &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    const auto origSize = job.items.size();
+                    auto g = [&](AncestorResolutionItem &item) -> bool {
+                        auto resolved = resolveAncestorJob(ctx, item, false);
+                        if (resolved) {
+                            tryRegisterSealedSubclass(ctx, item);
+                        }
+                        return resolved;
+                    };
+                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                    job.items.erase(fileIt, job.items.end());
+                    retries += origSize - job.items.size();
+                    return job.items.empty();
+                };
+                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), std::move(f));
                 todoAncestors.erase(it, todoAncestors.end());
                 categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
                 progress = retries > 0;
@@ -1641,18 +1640,18 @@ public:
                 // there would be no point in running the todoClassAliases step before todo
 
                 long retries = 0;
-                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(),
-                                    [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        auto origSize = job.items.size();
-                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                                [&](ClassAliasResolutionItem &item) -> bool {
-                                                                    return resolveClassAliasJob(ctx, item);
-                                                                });
-                                        job.items.erase(fileIt, job.items.end());
-                                        retries += origSize - job.items.size();
-                                        return job.items.empty();
-                                    });
+                auto f = [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    auto origSize = job.items.size();
+                    auto g = [&](ClassAliasResolutionItem &item) -> bool {
+                        return resolveClassAliasJob(ctx, item);
+                    };
+                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                    job.items.erase(fileIt, job.items.end());
+                    retries += origSize - job.items.size();
+                    return job.items.empty();
+                };
+                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(), std::move(f));
                 todoClassAliases.erase(it, todoClassAliases.end());
                 categoryCounterAdd("resolve.constants.aliases", "retry", retries);
                 progress = progress || retries > 0;
@@ -1660,18 +1659,16 @@ public:
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
                 long retries = 0;
-                auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
-                                    [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        auto origSize = job.items.size();
-                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                                [&](TypeAliasResolutionItem &item) -> bool {
-                                                                    return resolveTypeAliasJob(ctx, item);
-                                                                });
-                                        job.items.erase(fileIt, job.items.end());
-                                        retries += origSize - job.items.size();
-                                        return job.items.empty();
-                                    });
+                auto f = [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    auto origSize = job.items.size();
+                    auto g = [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); };
+                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                    job.items.erase(fileIt, job.items.end());
+                    retries += origSize - job.items.size();
+                    return job.items.empty();
+                };
+                auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(), std::move(f));
                 todoTypeAliases.erase(it, todoTypeAliases.end());
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
