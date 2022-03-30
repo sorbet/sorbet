@@ -84,6 +84,17 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
                 clientHoverMarkupKind = getPreferredMarkupKind(contentFormat);
             }
         }
+        if (textDocument->codeAction) {
+            auto &codeAction = *textDocument->codeAction;
+            if (codeAction->dataSupport) {
+                clientCodeActionDataSupport = codeAction->dataSupport.value_or(false);
+            }
+
+            if (codeAction->resolveSupport) {
+                auto &properties = (*codeAction->resolveSupport)->properties;
+                clientCodeActionResolveEditSupport = std::count(properties.begin(), properties.end(), "edit") > 0;
+            }
+        }
     }
 
     if (params.initializationOptions) {
