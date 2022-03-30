@@ -1,5 +1,9 @@
 #include "core/TypeErrorDiagnostics.h"
 
+#include "common/typecase.h"
+
+#include <algorithm>
+
 using namespace std;
 
 namespace sorbet::core {
@@ -30,6 +34,16 @@ namespace {
         gotStr, expectedStr, expectedStr, gotStr);
     return true;
 }
+
+void flattenOrType(vector<TypePtr> &results, const OrType &type) {
+    typecase(
+        type.left, [&results](const OrType &type) { flattenOrType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+
+    typecase(
+        type.right, [&results](const OrType &type) { flattenOrType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+}
 } // namespace
 
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
@@ -49,6 +63,45 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
             "    If you really mean to use types as values, use `{}` to hide the type syntax from the type checker.\n"
             "    Otherwise, you're likely using the type system in a way it wasn't meant to be used.",
             "T::Utils.coerce");
+        return;
+    }
+
+    if (isa_type<AppliedType>(got) && isa_type<AppliedType>(expected)) {
+        auto &gotRef = cast_type_nonnull<AppliedType>(got);
+        auto &expectedRef = cast_type_nonnull<AppliedType>(expected);
+        if (gotRef.klass != expectedRef.klass) {
+            return;
+        }
+        // We could extend this to multiple args, but the common cases are `T::Set`
+        // and `T::Array`, so go with the simple code for now.
+        if (gotRef.targs.size() != expectedRef.targs.size() ||
+            gotRef.targs.size() != 1) {
+            return;
+        }
+
+        auto &innerGot = gotRef.targs[0];
+        auto &innerExpected = expectedRef.targs[0];
+
+        if (!isa_type<OrType>(innerGot)) {
+            return;
+        }
+
+        // The idea here is that we got Container[T.any(...)] and we expected
+        // Container[$TYPE].  We suspect the `T.any(...)` actually has a number
+        // of components, but only a few of them may be wrong; let's try to show
+        // the user exactly which ones are incorrect.
+        //
+        // TODO: should we just limit this to `T.class_of`-style types?
+        vector<TypePtr> parts;
+        flattenOrType(parts, cast_type_nonnull<OrType>(innerGot));
+        auto it = std::remove_if(parts.begin(), parts.end(), [&](auto &part) -> bool {
+                return core::Types::isSubType(gs, part, innerExpected);
+            });
+        parts.erase(it, parts.end());
+
+        for (auto &part : parts) {
+            e.addErrorNote("`{}` is not a subtype of `{}`", part.show(gs), innerExpected.show(gs));
+        }
         return;
     }
 
