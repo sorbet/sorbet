@@ -134,4 +134,34 @@ void AbstractRenamer::addDispatchRelatedMethods(const core::GlobalState &gs, con
     }
 }
 
+void AbstractRenamer::getRenameEdits(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol, string newName) {
+    const core::GlobalState &gs = typechecker.state();
+    auto originalName = symbol.name(gs).show(gs);
+
+    addSymbol(symbol);
+
+    auto symbolQueue = getQueue();
+    for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
+        auto queryResult = queryBySymbol(config, typechecker, sym);
+        if (queryResult.error) {
+            return;
+        }
+
+        // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
+        // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
+        // expression.
+        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
+            auto loc = response->getLoc();
+            if (loc.file().data(gs).isPayload()) {
+                // We don't support renaming things in payload files.
+                return;
+            }
+
+            // We may process the same send multiple times in case of union types, but this is ok because the renamer
+            // de-duplicates edits at the same location
+            rename(response, sym);
+        }
+    }
+}
+
 } // namespace sorbet::realmain::lsp

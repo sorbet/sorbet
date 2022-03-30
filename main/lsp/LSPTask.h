@@ -68,9 +68,6 @@ protected:
                                   core::SymbolRef fallback,
                                   std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
-    void getRenameEdits(LSPTypecheckerInterface &typechecker, std::shared_ptr<AbstractRenamer> renamer,
-                        core::SymbolRef symbol, std::string newName);
-
     LSPTask(const LSPConfiguration &config, LSPMethod method);
 
 public:
