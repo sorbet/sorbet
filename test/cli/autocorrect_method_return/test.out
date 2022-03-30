@@ -36,6 +36,8 @@ autocorrect_method_return.rb:22: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:20:
     20 |    res = x.name
                   ^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:22: Replaced with `T.must(res)`
     22 |  return res
@@ -64,6 +66,8 @@ autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:34:
     34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:34: Replaced with `T.must(T.let("", T.nilable(String)))`
     34 |  T.let("", T.nilable(String))
@@ -80,6 +84,8 @@ autocorrect_method_return.rb:39: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:38:
     38 |def return_arg(x)
                        ^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:39: Replaced with `T.must(x)`
     39 |  x
@@ -99,6 +105,8 @@ autocorrect_method_return.rb:47: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:43: Possibly uninitialized (`NilClass`) in:
     43 |def return_uninitialized(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:47: Replaced with `T.must(a)`
     47 |  a
@@ -118,6 +126,8 @@ autocorrect_method_return.rb:55: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:51: Possibly uninitialized (`NilClass`) in:
     51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
 Errors: 8
 
 --------------------------------------------------------------------------
@@ -226,6 +236,8 @@ autocorrect_method_return.rb:22: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:20:
     20 |    res = x.name
                   ^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:22: Replaced with `T.unsafe(res)`
     22 |  return res
@@ -254,6 +266,8 @@ autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:34:
     34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:34: Replaced with `T.unsafe(T.let("", T.nilable(String)))`
     34 |  T.let("", T.nilable(String))
@@ -270,6 +284,8 @@ autocorrect_method_return.rb:39: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:38:
     38 |def return_arg(x)
                        ^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:39: Replaced with `T.unsafe(x)`
     39 |  x
@@ -289,6 +305,8 @@ autocorrect_method_return.rb:47: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:43: Possibly uninitialized (`NilClass`) in:
     43 |def return_uninitialized(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_method_return.rb:47: Replaced with `T.unsafe(a)`
     47 |  a
@@ -308,6 +326,8 @@ autocorrect_method_return.rb:55: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:51: Possibly uninitialized (`NilClass`) in:
     51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
 Errors: 8
 
 --------------------------------------------------------------------------

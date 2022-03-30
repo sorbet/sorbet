@@ -37,6 +37,8 @@ autocorrect.rb:6: Expected `String` but found `T.nilable(String)` for argument `
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect.rb:6: Replaced with `T.must(foo)`
      6 |"hi" + foo
@@ -53,6 +55,8 @@ autocorrect.rb:10: Expected `String` but found `T.nilable(String)` for argument 
     autocorrect.rb:10:
     10 |int(a: foo)
                ^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect.rb:10: Replaced with `T.must(foo)`
     10 |int(a: foo)
@@ -257,6 +261,8 @@ autocorrect.rb:23: Expected `T.nilable(Integer)` but found `T.nilable(Numeric)` 
     autocorrect.rb:23:
     23 |foo(a: a)
                ^
+  Note:
+    `Numeric` is not a subtype of `T.nilable(Integer)`
 
 autocorrect.rb:26: Expected `Integer` but found `NilClass` for argument `arg1` https://srb.help/7002
     26 |a[:a] = nil

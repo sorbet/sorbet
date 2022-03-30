@@ -12,6 +12,8 @@ test/cli/uninitialized-explanation/uninitialized.rb:15: Expected `Integer` but f
     test/cli/uninitialized-explanation/uninitialized.rb:8: Possibly uninitialized (`NilClass`) in:
      8 |def uninitialized_loc_is_decl_loc
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `Integer`
   Autocorrect: Use `-a` to autocorrect
     test/cli/uninitialized-explanation/uninitialized.rb:15: Replace with `T.must(x)`
     15 |  takes_int(x)
