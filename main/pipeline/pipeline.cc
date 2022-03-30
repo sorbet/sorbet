@@ -461,6 +461,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
     vector<ast::ParsedFile> ret;
+    size_t totalNumTrees = 0;
 
     {
         Timer timeit(cgs.tracer(), "mergeGlobalStates");
@@ -471,6 +472,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                 counterConsume(move(threadResult.counters));
                 auto numTrees = threadResult.res.trees.size();
                 batchq->push(IndexSubstitutionJob{cgs, std::move(threadResult.res)}, numTrees);
+                totalNumTrees += numTrees;
             }
         }
     }
@@ -499,6 +501,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
             }
         });
 
+        ret.reserve(totalNumTrees);
         vector<ast::ParsedFile> trees;
         for (auto result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer()); !result.done();
              result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
