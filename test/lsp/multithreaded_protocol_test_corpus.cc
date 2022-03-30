@@ -760,7 +760,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
 
-    // Wait for typechecking to begin.
+    // Set slow-path blocking, and wait for typechecking to begin.
+    setSlowPathBlocked(true);
     {
         auto status = getTypecheckRunStatus(*readAsync());
         REQUIRE(status.has_value());
@@ -779,7 +780,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
         CHECK(absl::StrContains(hoverText->contents->value, "note: information may be stale"));
     }
 
-    // Wait for typechecking to finish.
+    // Unblock slow-path, and wait for typechecking to finish.
+    setSlowPathBlocked(false);
     {
         auto status = getTypecheckRunStatus(*readAsync());
         REQUIRE(status.has_value());
@@ -850,7 +852,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
 
-    // Wait for typechecking to begin.
+    // Set slow-path blocking, and wait for typechecking to begin.
+    setSlowPathBlocked(true);
     {
         auto status = getTypecheckRunStatus(*readAsync());
         REQUIRE(status.has_value());
@@ -884,7 +887,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
         REQUIRE(holds_alternative<JSONNullObject>(*hoverResult));
     }
 
-    // Wait for typechecking to finish.
+    // Unblock slow-path, and wait for typechecking to finish.
+    setSlowPathBlocked(false);
     {
         auto status = getTypecheckRunStatus(*readAsync());
         REQUIRE(status.has_value());
