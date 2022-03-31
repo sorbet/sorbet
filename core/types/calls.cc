@@ -979,24 +979,29 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            bool hasKwSplatParam = false;
-            bool hasKwParam = false;
-            const ArgInfo *firstKwParam;
-            const ArgInfo *kwSplatParam;
+            const ArgInfo *kwSplatParam = nullptr;
+            auto hasRequiredKwParam = false;
+            auto kwParams = vector<const ArgInfo *>{};
             for (auto &param : data->arguments) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
+                    ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
-                    hasKwSplatParam = true;
                 } else if (param.flags.isKeyword && !param.flags.isRepeated) {
-                    if (!hasKwParam) {
-                        firstKwParam = &param;
-                    }
-                    hasKwParam = true;
+                    kwParams.emplace_back(&param);
+                    hasRequiredKwParam |= !param.flags.isDefault;
                 }
             }
 
+            auto hasKwSplatParam = kwSplatParam != nullptr;
+            auto hasKwParam = !kwParams.empty();
+
             auto &kwSplatArg = *aend;
             auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+            auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
+
+            auto hashType = cast_type_nonnull<AppliedType>(kwSplatType);
+            auto kwSplatKeyType = hashType.targs[0];
+            auto kwSplatValueType = hashType.targs[1];
 
             if (hasKwSplatParam && !hasKwParam) {
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, kwSplatTPO, *kwSplatParam,
@@ -1004,14 +1009,44 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                           args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
+            } else if (hasKwParam) {
+                // TODO(jez) share the same autocorrect for everything
+                if (hasRequiredKwParam) {
+                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                        e.setHeader("TODO(jez) can't splat hash when method has required kwparams");
+                        result.main.errors.emplace_back(e.build());
+                    }
+                } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
+                                                            UntypedMode::AlwaysCompatible)) {
+                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                        e.setHeader(
+                            "TODO(jez) kwsplat hash key must be symbol to splat into method taking optional kwparams");
+                        result.main.errors.emplace_back(e.build());
+                    }
+                } else {
+                    for (const auto &kwParam : kwParams) {
+                        auto kwParamType =
+                            Types::resultTypeAsSeenFrom(gs, kwParam->type, method.data(gs)->owner, symbol, targs);
+                        if (kwParamType == nullptr) {
+                            kwParamType = Types::untyped(gs, method);
+                        }
+                        if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
+                                                             UntypedMode::AlwaysCompatible)) {
+                            if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                                e.setHeader("TODO(jez) kwsplat hash value type not subtype of kwparam `{}`",
+                                            kwParam->argumentName(gs));
+                                result.main.errors.emplace_back(e.build());
+                            }
+                        }
+                    }
+                }
             } else {
                 // A keyword splat was passed in, but none of the declared arguments are keyword splats,
                 // or there is a keyword splat argument, but there is one ore more keyword non-splat argument
-                auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
                 if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
                     e.setHeader("Passing a non-literal `{}` to `{}`, which requires specific keyword parameters",
                                 "Hash", method.show(gs));
-                    e.addErrorLine(firstKwParam->loc, "Keyword parameters of `{}` begin here:", method.show(gs));
+                    e.addErrorLine(kwParams.front()->loc, "Keyword parameters of `{}` begin here:", method.show(gs));
                     e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
                     e.addErrorNote("Sorbet cannot statically guarantee that the splatted `{}` contains all the keys "
                                    "required by `{}`.\n"
