@@ -38,7 +38,7 @@ autocorrect-requires-ancestor-block.rb:12: Too many arguments provided for metho
 
 autocorrect-requires-ancestor-block.rb:12: `requires_ancestor` requires a block parameter, but no block was passed https://srb.help/7021
     12 |  requires_ancestor RA1
-          ^^^^^^^^^^^^^^^^^^^^^
+                               ^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L110: defined here
      110 |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,7 +56,7 @@ autocorrect-requires-ancestor-block.rb:13: Too many arguments provided for metho
 
 autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` requires a block parameter, but no block was passed https://srb.help/7021
     13 |  requires_ancestor RA2, RA3
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                    ^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L110: defined here
      110 |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

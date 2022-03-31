@@ -60,7 +60,7 @@ class BlockArg
     T.reveal_type(self.new {|x| x + 1}) # error: Revealed type: `T.attached_class (of BlockArg)`
 
     T.reveal_type(self.new)
-                # ^^^^^^^^ error: `initialize` requires a block parameter
+    #                     ^ error: `initialize` requires a block parameter
   # ^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of BlockArg)`
   end
 end

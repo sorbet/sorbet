@@ -1298,7 +1298,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments.back().type;
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::BlockNotPassed)) {
+            if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
