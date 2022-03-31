@@ -870,7 +870,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 bool isBuiltinGeneric = klass == core::Symbols::T_Hash() || klass == core::Symbols::T_Array() ||
                                         klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
                                         klass == core::Symbols::T_Enumerable() ||
-                                        klass == core::Symbols::T_Enumerator();
+                                        klass == core::Symbols::T_Enumerator() ||
+                                        klass == core::Symbols::T_Enumerator_Lazy();
 
                 if (isBuiltinGeneric || klass.data(ctx)->typeArity(ctx) > 0) {
                     // This set **should not** grow over time.
@@ -1135,6 +1136,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 corrected = core::Symbols::T_Enumerable();
             } else if (recvi->symbol == core::Symbols::Enumerator()) {
                 corrected = core::Symbols::T_Enumerator();
+            } else if (recvi->symbol == core::Symbols::Enumerator_Lazy()) {
+                corrected = core::Symbols::T_Enumerator_Lazy();
             } else if (recvi->symbol == core::Symbols::Range()) {
                 corrected = core::Symbols::T_Range();
             } else if (recvi->symbol == core::Symbols::Set()) {

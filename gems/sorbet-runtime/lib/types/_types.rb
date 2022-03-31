@@ -286,6 +286,16 @@ module T
         T::Types::TypedEnumerator.new(type)
       end
     end
+
+    module Lazy
+      def self.[](type)
+        if type.is_a?(T::Types::Untyped)
+          T::Types::TypedEnumeratorLazy::Untyped.new
+        else
+          T::Types::TypedEnumeratorLazy.new(type)
+        end
+      end
+    end
   end
 
   module Range
