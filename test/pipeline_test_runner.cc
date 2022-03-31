@@ -173,6 +173,38 @@ public:
     }
 };
 
+// Immutable namer + resolver mode, which is used by things like serving LSP requests from stale GlobalStates
+void immutableNamerResolver(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    // Non-mutating namer, before entering symbols into GlobalState
+
+    trees = move(namer::Namer::symbolizeTreesBestEffort(gs, move(trees), workers).result());
+    ENFORCE(!gs.hadCriticalError());
+
+    trees = move(resolver::Resolver::runIncremental(gs, move(trees)).result());
+
+    // Also run the rest of the pipeline as normal, to make sure that things still work as expected.
+
+    for (auto &resolvedTree : trees) {
+        auto file = resolvedTree.file;
+
+        core::Context ctx(gs, core::Symbols::root(), file);
+        resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
+        resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
+
+        // Don't run typecheck on RBI files.
+        if (resolvedTree.file.data(gs).isRBI()) {
+            continue;
+        }
+
+        if (file.data(gs).strictLevel >= core::StrictLevel::True) {
+            CFGCollectorAndTyper collector;
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+        }
+    }
+
+    // If no ENFORCE fired, then immutatable namer + resolver is working fine.
+}
+
 TEST_CASE("PerPhaseTest") { // NOLINT
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -413,22 +445,49 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     {
+        // Immutable namer + resolver (for stale GlobalState requests)
+
+        // Stashes any already-reported errors so we can check them later (we're going to toss all
+        // errors created at the end of this mode).
         handler.drainErrors(*gs);
 
-        // Non-mutating namer, before entering symbols into GlobalState
+        // This mode is not designed to run on files that Sorbet did not already know about. In LSP
+        // mode this constraint is satisfied naturally by way of the implementation. Here, we have
+        // to satisfy it by forcing the file-level `<static-init>` methods into existence first.
+        // This would mutate the rest of the pipeline, so for the sake of not polluting things
+        // downstream from us, we do it on a copy of GlobalState.
+        auto staleGS = gs->deepCopy();
+        {
+            core::UnfreezeNameTable nameTableAccess(*staleGS);
+            core::UnfreezeSymbolTable symbolTableAccess(*staleGS);
+            for (auto &tree : trees) {
+                staleGS->staticInitForFile(core::Loc(tree.file, tree.tree.loc()));
+            }
+
+            // Also, various later parts of Sorbet expect that the mutable resolver has run on the
+            // symbol table at least once (to compute things like externalTypes for classes). For
+            // the payload GlobalState this happens during the `--store-state` run.
+            //
+            // But for `# no-stdlib: true`, the initial empty GlobalState hasn't had resolver run on
+            // it once yet. In LSP mode with `--no-stdlib`, this would happen naturally as a part of
+            // initialization, but we need to run it manually here.
+            resolver::Resolver::run(*staleGS, {}, *workers);
+        }
+
+        // Immutable namer + resolver will completely garble the trees (it's only the GlobalState
+        // that's immutable) so we have to make copies it can scratch on.
         vector<ast::ParsedFile> treesCopy;
         for (auto &tree : trees) {
             treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
         }
 
-        move(namer::Namer::symbolizeTreesBestEffort(*gs, move(treesCopy), *workers).result());
-        ENFORCE(!gs->hadCriticalError());
-
-        // If no ENFORCE fired, then non-mutating namer is working fine.
+        // Implemented in a helper function, so that only one GlobalState and list of trees is in scope.
+        immutableNamerResolver(*staleGS, std::move(treesCopy), *workers);
 
         // Drop the errors that were produced as a result of this process.
         // It's good to have the error-reporting code run (ensure that it doesn't ENFORCE), but we
         // don't actually care what the errors are here, because LSP will never show them.
+        // (Even though we copied GlobalState, the error queues and collectors are shared with the original.)
         handler.dropErrors(*gs);
     }
 
@@ -758,19 +817,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
             handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
         }
-    }
-
-    {
-        // Non-mutating resolver.  Note that non-mutating resolver leaves GlobalState
-        // alone, but modifies trees with abandon, so we need to copy here.
-        vector<ast::ParsedFile> treesCopy;
-        for (auto &tree : trees) {
-            treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
-        }
-
-        move(resolver::Resolver::runIncrementalWithoutStateMutation(*gs, move(treesCopy)).result());
-        errorQueue->flushAllErrors(*gs);
-        errorCollector->drainErrors();
     }
 
     // resolver
