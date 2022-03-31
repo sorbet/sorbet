@@ -45,7 +45,7 @@ void emitProc(ofstream &out, int arity) {
 
 int main(int argc, char **argv) {
     ofstream rb(argv[1], ios::trunc);
-    rb << "# typed: strict" << '\n';
+    rb << "# typed: true" << '\n';
     for (int arity = 0; arity <= MAX_PROC_ARITY; ++arity) {
         emitProc(rb, arity);
     }
