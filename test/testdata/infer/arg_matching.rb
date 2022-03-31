@@ -14,7 +14,7 @@ class TestArgs
     required(1) # error: Not enough arguments
     required(1, 2)
     required(1, 2, 3)
-  # ^^^^^^^^^^^^^^^^^ error: Expected: `2`, got: `3`
+    #              ^ error: Expected: `2`, got: `3`
   end
 
   def optional(a, b=1)
@@ -24,7 +24,7 @@ class TestArgs
     optional(1)
     optional(1, 2)
     optional(1, 2, 3)
-  # ^^^^^^^^^^^^^^^^^ error: Expected: `1..2`, got: `3`
+    #              ^ error: Expected: `1..2`, got: `3`
   end
 
   sig do
@@ -40,7 +40,7 @@ class TestArgs
   def call_kwarg
     # "too many arguments" and "missing keyword argument b"
     kwarg(1, 2)
-  # ^^^^^^^^^^^ error: Too many positional arguments provided for method `TestArgs#kwarg`. Expected: `1`, got: `2`
+    #        ^ error: Too many positional arguments provided for method `TestArgs#kwarg`. Expected: `1`, got: `2`
   # ^^^^^^^^^^^ error: Missing required keyword argument `b` for method `TestArgs#kwarg`
     kwarg(1)
   # ^^^^^^^^ error: Missing required keyword argument `b`
@@ -109,6 +109,6 @@ class TestArgs
   # ^^^^^^^^^^^ error: Missing required keyword argument `u`
     optkw(1, 2, 3)
   # ^^^^^^^^^^^^^^ error: Missing required keyword argument `u` for method `TestArgs#optkw`
-  # ^^^^^^^^^^^^^^ error: Too many positional arguments provided for method `TestArgs#optkw`. Expected: `1..2`, got: `3`
+    #           ^ error: Too many positional arguments provided for method `TestArgs#optkw`. Expected: `1..2`, got: `3`
   end
 end

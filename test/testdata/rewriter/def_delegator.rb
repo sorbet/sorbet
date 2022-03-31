@@ -71,9 +71,9 @@ class IgnoredUsages
   def_delegator # error: Not enough arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing # error: Not enough arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, :foo, :bar, :baz
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
+  #                                 ^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, :foo, :bar, kwarg: :thing
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
+  #                                 ^^^^^^^^^^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, kwarg: :thing
   #                     ^^^^^^^^^^^^^ error: Expected `Symbol` but found `{kwarg: Symbol(:thing)}` for argument `method`
   def_delegator :foo, kwarg1: :thing, kwarg2: local
