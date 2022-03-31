@@ -69,11 +69,12 @@ class IgnoredUsages
   local = 0
   not_def_delegator :thing, :foo # error: Method `not_def_delegator` does not exist
   def_delegator # error: Not enough arguments provided for method `Forwardable#def_delegator`
-  def_delegator :thing # error: Not enough arguments provided for method `Forwardable#def_delegator`
+  def_delegator :thing
+  #             ^^^^^^ error: Not enough arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, :foo, :bar, :baz
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
+  #                                 ^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, :foo, :bar, kwarg: :thing
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
+  #                                 ^^^^^^^^^^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, kwarg: :thing
   #                     ^^^^^^^^^^^^^ error: Expected `Symbol` but found `{kwarg: Symbol(:thing)}` for argument `method`
   def_delegator :foo, kwarg1: :thing, kwarg2: local
@@ -82,8 +83,9 @@ class IgnoredUsages
   #                   ^^^^^^^^^^^^^^^ error: Expected `Symbol` but found `{Integer(0) => Symbol(:thing)}` for argument `method`
   def_delegator 234, :foo
   #             ^^^ error: Expected `T.any(Symbol, String)` but found `Integer(234)` for argument `accessor`
-  def_delegator :thing => :foo # error: Not enough arguments provided for method `Forwardable#def_delegator
-              # ^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{thing: Symbol(:foo)}` for argument `accessor`
+  def_delegator :thing => :foo
+  #             ^^^^^^^^^^^^^^ error: Not enough arguments provided for method `Forwardable#def_delegator
+  #             ^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{thing: Symbol(:foo)}` for argument `accessor`
 
 
   def_delegators # error: Not enough arguments provided for method `Forwardable#def_delegators`

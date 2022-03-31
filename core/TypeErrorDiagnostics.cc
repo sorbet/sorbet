@@ -32,8 +32,8 @@ namespace {
 }
 } // namespace
 
-void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr expected,
-                                               const TypePtr got) {
+void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
+                                               const TypePtr &got) {
     auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
     auto gotClassType = isa_type<ClassType>(got);
     if (expectedSelfTypeParam && gotClassType) {
@@ -56,7 +56,7 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
 }
 
 void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
-                                            TypePtr expectedType, TypePtr actualType) {
+                                            const TypePtr &expectedType, const TypePtr &actualType) {
     if (!loc.exists()) {
         return;
     }

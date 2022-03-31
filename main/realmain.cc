@@ -4,7 +4,6 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
-#include "absl/strings/str_split.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -21,7 +20,9 @@
 #include "packager/rbi_gen.h"
 #endif
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/sort.h"
@@ -500,6 +501,41 @@ int realmain(int argc, char *argv[]) {
     gs->suggestUnsafe = opts.suggestUnsafe;
 
     logger->trace("done building initial global state");
+
+    if (opts.print.PayloadSources.enabled) {
+        auto dumpDir = opts.print.PayloadSources.outputPath;
+        FileOps::ensureDir(dumpDir);
+
+        for (auto &payloadFile : gs->getFiles()) {
+            if (payloadFile == nullptr) {
+                continue;
+            }
+
+            auto payloadVersion = sorbet_is_release_build ? sorbet_build_scm_revision : "master";
+            auto payloadPath = payloadFile->path();
+            auto payloadPrefix = absl::StrCat("https://github.com/sorbet/sorbet/tree/", payloadVersion, "/rbi/");
+
+            if (!absl::StartsWith(payloadPath, payloadPrefix)) {
+                // Skip files from `bazel-out/`
+                continue;
+            }
+
+            payloadPath.remove_prefix(payloadPrefix.size());
+
+            vector<string_view> parts = absl::StrSplit(payloadPath, "/");
+            auto dumpSubdir = dumpDir;
+            for (int i = 0; i < parts.size() - 1; i++) {
+                auto part = parts[i];
+                dumpSubdir = absl::StrCat(dumpSubdir, "/", part);
+                FileOps::ensureDir(dumpSubdir);
+            }
+
+            auto dumpPath = absl::StrCat(dumpDir, "/", payloadPath);
+            opts.fs->writeFile(dumpPath, payloadFile->source());
+        }
+
+        return returnCode;
+    }
 
     unique_ptr<core::GlobalState> gsForMinimize;
     if (!opts.minimizeRBI.empty()) {

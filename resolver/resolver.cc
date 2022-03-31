@@ -443,7 +443,7 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(core::Loc{ctx.file, out->loc}, owner,
+        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc), owner,
                                                  ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
 
         auto data = symbol.data(ctx);
@@ -616,7 +616,7 @@ private:
                     auto loc = resolvedField.data(ctx)->loc();
                     if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                         e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                        e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
+                        e.addErrorLine(ctx.locAt(job.out->original.loc()), "Type alias used here");
                     }
 
                     if constexpr (isMutableStateType) {
@@ -719,8 +719,8 @@ private:
                             const auto replacement = suggestion.symbol.show(ctx);
                             lines.emplace_back(
                                 core::ErrorLine::from(suggestion.symbol.loc(ctx), "Did you mean: `{}`?", replacement));
-                            e.replaceWith(fmt::format("Replace with `{}`", replacement),
-                                          core::Loc(ctx.file, job.out->loc), "{}", replacement);
+                            e.replaceWith(fmt::format("Replace with `{}`", replacement), ctx.locAt(job.out->loc), "{}",
+                                          replacement);
                         }
                         e.addErrorSection(core::ErrorSection(lines));
                     }
@@ -869,7 +869,7 @@ private:
                     e.setHeader("Reassigning a type alias is not allowed");
                 }
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
-                auto rhsLoc = core::Loc{ctx.file, it.rhs->loc};
+                auto rhsLoc = ctx.locAt(it.rhs->loc);
                 if (rhsLoc.exists()) {
                     e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
                 }
@@ -2386,7 +2386,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
+        auto alias = ctx.state.enterMethodSymbol(ctx.locAt(job.loc), job.owner, job.fromName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
     }
 
@@ -2414,8 +2414,8 @@ class ResolveTypeMembersAndFieldsWalk {
         if (cast->cast != core::Names::let()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
                 e.setHeader("Use `{}` to specify the type of constants", "T.let");
-                auto rhsLoc = core::Loc(ctx.file, asgn.rhs.loc());
-                auto argSource = core::Loc(ctx.file, cast->arg.loc()).source(ctx).value();
+                auto rhsLoc = ctx.locAt(asgn.rhs.loc());
+                auto argSource = ctx.locAt(cast->arg.loc()).source(ctx).value();
                 e.replaceWith("Replace with `T.let`", rhsLoc, "T.let({}, {})", argSource, cast->type.show(ctx));
                 if (cast->cast == core::Names::cast()) {
                     e.addErrorNote("If you really want to use `{}`, assign to an intermediate variable first and then "
@@ -2732,6 +2732,8 @@ public:
                     klass = core::Symbols::Enumerable();
                 } else if (klass == core::Symbols::T_Enumerator()) {
                     klass = core::Symbols::Enumerator();
+                } else if (klass == core::Symbols::T_Enumerator_Lazy()) {
+                    klass = core::Symbols::Enumerator_Lazy();
                 } else if (klass == core::Symbols::T_Range()) {
                     klass = core::Symbols::Range();
                 } else if (klass == core::Symbols::T_Set()) {
@@ -3328,7 +3330,7 @@ private:
                 if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
                     e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
                                 "sig", treeArgName.show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, exprLoc), "Signature");
+                    e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                 }
             }
 
@@ -3365,7 +3367,7 @@ private:
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     treeArgName.show(ctx));
-                        e.addErrorLine(core::Loc(ctx.file, exprLoc), "Signature");
+                        e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }
                 }
             }
@@ -3481,8 +3483,7 @@ private:
                         if (!ctx.permitOverloadDefinitions(ctx.file)) {
                             if (auto e = ctx.beginError(lastSigs[0]->loc, core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
-                                e.addErrorLine(core::Loc(ctx.file, send.loc),
-                                               "Type annotation that will be used instead");
+                                e.addErrorLine(ctx.locAt(send.loc), "Type annotation that will be used instead");
                             }
                         }
                     }
@@ -3610,8 +3611,8 @@ public:
             i++;
             core::MethodRef overloadSym;
             if (isOverloaded) {
-                overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, sig.loc), mdef.symbol, originalName,
-                                                               i, sig.argsToKeep);
+                overloadSym =
+                    ctx.state.enterNewMethodOverload(ctx.locAt(sig.loc), mdef.symbol, originalName, i, sig.argsToKeep);
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 if (i != sigs.size() - 1) {
                     overloadSym.data(ctx)->flags.isOverloaded = true;
@@ -3636,7 +3637,7 @@ public:
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
+                    e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
                 }
 
                 mdef.rhs = ast::MK::EmptyTree();

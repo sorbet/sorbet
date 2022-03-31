@@ -29,5 +29,5 @@ class Main
 end
 
 Main.new.foo
-Main.voider.bad # error: Can not call method `bad` on void type
-Main.voider.equal?(3) # error: Can not call method `equal?` on void type
+Main.voider.bad # error: Cannot call method `bad` on void type
+Main.voider.equal?(3) # error: Cannot call method `equal?` on void type

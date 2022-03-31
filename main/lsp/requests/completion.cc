@@ -9,6 +9,7 @@
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/FieldFinder.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
@@ -681,28 +682,6 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
         return nullptr;
     }
 
-    core::ClassOrModuleRef receiverSym;
-    if (core::isa_type<core::ClassType>(receiverType)) {
-        auto classType = core::cast_type_nonnull<core::ClassType>(receiverType);
-        receiverSym = classType.symbol;
-    } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType)) {
-        receiverSym = appliedType->klass;
-    } else {
-        // receiverType is not a simple type. This can happen for any number of strange and uncommon reasons, like:
-        // x = T.let(self, T.nilable(T::Sig));  x.sig {void}
-        return nullptr;
-    }
-
-    if (receiverSym == core::Symbols::rootSingleton()) {
-        receiverSym = core::Symbols::Object().data(gs)->lookupSingletonClass(gs);
-    }
-    auto methodOwner = targetMethod.data(gs)->owner;
-
-    if (!(methodOwner == receiverSym || methodOwner == receiverSym.data(gs)->attachedClass(gs))) {
-        // The targetMethod we were going to suggest a sig for is not actually in the same scope as this sig.
-        return nullptr;
-    }
-
     auto queryFiles = vector<core::FileRef>{queryLoc.file()};
     auto queryResult = typechecker.query(core::lsp::Query::createSuggestSigQuery(targetMethod), queryFiles);
     if (queryResult.error) {
@@ -749,6 +728,86 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
     }
 
     item->documentation = formatRubyMarkup(markupKind, suggestedSig, suggestSigDocs);
+
+    return item;
+}
+
+unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerInterface &typechecker,
+                                                 const LSPClientConfiguration &clientConfig, core::Loc queryLoc) {
+    const auto &gs = typechecker.state();
+
+    auto method = firstMethodAfterQuery(typechecker, queryLoc);
+    if (!method.exists()) {
+        return nullptr;
+    }
+
+    auto item = make_unique<CompletionItem>("##");
+    item->kind = CompletionItemKind::Snippet;
+    item->detail = fmt::format("YARD doc snippet for {}", method.data(gs)->name.shortName(gs));
+    auto insertRange = Range::fromLoc(gs, queryLoc);
+
+    const auto supportSnippets = clientConfig.clientCompletionItemSnippetSupport;
+    if (supportSnippets) {
+        item->insertTextFormat = InsertTextFormat::Snippet;
+    } else {
+        item->insertTextFormat = InsertTextFormat::PlainText;
+    }
+
+    string yardSnippetText = "\n";
+
+    if (supportSnippets) {
+        yardSnippetText += "# ${1:Summary}";
+    } else {
+        yardSnippetText += "# Summary";
+    }
+    bool firstAfterSummary = true;
+
+    const auto &arguments = method.data(gs)->arguments;
+    auto resultType = method.data(gs)->resultType;
+
+    // 0 is final tabstop. 1 is initial tabstop (for summary)
+    auto tabStop = 1;
+    for (const auto &arg : arguments) {
+        auto argumentName = arg.argumentName(gs);
+        if (hasAngleBrackets(argumentName)) {
+            continue;
+        }
+
+        tabStop++;
+
+        if (firstAfterSummary) {
+            firstAfterSummary = false;
+            yardSnippetText += "\n#";
+        }
+
+        // TODO(jez) Might be nice to use @yieldparam / @yieldreturn for the block arg.
+        if (supportSnippets) {
+            yardSnippetText += fmt::format("\n# @param {} ${{{}:TODO}}", argumentName, tabStop);
+        } else {
+            yardSnippetText += fmt::format("\n# @param {} TODO", argumentName);
+        }
+    }
+
+    if (resultType != core::Types::void_()) {
+        if (firstAfterSummary) {
+            firstAfterSummary = false;
+            yardSnippetText += "\n#";
+        }
+
+        tabStop++;
+
+        if (supportSnippets) {
+            yardSnippetText += fmt::format("\n# @return ${{{}:TODO}}", tabStop);
+        } else {
+            yardSnippetText += fmt::format("\n# @return TODO");
+        }
+    }
+
+    if (insertRange != nullptr) {
+        item->textEdit = make_unique<TextEdit>(std::move(insertRange), string(yardSnippetText));
+    } else {
+        item->insertText = yardSnippetText;
+    }
 
     return item;
 }
@@ -1101,7 +1160,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         response->result = std::move(emptyResult);
         return response;
     }
-    auto result = queryByLoc(typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
+    auto result = LSPQuery::byLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
         // An error happened while setting up the query.
@@ -1112,6 +1171,16 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
     auto &queryResponses = result.responses;
     vector<unique_ptr<CompletionItem>> items;
     if (queryResponses.empty()) {
+        auto prevTwoChars = queryLoc.adjust(gs, -2, 0);
+        if (prevTwoChars.source(gs) == "##") {
+            auto item = trySuggestYardSnippet(typechecker, config.getClientConfig(), queryLoc);
+            if (item != nullptr) {
+                items.emplace_back(std::move(item));
+                response->result = make_unique<CompletionList>(false, move(items));
+                return response;
+            }
+        }
+
         response->result = std::move(emptyResult);
         return response;
     }

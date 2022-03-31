@@ -3,7 +3,7 @@ load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
-    # At some point the builtin @platforms package willbe removed, and we'll no longer be able to refer to
+    # At some point the builtin @platforms package will be removed, and we'll no longer be able to refer to
     # @platforms//os:macos etc. The long-term workaround for this is to depend directly on bazelbuild/platforms as
     # @platforms. See https://github.com/bazelbuild/bazel/issues/8622 for more information.
     http_archive(
@@ -399,6 +399,14 @@ def register_sorbet_dependencies():
         patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_2_7_for_compiler.patch"],
         patch_tool = "patch",
         patch_args = ["-p1"],
+    )
+
+    http_archive(
+        name = "sorbet_ruby_3_0",
+        urls = _ruby_urls("3.0/ruby-3.0.3.tar.gz"),
+        sha256 = "3586861cb2df56970287f0fd83f274bd92058872d830d15570b36def7f1a92ac",
+        strip_prefix = "ruby-3.0.3",
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
     raze_fetch_remote_crates()

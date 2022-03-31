@@ -157,6 +157,12 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       str = obj.inspect
       assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
     end
+
+    it 'inspects frozen structs' do
+      obj = a_serializable.freeze
+      str = obj.inspect
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob">', str)
+    end
   end
 
   describe '.from_hash' do

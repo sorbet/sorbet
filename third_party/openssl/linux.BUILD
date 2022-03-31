@@ -4,10 +4,9 @@ cc_import(
     visibility = ["//visibility:private"],
 )
 
+# No headers are exported, as /usr/include is already part of the system include path.
 cc_library(
     name = "ssl",
-    hdrs = glob(["include/openssl/**/*.h"]),
-    includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [":ssl-import"],
 )
@@ -18,10 +17,9 @@ cc_import(
     visibility = ["//visibility:private"],
 )
 
+# No headers are exported, as /usr/include is already part of the system include path.
 cc_library(
     name = "crypto",
-    hdrs = glob(["include/openssl/**/*.h"]),
-    includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [":crypto-import"],
 )

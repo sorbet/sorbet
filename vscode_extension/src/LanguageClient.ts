@@ -14,7 +14,7 @@ import {
   RevealOutputChannelOn,
   SymbolInformation,
   TextDocumentPositionParams,
-} from "vscode-languageclient";
+} from "vscode-languageclient/node";
 
 import { stopProcess } from "./connections";
 import { SorbetExtensionConfig } from "./config";

@@ -15,9 +15,15 @@ end
 class Bar
   def foo
     Foo1.new
-    Foo1.new(1) # error: Wrong number of arguments for constructor
+    Foo1.new(1)
+    #        ^ error: Wrong number of arguments for constructor
     Foo2.new(1)
     Foo3.new(1, 2)
+
+    Foo1.new(1) {}
+    #        ^ error: Wrong number of arguments for constructor
+    Foo1.new 1 do end
+    #        ^ error: Wrong number of arguments for constructor
   end
 end
 

@@ -15,12 +15,6 @@ public:
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
 
     bool canUseStaleData() const override;
-
-private:
-    std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config,
-                                                                      const core::GlobalState &gs,
-                                                                      const core::lsp::MethodDefResponse &definition,
-                                                                      LSPTypecheckerInterface &typechecker);
 };
 
 } // namespace sorbet::realmain::lsp

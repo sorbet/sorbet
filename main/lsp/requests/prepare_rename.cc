@@ -1,6 +1,7 @@
 #include "main/lsp/requests/prepare_rename.h"
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
@@ -54,8 +55,8 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentPrepareRename);
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.prepareRename");
-    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position,
-                             LSPMethod::TextDocumentPrepareRename, false);
+    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+                                  LSPMethod::TextDocumentPrepareRename, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

@@ -145,8 +145,8 @@ struct Import {
 };
 
 enum class ExportType {
-    Public,
-    PrivateTest,
+    Public = 0,
+    PrivateTest = 1,
 };
 
 struct Export {
@@ -157,6 +157,12 @@ struct Export {
 
     const vector<core::NameRef> &parts() const {
         return fqn.parts;
+    }
+
+    static bool lexCmp(const Export &a, const Export &b) {
+        // Lex sort by name. If they're equal ensure the `export` (type == Public) is less than
+        // `export_for_test` (type == PrivateTest)
+        return core::packages::PackageInfo::lexCmp(a.parts(), b.parts()) || (a.type < b.type && a.parts() == b.parts());
     }
 };
 
@@ -265,11 +271,12 @@ public:
         if (ctx.file.data(ctx).isPackagedTest()) {
             // In a test file first look to see in our own package to see if it's missing an `export_for_test`
             core::SymbolRef sym = findPrivateSymbol(ctx, scope, /* test */ false);
-            if (sym.exists() && sym.isClassOrModule()) {
+            if (sym.exists() && sym.isClassOrModule() && !sym.loc(ctx).file().data(ctx).isPackage()) {
                 res.emplace_back(MissingExportMatch{sym, this->mangledName()});
                 return res;
             }
         }
+
         for (auto &imported : importedPackageNames) {
             auto &info = ctx.state.packageDB().getPackageInfo(imported.name.mangledName);
             if (!info.exists()) {
@@ -490,7 +497,7 @@ void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
 
                 e.addAutocorrect(core::AutocorrectSuggestion{
                     fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
-                    {core::AutocorrectSuggestion::Edit{core::Loc(ctx.file, nameLoc), replacement}}});
+                    {core::AutocorrectSuggestion::Edit{ctx.locAt(nameLoc), replacement}}});
             }
         }
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
@@ -499,7 +506,7 @@ void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
-    fqn.loc = core::Loc(ctx.file, constantLit->loc);
+    fqn.loc = ctx.locAt(constantLit->loc);
     while (constantLit != nullptr) {
         fqn.parts.emplace_back(constantLit->cnst);
         constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
@@ -1108,7 +1115,7 @@ struct PackageInfoFinder {
                 ctx.state.freshNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
             info->privateMangledName = ctx.state.enterNameConstant(packagerPrivateName);
 
-            info->loc = core::Loc(ctx.file, classDef.loc);
+            info->loc = ctx.locAt(classDef.loc);
         } else {
             if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
@@ -1140,23 +1147,39 @@ struct PackageInfoFinder {
         if (exported.empty()) {
             return;
         }
-        fast_sort(exported, [](const auto &a, const auto &b) -> bool {
-            return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
-        });
-        for (auto it = exported.begin(); it != exported.end();) {
+
+        fast_sort(exported, Export::lexCmp);
+        vector<size_t> dupInds;
+        for (auto it = exported.begin(); it != exported.end(); ++it) {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (!allowedExportPrefix(ctx, *it, *longer)) {
-                    if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                if (allowedExportPrefix(ctx, *it, *longer)) {
+                    continue;
+                }
+
+                if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                    if (it->parts() == longer->parts()) {
+                        e.setHeader("Duplicate export of `{}`",
+                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    } else {
                         e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
                                     fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
                                     fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                        e.addErrorLine(it->fqn.loc, "Prefix exported here");
                     }
+                    e.addErrorLine(it->fqn.loc, "Prefix exported here");
                 }
+
+                dupInds.emplace_back(distance(exported.begin(), longer));
             }
-            it = longer;
+        }
+
+        // Remove duplicates we found (in reverse order)
+        fast_sort(dupInds);
+        dupInds.erase(unique(dupInds.begin(), dupInds.end()), dupInds.end());
+        for (auto indIt = dupInds.rbegin(); indIt != dupInds.rend(); ++indIt) {
+            // Yes this is quadratic, but this only happens in an error condition.
+            exported.erase(exported.begin() + *indIt);
         }
 
         ENFORCE(info->exports_.empty());
@@ -1652,7 +1675,7 @@ private:
             // and the file processing order is consistent.
             e.setHeader("Conflicting import sources for `{}`",
                         fmt::map_join(nameParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
-            e.addErrorLine(core::Loc(ctx.file, otherLoc), "Conflict from");
+            e.addErrorLine(ctx.locAt(otherLoc), "Conflict from");
         }
     }
 

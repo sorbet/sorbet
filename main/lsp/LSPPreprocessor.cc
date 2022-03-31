@@ -27,8 +27,6 @@ string readFile(string_view path, const FileSystem &fs) {
 
 } // namespace
 
-TaskQueue::TaskQueue() : stateMutex{}, pendingTasks{}, terminated{false}, paused{false}, errorCode{0} {}
-
 bool TaskQueue::isTerminated() const {
     return this->terminated;
 }

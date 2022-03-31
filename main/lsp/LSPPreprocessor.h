@@ -44,7 +44,7 @@ class TaskQueue final {
     CounterState counters GUARDED_BY(stateMutex);
 
 public:
-    TaskQueue();
+    TaskQueue() = default;
 
     TaskQueue(const TaskQueue &other) = delete;
     TaskQueue(TaskQueue &&other) = delete;

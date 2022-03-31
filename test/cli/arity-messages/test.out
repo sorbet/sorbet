@@ -1,96 +1,153 @@
-test/cli/arity-messages/arity-messages.rb:4: Too many positional arguments provided for method `Object#foo`. Expected: `0`, got: `1` https://srb.help/7004
+arity-messages.rb:4: Too many positional arguments provided for method `Object#foo`. Expected: `0`, got: `1` https://srb.help/7004
      4 |foo 1
-        ^^^^^
-    test/cli/arity-messages/arity-messages.rb:3: `foo` defined here
+            ^
+    arity-messages.rb:3: `foo` defined here
      3 |def foo(x: nil); end
         ^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:4: `Object#foo` has optional keyword arguments. Did you mean to provide a value for `x`?
+    arity-messages.rb:4: `Object#foo` has optional keyword arguments. Did you mean to provide a value for `x`?
      4 |foo 1
-        ^^^^^
+            ^
+  Autocorrect: Done
+    arity-messages.rb:4: Inserted `x: `
+     4 |foo 1
+            ^
 
-test/cli/arity-messages/arity-messages.rb:5: Unrecognized keyword argument `y` passed for method `Object#foo` https://srb.help/7004
+arity-messages.rb:5: Unrecognized keyword argument `y` passed for method `Object#foo` https://srb.help/7004
      5 |foo(y: 1)
         ^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:8: Too many positional arguments provided for method `Object#bar`. Expected: `0`, got: `1` https://srb.help/7004
+arity-messages.rb:8: Too many positional arguments provided for method `Object#bar`. Expected: `0`, got: `1` https://srb.help/7004
      8 |bar(5, x: 8)
-        ^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:7: `bar` defined here
+            ^
+    arity-messages.rb:7: `bar` defined here
      7 |def bar(x: nil, y: nil); end
         ^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:8: `Object#bar` has optional keyword arguments. Did you mean to provide a value for `y`?
+    arity-messages.rb:8: `Object#bar` has optional keyword arguments. Did you mean to provide a value for `y`?
      8 |bar(5, x: 8)
-        ^^^^^^^^^^^^
+            ^
+  Autocorrect: Done
+    arity-messages.rb:8: Inserted `y: `
+     8 |bar(5, x: 8)
+            ^
 
-test/cli/arity-messages/arity-messages.rb:9: Too many positional arguments provided for method `Object#bar`. Expected: `0`, got: `2` https://srb.help/7004
+arity-messages.rb:9: Too many positional arguments provided for method `Object#bar`. Expected: `0`, got: `2` https://srb.help/7004
      9 |bar(5, 8)
-        ^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:7: `bar` defined here
+            ^^^^
+    arity-messages.rb:7: `bar` defined here
      7 |def bar(x: nil, y: nil); end
         ^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:9: `Object#bar` has optional keyword arguments. Did you mean to provide a value for `x`?
+    arity-messages.rb:9: `Object#bar` has optional keyword arguments. Did you mean to provide a value for `x`?
      9 |bar(5, 8)
-        ^^^^^^^^^
+            ^
 
-test/cli/arity-messages/arity-messages.rb:12: Too many positional arguments provided for method `Object#baz`. Expected: `0`, got: `1` https://srb.help/7004
+arity-messages.rb:12: Too many positional arguments provided for method `Object#baz`. Expected: `0`, got: `1` https://srb.help/7004
     12 |baz 7
-        ^^^^^
-    test/cli/arity-messages/arity-messages.rb:11: `baz` defined here
+            ^
+    arity-messages.rb:11: `baz` defined here
     11 |def baz(x: nil); end
         ^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:12: `Object#baz` has optional keyword arguments. Did you mean to provide a value for `x`?
+    arity-messages.rb:12: `Object#baz` has optional keyword arguments. Did you mean to provide a value for `x`?
     12 |baz 7
-        ^^^^^
+            ^
+  Autocorrect: Done
+    arity-messages.rb:12: Inserted `x: `
+    12 |baz 7
+            ^
 
-test/cli/arity-messages/arity-messages.rb:15: Not enough arguments provided for method `Object#quux`. Expected: `3`, got: `2` https://srb.help/7004
+arity-messages.rb:15: Not enough arguments provided for method `Object#quux`. Expected: `3`, got: `2` https://srb.help/7004
     15 |quux(2, z: 3)
-        ^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:14: `Object#quux` defined here
+             ^^^^^^^
+    arity-messages.rb:14: `Object#quux` defined here
     14 |def quux(x, y, z); end
         ^^^^^^^^^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:18: Too many positional arguments provided for method `Object#qaar`. Expected: `2`, got: `3` https://srb.help/7004
+arity-messages.rb:18: Too many positional arguments provided for method `Object#qaar`. Expected: `2`, got: `3` https://srb.help/7004
     18 |qaar(1, 2, 3, c: nil, d: nil)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:17: `qaar` defined here
+                   ^
+    arity-messages.rb:17: `qaar` defined here
     17 |def qaar(a, b, c: nil, d: nil); end
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    arity-messages.rb:18: Deleted
+    18 |qaar(1, 2, 3, c: nil, d: nil)
+                 ^^^
 
-test/cli/arity-messages/arity-messages.rb:21: Unrecognized keyword argument `c` passed for method `Object#qaadr` https://srb.help/7004
+arity-messages.rb:21: Unrecognized keyword argument `c` passed for method `Object#qaadr` https://srb.help/7004
     21 |qaadr({a: 1}, {b: 2}, {c: 3})
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:21: Too many positional arguments provided for method `Object#qaadr`. Expected: `0`, got: `2` https://srb.help/7004
+arity-messages.rb:21: Too many positional arguments provided for method `Object#qaadr`. Expected: `0`, got: `2` https://srb.help/7004
     21 |qaadr({a: 1}, {b: 2}, {c: 3})
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:20: `qaadr` defined here
+              ^^^^^^^^^^^^^^^^^^^^^^
+    arity-messages.rb:20: `qaadr` defined here
     20 |def qaadr(e: 1); end
         ^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:21: `Object#qaadr` has optional keyword arguments. Did you mean to provide a value for `e`?
+    arity-messages.rb:21: `Object#qaadr` has optional keyword arguments. Did you mean to provide a value for `e`?
     21 |qaadr({a: 1}, {b: 2}, {c: 3})
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:24: Too many positional arguments provided for method `Object#pippo`. Expected: `1`, got: `2` https://srb.help/7004
+arity-messages.rb:24: Too many positional arguments provided for method `Object#pippo`. Expected: `1`, got: `2` https://srb.help/7004
     24 |pippo(2, 3, z: 4)
-        ^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:23: `pippo` defined here
+                 ^
+    arity-messages.rb:23: `pippo` defined here
     23 |def pippo(x, **kwargs); end
         ^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    arity-messages.rb:24: Deleted
+    24 |pippo(2, 3, z: 4)
+               ^^^
 
-test/cli/arity-messages/arity-messages.rb:27: Not enough arguments provided for method `Object#pluto`. Expected: `1+`, got: `0` https://srb.help/7004
+arity-messages.rb:27: Not enough arguments provided for method `Object#pluto`. Expected: `1+`, got: `0` https://srb.help/7004
     27 |pluto
-        ^^^^^
-    test/cli/arity-messages/arity-messages.rb:26: `Object#pluto` defined here
+             ^
+    arity-messages.rb:26: `Object#pluto` defined here
     26 |def pluto(x, *args); end
         ^^^^^^^^^^^^^^^^^^^
 
-test/cli/arity-messages/arity-messages.rb:30: Too many positional arguments provided for method `Object#paperino`. Expected: `1`, got: `2` https://srb.help/7004
+arity-messages.rb:30: Too many positional arguments provided for method `Object#paperino`. Expected: `1`, got: `2` https://srb.help/7004
     30 |paperino(2, 3, z: 4)
-        ^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:29: `paperino` defined here
+                    ^
+    arity-messages.rb:29: `paperino` defined here
     29 |def paperino(x, y: nil, **kwargs); end
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/arity-messages/arity-messages.rb:30: `Object#paperino` has optional keyword arguments. Did you mean to provide a value for `y`?
+    arity-messages.rb:30: `Object#paperino` has optional keyword arguments. Did you mean to provide a value for `y`?
     30 |paperino(2, 3, z: 4)
-        ^^^^^^^^^^^^^^^^^^^^
+                    ^
+  Autocorrect: Done
+    arity-messages.rb:30: Inserted `y: `
+    30 |paperino(2, 3, z: 4)
+                    ^
 Errors: 12
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+def foo(x: nil); end
+foo x: 1
+foo(y: 1)
+
+def bar(x: nil, y: nil); end
+bar(y: 5, x: 8)
+bar(5, 8)
+
+def baz(x: nil); end
+baz x: 7
+
+def quux(x, y, z); end
+quux(2, z: 3)
+
+def qaar(a, b, c: nil, d: nil); end
+qaar(1, 2, c: nil, d: nil)
+
+def qaadr(e: 1); end
+qaadr({a: 1}, {b: 2}, {c: 3})
+
+def pippo(x, **kwargs); end
+pippo(2, z: 4)
+
+def pluto(x, *args); end
+pluto
+
+def paperino(x, y: nil, **kwargs); end
+paperino(2, y: 3, z: 4)

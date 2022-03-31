@@ -32,7 +32,7 @@ class Main
         one_required(a: 1)
         one_required(1, a: 1)
         one_required(1, 2, a: 1)
-      # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected: `1`, got: `2`
+        #               ^ error: Expected: `1`, got: `2`
         one_kwarg(foo: 1)
         one_kwarg(foo: 1, a: "a")
 

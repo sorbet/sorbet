@@ -171,10 +171,10 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string LocOffsets::showRaw(const Context ctx) const {
-    return Loc(ctx.file, *this).showRaw(ctx);
+    return ctx.locAt(*this).showRaw(ctx);
 }
 string LocOffsets::showRaw(const MutableContext ctx) const {
-    return Loc(ctx.file, *this).showRaw(ctx);
+    return ctx.locAt(*this).showRaw(ctx);
 }
 string LocOffsets::showRaw(const GlobalState &gs, const FileRef file) const {
     return Loc(file, *this).showRaw(gs);

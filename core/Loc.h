@@ -129,6 +129,7 @@ public:
     Loc(Loc &&rhs) = default;
 
     struct Detail {
+        // 1-indexed, like would be reported in a text editor (useful for error messages)
         uint32_t line, column;
     };
 

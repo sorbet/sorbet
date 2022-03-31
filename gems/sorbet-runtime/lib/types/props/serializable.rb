@@ -324,9 +324,9 @@ module T::Props::Serializable::DecoratorMethods
 
   def extra_props(instance)
     if instance.instance_variable_defined?(:@_extra_props)
-      instance.instance_variable_get(:@_extra_props)
+      instance.instance_variable_get(:@_extra_props) || EMPTY_EXTRA_PROPS
     else
-      instance.instance_variable_set(:@_extra_props, EMPTY_EXTRA_PROPS)
+      EMPTY_EXTRA_PROPS
     end
   end
 

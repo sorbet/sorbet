@@ -7,6 +7,7 @@ import {
   ConfigurationChangeEvent,
   Uri,
   WorkspaceFolder,
+  extensions,
 } from "vscode";
 
 import * as fs from "fs";
@@ -22,13 +23,35 @@ import {
 class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
   public _emitter = new EventEmitter<ConfigurationChangeEvent>();
   public backingStore: Map<String, any>;
+  public defaults: Map<String, any>;
   constructor(public properties: Iterable<[String, any]> = []) {
     this.backingStore = new Map<String, any>(properties);
+
+    const defaultProperties = extensions.getExtension(
+      "sorbet.sorbet-vscode-extension",
+    )!.packageJSON.contributes.configuration.properties;
+    const defaultValues: Iterable<[String, any]> = Object.keys(
+      defaultProperties,
+    ).map((settingName) => {
+      let value = defaultProperties[settingName].default;
+
+      if (
+        defaultProperties[settingName].type === "boolean" &&
+        value === undefined
+      ) {
+        value = false;
+      }
+
+      return [settingName.replace("sorbet.", ""), value];
+    });
+    this.defaults = new Map<String, any>(defaultValues);
   }
 
   get<T>(section: string, defaultValue: T): T {
     if (this.backingStore.has(section)) {
       return this.backingStore.get(section);
+    } else if (this.defaults.has(section)) {
+      return this.defaults.get(section);
     } else {
       return defaultValue;
     }
@@ -60,6 +83,14 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
 
   workspaceFolders() {
     return [{ uri: { fsPath: "/fake/path/to/project" } }] as WorkspaceFolder[];
+  }
+
+  initializeEnabled(enabled: boolean): void {
+    const stateEnabled = this.backingStore.get("enabled");
+
+    if (stateEnabled === undefined) {
+      this.update("enabled", enabled);
+    }
   }
 }
 
@@ -217,10 +248,10 @@ suite("SorbetExtensionConfig", async () => {
         const workspaceConfig = new FakeWorkspaceConfiguration();
         const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
         assert.equal(sorbetConfig.enabled, false, "should not be enabled");
-        assert.equal(
+        assert.deepStrictEqual(
           sorbetConfig.selectedLspConfig,
-          undefined,
-          "no selected LSP config has been defined",
+          new SorbetLspConfig(workspaceConfig.defaults.get("lspConfigs")[0]),
+          "LSP configs should have been set to first default",
         );
         assert.equal(
           sorbetConfig.activeLspConfig,
@@ -240,7 +271,7 @@ suite("SorbetExtensionConfig", async () => {
         const workspaceConfig = new FakeWorkspaceConfiguration();
         const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
 
-        assert.equal(sorbetConfig.enabled, true, "should be enabled");
+        assert.strictEqual(sorbetConfig.enabled, true, "should be enabled");
         sinon.restore();
       });
     });

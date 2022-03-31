@@ -268,7 +268,7 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
         return body;
     }
 
-    auto loc = core::Loc(dctx.ctx.file, body.loc());
+    auto loc = dctx.ctx.locAt(body.loc());
     if (isa_tree<EmptyTree>(body)) {
         return body;
     } else if (isa_tree<Assign>(body)) {
@@ -598,8 +598,7 @@ public:
                 }
 
                 e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(core::Loc(dctx.ctx.file, originalLoc), "First occurrence of `{}` hash key",
-                               nameRef.toString(gs));
+                e.addErrorLine(dctx.ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
             }
         }
     }
@@ -744,7 +743,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         argnodes.erase(fwdIt);
                     }
 
-                    auto array = make_unique<parser::Array>(loc, std::move(argnodes));
+                    auto array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
                     auto args = node2TreeImpl(dctx, std::move(array));
 
                     if (hasFwdArgs) {
@@ -1066,8 +1065,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                     ExpressionPtr thenp;
                     if (lhsSend != nullptr && rhsSend != nullptr) {
-                        auto lhsSource = core::Loc(dctx.ctx.file, lhsSend->loc).source(dctx.ctx);
-                        auto rhsRecvSource = core::Loc(dctx.ctx.file, rhsSend->recv.loc()).source(dctx.ctx);
+                        auto lhsSource = dctx.ctx.locAt(lhsSend->loc).source(dctx.ctx);
+                        auto rhsRecvSource = dctx.ctx.locAt(rhsSend->recv.loc()).source(dctx.ctx);
                         if (lhsSource.has_value() && lhsSource == rhsRecvSource) {
                             // Have to use zero-width locs here so that these auto-generated things
                             // don't show up in e.g. completion requests.
@@ -1313,7 +1312,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // The arg loc for the synthetic variable created for the purpose of this safe navigation
                     // check is a bit of a hack. It's intentionally one character too short so that for
                     // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
-                    if (core::Loc(dctx.ctx.file, ampersandLoc).source(dctx.ctx) == "&") {
+                    if (dctx.ctx.locAt(ampersandLoc).source(dctx.ctx) == "&") {
                         csendLoc = ampersandLoc;
                     }
                 }
@@ -1892,8 +1891,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                                          core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.show(dctx.ctx), "yield");
-                            e.addErrorLine(core::Loc(dctx.ctx.file, loc), "Arising from use of `{}` in method body",
-                                           "yield");
+                            e.addErrorLine(dctx.ctx.locAt(loc), "Arising from use of `{}` in method body", "yield");
                         }
                     }
 
@@ -2099,7 +2097,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::LineLiteral *line) {
-                auto pos = core::Loc(dctx.ctx.file, loc).position(dctx.ctx);
+                auto pos = dctx.ctx.locAt(loc).position(dctx.ctx);
                 ENFORCE(pos.first.line == pos.second.line, "position corrupted");
                 auto res = MK::Int(loc, pos.first.line);
                 result = std::move(res);

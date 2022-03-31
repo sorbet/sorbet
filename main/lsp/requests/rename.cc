@@ -5,6 +5,7 @@
 #include "absl/strings/str_split.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/AbstractRenamer.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
@@ -217,7 +218,8 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
 
     ShowOperation op(config, ShowOperation::Kind::Rename);
 
-    auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
+    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+                                  LSPMethod::TextDocumentRename);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -244,20 +246,20 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
         if (isValidRenameLocation(constResp->symbol, gs, response)) {
             auto originalName = constResp->symbol.name(gs).show(gs);
             renamer = makeRenamer(gs, config, constResp->symbol, params->newName);
-            getRenameEdits(typechecker, renamer, constResp->symbol, params->newName);
+            renamer->getRenameEdits(typechecker, constResp->symbol, params->newName);
             enrichResponse(response, renamer);
         }
     } else if (auto defResp = resp->isMethodDef()) {
         if (isValidRenameLocation(defResp->symbol, gs, response)) {
             renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
-            getRenameEdits(typechecker, renamer, defResp->symbol, params->newName);
+            renamer->getRenameEdits(typechecker, defResp->symbol, params->newName);
             enrichResponse(response, renamer);
         }
     } else if (auto sendResp = resp->isSend()) {
         // We don't need to handle dispatchResult->secondary here, because it will be checked in getRenameEdits.
         auto method = sendResp->dispatchResult->main.method;
         renamer = makeRenamer(gs, config, method, params->newName);
-        getRenameEdits(typechecker, renamer, method, params->newName);
+        renamer->getRenameEdits(typechecker, method, params->newName);
         enrichResponse(response, renamer);
     }
 

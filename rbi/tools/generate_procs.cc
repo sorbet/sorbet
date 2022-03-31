@@ -13,13 +13,23 @@ void emitProc(ofstream &out, int arity) {
 
     out << '\n';
 
-    out << "  sig {params(" << '\n';
+    if (arity > 0) {
+        out << "  sig do" << '\n';
+        out << "    params(" << '\n';
+    } else {
+        out << "  sig {";
+    }
     for (int i = 0; i < arity; ++i) {
-        out << "    arg" << i << ": "
+        out << "      arg" << i << ": "
             << "Arg" << i << "," << '\n';
     }
-    out << "  )" << '\n';
-    out << "  .returns(Return)}" << '\n';
+    if (arity > 0) {
+        out << "    )" << '\n';
+        out << "    .returns(Return)" << '\n';
+        out << "  end" << '\n';
+    } else {
+        out << "returns(Return)}" << '\n';
+    }
     out << "  def call(";
     for (int i = 0; i < arity; ++i) {
         if (i != 0) {
@@ -27,16 +37,15 @@ void emitProc(ofstream &out, int arity) {
         }
         out << "arg" << i;
     }
-    out << ")" << '\n';
-    out << "  end" << '\n';
+    out << "); end" << '\n';
     out << '\n';
     out << "  alias_method :[], :call" << '\n';
-    out << '\n';
     out << "end" << '\n' << '\n';
 }
 
 int main(int argc, char **argv) {
     ofstream rb(argv[1], ios::trunc);
+    rb << "# typed: true" << '\n';
     for (int arity = 0; arity <= MAX_PROC_ARITY; ++arity) {
         emitProc(rb, arity);
     }

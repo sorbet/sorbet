@@ -60,10 +60,11 @@ TestChild.new.using_symbol # error: Non-private call to private method `using_sy
 
 T.unsafe(Test.new).using_symbol
 
-# TODO: The following methods should also error out. They currently do not do that due to issues with the instrinsics.
+# TODO: The following call should also error out. It currently does not do that due to issues with the instrinsics.
 Test.new.splat_call(*T.unsafe(nil)) # Currently no Error, since T.unsafe makes Magic_callWithSplat#apply return prematurely due to the untyped argument.
-Test.new.splat_and_block_call(*[1, 'a'], &nil) # Currently no Error, since the nil block makes Magic_callWithSplatAndBlock return prematurely.
-Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_callWithBlock return prematurely.
+
+Test.new.splat_and_block_call(*[1, 'a'], &nil) # error: Non-private call to private method `splat_and_block_call` on `Test`
+Test.new.block_call(&nil) # error: Non-private call to private method `block_call` on `Test`
 
 Test.new.subsequent_visibility # error: Non-private call to private method `subsequent_visibility`
 Test.new.subsequent_visibility_attr_reader # error: Non-private call to private method `subsequent_visibility_attr_reader`

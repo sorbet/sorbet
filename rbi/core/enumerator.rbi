@@ -551,9 +551,9 @@ class Enumerator::Lazy < Enumerator
     type_parameters(:U).params(
         blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+    .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def collect(&blk); end
 
   # Returns a new lazy enumerator with the concatenated results of running
@@ -586,7 +586,7 @@ class Enumerator::Lazy < Enumerator
     type_parameters(:U).params(
         blk: T.proc.params(arg0: Elem).returns(T::Enumerator[T.type_parameter(:U)]),
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+    .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
   def collect_concat(&blk); end
 
@@ -600,7 +600,7 @@ class Enumerator::Lazy < Enumerator
     params(
         n: Integer,
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
   def drop(n); end
 
@@ -614,9 +614,9 @@ class Enumerator::Lazy < Enumerator
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def drop_while(&blk); end
 
   # Similar to
@@ -654,9 +654,9 @@ class Enumerator::Lazy < Enumerator
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def find_all(&blk); end
 
   ### This signature is wrong; See entire note on Enumerator#flat_map
@@ -691,9 +691,9 @@ class Enumerator::Lazy < Enumerator
     type_parameters(:U).params(
         blk: T.proc.params(arg0: Elem).returns(T::Enumerable[T.type_parameter(:U)]),
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+    .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def flat_map(&blk); end
 
   # Like
@@ -706,14 +706,14 @@ class Enumerator::Lazy < Enumerator
     params(
         arg0: BasicObject,
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
   sig do
     type_parameters(:U).params(
         arg0: BasicObject,
         blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+    .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
   def grep(arg0, &blk); end
 
@@ -746,9 +746,9 @@ class Enumerator::Lazy < Enumerator
     type_parameters(:U).params(
         blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+    .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def map(&blk); end
 
   # Like
@@ -761,9 +761,9 @@ class Enumerator::Lazy < Enumerator
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def reject(&blk); end
 
   # Like
@@ -776,9 +776,9 @@ class Enumerator::Lazy < Enumerator
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def select(&blk); end
 
   # Like
@@ -806,7 +806,7 @@ class Enumerator::Lazy < Enumerator
     params(
         n: Integer,
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
   def take(n); end
 
@@ -820,9 +820,9 @@ class Enumerator::Lazy < Enumerator
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(Enumerator::Lazy[Elem])
+    .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig {returns(T::Enumerator::Lazy[Elem])}
   def take_while(&blk); end
 
   # Similar to

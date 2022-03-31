@@ -116,6 +116,8 @@ export interface ISorbetWorkspaceContext {
 
   /** See `vscode.workspace.workspaceFolders` */
   workspaceFolders(): ReadonlyArray<WorkspaceFolder> | undefined;
+
+  initializeEnabled(enabled: boolean): void;
 }
 
 /** Default implementation accesses `workspace` directly. */
@@ -166,6 +168,36 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   public workspaceFolders(): readonly WorkspaceFolder[] | undefined {
     return workspace.workspaceFolders;
   }
+
+  /**
+   * This function is a workaround to make it possible to enable Sorbet on first launch.
+   *
+   * The `sorbet.enabled` setting always has its default value set to `false` from `package.json` and cannot be
+   * undefined. That means that invoking `workspaceContext.get("enabled", this._enabled)` will always return `false` on
+   * first launch regardless of the value of `this._enabled`.
+   *
+   * To workaround this, we check if `sorbet.enabled` is still undefined in the workspace state and in every type of
+   * configuration other than the `defaultValue`. If that's the case, then we can update the workspace state and enable
+   * Sorbet on first launch.
+   */
+  public initializeEnabled(enabled: boolean) {
+    const stateEnabled = this._workspaceState.get("sorbet.enabled");
+
+    if (stateEnabled === undefined) {
+      const cachedConfig = this._cachedSorbetConfiguration.inspect("enabled");
+
+      if (
+        cachedConfig?.globalValue === undefined &&
+        cachedConfig?.workspaceValue === undefined &&
+        cachedConfig?.workspaceFolderValue === undefined &&
+        cachedConfig?.globalLanguageValue === undefined &&
+        cachedConfig?.workspaceFolderLanguageValue === undefined &&
+        cachedConfig?.workspaceLanguageValue === undefined
+      ) {
+        this.update("enabled", enabled);
+      }
+    }
+  }
 }
 
 export class SorbetExtensionConfig implements Disposable {
@@ -199,6 +231,8 @@ export class SorbetExtensionConfig implements Disposable {
     this._enabled = workspaceFolders
       ? fs.existsSync(`${workspaceFolders[0].uri.fsPath}/sorbet/config`)
       : false;
+
+    this._sorbetWorkspaceContext.initializeEnabled(this._enabled);
 
     this._refresh();
   }

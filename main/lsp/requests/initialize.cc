@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-const std::vector<std::string> InitializeTask::TRIGGER_CHARACTERS = {".", ":", "@"};
+const std::vector<std::string> InitializeTask::TRIGGER_CHARACTERS = {".", ":", "@", "#"};
 
 InitializeTask::InitializeTask(LSPConfiguration &config, MessageId id, std::unique_ptr<InitializeParams> params)
     : LSPRequestTask(config, id, LSPMethod::Initialize), mutableConfig(config), params(move(params)) {}

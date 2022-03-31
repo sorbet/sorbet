@@ -78,6 +78,12 @@ public:
      * (For tests only) Retrieve the number of times typechecking has run.
      */
     int getTypecheckCount();
+
+    /**
+     * (For tests only) Set a flag that forces the slow path to block indefinitely after saving undo state. Setting
+     * this flag to `false` will immediately unblock any currently blocked slow paths.
+     */
+    void setSlowPathBlocked(bool blocked);
 };
 
 class SingleThreadedLSPWrapper final : public LSPWrapper {

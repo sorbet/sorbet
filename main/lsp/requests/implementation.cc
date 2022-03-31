@@ -1,5 +1,6 @@
 #include "main/lsp/requests/implementation.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
@@ -64,8 +65,8 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerInterfa
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentImplementation);
 
     const core::GlobalState &gs = typechecker.state();
-    auto queryResult =
-        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentImplementation);
+    auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+                                       LSPMethod::TextDocumentImplementation);
 
     if (queryResult.error) {
         // An error happened while setting up the query.

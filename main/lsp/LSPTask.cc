@@ -5,6 +5,7 @@
 #include "core/NameHash.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
@@ -246,105 +247,6 @@ bool LSPRequestTask::cancel(const MessageId &id) {
     return false;
 }
 
-LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerInterface &typechecker, string_view uri, const Position &pos,
-                                   const LSPMethod forMethod, bool errorIfFileIsUntyped) const {
-    Timer timeit(config.logger, "setupLSPQueryByLoc");
-    const core::GlobalState &gs = typechecker.state();
-    auto fref = config.uri2FileRef(gs, uri);
-
-    if (!fref.exists() && config.isFileIgnored(config.remoteName2Local(uri))) {
-        auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            fmt::format("Ignored file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPQueryResult{{}, move(error)};
-    }
-
-    if (!fref.exists()) {
-        auto error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidParams,
-            fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPQueryResult{{}, move(error)};
-    }
-
-    if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
-        config.logger->info("Ignoring request on untyped file `{}`", uri);
-        // Act as if the query returned no results.
-        return LSPQueryResult{{}, nullptr};
-    }
-
-    auto loc = config.lspPos2Loc(fref, pos, gs);
-    return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
-}
-
-LSPQueryResult LSPTask::queryBySymbolInFiles(LSPTypecheckerInterface &typechecker, core::SymbolRef sym,
-                                             vector<core::FileRef> frefs) const {
-    Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
-    ENFORCE(sym.exists());
-    return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
-}
-
-LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef sym) const {
-    Timer timeit(config.logger, "setupLSPQueryBySymbol");
-    ENFORCE(sym.exists());
-    vector<core::FileRef> frefs;
-    const core::GlobalState &gs = typechecker.state();
-    const core::NameHash symNameHash(gs, sym.name(gs));
-    // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
-    int i = -1;
-    for (auto &file : typechecker.state().getFiles()) {
-        i++;
-        if (file == nullptr) {
-            continue;
-        }
-
-        ENFORCE(file->getFileHash() != nullptr);
-        const auto &hash = *file->getFileHash();
-        const auto &usedSends = hash.usages.sends;
-        const auto &usedSymbolNames = hash.usages.symbols;
-        auto ref = core::FileRef(i);
-
-        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid &&
-            (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-             std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symNameHash) != usedSymbolNames.end())) {
-            frefs.emplace_back(ref);
-        }
-    }
-
-    return typechecker.query(core::lsp::Query::createSymbolQuery(sym), frefs);
-}
-
-void LSPTask::getRenameEdits(LSPTypecheckerInterface &typechecker, shared_ptr<AbstractRenamer> renamer,
-                             core::SymbolRef symbol, string newName) {
-    const core::GlobalState &gs = typechecker.state();
-    auto originalName = symbol.name(gs).show(gs);
-
-    renamer->addSymbol(symbol);
-
-    auto symbolQueue = renamer->getQueue();
-    for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
-        auto queryResult = queryBySymbol(typechecker, sym);
-        if (queryResult.error) {
-            return;
-        }
-
-        // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
-        // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
-        // expression.
-        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
-            auto loc = response->getLoc();
-            if (loc.file().data(gs).isPayload()) {
-                // We don't support renaming things in payload files.
-                return;
-            }
-
-            // We may process the same send multiple times in case of union types, but this is ok because the renamer
-            // de-duplicates edits at the same location
-            renamer->rename(response, sym);
-        }
-    }
-}
-
 bool LSPTask::needsMultithreading(const LSPIndexer &indexer) const {
     return false;
 }
@@ -366,56 +268,11 @@ bool LSPTask::canUseStaleData() const {
     return false;
 }
 
-// Filter for untyped locations, and dedup responses that are at the same location
-vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::filterAndDedup(const core::GlobalState &gs,
-                        const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) const {
-    vector<unique_ptr<core::lsp::QueryResponse>> responses;
-    // Filter for responses with a loc that exists and points to a typed file, unless it's a const, field or
-    // definition in which case we're ok with untyped files (because we know where those things are even in untyped
-    // files.)
-    for (auto &q : queryResponses) {
-        core::Loc loc = q->getLoc();
-        if (loc.exists() && loc.file().exists()) {
-            auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
-            // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isField() || q->isMethodDef()) {
-                responses.push_back(make_unique<core::lsp::QueryResponse>(*q));
-            }
-        }
-    }
-
-    // sort by location and deduplicate
-    fast_sort(responses,
-              [](const unique_ptr<core::lsp::QueryResponse> &a, const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
-                  auto aLoc = a->getLoc();
-                  auto bLoc = b->getLoc();
-                  int cmp = aLoc.file().id() - bLoc.file().id();
-                  if (cmp == 0) {
-                      cmp = aLoc.beginPos() - bLoc.beginPos();
-                  }
-                  if (cmp == 0) {
-                      cmp = aLoc.endPos() - bLoc.endPos();
-                  }
-                  // TODO: precedence based on response type, in case of same location?
-                  return cmp < 0;
-              });
-    responses.resize(
-        std::distance(responses.begin(), std::unique(responses.begin(), responses.end(),
-                                                     [](const unique_ptr<core::lsp::QueryResponse> &a,
-                                                        const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
-                                                         auto aLoc = a->getLoc();
-                                                         auto bLoc = b->getLoc();
-                                                         return aLoc == bLoc;
-                                                     })));
-    return responses;
-}
-
 vector<unique_ptr<Location>>
 LSPTask::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                           vector<unique_ptr<Location>> locations) const {
-    auto queryResponsesFiltered = filterAndDedup(gs, queryResponses);
+    auto queryResponsesFiltered = LSPQuery::filterAndDedup(gs, queryResponses);
     for (auto &q : queryResponsesFiltered) {
         if (auto *send = q->isSend()) {
             addLocIfExists(gs, locations, send->funLoc);
@@ -430,7 +287,7 @@ vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
-        auto run2 = queryBySymbol(typechecker, symbol);
+        auto run2 = LSPQuery::bySymbol(config, typechecker, symbol);
         absl::c_move(run2.responses, back_inserter(priorRefs));
     }
     return move(priorRefs);
@@ -440,7 +297,7 @@ vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref, core::SymbolRef symbol,
                                      vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists() && fref.exists()) {
-        auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
+        auto run2 = LSPQuery::bySymbolInFiles(config, typechecker, symbol, {fref});
         for (auto &resp : run2.responses) {
             // Ignore results in other files (which may have been picked up for typechecking purposes)
             if (resp->getLoc().file() == fref) {

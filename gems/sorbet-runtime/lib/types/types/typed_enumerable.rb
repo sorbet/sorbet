@@ -51,6 +51,9 @@ module T::Types
           return false if !key_type.recursively_valid?(key) || !value_type.recursively_valid?(val)
         end
         true
+      when Enumerator::Lazy
+        # Enumerators can be unbounded: see `[:foo, :bar].cycle`
+        true
       when Enumerator
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         true
@@ -140,6 +143,8 @@ module T::Types
         else
           T::Range[type_from_instances(typeable_objects)]
         end
+      when Enumerator::Lazy
+        T::Enumerator::Lazy[type_from_instances(obj)]
       when Enumerator
         T::Enumerator[type_from_instances(obj)]
       when Set
