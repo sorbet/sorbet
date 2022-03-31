@@ -16,3 +16,10 @@ class Dog < Animal
     'Dog'
   end
 end
+
+x = T.let(nil, T.nilable(String))
+
+x.nil?
+#  ^ hover: sig {returns(T::Boolean)}
+#  ^ hover: sig {returns(TrueClass)}
+#  ^ hover: # result type: T::Boolean

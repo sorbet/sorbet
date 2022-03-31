@@ -139,10 +139,12 @@ def main
       # ^^^^^^ hover: The docs for BigFoo
 
   foo = BigFoo.new
-  #            ^^^ hover: sig {params(args: T.untyped, blk: T.untyped).returns(BigFoo)}
+  #            ^^^ hover: sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
   #            ^^^ hover: def new(*args, &blk); end
+  #            ^^^ hover: # result type: BigFoo
   hoo = BigFoo::LittleFoo1.new
-                         # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
+  #                        ^^^ hover: sig {returns(T.untyped)}
+  #                        ^^^ hover: # result type: BigFoo::LittleFoo1
   raise "error message"
 # ^ hover: sig {params(arg0: String).returns(T.noreturn)}
 end

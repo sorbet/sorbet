@@ -16,7 +16,7 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
                         const unique_ptr<core::TypeConstraint> &constraint) {
     string contents;
     auto start = &dispatchResult;
-    ;
+
     while (start != nullptr) {
         auto &component = start->main;
         if (component.method.exists()) {
@@ -24,10 +24,12 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
                 contents += "\n";
             }
             contents = absl::StrCat(
-                contents, prettyTypeForMethod(gs, component.method, component.receiver, retType, constraint.get()));
+                contents, prettyTypeForMethod(gs, component.method, component.receiver, nullptr, constraint.get()));
         }
         start = start->secondary.get();
     }
+
+    contents += "\n# result type: " + retType.show(gs);
 
     return contents;
 }
