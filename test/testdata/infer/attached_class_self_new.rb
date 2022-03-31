@@ -44,7 +44,7 @@ class NamedArgs
 
     # Not matching initialize
     T.reveal_type(self.new(x: 10))
-                # ^^^^^^^^^^^^^^^ error: Missing required keyword argument `y`
+    #                      ^^^^^ error: Missing required keyword argument `y`
   # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of NamedArgs)`
   end
 end

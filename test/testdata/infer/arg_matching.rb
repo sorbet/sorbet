@@ -42,15 +42,15 @@ class TestArgs
     # "too many arguments" and "missing keyword argument b"
     kwarg(1, 2)
     #        ^ error: Too many positional arguments provided for method `TestArgs#kwarg`. Expected: `1`, got: `2`
-  # ^^^^^^^^^^^ error: Missing required keyword argument `b` for method `TestArgs#kwarg`
+    #     ^^^^ error: Missing required keyword argument `b` for method `TestArgs#kwarg`
     kwarg(1)
-  # ^^^^^^^^ error: Missing required keyword argument `b`
+    #     ^ error: Missing required keyword argument `b`
 
     kwarg(1, b: 2)
     kwarg(1, b: 2, c: 3)
   # ^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `c`
     kwarg(1, {})
-  # ^^^^^^^^^^^^ error: Missing required keyword argument `b`
+    #     ^^^^^ error: Missing required keyword argument `b`
     kwarg(1, b: "hi")
     #           ^^^^ error: Expected `Integer` but found `String("hi")` for argument `b`
     kwarg(1, any)
@@ -107,9 +107,9 @@ class TestArgs
     # There's ambiguity here about whether to report `u` or `x` as
     # missing; We follow Ruby in complaining about `u`.
     optkw(u: 1)
-  # ^^^^^^^^^^^ error: Missing required keyword argument `u`
+    #     ^^^^ error: Missing required keyword argument `u`
     optkw(1, 2, 3)
-  # ^^^^^^^^^^^^^^ error: Missing required keyword argument `u` for method `TestArgs#optkw`
+    #     ^^^^^^^    error: Missing required keyword argument `u` for method `TestArgs#optkw`
     #           ^ error: Too many positional arguments provided for method `TestArgs#optkw`. Expected: `1..2`, got: `3`
   end
 end

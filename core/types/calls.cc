@@ -222,10 +222,17 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, MethodRef method,
-                             const ArgInfo &arg) {
-    if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs), method.show(gs));
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
+                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+    if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
+        auto argName = arg.name.show(gs);
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
+        auto expectedType = Types::resultTypeAsSeenFrom(gs, arg.type, method.data(gs)->owner, inClass, targs);
+        if (expectedType == nullptr) {
+            expectedType = Types::untyped(gs, method);
+        }
+        e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
+                       expectedType.show(gs));
         return e.build();
     }
     return nullptr;
@@ -1064,7 +1071,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
-                        if (auto e = missingArg(gs, args.callLoc(), args.receiverLoc(), method, spec)) {
+                        if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1130,7 +1137,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.callLoc(), args.receiverLoc(), method, spec)) {
+                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
