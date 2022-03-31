@@ -11,7 +11,8 @@ class TestArgs
   end
 
   def call_required
-    required(1) # error: Not enough arguments
+    required(1)
+    #        ^ error: Not enough arguments
     required(1, 2)
     required(1, 2, 3)
     #              ^ error: Expected: `2`, got: `3`

@@ -12,7 +12,7 @@ class A < PackageSpec
   import method
        # ^^^^^^ error: Argument to `import` must be a constant
        # ^^^^^^ error: Expected `T.class_of(PackageSpec)`
-       # ^^^^^^ error: Not enough arguments
+       #       ^ error: Not enough arguments
   import REFERENCE # error: Cannot find package `REFERENCE`
        # ^^^^^^^^^ error: Unable to resolve constant `REFERENCE`
   # Despite the above, this import should work.
@@ -23,7 +23,7 @@ class A < PackageSpec
   export 123 # error: Argument to `export` must be a constant
   export "hello" # error: Argument to `export` must be a constant
   export method # error: Argument to `export` must be a constant
-       # ^^^^^^ error: Not enough arguments
+       #       ^ error: Not enough arguments
   export A::REFERENCE # Works; it's a constant.
   export A::AClass
   export A::AModule

@@ -981,7 +981,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (pit != pend) {
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.type != args.thisType) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
                                 "Expected: `{}`, got: `{}`",

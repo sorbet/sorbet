@@ -56,7 +56,7 @@ arity-messages.rb:12: Too many positional arguments provided for method `Object#
 
 arity-messages.rb:15: Not enough arguments provided for method `Object#quux`. Expected: `3`, got: `2` https://srb.help/7004
     15 |quux(2, z: 3)
-        ^^^^^^^^^^^^^
+             ^^^^^^^
     arity-messages.rb:14: `Object#quux` defined here
     14 |def quux(x, y, z); end
         ^^^^^^^^^^^^^^^^^
@@ -99,7 +99,7 @@ arity-messages.rb:24: Too many positional arguments provided for method `Object#
 
 arity-messages.rb:27: Not enough arguments provided for method `Object#pluto`. Expected: `1+`, got: `0` https://srb.help/7004
     27 |pluto
-        ^^^^^
+             ^
     arity-messages.rb:26: `Object#pluto` defined here
     26 |def pluto(x, *args); end
         ^^^^^^^^^^^^^^^^^^^
