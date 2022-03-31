@@ -1145,8 +1145,20 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(maxPossiblePositional < numArgsGiven);
 
         // It's only the end of this loc that matters, because we're going to join it with maxPossiblePositional.
-        auto lastPositionalArg = hashArgsCount == 0 || !consumed.empty() ? args.argLoc(args.numPosArgs - 1)
-                                                                         : args.argLoc(args.locs.args.size() - 1);
+        core::Loc lastPositionalArg;
+        if (hashArgsCount == 0) {
+            // No keyword args and no kwsplat, so the mismatch must have been from extra pos args
+            lastPositionalArg = args.argLoc(args.numPosArgs - 1);
+        } else if (!consumed.empty()) {
+            // Either keyword args or kwsplat. If we consumed any keyword args, we'd have reported
+            // the message as "unrecognized keyword args", not as too many positional args, so there
+            // must be a positional arg.
+            lastPositionalArg = args.argLoc(args.numPosArgs - 1);
+        } else {
+            // Didn't consume any of the keyword args, which means they're being included in the
+            // list of positional args. Can just take the last arg in the list.
+            lastPositionalArg = args.argLoc(args.locs.args.size() - 1);
+        }
 
         auto extraArgsLoc = args.argLoc(maxPossiblePositional).join(lastPositionalArg);
         if (auto e = gs.beginError(extraArgsLoc, errors::Infer::MethodArgumentCountMismatch)) {
