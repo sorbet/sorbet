@@ -442,7 +442,13 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     return tp;
 }
 
-string prettyArity(const GlobalState &gs, MethodRef method) {
+struct ArityComponents {
+    int required;
+    int optional;
+    bool repeated;
+};
+
+ArityComponents arityComponents(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
     for (const auto &arg : method.data(gs)->arguments) {
@@ -456,6 +462,11 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
             ++required;
         }
     }
+    return {required, optional, repeated};
+}
+
+string prettyArity(const GlobalState &gs, MethodRef method) {
+    auto [required, optional, repeated] = arityComponents(gs, method);
     if (repeated) {
         return absl::StrCat(required, "+");
     } else if (optional > 0) {
@@ -1126,13 +1137,48 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (ait != aend) {
-        if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
-            auto hashCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
-            auto numArgsGiven = args.numPosArgs + hashCount;
+        auto arity = arityComponents(gs, method);
+        auto maxPossiblePositional = arity.required + arity.optional;
+
+        auto hashArgsCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
+        auto numArgsGiven = args.numPosArgs + hashArgsCount;
+        ENFORCE(maxPossiblePositional < numArgsGiven);
+
+        // It's only the end of this loc that matters, because we're going to join it with maxPossiblePositional.
+        core::Loc lastPositionalArg;
+        if (hashArgsCount == 0) {
+            // No keyword args and no kwsplat, so the mismatch must have been from extra pos args
+            lastPositionalArg = args.argLoc(args.numPosArgs - 1);
+        } else if (!consumed.empty()) {
+            // Either keyword args or kwsplat. If we consumed any keyword args, we'd have reported
+            // the message as "unrecognized keyword args", not as too many positional args, so there
+            // must be a positional arg.
+            lastPositionalArg = args.argLoc(args.numPosArgs - 1);
+        } else {
+            // Didn't consume any of the keyword args, which means they're being included in the
+            // list of positional args. Can just take the last arg in the list.
+            lastPositionalArg = args.argLoc(args.locs.args.size() - 1);
+        }
+
+        auto extraArgsLoc = args.argLoc(maxPossiblePositional).join(lastPositionalArg);
+        if (auto e = gs.beginError(extraArgsLoc, errors::Infer::MethodArgumentCountMismatch)) {
+            auto deleteLoc = extraArgsLoc;
+            // Heuristic to try to find leading commas. Not actually required for correctness
+            // (will still parse even if we delete something but don't find the comma) which is
+            // why we're fine with this just hard-coding two common cases (easiest to implement).
+            if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == ",") {
+                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+            } else if (extraArgsLoc.adjustLen(gs, -2, 2).source(gs) == ", ") {
+                deleteLoc = extraArgsLoc.adjust(gs, -2, 0);
+            } else if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == " ") {
+                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+            }
+
             if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.replaceWith("Delete extra args", deleteLoc, "");
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
                 // people some slightly confusing error messages.
@@ -1148,9 +1194,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
                 if (firstKeyword != data->arguments.end()) {
-                    e.addErrorLine(args.callLoc(),
+                    auto possibleArg = firstKeyword->argumentName(gs);
+                    e.addErrorLine(args.argLoc(maxPossiblePositional),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   method.show(gs), firstKeyword->argumentName(gs));
+                                   method.show(gs), possibleArg);
+                    auto howManyExtra = numArgsGiven - hashArgsCount - maxPossiblePositional;
+                    if (howManyExtra == 1) {
+                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
+                                      "{}: ", possibleArg);
+                    }
+                } else {
+                    e.replaceWith("Delete extra args", deleteLoc, "");
                 }
             }
             result.main.errors.emplace_back(e.build());

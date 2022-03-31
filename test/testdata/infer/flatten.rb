@@ -162,7 +162,7 @@ xs.flatten(true)
 #          ^^^^ error: You must pass an Integer literal to specify a depth with Array#flatten
 
   xs.flatten(1, 1)
-# ^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Array#flatten`. Expected: `0..1`, got: `2`
+  #             ^ error: Too many arguments provided for method `Array#flatten`. Expected: `0..1`, got: `2`
 
 or_type_collection = [
   case rand
