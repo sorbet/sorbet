@@ -1,42 +1,98 @@
-test.rb:11: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+test.rb:11: Passing a non-literal `Hash` to `Object#foo`, which requires specific keyword parameters https://srb.help/7019
     11 |foo(0, 1, 2, opts)
-        ^^^^^^^^^^^^^^^^^^
+                     ^^^^
+    test.rb:4: Keyword parameters of `Object#foo` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
   Got `T::Hash[Symbol, Integer]` originating from:
     test.rb:8:
      8 |opts = T::Hash[Symbol, Integer].new
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Sorbet cannot statically guarantee that the splatted `Hash` contains all the keys required by `foo`.
+    If that's okay, use `T.unsafe` to silence this error, otherwise pass the required keyword parameters directly.
+  Autocorrect: Done
+    test.rb:11: Replaced with `**T.unsafe(opts)`
+    11 |foo(0, 1, 2, opts)
+                     ^^^^
 
-test.rb:13: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+test.rb:13: Passing a non-literal `Hash` to `Object#foo`, which requires specific keyword parameters https://srb.help/7019
     13 |foo(0, 1, 2, **opts)
-        ^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^
+    test.rb:4: Keyword parameters of `Object#foo` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
   Got `T::Hash[Symbol, Integer]` originating from:
+    test.rb:8:
+     8 |opts = T::Hash[Symbol, Integer].new
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     test.rb:13:
     13 |foo(0, 1, 2, **opts)
                      ^^^^^^
+  Note:
+    Sorbet cannot statically guarantee that the splatted `Hash` contains all the keys required by `foo`.
+    If that's okay, use `T.unsafe` to silence this error, otherwise pass the required keyword parameters directly.
+  Autocorrect: Done
+    test.rb:13: Replaced with `T.unsafe(opts)`
+    13 |foo(0, 1, 2, **opts)
+                       ^^^^
 
-test.rb:15: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+test.rb:15: Passing a non-literal `Hash` to `Object#foo`, which requires specific keyword parameters https://srb.help/7019
     15 |foo(0, 1, 2, **opts, x: 0)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^
+    test.rb:4: Keyword parameters of `Object#foo` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
   Got `T::Hash[T.untyped, T.untyped]` originating from:
     test.rb:15:
     15 |foo(0, 1, 2, **opts, x: 0)
                      ^^^^^^^^^^^^
+  Note:
+    Sorbet cannot statically guarantee that the splatted `Hash` contains all the keys required by `foo`.
+    If that's okay, use `T.unsafe` to silence this error, otherwise pass the required keyword parameters directly.
+  Autocorrect: Done
+    test.rb:15: Replaced with `T.unsafe({opts, x: 0})`
+    15 |foo(0, 1, 2, **opts, x: 0)
+                       ^^^^^^^^^^
 
-test.rb:17: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+test.rb:17: Passing a non-literal `Hash` to `Object#foo`, which requires specific keyword parameters https://srb.help/7019
     17 |foo(0, 1, 2, x: 0, **opts)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^
+    test.rb:4: Keyword parameters of `Object#foo` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
   Got `T::Hash[T.untyped, T.untyped]` originating from:
     test.rb:17:
     17 |foo(0, 1, 2, x: 0, **opts)
                      ^^^^^^^^^^^^
+  Note:
+    Sorbet cannot statically guarantee that the splatted `Hash` contains all the keys required by `foo`.
+    If that's okay, use `T.unsafe` to silence this error, otherwise pass the required keyword parameters directly.
+  Autocorrect: Done
+    test.rb:17: Replaced with `**T.unsafe({x: 0, **opts})`
+    17 |foo(0, 1, 2, x: 0, **opts)
+                     ^^^^^^^^^^^^
 
-test.rb:19: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+test.rb:19: Passing a non-literal `Hash` to `Object#foo`, which requires specific keyword parameters https://srb.help/7019
     19 |foo(0, 1, 2, **{x => 0})
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^
+    test.rb:4: Keyword parameters of `Object#foo` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
   Got `T::Hash[T.untyped, T.untyped]` originating from:
     test.rb:19:
     19 |foo(0, 1, 2, **{x => 0})
                      ^^^^^^^^^^
+    test.rb:19:
+    19 |foo(0, 1, 2, **{x => 0})
+                       ^^^^^^^^
+  Note:
+    Sorbet cannot statically guarantee that the splatted `Hash` contains all the keys required by `foo`.
+    If that's okay, use `T.unsafe` to silence this error, otherwise pass the required keyword parameters directly.
+  Autocorrect: Done
+    test.rb:19: Replaced with `T.unsafe({x => 0})`
+    19 |foo(0, 1, 2, **{x => 0})
+                       ^^^^^^^^
 Errors: 5
 
 --------------------------------------------------------------------------
@@ -51,12 +107,12 @@ end
 opts = T::Hash[Symbol, Integer].new
 x = T.let(:x, Symbol)
 
-foo(0, 1, 2, opts)
+foo(0, 1, 2, **T.unsafe(opts))
 
-foo(0, 1, 2, **opts)
+foo(0, 1, 2, **T.unsafe(opts))
 
-foo(0, 1, 2, **opts, x: 0)
+foo(0, 1, 2, **T.unsafe({opts, x: 0}))
 
-foo(0, 1, 2, x: 0, **opts)
+foo(0, 1, 2, **T.unsafe({x: 0, **opts}))
 
-foo(0, 1, 2, **{x => 0})
+foo(0, 1, 2, **T.unsafe({x => 0}))

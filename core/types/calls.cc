@@ -981,12 +981,16 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (kwSplatIsHash) {
             bool hasKwSplatParam = false;
             bool hasKwParam = false;
+            const ArgInfo *firstKwParam;
             const ArgInfo *kwSplatParam;
             for (auto &param : data->arguments) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     kwSplatParam = &param;
                     hasKwSplatParam = true;
                 } else if (param.flags.isKeyword && !param.flags.isRepeated) {
+                    if (!hasKwParam) {
+                        firstKwParam = &param;
+                    }
                     hasKwParam = true;
                 }
             }
@@ -1003,10 +1007,36 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             } else {
                 // A keyword splat was passed in, but none of the declared arguments are keyword splats,
                 // or there is a keyword splat argument, but there is one ore more keyword non-splat argument
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::UntypedSplat)) {
-                    e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
-                                "arguments");
+                auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
+                if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
+                    e.setHeader("Passing a non-literal `{}` to `{}`, which requires specific keyword parameters",
+                                "Hash", method.show(gs));
+                    e.addErrorLine(firstKwParam->loc, "Keyword parameters of `{}` begin here:", method.show(gs));
                     e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                    e.addErrorNote("Sorbet cannot statically guarantee that the splatted `{}` contains all the keys "
+                                   "required by `{}`.\n"
+                                   "    If that's okay, use `{}` to silence this error, otherwise pass the required "
+                                   "keyword parameters directly.",
+                                   "Hash", args.name.show(gs), "T.unsafe");
+                    if (kwSplatArgLoc.exists()) {
+                        auto replaceLoc = kwSplatArgLoc;
+                        string maybeStarStar = "**";
+                        if (kwSplatArgLoc.adjustLen(gs, 0, 2).source(gs) == "**") {
+                            replaceLoc = kwSplatArgLoc.adjust(gs, 2, 0);
+                            maybeStarStar = "";
+                        }
+
+                        auto replaceValue = replaceLoc.source(gs).value();
+
+                        if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
+                            (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
+                            e.replaceWith("Wrap in `T.unsafe`", replaceLoc, "{}T.unsafe({})", maybeStarStar,
+                                          replaceLoc.source(gs).value());
+                        } else {
+                            e.replaceWith("Wrap in `T.unsafe`", replaceLoc, "{}T.unsafe({{{}}})", maybeStarStar,
+                                          replaceLoc.source(gs).value());
+                        }
+                    }
                     result.main.errors.emplace_back(e.build());
                 }
             }
