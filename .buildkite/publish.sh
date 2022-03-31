@@ -35,29 +35,29 @@ rm -rf release
 rm -rf _out_
 buildkite-agent artifact download "_out_/**/*" .
 
-echo "--- releasing sorbet.run"
+if [ "$dryrun" = "" ]; then
+  echo "--- releasing sorbet.run"
 
-rm -rf sorbet.run
-git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master
-tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
-mv sorbet-wasm.wasm sorbet.run/docs
-mv sorbet-wasm.js sorbet.run/docs
-pushd sorbet.run/docs
-git add sorbet-wasm.wasm sorbet-wasm.js
-dirty=
-git diff-index --quiet HEAD -- || dirty=1
-if [ "$dirty" != "" ]; then
-  echo "$BUILDKITE_COMMIT" > sha.html
-  git add sha.html
-  git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
-  if [ "$dryrun" = "" ]; then
-      git push
+  rm -rf sorbet.run
+  git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master
+  tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
+  mv sorbet-wasm.wasm sorbet.run/docs
+  mv sorbet-wasm.js sorbet.run/docs
+  pushd sorbet.run/docs
+  git add sorbet-wasm.wasm sorbet-wasm.js
+  dirty=
+  git diff-index --quiet HEAD -- || dirty=1
+  if [ "$dirty" != "" ]; then
+    echo "$BUILDKITE_COMMIT" > sha.html
+    git add sha.html
+    git commit -m "Updated site - $(date -u +%Y-%m-%dT%H:%M:%S%z)"
+    git push
+  else
+    echo "Nothing to update"
   fi
-else
-  echo "Nothing to update"
+  popd
+  rm -rf sorbet.run
 fi
-popd
-rm -rf sorbet.run
 
 echo "--- releasing sorbet.org"
 git fetch origin gh-pages
