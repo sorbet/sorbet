@@ -1,0 +1,62 @@
+test.rb:11: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    11 |foo(0, 1, 2, opts)
+        ^^^^^^^^^^^^^^^^^^
+  Got `T::Hash[Symbol, Integer]` originating from:
+    test.rb:8:
+     8 |opts = T::Hash[Symbol, Integer].new
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.rb:13: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    13 |foo(0, 1, 2, **opts)
+        ^^^^^^^^^^^^^^^^^^^^
+  Got `T::Hash[Symbol, Integer]` originating from:
+    test.rb:13:
+    13 |foo(0, 1, 2, **opts)
+                     ^^^^^^
+
+test.rb:15: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    15 |foo(0, 1, 2, **opts, x: 0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T::Hash[T.untyped, T.untyped]` originating from:
+    test.rb:15:
+    15 |foo(0, 1, 2, **opts, x: 0)
+                     ^^^^^^^^^^^^
+
+test.rb:17: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    17 |foo(0, 1, 2, x: 0, **opts)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T::Hash[T.untyped, T.untyped]` originating from:
+    test.rb:17:
+    17 |foo(0, 1, 2, x: 0, **opts)
+                     ^^^^^^^^^^^^
+
+test.rb:19: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    19 |foo(0, 1, 2, **{x => 0})
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T::Hash[T.untyped, T.untyped]` originating from:
+    test.rb:19:
+    19 |foo(0, 1, 2, **{x => 0})
+                     ^^^^^^^^^^
+Errors: 5
+
+--------------------------------------------------------------------------
+
+# typed: strict
+extend T::Sig
+
+sig {params(pos: Integer, x: Integer).void}
+def foo(*pos, x:)
+end
+
+opts = T::Hash[Symbol, Integer].new
+x = T.let(:x, Symbol)
+
+foo(0, 1, 2, opts)
+
+foo(0, 1, 2, **opts)
+
+foo(0, 1, 2, **opts, x: 0)
+
+foo(0, 1, 2, x: 0, **opts)
+
+foo(0, 1, 2, **{x => 0})
