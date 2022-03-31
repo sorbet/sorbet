@@ -58,7 +58,7 @@ test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` be
 
 test/cli/expected-got/expected-got.rb:30: `T.must` called on `Integer(0)`, which is never `nil` https://srb.help/7015
     30 |T.must(0)
-        ^^^^^^^^^
+               ^
   Got `Integer(0)` originating from:
     test/cli/expected-got/expected-got.rb:30:
     30 |T.must(0)

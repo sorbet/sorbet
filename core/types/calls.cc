@@ -1560,16 +1560,15 @@ public:
         if (args.args.empty()) {
             return;
         }
-        const auto loc = args.callLoc();
         if (!args.args[0]->type.isFullyDefined()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type.show(gs));
+            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::BareTypeUsage)) {
+                e.setHeader("`{}` applied to incomplete type `{}`", "T.must", args.args[0]->type.show(gs));
             }
             return;
         }
         auto ret = Types::dropNil(gs, args.args[0]->type);
         if (ret == args.args[0]->type) {
-            if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
+            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
                 if (args.args[0]->type.isUntyped()) {
                     e.setHeader("`{}` called on `{}`, which is redundant", "T.must", args.args[0]->type.show(gs));
                 } else {
@@ -1577,9 +1576,10 @@ public:
                                 "nil");
                 }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                const auto locWithoutTMust = loc.adjust(gs, 7, -1);
-                if (loc.exists() && locWithoutTMust.exists()) {
-                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs).value());
+                auto replaceLoc = args.callLoc();
+                const auto locWithoutTMust = args.callLoc().adjust(gs, 7, -1);
+                if (replaceLoc.exists() && locWithoutTMust.exists()) {
+                    e.replaceWith("Remove `T.must`", replaceLoc, "{}", locWithoutTMust.source(gs).value());
                 }
             }
         }

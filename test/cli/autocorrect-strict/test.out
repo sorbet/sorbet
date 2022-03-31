@@ -18,7 +18,7 @@ autocorrect-strict.rb:13: Use `T::Array[...]`, not `Array[...]` to declare a typ
 
 autocorrect-strict.rb:3: `T.must` called on `Integer(3)`, which is never `nil` https://srb.help/7015
      3 |x = T.must(3)
-            ^^^^^^^^^
+                   ^
   Got `Integer(3)` originating from:
     autocorrect-strict.rb:3:
      3 |x = T.must(3)
