@@ -87,7 +87,9 @@ public:
      */
     void setSlowPathBlocked(bool blocked);
 
-    bool isSlowPathBlocked() const { return slowPathBlocked; }
+    bool isSlowPathBlocked() const {
+        return slowPathBlocked;
+    }
 };
 
 class SingleThreadedLSPWrapper final : public LSPWrapper {
