@@ -131,9 +131,9 @@ test/cli/expected-got/expected-got.rb:63: `T.cast` is useless because `Integer(1
     63 |T.cast(1, Integer)
                ^
 
-test/cli/expected-got/expected-got.rb:68: Can not call method `foo` on void type https://srb.help/7003
+test/cli/expected-got/expected-got.rb:68: Cannot call method `foo` on void type https://srb.help/7003
     68 |returns_void.foo
-        ^^^^^^^^^^^^^^^^
+                     ^^^
 
 test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found `[Integer(1), Integer(2), T.nilable(Integer)]` for argument `xs` https://srb.help/7002
     73 |takes_int_array(xs)
