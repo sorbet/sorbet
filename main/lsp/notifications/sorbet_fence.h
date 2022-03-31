@@ -12,6 +12,8 @@ public:
 
     bool canPreempt(const LSPIndexer &indexer) const override;
 
+    bool canUseStaleData() const override;
+
     void run(LSPTypecheckerInterface &tc) override;
 };
 } // namespace sorbet::realmain::lsp
