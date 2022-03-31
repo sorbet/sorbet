@@ -8,7 +8,8 @@ end
 module Helper2
   extend T::Helpers
 
-  requires_ancestor # error: `requires_ancestor` requires a block parameter, but no block was passed
+  requires_ancestor
+  #                ^ error: `requires_ancestor` requires a block parameter, but no block was passed
 end
 
 module Helper3
@@ -77,7 +78,7 @@ module Helper10
   extend T::Helpers
 
   requires_ancestor
-# ^^^^^^^^^^^^^^^^^ error: `requires_ancestor` requires a block parameter, but no block was passed
+  #                ^ error: `requires_ancestor` requires a block parameter, but no block was passed
 end
 
 module Helper11
@@ -86,7 +87,7 @@ module Helper11
   requires_ancestor (Kernel)
   #                  ^^^^^^ error: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `1`
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `requires_ancestor` only accepts a block
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `requires_ancestor` requires a block parameter, but no block was passed
+  #                         ^ error: `requires_ancestor` requires a block parameter, but no block was passed
 end
 
 module Helper12

@@ -1,6 +1,6 @@
 test/cli/no-valid-instantiation/no-valid-instantiation.rb:40: Could not find valid instantiation of type parameters for `Object#dispatch_call_fail` https://srb.help/7020
     40 |dispatch_call_fail(f, 0) # error: Could not find valid instantiation of type parameters
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^
     test/cli/no-valid-instantiation/no-valid-instantiation.rb:26: `Object#dispatch_call_fail` defined here
     26 |def dispatch_call_fail(f, x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

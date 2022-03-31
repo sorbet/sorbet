@@ -16,7 +16,7 @@ autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/70
 
 autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
     13 |sig {returns(T::Array[foo: Integer])}
-                     ^^^^^^^^^^^^^^^^^^^^^^
+                              ^^^^^^^^^^^^
 
 autocorrect-kwargs.rb:21: `params` expects keyword arguments https://srb.help/5003
     21 |sig {params({a: Integer, b: String}).void}
@@ -52,7 +52,7 @@ autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/70
 
 autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
     13 |sig {returns(T::Array[foo: Integer])}
-                     ^^^^^^^^^^^^^^^^^^^^^^
+                              ^^^^^^^^^^^^
 
 autocorrect-kwargs.rb:13: Unexpected bare `Symbol(:foo)` value found in type position https://srb.help/7009
     13 |sig {returns(T::Array[foo: Integer])}
@@ -68,7 +68,7 @@ autocorrect-kwargs.rb:18: Keyword arguments given to `Array` https://srb.help/70
 
 autocorrect-kwargs.rb:18: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
     18 |foo = T::Array[foo: Integer, bar: String].new
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-kwargs.rb:18: Unexpected bare `Symbol(:foo)` value found in type position https://srb.help/7009
     18 |foo = T::Array[foo: Integer, bar: String].new

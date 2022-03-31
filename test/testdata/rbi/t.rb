@@ -12,8 +12,10 @@ T.enum([:a, :b]) # error: Method `enum` does not exist on `T.class_of(T)`
 T.deprecated_enum([:a, :b])
 
 T.untyped
-T.any(String) # error: Not enough arguments provided for method `T.any`.
-T.all(String) # error: Not enough arguments provided for method `T.all`.
+T.any(String)
+#     ^^^^^^ error: Not enough arguments provided for method `T.any`.
+T.all(String)
+#     ^^^^^^ error: Not enough arguments provided for method `T.all`.
 T.any(String, Integer, Symbol)
 T.all(String, Integer, Symbol)
 

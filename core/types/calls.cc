@@ -222,10 +222,17 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, MethodRef method,
-                             const ArgInfo &arg) {
-    if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs), method.show(gs));
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
+                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+    if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
+        auto argName = arg.name.show(gs);
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
+        auto expectedType = Types::resultTypeAsSeenFrom(gs, arg.type, method.data(gs)->owner, inClass, targs);
+        if (expectedType == nullptr) {
+            expectedType = Types::untyped(gs, method);
+        }
+        e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
+                       expectedType.show(gs));
         return e.build();
     }
     return nullptr;
@@ -578,19 +585,21 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
+    auto funLoc = args.funLoc();
+    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::UnknownMethod)) {
-                e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
+            if (auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod)) {
+                e.setHeader("Cannot call method `{}` on void type", args.name.show(gs));
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name == Names::new_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                             symbol.show(gs));
             }
@@ -622,9 +631,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             if (!args.args.empty() && !args.suppressErrors) {
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+                if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
                                 args.args.size());
+                    e.replaceWith("Delete args", args.argsLoc(), "");
                     result.main.errors.emplace_back(e.build());
                 }
             }
@@ -637,8 +647,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // Short circuit here to avoid constructing an expensive error message.
             return result;
         }
-        auto funLoc = args.funLoc();
-        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
@@ -1007,7 +1015,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (pit != pend) {
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.type != args.thisType) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
                                 "Expected: `{}`, got: `{}`",
@@ -1090,7 +1098,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
-                        if (auto e = missingArg(gs, args.callLoc(), args.receiverLoc(), method, spec)) {
+                        if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1156,7 +1164,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.callLoc(), args.receiverLoc(), method, spec)) {
+                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
@@ -1252,11 +1260,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = data->loc().file();
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
                 bspec.isSyntheticBlockArgument()) {
-                // TODO(jez) Do we have a loc for the block itself, not the entire call?
-                if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::TakesNoBlock)) {
+                auto blockLoc = args.blockLoc(gs);
+                if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
+                    }
+
+                    if (blockLoc.exists()) {
+                        e.replaceWith("Remove block", blockLoc, "");
                     }
                 }
             }
@@ -1302,7 +1314,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(gs)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::GenericMethodConstraintUnsolved)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
@@ -1313,7 +1325,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments.back().type;
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::BlockNotPassed)) {
+            if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
@@ -1415,11 +1427,12 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
 } // namespace
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    auto funLoc = args.funLoc();
+    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
             if (!canCallNew(gs, wrapped)) {
-                auto callLoc = core::Loc(args.locs.file, args.locs.call);
-                if (auto e = gs.beginError(callLoc, errors::Infer::MetaTypeDispatchCall)) {
+                if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
                     e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                                 wrapped.show(gs));
 
@@ -1464,7 +1477,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         }
         default:
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
                             this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
@@ -1581,16 +1594,15 @@ public:
         if (args.args.empty()) {
             return;
         }
-        const auto loc = args.callLoc();
         if (!args.args[0]->type.isFullyDefined()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type.show(gs));
+            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::BareTypeUsage)) {
+                e.setHeader("`{}` applied to incomplete type `{}`", "T.must", args.args[0]->type.show(gs));
             }
             return;
         }
         auto ret = Types::dropNil(gs, args.args[0]->type);
         if (ret == args.args[0]->type) {
-            if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
+            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
                 if (args.args[0]->type.isUntyped()) {
                     e.setHeader("`{}` called on `{}`, which is redundant", "T.must", args.args[0]->type.show(gs));
                 } else {
@@ -1598,9 +1610,10 @@ public:
                                 "nil");
                 }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                const auto locWithoutTMust = loc.adjust(gs, 7, -1);
-                if (loc.exists() && locWithoutTMust.exists()) {
-                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs).value());
+                auto replaceLoc = args.callLoc();
+                const auto locWithoutTMust = args.callLoc().adjust(gs, 7, -1);
+                if (replaceLoc.exists() && locWithoutTMust.exists()) {
+                    e.replaceWith("Remove `T.must`", replaceLoc, "{}", locWithoutTMust.source(gs).value());
                 }
             }
         }
@@ -1803,7 +1816,7 @@ public:
         }
 
         if (args.numPosArgs != arity) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::GenericArgumentCountMismatch)) {
+            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
                             attachedClass.show(gs), arity, args.numPosArgs);
             }
