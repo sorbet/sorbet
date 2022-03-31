@@ -1140,7 +1140,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto arity = arityComponents(gs, method);
         auto maxPossiblePositional = arity.required + arity.optional;
 
-        // TODO(jez) check if you can move this back inside the `if`
         auto hashArgsCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
         auto numArgsGiven = args.numPosArgs + hashArgsCount;
         ENFORCE(maxPossiblePositional < numArgsGiven);
