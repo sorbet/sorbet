@@ -893,6 +893,24 @@ struct DispatchArgs {
     Loc argLoc(size_t i) const {
         return core::Loc(locs.file, locs.args[i]);
     }
+    Loc argsLoc() const {
+        if (!locs.args.empty()) {
+            return core::Loc(locs.file, locs.args.front().join(locs.args.back()));
+        }
+
+        if (this->block != nullptr) {
+            if (locs.fun.exists()) {
+                return funLoc().copyEndWithZeroLength();
+            }
+            return callLoc().copyEndWithZeroLength();
+        }
+
+        if (locs.fun.exists()) {
+            return core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+        }
+
+        return callLoc().copyEndWithZeroLength();
+    }
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;

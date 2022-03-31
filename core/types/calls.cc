@@ -602,9 +602,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             if (!args.args.empty() && !args.suppressErrors) {
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+                if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
                                 args.args.size());
+                    e.replaceWith("Delete args", args.argsLoc(), "");
                     result.main.errors.emplace_back(e.build());
                 }
             }
