@@ -83,6 +83,7 @@ end
 
 # Doesn't need generated because parent already has overridable
 class DoesntNeedGenerated
+  extend T::Sig
   sig {override.overridable.void}
   def already_overridable; end
 end
