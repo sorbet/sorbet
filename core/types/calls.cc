@@ -1742,6 +1742,8 @@ public:
             attachedClass = Symbols::Enumerable();
         } else if (attachedClass == Symbols::T_Enumerator()) {
             attachedClass = Symbols::Enumerator();
+        } else if (attachedClass == Symbols::T_Enumerator_Lazy()) {
+            attachedClass = Symbols::Enumerator_Lazy();
         } else if (attachedClass == Symbols::T_Range()) {
             attachedClass = Symbols::Range();
         } else if (attachedClass == Symbols::T_Set()) {
@@ -3658,6 +3660,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerable(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerator_Lazy(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
