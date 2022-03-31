@@ -465,21 +465,40 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
     }
 }
 
-bool extendsTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosingClass) {
+bool extendsModule(const GlobalState &gs, core::ClassOrModuleRef enclosingClass, core::ClassOrModuleRef mod) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(gs)->lookupSingletonClass(gs);
     ENFORCE(enclosingSingletonClass.exists());
-    return enclosingSingletonClass.data(gs)->derivesFrom(gs, core::Symbols::T_Helpers());
+    return enclosingSingletonClass.data(gs)->derivesFrom(gs, mod);
 }
 
 /**
- * Make an autocorrection for adding `extend T::Helpers`, when needed.
+ * Make an autocorrection for adding `extend T::Sig` or `extend T::Helpers`, when needed.
  */
-optional<core::AutocorrectSuggestion>
-maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosingClass, const Loc &call) {
-    if (extendsTHelpers(gs, enclosingClass)) {
+optional<core::AutocorrectSuggestion> maybeSuggestExtendModule(const GlobalState &gs,
+                                                               core::ClassOrModuleRef enclosingClass, const Loc &call,
+                                                               core::ClassOrModuleRef mod) {
+    if (extendsModule(gs, enclosingClass, mod)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
+    }
+
+    if (enclosingClass == core::Symbols::root()) {
+        // We don't put any locs on <root> for performance (would have one loc for each file in the codebase)
+        // If they're writing methods at the top level, it's probably a small script.
+        // Just put the `extend` immediately above the sig.
+
+        auto [sigStart, _sigEnd] = call.position(gs);
+        auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
+        auto thisLineLoc = core::Loc::fromDetails(gs, call.file(), thisLineStart, thisLineStart);
+        ENFORCE(thisLineLoc.has_value());
+        auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+
+        string prefix(thisLinePadding, ' ');
+        auto modStr = mod.show(gs);
+        return core::AutocorrectSuggestion{
+            fmt::format("Add `extend {}`", modStr),
+            {core::AutocorrectSuggestion::Edit{thisLineLoc.value(), fmt::format("{}extend {}\n\n", prefix, modStr)}}};
     }
 
     auto inFileOfMethod = [&](const auto &loc) { return loc.file() == call.file(); };
@@ -493,12 +512,12 @@ maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosi
 
     auto [classStart, classEnd] = classLoc->position(gs);
 
-    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    auto thisLineStart = core::Loc::Detail{classStart.line, 1};
     auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
     ENFORCE(thisLineLoc.has_value());
     auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
 
-    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    auto nextLineStart = core::Loc::Detail{classStart.line + 1, 1};
     auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
     if (!nextLineLoc.has_value()) {
         return nullopt;
@@ -507,9 +526,10 @@ maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosi
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
+    auto modStr = mod.show(gs);
     return core::AutocorrectSuggestion{
-        "Add `extend T::Helpers`",
-        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
+        fmt::format("Add `extend {}`", modStr),
+        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend {}\n", prefix, modStr)}}};
 }
 
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
@@ -629,7 +649,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     args.name == core::Names::mixesInClassMethods() ||
                     (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
                     auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                    if (auto suggestion = maybeSuggestExtendTHelpers(gs, attachedClass, args.callLoc())) {
+                    if (auto suggestion =
+                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Helpers())) {
+                        e.addAutocorrect(std::move(*suggestion));
+                    }
+                } else if (args.name == core::Names::sig()) {
+                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                    if (auto suggestion =
+                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Sig())) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
