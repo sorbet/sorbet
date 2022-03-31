@@ -190,6 +190,7 @@ int LSPWrapper::getTypecheckCount() {
 }
 
 void LSPWrapper::setSlowPathBlocked(bool blocked) {
+    this->slowPathBlocked = blocked;
     lspLoop->setSlowPathBlocked(blocked);
 }
 

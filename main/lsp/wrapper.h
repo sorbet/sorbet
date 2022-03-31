@@ -39,6 +39,8 @@ protected:
     /** The LSP 'server', which runs in the same thread as LSPWrapper (unless multithreading is enabled) */
     const std::shared_ptr<LSPLoop> lspLoop;
 
+    bool slowPathBlocked = false;
+
     /** Raw constructor. Note: Constructor is unwieldy so we can make class fields `const`. */
     LSPWrapper(std::unique_ptr<core::GlobalState> gs, std::shared_ptr<options::Options> opts,
                std::shared_ptr<spd::logger> logger,
@@ -84,6 +86,8 @@ public:
      * this flag to `false` will immediately unblock any currently blocked slow paths.
      */
     void setSlowPathBlocked(bool blocked);
+
+    bool isSlowPathBlocked() const { return slowPathBlocked; }
 };
 
 class SingleThreadedLSPWrapper final : public LSPWrapper {

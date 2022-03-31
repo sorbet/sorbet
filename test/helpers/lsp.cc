@@ -470,7 +470,11 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
         return stWrapper->getLSPResponsesFor(move(messages));
     } else if (auto mtWrapper = dynamic_cast<MultiThreadedLSPWrapper *>(&wrapper)) {
         // Fences are only used in tests. Use an ID that is likely to be unique to this method.
-        const int fenceId = 909090;
+        int fenceId = 909090;
+        if (mtWrapper->isSlowPathBlocked()) {
+            fenceId |= (1 << 30);
+        }
+
         // Chase messages with a fence, and wait for a fence response.
         messages.push_back(
             make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, fenceId)));

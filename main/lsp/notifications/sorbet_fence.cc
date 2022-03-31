@@ -9,7 +9,7 @@ SorbetFenceTask::SorbetFenceTask(const LSPConfiguration &config, int id)
     : LSPTask(config, LSPMethod::SorbetFence), id(id) {}
 
 bool SorbetFenceTask::canPreempt(const LSPIndexer &indexer) const {
-    return false;
+    return (id & (1 << 30)) != 0;
 }
 
 bool SorbetFenceTask::canUseStaleData() const {

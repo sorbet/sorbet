@@ -1098,6 +1098,11 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto id = nextId++;
     auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
     auto responses = getLSPResponsesFor(wrapper, move(msg));
+    if (responses.size() != 1) {
+        for (auto &r : responses) {
+            cout << r->toJSON() << endl;
+        }
+    }
     REQUIRE_EQ(responses.size(), 1);
     auto &responseMsg = responses.at(0);
     REQUIRE(responseMsg->isResponse());

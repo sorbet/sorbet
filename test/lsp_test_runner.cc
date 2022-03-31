@@ -430,6 +430,7 @@ TEST_CASE("LSPTest") {
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }
+        opts->disableWatchman = true;
 
         if (haveStaleUpdates) {
             opts->lspStaleStateEnabled = true;
@@ -722,6 +723,7 @@ TEST_CASE("LSPTest") {
                 auto mtWrapper = dynamic_cast<MultiThreadedLSPWrapper *>(lspWrapper.get());
                 REQUIRE(mtWrapper != nullptr);
 
+                auto drained = getLSPResponsesFor(*lspWrapper, std::vector<std::unique_ptr<LSPMessage>>{});
                 mtWrapper->setSlowPathBlocked(true);
                 auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
                 bool foundTypecheckRunInfo = false;
