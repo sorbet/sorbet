@@ -26,7 +26,6 @@ bool isServerNotification(const LSPMethod method) {
 } // namespace
 
 void LSPOutput::write(unique_ptr<LSPMessage> msg) {
-    cout << "Write: " << msg->toJSON() << endl;
     // Sanity check that message is acceptable.
     if (msg->isResponse()) {
         ENFORCE(msg->asResponse().result || msg->asResponse().error,
