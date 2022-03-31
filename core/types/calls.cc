@@ -1226,11 +1226,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = data->loc().file();
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
                 bspec.isSyntheticBlockArgument()) {
-                // TODO(jez) Do we have a loc for the block itself, not the entire call?
-                if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::TakesNoBlock)) {
+                auto blockLoc = args.blockLoc(gs);
+                if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
+                    }
+
+                    if (blockLoc.exists()) {
+                        e.replaceWith("Remove block", blockLoc, "");
                     }
                 }
             }

@@ -911,6 +911,7 @@ struct DispatchArgs {
 
         return callLoc().copyEndWithZeroLength();
     }
+    Loc blockLoc(const GlobalState &gs) const;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
