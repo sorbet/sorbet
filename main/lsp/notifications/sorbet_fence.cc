@@ -13,8 +13,7 @@ bool SorbetFenceTask::canPreempt(const LSPIndexer &indexer) const {
 }
 
 bool SorbetFenceTask::canUseStaleData() const {
-    // return (id & (1 << 30)) != 0;
-    return true;
+    return (id & (1 << 30)) != 0;
 }
 
 void SorbetFenceTask::run(LSPTypecheckerInterface &tc) {
