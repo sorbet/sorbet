@@ -83,6 +83,7 @@ LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
 
     auto msg = move(available.front());
     available.pop_front();
+    cout << "Read: " << msg->toJSON() << endl;
     return ReadOutput{FileOps::ReadResult::Success, move(msg)};
 }
 
