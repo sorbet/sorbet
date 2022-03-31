@@ -61,7 +61,7 @@ class LSPTypechecker final {
 
     /** Used in tests to force the slow path to block just after cancellation state has been set. */
     bool slowPathBlocked ABSL_GUARDED_BY(slowPathBlockedMutex) = false;
-    absl::Mutex slowPathBlockedMutex;
+    mutable absl::Mutex slowPathBlockedMutex;
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
@@ -149,6 +149,9 @@ public:
      * this flag to `false` will immediately unblock any currently blocked slow paths.
      */
     void setSlowPathBlocked(bool blocked);
+
+    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
+    bool isSlowPathBlocked() const;
 };
 
 /**
