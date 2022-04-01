@@ -781,6 +781,24 @@ class Enumerator::Lazy < Enumerator
   sig {returns(T::Enumerator::Lazy[Elem])}
   def select(&blk); end
 
+  # Returns a new lazy enumerator containing the truthy results (everything except `false`
+  # or `nil`) of running the `block` for every element in `enum`.
+  #
+  # If no block is given, a
+  # [`Lazy`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).lazy.filter_map { |i| i * 2 if i.even? } #=> #<Enumerator::Lazy: #<Enumerator::Lazy: 1..10>:filter_map>
+  # ```
+  sig do
+    type_parameters(:T)
+      .params(blk: T.proc.params(arg0: Elem).returns(T.any(NilClass, FalseClass, T.type_parameter(:T))))
+      .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  sig {returns(T::Enumerator::Lazy[Elem])}
+  def filter_map(&blk); end  
+
   # Like
   # [`Enumerable#slice_after`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_after),
   # but chains operation to be lazy-evaluated.
