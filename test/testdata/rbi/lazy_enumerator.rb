@@ -20,6 +20,7 @@ T.assert_type!([1].lazy.flat_map{|i| [i + 1]}, T::Enumerator::Lazy[Integer])
 
 T.assert_type!([1].lazy.grep(1..10), T::Enumerator::Lazy[Integer])
 T.assert_type!([1].lazy.grep(1..10, &:to_s), T::Enumerator::Lazy[String])
+T.assert_type!([1].lazy.lazy, T::Enumerator::Lazy[Integer])
 T.assert_type!([1].lazy.map(&:to_s), T::Enumerator::Lazy[String])
 T.assert_type!([1].lazy.map, T::Enumerator::Lazy[Integer])
 T.assert_type!([1].lazy.reject(&:even?), T::Enumerator::Lazy[Integer])

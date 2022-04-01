@@ -726,6 +726,7 @@ class Enumerator::Lazy < Enumerator
   def grep_v(_); end
 
   # Returns self.
+  sig {returns(T.self_type)}
   def lazy; end
 
   # Like
