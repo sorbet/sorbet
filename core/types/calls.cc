@@ -1038,16 +1038,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 if (hasRequiredKwParam) {
                     if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
+                        // Unfortunately, this prevents even valid splats:
+                        //     def f(x:, y: 0); end
+                        //     f(x: 0, **opts)
+                        // This should work, but we currently handle kwsplat even before we check
+                        // which keyword args have already been consumed (see below for that).
+                        // This is harder to support, but maybe also less likely:
+                        //     f(**opts, x: 0)
                         e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
                                     "keyword parameters",
                                     method.show(gs), "Hash");
                         e.addErrorLine(kwParams.front()->loc,
                                        "Keyword parameters of `{}` begin here:", method.show(gs));
                         e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                        e.addErrorNote(
-                            "Sorbet couldn't determine that all the required keyword parameters were present.\n"
-                            "    To ignore this and pass the splat anyways, use `{}`",
-                            "T.unsafe");
+                        e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
+                                       "with splats.\n"
+                                       "    To ignore this and pass the splat anyways, use `{}`",
+                                       "T.unsafe");
                         maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
                         result.main.errors.emplace_back(e.build());
                     }
