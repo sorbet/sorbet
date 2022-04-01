@@ -1085,6 +1085,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                     send.link->result = move(retainedResult);
                 }
+                if (send.fun == core::Names::toHashDup()) {
+                    ENFORCE(send.args.size() == 1, "Desugar invariant");
+                    tp.origins = args[0]->origins;
+                }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::Ident &i) {

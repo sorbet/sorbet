@@ -1,0 +1,161 @@
+test.rb:17: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
+    17 |requires_x(0, 1, 2, opts)
+                            ^^^^
+    test.rb:4: Keyword parameters of `Object#requires_x` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
+  Got `T::Hash[Symbol, Integer]` originating from:
+    test.rb:12:
+    12 |opts = T::Hash[Symbol, Integer].new
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Note that Sorbet does not yet handle mixing explicitly-passed keyword args with splats.
+    To ignore this and pass the splat anyways, use `T.unsafe`
+  Autocorrect: Done
+    test.rb:17: Replaced with `**T.unsafe(opts)`
+    17 |requires_x(0, 1, 2, opts)
+                            ^^^^
+
+test.rb:19: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
+    19 |requires_x(0, 1, 2, **opts)
+                            ^^^^^^
+    test.rb:4: Keyword parameters of `Object#requires_x` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
+  Got `T::Hash[Symbol, Integer]` originating from:
+    test.rb:12:
+    12 |opts = T::Hash[Symbol, Integer].new
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:19:
+    19 |requires_x(0, 1, 2, **opts)
+                            ^^^^^^
+  Note:
+    Note that Sorbet does not yet handle mixing explicitly-passed keyword args with splats.
+    To ignore this and pass the splat anyways, use `T.unsafe`
+  Autocorrect: Done
+    test.rb:19: Replaced with `T.unsafe(opts)`
+    19 |requires_x(0, 1, 2, **opts)
+                              ^^^^
+
+test.rb:21: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
+    21 |requires_x(0, 1, 2, **opts, x: 0)
+                            ^^^^^^^^^^^^
+    test.rb:4: Keyword parameters of `Object#requires_x` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
+  Got `T::Hash[T.untyped, T.untyped]` originating from:
+    test.rb:21:
+    21 |requires_x(0, 1, 2, **opts, x: 0)
+                            ^^^^^^^^^^^^
+  Note:
+    Note that Sorbet does not yet handle mixing explicitly-passed keyword args with splats.
+    To ignore this and pass the splat anyways, use `T.unsafe`
+  Autocorrect: Done
+    test.rb:21: Replaced with `T.unsafe({**opts, x: 0})`
+    21 |requires_x(0, 1, 2, **opts, x: 0)
+                              ^^^^^^^^^^
+
+test.rb:23: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
+    23 |requires_x(0, 1, 2, x: 0, **opts)
+                            ^^^^^^^^^^^^
+    test.rb:4: Keyword parameters of `Object#requires_x` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
+  Got `T::Hash[T.untyped, T.untyped]` originating from:
+    test.rb:23:
+    23 |requires_x(0, 1, 2, x: 0, **opts)
+                            ^^^^^^^^^^^^
+  Note:
+    Note that Sorbet does not yet handle mixing explicitly-passed keyword args with splats.
+    To ignore this and pass the splat anyways, use `T.unsafe`
+  Autocorrect: Done
+    test.rb:23: Replaced with `**T.unsafe({x: 0, **opts})`
+    23 |requires_x(0, 1, 2, x: 0, **opts)
+                            ^^^^^^^^^^^^
+
+test.rb:25: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
+    25 |requires_x(0, 1, 2, **{x => 0})
+                            ^^^^^^^^^^
+    test.rb:4: Keyword parameters of `Object#requires_x` begin here:
+     4 |sig {params(pos: Integer, x: Integer).void}
+                                  ^
+  Got `T::Hash[T.untyped, T.untyped]` originating from:
+    test.rb:25:
+    25 |requires_x(0, 1, 2, **{x => 0})
+                            ^^^^^^^^^^
+    test.rb:25:
+    25 |requires_x(0, 1, 2, **{x => 0})
+                              ^^^^^^^^
+  Note:
+    Note that Sorbet does not yet handle mixing explicitly-passed keyword args with splats.
+    To ignore this and pass the splat anyways, use `T.unsafe`
+  Autocorrect: Done
+    test.rb:25: Replaced with `T.unsafe({x => 0})`
+    25 |requires_x(0, 1, 2, **{x => 0})
+                              ^^^^^^^^
+
+test.rb:27: Expected `Symbol` but found `String` for keyword splat keys type https://srb.help/7002
+    27 |optional_x(0, 1, 2, **string_keys)
+                            ^^^^^^^^^^^^^
+  Got `T::Hash[String, Integer]` originating from:
+    test.rb:13:
+    13 |string_keys = T::Hash[String, Integer].new
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:27:
+    27 |optional_x(0, 1, 2, **string_keys)
+                            ^^^^^^^^^^^^^
+
+test.rb:29: Expected `String` for keyword parameter `x` but found `T.nilable(Integer)` from keyword splat https://srb.help/7002
+    29 |optional_x(0, 1, 2, **nilble_opts)
+                            ^^^^^^^^^^^^^
+  Expected `String` for argument `x` of method `Object#optional_x`:
+    test.rb:8:
+     8 |sig {params(pos: Integer, x: String).void}
+                                  ^
+  Got `T::Hash[Symbol, T.nilable(Integer)]` originating from:
+    test.rb:14:
+    14 |nilble_opts = T::Hash[Symbol, T.nilable(Integer)].new
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:29:
+    29 |optional_x(0, 1, 2, **nilble_opts)
+                            ^^^^^^^^^^^^^
+  Note:
+    A `Hash` passed as a keyword splat must match the type of all keyword parameters
+    because Sorbet cannot see what specific keys exist in the `Hash`.
+  Autocorrect: Done
+    test.rb:29: Replaced with `T.unsafe(nilble_opts)`
+    29 |optional_x(0, 1, 2, **nilble_opts)
+                              ^^^^^^^^^^^
+Errors: 7
+
+--------------------------------------------------------------------------
+
+# typed: strict
+extend T::Sig
+
+sig {params(pos: Integer, x: Integer).void}
+def requires_x(*pos, x:)
+end
+
+sig {params(pos: Integer, x: String).void}
+def optional_x(*pos, x: '')
+end
+
+opts = T::Hash[Symbol, Integer].new
+string_keys = T::Hash[String, Integer].new
+nilble_opts = T::Hash[Symbol, T.nilable(Integer)].new
+x = T.let(:x, Symbol)
+
+requires_x(0, 1, 2, **T.unsafe(opts))
+
+requires_x(0, 1, 2, **T.unsafe(opts))
+
+requires_x(0, 1, 2, **T.unsafe({**opts, x: 0}))
+
+requires_x(0, 1, 2, **T.unsafe({x: 0, **opts}))
+
+requires_x(0, 1, 2, **T.unsafe({x => 0}))
+
+optional_x(0, 1, 2, **string_keys)
+
+optional_x(0, 1, 2, **T.unsafe(nilble_opts))

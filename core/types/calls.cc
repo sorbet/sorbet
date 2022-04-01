@@ -550,6 +550,31 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendModule(const GlobalState
         {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend {}\n", prefix, modStr)}}};
 }
 
+void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc kwSplatArgLoc) {
+    if (!kwSplatArgLoc.exists()) {
+        return;
+    }
+
+    auto replaceLoc = kwSplatArgLoc;
+    string maybeStarStar = "**";
+    if (kwSplatArgLoc.adjustLen(gs, 0, 2).source(gs) == "**") {
+        replaceLoc = kwSplatArgLoc.adjust(gs, 2, 0);
+        maybeStarStar = "";
+    }
+
+    auto suggestUnsafe = gs.suggestUnsafe.value_or("T.unsafe"s);
+    auto title = fmt::format("Wrap in `{}`", suggestUnsafe);
+    auto replaceValue = replaceLoc.source(gs).value();
+    if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
+        (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
+        e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceValue);
+    } else {
+        // wraps inside of T.unsafe(...) in `{...}`
+        auto extraStarStar = replaceLoc != kwSplatArgLoc ? "**" : "";
+        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar, replaceValue);
+    }
+}
+
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
 const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
     auto *hash = cast_type<ShapeType>(ty);
@@ -979,20 +1004,25 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            bool hasKwSplatParam = false;
-            bool hasKwParam = false;
-            const ArgInfo *kwSplatParam;
+            const ArgInfo *kwSplatParam = nullptr;
+            auto hasRequiredKwParam = false;
+            auto kwParams = vector<const ArgInfo *>{};
             for (auto &param : data->arguments) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
+                    ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
-                    hasKwSplatParam = true;
                 } else if (param.flags.isKeyword && !param.flags.isRepeated) {
-                    hasKwParam = true;
+                    kwParams.emplace_back(&param);
+                    hasRequiredKwParam |= !param.flags.isDefault;
                 }
             }
 
+            auto hasKwSplatParam = kwSplatParam != nullptr;
+            auto hasKwParam = !kwParams.empty();
+
             auto &kwSplatArg = *aend;
             auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+            auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
 
             if (hasKwSplatParam && !hasKwParam) {
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, kwSplatTPO, *kwSplatParam,
@@ -1000,15 +1030,78 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                           args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
-            } else {
-                // A keyword splat was passed in, but none of the declared arguments are keyword splats,
-                // or there is a keyword splat argument, but there is one ore more keyword non-splat argument
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::UntypedSplat)) {
-                    e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
-                                "arguments");
-                    e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                    result.main.errors.emplace_back(e.build());
+            } else if (hasKwParam) {
+                auto hashType = isa_type<ShapeType>(kwSplatType) ? kwSplatType.underlying(gs) : kwSplatType;
+                auto appliedType = cast_type_nonnull<AppliedType>(hashType);
+                auto kwSplatKeyType = appliedType.targs[0];
+                auto kwSplatValueType = appliedType.targs[1];
+
+                if (hasRequiredKwParam) {
+                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
+                        // Unfortunately, this prevents even valid splats:
+                        //     def f(x:, y: 0); end
+                        //     f(x: 0, **opts)
+                        // This should work, but we currently handle kwsplat even before we check
+                        // which keyword args have already been consumed (see below for that).
+                        // This is harder to support, but maybe also less likely:
+                        //     f(**opts, x: 0)
+                        e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
+                                    "keyword parameters",
+                                    method.show(gs), "Hash");
+                        e.addErrorLine(kwParams.front()->loc,
+                                       "Keyword parameters of `{}` begin here:", method.show(gs));
+                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                        e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
+                                       "with splats.\n"
+                                       "    To ignore this and pass the splat anyways, use `{}`",
+                                       "T.unsafe");
+                        maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                        result.main.errors.emplace_back(e.build());
+                    }
+                } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
+                                                            UntypedMode::AlwaysCompatible)) {
+                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                        e.setHeader("Expected `{}` but found `{}` for keyword splat keys type", "Symbol",
+                                    kwSplatKeyType.show(gs));
+                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                        if (gs.suggestUnsafe.has_value()) {
+                            maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                        }
+                        result.main.errors.emplace_back(e.build());
+                    }
+                } else {
+                    for (const auto &kwParam : kwParams) {
+                        auto kwParamType =
+                            Types::resultTypeAsSeenFrom(gs, kwParam->type, method.data(gs)->owner, symbol, targs);
+                        if (kwParamType == nullptr) {
+                            kwParamType = Types::untyped(gs, method);
+                        }
+                        if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
+                                                            UntypedMode::AlwaysCompatible)) {
+                            continue;
+                        }
+
+                        if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                            e.setHeader("Expected `{}` for keyword parameter `{}` but found `{}` from keyword splat",
+                                        kwParamType.show(gs), kwParam->argumentName(gs), kwSplatValueType.show(gs));
+                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->argumentName(gs),
+                                                            method.show(gs));
+                            e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
+                            e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                            e.addErrorNote(
+                                "A `{}` passed as a keyword splat must match the type of all keyword parameters\n"
+                                "    because Sorbet cannot see what specific keys exist in the `{}`.",
+                                "Hash", "Hash");
+                            maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                            result.main.errors.emplace_back(e.build());
+                        }
+
+                        break;
+                    }
                 }
+            } else {
+                Exception::raise("Code at {} triggered unknown codepath in Sorbet. Please report a bug.",
+                                 args.callLoc().showRaw(gs));
             }
         }
     }
