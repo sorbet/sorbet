@@ -138,7 +138,8 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
                     }
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
-                    bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport && config.getClientConfig().clientCodeActionDataSupport;
+                    bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
+                                            config.getClientConfig().clientCodeActionDataSupport;
                     if (canResolveLazily) {
                         action->data = move(params);
                     } else {

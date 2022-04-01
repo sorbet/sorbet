@@ -8,10 +8,10 @@
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "common/web_tracer_framework/tracing.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/expectations.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
-#include "main/lsp/LSPConfiguration.h"
 
 namespace sorbet::test {
 namespace spd = spdlog;
@@ -72,8 +72,8 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
-optional<unique_ptr<CodeAction>> resolveCodeAction(LSPWrapper &lspWrapper, int &nextId, unique_ptr<CodeAction> codeAction) {
-
+optional<unique_ptr<CodeAction>> resolveCodeAction(LSPWrapper &lspWrapper, int &nextId,
+                                                   unique_ptr<CodeAction> codeAction) {
     const auto &config = lspWrapper.config().getClientConfig();
     if (!config.clientCodeActionResolveEditSupport || !config.clientCodeActionDataSupport) {
         return codeAction;
@@ -137,7 +137,7 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
     auto codeActions = move(get<vector<unique_ptr<CodeAction>>>(receivedCodeActionResponse));
     vector<unique_ptr<CodeAction>> resolvedCodeActions;
 
-    for (auto &ca: codeActions) {
+    for (auto &ca : codeActions) {
         if (ca->edit.has_value()) {
             resolvedCodeActions.emplace_back(move(ca));
             continue;
@@ -148,13 +148,13 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
         }
     }
 
-    for (auto &ca: resolvedCodeActions) {
-        CHECK_MESSAGE(ca->edit.has_value(), fmt::format("Code action with kind {} has no edits", convertCodeActionKindToString(ca->kind.value())));
+    for (auto &ca : resolvedCodeActions) {
+        CHECK_MESSAGE(ca->edit.has_value(), fmt::format("Code action with kind {} has no edits",
+                                                        convertCodeActionKindToString(ca->kind.value())));
     }
 
     return resolvedCodeActions;
 }
-
 
 void validateCodeActionAbsence(LSPWrapper &lspWrapper, string fileUri, unique_ptr<Range> range, int &nextId,
                                vector<CodeActionKind> &selectedCodeActionKinds,
@@ -496,7 +496,7 @@ TEST_CASE("LSPTest") {
 
     const auto &config = lspWrapper->config();
     auto shouldUseCodeActionResolve =
-                BooleanPropertyAssertion::getValue("use-code-action-resolve", assertions).value_or(true);
+        BooleanPropertyAssertion::getValue("use-code-action-resolve", assertions).value_or(true);
 
     // Perform initialize / initialized handshake.
     {
@@ -504,8 +504,8 @@ TEST_CASE("LSPTest") {
         string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
-        auto initializedResponses =
-            initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true, shouldUseCodeActionResolve, move(sorbetInitOptions));
+        auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
+                                                  shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");
         CHECK_EQ(0, countNonTestMessages(initializedResponses));
     }

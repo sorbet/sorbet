@@ -11,17 +11,19 @@ CodeActionResolveTask::CodeActionResolveTask(const LSPConfiguration &config, Mes
 unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerInterface &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::CodeActionResolve);
     if (params->kind != CodeActionKind::RefactorExtract || !params->data.has_value()) {
-        response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
+        response->error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
         return response;
     }
     const core::GlobalState &gs = typechecker.state();
     const auto &actualParams = *params->data;
 
-    const auto queryResult = LSPQuery::byLoc(config, typechecker, actualParams->textDocument->uri, *actualParams->range->start,
-            LSPMethod::CodeActionResolve, false);
+    const auto queryResult = LSPQuery::byLoc(config, typechecker, actualParams->textDocument->uri,
+                                             *actualParams->range->start, LSPMethod::CodeActionResolve, false);
 
     if (queryResult.error != nullptr) {
-        response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
+        response->error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
         return response;
     }
 
