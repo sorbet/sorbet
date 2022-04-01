@@ -1,3 +1,4 @@
+# -- test/testdata/infer/kwsplat_is_sometimes_okay.rb --
 # typed: strict
 extend T::Sig
 
@@ -22,8 +23,11 @@ def takes_some_required_untyped(x:, y: ''); end
 sig {params(x: String, y: String).void}
 def takes_all_optional_untyped(x: '', y: ''); end
 
+sig {params(x: T.untyped, y: T.untyped).returns(NilClass)}
 def takes_all_required_unsigged(x:, y:); end # error: does not have a `sig`
+sig {params(x: T.untyped, y: T.untyped).returns(NilClass)}
 def takes_some_required_unsigged(x:, y: ''); end # error: does not have a `sig`
+sig {params(x: T.untyped, y: T.untyped).returns(NilClass)}
 def takes_all_optional_unsigged(x: '', y: ''); end # error: does not have a `sig`
 
 sig {params(x: Integer, y: String).void}
@@ -39,49 +43,50 @@ sig do
   .void
 end
 def example(opts, nilable_opts, mixed_opts, untyped_opts)
-  takes_all_required_nilable(**opts)
+  takes_all_required_nilable(**T.unsafe(opts))
   #                          ^^^^^^ error: Cannot call `Object#takes_all_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
-  takes_some_required_nilable(**opts)
+  takes_some_required_nilable(**T.unsafe(opts))
   #                           ^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
 
   # It might be nice to get better locations for these two in the future, and
   # also to somehow allow them.
-  takes_some_required_nilable(x: nil, **opts)
+  takes_some_required_nilable(**T.unsafe({x: nil, **opts}))
   #                           ^^^^^^^^^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
-  takes_some_required_nilable(**opts, x: nil)
+  takes_some_required_nilable(**T.unsafe({opts, x: nil}))
   #                           ^^^^^^^^^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
 
   takes_all_optional_nilable(**opts)
 
-  takes_all_required(**opts)
+  takes_all_required(**T.unsafe(opts))
   #                  ^^^^^^ error: Cannot call `Object#takes_all_required` with a `Hash` keyword splat because the method has required keyword parameters
-  takes_some_required(**opts)
+  takes_some_required(**T.unsafe(opts))
   #                   ^^^^^^ error: Cannot call `Object#takes_some_required` with a `Hash` keyword splat because the method has required keyword parameters
   takes_all_optional(**opts)
-  takes_all_optional(**nilable_opts)
+  takes_all_optional(**T.unsafe(nilable_opts))
   #                  ^^^^^^^^^^^^^^ error: Expected `String` for keyword parameter `x` but found `T.nilable(String)` from keyword splat
-  takes_all_optional(**mixed_opts)
+  takes_all_optional(**T.unsafe(mixed_opts))
   #                  ^^^^^^^^^^^^ error: Expected `String` for keyword parameter `x` but found `T.any(Integer, String)` from keyword splat
   takes_all_optional(**untyped_opts)
 
 
-  takes_all_required_untyped(**opts)
+  takes_all_required_untyped(**T.unsafe(opts))
   #                          ^^^^^^ error: Cannot call `Object#takes_all_required_untyped` with a `Hash` keyword splat because the method has required keyword parameters
-  takes_some_required_untyped(**opts)
+  takes_some_required_untyped(**T.unsafe(opts))
   #                           ^^^^^^ error: Cannot call `Object#takes_some_required_untyped` with a `Hash` keyword splat because the method has required keyword parameters
   takes_all_optional_untyped(**opts)
 
-  takes_all_required_unsigged(**opts)
+  takes_all_required_unsigged(**T.unsafe(opts))
   #                           ^^^^^^ error: Cannot call `Object#takes_all_required_unsigged` with a `Hash` keyword splat because the method has required keyword parameters
-  takes_some_required_unsigged(**opts)
+  takes_some_required_unsigged(**T.unsafe(opts))
   #                            ^^^^^^ error: Cannot call `Object#takes_some_required_unsigged` with a `Hash` keyword splat because the method has required keyword parameters
   takes_all_optional_unsigged(**opts)
 
-  takes_one_int_one_str(**opts)
+  takes_one_int_one_str(**T.unsafe(opts))
   #                     ^^^^^^ error: Expected `Integer` for keyword parameter `x` but found `String` from keyword splat
-  takes_one_int_one_str(**nilable_opts)
+  takes_one_int_one_str(**T.unsafe(nilable_opts))
   #                     ^^^^^^^^^^^^^^ error: Expected `Integer` for keyword parameter `x` but found `T.nilable(String)` from keyword splat
-  takes_one_int_one_str(**mixed_opts)
+  takes_one_int_one_str(**T.unsafe(mixed_opts))
   #                     ^^^^^^^^^^^^ error: Expected `Integer` for keyword parameter `x` but found `T.any(Integer, String)` from keyword splat
   takes_one_int_one_str(**untyped_opts)
 end
+# ------------------------------

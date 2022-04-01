@@ -1034,7 +1034,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     result.main.errors.emplace_back(std::move(e));
                 }
             } else if (hasKwParam) {
-                // TODO(jez) share the same autocorrect for everything
                 if (hasRequiredKwParam) {
                     if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
                         e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
@@ -1075,9 +1074,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                             e.setHeader("Expected `{}` for keyword parameter `{}` but found `{}` from keyword splat",
-                                        kwParamType, kwParam->argumentName(gs), kwSplatValueType);
+                                        kwParamType.show(gs), kwParam->argumentName(gs), kwSplatValueType.show(gs));
                             e.addErrorLine(kwParam->loc,
-                                           "Keyword parameter `{}` of `{}` declared here:", method.show(gs));
+                                           "Keyword parameter `{}` of `{}` declared here:", kwParam->argumentName(gs),
+                                           method.show(gs));
                             auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->argumentName(gs),
                                                             method.show(gs));
                             e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
