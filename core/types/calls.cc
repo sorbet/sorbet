@@ -574,8 +574,6 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
     }
 }
 
-} // namespace
-
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
 const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
     auto *hash = cast_type<ShapeType>(ty);
