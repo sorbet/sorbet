@@ -700,6 +700,11 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
     slowPathBlocked = blocked;
 }
 
+bool LSPTypechecker::isSlowPathBlocked() const {
+    absl::MutexLock lck(&slowPathBlockedMutex);
+    return slowPathBlocked;
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 

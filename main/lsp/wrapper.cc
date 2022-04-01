@@ -193,6 +193,10 @@ void LSPWrapper::setSlowPathBlocked(bool blocked) {
     lspLoop->setSlowPathBlocked(blocked);
 }
 
+bool LSPWrapper::isSlowPathBlocked() const {
+    return lspLoop->isSlowPathBlocked();
+}
+
 const LSPConfiguration &LSPWrapper::config() const {
     return *config_;
 }

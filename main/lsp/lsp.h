@@ -87,6 +87,11 @@ public:
     void setSlowPathBlocked(bool blocked) {
         typecheckerCoord.setSlowPathBlocked(blocked);
     }
+
+    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
+    bool isSlowPathBlocked() const {
+        return typecheckerCoord.isSlowPathBlocked();
+    }
 };
 
 // TODO(jvilk): Move to LSPTask.

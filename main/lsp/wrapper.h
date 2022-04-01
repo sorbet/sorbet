@@ -84,6 +84,9 @@ public:
      * this flag to `false` will immediately unblock any currently blocked slow paths.
      */
     void setSlowPathBlocked(bool blocked);
+
+    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
+    bool isSlowPathBlocked() const;
 };
 
 class SingleThreadedLSPWrapper final : public LSPWrapper {

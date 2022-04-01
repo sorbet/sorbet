@@ -134,7 +134,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     }
 
     // Send a no-op to clear out the pipeline. Should have errors in bar and baz, but not foo.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"bar.rb", 7, "Expected `Integer` but found `String(\"hi\")` for method result type"},
                           {"baz.rb", 7, "Expected `String` but found `Integer` for method result type"},
@@ -205,7 +206,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     }
 
     // Send a no-op to clear out the pipeline. Should have one error per file.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 6, "Expected `Integer` but found `String` for method result type"},
                           {"bar.rb", 6, "Expected `String` but found `Integer(10)` for method result type"},
@@ -271,7 +273,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
     }
 
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
@@ -321,7 +325,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndRetu
     }
 
     // Send a no-op to clear out the pipeline. Should have one error in `foo.rb`.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 6, "Expected `String` but found `Integer(3)` for method result type"},
                       });
@@ -363,7 +368,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
 
     // Send a no-op to clear out the pipeline. Should have two error now: bar.rb from slow path and foo.rb from fast
     // path.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 9, "Expected `Float` but found `String(\"not a float\")` for method result type"},
                           {"bar.rb", 5, "Expected `String` but found `Integer(1)` for method result type"},
@@ -405,7 +411,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
                           "bar\n'hello'\nend\nend\n",
                           3));
     // Send a no-op to clear out the pipeline. Should have no errors at end of both typechecking runs.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 
     // Need to re-evaluate the test strategy for timings
     // checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
@@ -499,7 +507,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
 
     // We should receive errors for `foo`, `bar`, and `baz`.
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 2, "unexpected token"},
                           {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
@@ -551,7 +560,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7,
                          /* assertUniqueStartTimes */ false);
@@ -599,7 +609,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
     sendAsync(*openFile("bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef hi\n10\nend"));
 
     // Send fence to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
                        {"bar.rb", 6, "unexpected"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
@@ -625,7 +636,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyM
     sendAsync(*cancelRequest(nextId - 1));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
     // Clear out the pipeline to wait for previous requests to finish.
-    send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    send(LSPMessage(
+        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, make_unique<SorbetFenceParams>(20, false))));
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 0);
@@ -672,7 +684,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
                           4, false, 0));
 
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
@@ -801,7 +815,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
     }
 
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
@@ -920,7 +936,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
     }
 
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 }
 
 } // namespace sorbet::test::lsp
