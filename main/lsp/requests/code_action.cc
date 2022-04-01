@@ -138,9 +138,14 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
                     }
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
-                    auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, *def, typechecker);
-                    action->edit = move(workspaceEdit);
+                    bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport && config.getClientConfig().clientCodeActionDataSupport;
+                    if (canResolveLazily) {
+                        action->data = move(params);
+                    } else {
+                        auto workspaceEdit = make_unique<WorkspaceEdit>();
+                        workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, *def, typechecker);
+                        action->edit = move(workspaceEdit);
+                    }
                     result.emplace_back(move(action));
                 }
             }
