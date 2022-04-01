@@ -21,7 +21,7 @@ using namespace std;
 namespace sorbet::core {
 
 namespace {
-DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, DispatchArgs args) {
+DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, const DispatchArgs &args) {
     categoryCounterInc("dispatch_call", "proxytype");
     return und.dispatchCall(gs, args.withThisRef(und));
 }
@@ -49,7 +49,7 @@ bool TupleType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass)
     return underlying(gs).derivesFrom(gs, klass);
 }
 
-DispatchResult LiteralType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult LiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 

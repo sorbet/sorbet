@@ -330,7 +330,7 @@ public:
 
     uint32_t hash(const GlobalState &gs) const;
 
-    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&...args);
     template <class To> friend To const *cast_type(const TypePtr &what);
