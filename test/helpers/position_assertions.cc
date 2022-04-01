@@ -41,6 +41,7 @@ const UnorderedMap<
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
         {"selective-apply-code-action", StringPropertyAssertions::make},
+        {"use-code-action-resolve", BooleanPropertyAssertion::make},
         {"assert-no-code-action", StringPropertyAssertions::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
