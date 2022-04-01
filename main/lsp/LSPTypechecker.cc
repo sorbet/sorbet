@@ -818,7 +818,7 @@ const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const
 }
 
 std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
-    const auto &gs = *(undoState.getEvictedGs());
+    const auto &gs = *evictedGs;
     vector<ast::ParsedFile> updatedIndexed;
 
     for (auto fref : frefs) {
@@ -827,12 +827,8 @@ std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<
             updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
         }
     }
-<<<<<<< HEAD
 
     return pipeline::incrementalResolveWithoutStateMutation(gs, move(updatedIndexed), config->opts);
-=======
-    return pipeline::incrementalResolve(*evictedGs, move(updatedIndexed), config->opts);
->>>>>>> 61824caf4 (Let's see if we can convince ourselves that sharing the indexed file vector is safe)
 }
 
 const core::GlobalState &LSPStaleTypechecker::state() const {
