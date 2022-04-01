@@ -34,7 +34,7 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(std::shared_ptr<Task> task
     return success;
 }
 
-bool PreemptionTaskManager::tryRunScheduledPreemptionTask(core::GlobalState &gs) {
+bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs) {
     TypecheckEpochManager::assertConsistentThread(
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
     auto preemptTask = atomic_load(&this->preemptTask);
