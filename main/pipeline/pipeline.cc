@@ -1062,12 +1062,12 @@ void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> 
                WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
-    return typecheck(reinterpret_cast<const unique_ptr<const core::GlobalState> &>(gs), move(what), opts, workers, cancelable, move(preemptionManager), presorted,
-                     intentionallyLeakASTs);
+    return typecheck(reinterpret_cast<const unique_ptr<const core::GlobalState> &>(gs), move(what), opts, workers,
+                     cancelable, move(preemptionManager), presorted, intentionallyLeakASTs);
 }
 
-void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable,
+void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::ParsedFile> what,
+               const options::Options &opts, WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
