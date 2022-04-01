@@ -43,15 +43,8 @@ ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, std
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
-void typecheck(const std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-               const options::Options &opts, WorkerPool &workers, bool cancelable = false,
-               std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
-               bool presorted = false, bool intentionallyLeakASTs = false);
-
-// Overload with more semantically correct types; the above forwards here for the
-// convenience of consumers that hold `unique_ptr<GlobalState>`.
-void typecheck(const std::unique_ptr<const core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-               const options::Options &opts, WorkerPool &workers, bool cancelable = false,
+void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
+               WorkerPool &workers, bool cancelable = false,
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
                bool presorted = false, bool intentionallyLeakASTs = false);
 

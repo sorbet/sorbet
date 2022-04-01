@@ -1058,31 +1058,23 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-void typecheck(const unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                WorkerPool &workers, bool cancelable,
-               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
-               bool intentionallyLeakASTs) {
-    return typecheck(reinterpret_cast<const unique_ptr<const core::GlobalState> &>(gs), move(what), opts, workers,
-                     cancelable, move(preemptionManager), presorted, intentionallyLeakASTs);
-}
-
-void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::ParsedFile> what,
-               const options::Options &opts, WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
-    ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
+    ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
 
-    const auto &epochManager = *gs->epochManager;
+    const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
     const uint32_t epoch = epochManager.getStatus().epoch;
 
     {
-        Timer timeit(gs->tracer(), "typecheck");
+        Timer timeit(gs.tracer(), "typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
-            (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
+            (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
         }
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
@@ -1093,12 +1085,11 @@ void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::Parsed
             outputq = make_shared<BlockingBoundedQueue<vector<core::FileRef>>>(what.size());
         }
 
-        const core::GlobalState &igs = *gs;
         if (!presorted) {
             // If files are not already sorted, we want to start typeckecking big files first because it helps with
             // better work distribution
             fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
-                return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+                return lhs.file.data(gs).source().size() > rhs.file.data(gs).source().size();
             });
         }
 
@@ -1108,7 +1099,7 @@ void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::Parsed
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
+            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
                                                cancelable, intentionallyLeakASTs]() {
                 vector<core::FileRef> processedFiles;
                 ast::ParsedFile job;
@@ -1129,18 +1120,18 @@ void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::Parsed
                             // [IDE] Also, don't do work if the file has changed under us since we began
                             // typechecking!
                             // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
-                            const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
+                            const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
                             if (!isCanceled && !fileWasChanged) {
                                 core::FileRef file = job.file;
                                 try {
-                                    core::Context ctx(igs, core::Symbols::root(), file);
+                                    core::Context ctx(gs, core::Symbols::root(), file);
                                     auto file = job.file;
                                     typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
                                     processedFiles.emplace_back(file);
                                 } catch (SorbetException &) {
                                     Exception::failInFuzzer();
-                                    igs.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                       file.data(igs).path());
+                                    gs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                      file.data(gs).path());
                                 }
                                 // Stream out errors
                                 outputq->push(move(processedFiles), processedByThread);
@@ -1156,18 +1147,18 @@ void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::Parsed
 
             vector<core::FileRef> files;
             {
-                for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
+                for (auto result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                      !result.done();
-                     result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs->tracer())) {
+                     result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                     if (result.gotItem()) {
                         for (auto &file : files) {
-                            gs->errorQueue->flushErrorsForFile(*gs, file);
+                            gs.errorQueue->flushErrorsForFile(gs, file);
                         }
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 
                     if (preemptionManager) {
-                        (*preemptionManager)->tryRunScheduledPreemptionTask(*gs);
+                        (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
@@ -1190,12 +1181,12 @@ void typecheck(const unique_ptr<const core::GlobalState> &gs, vector<ast::Parsed
                 }
             }
         }
-        for (auto &extension : gs->semanticExtensions) {
-            extension->finishTypecheck(*gs);
+        for (auto &extension : gs.semanticExtensions) {
+            extension->finishTypecheck(gs);
         }
 
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
-        gs->errorQueue->filesFlushedCount = 0;
+        gs.errorQueue->filesFlushedCount = 0;
 
         return;
     }
