@@ -570,7 +570,9 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
         e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceLoc.source(gs).value());
     } else {
         // wraps inside of T.unsafe(...) in `{...}`
-        e.replaceWith(title, replaceLoc, "{}{}({{{}}})", maybeStarStar, suggestUnsafe, replaceLoc.source(gs).value());
+        auto extraStarStar = replaceLoc != kwSplatArgLoc ? "**" : "";
+        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar,
+                      replaceLoc.source(gs).value());
     }
 }
 

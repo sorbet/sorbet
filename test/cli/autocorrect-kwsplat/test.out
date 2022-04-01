@@ -51,7 +51,7 @@ test.rb:21: Cannot call `Object#requires_x` with a `Hash` keyword splat because 
     Sorbet couldn't determine that all the required keyword parameters were present.
     To ignore this and pass the splat anyways, use `T.unsafe`
   Autocorrect: Done
-    test.rb:21: Replaced with `T.unsafe({opts, x: 0})`
+    test.rb:21: Replaced with `T.unsafe({**opts, x: 0})`
     21 |requires_x(0, 1, 2, **opts, x: 0)
                               ^^^^^^^^^^
 
@@ -150,7 +150,7 @@ requires_x(0, 1, 2, **T.unsafe(opts))
 
 requires_x(0, 1, 2, **T.unsafe(opts))
 
-requires_x(0, 1, 2, **T.unsafe({opts, x: 0}))
+requires_x(0, 1, 2, **T.unsafe({**opts, x: 0}))
 
 requires_x(0, 1, 2, **T.unsafe({x: 0, **opts}))
 
