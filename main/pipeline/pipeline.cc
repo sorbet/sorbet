@@ -275,6 +275,56 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
     return what;
 }
 
+// TODO: Deduplicate implementation with incrementalResolve using is_const_v-ish tricks
+vector<ast::ParsedFile> incrementalResolveWithoutStateMutation(const core::GlobalState &gs,
+                                                               vector<ast::ParsedFile> what,
+                                                               const options::Options &opts) {
+    try {
+#ifndef SORBET_REALMAIN_MIN
+        // TODO: Figure out how to run the packager
+        // if (opts.stripePackages) {
+        //     Timer timeit(gs.tracer(), "incremental_packager");
+        //     what = packager::Packager::runIncremental(gs, move(what));
+        // }
+#endif
+        {
+            Timer timeit(gs.tracer(), "incremental_naming");
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+
+            auto result = sorbet::namer::Namer::symbolizeTreesBestEffort(gs, move(what), *emptyWorkers);
+            // Cancellation cannot occur during incremental namer.
+            ENFORCE(result.hasResult());
+            what = move(result.result());
+
+            // Required for autogen tests, which need to control which phase to stop after.
+            if (opts.stopAfterPhase == options::Phase::NAMER) {
+                return what;
+            }
+        }
+
+        {
+            Timer timeit(gs.tracer(), "incremental_resolve");
+            gs.tracer().trace("Resolving (incremental pass)...");
+
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what));
+            // incrementalResolve is not cancelable.
+            ENFORCE(result.hasResult());
+            what = move(result.result());
+
+            // Required for autogen tests, which need to control which phase to stop after.
+            if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+                return what;
+            }
+        }
+    } catch (SorbetException &) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
+            e.setHeader("Exception resolving (backtrace is above)");
+        }
+    }
+
+    return what;
+}
+
 vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
     Timer timeit(gs->tracer(), "reserveFiles");
     vector<core::FileRef> ret;

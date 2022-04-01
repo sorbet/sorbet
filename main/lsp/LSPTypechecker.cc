@@ -770,7 +770,7 @@ std::vector<std::unique_ptr<core::Error>> LSPStaleTypechecker::retypecheck(std::
 
 LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
                                           const std::vector<core::FileRef> &filesForQuery) const {
-    auto &gs = undoState.getEvictedGs();
+    const auto &gs = undoState.getEvictedGs();
 
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
     ENFORCE(gs->lspTypecheckCount > 0,
@@ -800,6 +800,7 @@ const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const
 }
 
 std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
+    const auto &gs = *(undoState.getEvictedGs());
     vector<ast::ParsedFile> updatedIndexed;
 
     for (auto fref : frefs) {
@@ -808,7 +809,8 @@ std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<
             updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
         }
     }
-    return pipeline::incrementalResolve(*(undoState.getEvictedGs()), move(updatedIndexed), config->opts);
+
+    return pipeline::incrementalResolveWithoutStateMutation(gs, move(updatedIndexed), config->opts);
 }
 
 const core::GlobalState &LSPStaleTypechecker::state() const {
