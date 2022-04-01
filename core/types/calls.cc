@@ -567,12 +567,11 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
     auto replaceValue = replaceLoc.source(gs).value();
     if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
         (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
-        e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceLoc.source(gs).value());
+        e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceValue);
     } else {
         // wraps inside of T.unsafe(...) in `{...}`
         auto extraStarStar = replaceLoc != kwSplatArgLoc ? "**" : "";
-        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar,
-                      replaceLoc.source(gs).value());
+        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar, replaceValue);
     }
 }
 
