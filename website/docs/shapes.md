@@ -23,7 +23,8 @@ being a `Float` or `nil`. For example: `{foo: 'hello', bar: 3.14}`.
 > [Typed Structs](tstruct.md).
 
 ```ruby
-##
+# typed: true
+
 # Shape types work for some simple cases,
 # but have many known limitations.
 #
