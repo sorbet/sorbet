@@ -19,6 +19,9 @@ class UndoState final {
     // Stores the index trees stored in `gs` that were evicted because the slow path operation replaced `gs`.
     UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS;
 
+    // Dummy ParsedFile that we return when the file requested by getIndexed is not available.
+    ast::ParsedFile dummyParsedFile{nullptr, core::FileRef()};
+
 public:
     // Epoch of the running slow path
     const uint32_t epoch;
@@ -40,7 +43,12 @@ public:
     /**
      * Retrieves the evicted global state.
      */
-    const core::GlobalState &getEvictedGs() const;
+    const std::unique_ptr<core::GlobalState> &getEvictedGs();
+
+    /**
+     * Returns the indexed file
+     */
+    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
 };
 
 } // namespace sorbet::realmain::lsp

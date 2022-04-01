@@ -739,6 +739,9 @@ const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
 
+LSPStaleTypechecker::LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState)
+    : config(config), undoState(undoState), emptyWorkers(WorkerPool::create(0, undoState.getEvictedGs()->tracer())) {}
+
 void LSPStaleTypechecker::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
                                      std::unique_ptr<KeyValueStore> kvstore) {
     ENFORCE(false, "initialize not supported");
@@ -756,22 +759,51 @@ std::vector<std::unique_ptr<core::Error>> LSPStaleTypechecker::retypecheck(std::
 
 LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
                                           const std::vector<core::FileRef> &filesForQuery) const {
-    ENFORCE(false, "query not implemented");
-    return LSPQueryResult();
+    const auto &gs = undoState.getEvictedGs();
+
+    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    ENFORCE(gs->lspTypecheckCount > 0,
+            "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
+
+    // Replace error queue with one that is owned by this thread.
+    auto queryCollector = make_shared<QueryCollector>();
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
+
+    Timer timeit(config->logger, "query");
+    prodCategoryCounterInc("lsp.updates", "query");
+    ENFORCE(gs->errorQueue->isEmpty());
+    ENFORCE(gs->lspQuery.isEmpty());
+    gs->lspQuery = q;
+    auto resolved = getResolved(filesForQuery);
+    tryApplyDefLocSaver(*gs, resolved);
+    tryApplyLocalVarSaver(*gs, resolved);
+
+    pipeline::typecheck(gs, move(resolved), config->opts, *emptyWorkers, /*presorted*/ true);
+    gs->lspTypecheckCount++;
+    gs->lspQuery = core::lsp::Query::noQuery();
+    return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
 const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const {
-    ENFORCE(false, "getIndexed not implemented");
-    return *pf;
+    return undoState.getIndexed(fref);
 }
 
 std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
-    ENFORCE(false, "getResolved not implemented");
-    return {};
+    const auto &gs = *(undoState.getEvictedGs());
+    vector<ast::ParsedFile> updatedIndexed;
+
+    for (auto fref : frefs) {
+        auto &indexed = getIndexed(fref);
+        if (indexed.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+        }
+    }
+
+    return pipeline::incrementalResolveWithoutStateMutation(gs, move(updatedIndexed), config->opts);
 }
 
 const core::GlobalState &LSPStaleTypechecker::state() const {
-    return undoState.getEvictedGs();
+    return *(undoState.getEvictedGs());
 };
 
 } // namespace sorbet::realmain::lsp

@@ -30,6 +30,10 @@ ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std:
 std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 const options::Options &opts);
 
+std::vector<ast::ParsedFile> incrementalResolveWithoutStateMutation(const core::GlobalState &gs,
+                                                                    std::vector<ast::ParsedFile> what,
+                                                                    const options::Options &opts);
+
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers);
 
