@@ -2,6 +2,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "main/lsp/LSPIndexer.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/notifications.h"
@@ -71,8 +72,47 @@ absl::Mutex *TaskQueue::getMutex() {
     return &this->stateMutex;
 }
 
-bool TaskQueue::ready() const {
-    return this->terminated || (!this->paused && !this->pendingTasks.empty());
+namespace {
+
+class ReadyHandle final {
+    friend void TaskQueue::waitReady(const LSPIndexer &indexer);
+
+    const bool &terminated;
+    const bool &paused;
+    const std::deque<std::unique_ptr<LSPTask>> &pendingTasks;
+    const LSPIndexer &indexer;
+
+    ReadyHandle(const bool &terminated, const bool &paused, const std::deque<std::unique_ptr<LSPTask>> &pendingTasks,
+                const LSPIndexer &indexer)
+        : terminated{terminated}, paused{paused}, pendingTasks{pendingTasks}, indexer{indexer} {}
+
+public:
+    bool isReady() const {
+        if (this->terminated) {
+            return true;
+        }
+
+        if (this->paused) {
+            return false;
+        }
+
+        bool frontOfQueue = true;
+        for (auto &task : this->pendingTasks) {
+            if (this->indexer.canHandleTask(frontOfQueue, *task)) {
+                return true;
+            }
+            frontOfQueue = false;
+        }
+
+        return false;
+    }
+};
+
+} // namespace
+
+void TaskQueue::waitReady(const LSPIndexer &indexer) {
+    ReadyHandle handle{this->terminated, this->paused, this->pendingTasks, indexer};
+    this->stateMutex.Await(absl::Condition(&handle, &ReadyHandle::isReady));
 }
 
 LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr<TaskQueue> taskQueue,
