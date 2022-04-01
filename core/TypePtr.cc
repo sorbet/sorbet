@@ -347,7 +347,7 @@ bool TypePtr::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
 #undef DERIVES_FROM
 }
 
-DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult TypePtr::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
 #define DISPATCH_CALL(T) return CALL_MEMBER_dispatchCall<const T>::call(cast_type_nonnull<T>(*this), gs, args);
     GENERATE_TAG_SWITCH(tag(), DISPATCH_CALL)
 #undef DISPATCH_CALL

@@ -501,7 +501,7 @@ public:
     LiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
-    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     int64_t asInteger() const;
     double asFloat() const;
     core::NameRef asName(const core::GlobalState &gs) const;
@@ -880,6 +880,9 @@ struct DispatchArgs {
     // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
     // unreported errors is expensive!
     bool suppressErrors;
+
+    DispatchArgs(const DispatchArgs &) = delete;
+    DispatchArgs &operator=(const DispatchArgs &) = delete;
 
     Loc callLoc() const {
         return core::Loc(locs.file, locs.call);
