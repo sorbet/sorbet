@@ -31,11 +31,11 @@ g(3, **untyped_hash, w: 2.0)
 
 untyped_values_hash = T.let(shaped_hash, T::Hash[Symbol, T.untyped])
   f(3, untyped_values_hash)
-  #    ^^^^^^^^^^^^^^^^^^^ error: Passing a non-literal `Hash` to `Object#f`, which requires specific keyword parameters
+  #    ^^^^^^^^^^^^^^^^^^^ error: Cannot call `Object#f` with a `Hash` keyword splat because the method has required keyword parameters
   f(3, **untyped_values_hash)
-  #    ^^^^^^^^^^^^^^^^^^^^^ error: Passing a non-literal `Hash` to `Object#f`, which requires specific keyword parameters
+  #    ^^^^^^^^^^^^^^^^^^^^^ error: Cannot call `Object#f` with a `Hash` keyword splat because the method has required keyword parameters
   g(3, **untyped_values_hash, w: 2.0)
-  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a non-literal `Hash` to `Object#g`, which requires specific keyword parameters
+  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot call `Object#g` with a `Hash` keyword splat because the method has required keyword parameters
 
 # Ensure that constructing a kwargs hash with untyped keys works
 untyped = T.unsafe(:y)
@@ -50,7 +50,7 @@ end
 
 untyped_values_hash = T.let({}, T::Hash[Symbol, T.untyped])
   h(1, y: 2, **untyped_values_hash)
-#      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a non-literal `Hash` to `Object#h`, which requires specific keyword parameters
+  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot call `Object#h` with a `Hash` keyword splat because the method has required keyword parameters
 
 sig {params(kw_splat: T::Hash[Symbol, String]).void}
 def i(**kw_splat)

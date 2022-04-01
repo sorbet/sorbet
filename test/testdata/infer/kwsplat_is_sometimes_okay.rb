@@ -35,10 +35,11 @@ sig do
     nilable_opts: T::Hash[Symbol, T.nilable(String)],
     mixed_opts: T::Hash[Symbol, T.any(Integer, String)],
     untyped_opts: T::Hash[Symbol, T.untyped],
+    string_keys: T::Hash[String, String],
   )
   .void
 end
-def example(opts, nilable_opts, mixed_opts, untyped_opts)
+def example(opts, nilable_opts, mixed_opts, untyped_opts, string_keys)
   takes_all_required_nilable(**opts)
   #                          ^^^^^^ error: Cannot call `Object#takes_all_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
   takes_some_required_nilable(**opts)
@@ -84,4 +85,7 @@ def example(opts, nilable_opts, mixed_opts, untyped_opts)
   takes_one_int_one_str(**mixed_opts)
   #                     ^^^^^^^^^^^^ error: Expected `Integer` for keyword parameter `x` but found `T.any(Integer, String)` from keyword splat
   takes_one_int_one_str(**untyped_opts)
+
+  takes_all_optional(**string_keys)
+  #                  ^^^^^^^^^^^^^ error: Expected `Symbol` but found `String` for keyword splat keys type
 end
