@@ -1094,14 +1094,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             } else {
-                // A keyword splat was passed in, but none of the declared parameters are keyword splats,
-                // and there are no keyword non-splat parameters
-                ENFORCE(false, "Congrates, you've found a test case for something that is otherwise untested.");
-                if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
-                    e.setHeader("Passing a keyword splat to `{}` which does not take a keyword splat", method.show(gs));
-                    e.addErrorLine(method.data(gs)->loc(), "`{}` defined here:", method.show(gs));
-                    result.main.errors.emplace_back(e.build());
-                }
+                Exception::raise("Code at {} triggered unknown codepath in Sorbet. Please report a bug.",
+                                 args.callLoc().showRaw(gs));
             }
         }
     }
