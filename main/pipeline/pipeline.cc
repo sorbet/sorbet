@@ -637,6 +637,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files
     return ret;
 }
 
+namespace {
 void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
                   bool intentionallyLeakASTs) {
     core::FileRef f = resolved.file;
@@ -714,6 +715,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
     }
     return;
 }
+} // namespace
 
 vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                 WorkerPool &workers) {

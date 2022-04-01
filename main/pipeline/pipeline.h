@@ -48,9 +48,6 @@ void typecheck(const std::unique_ptr<core::GlobalState> &gs, std::vector<ast::Pa
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
                bool presorted = false, bool intentionallyLeakASTs = false);
 
-void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
-                  bool intentionallyLeakASTs = false);
-
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
 
