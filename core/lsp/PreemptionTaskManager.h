@@ -31,7 +31,7 @@ public:
     // Run only from the typechecking thread.
     // Runs the scheduled preemption task, if any.
     // Handles running task with a fresh errorQueue, and restoring previous errorQueue when done.
-    bool tryRunScheduledPreemptionTask(core::GlobalState &gs);
+    bool tryRunScheduledPreemptionTask(const core::GlobalState &gs);
     // Run only from processing thread.
     // Tries to cancel the scheduled preemption task. Returns true if it succeeds.
     bool tryCancelScheduledPreemptionTask(std::shared_ptr<Task> &task);
