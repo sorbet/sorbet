@@ -37,7 +37,7 @@ void CompilerState::trace(string_view msg) const {
 }
 
 llvm::Value *CompilerState::stringTableRef(std::string_view str) {
-    auto it = this->stringTable.table.find(str);
+    auto it = this->stringTable.map.find(str);
 
     // We would like to return &sorbet_moduleStringTable[offset], but that would
     // require knowing the length of the string table at this point (we would
@@ -48,7 +48,7 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     // Then, when we're finished compiling the module, we can declare the string
     // table with the proper length (i.e. type) and go back and properly initialize
     // all of the temporary variables we created along the way.
-    if (it != this->stringTable.table.end()) {
+    if (it != this->stringTable.map.end()) {
         return it->second.addrVar;
     }
 
@@ -64,7 +64,7 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
                                             initializer, globalName);
     global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
     global->setAlignment(llvm::MaybeAlign(8));
-    this->stringTable.table[str] = StringTable::StringTableEntry{offset, global};
+    this->stringTable.map[str] = StringTable::StringTableEntry{offset, global};
     this->stringTable.size += str.size();
 
     return global;
@@ -72,8 +72,8 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
 
 void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module) {
     vector<pair<string_view, StringTable::StringTableEntry>> tableElements;
-    tableElements.reserve(this->table.size());
-    absl::c_copy(this->table, std::back_inserter(tableElements));
+    tableElements.reserve(this->map.size());
+    absl::c_copy(this->map, std::back_inserter(tableElements));
     fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
     string tableInitializer = fmt::format("{}", fmt::map_join(tableElements, "", [&](const auto &e) -> std::string_view { return e.first; }));
     ENFORCE(tableInitializer.size() == this->size);

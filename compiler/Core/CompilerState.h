@@ -14,11 +14,11 @@ struct StringTable {
         llvm::GlobalVariable *addrVar = nullptr;
     };
 
-    UnorderedMap<std::string, StringTableEntry> table;
+    UnorderedMap<std::string, StringTableEntry> map;
     uint32_t size = 0;
 
     void clear() {
-        this->table.clear();
+        this->map.clear();
         this->size = 0;
     }
 
