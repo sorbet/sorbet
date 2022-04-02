@@ -688,10 +688,11 @@ module Kernel
   # Array(1)           #=> [1]
   # ```
   sig do
-    params(
-        x: BasicObject,
-    )
-    .returns(T::Array[T.untyped])
+    type_parameters(:Elem)
+      .params(
+        x: T.type_parameter(:Elem),
+      )
+      .returns(T::Array[T.type_parameter(:Elem)])
   end
   sig {params(x: NilClass).returns([])}
   def Array(x); end
