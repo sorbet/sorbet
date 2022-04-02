@@ -54,9 +54,7 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
 
     auto offset = this->stringTable.size;
     auto globalName = fmt::format("addr_str_{}", str);
-    // We will change the initializer later, but the variable itself is not
-    // modified at runtime.
-    const auto isConstant = true;
+    const auto isConstant = false;
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
     llvm::Constant *initializer = llvm::ConstantPointerNull::get(type);
     auto *global = new llvm::GlobalVariable(*this->module, type, isConstant,
@@ -95,6 +93,7 @@ void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &m
         llvm::Constant *indices[] = {zero, index};
         auto *initializer = llvm::ConstantExpr::getInBoundsGetElementPtr(table->getValueType(), table, indices);
         var->setInitializer(initializer);
+        var->setConstant(true);
     }
 }
 
