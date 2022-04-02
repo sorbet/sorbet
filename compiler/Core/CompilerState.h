@@ -52,7 +52,7 @@ public:
     core::FileRef file;
     StringTable &stringTable;
 
-    llvm::Value *stringTableRef(llvm::IRBuilderBase &builder, std::string_view str);
+    llvm::Value *stringTableRef(std::string_view str);
 
     // useful apis for getting common types
 

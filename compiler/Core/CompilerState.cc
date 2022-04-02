@@ -36,7 +36,7 @@ void CompilerState::trace(string_view msg) const {
     gs.trace(msg);
 }
 
-llvm::Value *CompilerState::stringTableRef(llvm::IRBuilderBase &builder, std::string_view str) {
+llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     auto it = this->stringTable.table.find(str);
 
     // We would like to return &sorbet_moduleStringTable[offset], but that would
@@ -49,8 +49,7 @@ llvm::Value *CompilerState::stringTableRef(llvm::IRBuilderBase &builder, std::st
     // table with the proper length (i.e. type) and go back and properly initialize
     // all of the temporary variables we created along the way.
     if (it != this->stringTable.table.end()) {
-        auto *var = it->second.addrVar;
-        return builder.CreateLoad(var);
+        return it->second.addrVar;
     }
 
     auto offset = this->stringTable.size;
@@ -68,7 +67,7 @@ llvm::Value *CompilerState::stringTableRef(llvm::IRBuilderBase &builder, std::st
     this->stringTable.table[str] = StringTable::StringTableEntry{offset, global};
     this->stringTable.size += str.size();
 
-    return builder.CreateLoad(global);
+    return global;
 }
 
 void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module) {

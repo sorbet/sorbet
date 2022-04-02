@@ -226,7 +226,7 @@ llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, ll
 }
 
 llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
-    return cs.stringTableRef(builder, str);
+    return builder.CreateLoad(cs.stringTableRef(str));
 }
 
 namespace {
