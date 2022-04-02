@@ -226,25 +226,7 @@ llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, ll
 }
 
 llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
-    llvm::StringRef valueRef(str.data(), str.length());
-    auto globalName = "addr_str_" + string(str);
-    auto globalDeclaration =
-        static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(globalName, builder.getInt8PtrTy(), [&] {
-            auto valueGlobal = builder.CreateGlobalString(valueRef, llvm::Twine("str_") + valueRef);
-            auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-            llvm::Constant *indicesString[] = {zero, zero};
-            auto addrGlobalInitializer =
-                llvm::ConstantExpr::getInBoundsGetElementPtr(valueGlobal->getValueType(), valueGlobal, indicesString);
-            auto addrGlobal =
-                new llvm::GlobalVariable(*cs.module, builder.getInt8PtrTy(), true,
-                                         llvm::GlobalVariable::InternalLinkage, addrGlobalInitializer, globalName);
-            addrGlobal->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-            addrGlobal->setAlignment(llvm::MaybeAlign(8));
-
-            return addrGlobal;
-        }));
-
-    return builder.CreateLoad(globalDeclaration);
+    return cs.stringTableRef(builder, str);
 }
 
 namespace {

@@ -8,13 +8,30 @@
 
 namespace sorbet::compiler {
 
+struct StringTable {
+    struct StringTableEntry {
+        uint32_t offset = 0;
+        llvm::GlobalVariable *addrVar = nullptr;
+    };
+
+    UnorderedMap<std::string, StringTableEntry> table;
+    uint32_t size = 0;
+
+    void clear() {
+        this->table.clear();
+        this->size = 0;
+    }
+
+    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module);
+};
+
 // Like GlobalState, but for the Sorbet Compiler.
 class CompilerState {
 public:
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
     CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, llvm::DIBuilder *,
                   llvm::DICompileUnit *, core::FileRef, llvm::BasicBlock *allocRubyIdsEntry,
-                  llvm::BasicBlock *globalConstructorsEntry);
+                  llvm::BasicBlock *globalConstructorsEntry, StringTable &stringTable);
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
@@ -33,6 +50,10 @@ public:
     llvm::BasicBlock *functionEntryInitializers;
 
     core::FileRef file;
+    StringTable &stringTable;
+
+    llvm::Value *stringTableRef(llvm::IRBuilderBase &builder, std::string_view str);
+
     // useful apis for getting common types
 
     llvm::StructType *getValueType();
