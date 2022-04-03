@@ -24,8 +24,7 @@ CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lct
                              StringTable &stringTable)
     : gs(gs), lctx(lctx), module(module), allocRubyIdsEntry(allocRubyIdsEntry),
       globalConstructorsEntry(globalConstructorsEntry), debug(debug), compileUnit(compileUnit),
-      functionEntryInitializers(nullptr), file(file), stringTable(stringTable) {
-}
+      functionEntryInitializers(nullptr), file(file), stringTable(stringTable) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
@@ -61,8 +60,7 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     const auto isConstant = false;
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
     llvm::Constant *initializer = llvm::ConstantPointerNull::get(type);
-    auto *global = new llvm::GlobalVariable(*this->module, type, isConstant,
-                                            llvm::GlobalVariable::InternalLinkage,
+    auto *global = new llvm::GlobalVariable(*this->module, type, isConstant, llvm::GlobalVariable::InternalLinkage,
                                             initializer, globalName);
     global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
     global->setAlignment(llvm::MaybeAlign(8));
@@ -90,8 +88,7 @@ void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &m
     const auto isConstant = true;
     const auto addNull = false;
     auto *initializer = llvm::ConstantDataArray::getString(lctx, tableInitializer, addNull);
-    auto *table = new llvm::GlobalVariable(module, arrayType, isConstant,
-                                           llvm::GlobalVariable::InternalLinkage,
+    auto *table = new llvm::GlobalVariable(module, arrayType, isConstant, llvm::GlobalVariable::InternalLinkage,
                                            initializer, "sorbet_moduleStringTable");
     table->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
     table->setAlignment(llvm::MaybeAlign(1));
