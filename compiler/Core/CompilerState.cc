@@ -54,6 +54,10 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
 
     auto offset = this->stringTable.size;
     auto globalName = fmt::format("addr_str_{}", str);
+    // This variable is conceptually `const` (even though we're going to change its
+    // initializer during compilation, at runtime its value doesn't change), but
+    // if we declare that up front, LLVM will fold loads of its value, which
+    // causes problems.  So save declaring it as `const` until later.
     const auto isConstant = false;
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
     llvm::Constant *initializer = llvm::ConstantPointerNull::get(type);
@@ -63,7 +67,8 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
     global->setAlignment(llvm::MaybeAlign(8));
     this->stringTable.map[str] = StringTable::StringTableEntry{offset, global};
-    this->stringTable.size += str.size();
+    // +1 for the null terminator.
+    this->stringTable.size += str.size() + 1;
 
     return global;
 }
@@ -73,7 +78,12 @@ void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &m
     tableElements.reserve(this->map.size());
     absl::c_copy(this->map, std::back_inserter(tableElements));
     fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
-    string tableInitializer = fmt::format("{}", fmt::map_join(tableElements, "", [&](const auto &e) -> std::string_view { return e.first; }));
+    string tableInitializer;
+    tableInitializer.reserve(this->size);
+    for (auto &elem : tableElements) {
+        tableInitializer += elem.first;
+        tableInitializer += '\0';
+    }
     ENFORCE(tableInitializer.size() == this->size);
 
     auto *arrayType = llvm::ArrayType::get(llvm::Type::getInt8Ty(lctx), this->size);
