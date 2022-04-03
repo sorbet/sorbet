@@ -25,6 +25,23 @@ struct StringTable {
     void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module);
 };
 
+struct IDTable {
+    struct IDTableEntry {
+        uint32_t offset;
+        uint32_t stringTableOffset = 0;
+        uint32_t stringLength = 0;
+        llvm::GlobalVariable *addrVar = nullptr;
+    };
+
+    UnorderedMap<std::string, IDTableEntry> map;
+
+    void clear() {
+        this->map.clear();
+    }
+
+    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module);
+};
+
 // Like GlobalState, but for the Sorbet Compiler.
 class CompilerState {
 public:
