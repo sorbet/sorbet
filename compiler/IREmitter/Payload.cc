@@ -74,7 +74,6 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
     auto rawName = fmt::format("rubyRegexpFrozen_{}_{}", str, options);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    llvm::Constant *indices[] = {zero};
 
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
         llvm::IRBuilder<> globalInitBuilder(cs);
@@ -95,8 +94,7 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
                                          {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length())),
 
                                           llvm::ConstantInt::get(cs, llvm::APInt(32, options))});
-        globalInitBuilder.CreateStore(rawStr,
-                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+        globalInitBuilder.CreateStore(rawStr, ret);
         globalInitBuilder.CreateRetVoid();
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         globalInitBuilder.CreateCall(constr, {});
@@ -129,7 +127,6 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
     string rawName = "rubyStrFrozen_" + string(str);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    llvm::Constant *indices[] = {zero};
 
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
         llvm::IRBuilder<> globalInitBuilder(cs);
@@ -148,8 +145,7 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
         auto rawStr =
             globalInitBuilder.CreateCall(cs.getFunction("sorbet_cPtrToRubyStringFrozen"),
                                          {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
-        globalInitBuilder.CreateStore(rawStr,
-                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+        globalInitBuilder.CreateStore(rawStr, ret);
         globalInitBuilder.CreateRetVoid();
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         globalInitBuilder.CreateCall(constr, {});
@@ -175,7 +171,6 @@ llvm::Value *Payload::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &build
 llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = llvm::StringRef(idName.data(), idName.length());
-    llvm::Constant *indices[] = {zero};
     string rawName = "rubyIdPrecomputed_" + string(idName);
     auto tp = llvm::Type::getInt64Ty(cs);
     auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
@@ -195,8 +190,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
         auto rawID = globalInitBuilder.CreateCall(
             cs.getFunction("sorbet_idIntern"),
             {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, idName.length()))}, "rawId");
-        globalInitBuilder.CreateStore(rawID,
-                                      llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+        globalInitBuilder.CreateStore(rawID, ret);
         globalInitBuilder.CreateRetVoid();
         globalInitBuilder.SetInsertPoint(cs.allocRubyIdsEntry);
         globalInitBuilder.CreateCall(constr, {});
@@ -662,9 +656,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     auto ret = builder.CreateCall(fn, {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
                                        llvm::ConstantInt::get(cs, llvm::APInt(32, startLine)), fileLineNumberInfo,
                                        locals, numLocals, sendMax});
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    llvm::Constant *indices[] = {zero};
-    builder.CreateStore(ret, llvm::ConstantExpr::getInBoundsGetElementPtr(store->getValueType(), store, indices));
+    builder.CreateStore(ret, store);
     builder.CreateRetVoid();
     builder.SetInsertPoint(bei);
     builder.CreateBr(bb);

@@ -307,7 +307,6 @@ public:
         string rawName = fmt::format("ruby_hashLiteral{}", ++counter);
         auto tp = llvm::Type::getInt64Ty(mcctx.cs);
         auto zero = llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0));
-        llvm::Constant *indices[] = {zero};
 
         auto oldInsertPoint = builder.saveIP();
         auto globalDeclaration =
@@ -343,8 +342,7 @@ public:
                      globalInitBuilder.CreateConstGEP2_64(argArray, 0, 0)},
                     "builtHash");
 
-                globalInitBuilder.CreateStore(
-                    hashValue, llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+                globalInitBuilder.CreateStore(hashValue, ret);
                 globalInitBuilder.CreateRetVoid();
                 globalInitBuilder.SetInsertPoint(mcctx.cs.globalConstructorsEntry);
                 globalInitBuilder.CreateCall(constr, {});
@@ -353,9 +351,7 @@ public:
             }));
         builder.restoreIP(oldInsertPoint);
 
-        auto *index = builder.CreateLoad(
-            llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-            "hashLiteral");
+        auto *index = builder.CreateLoad(globalDeclaration, "hashLiteral");
         auto *copy = builder.CreateCall(mcctx.cs.getFunction("sorbet_globalConstDupHash"), {index}, "duplicatedHash");
         Payload::assumeType(mcctx.cs, builder, copy, core::Symbols::Hash());
         return copy;
