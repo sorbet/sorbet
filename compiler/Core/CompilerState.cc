@@ -35,6 +35,24 @@ void CompilerState::trace(string_view msg) const {
     gs.trace(msg);
 }
 
+namespace {
+llvm::GlobalVariable *declareNullptrPlaceholder(llvm::Module &module,
+                                                llvm::Type *type,
+                                                const string &name) {
+    // This variable is conceptually `const` (even though we're going to change its
+    // initializer during compilation, at runtime its value doesn't change), but
+    // if we declare that up front, LLVM will fold loads of its value, which
+    // causes problems.  So save declaring it as `const` until later.
+    const auto isConstant = false;
+    llvm::Constant *initializer = llvm::Constant::getNullValue(type);
+    auto *global = new llvm::GlobalVariable(module, type, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                            initializer, name);
+    global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+    global->setAlignment(llvm::MaybeAlign(8));
+    return global;
+}
+}
+
 llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     auto it = this->stringTable.map.find(str);
 
@@ -53,17 +71,8 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
 
     auto offset = this->stringTable.size;
     auto globalName = fmt::format("addr_str_{}", str);
-    // This variable is conceptually `const` (even though we're going to change its
-    // initializer during compilation, at runtime its value doesn't change), but
-    // if we declare that up front, LLVM will fold loads of its value, which
-    // causes problems.  So save declaring it as `const` until later.
-    const auto isConstant = false;
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
-    llvm::Constant *initializer = llvm::ConstantPointerNull::get(type);
-    auto *global = new llvm::GlobalVariable(*this->module, type, isConstant, llvm::GlobalVariable::InternalLinkage,
-                                            initializer, globalName);
-    global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-    global->setAlignment(llvm::MaybeAlign(8));
+    auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     this->stringTable.map[str] = StringTable::StringTableEntry{offset, global};
     // +1 for the null terminator.
     this->stringTable.size += str.size() + 1;
