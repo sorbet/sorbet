@@ -110,9 +110,7 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
     auto oldInsertPoint = builder.saveIP();
     builder.SetInsertPoint(cs.functionEntryInitializers);
     auto name = llvm::StringRef(str.data(), str.length());
-    auto global = builder.CreateLoad(
-        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        {"rubyRegexp_", name});
+    auto global = builder.CreateLoad(globalDeclaration, {"rubyRegexp_", name});
     builder.restoreIP(oldInsertPoint);
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
@@ -160,9 +158,7 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
     }));
 
     auto name = llvm::StringRef(str.data(), str.length());
-    auto global = builder.CreateLoad(
-        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        {"rubyStr_", name});
+    auto global = builder.CreateLoad(globalDeclaration, {"rubyStr_", name});
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
@@ -208,9 +204,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
         return ret;
     }));
 
-    auto global = builder.CreateLoad(
-        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        {"rubyId_", name});
+    auto global = builder.CreateLoad(globalDeclaration, {"rubyId_", name});
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
@@ -733,11 +727,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
     }
 
     globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    llvm::Constant *indices[] = {zero};
-    auto global = globalInitBuilder.CreateLoad(
-        llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        "stackFrame");
+    auto global = globalInitBuilder.CreateLoad(globalDeclaration, "stackFrame");
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
