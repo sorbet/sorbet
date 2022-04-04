@@ -1,0 +1,11 @@
+# typed: true
+
+class A
+  def initialize
+    @x = T.let(1, Integer)
+    #^ hover: # note: information may be stale
+    #^ hover: Integer
+  end
+end
+
+X = 1
