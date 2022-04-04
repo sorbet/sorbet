@@ -1,3 +1,6 @@
+#ifndef SORBET_PARSER_NODE_H
+#define SORBET_PARSER_NODE_H
+
 #include "common/common.h"
 #include "core/core.h"
 #include <memory>
@@ -54,3 +57,5 @@ using NodeVec = InlinedVector<std::unique_ptr<Node>, 4>;
 
 #include "parser/Node_gen.h"
 }; // namespace sorbet::parser
+
+#endif

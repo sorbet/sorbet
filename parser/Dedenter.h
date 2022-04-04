@@ -1,3 +1,6 @@
+#ifndef SORBET_PARSER_DEDENTER_H
+#define SORBET_PARSER_DEDENTER_H
+
 #include <optional>
 #include <string>
 
@@ -23,3 +26,5 @@ private:
 };
 
 } // namespace sorbet::parser
+
+#endif
