@@ -1443,7 +1443,7 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
-        return nullptr;
+        return core::Types::untypedUntracked();
     }
     auto data = method.data(gs);
 
