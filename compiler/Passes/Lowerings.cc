@@ -87,6 +87,23 @@ public:
         if (elemPtr == nullptr) {
             throw OptimizerException("Unexpected argument to intrinsic");
         }
+        auto stringLength = llvm::dyn_cast<llvm::ConstantInt>(instr->getArgOperand(1));
+        if (stringLength == nullptr) {
+            throw OptimizerException("Unexpected argument to intrinsic");
+        }
+
+        llvm::APInt apOffset{64, 0};
+        bool success = elemPtr->accumulateConstantOffset(module.getDataLayout(), apOffset);
+        if (!success) {
+            throw OptimizerException("Cannot determine constant offset for intrinsic");
+        }
+        uint64_t offset = apOffset.getLimitedValue();
+        if (offset == UINT64_MAX) {
+            throw OptimizerException("Too big of an offset for intrinsic");
+        }
+
+        uint64_t length = stringLength->getZExtValue();
+
         auto global = llvm::dyn_cast<llvm::GlobalVariable>(elemPtr->getOperand(0));
 
         if (global == nullptr) {
@@ -99,7 +116,8 @@ public:
 
         llvm::IRBuilder<> builder(instr);
 
-        auto symName = initializer->getAsCString();
+        auto initializerString = initializer->getAsString();
+        auto symName = initializerString.substr(offset, length);
         auto tp = llvm::Type::getInt64Ty(lctx);
 
         for (const auto &[rubySourceName, rubyCApiName] : knownSymbolMapping) {
@@ -173,8 +191,9 @@ public:
 
             functionBuilder.SetInsertPoint(llvm::BasicBlock::Create(lctx, "", recomputeFun));
 
-            auto zero = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0));
-            llvm::Constant *indicesString[] = {zero, zero};
+            auto origIndices = elemPtr->idx_begin();
+            llvm::Constant *indicesString[] = {llvm::dyn_cast<llvm::Constant>(&**origIndices),
+                                               llvm::dyn_cast<llvm::Constant>(&**(origIndices + 1))};
             functionBuilder.CreateStore(
                 functionBuilder.CreateCall(
                     module.getFunction("sorbet_getConstant"),
