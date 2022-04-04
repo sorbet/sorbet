@@ -5,7 +5,7 @@ Parts of the source are derived from ruby_parser:
 Copyright (c) Ryan Davis, seattle.rb
 
 This lexer is a rewrite of the original in Ragel/C:
-Copyright (c) Charlie Somerville, GitHub
+Copyright (c) Hailey Somerville, GitHub
 
 MIT License
 
