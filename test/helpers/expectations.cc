@@ -169,7 +169,6 @@ Expectations getExpectationsForTest(string_view parentDir, string_view testName)
 } // namespace
 
 Expectations Expectations::getExpectations(std::string singleTest) {
-    vector<Expectations> result;
     if (singleTest.empty()) {
         Exception::raise("No test specified. Pass one with --single_test=<test_path>");
     }
