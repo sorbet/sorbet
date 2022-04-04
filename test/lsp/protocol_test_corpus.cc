@@ -312,7 +312,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MissingRootPathInitialization") {
     const bool supportsMarkdown = true;
     auto params =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize,
-                                    makeInitializeParams(nullopt, JSONNullObject(), supportsMarkdown, nullopt));
+                                    makeInitializeParams(nullopt, JSONNullObject(), supportsMarkdown, false, nullopt));
     {
         auto responses = send(LSPMessage(move(params)));
         INFO("Expected only a single response to the initialize request.");
@@ -349,7 +349,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MonacoInitialization") {
     const bool supportsMarkdown = true;
     auto params = make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::Initialize,
-        makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown, nullopt));
+        makeInitializeParams(JSONNullObject(), JSONNullObject(), supportsMarkdown, false, nullopt));
     {
         auto responses = send(LSPMessage(move(params)));
         INFO("Expected only a single response to the initialize request");
@@ -470,10 +470,11 @@ TEST_CASE_FIXTURE(ProtocolTest, "RespectsHoverTextLimitations") {
 // them.
 TEST_CASE_FIXTURE(ProtocolTest, "SorbetURIsWork") {
     const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
     lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
-    assertDiagnostics(initializeLSP(supportsMarkdown, move(initOptions)), {});
+    assertDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
 
     string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
     assertDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
@@ -500,12 +501,13 @@ TEST_CASE_FIXTURE(ProtocolTest, "SorbetURIsWork") {
 // Tests that Sorbet URIs are not typechecked.
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotTypecheckSorbetURIs") {
     const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
     initOptions->enableTypecheckInfo = true;
     lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
     // Don't assert diagnostics; it will fail due to the spurious typecheckinfo message.
-    initializeLSP(supportsMarkdown, move(initOptions));
+    initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions));
 
     string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
     send(*openFile("folder/foo.rb", fileContents));
@@ -526,7 +528,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotTypecheckSorbetURIs") {
 
 // Tests that files with url encoded characters in their name are matched to local files
 TEST_CASE_FIXTURE(ProtocolTest, "MatchesFilesWithUrlEncodedNames") {
-    initializeLSP(false, {});
+    initializeLSP(false, false, {});
 
     string filename = "test file@123+%&*#!.rbi";
     string encodedFilename = "test%20file%40123%2B%25%26*%23!.rbi";
@@ -541,13 +543,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "MatchesFilesWithUrlEncodedNames") {
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     const bool supportsMarkdown = false;
+    const bool supportsCodeActionResolve = false;
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
 
     // Manually invoke to customize rootURI and rootPath.
     auto initializeResponses = sorbet::test::initializeLSP(
         "/Users/jvilk/stripe/areallybigfoldername", "file://Users/jvilk/stripe/areallybigfoldername", *lspWrapper,
-        nextId, supportsMarkdown, make_optional(move(initOptions)));
+        nextId, supportsMarkdown, supportsCodeActionResolve, make_optional(move(initOptions)));
 
     auto fileUri = "file:///Users/jvilk/Desktop/test.rb";
     auto didOpenParams =

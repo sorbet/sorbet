@@ -58,9 +58,10 @@ ProtocolTest::~ProtocolTest() {
     }
 }
 
-vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP(bool supportsMarkdown,
+vector<unique_ptr<LSPMessage>> ProtocolTest::initializeLSP(bool supportsMarkdown, bool supportsCodeActionResolve,
                                                            optional<unique_ptr<SorbetInitializationOptions>> opts) {
-    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown, move(opts));
+    auto responses = sorbet::test::initializeLSP(rootPath, rootUri, *lspWrapper, nextId, supportsMarkdown,
+                                                 supportsCodeActionResolve, move(opts));
     updateDiagnostics(responses);
     return responses;
 }

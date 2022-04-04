@@ -71,7 +71,8 @@ unique_ptr<WorkspaceClientCapabilities> makeWorkspaceClientCapabilities() {
     return capabilities;
 }
 
-unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bool supportsMarkdown) {
+unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bool supportsMarkdown,
+                                                                              bool supportsCodeActionResolve) {
     auto capabilities = make_unique<TextDocumentClientCapabilities>();
     vector<MarkupKind> supportedTextFormats({MarkupKind::Plaintext});
     if (supportsMarkdown) {
@@ -131,18 +132,27 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
     capabilities->implementation = makeDynamicRegistrationOption(true);
     capabilities->colorProvider = makeDynamicRegistrationOption(true);
 
+    if (supportsCodeActionResolve) {
+        auto codeActionCaps = make_unique<CodeActionCapabilities>();
+        codeActionCaps->dataSupport = true;
+        codeActionCaps->resolveSupport = make_unique<CodeActionResolveSupport>(vector<string>{"edit"});
+        capabilities->codeAction = move(codeActionCaps);
+    }
+
     return capabilities;
 }
 
 unique_ptr<InitializeParams>
 makeInitializeParams(std::optional<variant<string, JSONNullObject>> rootPath, variant<string, JSONNullObject> rootUri,
-                     bool supportsMarkdown, std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
+                     bool supportsMarkdown, bool supportsCodeActionResolve,
+                     std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions) {
     auto initializeParams = make_unique<InitializeParams>(rootUri, make_unique<ClientCapabilities>());
     if (rootPath) {
         initializeParams->rootPath = rootPath;
     }
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
-    initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities(supportsMarkdown);
+    initializeParams->capabilities->textDocument =
+        makeTextDocumentClientCapabilities(supportsMarkdown, supportsCodeActionResolve);
     initializeParams->trace = TraceKind::Off;
 
     string stringRootUri;
@@ -396,15 +406,15 @@ unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, cons
 }
 
 vector<unique_ptr<LSPMessage>> initializeLSP(string_view rootPath, string_view rootUri, LSPWrapper &lspWrapper,
-                                             int &nextId, bool supportsMarkdown,
+                                             int &nextId, bool supportsMarkdown, bool supportsCodeActionResolve,
                                              optional<unique_ptr<SorbetInitializationOptions>> initOptions) {
     // Reset next id.
     nextId = 0;
 
     // Send 'initialize' message.
     {
-        auto initializeParams =
-            makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown, move(initOptions));
+        auto initializeParams = makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown,
+                                                     supportsCodeActionResolve, move(initOptions));
         auto message = make_unique<LSPMessage>(
             make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Initialize, move(initializeParams)));
         auto responses = getLSPResponsesFor(lspWrapper, move(message));

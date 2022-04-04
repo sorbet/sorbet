@@ -84,7 +84,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three files.
     assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n\nclass Foo\n\nend\n")), {});
@@ -167,7 +168,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTakeSlowPath") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Initial state: Two empty files.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
@@ -231,7 +233,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a new file.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
@@ -294,7 +297,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndReturnsErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a new file.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
@@ -337,7 +341,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndRetu
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create two new files.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
@@ -381,7 +386,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThatFixesAllErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create two new files.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
@@ -423,7 +429,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndThenCancelBoth") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three new files! foo.rb defines a class, bar.rb defines a class and method used in baz.rb.
     assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
@@ -477,7 +484,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndT
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndBothErrorsAreReported") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three new files! foo.rb defines a class, bar.rb defines a class and method used in baz.rb.
     assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
@@ -521,7 +529,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatReintroducesOldError") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // foo stands alone
     assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend\n")), {});
@@ -570,7 +579,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // bar has no error
     assertDiagnostics(
@@ -650,7 +660,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyM
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptionByFastPathClearedByNewSlowPath") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create new file
     assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
@@ -692,7 +703,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a simple file.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
@@ -750,7 +762,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
 
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Set initial file contents for foo.rb.
     assertDiagnostics(
@@ -828,7 +841,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
 
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Set initial file contents for foo.rb and bar.rb.
     assertDiagnostics(

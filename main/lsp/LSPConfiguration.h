@@ -43,6 +43,10 @@ public:
     MarkupKind clientHoverMarkupKind = MarkupKind::Plaintext;
     /** What completion item markup should we send to the client? */
     MarkupKind clientCompletionItemMarkupKind = MarkupKind::Plaintext;
+    /** If true, then LSP client can resolve CodeAction's `edit` property lazily */
+    bool clientCodeActionResolveEditSupport = false;
+    /** If true, then LSP client can pass additional data between codeAction and codeAction/resolve requests */
+    bool clientCodeActionDataSupport = false;
 
     LSPClientConfiguration(const InitializeParams &initializeParams);
 };

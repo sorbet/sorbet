@@ -64,12 +64,12 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         }
     }
 
-    if (params.capabilities->textDocument) {
-        auto &textDocument = *params.capabilities->textDocument;
-        if (textDocument->completion) {
-            auto &completion = *textDocument->completion;
-            if (completion->completionItem) {
-                auto &completionItem = (*completion->completionItem);
+    if (params.capabilities->textDocument.has_value()) {
+        auto &textDocument = params.capabilities->textDocument.value();
+        if (textDocument->completion.has_value()) {
+            auto &completion = textDocument->completion.value();
+            if (completion->completionItem.has_value()) {
+                auto &completionItem = completion->completionItem.value();
                 clientCompletionItemSnippetSupport = completionItem->snippetSupport.value_or(false);
                 if (completionItem->documentationFormat != nullopt) {
                     clientCompletionItemMarkupKind =
@@ -77,11 +77,23 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
                 }
             }
         }
-        if (textDocument->hover) {
-            auto &hover = *textDocument->hover;
-            if (hover->contentFormat) {
-                auto &contentFormat = *hover->contentFormat;
+        if (textDocument->hover.has_value()) {
+            auto &hover = textDocument->hover.value();
+            if (hover->contentFormat.has_value()) {
+                auto &contentFormat = hover->contentFormat.value();
                 clientHoverMarkupKind = getPreferredMarkupKind(contentFormat);
+            }
+        }
+        if (textDocument->codeAction.has_value()) {
+            auto &codeAction = textDocument->codeAction.value();
+            if (codeAction->dataSupport.has_value()) {
+                clientCodeActionDataSupport = codeAction->dataSupport.value_or(false);
+            }
+
+            if (codeAction->resolveSupport.has_value()) {
+                auto &properties = codeAction->resolveSupport.value()->properties;
+                clientCodeActionResolveEditSupport =
+                    absl::c_any_of(properties, [](auto prop) { return prop == "edit"; });
             }
         }
     }
