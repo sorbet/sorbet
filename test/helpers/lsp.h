@@ -16,6 +16,7 @@ std::string uriToFilePath(const LSPConfiguration &config, std::string_view uri);
 std::unique_ptr<InitializeParams>
 makeInitializeParams(std::optional<std::variant<std::string, JSONNullObject>> rootPath,
                      std::variant<std::string, JSONNullObject> rootUri, bool supportsMarkdown,
+                     bool supportsCodeActionResolve,
                      std::optional<std::unique_ptr<SorbetInitializationOptions>> initOptions);
 
 /** Create an LSPMessage containing a textDocument/definition request. */
