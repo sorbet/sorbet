@@ -46,14 +46,14 @@ res = x_f(0, f)
 T.reveal_type(res) # error: Revealed type: `T.any(String, Integer)`
 
 res = f_x(T.unsafe(f), 0)
-T.reveal_type(res) # error: Revealed type `T.untyped`
+T.reveal_type(res) # error: Revealed type: `T.untyped`
 res = x_f(0, T.unsafe(f))
-T.reveal_type(res) # error: Revealed type `T.untyped`
+T.reveal_type(res) # error: Revealed type: `T.untyped`
 
 res = f_x(f, T.unsafe(0))
-T.reveal_type(res) # error: Revealed type `T.any(String, Integer)`
+T.reveal_type(res) # error: Revealed type: `T.any(String, Integer)`
 res = x_f(T.unsafe(0), f)
-T.reveal_type(res) # error: Revealed type `T.any(String, Integer)`
+T.reveal_type(res) # error: Revealed type: `T.any(String, Integer)`
 
 # ---------------
 
@@ -63,11 +63,11 @@ res = x_f(str_or_int, g)
 T.reveal_type(res) # error: Revealed type: `T.untyped`
 
 res = f_x(T.unsafe(g), str_or_int)
-T.reveal_type(res) # error: Revealed type `T.untyped`
+T.reveal_type(res) # error: Revealed type: `T.untyped`
 res = x_f(str_or_int, T.unsafe(g))
-T.reveal_type(res) # error: Revealed type `T.untyped`
+T.reveal_type(res) # error: Revealed type: `T.untyped`
 
 res = f_x(g, T.unsafe(str_or_int))
-T.reveal_type(res) # error: Revealed type `T.untyped`
+T.reveal_type(res) # error: Revealed type: `T.untyped`
 res = x_f(T.unsafe(str_or_int), g)
-T.reveal_type(res) # error: Revealed type `T.untyped`
+T.reveal_type(res) # error: Revealed type: `T.untyped`
