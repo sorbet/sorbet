@@ -700,7 +700,7 @@ TEST_CASE("LSPTest") {
 
         // Apply updates in order.
         for (auto version : sortedUpdates) {
-            auto errorPrefix = fmt::format("[*.{}.{}] ", version, haveStaleUpdates ? "rbupdate" : "rbstaleupdate");
+            auto errorPrefix = fmt::format("[*.{}.{}] ", version, haveStaleUpdates ? "rbstaleupdate" : "rbupdate");
             auto &updates = testUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
