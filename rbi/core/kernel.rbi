@@ -690,12 +690,19 @@ module Kernel
   sig do
     type_parameters(:Elem)
       .params(
+        x: T::Enumerable[T.type_parameter(:Elem)],
+      )
+      .returns(T::Array[T.type_parameter(:Elem)])
+  end
+  sig do
+    type_parameters(:Elem)
+      .params(
         x: T.type_parameter(:Elem),
       )
       .returns(T::Array[T.type_parameter(:Elem)])
   end
   sig {params(x: NilClass).returns([])}
-  def Array(*x); end
+  def Array(x); end
 
   # Create a new
   # [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html) object.
