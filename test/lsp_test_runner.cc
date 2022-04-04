@@ -392,6 +392,46 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
     CHECK_EQ_DIFF(expectedFormattedText, formattedText, "Mismatch on: " + expectedFormattingPath);
 }
 
+enum class ExpectDiagnosticMessages {
+    No = 0,
+    Yes = 1,
+};
+
+// Check responses for a SorbetTypecheckRunInfo notification with the expected
+// status.  If such a notification is found, run custom logic via the handler.
+void verifyTypecheckRunInfo(const string &errorPrefix, vector<unique_ptr<LSPMessage>> &responses,
+                            SorbetTypecheckRunStatus expectedStatus, ExpectDiagnosticMessages expectDiagnostics,
+                            function<void(unique_ptr<SorbetTypecheckRunInfo> &)> handler) {
+    bool foundTypecheckRunInfo = false;
+
+    for (auto &r : responses) {
+        if (!r->isNotification()) {
+            FAIL_CHECK(errorPrefix << "Sorbet sent an unexpected message");
+            continue;
+        }
+
+        if (r->method() != LSPMethod::SorbetTypecheckRunInfo) {
+            if (expectDiagnostics == ExpectDiagnosticMessages::Yes &&
+                r->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+                continue;
+            }
+            FAIL_CHECK(errorPrefix << fmt::format("Unexpected message response to file update of type {}:\n{}",
+                                                  convertLSPMethodToString(r->method()), r->toJSON()));
+            continue;
+        }
+
+        auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
+        if (params->status == expectedStatus) {
+            foundTypecheckRunInfo = true;
+            handler(params);
+        }
+    }
+
+    if (!foundTypecheckRunInfo) {
+        FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking metadata.");
+    }
+}
+
 TEST_CASE("LSPTest") {
     /** The path to the test Ruby files on disk */
     vector<std::string> filenames;
@@ -731,34 +771,14 @@ TEST_CASE("LSPTest") {
 
                 // Make sure we get the expected typecheck start message, and nothing unexpected in response to the
                 // edits.
-                bool foundTypecheckStart = false;
-
-                for (auto &r : responses) {
-                    if (r->isNotification()) {
-                        if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
-                            if (params->status == SorbetTypecheckRunStatus::Started) {
-                                foundTypecheckStart = true;
-                                // For stale state, we must take the slow path.
-                                INFO(errorPrefix << "For stale state tests, we always expect Sorbet to take slow path, "
-                                                    "but it took the fast path.");
-                                CHECK_EQ(params->fastPath, false);
-                            }
-                        } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
-                            FAIL_CHECK(errorPrefix
-                                       << fmt::format("Unexpected message response to file update of type {}:\n{}",
-                                                      convertLSPMethodToString(r->method()), r->toJSON()));
-                        }
-                    } else {
-                        FAIL_CHECK(errorPrefix
-                                   << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
-                    }
-                }
-
-                if (!foundTypecheckStart) {
-                    FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking start.");
-                }
+                verifyTypecheckRunInfo(errorPrefix, responses, SorbetTypecheckRunStatus::Started,
+                                       ExpectDiagnosticMessages::Yes, [&errorPrefix](auto &params) -> void {
+                                           // For stale state, we must take the slow path.
+                                           INFO(errorPrefix
+                                                << "For stale state tests, we always expect Sorbet to take slow path, "
+                                                   "but it took the fast path.");
+                                           CHECK_EQ(params->fastPath, false);
+                                       });
 
                 // Check any new HoverAssertions in the updates.
                 HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
@@ -771,67 +791,27 @@ TEST_CASE("LSPTest") {
 
                 // Make sure we get the expected end message for the unblocked slow path, and nothing else that's
                 // unexpected.
-                bool foundTypecheckEnd = false;
-
-                for (auto &r : responses) {
-                    if (r->isNotification()) {
-                        if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
-                            if (params->status == SorbetTypecheckRunStatus::Ended) {
-                                foundTypecheckEnd = true;
-                            }
-                            // We could check if the end message is for a slow path, but it's probably not necessary
-                            // since we already checked that we got a slow-path start message.
-                        } else {
-                            FAIL_CHECK(errorPrefix
-                                       << fmt::format("Unexpected message response to file update of type {}:\n{}",
-                                                      convertLSPMethodToString(r->method()), r->toJSON()));
-                        }
-                    } else {
-                        FAIL_CHECK(errorPrefix
-                                   << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
-                    }
-                }
-
-                if (!foundTypecheckEnd) {
-                    FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking end.");
-                }
+                verifyTypecheckRunInfo(errorPrefix, responses, SorbetTypecheckRunStatus::Ended,
+                                       ExpectDiagnosticMessages::No, [](auto &params) -> void {
+                                           // We could check if the end message is for a slow path, but it's probably
+                                           // not necessary since we already checked that we got a slow-path start
+                                           // message.
+                                       });
             } else {
                 auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
-                bool foundTypecheckRunInfo = false;
-
-                for (auto &r : responses) {
-                    if (r->isNotification()) {
-                        if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                            // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
-                            // test_corpus only runs LSP in single-threaded mode.
-                            if (params->status == SorbetTypecheckRunStatus::Ended) {
-                                foundTypecheckRunInfo = true;
-                                if (assertSlowPath.value_or(false)) {
-                                    INFO(errorPrefix
-                                         << "Expected Sorbet to take slow path, but it took the fast path.");
-                                    CHECK_EQ(params->fastPath, false);
-                                }
-                                if (assertFastPath.has_value()) {
-                                    (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
-                                }
-                            }
-                        } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
-                            FAIL_CHECK(errorPrefix
-                                       << fmt::format("Unexpected message response to file update of type {}:\n{}",
-                                                      convertLSPMethodToString(r->method()), r->toJSON()));
+                // Ignore started messages.  Note that cancelation messages cannot occur
+                // in this codepath since we are running in single-threaded mode.
+                verifyTypecheckRunInfo(
+                    errorPrefix, responses, SorbetTypecheckRunStatus::Ended, ExpectDiagnosticMessages::Yes,
+                    [&errorPrefix, assertSlowPath, &assertFastPath, &test, &version](auto &params) -> void {
+                        if (assertSlowPath.value_or(false)) {
+                            INFO(errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.");
+                            CHECK_EQ(params->fastPath, false);
                         }
-                    } else {
-                        FAIL_CHECK(errorPrefix
-                                   << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
-                    }
-                }
-
-                if (!foundTypecheckRunInfo) {
-                    FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking metadata.");
-                }
+                        if (assertFastPath.has_value()) {
+                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                        }
+                    });
 
                 updateDiagnostics(config, testFileUris, responses, diagnostics);
 
