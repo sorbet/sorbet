@@ -43,82 +43,68 @@ TEST_CASE("SimpleClass") { // NOLINT
     Helper helper;
 
     // we'll use this simple file as our baseline
-    auto basicHash = helper.hashExample(
-        "class Foo\n"
-        "end\n"
-        );
+    auto basicHash = helper.hashExample("class Foo\n"
+                                        "end\n");
 
     // the following are all transformations to the file that do not
     // affect the constant hash:
 
     // comments do not affect the hashed value
-    CHECK_EQ(basicHash, helper.hashExample(
-                 "# comment\n"
-                 "class Foo\n"
-                 "end\n"));
+    CHECK_EQ(basicHash, helper.hashExample("# comment\n"
+                                           "class Foo\n"
+                                           "end\n"));
     // the presence of method calls does not affect the hashed value
-    CHECK_EQ(basicHash, helper.hashExample(
-                 "a_method!\n"
-                 "class Foo\n"
-                 "end\n"));
+    CHECK_EQ(basicHash, helper.hashExample("a_method!\n"
+                                           "class Foo\n"
+                                           "end\n"));
     // the presence of method definitions does not affect the hashed value
-    CHECK_EQ(basicHash, helper.hashExample(
-                 "class Foo\n"
-                 "  def hello!; end\n"
-                 "  def goodbye!; end\n"
-                 "end\n"));
+    CHECK_EQ(basicHash, helper.hashExample("class Foo\n"
+                                           "  def hello!; end\n"
+                                           "  def goodbye!; end\n"
+                                           "end\n"));
     // the presence of locals (eugh) does not affect the hashed value
-    CHECK_EQ(basicHash, helper.hashExample(
-                 "class Foo\n"
-                 "  foo = whatever\n"
-                 "end\n"));
+    CHECK_EQ(basicHash, helper.hashExample("class Foo\n"
+                                           "  foo = whatever\n"
+                                           "end\n"));
     // a send, even containing a constant, should not affect the hashed value
-    CHECK_EQ(basicHash, helper.hashExample(
-                 "class Foo\n"
-                 "  arglbargl(This)\n"
-                 "end\n"));
+    CHECK_EQ(basicHash, helper.hashExample("class Foo\n"
+                                           "  arglbargl(This)\n"
+                                           "end\n"));
 
     // the following are all transformations which SHOULD affect the hashed value
 
     // changing the name of the class SHOULD affect the hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "class Fwoo\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("class Fwoo\n"
+                                           "end\n"));
 
     // changing the scoping of the class SHOULD affect the hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "class Something::Foo\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("class Something::Foo\n"
+                                           "end\n"));
 
     // changing `class` to `module` SHOULD affect the hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "module Foo\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("module Foo\n"
+                                           "end\n"));
 
     // changing the superclass SHOULD affect the hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "class Foo < Bar\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("class Foo < Bar\n"
+                                           "end\n"));
 
     // adding an `include` SHOULD affect the hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "class Foo < Bar\n"
-                 "  include This\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("class Foo < Bar\n"
+                                           "  include This\n"
+                                           "end\n"));
 
     // adding an `extend` SHOULD affect the hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "class Foo < Bar\n"
-                 "  extend This\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("class Foo < Bar\n"
+                                           "  extend This\n"
+                                           "end\n"));
 
     // because changing a `require` could cause the autoloader to
     // regenerate, adding or removing a `require` SHOULD affect the
     // hashed value
-    CHECK_NE(basicHash, helper.hashExample(
-                 "require 'something\n"
-                 "class Foo < Bar\n"
-                 "end\n"));
+    CHECK_NE(basicHash, helper.hashExample("require 'something\n"
+                                           "class Foo < Bar\n"
+                                           "end\n"));
 }
 
 TEST_CASE("Constant Assignments") { // NOLINT
