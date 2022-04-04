@@ -1069,19 +1069,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                  },
                                  classTypes);
 
-    auto SorbetErrorParams = makeObject("SorbetErrorParams",
-                                        {
-                                            makeField("code", JSONInt),
-                                            makeField("message", JSONString),
-                                        },
-                                        classTypes);
-    auto CodeActionResolveResponse = makeObject("CodeActionResolveResponse",
-                                                {
-                                                    makeField("result", makeOptional(CodeAction)),
-                                                    makeField("error", makeOptional(SorbetErrorParams)),
-                                                },
-                                                classTypes);
-
     auto CodeActionRegistrationOptions =
         makeObject("CodeActionRegistrationOptions",
                    {
@@ -1295,6 +1282,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                     makeField("status", SorbetOperationStatus),
                                                 },
                                                 classTypes);
+    auto SorbetErrorParams = makeObject("SorbetErrorParams",
+                                        {
+                                            makeField("code", JSONInt),
+                                            makeField("message", JSONString),
+                                        },
+                                        classTypes);
     auto SorbetFenceParams = makeObject("SorbetFenceParams",
                                         {
                                             makeField("id", JSONInt),
