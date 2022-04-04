@@ -28,7 +28,7 @@ namespace sorbet::autogen {
 // then we do not need to re-run autogen-related logic on that file,
 // because no changes have happened which could possibly affect what
 // autogen produces.
-unsigned int constantHashNode(core::GlobalState &gs, parser::Node *what);
+unsigned int constantHashNode(core::GlobalState &gs, const std::unique_ptr<parser::Node> &what);
 
 } // namespace sorbet::autogen
 #endif // AUTOGEN_CONSTANT_HASH_H

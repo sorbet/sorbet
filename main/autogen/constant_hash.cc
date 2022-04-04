@@ -15,7 +15,7 @@ namespace sorbet::autogen {
 // one) is that this means we can do less allocation and run the hash
 // as quickly as possible.
 //
-// - the reason it takes a pointer rather than a `unique_ptr` is so it
+// - the reason it takes a reference to a `unique_ptr` is so it
 // doesn't need to `move` or consume the AST: it just observes it. The
 // reason it takes a pointer rather than a reference is so we don't
 // need to check for nullability on every recursive call: we can check
@@ -31,15 +31,15 @@ namespace sorbet::autogen {
 // implementation simpler. This should rarely be a problem in
 // practice, since it's relatively rare to find a bare constant
 // reference directly in that position.
-unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Node *what) {
-    if (what == nullptr) {
+unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, const unique_ptr<parser::Node> &what) {
+    if (what.get() == nullptr) {
         return hashSoFar;
     }
     typecase(
-        what,
+        what.get(),
         [&](parser::Const *cnst) {
             // hash the scope then the name
-            hashSoFar = hashNode(gs, hashSoFar, cnst->scope.get());
+            hashSoFar = hashNode(gs, hashSoFar, cnst->scope);
             hashSoFar = core::mix(hashSoFar, core::_hash("::"));
             hashSoFar = core::mix(hashSoFar, core::_hash(cnst->name.shortName(gs)));
         },
@@ -58,7 +58,7 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
                 hashSoFar = core::mix(hashSoFar, core::_hash("(i"));
                 hashSoFar = core::mix(hashSoFar, core::_hash(send->method.shortName(gs)));
                 for (auto &arg : send->args) {
-                    hashSoFar = hashNode(gs, hashSoFar, arg.get());
+                    hashSoFar = hashNode(gs, hashSoFar, arg);
                 }
                 hashSoFar = core::mix(hashSoFar, core::_hash(")"));
             }
@@ -81,7 +81,7 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
                     hashSoFar = core::mix(hashSoFar, core::_hash("(a"));
                     hashSoFar = core::mix(hashSoFar, core::_hash(lhs->name.shortName(gs)));
                     hashSoFar = core::mix(hashSoFar, core::_hash(" "));
-                    hashSoFar = hashNode(gs, hashSoFar, asgn->rhs.get());
+                    hashSoFar = hashNode(gs, hashSoFar, asgn->rhs);
                     hashSoFar = core::mix(hashSoFar, core::_hash(")"));
                 } else {
                     // if the RHS is anything else, then it's a constant
@@ -94,23 +94,23 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
         },
         [&](parser::Module *module) {
             hashSoFar = core::mix(hashSoFar, core::_hash("(m"));
-            hashSoFar = hashNode(gs, hashSoFar, module->name.get());
+            hashSoFar = hashNode(gs, hashSoFar, module->name);
             hashSoFar = core::mix(hashSoFar, core::_hash(" "));
-            hashSoFar = hashNode(gs, hashSoFar, module->body.get());
+            hashSoFar = hashNode(gs, hashSoFar, module->body);
             hashSoFar = core::mix(hashSoFar, core::_hash(")"));
         },
         [&](parser::Class *claz) {
             hashSoFar = core::mix(hashSoFar, core::_hash("(c"));
-            hashSoFar = hashNode(gs, hashSoFar, claz->name.get());
+            hashSoFar = hashNode(gs, hashSoFar, claz->name);
             hashSoFar = core::mix(hashSoFar, core::_hash("<"));
-            hashSoFar = hashNode(gs, hashSoFar, claz->superclass.get());
+            hashSoFar = hashNode(gs, hashSoFar, claz->superclass);
             hashSoFar = core::mix(hashSoFar, core::_hash(" "));
-            hashSoFar = hashNode(gs, hashSoFar, claz->body.get());
+            hashSoFar = hashNode(gs, hashSoFar, claz->body);
             hashSoFar = core::mix(hashSoFar, core::_hash(")"));
         },
         [&](parser::Begin *begin) {
             for (auto &stmt : begin->stmts) {
-                hashSoFar = hashNode(gs, hashSoFar, stmt.get());
+                hashSoFar = hashNode(gs, hashSoFar, stmt);
             }
         },
         // the above are the only cases we should need to handle;
@@ -121,7 +121,7 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
     return hashSoFar;
 }
 
-unsigned int constantHashNode(core::GlobalState &gs, parser::Node *what) {
+unsigned int constantHashNode(core::GlobalState &gs, const unique_ptr<parser::Node> &what) {
     return hashNode(gs, 0, what);
 }
 
