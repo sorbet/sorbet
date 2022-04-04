@@ -48,15 +48,18 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
             // or `extend`
             if (send->method == core::Names::require()) {
                 hashSoFar = core::mix(hashSoFar, core::_hash("(r"));
-                hashSoFar = core::mix(hashSoFar, core::_hash(send->method.shortName(gs)));
+                if (send->args.size() >= 1) {
+                    if (auto str = parser::cast_node<parser::String>(send->args[0].get())) {
+                        hashSoFar = core::mix(hashSoFar, core::_hash(str->val.shortName(gs)));
+                    }
+                }
                 hashSoFar = core::mix(hashSoFar, core::_hash(")"));
-            } else if (send->method == core::Names::include()) {
-                hashSoFar = core::mix(hashSoFar, core::_hash("(i"));
+            } else if (send->method == core::Names::include() || send->method == core::Names::extend()) {
+                hashSoFar = core::mix(hashSoFar, core::_hash("(r"));
                 hashSoFar = core::mix(hashSoFar, core::_hash(send->method.shortName(gs)));
-                hashSoFar = core::mix(hashSoFar, core::_hash(")"));
-            } else if (send->method == core::Names::extend()) {
-                hashSoFar = core::mix(hashSoFar, core::_hash("(e"));
-                hashSoFar = core::mix(hashSoFar, core::_hash(send->method.shortName(gs)));
+                for (auto &arg : send->args) {
+                    hashSoFar = hashNode(gs, hashSoFar, arg.get());
+                }
                 hashSoFar = core::mix(hashSoFar, core::_hash(")"));
             }
         },

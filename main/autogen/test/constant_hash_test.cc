@@ -102,7 +102,7 @@ TEST_CASE("SimpleClass") { // NOLINT
     // because changing a `require` could cause the autoloader to
     // regenerate, adding or removing a `require` SHOULD affect the
     // hashed value
-    CHECK_NE(basicHash, helper.hashExample("require 'something\n"
+    CHECK_NE(basicHash, helper.hashExample("require 'something'\n"
                                            "class Foo < Bar\n"
                                            "end\n"));
 }
@@ -139,6 +139,46 @@ TEST_CASE("Constant Assignments") { // NOLINT
     // changing the RHS SHOULD NOT affect the hash here
     CHECK_EQ(cnst, helper.hashExample("module Example\n"
                                       "  X = T.let(Z, nil)\n"
+                                      "end\n"));
+}
+
+TEST_CASE("Require") { // NOLINT
+    Helper helper;
+
+    // changing requires should affect the hash
+    auto req = helper.hashExample("require 'foo'\n");
+
+    // changing the name of a require should affect the hash
+    CHECK_NE(req, helper.hashExample("require 'bar'\n"));
+
+    // adding a new requires hould affect the hash
+    CHECK_NE(req, helper.hashExample("require 'foo'\n"
+                                     "require 'bar'\n"));
+
+    // obviously deleting the require should affect the hash
+    CHECK_NE(req, helper.hashExample("\n"));
+
+    // other sends should not affect the hash
+    CHECK_EQ(req, helper.hashExample("require 'foo'\n"
+                                     "do_the_thing!"));
+}
+
+TEST_CASE("Extend/Include") {
+    Helper helper;
+
+    // changing requires should affect the hash
+    auto incl = helper.hashExample("class Example\n"
+                                   "  include Foo\n"
+                                   "end\n");
+
+    // changing the name of the included module should affect the hash
+    CHECK_NE(incl, helper.hashExample("class Example\n"
+                                      "  include Bar\n"
+                                      "end\n"));
+
+    // changing the module to be extended should affect the hash
+    CHECK_NE(incl, helper.hashExample("class Example\n"
+                                      "  extend Foo\n"
                                       "end\n"));
 }
 
