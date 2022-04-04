@@ -27,7 +27,7 @@ class PosArgs
 
     # Not matching initialize
     T.reveal_type(self.new())
-                # ^^^^^^^^^^ error: Not enough arguments provided
+    #                     ^^ error: Not enough arguments provided
   # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of PosArgs)`
   end
 end
@@ -44,7 +44,7 @@ class NamedArgs
 
     # Not matching initialize
     T.reveal_type(self.new(x: 10))
-                # ^^^^^^^^^^^^^^^ error: Missing required keyword argument `y`
+    #                      ^^^^^ error: Missing required keyword argument `y`
   # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of NamedArgs)`
   end
 end
@@ -60,7 +60,7 @@ class BlockArg
     T.reveal_type(self.new {|x| x + 1}) # error: Revealed type: `T.attached_class (of BlockArg)`
 
     T.reveal_type(self.new)
-                # ^^^^^^^^ error: `initialize` requires a block parameter
+    #                     ^ error: `initialize` requires a block parameter
   # ^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of BlockArg)`
   end
 end

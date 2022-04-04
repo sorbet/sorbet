@@ -1295,6 +1295,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                     makeField("status", SorbetOperationStatus),
                                                 },
                                                 classTypes);
+    auto SorbetFenceParams = makeObject("SorbetFenceParams",
+                                        {
+                                            makeField("id", JSONInt),
+                                            makeField("advanceIfStaleDataAvailable", JSONBool),
+                                        },
+                                        classTypes);
 
     /* Watchman JSON response objects */
     auto WatchmanQueryResponse = makeObject("WatchmanQueryResponse",
@@ -1404,6 +1410,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/formatting", DocumentFormattingParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
+                                                {"sorbet/fence", SorbetFenceParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
                                                 {"sorbet/showSymbol", TextDocumentPositionParams},
                                             });
@@ -1478,7 +1485,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
-                                                {"sorbet/fence", JSONInt},
+                                                {"sorbet/fence", SorbetFenceParams},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                                 {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
                                             });

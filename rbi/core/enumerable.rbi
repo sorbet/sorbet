@@ -1996,7 +1996,7 @@ module Enumerable
   # # show pythagorean triples less than 100
   # p pythagorean_triples.take_while { |*, z| z < 100 }.force
   # ```
-  sig { returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem])}
   def lazy(); end
 
   # Takes one element from *enum* and merges corresponding elements from each

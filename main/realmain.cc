@@ -722,7 +722,7 @@ int realmain(int argc, char *argv[]) {
 
             if (!opts.packageRBIGeneration) {
                 // we don't need to typecheck when generating rbis
-                pipeline::typecheck(gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
+                pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
                                     /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
             }
             if (gs->hadCriticalError()) {

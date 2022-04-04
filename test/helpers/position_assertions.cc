@@ -236,6 +236,14 @@ int RangeAssertion::matches(string_view otherFilename, const Range &otherRange) 
             return cmp;
         }
     }
+    if (otherRange.start->cmp(*otherRange.end) == 0) {
+        // zero-width error message. Allow single `^` to match this
+        // (VS Code will still show a red squiggle for a diagnostic that is zero-width)
+        if (range->start->cmp(*otherRange.start) == 0 && range->end->line == otherRange.end->line &&
+            range->end->character - 1 == otherRange.end->character) {
+            return 0;
+        }
+    }
     return range->cmp(otherRange);
 }
 

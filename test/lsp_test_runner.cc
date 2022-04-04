@@ -449,6 +449,12 @@ TEST_CASE("LSPTest") {
     /** Test expectations. */
     Expectations test = Expectations::getExpectations(singleTest);
 
+    /** Currently we cannot mix .rbupdate and .rbstaleupdate files, since the latter requires us to use a multithreaded
+        LSPWrapper and the former requires us to use a single-threaded LSPWrapper. */
+    bool haveSourceUpdates = test.sourceLSPFileUpdates.size() > 0;
+    bool haveStaleUpdates = test.staleLSPFileUpdates.size() > 0;
+    REQUIRE_MESSAGE(!(haveSourceUpdates && haveStaleUpdates), "Cannot mix .rbupdate and .rbstaleupdate files in test");
+
     /** All test assertions ordered by (filename, range, message). */
     std::vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
@@ -473,10 +479,18 @@ TEST_CASE("LSPTest") {
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }
-        // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle this
-        // edge case. If you change this number, update the `lsp/fast_path/too_many_files` and `not_enough_files` tests.
-        opts->lspMaxFilesOnFastPath = 10;
-        lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
+        opts->disableWatchman = true;
+
+        if (haveStaleUpdates) {
+            opts->lspStaleStateEnabled = true;
+            lspWrapper = MultiThreadedLSPWrapper::create("", move(opts));
+        } else {
+            // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
+            // this edge case. If you change this number, update the `lsp/fast_path/too_many_files` and
+            // `not_enough_files` tests.
+            opts->lspMaxFilesOnFastPath = 10;
+            lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
+        }
         lspWrapper->enableAllExperimentalFeatures();
     }
 
@@ -722,19 +736,23 @@ TEST_CASE("LSPTest") {
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
-        // sourceLSPFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
+        // sourceLSPFileUpdates/staleLSPFileUpdates are unordered (and we can't use ordered maps unless we make their
+        // contents `const`)
         // Sort by version.
         vector<int> sortedUpdates;
         const int baseVersion = 4;
-        for (auto &update : test.sourceLSPFileUpdates) {
+
+        auto &testUpdates = haveStaleUpdates ? test.staleLSPFileUpdates : test.sourceLSPFileUpdates;
+
+        for (auto &update : testUpdates) {
             sortedUpdates.push_back(update.first);
         }
         fast_sort(sortedUpdates);
 
         // Apply updates in order.
         for (auto version : sortedUpdates) {
-            auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
-            auto &updates = test.sourceLSPFileUpdates[version];
+            auto errorPrefix = fmt::format("[*.{}.{}] ", version, haveStaleUpdates ? "rbupdate" : "rbstaleupdate");
+            auto &updates = testUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
 
@@ -749,58 +767,142 @@ TEST_CASE("LSPTest") {
             auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
-            auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
-            bool foundTypecheckRunInfo = false;
 
-            for (auto &r : responses) {
-                if (r->isNotification()) {
-                    if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
-                        auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
-                        // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
-                        // test_corpus only runs LSP in single-threaded mode.
-                        if (params->status == SorbetTypecheckRunStatus::Ended) {
-                            foundTypecheckRunInfo = true;
-                            if (assertSlowPath.value_or(false)) {
-                                INFO(errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.");
+            // TODO(aprocter): There's probably more code duplication than necessary between the 'if' and the 'else'
+            // here.
+            if (haveStaleUpdates) {
+                // Wait for a fence, to clear out any pending slow-path operations.
+                (void)getLSPResponsesFor(*lspWrapper, std::vector<std::unique_ptr<LSPMessage>>{});
+
+                // Block the slow path, to force the edit tasks to operate on stale state.
+                lspWrapper->setSlowPathBlocked(true);
+
+                // Send the updates.
+                auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
+
+                // Make sure we get the expected typecheck start message, and nothing unexpected in response to the
+                // edits.
+                bool foundTypecheckStart = false;
+
+                for (auto &r : responses) {
+                    if (r->isNotification()) {
+                        if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
+                            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
+                            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+                            if (params->status == SorbetTypecheckRunStatus::Started) {
+                                foundTypecheckStart = true;
+                                // For stale state, we must take the slow path.
+                                INFO(errorPrefix << "For stale state tests, we always expect Sorbet to take slow path, "
+                                                    "but it took the fast path.");
                                 CHECK_EQ(params->fastPath, false);
                             }
-                            if (assertFastPath.has_value()) {
-                                (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
-                            }
+                        } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
+                            FAIL_CHECK(errorPrefix
+                                       << fmt::format("Unexpected message response to file update of type {}:\n{}",
+                                                      convertLSPMethodToString(r->method()), r->toJSON()));
                         }
-                    } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
+                    } else {
                         FAIL_CHECK(errorPrefix
-                                   << fmt::format("Unexpected message response to file update of type {}:\n{}",
-                                                  convertLSPMethodToString(r->method()), r->toJSON()));
+                                   << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
                     }
-                } else {
-                    FAIL_CHECK(errorPrefix
-                               << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
                 }
+
+                if (!foundTypecheckStart) {
+                    FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking start.");
+                }
+
+                // Check any new HoverAssertions in the updates.
+                HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
+
+                // Unblock the slow path.
+                lspWrapper->setSlowPathBlocked(false);
+
+                // Wait for a fence, to clear out the slow path we've just unblocked.
+                responses = getLSPResponsesFor(*lspWrapper, std::vector<std::unique_ptr<LSPMessage>>{});
+
+                // Make sure we get the expected end message for the unblocked slow path, and nothing else that's
+                // unexpected.
+                bool foundTypecheckEnd = false;
+
+                for (auto &r : responses) {
+                    if (r->isNotification()) {
+                        if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
+                            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
+                            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+                            if (params->status == SorbetTypecheckRunStatus::Ended) {
+                                foundTypecheckEnd = true;
+                            }
+                            // We could check if the end message is for a slow path, but it's probably not necessary
+                            // since we already checked that we got a slow-path start message.
+                        } else {
+                            FAIL_CHECK(errorPrefix
+                                       << fmt::format("Unexpected message response to file update of type {}:\n{}",
+                                                      convertLSPMethodToString(r->method()), r->toJSON()));
+                        }
+                    } else {
+                        FAIL_CHECK(errorPrefix
+                                   << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
+                    }
+                }
+
+                if (!foundTypecheckEnd) {
+                    FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking end.");
+                }
+            } else {
+                auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
+                bool foundTypecheckRunInfo = false;
+
+                for (auto &r : responses) {
+                    if (r->isNotification()) {
+                        if (r->method() == LSPMethod::SorbetTypecheckRunInfo) {
+                            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(r->asNotification().params);
+                            // Ignore started messages. Note that cancelation messages cannot occur in test_corpus since
+                            // test_corpus only runs LSP in single-threaded mode.
+                            if (params->status == SorbetTypecheckRunStatus::Ended) {
+                                foundTypecheckRunInfo = true;
+                                if (assertSlowPath.value_or(false)) {
+                                    INFO(errorPrefix
+                                         << "Expected Sorbet to take slow path, but it took the fast path.");
+                                    CHECK_EQ(params->fastPath, false);
+                                }
+                                if (assertFastPath.has_value()) {
+                                    (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                                }
+                            }
+                        } else if (r->method() != LSPMethod::TextDocumentPublishDiagnostics) {
+                            FAIL_CHECK(errorPrefix
+                                       << fmt::format("Unexpected message response to file update of type {}:\n{}",
+                                                      convertLSPMethodToString(r->method()), r->toJSON()));
+                        }
+                    } else {
+                        FAIL_CHECK(errorPrefix
+                                   << fmt::format("Unexpected message response to file update:\n{}", r->toJSON()));
+                    }
+                }
+
+                if (!foundTypecheckRunInfo) {
+                    FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking metadata.");
+                }
+
+                updateDiagnostics(config, testFileUris, responses, diagnostics);
+
+                for (auto &update : updates) {
+                    auto originalFile = test.folder + update.first;
+                    auto updateFile = test.folder + update.second;
+                    testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
+                }
+
+                const bool passed = ErrorAssertion::checkAll(
+                    updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+
+                if (!passed) {
+                    // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
+                    break;
+                }
+
+                // Check any new HoverAssertions in the updates.
+                HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
             }
-
-            if (!foundTypecheckRunInfo) {
-                FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking metadata.");
-            }
-
-            updateDiagnostics(config, testFileUris, responses, diagnostics);
-
-            for (auto &update : updates) {
-                auto originalFile = test.folder + update.first;
-                auto updateFile = test.folder + update.second;
-                testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
-            }
-
-            const bool passed = ErrorAssertion::checkAll(
-                updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
-
-            if (!passed) {
-                // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
-                break;
-            }
-
-            // Check any new HoverAssertions in the updates.
-            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
         }
     }
 

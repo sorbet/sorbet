@@ -134,7 +134,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     }
 
     // Send a no-op to clear out the pipeline. Should have errors in bar and baz, but not foo.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"bar.rb", 7, "Expected `Integer` but found `String(\"hi\")` for method result type"},
                           {"baz.rb", 7, "Expected `String` but found `Integer` for method result type"},
@@ -205,7 +206,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     }
 
     // Send a no-op to clear out the pipeline. Should have one error per file.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 6, "Expected `Integer` but found `String` for method result type"},
                           {"bar.rb", 6, "Expected `String` but found `Integer(10)` for method result type"},
@@ -271,7 +273,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
     }
 
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
@@ -321,7 +325,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndRetu
     }
 
     // Send a no-op to clear out the pipeline. Should have one error in `foo.rb`.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 6, "Expected `String` but found `Integer(3)` for method result type"},
                       });
@@ -363,7 +368,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
 
     // Send a no-op to clear out the pipeline. Should have two error now: bar.rb from slow path and foo.rb from fast
     // path.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 9, "Expected `Float` but found `String(\"not a float\")` for method result type"},
                           {"bar.rb", 5, "Expected `String` but found `Integer(1)` for method result type"},
@@ -405,7 +411,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
                           "bar\n'hello'\nend\nend\n",
                           3));
     // Send a no-op to clear out the pipeline. Should have no errors at end of both typechecking runs.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 
     // Need to re-evaluate the test strategy for timings
     // checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
@@ -499,7 +507,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
 
     // We should receive errors for `foo`, `bar`, and `baz`.
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {
                           {"foo.rb", 2, "unexpected token"},
                           {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
@@ -551,7 +560,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7,
                          /* assertUniqueStartTimes */ false);
@@ -599,7 +609,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
     sendAsync(*openFile("bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef hi\n10\nend"));
 
     // Send fence to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
                       {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
                        {"bar.rb", 6, "unexpected"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
@@ -625,7 +636,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyM
     sendAsync(*cancelRequest(nextId - 1));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
     // Clear out the pipeline to wait for previous requests to finish.
-    send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    send(LSPMessage(
+        make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, make_unique<SorbetFenceParams>(20, false))));
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.hover"), 0);
@@ -672,7 +684,261 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
                           4, false, 0));
 
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Create a simple file.
+    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\n  def foo\n  end\nend\n", 2));
+
+    // Wait for initial typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Wait for initial typechecking to finish.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Turn on slow path blocking, and send an edit that is going to cause a slow path.
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\n  def bar\n  end\nend\n", 3, false, 0));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive any messages within a
+    // pretty long time frame---let's say 2000ms.
+    {
+        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+        auto msg = wrapper.read(2000);
+        REQUIRE(msg == nullptr);
+    }
+
+    // Unblock the slow path.
+    setSlowPathBlocked(false);
+
+    // The slow path should now be unblocked. Wait for typechecking to end.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
+    // Reset the options to enable stale state.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspStaleStateEnabled = true;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Set initial file contents for foo.rb.
+    assertDiagnostics(
+        send(*openFile("foo.rb",
+                       "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\n1\nend\nend")),
+        {});
+
+    // Send a hover.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Make an edit, renaming Foo::foo to Foo::bar.
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
+
+    // Set slow-path blocking, and wait for typechecking to begin.
+    setSlowPathBlocked(true);
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Send a hover.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Unblock slow-path, and wait for typechecking to finish.
+    setSlowPathBlocked(false);
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Send a hover.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a no-op to clear out the pipeline.
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
+    // Reset the options to enable stale state.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspStaleStateEnabled = true;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(initializeLSP(true /* supportsMarkdown */, move(initOptions)), {});
+
+    // Set initial file contents for foo.rb and bar.rb.
+    assertDiagnostics(
+        send(*openFile("foo.rb",
+                       "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\n1\nend\nend")),
+        {});
+    assertDiagnostics(
+        send(*openFile("bar.rb",
+                       "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend")),
+        {});
+
+    // Send a hover in foo.rb.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a hover in bar.rb.
+    sendAsync(*hover("bar.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Make an edit, renaming Foo::foo to Foo::bar.
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
+
+    // Set slow-path blocking, and wait for typechecking to begin.
+    setSlowPathBlocked(true);
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Send a hover to foo.rb.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a hover to bar.rb.
+    sendAsync(*hover("bar.rb", 4, 4));
+
+    // We expect a null response from our hover on bar.rb. (NOTE: This is not ideal behavior, just what's expected with
+    // the current partial implementation.)
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+
+        auto hoverResult = get_if<variant<JSONNullObject, unique_ptr<Hover>>>(&(*response->asResponse().result));
+        REQUIRE(hoverResult != nullptr);
+
+        REQUIRE(holds_alternative<JSONNullObject>(*hoverResult));
+    }
+
+    // Unblock slow-path, and wait for typechecking to finish.
+    setSlowPathBlocked(false);
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Send a hover to foo.rb.
+    sendAsync(*hover("foo.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a hover to bar.rb.
+    sendAsync(*hover("bar.rb", 4, 4));
+
+    // First response should be hover, and we do not expect the information to be stale.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &hoverText =
+            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
+        CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
+    }
+
+    // Send a no-op to clear out the pipeline.
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
 }
 
 } // namespace sorbet::test::lsp

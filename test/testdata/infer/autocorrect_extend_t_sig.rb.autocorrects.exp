@@ -1,0 +1,29 @@
+# -- test/testdata/infer/autocorrect_extend_t_sig.rb --
+# typed: true
+
+class DoesntHaveSig
+  extend T::Sig
+  sig do
+# ^^^ error: Method `sig` does not exist
+    void
+  # ^^^^ error: Method `void` does not exist
+  end
+  def foo; end
+end
+
+class HasSig
+  extend T::Sig
+
+  sig {void}
+  def foo; end
+end
+
+  extend T::Sig
+
+  sig do
+# ^^^ error: Method `sig` does not exist
+    void
+  # ^^^^ error: Method `void` does not exist
+  end
+  def foo; end
+# ------------------------------

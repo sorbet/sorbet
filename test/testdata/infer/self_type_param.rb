@@ -20,7 +20,7 @@ class GenricClass
 
   def as_optional_hash
     kwargs(return_type_member)
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many positional arguments provided
+    #      ^^^^^^^^^^^^^^^^^^ error: Too many positional arguments provided
   end
 
   def splat_expand

@@ -588,15 +588,15 @@ private:
         stubConstantSuffix(ctx, owner, suffix, possibleGenericType);
     }
 
-    // Mark type aliases as TODO items for a later pass, as all constants will have been stubbed out by then.
-    static void stubTypeAliasForRbiGeneration(core::MutableContext ctx, core::SymbolRef sym) {
-        sym.setResultType(ctx, core::make_type<core::ClassType>(core::Symbols::todo()));
-    }
-
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
-    static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job, const ImportStubs &importStubs,
-                                         int &suggestionCount) {
+    template <typename StateType>
+    static void constantResolutionFailed(StateType &gs, core::FileRef file, ResolutionItem &job,
+                                         const ImportStubs &importStubs, int &suggestionCount) {
+        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+        constexpr bool isMutableStateType = !is_const_v<StateType>;
+
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
+        core::Context ctx(gs, core::Symbols::root(), file);
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
@@ -605,7 +605,11 @@ private:
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
                 if (singlePackageRbiGeneration) {
-                    stubTypeAliasForRbiGeneration(ctx, job.out->symbol);
+                    if constexpr (isMutableStateType) {
+                        job.out->symbol.setResultType(gs, core::make_type<core::ClassType>(core::Symbols::todo()));
+                    } else {
+                        ENFORCE(false, "Was not expecting non-mutating resolver and single package RBI generation");
+                    }
                 } else {
                     // This is actually a use-site error, but we limit ourselves to emitting it once by checking
                     // resultType
@@ -614,8 +618,13 @@ private:
                         e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
                         e.addErrorLine(ctx.locAt(job.out->original.loc()), "Type alias used here");
                     }
-                    resolvedField.data(ctx)->resultType =
-                        core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
+
+                    if constexpr (isMutableStateType) {
+                        resolvedField.data(gs)->resultType = core::Types::untyped(ctx, resolved);
+                    } else {
+                        // Welp. We'll just report extra use-site errors possibly. But we don't care
+                        // about errors for the best-effort / non-mutating mode anyways.
+                    }
                 }
             }
             job.out->symbol = resolved;
@@ -630,8 +639,12 @@ private:
 
         // When generating rbis in single-package mode, we may need to invent a symbol at this point
         if (singlePackageRbiGeneration) {
-            stubForRbiGeneration(ctx.withOwner(job.scope->scope), importStubs, job.scope.get(), job.out,
-                                 job.possibleGenericType);
+            if constexpr (isMutableStateType) {
+                core::MutableContext ctx(gs, job.scope->scope, file);
+                stubForRbiGeneration(ctx, importStubs, job.scope.get(), job.out, job.possibleGenericType);
+            } else {
+                ENFORCE(false, "Was not expecting non-mutating resolver and single package RBI generation");
+            }
             return;
         }
 
@@ -1002,7 +1015,11 @@ private:
         return true;
     }
 
-    static void resolveClassMethodsJob(core::GlobalState &gs, const ClassMethodsResolutionItem &todo) {
+    template <typename StateType>
+    static void resolveClassMethodsJob(StateType &gs, const ClassMethodsResolutionItem &todo) {
+        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+        constexpr bool isMutableStateType = !is_const_v<StateType>;
+
         auto owner = todo.owner;
         auto send = todo.send;
         if (!owner.isClassOrModule() || !owner.asClassOrModuleRef().data(gs)->isClassOrModuleModule()) {
@@ -1065,30 +1082,36 @@ private:
                 continue;
             }
 
-            // Get the fake property holding the mixes
-            auto mixMethod = ownerKlass.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
-            if (!mixMethod.exists()) {
-                // We never stored a mixin in this symbol
-                // Create a the fake property that will hold the mixed in modules
-                mixMethod = gs.enterMethodSymbol(core::Loc{todo.file, send->loc}, ownerKlass,
-                                                 core::Names::mixedInClassMethods());
-                mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{});
+            if constexpr (isMutableStateType) {
+                // Get the fake property holding the mixes
+                auto mixMethod = ownerKlass.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
+                if (!mixMethod.exists()) {
+                    // We never stored a mixin in this symbol
+                    // Create a the fake property that will hold the mixed in modules
+                    mixMethod = gs.enterMethodSymbol(core::Loc{todo.file, send->loc}, ownerKlass,
+                                                     core::Names::mixedInClassMethods());
+                    mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{});
 
-                // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
-                auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod, core::Names::blkArg());
-                arg.flags.isBlock = true;
-            }
+                    // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
+                    auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod, core::Names::blkArg());
+                    arg.flags.isBlock = true;
+                }
 
-            auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
-            auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
-            // Make sure we are not adding existing symbols to our tuple
-            if (absl::c_find(elems, type) == elems.end()) {
-                elems.emplace_back(type);
+                auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
+                auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
+                // Make sure we are not adding existing symbols to our tuple
+                if (absl::c_find(elems, type) == elems.end()) {
+                    elems.emplace_back(type);
+                }
             }
         }
     }
 
-    static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+    template <typename StateType>
+    static void resolveRequiredAncestorsJob(StateType &gs, const RequireAncestorResolutionItem &todo) {
+        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+        constexpr bool isMutableStateType = !is_const_v<StateType>;
+
         auto owner = todo.owner;
         auto send = todo.send;
         auto loc = core::Loc(todo.file, send->loc);
@@ -1154,7 +1177,9 @@ private:
             return;
         }
 
-        owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), blockLoc);
+        if constexpr (isMutableStateType) {
+            owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), blockLoc);
+        }
     }
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
@@ -1498,8 +1523,11 @@ public:
         vector<ast::ParsedFile> trees;
     };
 
-    static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                    WorkerPool &workers) {
+    template <typename StateType>
+    static vector<ast::ParsedFile> resolveConstants(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+        constexpr bool isMutableStateType = !is_const_v<StateType>;
+
         Timer timeit(gs.tracer(), "resolver.resolve_constants");
         const core::GlobalState &igs = gs;
         auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
@@ -1582,90 +1610,100 @@ public:
             }
         }
 
+        // Note: `todo` does not need to be sorted. There are no ordering effects on error production.
+
+        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+        fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
+
         ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
+        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
 
         Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
 
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
 
-        while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
-            first = false;
-            counterInc("resolve.constants.retries");
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
-                // This is an optimization. The order should not matter semantically
-                // We try to resolve most ancestors second because this makes us much more likely to resolve
-                // everything else.
-                long retries = 0;
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(),
-                                    [&gs, &retries](ResolveItems<AncestorResolutionItem> &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        const auto origSize = job.items.size();
-                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                                [&](AncestorResolutionItem &item) -> bool {
-                                                                    auto resolved =
-                                                                        resolveAncestorJob(ctx, item, false);
-                                                                    if (resolved) {
-                                                                        tryRegisterSealedSubclass(ctx, item);
-                                                                    }
-                                                                    return resolved;
-                                                                });
-                                        job.items.erase(fileIt, job.items.end());
-                                        retries += origSize - job.items.size();
-                                        return job.items.empty();
-                                    });
-                todoAncestors.erase(it, todoAncestors.end());
-                categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
-                progress = retries > 0;
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                bool resolvedSomeConstants = resolveConstants(gs, todo, workers);
-                progress = progress || resolvedSomeConstants;
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
-                // This is an optimization. The order should not matter semantically
-                // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
-                // every item in todoClassAliases implicitly depends on an item in item in todo
-                // there would be no point in running the todoClassAliases step before todo
+        // If the constant didn't immediately resolve during the initial treewalk, and we're not
+        // allowed to mutate GlobalState, it will never resolve. Let's just skip to the error phase.
+        if constexpr (isMutableStateType) {
+            while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
+                first = false;
+                counterInc("resolve.constants.retries");
+                {
+                    Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
+                    // This is an optimization. The order should not matter semantically
+                    // We try to resolve most ancestors second because this makes us much more likely to resolve
+                    // everything else.
+                    long retries = 0;
+                    auto f = [&gs, &retries](ResolveItems<AncestorResolutionItem> &job) -> bool {
+                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        const auto origSize = job.items.size();
+                        auto g = [&](AncestorResolutionItem &item) -> bool {
+                            auto resolved = resolveAncestorJob(ctx, item, false);
+                            if (resolved) {
+                                tryRegisterSealedSubclass(ctx, item);
+                            }
+                            return resolved;
+                        };
+                        auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                        job.items.erase(fileIt, job.items.end());
+                        retries += origSize - job.items.size();
+                        return job.items.empty();
+                    };
+                    auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), std::move(f));
+                    todoAncestors.erase(it, todoAncestors.end());
+                    categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
+                    progress = retries > 0;
+                }
+                {
+                    Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
+                    bool resolvedSomeConstants = resolveConstants(gs, todo, workers);
+                    progress = progress || resolvedSomeConstants;
+                }
+                {
+                    Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
+                    // This is an optimization. The order should not matter semantically
+                    // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
+                    // every item in todoClassAliases implicitly depends on an item in item in todo
+                    // there would be no point in running the todoClassAliases step before todo
 
-                long retries = 0;
-                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(),
-                                    [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        auto origSize = job.items.size();
-                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                                [&](ClassAliasResolutionItem &item) -> bool {
-                                                                    return resolveClassAliasJob(ctx, item);
-                                                                });
-                                        job.items.erase(fileIt, job.items.end());
-                                        retries += origSize - job.items.size();
-                                        return job.items.empty();
-                                    });
-                todoClassAliases.erase(it, todoClassAliases.end());
-                categoryCounterAdd("resolve.constants.aliases", "retry", retries);
-                progress = progress || retries > 0;
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
-                long retries = 0;
-                auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
-                                    [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        auto origSize = job.items.size();
-                                        auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                                                [&](TypeAliasResolutionItem &item) -> bool {
-                                                                    return resolveTypeAliasJob(ctx, item);
-                                                                });
-                                        job.items.erase(fileIt, job.items.end());
-                                        retries += origSize - job.items.size();
-                                        return job.items.empty();
-                                    });
-                todoTypeAliases.erase(it, todoTypeAliases.end());
-                categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
-                progress = progress || retries > 0;
+                    long retries = 0;
+                    auto f = [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
+                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        auto origSize = job.items.size();
+                        auto g = [&](ClassAliasResolutionItem &item) -> bool {
+                            return resolveClassAliasJob(ctx, item);
+                        };
+                        auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                        job.items.erase(fileIt, job.items.end());
+                        retries += origSize - job.items.size();
+                        return job.items.empty();
+                    };
+                    auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(), std::move(f));
+                    todoClassAliases.erase(it, todoClassAliases.end());
+                    categoryCounterAdd("resolve.constants.aliases", "retry", retries);
+                    progress = progress || retries > 0;
+                }
+                {
+                    Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
+                    long retries = 0;
+                    auto f = [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
+                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        auto origSize = job.items.size();
+                        auto g = [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); };
+                        auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                        job.items.erase(fileIt, job.items.end());
+                        retries += origSize - job.items.size();
+                        return job.items.empty();
+                    };
+                    auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(), std::move(f));
+                    todoTypeAliases.erase(it, todoTypeAliases.end());
+                    categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
+                    progress = progress || retries > 0;
+                }
             }
         }
 
@@ -1711,14 +1749,6 @@ public:
         fast_sort(todo,
                   [&gs](const auto &lhs, const auto &rhs) -> bool { return compareFiles(gs, lhs.file, rhs.file); });
 
-        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-        fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-        fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-        fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-
-        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
-
         for (auto &todos : todo) {
             fast_sort(todos.items, [](const ResolutionItem &lhs, const ResolutionItem &rhs) -> bool {
                 if (lhs.out->loc == rhs.out->loc) {
@@ -1749,34 +1779,47 @@ public:
             ImportStubs importStubs;
             bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
             if (singlePackageRbiGeneration) {
-                importStubs = ImportStubs::make(gs);
+                if constexpr (isMutableStateType) {
+                    importStubs = ImportStubs::make(gs);
+                } else {
+                    ENFORCE(false, "Was not expecting non-mutating resolver and single package RBI generation");
+                }
             }
 
             // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
             int suggestionCount = 0;
             for (auto &job : todo) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
-                    constantResolutionFailed(ctx, item, importStubs, suggestionCount);
+                    constantResolutionFailed(gs, job.file, item, importStubs, suggestionCount);
                 }
             }
 
             if (singlePackageRbiGeneration) {
-                for (auto &job : todoClassAliases) {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    for (auto &item : job.items) {
-                        resolveClassAliasJob(ctx, item);
+                if constexpr (isMutableStateType) {
+                    for (auto &job : todoClassAliases) {
+                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        for (auto &item : job.items) {
+                            resolveClassAliasJob(ctx, item);
+                        }
                     }
+
+                } else {
+                    ENFORCE(false, "Was not expecting non-mutating resolver and single package RBI generation");
                 }
             }
 
-            for (auto &job : todoAncestors) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                for (auto &item : job.items) {
-                    auto resolved = resolveAncestorJob(ctx, item, true);
-                    if (!resolved) {
-                        resolved = resolveAncestorJob(ctx, item, true);
-                        ENFORCE(resolved);
+            if constexpr (isMutableStateType) {
+                // Only purpose of resolveAncestorJob is to mutate the symbol table, not the tree, so
+                // in non-mutating resolver mode we don't have to do anything (because we don't care
+                // about errors).
+                for (auto &job : todoAncestors) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    for (auto &item : job.items) {
+                        auto resolved = resolveAncestorJob(ctx, item, true);
+                        if (!resolved) {
+                            resolved = resolveAncestorJob(ctx, item, true);
+                            ENFORCE(resolved);
+                        }
                     }
                 }
             }
@@ -2689,6 +2732,8 @@ public:
                     klass = core::Symbols::Enumerable();
                 } else if (klass == core::Symbols::T_Enumerator()) {
                     klass = core::Symbols::Enumerator();
+                } else if (klass == core::Symbols::T_Enumerator_Lazy()) {
+                    klass = core::Symbols::Enumerator_Lazy();
                 } else if (klass == core::Symbols::T_Range()) {
                     klass = core::Symbols::Range();
                 } else if (klass == core::Symbols::T_Set()) {
@@ -3829,7 +3874,10 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
 }
 } // namespace
 
-ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+template <typename StateType>
+ast::ParsedFilesOrCancelled Resolver::runIncremental(StateType &gs, vector<ast::ParsedFile> trees) {
+    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
@@ -3847,26 +3895,9 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     return result;
 }
 
-ast::ParsedFilesOrCancelled Resolver::runIncrementalWithoutStateMutation(const core::GlobalState &gs,
-                                                                         vector<ast::ParsedFile> trees) {
-    auto workers = WorkerPool::create(0, gs.tracer());
-    // trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
-    verifyLinearizationComputed(gs);
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(trees), *workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    // The non-mutating resolver isn't ready for this check to be run yet, because e.g.
-    // it doesn't resolve UnresolvedConstantLit nodes.
-    // sanityCheck(gs, result.result());
-    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
-    // But it can be super useful to uncomment when debugging certain issues.
-    // ctx.state.sanityCheck();
-
-    return result;
-}
+template ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees);
+template ast::ParsedFilesOrCancelled Resolver::runIncremental(const core::GlobalState &gs,
+                                                              vector<ast::ParsedFile> trees);
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {

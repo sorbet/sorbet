@@ -59,6 +59,10 @@ class LSPTypechecker final {
 
     std::shared_ptr<ErrorReporter> errorReporter;
 
+    /** Used in tests to force the slow path to block just after cancellation state has been set. */
+    bool slowPathBlocked ABSL_GUARDED_BY(slowPathBlockedMutex) = false;
+    mutable absl::Mutex slowPathBlockedMutex;
+
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
     bool runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable);
@@ -139,6 +143,15 @@ public:
      * Tries to run the function on the stale undo state, acquiring a lock.
      */
     bool tryRunOnStaleState(std::function<void(UndoState &)> func);
+
+    /**
+     * (For tests only) Set a flag that forces the slow path to block indefinitely after saving undo state. Setting
+     * this flag to `false` will immediately unblock any currently blocked slow paths.
+     */
+    void setSlowPathBlocked(bool blocked);
+
+    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
+    bool isSlowPathBlocked() const;
 };
 
 /**
@@ -152,11 +165,6 @@ public:
      */
     virtual void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                             std::unique_ptr<KeyValueStore> kvstore) = 0;
-
-    /**
-     * Resume processing of the task queue
-     */
-    virtual void resumeTaskQueue(InitializedTask &task) = 0;
 
     /**
      * Typechecks the given input on the fast path. The edit *must* be a fast path edit!
@@ -200,13 +208,14 @@ public:
 };
 
 class LSPStaleTypechecker final : public LSPTypecheckerInterface {
+    std::shared_ptr<const LSPConfiguration> config;
     UndoState &undoState;
-
-    // Just so we have something to return from the stubbed functions after we ENFORCE(false)
-    ast::ParsedFile *pf;
+    // Using an WorkerPool with size 0 for all typechecker operations causes the work to run on the
+    // current thread (usually: the indexer thread).
+    std::unique_ptr<WorkerPool> emptyWorkers;
 
 public:
-    LSPStaleTypechecker(UndoState &undoState) : undoState(undoState), pf(nullptr) {}
+    LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState);
 
     // Delete copy constructor / assignment.
     LSPStaleTypechecker(LSPStaleTypechecker &) = delete;
@@ -218,8 +227,6 @@ public:
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                     std::unique_ptr<KeyValueStore> kvstore) override;
-
-    void resumeTaskQueue(InitializedTask &task) override;
 
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;
@@ -268,8 +275,6 @@ public:
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                     std::unique_ptr<KeyValueStore> kvstore) override;
-
-    void resumeTaskQueue(InitializedTask &task) override;
 
     void typecheckOnFastPath(LSPFileUpdates updates,
                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) override;

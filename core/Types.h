@@ -501,7 +501,7 @@ public:
     LiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
-    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     int64_t asInteger() const;
     double asFloat() const;
     core::NameRef asName(const core::GlobalState &gs) const;
@@ -881,6 +881,9 @@ struct DispatchArgs {
     // unreported errors is expensive!
     bool suppressErrors;
 
+    DispatchArgs(const DispatchArgs &) = delete;
+    DispatchArgs &operator=(const DispatchArgs &) = delete;
+
     Loc callLoc() const {
         return core::Loc(locs.file, locs.call);
     }
@@ -893,6 +896,25 @@ struct DispatchArgs {
     Loc argLoc(size_t i) const {
         return core::Loc(locs.file, locs.args[i]);
     }
+    Loc argsLoc() const {
+        if (!locs.args.empty()) {
+            return core::Loc(locs.file, locs.args.front().join(locs.args.back()));
+        }
+
+        if (this->block != nullptr) {
+            if (locs.fun.exists()) {
+                return funLoc().copyEndWithZeroLength();
+            }
+            return callLoc().copyEndWithZeroLength();
+        }
+
+        if (locs.fun.exists()) {
+            return core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+        }
+
+        return callLoc().copyEndWithZeroLength();
+    }
+    Loc blockLoc(const GlobalState &gs) const;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;

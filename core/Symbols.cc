@@ -139,7 +139,8 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
         // defaulted to `T.untyped`. This set *should not* grow over time.
         bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
                                ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
-                               ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+                               ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator() ||
+                               ref == core::Symbols::Enumerator_Lazy();
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);

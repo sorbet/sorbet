@@ -134,11 +134,11 @@ class Enumerator < Object
   # ```
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      blk: T.proc.params(arg0: Elem).returns(BasicObject)
     )
-    .returns(T.untyped)
+      .returns(T.untyped)
   end
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   def each(&blk); end
 
   # Sets the value to be returned by the next yield inside `e`.
@@ -185,23 +185,23 @@ class Enumerator < Object
   # ```
   sig do
     params(
-        arg0: Elem,
+      arg0: Elem
     )
-    .returns(NilClass)
+      .returns(NilClass)
   end
   def feed(arg0); end
 
   sig do
     params(
-        arg0: T.any(Integer, T.proc.returns(Integer)),
-        blk: T.proc.params(arg0: Enumerator::Yielder).void,
+      arg0: T.any(Integer, T.proc.returns(Integer)),
+      blk: T.proc.params(arg0: Enumerator::Yielder).void
     )
-    .void
+      .void
   end
-  def initialize(arg0=T.unsafe(nil), &blk); end
+  def initialize(arg0 = T.unsafe(nil), &blk); end
 
   # Creates a printable version of *e*.
-  sig {returns(String)}
+  sig { returns(String) }
   def inspect(); end
 
   # Returns the next object in the enumerator, and move the internal position
@@ -224,7 +224,7 @@ class Enumerator < Object
   # enumeration methods, unless the underlying iteration methods itself has
   # side-effect, e.g.
   # [`IO#each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line).
-  sig {returns(Elem)}
+  sig { returns(Elem) }
   def next(); end
 
   # Returns the next object as an array in the enumerator, and move the internal
@@ -269,7 +269,7 @@ class Enumerator < Object
   # Note that `next_values` does not affect other non-external enumeration
   # methods unless underlying iteration method itself has side-effect, e.g.
   # [`IO#each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line).
-  sig {returns(T::Array[Elem])}
+  sig { returns(T::Array[Elem]) }
   def next_values(); end
 
   # Returns the next object in the enumerator, but doesn't move the internal
@@ -290,7 +290,7 @@ class Enumerator < Object
   # p e.next   #=> 3
   # p e.peek   #raises StopIteration
   # ```
-  sig {returns(Elem)}
+  sig { returns(Elem) }
   def peek(); end
 
   # Returns the next object as an array, similar to
@@ -319,13 +319,13 @@ class Enumerator < Object
   # e.next
   # p e.peek_values    # raises StopIteration
   # ```
-  sig {returns(T::Array[Elem])}
+  sig { returns(T::Array[Elem]) }
   def peek_values(); end
 
   # Rewinds the enumeration sequence to the beginning.
   #
   # If the enclosed object responds to a "rewind" method, it is called.
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   def rewind(); end
 
   # Returns the size of the enumerator, or `nil` if it can't be calculated
@@ -336,7 +336,7 @@ class Enumerator < Object
   # loop.size # => Float::INFINITY
   # (1..100).drop_while.size # => nil
   # ```
-  sig {returns(T.nilable(T.any(Integer, Float)))}
+  sig { returns(T.nilable(T.any(Integer, Float))) }
   def size(); end
 
   # Iterates the given block for each element with an index, which starts from
@@ -348,18 +348,18 @@ class Enumerator < Object
   # :   the starting index to use
   sig do
     params(
-        offset: Integer,
-        blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject),
+      offset: Integer,
+      blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject)
     )
-    .returns(T.untyped)
+      .returns(T.untyped)
   end
   sig do
     params(
-        offset: Integer,
+      offset: Integer
     )
-    .returns(T::Enumerator[[Elem, Integer]])
+      .returns(T::Enumerator[[Elem, Integer]])
   end
-  def with_index(offset=0, &blk); end
+  def with_index(offset = 0, &blk); end
 
   # Iterates the given block for each element with an arbitrary object, `obj`,
   # and returns `obj`
@@ -387,16 +387,16 @@ class Enumerator < Object
   # ```
   sig do
     type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
-        blk: T.proc.params(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject),
+      arg0: T.type_parameter(:U),
+      blk: T.proc.params(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject)
     )
-    .returns(T.untyped)
+                       .returns(T.untyped)
   end
   sig do
     type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
+      arg0: T.type_parameter(:U)
     )
-    .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
+                       .returns(T::Enumerator[[Elem, T.type_parameter(:U)]])
   end
   def with_object(arg0, &blk); end
 end
@@ -549,11 +549,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_collect`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_collect)
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+      blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U))
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+                       .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def collect(&blk); end
 
   # Returns a new lazy enumerator with the concatenated results of running
@@ -584,9 +584,9 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_collect_concat`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_collect_concat)
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T::Enumerator[T.type_parameter(:U)]),
+      blk: T.proc.params(arg0: Elem).returns(T::Enumerator[T.type_parameter(:U)])
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+                       .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
   def collect_concat(&blk); end
 
@@ -598,9 +598,9 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_drop`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_drop)
   sig do
     params(
-        n: Integer,
+      n: Integer
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
   def drop(n); end
 
@@ -612,11 +612,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_drop_while`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_drop_while)
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      blk: T.proc.params(arg0: Elem).returns(BasicObject)
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def drop_while(&blk); end
 
   # Similar to
@@ -652,11 +652,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_find_all`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_find_all)
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      blk: T.proc.params(arg0: Elem).returns(BasicObject)
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def find_all(&blk); end
 
   ### This signature is wrong; See entire note on Enumerator#flat_map
@@ -689,11 +689,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_flat_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_flat_map)
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T::Enumerable[T.type_parameter(:U)]),
+      blk: T.proc.params(arg0: Elem).returns(T::Enumerable[T.type_parameter(:U)])
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+                       .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def flat_map(&blk); end
 
   # Like
@@ -704,16 +704,16 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_grep)
   sig do
     params(
-        arg0: BasicObject,
+      arg0: BasicObject
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
   sig do
     type_parameters(:U).params(
-        arg0: BasicObject,
-        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+      arg0: BasicObject,
+      blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U))
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+                       .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
   def grep(arg0, &blk); end
 
@@ -726,6 +726,7 @@ class Enumerator::Lazy < Enumerator
   def grep_v(_); end
 
   # Returns self.
+  sig {returns(T.self_type)}
   def lazy; end
 
   # Like
@@ -744,11 +745,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_map)
   sig do
     type_parameters(:U).params(
-        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+      blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U))
     )
-    .returns(Enumerator::Lazy[T.type_parameter(:U)])
+                       .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def map(&blk); end
 
   # Like
@@ -759,11 +760,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_reject`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_reject)
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      blk: T.proc.params(arg0: Elem).returns(BasicObject)
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def reject(&blk); end
 
   # Like
@@ -774,12 +775,30 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_select`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_select)
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      blk: T.proc.params(arg0: Elem).returns(BasicObject)
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def select(&blk); end
+
+  # Returns a new lazy enumerator containing the truthy results (everything except `false`
+  # or `nil`) of running the `block` for every element in `enum`.
+  #
+  # If no block is given, a
+  # [`Lazy`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html) is
+  # returned instead.
+  #
+  # ```ruby
+  # (1..10).lazy.filter_map { |i| i * 2 if i.even? } #=> #<Enumerator::Lazy: #<Enumerator::Lazy: 1..10>:filter_map>
+  # ```
+  sig do
+    type_parameters(:T)
+      .params(blk: T.proc.params(arg0: Elem).returns(T.any(NilClass, FalseClass, T.type_parameter(:T))))
+      .returns(T::Enumerator::Lazy[T.type_parameter(:T)])
+  end
+  sig { returns(T::Enumerator::Lazy[Elem]) }
+  def filter_map(&blk); end
 
   # Like
   # [`Enumerable#slice_after`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_after),
@@ -804,9 +823,9 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_take`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_take)
   sig do
     params(
-        n: Integer,
+      n: Integer
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
   def take(n); end
 
@@ -818,11 +837,11 @@ class Enumerator::Lazy < Enumerator
   # [`_enumerable_take_while`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_take_while)
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      blk: T.proc.params(arg0: Elem).returns(BasicObject)
     )
-    .returns(Enumerator::Lazy[Elem])
+      .returns(T::Enumerator::Lazy[Elem])
   end
-  sig {returns(Enumerator::Lazy[Elem])}
+  sig { returns(T::Enumerator::Lazy[Elem]) }
   def take_while(&blk); end
 
   # Similar to
@@ -868,17 +887,17 @@ end
 class Enumerator::Yielder < Object
   sig do
     params(
-        arg0: BasicObject,
+      arg0: BasicObject
     )
-    .void
+      .void
   end
   def <<(*arg0); end
 
   sig do
     params(
-        arg0: BasicObject,
+      arg0: BasicObject
     )
-    .void
+      .void
   end
   def yield(*arg0); end
 end

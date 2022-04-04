@@ -4,7 +4,8 @@ class Root < ::T::Struct
   prop :foo, Integer
 end
 
-Root.new # error: Missing required keyword argument `foo` for method `Root#initialize`
+Root.new
+#       ^ error: Missing required keyword argument `foo` for method `Root#initialize`
 Root.new(foo: "no")
 #             ^^^^ error: Expected `Integer` but found `String("no")` for argument `foo`
   Root.new(foo: 3, bar: 4)

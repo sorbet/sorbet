@@ -85,14 +85,19 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
         string source_file_path = absl::StrCat(exp.folder, filePath.substr(0, kind_start));
         exp.expectations[kind][source_file_path] = filePath;
         return true;
-    } else if (absl::EndsWith(filePath, ".rbupdate")) {
-        // Should be `.[number].rbupdate`
-        auto pos = filePath.rfind('.', filePath.length() - 10);
+    } else if (absl::EndsWith(filePath, ".rbupdate") || absl::EndsWith(filePath, ".rbstaleupdate")) {
+        bool isStale = absl::EndsWith(filePath, ".rbstaleupdate");
+        int suffixLength = isStale ? strlen(".rbstaleupdate") : strlen(".rbupdate");
+
+        auto pos = filePath.rfind('.', filePath.length() - suffixLength - 1);
         if (pos != string::npos) {
-            int version = stoi(string(filePath.substr(pos + 1, filePath.length() - 9)));
-            exp.sourceLSPFileUpdates[version].emplace_back(absl::StrCat(filePath.substr(0, pos), ".rb"), filePath);
+            int version = stoi(string(filePath.substr(pos + 1, filePath.length() - suffixLength)));
+
+            auto &updates = isStale ? exp.staleLSPFileUpdates[version] : exp.sourceLSPFileUpdates[version];
+            updates.emplace_back(absl::StrCat(filePath.substr(0, pos), ".rb"), filePath);
         } else {
-            cout << "Ignoring " << filePath << ": No version number provided (expected .[number].rbupdate).\n";
+            cout << "Ignoring " << filePath
+                 << ": No version number provided (expected .[number].rbupdate or .[number].rbstaleupdate).\n";
         }
         return true;
     }
@@ -102,7 +107,7 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
 
 vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
     vector<string> names =
-        sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".exp"}, recursive, {}, {});
+        sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".rbstaleupdate", ".exp"}, recursive, {}, {});
     const int prefixLen = dir.length() + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),

@@ -21,7 +21,7 @@ autocorrect-case-meta-type.rb:12: Control flow could reach `T.absurd` because th
 
 autocorrect-case-meta-type.rb:16: Call to method `===` on `T::Array[Integer]` mistakes a type for a value https://srb.help/7030
     16 |T::Array[Integer].===(0)
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+                          ^^^
   Note:
     It looks like you're trying to pattern match on a generic, which doesn't work at runtime
   Autocorrect: Done

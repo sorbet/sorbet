@@ -169,3 +169,10 @@ class T::Types::TypedEnumerator < T::Types::TypedEnumerable
   def type; end
 end
 
+class T::Types::TypedEnumeratorLazy < T::Types::TypedEnumerable
+  def name; end
+  def valid?(obj); end
+  def new(*args); end
+  def type; end
+end
+

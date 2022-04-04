@@ -5,5 +5,5 @@ T.let(nil, T.nilable(T.proc.params(x: Integer).void))
 
 # this one fails because the proc doesn't have named params
 T.let(nil, T.nilable(T.proc.params(Integer).void))
-                   # ^^^^^^^^^^^^^^^^^^^^^^ error: Too many positional arguments
-                   # ^^^^^^^^^^^^^^^^^^^^^^ error: `params` expects keyword arguments
+#                                  ^^^^^^^ error: Too many positional arguments
+#                    ^^^^^^^^^^^^^^^^^^^^^^ error: `params` expects keyword arguments

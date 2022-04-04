@@ -13,8 +13,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Dir`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L868: Did you mean: `Enumerator::Yielder`?
-     868 |class Enumerator::Yielder < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L887: Did you mean: `Enumerator::Yielder`?
+     887 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/file.rbi#L33: Did you mean: `File`?
     33 |class File < IO

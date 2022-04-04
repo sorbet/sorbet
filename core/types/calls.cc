@@ -21,7 +21,7 @@ using namespace std;
 namespace sorbet::core {
 
 namespace {
-DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, DispatchArgs args) {
+DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, const DispatchArgs &args) {
     categoryCounterInc("dispatch_call", "proxytype");
     return und.dispatchCall(gs, args.withThisRef(und));
 }
@@ -49,7 +49,7 @@ bool TupleType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass)
     return underlying(gs).derivesFrom(gs, klass);
 }
 
-DispatchResult LiteralType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult LiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
@@ -222,10 +222,17 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, MethodRef method,
-                             const ArgInfo &arg) {
-    if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs), method.show(gs));
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
+                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+    if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
+        auto argName = arg.name.show(gs);
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
+        auto expectedType = Types::resultTypeAsSeenFrom(gs, arg.type, method.data(gs)->owner, inClass, targs);
+        if (expectedType == nullptr) {
+            expectedType = Types::untyped(gs, method);
+        }
+        e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
+                       expectedType.show(gs));
         return e.build();
     }
     return nullptr;
@@ -442,7 +449,13 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     return tp;
 }
 
-string prettyArity(const GlobalState &gs, MethodRef method) {
+struct ArityComponents {
+    int required;
+    int optional;
+    bool repeated;
+};
+
+ArityComponents arityComponents(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
     for (const auto &arg : method.data(gs)->arguments) {
@@ -456,6 +469,11 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
             ++required;
         }
     }
+    return {required, optional, repeated};
+}
+
+string prettyArity(const GlobalState &gs, MethodRef method) {
+    auto [required, optional, repeated] = arityComponents(gs, method);
     if (repeated) {
         return absl::StrCat(required, "+");
     } else if (optional > 0) {
@@ -465,21 +483,40 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
     }
 }
 
-bool extendsTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosingClass) {
+bool extendsModule(const GlobalState &gs, core::ClassOrModuleRef enclosingClass, core::ClassOrModuleRef mod) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(gs)->lookupSingletonClass(gs);
     ENFORCE(enclosingSingletonClass.exists());
-    return enclosingSingletonClass.data(gs)->derivesFrom(gs, core::Symbols::T_Helpers());
+    return enclosingSingletonClass.data(gs)->derivesFrom(gs, mod);
 }
 
 /**
- * Make an autocorrection for adding `extend T::Helpers`, when needed.
+ * Make an autocorrection for adding `extend T::Sig` or `extend T::Helpers`, when needed.
  */
-optional<core::AutocorrectSuggestion>
-maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosingClass, const Loc &call) {
-    if (extendsTHelpers(gs, enclosingClass)) {
+optional<core::AutocorrectSuggestion> maybeSuggestExtendModule(const GlobalState &gs,
+                                                               core::ClassOrModuleRef enclosingClass, const Loc &call,
+                                                               core::ClassOrModuleRef mod) {
+    if (extendsModule(gs, enclosingClass, mod)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
+    }
+
+    if (enclosingClass == core::Symbols::root()) {
+        // We don't put any locs on <root> for performance (would have one loc for each file in the codebase)
+        // If they're writing methods at the top level, it's probably a small script.
+        // Just put the `extend` immediately above the sig.
+
+        auto [sigStart, _sigEnd] = call.position(gs);
+        auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
+        auto thisLineLoc = core::Loc::fromDetails(gs, call.file(), thisLineStart, thisLineStart);
+        ENFORCE(thisLineLoc.has_value());
+        auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+
+        string prefix(thisLinePadding, ' ');
+        auto modStr = mod.show(gs);
+        return core::AutocorrectSuggestion{
+            fmt::format("Add `extend {}`", modStr),
+            {core::AutocorrectSuggestion::Edit{thisLineLoc.value(), fmt::format("{}extend {}\n\n", prefix, modStr)}}};
     }
 
     auto inFileOfMethod = [&](const auto &loc) { return loc.file() == call.file(); };
@@ -493,12 +530,12 @@ maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosi
 
     auto [classStart, classEnd] = classLoc->position(gs);
 
-    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    auto thisLineStart = core::Loc::Detail{classStart.line, 1};
     auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
     ENFORCE(thisLineLoc.has_value());
     auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
 
-    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    auto nextLineStart = core::Loc::Detail{classStart.line + 1, 1};
     auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
     if (!nextLineLoc.has_value()) {
         return nullopt;
@@ -507,9 +544,35 @@ maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosi
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
+    auto modStr = mod.show(gs);
     return core::AutocorrectSuggestion{
-        "Add `extend T::Helpers`",
-        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
+        fmt::format("Add `extend {}`", modStr),
+        {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend {}\n", prefix, modStr)}}};
+}
+
+void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc kwSplatArgLoc) {
+    if (!kwSplatArgLoc.exists()) {
+        return;
+    }
+
+    auto replaceLoc = kwSplatArgLoc;
+    string maybeStarStar = "**";
+    if (kwSplatArgLoc.adjustLen(gs, 0, 2).source(gs) == "**") {
+        replaceLoc = kwSplatArgLoc.adjust(gs, 2, 0);
+        maybeStarStar = "";
+    }
+
+    auto suggestUnsafe = gs.suggestUnsafe.value_or("T.unsafe"s);
+    auto title = fmt::format("Wrap in `{}`", suggestUnsafe);
+    auto replaceValue = replaceLoc.source(gs).value();
+    if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
+        (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
+        e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceValue);
+    } else {
+        // wraps inside of T.unsafe(...) in `{...}`
+        auto extraStarStar = replaceLoc != kwSplatArgLoc ? "**" : "";
+        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar, replaceValue);
+    }
 }
 
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
@@ -547,19 +610,21 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
+    auto funLoc = args.funLoc();
+    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::UnknownMethod)) {
-                e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
+            if (auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod)) {
+                e.setHeader("Cannot call method `{}` on void type", args.name.show(gs));
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     } else if (symbol == Symbols::DeclBuilderForProcsSingleton() && args.name == Names::new_()) {
         if (!args.suppressErrors) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                             symbol.show(gs));
             }
@@ -591,9 +656,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             if (!args.args.empty() && !args.suppressErrors) {
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+                if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
                                 args.args.size());
+                    e.replaceWith("Delete args", args.argsLoc(), "");
                     result.main.errors.emplace_back(e.build());
                 }
             }
@@ -606,8 +672,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // Short circuit here to avoid constructing an expensive error message.
             return result;
         }
-        auto funLoc = args.funLoc();
-        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
@@ -629,7 +693,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     args.name == core::Names::mixesInClassMethods() ||
                     (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
                     auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                    if (auto suggestion = maybeSuggestExtendTHelpers(gs, attachedClass, args.callLoc())) {
+                    if (auto suggestion =
+                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Helpers())) {
+                        e.addAutocorrect(std::move(*suggestion));
+                    }
+                } else if (args.name == core::Names::sig()) {
+                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                    if (auto suggestion =
+                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Sig())) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
                 }
@@ -933,20 +1004,25 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            bool hasKwSplatParam = false;
-            bool hasKwParam = false;
-            const ArgInfo *kwSplatParam;
+            const ArgInfo *kwSplatParam = nullptr;
+            auto hasRequiredKwParam = false;
+            auto kwParams = vector<const ArgInfo *>{};
             for (auto &param : data->arguments) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
+                    ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
-                    hasKwSplatParam = true;
                 } else if (param.flags.isKeyword && !param.flags.isRepeated) {
-                    hasKwParam = true;
+                    kwParams.emplace_back(&param);
+                    hasRequiredKwParam |= !param.flags.isDefault;
                 }
             }
 
+            auto hasKwSplatParam = kwSplatParam != nullptr;
+            auto hasKwParam = !kwParams.empty();
+
             auto &kwSplatArg = *aend;
             auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+            auto kwSplatArgLoc = args.argLoc(args.args.size() - 1);
 
             if (hasKwSplatParam && !hasKwParam) {
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, kwSplatTPO, *kwSplatParam,
@@ -954,22 +1030,85 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                           args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
-            } else {
-                // A keyword splat was passed in, but none of the declared arguments are keyword splats,
-                // or there is a keyword splat argument, but there is one ore more keyword non-splat argument
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::UntypedSplat)) {
-                    e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
-                                "arguments");
-                    e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                    result.main.errors.emplace_back(e.build());
+            } else if (hasKwParam) {
+                auto hashType = isa_type<ShapeType>(kwSplatType) ? kwSplatType.underlying(gs) : kwSplatType;
+                auto appliedType = cast_type_nonnull<AppliedType>(hashType);
+                auto kwSplatKeyType = appliedType.targs[0];
+                auto kwSplatValueType = appliedType.targs[1];
+
+                if (hasRequiredKwParam) {
+                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
+                        // Unfortunately, this prevents even valid splats:
+                        //     def f(x:, y: 0); end
+                        //     f(x: 0, **opts)
+                        // This should work, but we currently handle kwsplat even before we check
+                        // which keyword args have already been consumed (see below for that).
+                        // This is harder to support, but maybe also less likely:
+                        //     f(**opts, x: 0)
+                        e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
+                                    "keyword parameters",
+                                    method.show(gs), "Hash");
+                        e.addErrorLine(kwParams.front()->loc,
+                                       "Keyword parameters of `{}` begin here:", method.show(gs));
+                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                        e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
+                                       "with splats.\n"
+                                       "    To ignore this and pass the splat anyways, use `{}`",
+                                       "T.unsafe");
+                        maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                        result.main.errors.emplace_back(e.build());
+                    }
+                } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
+                                                            UntypedMode::AlwaysCompatible)) {
+                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                        e.setHeader("Expected `{}` but found `{}` for keyword splat keys type", "Symbol",
+                                    kwSplatKeyType.show(gs));
+                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                        if (gs.suggestUnsafe.has_value()) {
+                            maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                        }
+                        result.main.errors.emplace_back(e.build());
+                    }
+                } else {
+                    for (const auto &kwParam : kwParams) {
+                        auto kwParamType =
+                            Types::resultTypeAsSeenFrom(gs, kwParam->type, method.data(gs)->owner, symbol, targs);
+                        if (kwParamType == nullptr) {
+                            kwParamType = Types::untyped(gs, method);
+                        }
+                        if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
+                                                            UntypedMode::AlwaysCompatible)) {
+                            continue;
+                        }
+
+                        if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
+                            e.setHeader("Expected `{}` for keyword parameter `{}` but found `{}` from keyword splat",
+                                        kwParamType.show(gs), kwParam->argumentName(gs), kwSplatValueType.show(gs));
+                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->argumentName(gs),
+                                                            method.show(gs));
+                            e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
+                            e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                            e.addErrorNote(
+                                "A `{}` passed as a keyword splat must match the type of all keyword parameters\n"
+                                "    because Sorbet cannot see what specific keys exist in the `{}`.",
+                                "Hash", "Hash");
+                            maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                            result.main.errors.emplace_back(e.build());
+                        }
+
+                        break;
+                    }
                 }
+            } else {
+                Exception::raise("Code at {} triggered unknown codepath in Sorbet. Please report a bug.",
+                                 args.callLoc().showRaw(gs));
             }
         }
     }
 
     if (pit != pend) {
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.type != args.thisType) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
                                 "Expected: `{}`, got: `{}`",
@@ -1052,7 +1191,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
-                        if (auto e = missingArg(gs, args.callLoc(), args.receiverLoc(), method, spec)) {
+                        if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1118,7 +1257,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.callLoc(), args.receiverLoc(), method, spec)) {
+                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
@@ -1126,13 +1265,48 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (ait != aend) {
-        if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
-            auto hashCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
-            auto numArgsGiven = args.numPosArgs + hashCount;
+        auto arity = arityComponents(gs, method);
+        auto maxPossiblePositional = arity.required + arity.optional;
+
+        auto hashArgsCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
+        auto numArgsGiven = args.numPosArgs + hashArgsCount;
+        ENFORCE(maxPossiblePositional < numArgsGiven);
+
+        // It's only the end of this loc that matters, because we're going to join it with maxPossiblePositional.
+        core::Loc lastPositionalArg;
+        if (hashArgsCount == 0) {
+            // No keyword args and no kwsplat, so the mismatch must have been from extra pos args
+            lastPositionalArg = args.argLoc(args.numPosArgs - 1);
+        } else if (!consumed.empty()) {
+            // Either keyword args or kwsplat. If we consumed any keyword args, we'd have reported
+            // the message as "unrecognized keyword args", not as too many positional args, so there
+            // must be a positional arg.
+            lastPositionalArg = args.argLoc(args.numPosArgs - 1);
+        } else {
+            // Didn't consume any of the keyword args, which means they're being included in the
+            // list of positional args. Can just take the last arg in the list.
+            lastPositionalArg = args.argLoc(args.locs.args.size() - 1);
+        }
+
+        auto extraArgsLoc = args.argLoc(maxPossiblePositional).join(lastPositionalArg);
+        if (auto e = gs.beginError(extraArgsLoc, errors::Infer::MethodArgumentCountMismatch)) {
+            auto deleteLoc = extraArgsLoc;
+            // Heuristic to try to find leading commas. Not actually required for correctness
+            // (will still parse even if we delete something but don't find the comma) which is
+            // why we're fine with this just hard-coding two common cases (easiest to implement).
+            if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == ",") {
+                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+            } else if (extraArgsLoc.adjustLen(gs, -2, 2).source(gs) == ", ") {
+                deleteLoc = extraArgsLoc.adjust(gs, -2, 0);
+            } else if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == " ") {
+                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
+            }
+
             if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.replaceWith("Delete extra args", deleteLoc, "");
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
                 // people some slightly confusing error messages.
@@ -1148,9 +1322,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
                 if (firstKeyword != data->arguments.end()) {
-                    e.addErrorLine(args.callLoc(),
+                    auto possibleArg = firstKeyword->argumentName(gs);
+                    e.addErrorLine(args.argLoc(maxPossiblePositional),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   method.show(gs), firstKeyword->argumentName(gs));
+                                   method.show(gs), possibleArg);
+                    auto howManyExtra = numArgsGiven - hashArgsCount - maxPossiblePositional;
+                    if (howManyExtra == 1) {
+                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
+                                      "{}: ", possibleArg);
+                    }
+                } else {
+                    e.replaceWith("Delete extra args", deleteLoc, "");
                 }
             }
             result.main.errors.emplace_back(e.build());
@@ -1171,11 +1353,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = data->loc().file();
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
                 bspec.isSyntheticBlockArgument()) {
-                // TODO(jez) Do we have a loc for the block itself, not the entire call?
-                if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::TakesNoBlock)) {
+                auto blockLoc = args.blockLoc(gs);
+                if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
+                    }
+
+                    if (blockLoc.exists()) {
+                        e.replaceWith("Remove block", blockLoc, "");
                     }
                 }
             }
@@ -1221,7 +1407,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(gs)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::GenericMethodConstraintUnsolved)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
@@ -1232,7 +1418,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments.back().type;
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::BlockNotPassed)) {
+            if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
@@ -1334,11 +1520,12 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
 } // namespace
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    auto funLoc = args.funLoc();
+    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
             if (!canCallNew(gs, wrapped)) {
-                auto callLoc = core::Loc(args.locs.file, args.locs.call);
-                if (auto e = gs.beginError(callLoc, errors::Infer::MetaTypeDispatchCall)) {
+                if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
                     e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
                                 wrapped.show(gs));
 
@@ -1383,7 +1570,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         }
         default:
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::MetaTypeDispatchCall)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
                             this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
@@ -1500,16 +1687,15 @@ public:
         if (args.args.empty()) {
             return;
         }
-        const auto loc = args.callLoc();
         if (!args.args[0]->type.isFullyDefined()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type.show(gs));
+            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::BareTypeUsage)) {
+                e.setHeader("`{}` applied to incomplete type `{}`", "T.must", args.args[0]->type.show(gs));
             }
             return;
         }
         auto ret = Types::dropNil(gs, args.args[0]->type);
         if (ret == args.args[0]->type) {
-            if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
+            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
                 if (args.args[0]->type.isUntyped()) {
                     e.setHeader("`{}` called on `{}`, which is redundant", "T.must", args.args[0]->type.show(gs));
                 } else {
@@ -1517,9 +1703,10 @@ public:
                                 "nil");
                 }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                const auto locWithoutTMust = loc.adjust(gs, 7, -1);
-                if (loc.exists() && locWithoutTMust.exists()) {
-                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs).value());
+                auto replaceLoc = args.callLoc();
+                const auto locWithoutTMust = args.callLoc().adjust(gs, 7, -1);
+                if (replaceLoc.exists() && locWithoutTMust.exists()) {
+                    e.replaceWith("Remove `T.must`", replaceLoc, "{}", locWithoutTMust.source(gs).value());
                 }
             }
         }
@@ -1688,6 +1875,8 @@ public:
             attachedClass = Symbols::Enumerable();
         } else if (attachedClass == Symbols::T_Enumerator()) {
             attachedClass = Symbols::Enumerator();
+        } else if (attachedClass == Symbols::T_Enumerator_Lazy()) {
+            attachedClass = Symbols::Enumerator_Lazy();
         } else if (attachedClass == Symbols::T_Range()) {
             attachedClass = Symbols::Range();
         } else if (attachedClass == Symbols::T_Set()) {
@@ -1722,7 +1911,7 @@ public:
         }
 
         if (args.numPosArgs != arity) {
-            if (auto e = gs.beginError(args.callLoc(), errors::Infer::GenericArgumentCountMismatch)) {
+            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
                             attachedClass.show(gs), arity, args.numPosArgs);
             }
@@ -3604,6 +3793,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerable(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerator_Lazy(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 

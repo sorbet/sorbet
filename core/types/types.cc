@@ -1,5 +1,6 @@
 #include "core/Types.h"
 #include "absl/base/casts.h"
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/Context.h"
@@ -568,14 +569,6 @@ TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType)
     return applied->targs.front();
 }
 
-bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible);
-}
-
-bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
-}
-
 bool ClassType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     if (symbol == Symbols::untyped() || symbol == klass) {
         return true;
@@ -807,6 +800,21 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
         singleton = at->klass;
     }
     return singleton.data(gs)->attachedClass(gs);
+}
+
+Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
+    ENFORCE(this->block != nullptr);
+    auto blockLoc = core::Loc(locs.file, argsLoc().endPos(), callLoc().endPos());
+    auto blockLocSource = blockLoc.source(gs);
+    if (!blockLocSource.has_value()) {
+        return callLoc();
+    }
+
+    if (absl::StartsWith(blockLocSource.value(), ")") || absl::StartsWith(blockLocSource.value(), "]")) {
+        return blockLoc.adjust(gs, 1, 0);
+    }
+
+    return blockLoc;
 }
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) const {

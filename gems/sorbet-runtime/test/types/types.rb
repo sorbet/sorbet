@@ -595,6 +595,28 @@ module Opus::Types::Test
       end
     end
 
+    describe "TypedEnumerator" do
+      it 'describes enumerators' do
+        t = T::Enumerator::Lazy[Integer]
+        assert_equal(
+          "T::Enumerator::Lazy[Integer]",
+          t.describe_obj([1, 2, 3].each.lazy))
+      end
+
+      it 'works if the type is right' do
+        type = T::Enumerator::Lazy[Integer]
+        value = [1, 2, 3].each.lazy
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'can have its metatype instantiated' do
+        assert_equal([2, 4, 6], T::Enumerator::Lazy[Integer].new([1, 2, 3]) do |yielder, value|
+          yielder << value * 2
+        end.to_a)
+      end
+    end
+
     describe "TypedRange" do
       it 'describes ranges' do
         t = T::Range[Integer]

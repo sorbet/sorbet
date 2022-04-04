@@ -86,6 +86,7 @@ public:
 
     void initEmpty();
     void installIntrinsics();
+    void computeLinearization();
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
@@ -138,7 +139,7 @@ public:
     MethodRef staticInitForClass(ClassOrModuleRef klass, Loc loc);
 
     MethodRef lookupStaticInitForFile(FileRef file) const;
-    MethodRef lookupStaticInitForClass(ClassOrModuleRef klass) const;
+    MethodRef lookupStaticInitForClass(ClassOrModuleRef klass, bool allowMissing = false) const;
 
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;

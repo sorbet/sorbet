@@ -19,11 +19,13 @@ bool isTypecheckRun(const LSPMessage &msg) {
 }
 } // namespace
 
-void ProtocolTest::resetState() {
+void ProtocolTest::resetState(std::shared_ptr<realmain::options::Options> opts) {
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();
-    auto opts = make_shared<realmain::options::Options>();
+    if (opts == nullptr) {
+        opts = make_shared<realmain::options::Options>();
+    }
     opts->disableWatchman = true;
     if (useCache) {
         // Only recreate the cacheDir if we haven't created one before.

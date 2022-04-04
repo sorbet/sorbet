@@ -25,7 +25,6 @@
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/indexer_initialization.h"
-#include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
 
 namespace sorbet::realmain::lsp {
@@ -162,7 +161,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         queue.tasks().push_front(std::move(initTask));
     }
 
-    config->logger->error("Resuming");
+    config->logger->info("Initialization complete");
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
@@ -325,7 +324,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-    pipeline::typecheck(gs, move(sorted), config->opts, workers, /*presorted*/ true);
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
 
     return subset;
@@ -451,6 +450,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         }
 
         ENFORCE(gs->lspQuery.isEmpty());
+
+        // Test-only hook: Stall for as long as `slowPathBlocked` is set.
+        {
+            absl::MutexLock lck(&slowPathBlockedMutex);
+            slowPathBlockedMutex.Await(absl::Condition(
+                +[](bool *slowPathBlocked) -> bool { return !*slowPathBlocked; }, &slowPathBlocked));
+        }
+
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
@@ -496,7 +503,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         }
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-        pipeline::typecheck(gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
+        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -613,7 +620,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
-    pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
+    pipeline::typecheck(*gs, move(resolved), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
@@ -688,18 +695,22 @@ bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
     }
 }
 
+void LSPTypechecker::setSlowPathBlocked(bool blocked) {
+    absl::MutexLock lck(&slowPathBlockedMutex);
+    slowPathBlocked = blocked;
+}
+
+bool LSPTypechecker::isSlowPathBlocked() const {
+    absl::MutexLock lck(&slowPathBlockedMutex);
+    return slowPathBlocked;
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
 void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
                                         std::unique_ptr<KeyValueStore> kvstore) {
     return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers);
-}
-
-void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
-    absl::MutexLock lck{this->queue.getMutex()};
-    ENFORCE(this->queue.isPaused());
-    this->queue.resume();
 }
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
@@ -733,13 +744,12 @@ const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
 
+LSPStaleTypechecker::LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState)
+    : config(config), undoState(undoState), emptyWorkers(WorkerPool::create(0, undoState.getEvictedGs()->tracer())) {}
+
 void LSPStaleTypechecker::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
                                      std::unique_ptr<KeyValueStore> kvstore) {
     ENFORCE(false, "initialize not supported");
-}
-
-void LSPStaleTypechecker::resumeTaskQueue(InitializedTask &task) {
-    ENFORCE(false, "resumeTaskQueue not supported");
 }
 
 void LSPStaleTypechecker::typecheckOnFastPath(LSPFileUpdates updates,
@@ -754,22 +764,51 @@ std::vector<std::unique_ptr<core::Error>> LSPStaleTypechecker::retypecheck(std::
 
 LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
                                           const std::vector<core::FileRef> &filesForQuery) const {
-    ENFORCE(false, "query not implemented");
-    return LSPQueryResult();
+    const auto &gs = undoState.getEvictedGs();
+
+    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    ENFORCE(gs->lspTypecheckCount > 0,
+            "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
+
+    // Replace error queue with one that is owned by this thread.
+    auto queryCollector = make_shared<QueryCollector>();
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
+
+    Timer timeit(config->logger, "query");
+    prodCategoryCounterInc("lsp.updates", "query");
+    ENFORCE(gs->errorQueue->isEmpty());
+    ENFORCE(gs->lspQuery.isEmpty());
+    gs->lspQuery = q;
+    auto resolved = getResolved(filesForQuery);
+    tryApplyDefLocSaver(*gs, resolved);
+    tryApplyLocalVarSaver(*gs, resolved);
+
+    pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, /*presorted*/ true);
+    gs->lspTypecheckCount++;
+    gs->lspQuery = core::lsp::Query::noQuery();
+    return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
 const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const {
-    ENFORCE(false, "getIndexed not implemented");
-    return *pf;
+    return undoState.getIndexed(fref);
 }
 
 std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
-    ENFORCE(false, "getResolved not implemented");
-    return {};
+    const auto &gs = *(undoState.getEvictedGs());
+    vector<ast::ParsedFile> updatedIndexed;
+
+    for (auto fref : frefs) {
+        auto &indexed = getIndexed(fref);
+        if (indexed.tree) {
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+        }
+    }
+
+    return pipeline::incrementalResolveWithoutStateMutation(gs, move(updatedIndexed), config->opts);
 }
 
 const core::GlobalState &LSPStaleTypechecker::state() const {
-    return undoState.getEvictedGs();
+    return *(undoState.getEvictedGs());
 };
 
 } // namespace sorbet::realmain::lsp

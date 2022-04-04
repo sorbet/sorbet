@@ -93,6 +93,19 @@ public:
 
     /** Runs the typechecker in a dedicated thread. */
     std::unique_ptr<Joinable> startTypecheckerThread();
+
+    /**
+     * (For tests only) Set a flag that forces the slow path to block indefinitely after saving undo state. Setting
+     * this flag to `false` will immediately unblock any currently blocked slow paths.
+     */
+    void setSlowPathBlocked(bool blocked) {
+        typechecker.setSlowPathBlocked(blocked);
+    }
+
+    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
+    bool isSlowPathBlocked() const {
+        return typechecker.isSlowPathBlocked();
+    }
 };
 } // namespace sorbet::realmain::lsp
 

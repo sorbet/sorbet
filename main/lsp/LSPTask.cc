@@ -98,6 +98,9 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                 } else if constexpr (is_same_v<T, unique_ptr<SorbetErrorParams>>) {
                     // sorbet/error
                     return ResponseMessageStatus::Unknown;
+                } else if constexpr (is_same_v<T, unique_ptr<SorbetFenceParams>>) {
+                    // sorbet/fence
+                    return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, unique_ptr<TextDocumentItem>>) {
                     // sorbet/readFile
                     return ResponseMessageStatus::Unknown;

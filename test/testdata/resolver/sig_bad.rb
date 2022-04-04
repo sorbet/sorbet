@@ -37,7 +37,7 @@ class A
       h: T.junk, # error: Unsupported method `T.junk`
       #    ^^^^ error: Method `junk` does not exist on `T.class_of(T)`
       i: T.class_of(T1, T2),
-      #  ^^^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `T.class_of`
+      #                 ^^ error: Too many arguments provided for method `T.class_of`
       j: T.class_of(T.nilable(Integer)), # error: `T.class_of` must wrap each individual class type, not the outer `T.any`
       k: T.class_of(1),
       #  ^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
