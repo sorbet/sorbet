@@ -691,7 +691,7 @@ module Kernel
   sig do
     type_parameters(:Elem)
       .params(
-        x: T.any(T::Enumerable[T.type_parameter(:Elem)], T.type_parameter(:Elem))
+        x: T.any(T::Enumerable[T.type_parameter(:Elem)], T.type_parameter(:Elem), T.nilable(T.type_parameter(:Elem)))
       )
       .returns(T::Array[T.type_parameter(:Elem)])
   end
