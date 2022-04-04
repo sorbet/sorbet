@@ -35,9 +35,27 @@ struct Helper {
         core::UnfreezeNameTable nameTableAccess(gs);
         auto settings = parser::Parser::Settings{false, false, false};
         auto node = parser::Parser::run(gs, file, settings);
-        return autogen::constantHashNode(gs, node.get());
+        return autogen::constantHashNode(gs, node);
     }
 };
+
+TEST_CASE("Stability") { // NOLINT
+    Helper helper;
+
+    // files with no constants hash to 0
+    CHECK_EQ(0, helper.hashExample("\n"));
+
+    // a few hard-coded examples to check for stability
+    CHECK_EQ(3503786793, helper.hashExample("class Foo; end"));
+    CHECK_EQ(3576910453, helper.hashExample("class Bar; end"));
+    CHECK_EQ(663475261, helper.hashExample("class Foo::Bar; end"));
+    CHECK_EQ(3746578870, helper.hashExample("module Foo; end"));
+    CHECK_EQ(4044482410, helper.hashExample("module Bar; end"));
+    CHECK_EQ(2382413730, helper.hashExample("module Foo::Bar; end"));
+    CHECK_EQ(2200515961, helper.hashExample("X = T.let(5, Integer)"));
+    CHECK_EQ(4273770513, helper.hashExample("X = Y"));
+    CHECK_EQ(3333880970, helper.hashExample("require 'this'"));
+}
 
 TEST_CASE("SimpleClass") { // NOLINT
     Helper helper;
