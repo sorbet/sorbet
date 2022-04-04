@@ -316,7 +316,7 @@ We're indebted to several people and groups who have helped us get where we are:
 
 - Jeff Foster at Tufts University and his students have been working on RDL. We
   based our initial type annotations for the Ruby standard library on theirs.
-- Our initial Ruby parser was from [@charliesome] at GitHub.
+- Our initial Ruby parser was from [@haileys] at GitHub.
 - Coinbase has contributed code to Sorbet and created [sorbet-typed], a central
   repository for sharing type definitions for Ruby gems.
 - Shopify has had several contributions including a mechanism for adding types
@@ -329,7 +329,7 @@ that helped shape our thinking. Our thanks go out to [@soutaro], author of
 Steep; [@mame], who is working on a Type profiler; and of course our favorite
 BDFL [@matz].
 
-[@charliesome]: https://github.com/charliesome
+[@haileys]: https://github.com/haileys
 [@soutaro]: https://github.com/soutaro
 [@mame]: https://github.com/mame
 [@matz]: https://github.com/matz
