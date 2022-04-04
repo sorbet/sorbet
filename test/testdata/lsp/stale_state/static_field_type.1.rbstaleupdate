@@ -1,0 +1,6 @@
+# typed: true
+
+AA = 123
+#^ hover: jez
+puts AA
+#    ^ hover: jez

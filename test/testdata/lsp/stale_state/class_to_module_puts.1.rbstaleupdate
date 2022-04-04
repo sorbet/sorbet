@@ -1,0 +1,7 @@
+# typed: true
+
+module A
+  #    ^ hover: jez
+  puts(A)
+  #    ^ hover: jez
+end
