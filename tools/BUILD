@@ -70,7 +70,6 @@ compilation_database(
         "//main/autogen/data:data",
         "//main/cache:cache",
         "//main/cache:cache-orig",
-        "//main/constd:constd",
         "//main/lsp:error_reporter_test",
         "//main/lsp:generate_lsp_messages",
         "//main/lsp:generate_lsp_messages_test",
