@@ -7,8 +7,6 @@
 #include "core/GlobalState.h"
 
 namespace sorbet::parser {
-// pre-declaring this instead of importing this because including
-// "parser/Node.h" more than once causes errors
 class Node;
 } // namespace sorbet::parser
 
