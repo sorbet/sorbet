@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "autogen.cc",
         "autoloader.cc",
+        "constant_hash.cc",
         "crc_builder.cc",
         "packages.cc",
         "subclasses.cc",
@@ -10,6 +11,7 @@ cc_library(
     hdrs = [
         "autogen.h",
         "autoloader.h",
+        "constant_hash.h",
         "crc_builder.h",
         "packages.h",
         "subclasses.h",
@@ -25,6 +27,25 @@ cc_library(
         "//core",
         "//main/autogen/data",
         "//main/options",
+        "//parser",
         "@com_github_d_bahr_crcpp",
+    ],
+)
+
+cc_test(
+    name = "constant_hash_test",
+    size = "small",
+    srcs = ["test/constant_hash_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        ":autogen",
+        "//core",
+        "//parser",
+        "@doctest",
+        "@doctest//:doctest_main",
     ],
 )
