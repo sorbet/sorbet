@@ -55,7 +55,7 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
                 }
                 hashSoFar = core::mix(hashSoFar, core::_hash(")"));
             } else if (send->method == core::Names::include() || send->method == core::Names::extend()) {
-                hashSoFar = core::mix(hashSoFar, core::_hash("(r"));
+                hashSoFar = core::mix(hashSoFar, core::_hash("(i"));
                 hashSoFar = core::mix(hashSoFar, core::_hash(send->method.shortName(gs)));
                 for (auto &arg : send->args) {
                     hashSoFar = hashNode(gs, hashSoFar, arg.get());
@@ -86,7 +86,7 @@ unsigned int hashNode(core::GlobalState &gs, unsigned int hashSoFar, parser::Nod
                 } else {
                     // if the RHS is anything else, then it's a constant
                     // definition: we care only about the LHS in that case
-                    hashSoFar = core::mix(hashSoFar, core::_hash("(c"));
+                    hashSoFar = core::mix(hashSoFar, core::_hash("(x"));
                     hashSoFar = core::mix(hashSoFar, core::_hash(lhs->name.shortName(gs)));
                     hashSoFar = core::mix(hashSoFar, core::_hash(")"));
                 }
