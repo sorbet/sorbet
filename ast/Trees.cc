@@ -699,8 +699,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     if (resolutionScopes != nullptr && !resolutionScopes->empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
-                       fmt::map_join(this->resolutionScopes->begin(), this->resolutionScopes->end(), ", ",
-                                     [&](auto sym) { return sym.showFullName(gs); }));
+                       fmt::map_join(*this->resolutionScopes, ", ", [&](auto sym) { return sym.showFullName(gs); }));
     }
     printTabs(buf, tabs);
 

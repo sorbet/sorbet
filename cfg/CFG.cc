@@ -218,17 +218,16 @@ string CFG::toString(const core::GlobalState &gs) const {
         auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
-        fmt::format_to(
-            std::back_inserter(buf),
-            "    \"bb{}_{}\" [\n"
-            "        shape = {};\n"
-            "        color = {};\n"
-            "        label = \"{}\\l\"\n"
-            "    ];\n\n"
-            "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-            symbolName, basicBlock->id, shape, color,
-            fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
-            symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
+        fmt::format_to(std::back_inserter(buf),
+                       "    \"bb{}_{}\" [\n"
+                       "        shape = {};\n"
+                       "        color = {};\n"
+                       "        label = \"{}\\l\"\n"
+                       "    ];\n\n"
+                       "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
+                       symbolName, basicBlock->id, shape, color,
+                       fmt::map_join(lines, "\\l", [](auto line) -> string { return absl::CEscape(line); }), symbolName,
+                       basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
             fmt::format_to(std::back_inserter(buf), "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"tapered\"];\n\n",
@@ -273,17 +272,16 @@ string CFG::showRaw(core::Context ctx) const {
         auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
-        fmt::format_to(
-            std::back_inserter(buf),
-            "    \"bb{}_{}\" [\n"
-            "        shape = {};\n"
-            "        color = {};\n"
-            "        label = \"{}\\l\"\n"
-            "    ];\n\n"
-            "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-            symbolName, basicBlock->id, shape, color,
-            fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
-            symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
+        fmt::format_to(std::back_inserter(buf),
+                       "    \"bb{}_{}\" [\n"
+                       "        shape = {};\n"
+                       "        color = {};\n"
+                       "        label = \"{}\\l\"\n"
+                       "    ];\n\n"
+                       "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
+                       symbolName, basicBlock->id, shape, color,
+                       fmt::map_join(lines, "\\l", [](auto line) -> string { return absl::CEscape(line); }), symbolName,
+                       basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
             fmt::format_to(std::back_inserter(buf), "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"tapered\"];\n\n",
@@ -298,8 +296,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}, rubyRegionId={}]({})\n", this->id, this->rubyRegionId,
                    fmt::map_join(
-                       this->args.begin(), this->args.end(),
-                       ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
+                       this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
@@ -316,8 +313,7 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
     fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}]({}):\n", this->id, this->rubyRegionId,
                    this->firstDeadInstructionIdx,
                    fmt::map_join(
-                       this->args.begin(), this->args.end(),
-                       ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
+                       this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "    # outerLoops: {}\n", this->outerLoops);
@@ -347,10 +343,9 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
 
 string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(
-        std::back_inserter(buf), "block[id={}]({})\n", this->id,
-        fmt::map_join(
-            this->args.begin(), this->args.end(), ", ", [&](const auto &arg) -> auto { return arg.showRaw(gs, cfg); }));
+    fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
+                   fmt::map_join(
+                       this->args, ", ", [&](const auto &arg) -> auto { return arg.showRaw(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
