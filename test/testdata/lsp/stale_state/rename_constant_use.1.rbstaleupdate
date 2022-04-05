@@ -1,0 +1,16 @@
+# typed: true
+
+class MyClass
+  extend T::Sig
+
+  # Oops, we didn't rename the definition
+  A = T.let(1, Integer)
+
+  sig {params(x: Integer).returns(Integer)}
+  def frob(x)
+    x + THE_INTEGER
+      # ^ hover: ```ruby
+      # ^ hover: # note: information may be stale
+      # ^ hover: A
+  end
+end
