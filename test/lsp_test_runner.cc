@@ -67,8 +67,8 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
         return "null";
     } else {
         auto &symbols = get<vector<unique_ptr<DocumentSymbol>>>(symbolResult);
-        return fmt::format("{}", fmt::map_join(symbols.begin(), symbols.end(), ", ",
-                                               [](const auto &sym) -> string { return sym->toJSON(true); }));
+        return fmt::format("{}",
+                           fmt::map_join(symbols, ", ", [](const auto &sym) -> string { return sym->toJSON(true); }));
     }
 }
 
@@ -284,11 +284,11 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
     if (matchedCodeActionAssertions.size() > receivedCodeActionsCount) {
         FAIL_CHECK(fmt::format("Found apply-code-action assertions without "
                                "corresponding code actions from the server:\n{}",
-                               fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), ", ",
+                               fmt::map_join(applyCodeActionAssertions, ", ",
                                              [](const auto &assertion) -> string { return assertion->toString(); })));
     } else if (matchedCodeActionAssertions.size() < receivedCodeActionsCount) {
         FAIL_CHECK(fmt::format("Received code actions without corresponding apply-code-action assertions:\n{}",
-                               fmt::map_join(receivedCodeActionsByTitle.begin(), receivedCodeActionsByTitle.end(), "\n",
+                               fmt::map_join(receivedCodeActionsByTitle, "\n",
                                              [](const auto &action) -> string { return action.second->toJSON(); })));
     }
 }
@@ -359,7 +359,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
             // We've already removed any code action assertions that matches a received code action assertion.
             // Any remaining are therefore extraneous.
             INFO(fmt::format("Found extraneous apply-code-action assertions:\n{}",
-                             fmt::map_join(applyCodeActionAssertions.begin(), applyCodeActionAssertions.end(), "\n",
+                             fmt::map_join(applyCodeActionAssertions, "\n",
                                            [](const auto &assertion) -> string { return assertion->toString(); })));
             CHECK_EQ(applyCodeActionAssertions.size(), 0);
         } else {

@@ -384,7 +384,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                                 "regular comment that just happens to be formatted like an assertion comment, you "
                                 "can add the label to `ignoredAssertionLabels`.",
                                 assertionType,
-                                fmt::map_join(assertionConstructors.begin(), assertionConstructors.end(), ", ",
+                                fmt::map_join(assertionConstructors, ", ",
                                               [](const auto &entry) -> string { return entry.first; })));
             }
         } else {
@@ -1160,7 +1160,7 @@ void CompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File
     string actualMessage =
         completionList->items.empty()
             ? "(nothing)"
-            : fmt::format("{}", fmt::map_join(completionList->items.begin(), completionList->items.end(), ", ",
+            : fmt::format("{}", fmt::map_join(completionList->items, ", ",
                                               [](const auto &item) -> string { return item->label; }));
 
     auto partial = absl::EndsWith(this->message, ", ...");

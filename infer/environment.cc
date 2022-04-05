@@ -1029,8 +1029,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                     e.setHeader(
                                         "Method `{}` on `{}` is package-private and cannot be called from package `{}`",
                                         it->main.method.data(ctx)->name.show(ctx), klass.show(ctx),
-                                        fmt::map_join(curPkgName.begin(), curPkgName.end(),
-                                                      "::", [&](const auto &nr) { return nr.show(ctx); }));
+                                        fmt::map_join(curPkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                                     e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
                                                    it->main.method.data(ctx)->owner.show(ctx));
                                 }

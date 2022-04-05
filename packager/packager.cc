@@ -823,8 +823,7 @@ public:
                 errorDepth++;
                 if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                     e.setHeader("Class or method definition must match enclosing package namespace `{}`",
-                                fmt::map_join(pkgName.begin(), pkgName.end(),
-                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
+                                fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                     addPackageSuggestion(ctx, e);
                 }
             }
@@ -875,8 +874,7 @@ public:
                 errorDepth++;
                 if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                     e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
-                                fmt::map_join(pkgName.begin(), pkgName.end(),
-                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
+                                fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                     addPackageSuggestion(ctx, e);
                 }
             }
@@ -939,7 +937,7 @@ public:
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
-                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 addPackageSuggestion(ctx, e);
             }
         }
