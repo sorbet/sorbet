@@ -41,7 +41,7 @@ string ErrorColors::replaceAll(string_view inWhat, string_view from, string_view
 }
 
 bool Error::isCritical() const {
-    return this->what.minLevel == StrictLevel::Internal;
+    return this->what == core::errors::Internal::InternalError;
 }
 
 string restoreColors(string_view formatted, rang::fg color) {
