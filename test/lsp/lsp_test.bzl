@@ -1,3 +1,10 @@
+def basename(p):
+    return p.rpartition("/")[-1]
+
+def dropExtension(p):
+    "TODO: handle multiple . in name"
+    return p.partition(".")[0]
+
 def lsp_test(path):
     # path will be like `$name/$name.sh`
     words = path.split("/")
@@ -48,3 +55,26 @@ def update_test():
         tags = ["manual"],
         tests = update_rules,
     )
+
+_PROTOCOL_TEST_SRCS = ["ProtocolTest.cc", "ProtocolTest.h"]
+
+def protocol_tests(cc_files):
+    for cc_file in cc_files:
+        native.cc_test(
+            name = dropExtension(basename(cc_file)),
+            timeout = "moderate",
+            srcs = _PROTOCOL_TEST_SRCS + [cc_file],
+            linkstatic = select({
+                "//tools/config:linkshared": 0,
+                "//conditions:default": 1,
+            }),
+            visibility = ["//tools:__pkg__"],
+            deps = [
+                "//core",
+                "//main/lsp",
+                "//payload",
+                "//test/helpers",
+                "@doctest",
+                "@doctest//:doctest_main",
+            ],
+        )

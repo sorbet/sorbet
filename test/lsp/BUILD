@@ -1,4 +1,4 @@
-load(":lsp_test.bzl", "lsp_test", "update_test")
+load(":lsp_test.bzl", "lsp_test", "protocol_tests", "update_test")
 
 sh_binary(
     name = "lsp_test_runner",
@@ -6,97 +6,12 @@ sh_binary(
     data = ["//main:sorbet"],
 )
 
-cc_test(
-    name = "protocol_test_corpus",
-    size = "medium",
-    srcs = [
-        "ProtocolTest.cc",
-        "ProtocolTest.h",
-        "protocol_test_corpus.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//core",
-        "//main/lsp",
-        "//payload",
-        "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
-    ],
-)
-
-cc_test(
-    name = "cache_protocol_test_corpus",
-    size = "medium",
-    srcs = [
-        "ProtocolTest.cc",
-        "ProtocolTest.h",
-        "cache_protocol_test_corpus.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//core",
-        "//main/lsp",
-        "//payload",
-        "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
-    ],
-)
-
-cc_test(
-    name = "multithreaded_protocol_test_corpus",
-    size = "medium",
-    srcs = [
-        "ProtocolTest.cc",
-        "ProtocolTest.h",
-        "multithreaded_protocol_test_corpus.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//core",
-        "//main/lsp",
-        "//payload",
-        "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
-    ],
-)
-
-cc_test(
-    name = "watchman_test_corpus",
-    size = "medium",
-    srcs = [
-        "ProtocolTest.cc",
-        "ProtocolTest.h",
-        "watchman_test_corpus.cc",
-    ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//core",
-        "//main/lsp",
-        "//payload",
-        "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
-    ],
-)
+protocol_tests([
+    "cache_protocol_test_corpus.cc",
+    "multithreaded_protocol_test_corpus.cc",
+    "protocol_test_corpus.cc",
+    "watchman_test_corpus.cc",
+])
 
 test_suite(
     name = "lsp",
