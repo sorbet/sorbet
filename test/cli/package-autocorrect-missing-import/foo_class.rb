@@ -12,4 +12,5 @@ end
 
 module Foo::MyPackage
   Foo::Bar::OtherPackage::OtherClass # resolves via root
+  Foo::Bar::MyClass::SUBCLASSES # resolves via root
 end
