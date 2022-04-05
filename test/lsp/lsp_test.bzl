@@ -62,7 +62,7 @@ def protocol_tests(cc_files):
     for cc_file in cc_files:
         native.cc_test(
             name = dropExtension(basename(cc_file)),
-            size = "medium",
+            timeout = "moderate",
             srcs = _PROTOCOL_TEST_SRCS + [cc_file],
             linkstatic = select({
                 "//tools/config:linkshared": 0,
