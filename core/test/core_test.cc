@@ -26,19 +26,22 @@ struct Offset2PosTest {
     uint32_t col;
 };
 
-TEST_CASE("TestOffset2Pos") {
+TEST_CASE("TestOffset2Pos2Offset") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     UnfreezeFileTable fileTableAccess(gs);
 
-    vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
-                                    {"line 1\nline 2", 1, 1, 2},
-                                    {"line 1\nline 2", 7, 2, 1},
-                                    {"line 1\nline 2", 11, 2, 5},
-                                    {"a long line with no newlines\n", 20, 1, 21},
-                                    {"line 1\nline 2\nline3\n", 7, 2, 1},
-                                    {"line 1\nline 2\nline3", 6, 1, 7},
-                                    {"line 1\nline 2\nline3", 7, 2, 1}};
+    vector<Offset2PosTest> cases = {
+        {"hello", 0, 1, 1},
+        {"line 1\nline 2", 1, 1, 2},
+        {"line 1\nline 2", 7, 2, 1},
+        {"line 1\nline 2", 11, 2, 5},
+        {"a long line with no newlines\n", 20, 1, 21},
+        {"line 1\nline 2\nline3\n", 7, 2, 1},
+        {"line 1\nline 2\nline3", 6, 1, 7},
+        {"line 1\nline 2\nline3", 7, 2, 1},
+    };
+
     int i = 0;
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
@@ -49,6 +52,11 @@ TEST_CASE("TestOffset2Pos") {
 
         CHECK_EQ(tc.col, detail.column);
         CHECK_EQ(tc.line, detail.line);
+
+        // Test that it's reversible
+        auto offset = Loc::pos2Offset(f.data(gs), detail);
+        CHECK_EQ(tc.off, offset);
+
         i++;
     }
 }
