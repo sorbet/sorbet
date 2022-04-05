@@ -444,6 +444,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    // Immutable namer + resolver will completely garble the trees (it's only the GlobalState
+    // that's immutable) so we have to make copies it can scratch on.
+    vector<ast::ParsedFile> indexedTreesCopy;
+
     {
         // Immutable namer + resolver (for stale GlobalState requests)
 
@@ -479,6 +483,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         vector<ast::ParsedFile> treesCopy;
         for (auto &tree : trees) {
             treesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+            // Also stash a copy to use for the run of immutable namer + resolver that will be
+            // tested after running mutable namer + resolver once.
+            indexedTreesCopy.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
         }
 
         // Implemented in a helper function, so that only one GlobalState and list of trees is in scope.
@@ -549,6 +556,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
+    }
+
+    {
+        // Immutable namer + resolver, after populating GlobalState (for stale GlobalState requests)
+
+        handler.drainErrors(*gs);
+        immutableNamerResolver(*gs, std::move(indexedTreesCopy), *workers);
+        handler.dropErrors(*gs);
     }
 
     if (!test.minimizeRBI.empty()) {
