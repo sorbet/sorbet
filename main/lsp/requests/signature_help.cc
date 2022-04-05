@@ -90,7 +90,8 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerInterfac
             }
             auto src = fref.data(gs).source();
             auto loc = config.lspPos2Loc(fref, *params->position, gs);
-            string_view call_str = src.substr(sendLocIndex, loc.endPos() - sendLocIndex);
+            ENFORCE(loc.has_value(), "LSPQuery::byLoc should have reported an error earlier if nullopt");
+            string_view call_str = src.substr(sendLocIndex, loc.value().endPos() - sendLocIndex);
             int numberCommas = absl::c_count(call_str, ',');
             // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
             // 2nd arg)

@@ -11,6 +11,6 @@ class Foo
 
   sig {params(x: Integer).void}
   def bar(x)
-    # ^ hover: jez
+    # ^ hover: null
   end
 end

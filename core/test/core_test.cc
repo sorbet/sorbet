@@ -81,24 +81,24 @@ TEST_CASE("TestPos2OffsetNull") {
 
         {"hello", 4, 1, 5},
         {"hello", 5, 1, 6},
-        {"hello", 6, 1, 7},
+        {"hello", nullopt, 1, 7},
 
-        {"hello", 5, 2, 0},
-        {"hello", 6, 2, 1},
+        {"hello", 5, 2, 0}, // kind of strange?
+        {"hello", nullopt, 2, 1},
 
         {"hello\n", 5, 2, 0},
         {"hello\n", 6, 2, 1},
-        {"hello\n", 7, 2, 2},
+        {"hello\n", nullopt, 2, 2},
 
         {"line 1\nline 2", 5, 1, 6},
         {"line 1\nline 2", 6, 1, 7},
-        {"line 1\nline 2", 7, 1, 8},
+        {"line 1\nline 2", nullopt, 1, 8},
 
         {"line 1\nline 2", 6, 2, 0},
         {"line 1\nline 2", 7, 2, 1},
 
         {"line 1\n\nline 2", 7, 2, 1},
-        {"line 1\n\nline 2", 8, 2, 2},
+        {"line 1\n\nline 2", nullopt, 2, 2},
     };
 
     int i = 0;

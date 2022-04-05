@@ -57,6 +57,11 @@ optional<uint32_t> Loc::pos2Offset(const File &file, Loc::Detail pos) {
         return nullopt;
     }
     auto lineOffset = lineBreaks[l];
+    auto nextLineStart = l + 1 < lineBreaks.size() ? lineBreaks[l + 1] : file.source().size();
+    auto lineLength = nextLineStart - lineOffset;
+    if (pos.column > lineLength) {
+        return nullopt;
+    }
     return lineOffset + pos.column;
 }
 

@@ -119,8 +119,10 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
 // Sorbet:   zero-width core::Loc is a Position
 //
 // https://microsoft.github.io/language-server-protocol/specification#text-documents
-core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
-                                       const core::GlobalState &gs) const {
+//
+// Returns nullopt if the position does not represent a valid location.
+optional<core::Loc> LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
+                                                 const core::GlobalState &gs) const {
     core::Loc::Detail reqPos;
     reqPos.line = pos.line + 1;
     reqPos.column = pos.character + 1;
@@ -128,7 +130,7 @@ core::Loc LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position 
         auto offset = maybeOffset.value();
         return core::Loc{fref, offset, offset};
     } else {
-        return core::Loc::none(fref);
+        return nullopt;
     }
 }
 
