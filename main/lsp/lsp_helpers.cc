@@ -214,7 +214,9 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     ENFORCE(constant == constant.dealias(gs));
 
     core::TypePtr result;
-    if (constant.isClassOrModule()) {
+    if (constant == core::Symbols::StubModule()) {
+        result = core::Types::untyped(gs, constant);
+    } else if (constant.isClassOrModule()) {
         auto targetClass = constant.asClassOrModuleRef();
         if (!targetClass.data(gs)->attachedClass(gs).exists()) {
             targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
