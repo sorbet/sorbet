@@ -21,10 +21,18 @@ auto errorQueue = make_shared<ErrorQueue>(*logger, *logger, errorCollector);
 
 struct Offset2PosTest {
     string src;
-    uint32_t off;
+    optional<uint32_t> off;
     uint32_t line;
     uint32_t col;
 };
+
+string showOffset(const optional<uint32_t> &off) {
+    if (off.has_value()) {
+        return to_string(off.value());
+    } else {
+        return "nullopt";
+    }
+}
 
 TEST_CASE("TestOffset2Pos2Offset") {
     GlobalState gs(errorQueue);
@@ -48,7 +56,7 @@ TEST_CASE("TestOffset2Pos2Offset") {
         INFO(name);
         FileRef f = gs.enterFile(move(name), tc.src);
 
-        auto detail = Loc::offset2Pos(f.data(gs), tc.off);
+        auto detail = Loc::offset2Pos(f.data(gs), tc.off.value());
 
         CHECK_EQ(tc.col, detail.column);
         CHECK_EQ(tc.line, detail.line);
@@ -57,6 +65,51 @@ TEST_CASE("TestOffset2Pos2Offset") {
         auto offset = Loc::pos2Offset(f.data(gs), detail);
         CHECK_EQ(tc.off, offset);
 
+        i++;
+    }
+}
+
+TEST_CASE("TestPos2OffsetNull") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+    UnfreezeFileTable fileTableAccess(gs);
+
+    vector<Offset2PosTest> cases = {
+        {"hello", nullopt, 0, 1},
+        {"hello", UINT32_MAX, 1, 0},
+        {"hello", 0, 1, 1},
+
+        {"hello", 4, 1, 5},
+        {"hello", 5, 1, 6},
+        {"hello", 6, 1, 7},
+
+        {"hello", 5, 2, 0},
+        {"hello", 6, 2, 1},
+
+        {"hello\n", 5, 2, 0},
+        {"hello\n", 6, 2, 1},
+        {"hello\n", 7, 2, 2},
+
+        {"line 1\nline 2", 5, 1, 6},
+        {"line 1\nline 2", 6, 1, 7},
+        {"line 1\nline 2", 7, 1, 8},
+
+        {"line 1\nline 2", 6, 2, 0},
+        {"line 1\nline 2", 7, 2, 1},
+
+        {"line 1\n\nline 2", 7, 2, 1},
+        {"line 1\n\nline 2", 8, 2, 2},
+    };
+
+    int i = 0;
+    for (auto &tc : cases) {
+        auto name = string("case: ") + to_string(i);
+        FileRef f = gs.enterFile(move(name), tc.src);
+
+        auto actualOffset = Loc::pos2Offset(f.data(gs), Loc::Detail{tc.line, tc.col});
+
+        INFO(fmt::format("i={}, CHECK_EQ({}, {})", i, showOffset(tc.off), showOffset(actualOffset)));
+        CHECK_EQ(tc.off, actualOffset);
         i++;
     }
 }
