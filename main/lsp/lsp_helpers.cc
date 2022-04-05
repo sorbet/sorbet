@@ -213,6 +213,10 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     // We should understand where dealias calls go.
     ENFORCE(constant == constant.dealias(gs));
 
+    if (constant == core::Symbols::StubModule()) {
+        return "This constant is not defined";
+    }
+
     core::TypePtr result;
     if (constant.isClassOrModule()) {
         auto targetClass = constant.asClassOrModuleRef();
