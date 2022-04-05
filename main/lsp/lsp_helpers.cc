@@ -213,10 +213,12 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     // We should understand where dealias calls go.
     ENFORCE(constant == constant.dealias(gs));
 
-    core::TypePtr result;
     if (constant == core::Symbols::StubModule()) {
-        result = core::Types::untyped(gs, constant);
-    } else if (constant.isClassOrModule()) {
+        return "This constant is not defined";
+    }
+
+    core::TypePtr result;
+    if (constant.isClassOrModule()) {
         auto targetClass = constant.asClassOrModuleRef();
         if (!targetClass.data(gs)->attachedClass(gs).exists()) {
             targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
