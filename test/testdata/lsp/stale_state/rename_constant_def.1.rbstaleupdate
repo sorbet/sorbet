@@ -1,0 +1,18 @@
+# typed: true
+
+class MyClass
+  extend T::Sig
+
+  # Choose something that's not going to get autocorrected.
+  # We renamed the def but not the use.
+  THE_INTEGER = T.let(1, Integer)
+# ^ hover: ```ruby
+# ^ hover: # note: information may be stale
+# ^ hover: Integer
+
+  sig {params(x: Integer).returns(Integer)}
+  def frob(x)
+    x + MY_CONSTANT
+      # ^ hover: null
+  end
+end
