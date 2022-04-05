@@ -79,7 +79,20 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
     }
 
     auto loc = config.lspPos2Loc(fref, pos, gs);
-    return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
+    if (!loc.has_value()) {
+        if (typechecker.isStale()) {
+            // File location was not valid, but it's _probably_ not the client's fault--instead it's
+            // likely that we're not running on an up-to-date file yet.
+            return LSPQueryResult{{}, nullptr};
+        } else {
+            auto error = make_unique<ResponseError>(
+                (int)LSPErrorCodes::InvalidParams,
+                fmt::format("Position {} in {} does not correspond to a valid location", pos.showRaw(), uri));
+            return LSPQueryResult{{}, move(error)};
+        }
+    }
+
+    return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
 }
 
 LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,

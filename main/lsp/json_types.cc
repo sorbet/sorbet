@@ -158,6 +158,10 @@ unique_ptr<Position> Position::copy() const {
     return make_unique<Position>(line, character);
 }
 
+string Position::showRaw() const {
+    return fmt::format("Position{{.line={}, .character={}}}", this->line, this->character);
+}
+
 unique_ptr<DiagnosticRelatedInformation> DiagnosticRelatedInformation::copy() const {
     return make_unique<DiagnosticRelatedInformation>(location->copy(), message);
 }
