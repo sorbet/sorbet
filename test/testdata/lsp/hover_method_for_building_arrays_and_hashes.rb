@@ -19,7 +19,6 @@ class Issue1777
       123
       # ^ hover: Integer(123)
       #  ^ hover: Integer(123)
-      #   ^ hover: [String("foo"), Integer(123)] (2-tuple)
       ])
     # ^ hover: [String("foo"), Integer(123)] (2-tuple)
   end
@@ -40,7 +39,6 @@ class Issue1777
       bar: 123
       #      ^ hover: Integer(123)
       #       ^ hover: Integer(123)
-      #        ^ hover: {foo: String("foo"), bar: Integer(123)} (shape of T::Hash[T.untyped, T.untyped])
       })
     # ^ hover: {foo: String("foo"), bar: Integer(123)} (shape of T::Hash[T.untyped, T.untyped])
   end

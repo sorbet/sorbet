@@ -1111,7 +1111,7 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto &responseMsg = responses.at(0);
     REQUIRE(responseMsg->isResponse());
     auto &response = responseMsg->asResponse();
-    REQUIRE(response.result.has_value());
+    REQUIRE_MESSAGE(response.result.has_value(), response.error.value()->message);
     auto &hoverResponse = get<variant<JSONNullObject, unique_ptr<Hover>>>(*response.result);
     auto hoverContents = hoverToString(hoverResponse);
 
