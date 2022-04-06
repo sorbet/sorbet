@@ -50,6 +50,25 @@ public:
     friend class OwnedKeyValueStore;
 };
 
+// Usage:
+// unique_ptr<OwnedKeyValueStore> kvstore = ...;
+// ...
+// {
+//   unique_ptr<SuspendedKVStore> suspended = SuspendedKVStore::suspend(move(kvstore));
+//   // Make other kv store
+//   kvstore = SuspendedKVStore::resume(move(suspended)); // Put it back
+// }
+class SuspendedKVStore {
+    std::unique_ptr<OwnedKeyValueStore> okvs;
+
+public:
+    // Commits and closes the OwnedKeyValueStore, so that we can temporarily own a different one.
+    // This also sets kvstoreInUse to false
+    static std::unique_ptr<SuspendedKVStore> suspend(std::unique_ptr<OwnedKeyValueStore> kv);
+
+    static std::unique_ptr<OwnedKeyValueStore> resume(std::unique_ptr<SuspendedKVStore> kv);
+};
+
 /**
  * A database with single writer and multiple readers.
  * Only the thread that created OwnedKeyValueStore is allowed to invoke `write`.
