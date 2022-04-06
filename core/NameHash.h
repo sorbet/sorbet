@@ -49,6 +49,7 @@ struct GlobalStateHash {
     // field/static field hashes, or even finer subdivisions on static fields.
     uint32_t fieldHash = HASH_STATE_NOT_COMPUTED;
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
+    // TODO(jez) Change the name of this variable
     std::vector<std::pair<NameHash, uint32_t>> methodHashes;
 
     static GlobalStateHash invalid() {
