@@ -140,11 +140,12 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
 
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
-    const char *sectionTitle;
+    string sectionTitle;
     if (gs.autocorrect) {
         sectionTitle = "Autocorrect: Done";
-    } else if (autocorrect.isDidYouMean) {
-        sectionTitle = "Did you mean? Use `-a` to autocorrect";
+    } else if (autocorrect.isDidYouMean && autocorrect.edits.size() == 1) {
+        sectionTitle =
+            ErrorColors::format("Did you mean `{}`? Use `-a` to autocorrect", autocorrect.edits[0].replacement);
     } else {
         sectionTitle = "Autocorrect: Use `-a` to autocorrect";
     }
