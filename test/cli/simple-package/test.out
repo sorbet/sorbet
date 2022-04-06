@@ -1,7 +1,7 @@
 foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean? Use `-a` to autocorrect
+  Did you mean `Project::Bar::BarClass`? Use `-a` to autocorrect
     foo/foo.rb:13: Replace with `Project::Bar::BarClass`
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^

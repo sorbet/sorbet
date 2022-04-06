@@ -1,7 +1,7 @@
 test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` https://srb.help/5002
      .. |    MyConstantWithTypo
             ^^^^^^^^^^^^^^^^^^
-  Did you mean? Use `-a` to autocorrect
+  Did you mean `BasicError::MyConstantWithNoTypo`? Use `-a` to autocorrect
     test/cli/errors/errors.rb:5: Replace with `BasicError::MyConstantWithNoTypo`
      .. |    MyConstantWithTypo
             ^^^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ Errors: 4
 test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` https://srb.help/5002
      .. |    MyConstantWithTypo
             ^^^^^^^^^^^^^^^^^^
-  Did you mean? Use `-a` to autocorrect
+  Did you mean `BasicError::MyConstantWithNoTypo`? Use `-a` to autocorrect
     test/cli/errors/errors.rb:5: Replace with `BasicError::MyConstantWithNoTypo`
      .. |    MyConstantWithTypo
             ^^^^^^^^^^^^^^^^^^
@@ -115,7 +115,7 @@ Errors: 4
 test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` https://srb.help/5002
      .. |    MyConstantWithTypo
             ^^^^^^^^^^^^^^^^^^
-  Did you mean? Use `-a` to autocorrect
+  Did you mean `BasicError::MyConstantWithNoTypo`? Use `-a` to autocorrect
     test/cli/errors/errors.rb:5: Replace with `BasicError::MyConstantWithNoTypo`
      .. |    MyConstantWithTypo
             ^^^^^^^^^^^^^^^^^^
