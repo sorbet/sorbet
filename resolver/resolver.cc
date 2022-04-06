@@ -707,7 +707,6 @@ private:
                         suggested.resize(3);
                     }
                     if (!suggested.empty()) {
-                        vector<core::ErrorLine> lines;
                         for (auto suggestion : suggested) {
                             const auto replacement = suggestion.symbol.show(ctx);
                             e.didYouMean(replacement, ctx.locAt(job.out->loc));
