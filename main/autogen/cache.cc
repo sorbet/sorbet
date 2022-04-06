@@ -27,8 +27,9 @@ bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, 
         return false;
     }
 
+    auto changedFileSet = UnorderedSet<string>(changedFiles.begin(), changedFiles.end());
     auto cacheFile = FileOps::read(cachePath);
-    auto cache = AutogenCache::unpackForFiles(cacheFile, changedFiles);
+    auto cache = AutogenCache::unpackForFiles(cacheFile, changedFileSet);
 
     for (auto &file : changedFiles) {
         if (cache.constantHashMap().count(file) == 0) {
@@ -36,8 +37,8 @@ bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, 
         }
         if (!FileOps::exists(file)) {
             // this is... confusing, since the runner promised the
-            // file existed, but I guess it means we should redo
-            // autogen
+            // file existed and apparently it doesn't now, I guess it
+            // means we should redo autogen to be safe
             return false;
         }
         core::FileRef ref;
@@ -60,10 +61,10 @@ bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, 
 // this doesn't load the whole cache, since we never need to _consult_
 // the whole cache. Instead, we let it know which paths we care about
 // and load only those
-AutogenCache AutogenCache::unpackForFiles(string_view file_contents, vector<string>& changedFiles) {
+AutogenCache AutogenCache::unpackForFiles(string_view file_contents, UnorderedSet<string>& changedFiles) {
     // we'll initialize an empty one and add files as we find them
     AutogenCache cache;
-    
+
     // Going forward, if anything fails, we'll just return the
     // probably-empty cache. That means it might be incomplete, but if
     // it's incomplete in a way that matters, then we'll lack constant
@@ -85,7 +86,7 @@ AutogenCache AutogenCache::unpackForFiles(string_view file_contents, vector<stri
             break;
         }
         // extracting the buffer data is a bit of a chore, so here we go
-        uint32_t key_len = mpack_tag_str_length(&tag);
+        uint32_t key_len = mpack_tag_str_length(&key_tag);
         auto key_buf = mpack_read_bytes_inplace(&reader, key_len);
         if (mpack_reader_error(&reader) != mpack_ok) {
             break;
@@ -95,13 +96,13 @@ AutogenCache AutogenCache::unpackForFiles(string_view file_contents, vector<stri
 
         // and the value should be an int
         mpack_tag_t val_tag = mpack_read_tag(&reader);
-        if (mpack_tag_type(&val_tag) != mpack_type_int) {
+        if (mpack_tag_type(&val_tag) != mpack_type_uint) {
             break;
         }
 
         // if this is a file we care about, then add it to the cache we've found
-        if (std::count(changedFiles.begin(), changedFiles.end(), key)) {
-            cache._constantHashMap.emplace(key, mpack_tag_int_value(&val_tag));
+        if (changedFiles.contains(key)) {
+            cache._constantHashMap.emplace(key, mpack_tag_uint_value(&val_tag));
         }
 
         // final loop safety check in case of malformed data

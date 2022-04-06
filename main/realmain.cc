@@ -548,10 +548,12 @@ int realmain(int argc, char *argv[]) {
 
     if (!opts.autogenConstantCacheFile.empty() && !opts.autogenChangedFiles.empty()) {
 #ifndef SORBET_REALMAIN_MIN
-        logger->debug("Checking {} changed files", opts.autogenChangedFiles.size());
+        logger->info("Checking {} changed files", opts.autogenChangedFiles.size());
         if (autogen::AutogenCache::canSkipAutogen(*gs, opts.autogenConstantCacheFile, opts.autogenChangedFiles)) {
-            logger->debug("All constant hashes unchanged; exiting");
+            logger->info("All constant hashes unchanged; exiting");
             return 0;
+        } else {
+            logger->info("Autogen still needs rerunning");
         }
 #else
         logger->warn("Autogen is disabled in sorbet-orig for faster builds");
