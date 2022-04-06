@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "autogen.cc",
         "autoloader.cc",
+        "cache.cc",
         "constant_hash.cc",
         "crc_builder.cc",
         "packages.cc",
@@ -11,6 +12,7 @@ cc_library(
     hdrs = [
         "autogen.h",
         "autoloader.h",
+        "cache.h",
         "constant_hash.h",
         "crc_builder.h",
         "packages.h",
