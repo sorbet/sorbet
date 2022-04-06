@@ -7,25 +7,25 @@ or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.
 lib/test.rb:3: Unable to resolve constant `Parlour` https://srb.help/5002
      3 |FOO = Parlour # We expect `Parlour` to be undefined here since we didn't load any gem RBI
               ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `JSON::Ext::Parser`? Use `-a` to autocorrect
     lib/test.rb:3: Replace with `JSON::Ext::Parser`
      3 |FOO = Parlour # We expect `Parlour` to be undefined here since we didn't load any gem RBI
               ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#L974: `JSON::Ext::Parser` defined here
+     974 |class JSON::Ext::Parser
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  Did you mean `Psych::Parser`? Use `-a` to autocorrect
     lib/test.rb:3: Replace with `Psych::Parser`
      3 |FOO = Parlour # We expect `Parlour` to be undefined here since we didn't load any gem RBI
               ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#L1715: `Psych::Parser` defined here
+    1715 |class Psych::Parser
+          ^^^^^^^^^^^^^^^^^^^
+  Did you mean `Racc::Parser`? Use `-a` to autocorrect
     lib/test.rb:3: Replace with `Racc::Parser`
      3 |FOO = Parlour # We expect `Parlour` to be undefined here since we didn't load any gem RBI
               ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#L974: Did you mean: `JSON::Ext::Parser`?
-     974 |class JSON::Ext::Parser
-          ^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#L1715: Did you mean: `Psych::Parser`?
-    1715 |class Psych::Parser
-          ^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/racc.rbi#L3: Did you mean: `Racc::Parser`?
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/racc.rbi#L3: `Racc::Parser` defined here
      3 |class Racc::Parser
         ^^^^^^^^^^^^^^^^^^
 Errors: 1
