@@ -76,6 +76,11 @@
         "command": "sorbet.copySymbolToClipboard",
         "title": "Copy Symbol to Clipboard",
         "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.rename",
+        "title": "Rename Symbol",
+        "category": "Sorbet"
       }
     ],
     "configuration": {

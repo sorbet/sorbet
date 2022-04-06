@@ -5,6 +5,8 @@ import {
   OutputChannel,
   window as vscodeWindow,
   env as vscodeEnv,
+  Uri,
+  Position,
 } from "vscode";
 import {
   LanguageClient,
@@ -173,6 +175,27 @@ export default class SorbetLanguageClient implements ErrorHandler {
           }),
         );
       }
+
+      // Unfortunately, we need this command as a wrapper around `editor.action.rename`,
+      // because VSCode doesn't allow calling it from the JSON RPC
+      // https://github.com/microsoft/vscode/issues/146767
+      this._subscriptions.push(
+        commands.registerCommand(
+          "sorbet.rename",
+          (params: TextDocumentPositionParams) => {
+            try {
+              commands.executeCommand("editor.action.rename", [
+                Uri.parse(params.textDocument.uri),
+                new Position(params.position.line, params.position.character),
+              ]);
+            } catch (error) {
+              console.log(
+                `Failed to rename symbol at ${params.textDocument.uri}:${params.position.line}:${params.position.character}, ${error}`,
+              );
+            }
+          },
+        ),
+      );
     });
     this._subscriptions.push(this._languageClient.start());
   }
