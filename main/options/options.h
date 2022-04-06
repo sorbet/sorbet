@@ -224,6 +224,11 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
+    // A file which contains a cache that can be used to potentially skip autogen
+    std::string autogenConstantCacheFile;
+    // A list of files which have changed since the last autogen run.
+    std::vector<std::string> autogenChangedFiles;
+
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;
