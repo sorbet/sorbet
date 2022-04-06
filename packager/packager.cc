@@ -213,8 +213,12 @@ public:
         return packagePathPrefixes;
     }
 
-    core::Loc definitionLoc() const {
+    core::Loc fullLoc() const {
         return loc;
+    }
+
+    core::Loc declLoc() const {
+        return declLoc_;
     }
 
     // The possible path prefixes associated with files in the package, including path separator at end.
@@ -228,8 +232,10 @@ public:
     // it here ensures only O(packages) space complexity.
     core::NameRef privateMangledName;
 
-    // loc for the package definition. Used for error messages.
+    // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
+    // loc for the package definition. Single line (just the class def). Used for error messages.
+    core::Loc declLoc_;
     // The names of each package imported by this package.
     vector<Import> importedPackageNames;
     // List of exported items that form the body of this package's public API.
@@ -325,7 +331,7 @@ public:
                 continue;
             }
             if (!isTestImport && import.type == ImportType::Test) {
-                return convertTestImport(gs, info, core::Loc(definitionLoc().file(), import.name.loc));
+                return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
             }
             // we already import this, and if so, don't return an autocorrect
             return nullopt;
@@ -1097,7 +1103,7 @@ struct PackageInfoFinder {
 
         if (classDef.ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef.ancestors[0]) ||
             !ast::isa_tree<ast::UnresolvedConstantLit>(classDef.name)) {
-            if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::InvalidPackageDefinition)) {
+            if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::InvalidPackageDefinition)) {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
         } else if (info == nullptr) {
@@ -1114,8 +1120,9 @@ struct PackageInfoFinder {
             info->privateMangledName = ctx.state.enterNameConstant(packagerPrivateName);
 
             info->loc = ctx.locAt(classDef.loc);
+            info->declLoc_ = ctx.locAt(classDef.declLoc);
         } else {
-            if (auto e = ctx.beginError(classDef.loc, core::errors::Packager::MultiplePackagesInOneFile)) {
+            if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
                 e.addErrorLine(info->loc, "Previous package declaration found here");
             }
@@ -1894,11 +1901,11 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
                 continue;
             }
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
-            if (prevPkg.exists() && prevPkg.definitionLoc() != pkg->definitionLoc()) {
+            if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
                 if (auto e = ctx.beginError(pkg->loc.offsets(), core::errors::Packager::RedefinitionOfPackage)) {
                     auto pkgName = pkg->name.toString(ctx);
                     e.setHeader("Redefinition of package `{}`", pkgName);
-                    e.addErrorLine(prevPkg.definitionLoc(), "Package `{}` originally defined here", pkgName);
+                    e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
                 }
             } else {
                 packages.db.enterPackage(move(pkg));

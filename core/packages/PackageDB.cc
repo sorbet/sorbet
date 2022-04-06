@@ -32,7 +32,12 @@ public:
         return make_unique<NonePackage>();
     }
 
-    Loc definitionLoc() const {
+    Loc fullLoc() const {
+        notImplemented();
+        return Loc::none();
+    }
+
+    Loc declLoc() const {
         notImplemented();
         return Loc::none();
     }
@@ -120,7 +125,7 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
         // we always run slow-path and fully rebuild the set of packages. In some cases, the LSP
         // fast-path may re-run on an unchanged package file. Sanity check to ensure the loc and
         // prefixes are the same.
-        ENFORCE(prev->second->definitionLoc() == pkg->definitionLoc());
+        ENFORCE(prev->second->declLoc() == pkg->declLoc());
         ENFORCE(prev->second->pathPrefixes() == pkg->pathPrefixes());
     }
     packages_[nr] = move(pkg);
