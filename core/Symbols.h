@@ -226,6 +226,7 @@ public:
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
     uint32_t hash(const GlobalState &gs) const;
+    uint32_t fieldShapeHash(const GlobalState &gs) const;
 
     void sanityCheck(const GlobalState &gs) const;
 

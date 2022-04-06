@@ -2155,9 +2155,12 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
 
     counter = 0;
     for (const auto &field : this->fields) {
-        counter++;
         // No fields are ignored in hashing.
-        hierarchyHash = mix(hierarchyHash, field.hash(*this));
+        // TODO(jez) We're abusing methodHashes--after this change, the name is no longer accurate.
+        auto &target = methodHashes[NameHash(*this, field.name)];
+        target = mix(target, field.hash(*this));
+        hierarchyHash = mix(hierarchyHash, field.fieldShapeHash(*this));
+        counter++;
 
         if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));

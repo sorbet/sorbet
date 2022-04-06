@@ -2050,12 +2050,17 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
-        auto data = job.sym.data(ctx);
-        if (data->resultType == nullptr) {
-            if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
-                return resultType;
-            }
+        if (job.sym.show(ctx) == "A::X") {
+            stopInDebugger();
         }
+        // auto data = job.sym.data(ctx);
+        // if (data->resultType == nullptr) {
+        // TODO(jez) This is bad, this just implements something like last one wins. Is that ok? How
+        // does it work for methods, because they do something similar right?
+        if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
+            return resultType;
+        }
+        // }
         // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
         // `resolveStaticField`, which may produce an error message.
         return core::Types::todo();
@@ -2068,24 +2073,24 @@ class ResolveTypeMembersAndFieldsWalk {
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
         auto resultType = resolveConstantType(ctx, asgn->rhs);
-        if (data->resultType == nullptr) {
-            // Do not attempt to suggest types for aliases that fail to resolve in package files.
-            if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
-                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
-                auto rhs = move(job.asgn->rhs);
-                auto loc = rhs.loc();
-                if (!loc.exists()) {
-                    // If the rhs happens to be an EmptyTree (e.g., `begin; end`) there will be no loc.
-                    // In that case, use the assign's loc instead.
-                    loc = job.asgn->loc;
-                }
-                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                               core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
+        // TODO(jez) This is bad, this just implements something like last one wins. Is that ok? How
+        // does it work for methods, because they do something similar right?
+        // if (data->resultType == nullptr) {
+        // Do not attempt to suggest types for aliases that fail to resolve in package files.
+        if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
+            // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
+            auto rhs = move(job.asgn->rhs);
+            auto loc = rhs.loc();
+            if (!loc.exists()) {
+                // If the rhs happens to be an EmptyTree (e.g., `begin; end`) there will be no loc.
+                // In that case, use the assign's loc instead.
+                loc = job.asgn->loc;
             }
-            return resultType;
+            job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                           core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
         }
 
-        return data->resultType;
+        return resultType;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::TypeMemberRef lhs, ast::Send *rhs,

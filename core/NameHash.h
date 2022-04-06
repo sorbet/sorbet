@@ -42,6 +42,7 @@ struct GlobalStateHash {
     static constexpr int HASH_STATE_INVALID = 2;
     static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
+    // TODO(jez) Change the name of this variable
     std::vector<std::pair<NameHash, uint32_t>> methodHashes;
 };
 
