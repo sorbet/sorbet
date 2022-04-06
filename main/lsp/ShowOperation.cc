@@ -30,6 +30,8 @@ string_view kindToOperationName(ShowOperation::Kind kind) {
             return "SymbolSearch";
         case ShowOperation::Kind::Rename:
             return "Rename";
+        case ShowOperation::Kind::MoveMethod:
+            return "MoveMethod";
     }
 }
 
@@ -47,6 +49,8 @@ string_view kindToDescription(ShowOperation::Kind kind) {
             return "Workspace symbol search...";
         case ShowOperation::Kind::Rename:
             return "Renaming...";
+        case ShowOperation::Kind::MoveMethod:
+            return "Moving...";
     }
 }
 

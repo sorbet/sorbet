@@ -24,6 +24,7 @@ public:
         References,
         SymbolSearch,
         Rename,
+        MoveMethod,
     };
     ShowOperation(const LSPConfiguration &config, Kind kind);
     ~ShowOperation();

@@ -1,6 +1,7 @@
 #include "main/lsp/requests/code_action_resolve.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
+#include "main/lsp/ShowOperation.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {
@@ -26,6 +27,8 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerInte
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
         return response;
     }
+
+    ShowOperation op(config, ShowOperation::Kind::MoveMethod);
 
     for (const auto &resp : queryResult.responses) {
         if (const auto def = resp->isMethodDef()) {
