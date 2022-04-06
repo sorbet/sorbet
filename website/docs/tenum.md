@@ -174,7 +174,10 @@ Suit::Diamonds.serialize # => 'DIAMONDS'
 ```
 
 Each serialized value must be unique compared to all other serialized values for
-this enum.
+this enum. The argument to `new` currently accepts `T.untyped`, meaning you can
+pass any value to `new` (including things like `Symbol`s or `Integer`s). A
+future change to Sorbet may restrict this; we strongly recommend that you pass
+`String` values as the explicit serialization values.
 
 ## Converting from other types to enums
 
