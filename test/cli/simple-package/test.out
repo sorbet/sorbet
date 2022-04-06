@@ -1,11 +1,11 @@
 foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean? Use `-a` to autocorrect
     foo/foo.rb:13: Replace with `Project::Bar::BarClass`
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
-    bar/__package.rb: Did you mean: `Project::Bar::BarClass`?
+    bar/__package.rb: `Project::Bar::BarClass` defined here
 
 foo/foo.rb:14: Unable to resolve constant `UnexportedClass` https://srb.help/5002
     14 |    Project::Bar::UnexportedClass

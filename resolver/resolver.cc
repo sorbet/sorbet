@@ -710,12 +710,9 @@ private:
                         vector<core::ErrorLine> lines;
                         for (auto suggestion : suggested) {
                             const auto replacement = suggestion.symbol.show(ctx);
-                            lines.emplace_back(
-                                core::ErrorLine::from(suggestion.symbol.loc(ctx), "Did you mean: `{}`?", replacement));
-                            e.replaceWith(fmt::format("Replace with `{}`", replacement), ctx.locAt(job.out->loc), "{}",
-                                          replacement);
+                            e.didYouMean(replacement, ctx.locAt(job.out->loc));
+                            e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
                         }
-                        e.addErrorSection(core::ErrorSection(lines));
                     }
                 }
             }
