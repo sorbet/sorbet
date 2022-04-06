@@ -814,15 +814,7 @@ void readOptions(Options &opts,
 
         opts.autogenConstantCacheFile = raw["autogen-constant-cache-file"].as<string>();
         if (raw.count("autogen-changed-files") > 0) {
-            auto rawIgnorePatterns = raw["autogen-changed-files"].as<vector<string>>();
-            for (auto &p : rawIgnorePatterns) {
-                string_view pNormalized = stripTrailingSlashes(p);
-                if (p.at(0) == '/') {
-                    opts.autogenChangedFiles.emplace_back(pNormalized);
-                } else {
-                    opts.autogenChangedFiles.emplace_back(fmt::format("/{}", pNormalized));
-                }
-            }
+            opts.autogenChangedFiles = raw["autogen-changed-files"].as<vector<string>>();
         }
 
 
