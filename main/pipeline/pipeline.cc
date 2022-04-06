@@ -4,9 +4,9 @@
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
 // ^^ has to go first
+#include "common/json2msgpack/json2msgpack.h"
 #include "main/autogen/cache.h"
 #include "main/autogen/constant_hash.h"
-#include "common/json2msgpack/json2msgpack.h"
 #include "packager/packager.h"
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
@@ -170,7 +170,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         ast::ExpressionPtr tree, autogen::AutogenCache* autogenCache) {
+                         ast::ExpressionPtr tree, autogen::AutogenCache *autogenCache) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
 
@@ -626,7 +626,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files
 
     gs.sanityCheck();
 
-    autogen::AutogenCache* cachePtr = nullptr;
+    autogen::AutogenCache *cachePtr = nullptr;
 
 #ifndef SORBET_REALMAIN_MIN
     autogen::AutogenCache cache;
@@ -649,7 +649,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files
 
 #ifndef SORBET_REALMAIN_MIN
     if (cachePtr) {
-        FileOps::write(opts.autogenConstantCacheFile, cache.pack()); 
+        FileOps::write(opts.autogenConstantCacheFile, cache.pack());
     }
 #endif
 
