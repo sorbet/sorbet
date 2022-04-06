@@ -2080,8 +2080,6 @@ class ResolveTypeMembersAndFieldsWalk {
                 return resultType;
             }
         }
-        // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
-        // `resolveStaticField`, which may produce an error message.
         return core::Types::todo();
     }
 
@@ -2106,10 +2104,9 @@ class ResolveTypeMembersAndFieldsWalk {
                 job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                                core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
             }
-            return resultType;
         }
-
-        return data->resultType;
+        // Always return the re-derived type, even on the fast path.
+        return resultType;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::TypeMemberRef lhs, ast::Send *rhs,

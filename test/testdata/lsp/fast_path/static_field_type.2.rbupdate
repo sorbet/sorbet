@@ -1,0 +1,10 @@
+# typed: true
+# assert-fast-path: static_field_type.rb
+
+class A
+  def foo(x); end
+
+  X = ''
+end
+
+T.reveal_type(A::X) # error: `String`

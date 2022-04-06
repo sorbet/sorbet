@@ -2294,6 +2294,30 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     return result;
 }
 
+uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
+    uint32_t result = _hash(name.shortName(gs));
+
+    // TODO(jez) type aliases and class aliases participate in the constant resolution fixed
+    // point, which could probably make something start to resolve in a file that doesn't
+    // literally mention the name of this type alias. Add a test for this.
+    // (also maybe double check this logic?)
+    // TODO(jez) There's actually some non-trivial logic in resolver to handle constant fields.
+    // They're no longer handled by resolveSigs; they're handled by ResolveTypeMembersAndFieldsWalk
+    // now. Stare at that code to see if this whole idea is not going to work.
+    auto canSkipType =
+        // All fields are ok (don't participate in constant resolution)
+        this->flags.isField ||
+        // Only normal static fields are ok (no class aliases, no type aliases).
+        (!this->flags.isStaticFieldTypeAlias && !isa_type<AliasType>(this->resultType));
+
+    if (!canSkipType) {
+        result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    }
+    result = mix(result, this->flags.serialize());
+    result = mix(result, this->owner.id());
+    return result;
+}
+
 // This has to match the implementation of ArgParsing::hashArgs
 uint32_t Method::methodArgumentHash(const GlobalState &gs) const {
     uint32_t result = 0;

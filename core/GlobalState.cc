@@ -2158,9 +2158,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     for (const auto &field : this->fields) {
         counter++;
         // No fields are ignored in hashing.
+        // TODO(jez) We're abusing methodHashes--after this change, the name is no longer accurate.
+        auto &target = methodHashes[NameHash(*this, field.name)];
         uint32_t symhash = field.hash(*this);
-        hierarchyHash = mix(hierarchyHash, symhash);
+        hierarchyHash = mix(hierarchyHash, field.fieldShapeHash(*this));
         fieldHash = mix(fieldHash, symhash);
+        target = mix(target, symhash);
 
         if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));
