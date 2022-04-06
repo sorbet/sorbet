@@ -8,6 +8,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/cache.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
 #include "main/autogen/packages.h"
@@ -542,6 +543,19 @@ int realmain(int argc, char *argv[]) {
         // Copy GlobalState after createInitialGlobalState and option handling, but before rest of
         // pipeline, so that it represents an "empty" GlobalState.
         gsForMinimize = gs->deepCopy();
+    }
+
+
+    if (!opts.autogenConstantCacheFile.empty() && !opts.autogenChangedFiles.empty()) {
+#ifndef SORBET_REALMAIN_MIN
+        logger->debug("Checking {} changed files", opts.autogenChangedFiles.size());
+        if (autogen::AutogenCache::canSkipAutogen(*gs, opts.autogenConstantCacheFile, opts.autogenChangedFiles)) {
+            logger->debug("All constant hashes unchanged; exiting");
+            return 0;
+        }
+#else
+        logger->warn("Autogen is disabled in sorbet-orig for faster builds");
+#endif
     }
 
     if (opts.runLSP) {

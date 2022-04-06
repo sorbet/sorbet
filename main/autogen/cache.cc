@@ -1,6 +1,10 @@
 #include "mpack/mpack.h"
 
+#include "common/FileOps.h"
+#include "core/Unfreeze.h"
 #include "main/autogen/cache.h"
+#include "main/autogen/constant_hash.h"
+#include "parser/parser.h"
 
 using namespace std;
 
@@ -8,7 +12,7 @@ namespace sorbet::autogen {
 
 const size_t MAX_SKIP_AMOUNT = 100;
 
-bool AutogenCache::canSkipAutogen(core::GlobalState& gs, vector<string_view> changedFiles) {
+bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, vector<string>& changedFiles) {
     // this is here as an escape valve: if a _bunch_ of files change
     // all at once, then don't let us skip at all. This should pretty
     // rarely be the case: the autogen runner should only pass us a
@@ -19,13 +23,44 @@ bool AutogenCache::canSkipAutogen(core::GlobalState& gs, vector<string_view> cha
         return false;
     }
 
-    return false;
+    if (!FileOps::exists(cachePath)) {
+        return false;
+    }
+
+    auto cacheFile = FileOps::read(cachePath);
+    auto cache = AutogenCache::unpackForFiles(cacheFile, changedFiles);
+
+    for (auto &file : changedFiles) {
+        if (cache.constantHashMap().count(file) == 0) {
+            return false;
+        }
+        if (!FileOps::exists(file)) {
+            // this is... confusing, since the runner promised the
+            // file existed, but I guess it means we should redo
+            // autogen
+            return false;
+        }
+        core::FileRef ref;
+        {
+            core::UnfreezeFileTable fileTableAccess(gs);
+            ref = gs.enterFile(file,  FileOps::read(file));
+        }
+
+        core::UnfreezeNameTable nameTableAccess(gs);
+        auto settings = parser::Parser::Settings{false, false, false};
+        auto node = parser::Parser::run(gs, ref, settings);
+        if (autogen::constantHashNode(gs, node) != cache.constantHashMap().at(file)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // this doesn't load the whole cache, since we never need to _consult_
 // the whole cache. Instead, we let it know which paths we care about
 // and load only those
-AutogenCache AutogenCache::unpack_for_files(string_view file_contents, vector<string_view> changedFiles) {
+AutogenCache AutogenCache::unpackForFiles(string_view file_contents, vector<string>& changedFiles) {
     // we'll initialize an empty one and add files as we find them
     AutogenCache cache;
     
@@ -66,7 +101,7 @@ AutogenCache AutogenCache::unpack_for_files(string_view file_contents, vector<st
 
         // if this is a file we care about, then add it to the cache we've found
         if (std::count(changedFiles.begin(), changedFiles.end(), key)) {
-            cache.constantHashMap.emplace(key, mpack_tag_int_value(&val_tag));
+            cache._constantHashMap.emplace(key, mpack_tag_int_value(&val_tag));
         }
 
         // final loop safety check in case of malformed data
@@ -87,8 +122,8 @@ string AutogenCache::pack() {
     size_t size;
     mpack_writer_t writer;
     mpack_writer_init_growable(&writer, &data, &size);
-    mpack_start_map(&writer, constantHashMap.size());
-    for (auto &[path, hash] : constantHashMap) {
+    mpack_start_map(&writer, _constantHashMap.size());
+    for (auto &[path, hash] : _constantHashMap) {
         mpack_write_str(&writer, path.data(), path.size());
         mpack_write_u64(&writer, hash);
     }
