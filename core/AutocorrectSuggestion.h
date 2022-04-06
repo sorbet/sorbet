@@ -16,7 +16,10 @@ struct AutocorrectSuggestion {
     const std::string title;
     std::vector<Edit> edits;
 
-    AutocorrectSuggestion(std::string title, std::vector<Edit> edits) : title(title), edits(edits) {}
+    bool isDidYouMean;
+
+    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false)
+        : title(title), edits(edits), isDidYouMean(isDidYouMean) {}
 
     // Apply a single `AutocorrectSuggestion` that contains either zero or one edits to a string, yielding the
     // autocorrected source.  This is useful for testing that an autocorrect does what we want.

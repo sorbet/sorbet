@@ -1,250 +1,250 @@
 test/cli/no-did-you-mean/no-did-you-mean.rb:205: Unable to resolve constant `MyClass` https://srb.help/5002
      205 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `MyClass1`
      205 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `MyClass2`
      205 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `MyClass3`
      205 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:206: Unable to resolve constant `MyClass` https://srb.help/5002
      206 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `MyClass1`
      206 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `MyClass2`
      206 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `MyClass3`
      206 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:207: Unable to resolve constant `MyClass` https://srb.help/5002
      207 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `MyClass1`
      207 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `MyClass2`
      207 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `MyClass3`
      207 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:208: Unable to resolve constant `MyClass` https://srb.help/5002
      208 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `MyClass1`
      208 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `MyClass2`
      208 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `MyClass3`
      208 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:209: Unable to resolve constant `MyClass` https://srb.help/5002
      209 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `MyClass1`
      209 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `MyClass2`
      209 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `MyClass3`
      209 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:210: Unable to resolve constant `MyClass` https://srb.help/5002
      210 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `MyClass1`
      210 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `MyClass2`
      210 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `MyClass3`
      210 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:211: Unable to resolve constant `MyClass` https://srb.help/5002
      211 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `MyClass1`
      211 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `MyClass2`
      211 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `MyClass3`
      211 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:212: Unable to resolve constant `MyClass` https://srb.help/5002
      212 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `MyClass1`
      212 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `MyClass2`
      212 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `MyClass3`
      212 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:213: Unable to resolve constant `MyClass` https://srb.help/5002
      213 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `MyClass1`
      213 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `MyClass2`
      213 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `MyClass3`
      213 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 
 test/cli/no-did-you-mean/no-did-you-mean.rb:214: Unable to resolve constant `MyClass` https://srb.help/5002
      214 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `MyClass1`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `MyClass1`
      214 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:3: `MyClass1` defined here
+     3 |class MyClass1; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass2`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `MyClass2`
      214 |p MyClass
             ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:4: `MyClass2` defined here
+     4 |class MyClass2; end
+        ^^^^^^^^^^^^^^
+  Did you mean `MyClass3`? Use `-a` to autocorrect
     test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `MyClass3`
      214 |p MyClass
             ^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:3: Did you mean: `MyClass1`?
-     3 |class MyClass1; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:4: Did you mean: `MyClass2`?
-     4 |class MyClass2; end
-        ^^^^^^^^^^^^^^
-    test/cli/no-did-you-mean/no-did-you-mean.rb:5: Did you mean: `MyClass3`?
+    test/cli/no-did-you-mean/no-did-you-mean.rb:5: `MyClass3` defined here
      5 |class MyClass3; end
         ^^^^^^^^^^^^^^
 

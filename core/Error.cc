@@ -140,7 +140,15 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
 
 void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
-    auto sectionTitle = gs.autocorrect ? "Autocorrect: Done" : "Autocorrect: Use `-a` to autocorrect";
+    string sectionTitle;
+    if (gs.autocorrect) {
+        sectionTitle = "Autocorrect: Done";
+    } else if (autocorrect.isDidYouMean && autocorrect.edits.size() == 1) {
+        sectionTitle =
+            ErrorColors::format("Did you mean `{}`? Use `-a` to autocorrect", autocorrect.edits[0].replacement);
+    } else {
+        sectionTitle = "Autocorrect: Use `-a` to autocorrect";
+    }
 
     std::vector<ErrorLine> messages;
     for (auto &edit : autocorrect.edits) {

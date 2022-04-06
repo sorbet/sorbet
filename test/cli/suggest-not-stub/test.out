@@ -5,18 +5,18 @@ test/cli/suggest-not-stub/suggest-not-stub.rb:3: Unable to resolve constant `B` 
 test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` https://srb.help/5002
      6 |B
         ^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `T`? Use `-a` to autocorrect
     test/cli/suggest-not-stub/suggest-not-stub.rb:6: Replace with `T`
      6 |B
         ^
-  Autocorrect: Use `-a` to autocorrect
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
+    16 |module T
+        ^^^^^^^^
+  Did you mean `A`? Use `-a` to autocorrect
     test/cli/suggest-not-stub/suggest-not-stub.rb:6: Replace with `A`
      6 |B
         ^
-    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: Did you mean: `T`?
-    16 |module T
-        ^^^^^^^^
-    test/cli/suggest-not-stub/suggest-not-stub.rb:2: Did you mean: `A`?
+    test/cli/suggest-not-stub/suggest-not-stub.rb:2: `A` defined here
      2 |class A
         ^^^^^^^
 Errors: 2
