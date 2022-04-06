@@ -545,7 +545,6 @@ int realmain(int argc, char *argv[]) {
         gsForMinimize = gs->deepCopy();
     }
 
-
     if (!opts.autogenConstantCacheFile.empty() && !opts.autogenChangedFiles.empty()) {
 #ifndef SORBET_REALMAIN_MIN
         logger->info("Checking {} changed files", opts.autogenChangedFiles.size());

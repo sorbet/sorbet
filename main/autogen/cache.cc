@@ -12,7 +12,7 @@ namespace sorbet::autogen {
 
 const size_t MAX_SKIP_AMOUNT = 100;
 
-bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, vector<string>& changedFiles) {
+bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, vector<string> &changedFiles) {
     // this is here as an escape valve: if a _bunch_ of files change
     // all at once, then don't let us skip at all. This should pretty
     // rarely be the case: the autogen runner should only pass us a
@@ -44,7 +44,7 @@ bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, 
         core::FileRef ref;
         {
             core::UnfreezeFileTable fileTableAccess(gs);
-            ref = gs.enterFile(file,  FileOps::read(file));
+            ref = gs.enterFile(file, FileOps::read(file));
         }
 
         core::UnfreezeNameTable nameTableAccess(gs);
@@ -61,7 +61,7 @@ bool AutogenCache::canSkipAutogen(core::GlobalState& gs, string_view cachePath, 
 // this doesn't load the whole cache, since we never need to _consult_
 // the whole cache. Instead, we let it know which paths we care about
 // and load only those
-AutogenCache AutogenCache::unpackForFiles(string_view file_contents, UnorderedSet<string>& changedFiles) {
+AutogenCache AutogenCache::unpackForFiles(string_view file_contents, UnorderedSet<string> &changedFiles) {
     // we'll initialize an empty one and add files as we find them
     AutogenCache cache;
 
@@ -119,7 +119,7 @@ AutogenCache AutogenCache::unpackForFiles(string_view file_contents, UnorderedSe
 }
 
 string AutogenCache::pack() {
-    char* data;
+    char *data;
     size_t size;
     mpack_writer_t writer;
     mpack_writer_init_growable(&writer, &data, &size);
@@ -137,6 +137,4 @@ string AutogenCache::pack() {
     return ret;
 }
 
-
-
-}
+} // namespace sorbet::autogen

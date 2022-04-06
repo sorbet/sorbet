@@ -817,7 +817,6 @@ void readOptions(Options &opts,
             opts.autogenChangedFiles = raw["autogen-changed-files"].as<vector<string>>();
         }
 
-
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.minimizeRBI = raw["minimize-to-rbi"].as<string>();
