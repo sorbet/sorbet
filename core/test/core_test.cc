@@ -21,34 +21,95 @@ auto errorQueue = make_shared<ErrorQueue>(*logger, *logger, errorCollector);
 
 struct Offset2PosTest {
     string src;
-    uint32_t off;
+    optional<uint32_t> off;
     uint32_t line;
     uint32_t col;
 };
 
-TEST_CASE("TestOffset2Pos") {
+string showOffset(const optional<uint32_t> &off) {
+    if (off.has_value()) {
+        return to_string(off.value());
+    } else {
+        return "nullopt";
+    }
+}
+
+TEST_CASE("TestOffset2Pos2Offset") {
     GlobalState gs(errorQueue);
     gs.initEmpty();
     UnfreezeFileTable fileTableAccess(gs);
 
-    vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
-                                    {"line 1\nline 2", 1, 1, 2},
-                                    {"line 1\nline 2", 7, 2, 1},
-                                    {"line 1\nline 2", 11, 2, 5},
-                                    {"a long line with no newlines\n", 20, 1, 21},
-                                    {"line 1\nline 2\nline3\n", 7, 2, 1},
-                                    {"line 1\nline 2\nline3", 6, 1, 7},
-                                    {"line 1\nline 2\nline3", 7, 2, 1}};
+    vector<Offset2PosTest> cases = {
+        {"hello", 0, 1, 1},
+        {"line 1\nline 2", 1, 1, 2},
+        {"line 1\nline 2", 7, 2, 1},
+        {"line 1\nline 2", 11, 2, 5},
+        {"a long line with no newlines\n", 20, 1, 21},
+        {"line 1\nline 2\nline3\n", 7, 2, 1},
+        {"line 1\nline 2\nline3", 6, 1, 7},
+        {"line 1\nline 2\nline3", 7, 2, 1},
+    };
+
     int i = 0;
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
         INFO(name);
         FileRef f = gs.enterFile(move(name), tc.src);
 
-        auto detail = Loc::offset2Pos(f.data(gs), tc.off);
+        auto detail = Loc::offset2Pos(f.data(gs), tc.off.value());
 
         CHECK_EQ(tc.col, detail.column);
         CHECK_EQ(tc.line, detail.line);
+
+        // Test that it's reversible
+        auto offset = Loc::pos2Offset(f.data(gs), detail);
+        CHECK_EQ(tc.off, offset);
+
+        i++;
+    }
+}
+
+TEST_CASE("TestPos2OffsetNull") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+    UnfreezeFileTable fileTableAccess(gs);
+
+    vector<Offset2PosTest> cases = {
+        {"hello", nullopt, 0, 1},
+        {"hello", UINT32_MAX, 1, 0},
+        {"hello", 0, 1, 1},
+
+        {"hello", 4, 1, 5},
+        {"hello", 5, 1, 6},
+        {"hello", nullopt, 1, 7},
+
+        {"hello", 5, 2, 0}, // kind of strange?
+        {"hello", nullopt, 2, 1},
+
+        {"hello\n", 5, 2, 0},
+        {"hello\n", 6, 2, 1},
+        {"hello\n", nullopt, 2, 2},
+
+        {"line 1\nline 2", 5, 1, 6},
+        {"line 1\nline 2", 6, 1, 7},
+        {"line 1\nline 2", nullopt, 1, 8},
+
+        {"line 1\nline 2", 6, 2, 0},
+        {"line 1\nline 2", 7, 2, 1},
+
+        {"line 1\n\nline 2", 7, 2, 1},
+        {"line 1\n\nline 2", nullopt, 2, 2},
+    };
+
+    int i = 0;
+    for (auto &tc : cases) {
+        auto name = string("case: ") + to_string(i);
+        FileRef f = gs.enterFile(move(name), tc.src);
+
+        auto actualOffset = Loc::pos2Offset(f.data(gs), Loc::Detail{tc.line, tc.col});
+
+        INFO(fmt::format("i={}, CHECK_EQ({}, {})", i, showOffset(tc.off), showOffset(actualOffset)));
+        CHECK_EQ(tc.off, actualOffset);
         i++;
     }
 }

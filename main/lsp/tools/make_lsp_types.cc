@@ -96,6 +96,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                {
                                    "int cmp(const Position &b) const;",
                                    "std::unique_ptr<Position> copy() const;",
+                                   "std::string showRaw() const;",
                                });
 
     auto Range = makeObject("Range",

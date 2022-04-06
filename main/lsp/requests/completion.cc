@@ -1155,11 +1155,13 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         return response;
     }
     auto pos = *params->position;
-    auto queryLoc = config.lspPos2Loc(fref, pos, gs);
-    if (!queryLoc.exists()) {
+    auto maybeQueryLoc = config.lspPos2Loc(fref, pos, gs);
+    if (!maybeQueryLoc.has_value()) {
         response->result = std::move(emptyResult);
         return response;
     }
+    auto queryLoc = maybeQueryLoc.value();
+
     auto result = LSPQuery::byLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
