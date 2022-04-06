@@ -8,7 +8,6 @@
 namespace sorbet::realmain::lsp {
 
 class LSPTask;
-class LSPIndexer;
 class SorbetWorkspaceEditParams;
 class DidChangeTextDocumentParams;
 class DidCloseTextDocumentParams;
@@ -70,7 +69,7 @@ public:
 
     absl::Mutex *getMutex() ABSL_LOCK_RETURNED(stateMutex);
 
-    void waitReady(const LSPIndexer &indexer) ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    bool ready() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
 };
 
 /**

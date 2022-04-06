@@ -25,6 +25,7 @@
 #include "main/lsp/UndoState.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/indexer_initialization.h"
+#include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
 
 namespace sorbet::realmain::lsp {
@@ -161,7 +162,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
         queue.tasks().push_front(std::move(initTask));
     }
 
-    config->logger->info("Initialization complete");
+    config->logger->error("Resuming");
 }
 
 bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
@@ -713,6 +714,12 @@ void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<c
     return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers);
 }
 
+void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
+    absl::MutexLock lck{this->queue.getMutex()};
+    ENFORCE(this->queue.isPaused());
+    this->queue.resume();
+}
+
 void LSPTypecheckerDelegate::typecheckOnFastPath(LSPFileUpdates updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     if (!updates.canTakeFastPath) {
@@ -750,6 +757,10 @@ LSPStaleTypechecker::LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration>
 void LSPStaleTypechecker::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
                                      std::unique_ptr<KeyValueStore> kvstore) {
     ENFORCE(false, "initialize not supported");
+}
+
+void LSPStaleTypechecker::resumeTaskQueue(InitializedTask &task) {
+    ENFORCE(false, "resumeTaskQueue not supported");
 }
 
 void LSPStaleTypechecker::typecheckOnFastPath(LSPFileUpdates updates,
