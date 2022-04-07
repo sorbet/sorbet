@@ -523,7 +523,10 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConst
 }
 
 // Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit) {
+template <typename ContextType>
+optional<PackageName> getPackageName(ContextType ctx, ast::UnresolvedConstantLit *constantLit) {
+    static_assert(is_same_v<ContextType, core::Context> || is_same_v<ContextType, core::MutableContext>);
+    constexpr bool isMutableContext = is_same_v<ContextType, core::MutableContext>;
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
@@ -533,11 +536,40 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
 
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), core::PACKAGE_SUFFIX);
-    auto utf8Name = ctx.state.enterNameUTF8(mangledName);
-    auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
-    pName.mangledName = ctx.state.enterNameConstant(packagerName);
+
+    if constexpr (isMutableContext) {
+        auto utf8Name = ctx.state.enterNameUTF8(mangledName);
+        auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+        pName.mangledName = ctx.state.enterNameConstant(packagerName);
+    } else {
+        auto utf8Name = ctx.state.lookupNameUTF8(mangledName);
+        if (!utf8Name.exists()) {
+            return nullopt;
+        }
+
+        auto packagerName = ctx.state.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+        if (!packagerName.exists()) {
+            return nullopt;
+        }
+
+        auto constantName = ctx.state.lookupNameConstant(packagerName);
+        if (!constantName.exists()) {
+            return nullopt;
+        }
+        pName.mangledName = constantName;
+    }
 
     return pName;
+}
+
+// We're going to delete this tree when we get to the postTransformClassDef, because we're running
+// in immutable incremental package resolver mode (for serving LSP queries with stale GlobalState).
+// Errors don't matter, because LSP drops all the errors when running for the sake of a query.
+// Therefore, drop the RHS to make the tree walk get back to postTransformClassDef faster.
+//
+// (Factored out to a helper function just to avoid copying this comment everywhere.)
+void dropRhs(ast::ClassDef &classDef) {
+    classDef.rhs.clear();
 }
 
 bool isReferenceToPackageSpec(core::Context ctx, ast::ExpressionPtr &expr) {
@@ -591,7 +623,7 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
     return scope;
 }
 
-ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
+ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
         if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidImportOrExport)) {
@@ -1012,11 +1044,15 @@ private:
     }
 };
 
+template <typename ContextType> // Immutable or mutable context will decide whether we're in "best effort" mode
 struct PackageInfoFinder {
+    static_assert(is_same_v<ContextType, core::Context> || is_same_v<ContextType, core::MutableContext>);
+    constexpr static bool isMutableContext = is_same_v<ContextType, core::MutableContext>;
+
     unique_ptr<PackageInfoImpl> info = nullptr;
     vector<Export> exported;
 
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformSend(ContextType ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
@@ -1082,19 +1118,24 @@ struct PackageInfoFinder {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
-                if (name.mangledName == info->name.mangledName) {
+                if (!name.has_value()) {
+                    ENFORCE(!isMutableContext);
+                    return tree;
+                }
+
+                if (name.value().mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
                         e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), send.fun.toString(ctx));
                     }
                 }
-                info->importedPackageNames.emplace_back(move(name), method2ImportType(send));
+                info->importedPackageNames.emplace_back(move(name.value()), method2ImportType(send));
             }
         }
 
         return tree;
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformClassDef(ContextType ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -1110,14 +1151,43 @@ struct PackageInfoFinder {
             auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
             info = make_unique<PackageInfoImpl>();
             checkPackageName(ctx, nameTree);
-            info->name = getPackageName(ctx, nameTree);
+            auto packageName = getPackageName(ctx, nameTree);
+            if (!packageName.has_value()) {
+                ENFORCE(!isMutableContext);
+                dropRhs(classDef);
+                return tree;
+            }
+
+            info->name = move(packageName.value());
 
             // Append _Private at the end of the mangled package name to get the name of its private namespace.
-            auto utf8PrivateName =
-                ctx.state.enterNameUTF8(absl::StrCat(info->name.mangledName.show(ctx.state), "_Private"));
-            auto packagerPrivateName =
-                ctx.state.freshNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
-            info->privateMangledName = ctx.state.enterNameConstant(packagerPrivateName);
+            auto mangledWithPrivate = absl::StrCat(info->name.mangledName.show(ctx.state), "_Private");
+            if constexpr (isMutableContext) {
+                auto utf8PrivateName = ctx.state.enterNameUTF8(mangledWithPrivate);
+                auto packagerPrivateName =
+                    ctx.state.freshNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
+                info->privateMangledName = ctx.state.enterNameConstant(packagerPrivateName);
+            } else {
+                auto utf8PrivateName = ctx.state.lookupNameUTF8(mangledWithPrivate);
+                if (!utf8PrivateName.exists()) {
+                    dropRhs(classDef);
+                    return tree;
+                }
+
+                auto packagerPrivateName =
+                    ctx.state.lookupNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
+                if (!packagerPrivateName.exists()) {
+                    dropRhs(classDef);
+                    return tree;
+                }
+
+                auto constantPrivateName = ctx.state.lookupNameConstant(packagerPrivateName);
+                if (!constantPrivateName.exists()) {
+                    dropRhs(classDef);
+                    return tree;
+                }
+                info->privateMangledName = constantPrivateName;
+            }
 
             info->loc = ctx.locAt(classDef.loc);
             info->declLoc_ = ctx.locAt(classDef.declLoc);
@@ -1131,16 +1201,38 @@ struct PackageInfoFinder {
         return tree;
     }
 
+    ast::ExpressionPtr postTransformClassDef(ContextType ctx, ast::ExpressionPtr tree) {
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (classDef.symbol == core::Symbols::root()) {
+            // Ignore top-level <root>
+            return tree;
+        }
+
+        if constexpr (!isMutableContext) {
+            if (info != nullptr && !(info->name.mangledName.exists() && info->privateMangledName.exists())) {
+                // On preTransformClassDef we were unable to populate the mangled name.
+                // As a best effort in immutable packager mode, just imagine that the file did not
+                // define a package.
+                info = nullptr;
+                return ast::MK::EmptyTree();
+            }
+        }
+
+        return tree;
+    }
+
     // Bar::Baz => <PackageRegistry>::Foo_Package_Private::Bar::Baz
     ast::ExpressionPtr prependInternalPackageName(const core::GlobalState &gs, ast::ExpressionPtr scope) {
         return prependPackageScope(gs, move(scope), this->info->privateMangledName);
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
-    void finalize(core::MutableContext ctx) {
+    void finalize(ContextType ctx) {
         if (info == nullptr) {
             // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
             // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
+            // Additional note: immutable incremental packager mode now depends on being allowed to set `info = nullptr`
+            // for the sake of doing best-effort packager runs.
             if (!ctx.file.data(ctx).source().empty()) {
                 if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::InvalidPackageDefinition)) {
                     e.setHeader("Package file must contain a package definition of form `Foo::Bar < PackageSpec`");
@@ -1191,7 +1283,7 @@ struct PackageInfoFinder {
         std::swap(exported, info->exports_);
     }
 
-    bool allowedExportPrefix(core::Context ctx, const Export &shorter, const Export &longer) {
+    bool allowedExportPrefix(ContextType ctx, const Export &shorter, const Export &longer) {
         // Permits:
         //   export Foo::Bar::Baz
         //   export_for_test Foo::Bar
@@ -1226,78 +1318,78 @@ struct PackageInfoFinder {
 
     /* Forbid arbitrary computation in packages */
 
-    void illegalNode(core::MutableContext ctx, core::LocOffsets loc, string_view type) {
+    void illegalNode(ContextType ctx, core::LocOffsets loc, string_view type) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
             e.setHeader("Invalid expression in package: {} not allowed", type);
         }
     }
 
-    ast::ExpressionPtr preTransformIf(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformIf(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`if`");
         return original;
     }
 
-    ast::ExpressionPtr preTransformWhile(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformWhile(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`while`");
         return original;
     }
 
-    ast::ExpressionPtr postTransformBreak(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr postTransformBreak(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`break`");
         return original;
     }
 
-    ast::ExpressionPtr postTransformRetry(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr postTransformRetry(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`retry`");
         return original;
     }
 
-    ast::ExpressionPtr postTransformNext(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr postTransformNext(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`next`");
         return original;
     }
 
-    ast::ExpressionPtr preTransformReturn(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformReturn(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`return`");
         return original;
     }
 
-    ast::ExpressionPtr preTransformRescueCase(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformRescueCase(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`rescue case`");
         return original;
     }
 
-    ast::ExpressionPtr preTransformRescue(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformRescue(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`rescue`");
         return original;
     }
 
-    ast::ExpressionPtr preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformAssign(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`=`");
         return original;
     }
 
-    ast::ExpressionPtr preTransformHash(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformHash(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "hash literals");
         return original;
     }
 
-    ast::ExpressionPtr preTransformArray(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformArray(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "array literals");
         return original;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformMethodDef(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "method definitions");
         return original;
     }
 
-    ast::ExpressionPtr preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformBlock(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "blocks");
         return original;
     }
 
-    ast::ExpressionPtr preTransformInsSeq(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformInsSeq(ContextType ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`begin` and `end`");
         return original;
     }
@@ -1305,8 +1397,10 @@ struct PackageInfoFinder {
 
 // Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
 // builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
-unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::ParsedFile &package,
+template <typename ContextType>
+unique_ptr<PackageInfoImpl> getPackageInfo(ContextType ctx, ast::ParsedFile &package,
                                            const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
+    static_assert(is_same_v<ContextType, core::Context> || is_same_v<ContextType, core::MutableContext>);
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -1316,7 +1410,7 @@ unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::Parsed
     ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
     auto packageFilePath = package.file.data(ctx).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
-    PackageInfoFinder finder;
+    PackageInfoFinder<ContextType> finder;
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
     if (finder.info) {
@@ -1847,19 +1941,31 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
 
 // Re-write source files to be in packages. This is only called if no package definitions were
 // changed.
-vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+template <typename StateType> vector<ast::ParsedFile> rewriteFilesFast(StateType &gs, vector<ast::ParsedFile> files) {
+    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+    constexpr bool isMutableStateType = !is_const_v<StateType>;
     Timer timeit(gs.tracer(), "packager.rewriteFilesFast");
-    for (auto i = 0; i < files.size(); i++) {
-        core::Context ctx(gs, core::Symbols::root(), files[i].file);
-        if (files[i].file.data(gs).isPackage()) {
+    for (auto &file : files) {
+        core::Context ctx(gs, core::Symbols::root(), file.file);
+        if (file.file.data(gs).isPackage()) {
             {
-                core::MutableContext ctx(gs, core::Symbols::root(), files[i].file);
-                // Re-write imports and exports:
-                getPackageInfo(ctx, files[i], gs.packageDB().extraPackageFilesDirectoryPrefixes());
+                if constexpr (isMutableStateType) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), file.file);
+                    getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+                } else {
+                    if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+                        // When we're running with an immutable GlobalState, we can't setIsPackage(false)
+                        // like we would have been able to for the mutatble mode.
+                        continue;
+                    }
+                    core::Context ctx(gs, core::Symbols::root(), file.file);
+                    getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+                }
             }
-            files[i] = rewritePackage(ctx, move(files[i]));
+            // Re-write imports and exports:
+            file = rewritePackage(ctx, move(file));
         } else {
-            files[i] = rewritePackagedFile(ctx, move(files[i]));
+            file = rewritePackagedFile(ctx, move(file));
         }
     }
     return files;
@@ -1985,7 +2091,10 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     return files;
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+namespace {
+
+template <typename StateType> vector<ast::ParsedFile> runIncrementalImpl(StateType &gs, vector<ast::ParsedFile> files) {
+    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
     // building in an understanding of the dependencies between packages.
@@ -1993,6 +2102,16 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     files = rewriteFilesFast(gs, move(files));
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
+}
+
+} // namespace
+
+vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+    return runIncrementalImpl(gs, move(files));
+}
+
+vector<ast::ParsedFile> Packager::runIncrementalBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
+    return runIncrementalImpl(gs, move(files));
 }
 
 ast::ParsedFile Packager::removePackageModules(core::Context ctx, ast::ParsedFile pf, bool intentionallyLeakASTs) {

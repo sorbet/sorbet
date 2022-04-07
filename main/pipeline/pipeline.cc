@@ -280,11 +280,10 @@ vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs
                                                      const options::Options &opts) {
     try {
 #ifndef SORBET_REALMAIN_MIN
-        // TODO: Figure out how to run the packager
-        // if (opts.stripePackages) {
-        //     Timer timeit(gs.tracer(), "incremental_packager");
-        //     what = packager::Packager::runIncremental(gs, move(what));
-        // }
+        if (opts.stripePackages) {
+            Timer timeit(gs.tracer(), "incremental_packager");
+            what = packager::Packager::runIncrementalBestEffort(gs, move(what));
+        }
 #endif
         {
             Timer timeit(gs.tracer(), "incremental_naming");
