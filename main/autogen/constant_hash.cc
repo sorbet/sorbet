@@ -112,11 +112,11 @@ struct ConstantHashWalk {
     }
 };
 
-unsigned int constantHashTree(core::GlobalState &gs, ast::ParsedFile pf) {
+HashedParsedFile constantHashTree(const core::GlobalState &gs, ast::ParsedFile pf) {
     core::Context ctx{gs, core::Symbols::root(), pf.file};
     ConstantHashWalk walk;
     pf.tree = ast::ShallowMap::apply(ctx, walk, std::move(pf.tree));
-    return walk.hashSoFar;
+    return {move(pf), walk.hashSoFar};
 }
 
 } // namespace sorbet::autogen

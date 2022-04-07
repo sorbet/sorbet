@@ -57,7 +57,7 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
 
         ast::ParsedFile pf{std::move(ast), ref};
 
-        if (autogen::constantHashTree(gs, std::move(pf)) != cache.constantHashMap().at(file)) {
+        if (autogen::constantHashTree(gs, std::move(pf)).constantHash != cache.constantHashMap().at(file)) {
             return false;
         }
     }

@@ -40,7 +40,7 @@ struct Helper {
         core::MutableContext ctx{gs, core::Symbols::root(), file};
         auto ast = ast::desugar::node2Tree(ctx, move(node));
         ast::ParsedFile pf{move(ast), file};
-        return autogen::constantHashTree(gs, std::move(pf));
+        return autogen::constantHashTree(gs, std::move(pf)).constantHash;
     }
 };
 
