@@ -276,9 +276,8 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 }
 
 // TODO: Deduplicate implementation with incrementalResolve using is_const_v-ish tricks
-vector<ast::ParsedFile> incrementalResolveWithoutStateMutation(const core::GlobalState &gs,
-                                                               vector<ast::ParsedFile> what,
-                                                               const options::Options &opts) {
+vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> what,
+                                                     const options::Options &opts) {
     try {
 #ifndef SORBET_REALMAIN_MIN
         // TODO: Figure out how to run the packager
