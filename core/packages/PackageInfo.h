@@ -30,7 +30,8 @@ public:
     virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
-    virtual core::Loc definitionLoc() const = 0;
+    virtual core::Loc fullLoc() const = 0;
+    virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
 
     virtual std::optional<ImportType> importsPackage(const PackageInfo &other) const = 0;

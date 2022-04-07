@@ -3,8 +3,7 @@ foo_bar/thing.test.rb:5: Unable to resolve constant `Thing` https://srb.help/500
                 ^^^^^^^^^^^^^^^
     foo_bar/__package.rb:3: To expose this name to a package's own tests it must be exported. Do you need to `export_for_test Foo::Bar` in this package?
      3 |class Foo::Bar < PackageSpec
-     4 |  export Foo::Bar::Exported
-     5 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     foo_bar/exported.rb:3: Constant `Foo::Bar` is defined here:
      3 |class Foo::Bar::Exported
               ^^^^^^^^
@@ -19,8 +18,7 @@ other/other.test.rb:5: Unable to resolve constant `Thing` https://srb.help/5002
             ^^^^^^^^^^^^^^^
     foo_bar/__package.rb:3: Do you need to `export Foo::Bar::Thing` in package `Foo::Bar`?
      3 |class Foo::Bar < PackageSpec
-     4 |  export Foo::Bar::Exported
-     5 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     foo_bar/thing.rb:3: Constant `Foo::Bar::Thing` is defined here:
      3 |class Foo::Bar::Thing
         ^^^^^^^^^^^^^^^^^^^^^

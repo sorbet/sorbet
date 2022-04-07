@@ -3,8 +3,7 @@ main_lib/lib.rb:8: Unable to resolve constant `TestOnly` https://srb.help/5002
           ^^^^^^^^^^^^^^^^^
     test_only/__package.rb:5: Do you need to `import` package `Project::TestOnly`?
      5 |class Project::TestOnly < PackageSpec
-     6 |  export Project::TestOnly::SomeHelper
-     7 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     main_lib/__package.rb:7: Replace with `import Project::TestOnly`
      7 |  test_import Project::TestOnly

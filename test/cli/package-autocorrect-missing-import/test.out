@@ -3,9 +3,7 @@ foo_class.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
               ^^^^^^^^
     other/__package.rb:3: Do you need to `import` package `Foo::Bar::OtherPackage`?
      3 |class Foo::Bar::OtherPackage < PackageSpec
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-     5 |  export Test::Foo::Bar::OtherPackage::TestUtil
-     6 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
@@ -17,9 +15,7 @@ foo_class.rb:8: Unable to resolve constant `Bar` https://srb.help/5002
               ^^^
     other/__package.rb:3: Do you need to `import` package `Foo::Bar::OtherPackage`?
      3 |class Foo::Bar::OtherPackage < PackageSpec
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-     5 |  export Test::Foo::Bar::OtherPackage::TestUtil
-     6 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
@@ -31,9 +27,7 @@ foo_class.rb:14: Unable to resolve constant `Bar` https://srb.help/5002
           ^^^^^^^^
     other/__package.rb:3: Do you need to `import` package `Foo::Bar::OtherPackage`?
      3 |class Foo::Bar::OtherPackage < PackageSpec
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-     5 |  export Test::Foo::Bar::OtherPackage::TestUtil
-     6 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
@@ -45,9 +39,7 @@ foo_class.rb:15: Unable to resolve constant `Bar` https://srb.help/5002
           ^^^^^^^^
     other/__package.rb:3: Do you need to `import` package `Foo::Bar::OtherPackage`?
      3 |class Foo::Bar::OtherPackage < PackageSpec
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-     5 |  export Test::Foo::Bar::OtherPackage::TestUtil
-     6 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `
   import Foo::Bar::OtherPackage`
@@ -59,9 +51,7 @@ foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
           ^^^^^^^^^^^^^^
     other/__package.rb:3: Do you need to `test_import` package `Foo::Bar::OtherPackage`?
      3 |class Foo::Bar::OtherPackage < PackageSpec
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-     5 |  export Test::Foo::Bar::OtherPackage::TestUtil
-     6 |end
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `
   test_import Foo::Bar::OtherPackage`

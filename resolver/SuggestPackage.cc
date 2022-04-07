@@ -84,7 +84,7 @@ public:
         }
         vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
-        lines.emplace_back(core::ErrorLine::from(srcPkg.definitionLoc(), "Do you need to `{} {}` in package `{}`?",
+        lines.emplace_back(core::ErrorLine::from(srcPkg.declLoc(), "Do you need to `{} {}` in package `{}`?",
                                                  core::Names::export_().show(ctx), match.symbol.show(ctx),
                                                  formatPackageName(srcPkg)));
         lines.emplace_back(
@@ -103,7 +103,7 @@ public:
         vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
         lines.emplace_back(core::ErrorLine::from(
-            srcPkg.definitionLoc(),
+            srcPkg.declLoc(),
             "To expose this name to a package's own tests it must be exported. Do you need to `{} {}` in this package?",
             core::Names::export_for_test().show(ctx), match.symbol.show(ctx)));
         lines.emplace_back(
@@ -122,7 +122,7 @@ public:
         bool isTestFile = ctx.file.data(ctx).isPackagedTest();
         auto importName = isTestFile ? core::Names::test_import() : core::Names::import();
 
-        lines.emplace_back(core::ErrorLine::from(otherPkg.definitionLoc(), "Do you need to `{}` package `{}`?",
+        lines.emplace_back(core::ErrorLine::from(otherPkg.declLoc(), "Do you need to `{}` package `{}`?",
                                                  importName.show(ctx), formatPackageName(otherPkg)));
         e.addErrorSection(core::ErrorSection(lines));
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
