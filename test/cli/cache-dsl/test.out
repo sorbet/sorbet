@@ -7,8 +7,8 @@ test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` http
      6 |a = A.new
             ^^^^^
   Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1783: `Kernel#proc`
-    1783 |  def proc(&blk); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1784: `Kernel#proc`
+    1784 |  def proc(&blk); end
             ^^^^^^^^^^^^^^
 
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://srb.help/7003
@@ -31,8 +31,8 @@ test/cli/cache-dsl/attr_accessor.rb:7: Method `prop=` does not exist on `A` http
      6 |a = A.new
             ^^^^^
   Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1783: `Kernel#proc`
-    1783 |  def proc(&blk); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1784: `Kernel#proc`
+    1784 |  def proc(&blk); end
             ^^^^^^^^^^^^^^
 
 test/cli/cache-dsl/attr_accessor.rb:8: Method `prop` does not exist on `A` https://srb.help/7003
