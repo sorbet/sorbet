@@ -44,12 +44,48 @@ passes=(
   minimized-rbi
 )
 
-./bazel build //main:sorbet //test:print_document_symbols -c opt
+usage() {
+  cat <<EOF
+$0 [options] [<file>...]
 
+Arguments
+  <file>      One or more *.rb files whose exp files to update.
+              Defaults to everything in test/testdata/
+
+Options
+  --no-build  Don't build anything, just reuse what was already built
+  -h, --help  Print this message
+EOF
+}
+
+BUILD=1
 if [ $# -eq 0 ]; then
   paths=(test/testdata)
 else
+  while true; do
+    case $1 in
+      --no-build)
+        BUILD=
+        shift
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -*)
+        1>&2 echo "Unrecognized option '$1'"
+        1>&2 usage
+        exit 1
+        ;;
+      *)
+        break;
+    esac
+  done
   paths=("$@")
+fi
+
+if [ "$BUILD" != "" ]; then
+  ./bazel build //main:sorbet //test:print_document_symbols -c opt
 fi
 
 rb_src=()
