@@ -1320,6 +1320,8 @@ unique_ptr<PackageInfoImpl> getPackageInfo(core::MutableContext ctx, ast::Parsed
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
     if (finder.info) {
+        const auto numPrefixes = extraPackageFilesDirectoryPrefixes.size() + 1;
+        finder.info->packagePathPrefixes.reserve(numPrefixes);
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
         const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
         const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
