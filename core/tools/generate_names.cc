@@ -225,6 +225,7 @@ NameDef names[] = {
     {"computedBy", "computed_by"},
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
+    {"ImmutableStruct", "ImmutableStruct", true},
     {"Chalk", "Chalk", true},
     {"ODM", "ODM", true},
     {"Document", "Document", true},

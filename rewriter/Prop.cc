@@ -49,6 +49,11 @@ bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope);
 }
 
+bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
+    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() && isT(struct_->scope);
+}
+
 bool isChalkODMDocument(const ast::ExpressionPtr &expr) {
     auto *document = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (document == nullptr || document->cnst != core::Names::Constants::Document()) {
@@ -67,6 +72,7 @@ enum class SyntacticSuperClass {
     TStruct,
     TInexactStruct,
     ChalkODMDocument,
+    TImmutableStruct,
 };
 
 bool knownNonModel(SyntacticSuperClass syntacticSuperClass) {
@@ -74,6 +80,7 @@ bool knownNonModel(SyntacticSuperClass syntacticSuperClass) {
         case SyntacticSuperClass::TStruct:
         case SyntacticSuperClass::TInexactStruct:
         case SyntacticSuperClass::ChalkODMDocument:
+        case SyntacticSuperClass::TImmutableStruct:
             return true;
         case SyntacticSuperClass::Unknown:
             return false;
@@ -84,6 +91,7 @@ bool knownNonDocument(SyntacticSuperClass syntacticSuperClass) {
     switch (syntacticSuperClass) {
         case SyntacticSuperClass::TStruct:
         case SyntacticSuperClass::TInexactStruct:
+        case SyntacticSuperClass::TImmutableStruct:
             return true;
         case SyntacticSuperClass::ChalkODMDocument:
         case SyntacticSuperClass::Unknown:
@@ -94,6 +102,7 @@ bool knownNonDocument(SyntacticSuperClass syntacticSuperClass) {
 bool wantTypedInitialize(SyntacticSuperClass syntacticSuperClass) {
     switch (syntacticSuperClass) {
         case SyntacticSuperClass::TStruct:
+        case SyntacticSuperClass::TImmutableStruct:
             return true;
         case SyntacticSuperClass::TInexactStruct:
         case SyntacticSuperClass::ChalkODMDocument:
@@ -595,6 +604,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             syntacticSuperClass = SyntacticSuperClass::TStruct;
         } else if (isTInexactStruct(superClass)) {
             syntacticSuperClass = SyntacticSuperClass::TInexactStruct;
+        } else if (isTImmutableStruct(superClass)) {
+            syntacticSuperClass = SyntacticSuperClass::TImmutableStruct;
         } else if (isChalkODMDocument(superClass)) {
             syntacticSuperClass = SyntacticSuperClass::ChalkODMDocument;
         }
@@ -609,7 +620,8 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             continue;
         }
         auto propInfo = parseProp(ctx, send);
-        if (!propInfo.has_value()) {
+        if (!propInfo.has_value() ||
+            (!propInfo->isImmutable && syntacticSuperClass == SyntacticSuperClass::TImmutableStruct)) {
             continue;
         }
         auto processed = processProp(ctx, propInfo.value(), propContext);

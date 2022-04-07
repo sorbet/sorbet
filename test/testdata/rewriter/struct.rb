@@ -120,3 +120,19 @@ class FullyQualifiedStructUsages
   Foo.new.a
   Bar.new.a
 end
+
+class Immutable < T::ImmutableStruct
+  prop :a, Integer
+# ^^^^ error: Method `prop` does not exist on `T.class_of(Immutable)`
+
+  const :b, String
+end
+
+class ImmutableTest
+  Immutable.new(a: 1, b: "foo")
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `a` passed for method `Immutable#initialize`
+
+  obj = Immutable.new(b: "foo")
+  obj.b = "bar"
+    # ^^^ error: Method `b=` does not exist on `Immutable`
+end
