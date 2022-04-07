@@ -32,53 +32,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus><<C <todo sym>>> < ()
-      <emptyTree>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C FooClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C FooClass>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C FooClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C FooClass>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C Private><<C <todo sym>>> < ()
-      <emptyTree>::<C ImplDetail> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus><<C <todo sym>>> < ()
-      <emptyTree>::<C TestImported> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C TestImported> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus><<C <todo sym>>> < ()
-      <emptyTree>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package$1>::<C Opus>::<C Util>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Test>::<C Opus>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Test>::<C Opus>::<C Foo>::<C Bar> = <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Test>::<C Opus><<C <todo sym>>> < ()
-      <emptyTree>::<C TestImported> = <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package$1>::<C Test>::<C Opus>::<C TestImported>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Test>::<C Opus>::<C TestImported> = <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package$1>::<C Test>::<C Opus>::<C TestImported>
 
-    module <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Test>::<C Opus><<C <todo sym>>> < ()
-      <emptyTree>::<C Util> = <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package$1>::<C Test>::<C Opus>::<C Util>
-    end
+    <emptyTree>::<C Opus_Foo_Package_Private$1>::<C Test>::<C Opus>::<C Util> = <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package$1>::<C Test>::<C Opus>::<C Util>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C FooClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C FooClass>
-    end
+    <emptyTree>::<C Opus_Foo_Package$1>::<C Opus>::<C Foo>::<C FooClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Package_Private$1>::<C Opus>::<C Foo>::<C FooClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
@@ -96,21 +74,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Foo_Bar_Package_Private$1>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package_Private$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
-    end
+    <emptyTree>::<C Opus_Foo_Bar_Package_Private$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package_Private$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package_Private$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
-    end
+    <emptyTree>::<C Opus_Foo_Bar_Package$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Foo_Bar_Package_Private$1>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Foo_Bar_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C BarClassTest> = <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package_Private$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
-    end
+    <emptyTree>::<C Opus_Foo_Bar_Package$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest> = <emptyTree>::<C <PackageTests>>::<C Opus_Foo_Bar_Package_Private$1>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>
   end
 end
 # -- test/testdata/packager/export_for_test/foo/bar/bar.rb --
@@ -218,21 +190,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_TestImported_Package_Private$1>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
-      <emptyTree>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package_Private$1>::<C Opus>::<C TestImported>::<C TIClass>
-    end
+    <emptyTree>::<C Opus_TestImported_Package_Private$1>::<C Opus>::<C TestImported>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package_Private$1>::<C Opus>::<C TestImported>::<C TIClass>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
-      <emptyTree>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package_Private$1>::<C Opus>::<C TestImported>::<C TIClass>
-    end
+    <emptyTree>::<C Opus_TestImported_Package$1>::<C Opus>::<C TestImported>::<C TIClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_TestImported_Package_Private$1>::<C Opus>::<C TestImported>::<C TIClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_TestImported_Package$1>::<C Test>::<C Opus>::<C TestImported><<C <todo sym>>> < ()
-      <emptyTree>::<C TITestClass> = <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package_Private$1>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
-    end
+    <emptyTree>::<C Opus_TestImported_Package$1>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass> = <emptyTree>::<C <PackageTests>>::<C Opus_TestImported_Package_Private$1>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
   end
 end
 # -- test/testdata/packager/export_for_test/test_imported/test_imported.rb --
@@ -269,29 +235,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C Nesting> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C Nesting>
-    end
+    <emptyTree>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C Nesting> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C Nesting>
 
-    module <emptyTree>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C UtilClass>
-    end
+    <emptyTree>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C UtilClass>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C Nesting><<C <todo sym>>> < ()
-      <emptyTree>::<C Public> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C Nesting>::<C Public>
-    end
+    <emptyTree>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C Nesting>::<C Public> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C Nesting>::<C Public>
 
-    module <emptyTree>::<C Opus_Util_Package$1>::<C Opus>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C UtilClass>
-    end
+    <emptyTree>::<C Opus_Util_Package$1>::<C Opus>::<C Util>::<C UtilClass> = <emptyTree>::<C <PackageRegistry>>::<C Opus_Util_Package_Private$1>::<C Opus>::<C Util>::<C UtilClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Opus_Util_Package$1>::<C Test>::<C Opus>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C TestUtil> = <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package_Private$1>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
-    end
+    <emptyTree>::<C Opus_Util_Package$1>::<C Test>::<C Opus>::<C Util>::<C TestUtil> = <emptyTree>::<C <PackageTests>>::<C Opus_Util_Package_Private$1>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
   end
 end
 # -- test/testdata/packager/export_for_test/util/util.rb --

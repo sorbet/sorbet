@@ -27,41 +27,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C A_Package_Private$1><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
-    end
+    <emptyTree>::<C A_Package_Private$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C A_Package_Private$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
-    end
+    <emptyTree>::<C A_Package_Private$1>::<C A>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
 
-    module <emptyTree>::<C A_Package_Private$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
-    end
+    <emptyTree>::<C A_Package_Private$1>::<C A>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
 
-    module <emptyTree>::<C A_Package_Private$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
-    end
+    <emptyTree>::<C A_Package_Private$1>::<C A>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
 
-    module <emptyTree>::<C A_Package_Private$1><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
-    end
+    <emptyTree>::<C A_Package_Private$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C A_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
-    end
+    <emptyTree>::<C A_Package$1>::<C A>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
 
-    module <emptyTree>::<C A_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
-    end
+    <emptyTree>::<C A_Package$1>::<C A>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
 
-    module <emptyTree>::<C A_Package$1>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
-    end
+    <emptyTree>::<C A_Package$1>::<C A>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
@@ -117,33 +101,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C B_Package_Private$1><<C <todo sym>>> < ()
-      <emptyTree>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
-    end
+    <emptyTree>::<C B_Package_Private$1>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C B_Package_Private$1><<C <todo sym>>> < ()
-      <emptyTree>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
-    end
+    <emptyTree>::<C B_Package_Private$1>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
 
-    module <emptyTree>::<C B_Package_Private$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
-    end
+    <emptyTree>::<C B_Package_Private$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
 
-    module <emptyTree>::<C B_Package_Private$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
-    end
+    <emptyTree>::<C B_Package_Private$1>::<C B>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C B_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
-    end
+    <emptyTree>::<C B_Package$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
 
-    module <emptyTree>::<C B_Package$1>::<C B><<C <todo sym>>> < ()
-      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
-    end
+    <emptyTree>::<C B_Package$1>::<C B>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()

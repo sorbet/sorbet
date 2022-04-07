@@ -211,80 +211,26 @@ begin
   end
   module ::<PackageRegistry><<C <PackageRegistry>>> < ()
     def self.<static-init>(<blk>)
-      begin
-        ::<Magic>.<define-top-class-or-module>(::<PackageRegistry>::Project_Bar_Package_Private::Project)
-        ::Sorbet::Private::Static.keep_for_ide(::<PackageRegistry>::Project_Bar_Package_Private::Project)
-        <emptyTree>
-      end
-    end
-  end
-  module ::<PackageRegistry>::Project_Bar_Package_Private::Project<<C Project>> < ()
-    def self.<static-init>(<blk>)
       ::<PackageRegistry>::Project_Bar_Package_Private::Project::Foo = ::<PackageRegistry>::Project_Foo_Package::Project::Foo
     end
   end
   module ::<PackageTests><<C <PackageTests>>> < ()
     def self.<static-init>(<blk>)
       begin
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageTests>::Project_Bar_Package_Private::Project::Bar)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageTests>::Project_Bar_Package_Private::Project::Bar)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageTests>::Project_Bar_Package_Private::Project::Bar)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageTests>::Project_Bar_Package_Private::Project::Bar)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageTests>::Project_Bar_Package_Private::Project)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageTests>::Project_Bar_Package_Private::Project)
-          <emptyTree>
-        end
+        ::<PackageTests>::Project_Bar_Package_Private::Project::Bar::Bar = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::Bar
+        ::<PackageTests>::Project_Bar_Package_Private::Project::Bar::CallsFoo = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::CallsFoo
+        ::<PackageTests>::Project_Bar_Package_Private::Project::Foo = ::<PackageRegistry>::Project_Foo_Package::Project::Foo
         <emptyTree>
       end
-    end
-  end
-  module ::<PackageTests>::Project_Bar_Package_Private::Project::Bar<<C Bar>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageTests>::Project_Bar_Package_Private::Project::Bar::Bar = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::Bar
-    end
-  end
-  module ::<PackageTests>::Project_Bar_Package_Private::Project::Bar<<C Bar>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageTests>::Project_Bar_Package_Private::Project::Bar::CallsFoo = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::CallsFoo
-    end
-  end
-  module ::<PackageTests>::Project_Bar_Package_Private::Project<<C Project>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageTests>::Project_Bar_Package_Private::Project::Foo = ::<PackageRegistry>::Project_Foo_Package::Project::Foo
     end
   end
   module ::<PackageRegistry><<C <PackageRegistry>>> < ()
     def self.<static-init>(<blk>)
       begin
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageRegistry>::Project_Bar_Package::Project::Bar)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageRegistry>::Project_Bar_Package::Project::Bar)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageRegistry>::Project_Bar_Package::Project::Bar)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageRegistry>::Project_Bar_Package::Project::Bar)
-          <emptyTree>
-        end
+        ::<PackageRegistry>::Project_Bar_Package::Project::Bar::Bar = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::Bar
+        ::<PackageRegistry>::Project_Bar_Package::Project::Bar::CallsFoo = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::CallsFoo
         <emptyTree>
       end
-    end
-  end
-  module ::<PackageRegistry>::Project_Bar_Package::Project::Bar<<C Bar>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageRegistry>::Project_Bar_Package::Project::Bar::Bar = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::Bar
-    end
-  end
-  module ::<PackageRegistry>::Project_Bar_Package::Project::Bar<<C Bar>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageRegistry>::Project_Bar_Package::Project::Bar::CallsFoo = ::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::CallsFoo
     end
   end
   module ::<PackageTests><<C <PackageTests>>> < ()
@@ -341,80 +287,26 @@ begin
   end
   module ::<PackageRegistry><<C <PackageRegistry>>> < ()
     def self.<static-init>(<blk>)
-      begin
-        ::<Magic>.<define-top-class-or-module>(::<PackageRegistry>::Project_Foo_Package_Private::Project)
-        ::Sorbet::Private::Static.keep_for_ide(::<PackageRegistry>::Project_Foo_Package_Private::Project)
-        <emptyTree>
-      end
-    end
-  end
-  module ::<PackageRegistry>::Project_Foo_Package_Private::Project<<C Project>> < ()
-    def self.<static-init>(<blk>)
       ::<PackageRegistry>::Project_Foo_Package_Private::Project::Bar = ::<PackageRegistry>::Project_Bar_Package::Project::Bar
     end
   end
   module ::<PackageTests><<C <PackageTests>>> < ()
     def self.<static-init>(<blk>)
       begin
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageTests>::Project_Foo_Package_Private::Project)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageTests>::Project_Foo_Package_Private::Project)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageTests>::Project_Foo_Package_Private::Project::Foo)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageTests>::Project_Foo_Package_Private::Project::Foo)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageTests>::Project_Foo_Package_Private::Project::Foo)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageTests>::Project_Foo_Package_Private::Project::Foo)
-          <emptyTree>
-        end
+        ::<PackageTests>::Project_Foo_Package_Private::Project::Bar = ::<PackageRegistry>::Project_Bar_Package::Project::Bar
+        ::<PackageTests>::Project_Foo_Package_Private::Project::Foo::CallsBar = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::CallsBar
+        ::<PackageTests>::Project_Foo_Package_Private::Project::Foo::Foo = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::Foo
         <emptyTree>
       end
-    end
-  end
-  module ::<PackageTests>::Project_Foo_Package_Private::Project<<C Project>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageTests>::Project_Foo_Package_Private::Project::Bar = ::<PackageRegistry>::Project_Bar_Package::Project::Bar
-    end
-  end
-  module ::<PackageTests>::Project_Foo_Package_Private::Project::Foo<<C Foo>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageTests>::Project_Foo_Package_Private::Project::Foo::CallsBar = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::CallsBar
-    end
-  end
-  module ::<PackageTests>::Project_Foo_Package_Private::Project::Foo<<C Foo>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageTests>::Project_Foo_Package_Private::Project::Foo::Foo = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::Foo
     end
   end
   module ::<PackageRegistry><<C <PackageRegistry>>> < ()
     def self.<static-init>(<blk>)
       begin
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageRegistry>::Project_Foo_Package::Project::Foo)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageRegistry>::Project_Foo_Package::Project::Foo)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::<PackageRegistry>::Project_Foo_Package::Project::Foo)
-          ::Sorbet::Private::Static.keep_for_ide(::<PackageRegistry>::Project_Foo_Package::Project::Foo)
-          <emptyTree>
-        end
+        ::<PackageRegistry>::Project_Foo_Package::Project::Foo::CallsBar = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::CallsBar
+        ::<PackageRegistry>::Project_Foo_Package::Project::Foo::Foo = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::Foo
         <emptyTree>
       end
-    end
-  end
-  module ::<PackageRegistry>::Project_Foo_Package::Project::Foo<<C Foo>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageRegistry>::Project_Foo_Package::Project::Foo::CallsBar = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::CallsBar
-    end
-  end
-  module ::<PackageRegistry>::Project_Foo_Package::Project::Foo<<C Foo>> < ()
-    def self.<static-init>(<blk>)
-      ::<PackageRegistry>::Project_Foo_Package::Project::Foo::Foo = ::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::Foo
     end
   end
   module ::<PackageTests><<C <PackageTests>>> < ()

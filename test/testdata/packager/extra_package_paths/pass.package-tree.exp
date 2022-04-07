@@ -7,23 +7,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
-    end
+    <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
 
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
-    end
+    <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
-    end
+    <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
 
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
-    end
+    <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -70,15 +62,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
-    end
+    <emptyTree>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
-    end
+    <emptyTree>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
@@ -132,15 +120,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>
-    end
+    <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>
-    end
+    <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
