@@ -154,7 +154,7 @@ We will discuss individual phases and IRs below.
 
 The parser we're using is based on whitequark/parser, the popular Ruby parser.
 The Ruby 2.4 whitequark parser was ported to yacc / C++ by Hailey Somerville
-for use in his [TypedRuby] project, and has since seen many external
+for use in her [TypedRuby] project, and has since seen many external
 contributions to support later Ruby versions. You can find the sources in
 `third_party/parser/`.
 
