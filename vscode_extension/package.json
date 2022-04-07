@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -75,6 +75,11 @@
       {
         "command": "sorbet.copySymbolToClipboard",
         "title": "Copy Symbol to Clipboard",
+        "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.rename",
+        "title": "Rename Symbol",
         "category": "Sorbet"
       }
     ],

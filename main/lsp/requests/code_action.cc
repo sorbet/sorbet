@@ -142,15 +142,27 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
                     }
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
+
                     bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
                                             config.getClientConfig().clientCodeActionDataSupport;
+                    auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
+                    auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
+                    auto arg = make_unique<TextDocumentPositionParams>(
+                        make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
+                    auto args = vector<unique_ptr<TextDocumentPositionParams>>();
+                    args.emplace_back(move(arg));
+
+                    renameCommand->arguments = move(args);
+                    action->command = move(renameCommand);
                     if (canResolveLazily) {
                         action->data = move(params);
                     } else {
                         auto workspaceEdit = make_unique<WorkspaceEdit>();
-                        workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, *def, typechecker);
+                        auto edits = getMoveMethodEdits(config, gs, *def, typechecker);
+                        workspaceEdit->documentChanges = move(edits);
                         action->edit = move(workspaceEdit);
                     }
+
                     result.emplace_back(move(action));
                 }
             }

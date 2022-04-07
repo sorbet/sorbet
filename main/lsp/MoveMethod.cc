@@ -7,6 +7,8 @@ namespace sorbet::realmain::lsp {
 
 namespace {
 
+const auto moduleKeyword = "module "s;
+
 bool isTSigRequired(const core::GlobalState &gs) {
     return !core::Symbols::Module().data(gs)->derivesFrom(gs, core::Symbols::T_Sig());
 }
@@ -155,7 +157,8 @@ public:
 vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
                                         const core::lsp::MethodDefResponse &definition,
                                         LSPTypecheckerInterface &typechecker, string_view newModuleName) {
-    auto moduleStart = fmt::format("module {}{}\n  ", newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
+    auto moduleStart =
+        fmt::format("{}{}{}\n  ", moduleKeyword, newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
     auto moduleEnd = "\nend";
 
     auto fref = definition.termLoc.file();
@@ -188,10 +191,24 @@ vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const co
     vector<unique_ptr<TextEdit>> res;
     res.emplace_back(make_unique<TextEdit>(move(insertPosition), newModuleSource));
     res.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, oldMethodLoc.value()), ""));
+
     return res;
 }
 
 } // namespace
+
+unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const core::lsp::MethodDefResponse &definition,
+                                          LSPTypecheckerInterface &typechecker) {
+    auto fref = definition.termLoc.file();
+
+    auto trees = typechecker.getResolved({fref});
+    ENFORCE(!trees.empty());
+    auto &rootTree = trees[0].tree;
+    auto insertPosition = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
+    auto newModuleSymbol = insertPosition->start->copy();
+    newModuleSymbol->character += moduleKeyword.size() + 1;
+    return newModuleSymbol;
+}
 
 vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                                         const core::lsp::MethodDefResponse &definition,
@@ -202,7 +219,7 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &
         return res;
     }
 
-    vector<unique_ptr<TextEdit>> edits = moveMethod(config, gs, definition, typechecker, newModuleName.value());
+    auto edits = moveMethod(config, gs, definition, typechecker, newModuleName.value());
 
     auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
     renamer->getRenameEdits(typechecker, definition.symbol, newModuleName.value());
