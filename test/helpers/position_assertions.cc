@@ -505,7 +505,16 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
     auto responses = getLSPResponsesFor(lspWrapper, makeDefinitionRequest(id, queryLoc.uri, line, character));
     {
         INFO("Unexpected number of responses to a `textDocument/definition` request.");
-        REQUIRE_EQ(1, responses.size());
+        const auto numResponses = absl::c_count_if(responses, [](const auto &m) { return m->isResponse(); });
+        REQUIRE_EQ(1, numResponses);
+        const auto numRequests = absl::c_count_if(responses, [](const auto &m) { return m->isRequest(); });
+        REQUIRE_EQ(0, numRequests);
+        // Ensure the lone response is at the front.
+        absl::c_partition(responses, [](const auto &m) { return m->isResponse(); });
+        // We would like to verify the number of notifications here, but the number
+        // of notifications depends on the typed-ness of the file as well as the
+        // particular kind of query we're running, and we don't have access to the
+        // latter here.
     }
     assertResponseMessage(id, *responses.at(0));
 
