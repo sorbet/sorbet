@@ -59,4 +59,8 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
     return response;
 }
 
+bool DefinitionTask::canUseStaleData() const {
+    return true;
+}
+
 } // namespace sorbet::realmain::lsp
