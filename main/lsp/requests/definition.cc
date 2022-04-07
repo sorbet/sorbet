@@ -1,5 +1,6 @@
 #include "main/lsp/requests/definition.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
@@ -23,6 +24,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
 
     auto &queryResponses = result.responses;
     vector<unique_ptr<Location>> locations;
+    bool notifyAboutUntypedFile = false;
     if (!queryResponses.empty()) {
         const bool fileIsTyped =
             config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
@@ -39,21 +41,37 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
             for (auto &originLoc : retType.origins) {
                 addLocIfExists(gs, locations, originLoc);
             }
-        } else if (fileIsTyped && resp->isMethodDef()) {
-            auto sym = resp->isMethodDef()->symbol;
-            for (auto loc : sym.data(gs)->locs()) {
-                addLocIfExists(gs, locations, loc);
-            }
-        } else if (fileIsTyped && resp->isSend()) {
-            auto sendResp = resp->isSend();
-            auto start = sendResp->dispatchResult.get();
-            while (start != nullptr) {
-                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    addLocIfExists(gs, locations, start->main.method.data(gs)->loc());
+        } else if (!fileIsTyped && (resp->isIdent() || resp->isLiteral())) {
+            notifyAboutUntypedFile = true;
+        } else if (resp->isMethodDef()) {
+            if (!fileIsTyped) {
+                notifyAboutUntypedFile = true;
+            } else {
+                auto sym = resp->isMethodDef()->symbol;
+                for (auto loc : sym.data(gs)->locs()) {
+                    addLocIfExists(gs, locations, loc);
                 }
-                start = start->secondary.get();
+            }
+        } else if (resp->isSend()) {
+            if (!fileIsTyped) {
+                notifyAboutUntypedFile = true;
+            } else {
+                auto sendResp = resp->isSend();
+                auto start = sendResp->dispatchResult.get();
+                while (start != nullptr) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                        addLocIfExists(gs, locations, start->main.method.data(gs)->loc());
+                    }
+                    start = start->secondary.get();
+                }
             }
         }
+    }
+    if (notifyAboutUntypedFile) {
+        auto msg = fmt::format("Could not go to definition because the file is not at least `# typed: true`");
+        auto params = make_unique<ShowMessageParams>(MessageType::Info, msg);
+        this->config.output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
     }
     response->result = move(locations);
     return response;
