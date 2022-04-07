@@ -12,8 +12,6 @@ class KeyValueStore;
 namespace sorbet::realmain::lsp {
 class InitializedTask final : public LSPTask {
     LSPConfiguration &mutableConfig;
-    LSPFileUpdates updates;
-    LSPPreprocessor *preprocessor;
     std::unique_ptr<core::GlobalState> gs;
     std::unique_ptr<KeyValueStore> kvstore;
 

@@ -63,6 +63,11 @@ public:
     ~LSPIndexer();
 
     /**
+     * Returns `true` when the indexer is currently in a state where it can handle the request.
+     */
+    bool canHandleTask(bool frontOfQueue, const LSPTask &task) const;
+
+    /**
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
     bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
