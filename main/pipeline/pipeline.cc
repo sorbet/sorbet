@@ -4,9 +4,9 @@
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
 // ^^ has to go first
+#include "common/json2msgpack/json2msgpack.h"
 #include "main/autogen/cache.h"
 #include "main/autogen/constant_hash.h"
-#include "common/json2msgpack/json2msgpack.h"
 #include "packager/packager.h"
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
@@ -1259,7 +1259,8 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     return written;
 }
 
-vector<ast::ParsedFile> autogenCacheFiles(const core::GlobalState &gs, string_view cachePath, vector<ast::ParsedFile> what, WorkerPool &workers) {
+vector<ast::ParsedFile> autogenCacheFiles(const core::GlobalState &gs, string_view cachePath,
+                                          vector<ast::ParsedFile> what, WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     Timer timeit(gs.tracer(), "autogenConstantCache");
 
@@ -1281,8 +1282,7 @@ vector<ast::ParsedFile> autogenCacheFiles(const core::GlobalState &gs, string_vi
 
     {
         autogen::HashedParsedFile output;
-        for (auto result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
+        for (auto result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !result.done();
              result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (!result.gotItem()) {
                 continue;
