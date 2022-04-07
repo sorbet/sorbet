@@ -34,8 +34,8 @@ autocorrect-helpers.rb:16: Method `sealed!` does not exist on `T.class_of(S4)` h
     16 |  sealed!
         ^
   Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2212: `Kernel#select`
-    2212 |  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2213: `Kernel#select`
+    2213 |  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-helpers.rb:20: Method `interface!` does not exist on `T.class_of(S5)` https://srb.help/7003
@@ -74,8 +74,8 @@ autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` h
     25 |  abstract!
         ^
   Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2212: `Kernel#select`
-    2212 |  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2213: `Kernel#select`
+    2213 |  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.class_of(S7)` https://srb.help/7003
