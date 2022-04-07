@@ -348,8 +348,6 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::NilClass());
     klass = synthesizeClass(core::Names::Constants::Untyped(), 0);
     ENFORCE(klass == Symbols::untyped());
-    klass = synthesizeClass(core::Names::Constants::Opus(), 0, true);
-    ENFORCE(klass == Symbols::Opus());
     klass = synthesizeClass(core::Names::Constants::T(), Symbols::todo().id(), true);
     ENFORCE(klass == Symbols::T());
     klass = synthesizeClass(core::Names::Constants::Class(), 0);

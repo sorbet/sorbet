@@ -2,7 +2,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:1 end=16:4}
       argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
-  module <C <U Opus>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+  module <C <U Opus>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:11}
     module <C <U Opus>>::<C <U CIBot>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:18}
       module <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:25}
         class <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<C <U NotifySlackBuildComplete>> < <C <U Object>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:1 end=2:51}
@@ -21,4 +21,6 @@ class <C <U <root>>> < <C <U Object>> ()
         type-member(+) <C <U Opus>>::<C <U CIBot>>::<S <C <U Tasks>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U CIBot>>::<S <C <U Tasks>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::CIBot::Tasks) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:25}
     class <C <U Opus>>::<S <C <U CIBot>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:18}
       type-member(+) <C <U Opus>>::<S <C <U CIBot>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<S <C <U CIBot>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::CIBot) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:18}
+  class <S <C <U Opus>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:11}
+    type-member(+) <S <C <U Opus>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Opus>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:11}
 
