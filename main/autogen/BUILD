@@ -25,11 +25,11 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//ast/desugar",
         "//ast/treemap",
         "//core",
         "//main/autogen/data",
         "//main/options",
-        "//parser",
         "@com_github_d_bahr_crcpp",
     ],
 )
@@ -45,6 +45,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":autogen",
+        "//ast/desugar",
         "//core",
         "//parser",
         "@doctest",

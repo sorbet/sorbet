@@ -5,8 +5,6 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
-#include "main/autogen/cache.h"
-#include "main/autogen/constant_hash.h"
 #include "packager/packager.h"
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
@@ -170,7 +168,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         ast::ExpressionPtr tree, autogen::AutogenCache *autogenCache) {
+                         ast::ExpressionPtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
 
@@ -185,11 +183,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
-#ifndef SORBET_REALMAIN_MIN
-            if (autogenCache) {
-                autogenCache->add(string(file.data(lgs).path()), autogen::constantHashNode(lgs, parseTree));
-            }
-#endif
             tree = runDesugar(lgs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
@@ -626,32 +619,17 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files
 
     gs.sanityCheck();
 
-    autogen::AutogenCache *cachePtr = nullptr;
-
-#ifndef SORBET_REALMAIN_MIN
-    autogen::AutogenCache cache;
-    if (!opts.autogenConstantCacheFile.empty()) {
-        cachePtr = &cache;
-    }
-#endif
-
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
         for (auto file : files) {
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
-            auto parsedFile = indexOne(opts, gs, file, move(tree), cachePtr);
+            auto parsedFile = indexOne(opts, gs, file, move(tree));
             ret.emplace_back(move(parsedFile));
         }
         ENFORCE(files.size() == ret.size());
     } else {
         ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
     }
-
-#ifndef SORBET_REALMAIN_MIN
-    if (cachePtr) {
-        FileOps::write(opts.autogenConstantCacheFile, cache.pack());
-    }
-#endif
 
     fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
     return ret;

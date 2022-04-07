@@ -1,5 +1,6 @@
 #include "doctest.h"
 // has to go first as it violates our requirements
+#include "ast/desugar/Desugar.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
@@ -35,26 +36,31 @@ struct Helper {
         core::UnfreezeNameTable nameTableAccess(gs);
         auto settings = parser::Parser::Settings{false, false, false};
         auto node = parser::Parser::run(gs, file, settings);
-        return autogen::constantHashNode(gs, node);
+
+        core::MutableContext ctx{gs, core::Symbols::root(), file};
+        auto ast = ast::desugar::node2Tree(ctx, move(node));
+        ast::ParsedFile pf{move(ast), file};
+        return autogen::constantHashTree(gs, std::move(pf));
     }
 };
 
 TEST_CASE("Stability") { // NOLINT
     Helper helper;
 
-    // files with no constants hash to 0
-    CHECK_EQ(0, helper.hashExample("\n"));
+    // the reason this hashes to something other than 0 is because the
+    // desugaring pass adds a "fake" class with no name to the root
+    CHECK_EQ(98084193, helper.hashExample("\n"));
 
     // a few hard-coded examples to check for stability
-    CHECK_EQ(3503786793, helper.hashExample("class Foo; end"));
-    CHECK_EQ(3576910453, helper.hashExample("class Bar; end"));
-    CHECK_EQ(663475261, helper.hashExample("class Foo::Bar; end"));
-    CHECK_EQ(3746578870, helper.hashExample("module Foo; end"));
-    CHECK_EQ(4044482410, helper.hashExample("module Bar; end"));
-    CHECK_EQ(2382413730, helper.hashExample("module Foo::Bar; end"));
-    CHECK_EQ(2200515961, helper.hashExample("X = T.let(5, Integer)"));
-    CHECK_EQ(4273770513, helper.hashExample("X = Y"));
-    CHECK_EQ(3333880970, helper.hashExample("require 'this'"));
+    CHECK_EQ(3145201656, helper.hashExample("class Foo; end"));
+    CHECK_EQ(2505704364, helper.hashExample("class Bar; end"));
+    CHECK_EQ(2162981476, helper.hashExample("class Foo::Bar; end"));
+    CHECK_EQ(3908589664, helper.hashExample("module Foo; end"));
+    CHECK_EQ(3269092372, helper.hashExample("module Bar; end"));
+    CHECK_EQ(1735599820, helper.hashExample("module Foo::Bar; end"));
+    CHECK_EQ(1304948417, helper.hashExample("X = T.let(5, Integer)"));
+    CHECK_EQ(638052961, helper.hashExample("X = Y"));
+    CHECK_EQ(3058241009, helper.hashExample("require 'this'"));
 }
 
 TEST_CASE("SimpleClass") { // NOLINT
