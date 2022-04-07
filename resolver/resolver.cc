@@ -3812,7 +3812,47 @@ ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> t
 
     return trees;
 }
-}; // namespace
+void sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
+    if (debug_mode) {
+        Timer timeit(gs.tracer(), "resolver.sanity_check");
+        ResolveSanityCheckWalk sanity;
+        for (auto &tree : trees) {
+            core::Context ctx(gs, core::Symbols::root(), tree.file);
+            tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));
+        }
+    }
+}
+
+void verifyLinearizationComputed(const core::GlobalState &gs) {
+    DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
+        core::ClassOrModuleRef sym(gs, i);
+        // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
+        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
+    })
+}
+
+template <typename StateType>
+ast::ParsedFilesOrCancelled runIncrementalImpl(StateType &gs, vector<ast::ParsedFile> trees) {
+    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
+
+    auto workers = WorkerPool::create(0, gs.tracer());
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+    verifyLinearizationComputed(gs);
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
+    auto result = resolveSigs(gs, std::move(trees), *workers);
+    if (!result.hasResult()) {
+        return result;
+    }
+    sanityCheck(gs, result.result());
+    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
+    // But it can be super useful to uncomment when debugging certain issues.
+    // ctx.state.sanityCheck();
+
+    return result;
+}
+
+} // namespace
 
 ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     const auto &epochManager = *gs.epochManager;
@@ -3842,51 +3882,14 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     return result;
 }
 
-void Resolver::sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
-    if (debug_mode) {
-        Timer timeit(gs.tracer(), "resolver.sanity_check");
-        ResolveSanityCheckWalk sanity;
-        for (auto &tree : trees) {
-            core::Context ctx(gs, core::Symbols::root(), tree.file);
-            tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));
-        }
-    }
+ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+    return runIncrementalImpl(gs, move(trees));
 }
 
-namespace {
-void verifyLinearizationComputed(const core::GlobalState &gs) {
-    DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
-        core::ClassOrModuleRef sym(gs, i);
-        // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), "{}", sym.toString(gs));
-    })
+ast::ParsedFilesOrCancelled Resolver::runIncrementalBestEffort(const core::GlobalState &gs,
+                                                               vector<ast::ParsedFile> trees) {
+    return runIncrementalImpl(gs, move(trees));
 }
-} // namespace
-
-template <typename StateType>
-ast::ParsedFilesOrCancelled Resolver::runIncremental(StateType &gs, vector<ast::ParsedFile> trees) {
-    static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
-
-    auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
-    verifyLinearizationComputed(gs);
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(trees), *workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
-    // This check is FAR too slow to run on large codebases, especially with sanitizers on.
-    // But it can be super useful to uncomment when debugging certain issues.
-    // ctx.state.sanityCheck();
-
-    return result;
-}
-
-template ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees);
-template ast::ParsedFilesOrCancelled Resolver::runIncremental(const core::GlobalState &gs,
-                                                              vector<ast::ParsedFile> trees);
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {

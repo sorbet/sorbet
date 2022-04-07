@@ -185,7 +185,7 @@ void immutableNamerResolver(const core::GlobalState &gs, vector<ast::ParsedFile>
     trees = move(namer::Namer::symbolizeTreesBestEffort(gs, move(trees), workers).result());
     ENFORCE(!gs.hadCriticalError());
 
-    trees = move(resolver::Resolver::runIncremental(gs, move(trees)).result());
+    trees = move(resolver::Resolver::runIncrementalBestEffort(gs, move(trees)).result());
 
     // Also run the rest of the pipeline as normal, to make sure that things still work as expected.
 

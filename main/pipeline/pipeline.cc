@@ -306,7 +306,7 @@ vector<ast::ParsedFile> incrementalResolveWithoutStateMutation(const core::Globa
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what));
+            auto result = sorbet::resolver::Resolver::runIncrementalBestEffort(gs, move(what));
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());
