@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "ast/Trees.h"
 #include "core/GlobalState.h"
 
 namespace sorbet::parser {
@@ -26,7 +27,7 @@ namespace sorbet::autogen {
 // then we do not need to re-run autogen-related logic on that file,
 // because no changes have happened which could possibly affect what
 // autogen produces.
-unsigned int constantHashNode(core::GlobalState &gs, const std::unique_ptr<parser::Node> &what);
+unsigned int constantHashTree(core::GlobalState &gs, const ast::ParsedFile pf);
 
 } // namespace sorbet::autogen
 #endif // AUTOGEN_CONSTANT_HASH_H

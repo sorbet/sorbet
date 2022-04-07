@@ -1,5 +1,6 @@
 #include "mpack/mpack.h"
 
+#include "ast/desugar/Desugar.h"
 #include "common/FileOps.h"
 #include "core/Unfreeze.h"
 #include "main/autogen/cache.h"
@@ -50,7 +51,13 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
         core::UnfreezeNameTable nameTableAccess(gs);
         auto settings = parser::Parser::Settings{false, false, false};
         auto node = parser::Parser::run(gs, ref, settings);
-        if (autogen::constantHashNode(gs, node) != cache.constantHashMap().at(file)) {
+
+        core::MutableContext ctx{gs, core::Symbols::root(), ref};
+        auto ast = ast::desugar::node2Tree(ctx, move(node));
+
+        ast::ParsedFile pf{std::move(ast), ref};
+
+        if (autogen::constantHashTree(gs, std::move(pf)) != cache.constantHashMap().at(file)) {
             return false;
         }
     }
