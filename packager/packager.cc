@@ -1722,20 +1722,6 @@ private:
             return;
         }
 
-        // Construct a module containing an assignment for an imported name:
-        // For name `A::B::C::D` imported from package `A::B` construct:
-        // module A::B::C
-        //   D = <Mangled A::B>::A::B::C::D
-        // end
-        const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
-        auto assignRhs = prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
-
-        auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
-                                      std::move(assignRhs));
-
-        ast::ClassDef::RHS_store rhs;
-        rhs.emplace_back(std::move(assign));
-
         // Use the loc from the import in the module name and declaration to get the
         // following jump to definition behavior in the case of enumerated imports:
         // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
@@ -1748,16 +1734,22 @@ private:
         // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
         //                     ^^^^^^^^       jump to top of package file of `Foo::Bar`
         //                               ^^^  jump to actual definition of `Baz` class
+        const auto &assignLoc = getAssignLoc(source, packageLoc);
 
-        // Ensure import's do not add duplicate loc-s in the test_module
-        const auto &moduleLoc = getModuleLoc(source, packageLoc);
+        // Construct an assignment for an imported name:
+        // For name `A::B::C::D` imported from package `A::B` construct:
+        // A::B::C::D = <Mangled A::B>::A::B::C::D
+        const auto &sourceMangledName = isFriendImport ? privatePkgMangledName : source.packageMangledName;
+        auto assignRhs = prependPackageScope(ctx, parts2literal(parts, core::LocOffsets::none()), sourceMangledName);
 
-        auto mod = ast::MK::Module(core::LocOffsets::none(), moduleLoc, importModuleName(parts, moduleLoc, moduleType),
-                                   {}, std::move(rhs));
-        modRhs.emplace_back(std::move(mod));
+        auto scope = importScopeName(parts, assignLoc, moduleType);
+        auto assignLhs = name2Expr(parts.back(), std::move(scope));
+        auto assign = ast::MK::Assign(assignLoc, std::move(assignLhs), std::move(assignRhs));
+
+        modRhs.emplace_back(std::move(assign));
     }
 
-    const core::LocOffsets getModuleLoc(ImportTree::Source &source, const core::Loc *packageLoc) {
+    const core::LocOffsets getAssignLoc(ImportTree::Source &source, const core::Loc *packageLoc) {
         // normal or test import
         if (source.isTestImport() || source.isNormalImport()) {
             return source.isEnumeratedImport ? source.importLoc : core::LocOffsets::none();
@@ -1794,9 +1786,9 @@ private:
         }
     }
 
-    // Name of the wrapper module for a given import, prefixed with the mangled name of the package.
-    ast::ExpressionPtr importModuleName(vector<core::NameRef> &parts, core::LocOffsets importLoc,
-                                        ModuleType moduleType) const {
+    // Name of the wrapper scope for a given import, prefixed with the mangled name of the package.
+    ast::ExpressionPtr importScopeName(vector<core::NameRef> &parts, core::LocOffsets importLoc,
+                                       ModuleType moduleType) const {
         // Export mapping modules are built in the public (_Package) namespace, whereas other modules are built in
         // the private (_Package_Private) namespace.
         ast::ExpressionPtr name =
