@@ -154,7 +154,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
     method <C <U Object>>#<U main> : private (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=94:1 end=94:9}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  module <C <U Opus>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+  module <C <U Opus>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}
     module <C <U Opus>>::<C <U DB>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:15}
       module <C <U Opus>>::<C <U DB>>::<C <U Model>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:22}
         module <C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:30}
@@ -172,6 +172,8 @@ class <C <U <root>>> < <C <U Object>> ()
         type-member(+) <C <U Opus>>::<C <U DB>>::<S <C <U Model>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U DB>>::<S <C <U Model>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB::Model) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:22}
     class <C <U Opus>>::<S <C <U DB>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:15}
       type-member(+) <C <U Opus>>::<S <C <U DB>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<S <C <U DB>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:15}
+  class <S <C <U Opus>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}
+    type-member(+) <S <C <U Opus>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Opus>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}
   class <C <U PropHelpers>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=64:1 end=64:18}
     method <C <U PropHelpers>>#<U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=69:3 end=69:15}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
