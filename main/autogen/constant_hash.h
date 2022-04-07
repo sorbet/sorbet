@@ -18,7 +18,7 @@ struct HashedParsedFile {
     unsigned int constantHash;
 
     HashedParsedFile() = default;
-    HashedParsedFile(ast::ParsedFile pf, unsigned int constantHash) : pf(std::move(pf)), constantHash(constantHash) {};
+    HashedParsedFile(ast::ParsedFile pf, unsigned int constantHash) : pf(std::move(pf)), constantHash(constantHash){};
 };
 
 // This computes a "constant hash", i.e. a hash entirely of the
