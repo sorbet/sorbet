@@ -1,6 +1,6 @@
 # typed: false
 
 module Foo
-  module Opus::Bar # error: is ambiguous
+  module Opus::Bar
   end
 end
