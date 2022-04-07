@@ -708,6 +708,11 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Autogen is disabled in sorbet-orig for faster builds");
             return 1;
 #else
+            if (!opts.autogenConstantCacheFile.empty()) {
+                // we should regenerate the constant cache here
+                indexed = pipeline::autogenCacheFiles(*gs, opts.autogenConstantCacheFile, move(indexed), *workers);
+            }
+
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);

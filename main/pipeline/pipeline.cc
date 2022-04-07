@@ -4,6 +4,8 @@
 // has to go first, as it violates poisons
 #include "core/proto/proto.h"
 // ^^ has to go first
+#include "main/autogen/cache.h"
+#include "main/autogen/constant_hash.h"
 #include "common/json2msgpack/json2msgpack.h"
 #include "packager/packager.h"
 #include "rapidjson/ostreamwrapper.h"
@@ -1255,6 +1257,47 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
         }
     }
     return written;
+}
+
+vector<ast::ParsedFile> autogenCacheFiles(const core::GlobalState &gs, string_view cachePath, vector<ast::ParsedFile> what, WorkerPool &workers) {
+#ifndef SORBET_REALMAIN_MIN
+    Timer timeit(gs.tracer(), "autogenConstantCache");
+
+    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
+    auto resultq = make_shared<BlockingBoundedQueue<autogen::HashedParsedFile>>(what.size());
+    for (auto &pf : what) {
+        fileq->push(move(pf), 1);
+    }
+
+    workers.multiplexJob("computeConstantCache", [&]() {
+        ast::ParsedFile job;
+        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            resultq->push(autogen::constantHashTree(gs, move(job)), 1);
+        }
+    });
+
+    autogen::AutogenCache cache;
+    vector<ast::ParsedFile> results;
+
+    {
+        autogen::HashedParsedFile output;
+        for (auto result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            cache.add(string(output.pf.file.data(gs).path()), output.constantHash);
+            results.emplace_back(move(output.pf));
+        }
+    }
+
+    FileOps::write(cachePath, cache.pack());
+
+    return results;
+#else
+    return what;
+#endif
 }
 
 } // namespace sorbet::realmain::pipeline
