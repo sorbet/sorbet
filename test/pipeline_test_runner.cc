@@ -139,7 +139,12 @@ public:
             auto checker = test.folder + expectation->second.begin()->second;
             auto expect = FileOps::read(checker);
 
-            CHECK_EQ_DIFF(expect, gotPhase.second, fmt::format("{}Mismatch on: {}", prefix, checker));
+            CHECK_EQ_DIFF(expect, gotPhase.second,
+                          fmt::format("{}Mismatch on: {}\n"
+                                      "\n"
+                                      "If these changes are expected, run this script and commit the results:\n"
+                                      "tools/scripts/update_testdata_exp.sh\n",
+                                      prefix, checker));
             if (expect == gotPhase.second) {
                 MESSAGE(gotPhase.first << " OK");
             }
