@@ -19,7 +19,7 @@ autocorrect-block-pass-curly-braces.rb:13: block pass should not be enclosed in 
     14 |                        : :cough)}
   Autocorrect: Done
     autocorrect-block-pass-curly-braces.rb:13: Replaced with `(&(T.unsafe(true) ? :sneeze
-                        : :cough))`
+                            : :cough))`
     13 |    h {&(T.unsafe(true) ? :sneeze
     14 |                        : :cough)}
 Errors: 3

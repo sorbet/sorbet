@@ -36,8 +36,7 @@ suggest-sig.rb:5: This function does not have a `sig` https://srb.help/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:5: Inserted `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
-`
+    suggest-sig.rb:5: Inserted `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}`
      5 |def hazTwoArgs(a, b); 1; end;
         ^
 
@@ -49,8 +48,7 @@ suggest-sig.rb:7: This function does not have a `sig` https://srb.help/7017
      7 |def baz
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:7: Inserted `sig {returns(T.any(T::Array[T.untyped], String))}
-`
+    suggest-sig.rb:7: Inserted `sig {returns(T.any(T::Array[T.untyped], String))}`
      7 |def baz
         ^
 
@@ -58,8 +56,7 @@ suggest-sig.rb:18: This function does not have a `sig` https://srb.help/7017
     18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:18: Inserted `sig {void}
-`
+    suggest-sig.rb:18: Inserted `sig {void}`
     18 |def bla; give_me_void; end
         ^
 
@@ -71,8 +68,7 @@ suggest-sig.rb:20: This function does not have a `sig` https://srb.help/7017
     20 |def bbq
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:20: Inserted `sig {void}
-`
+    suggest-sig.rb:20: Inserted `sig {void}`
     20 |def bbq
         ^
 
@@ -84,8 +80,7 @@ suggest-sig.rb:30: This function does not have a `sig` https://srb.help/7017
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:30: Inserted `sig {returns(Integer)}
-`
+    suggest-sig.rb:30: Inserted `sig {returns(Integer)}`
     30 |def give_me_literal; 1; end;
         ^
 
@@ -93,8 +88,7 @@ suggest-sig.rb:32: This function does not have a `sig` https://srb.help/7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:32: Inserted `sig {returns(T::Array[T::Array[Integer]])}
-`
+    suggest-sig.rb:32: Inserted `sig {returns(T::Array[T::Array[Integer]])}`
     32 |def give_me_literal_nested; [[1]]; end;
         ^
 
@@ -102,8 +96,7 @@ suggest-sig.rb:34: This function does not have a `sig` https://srb.help/7017
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:34: Inserted `sig {returns(NilClass)}
-`
+    suggest-sig.rb:34: Inserted `sig {returns(NilClass)}`
     34 |private def root_private; end
         ^
 
@@ -111,8 +104,7 @@ suggest-sig.rb:36: This function does not have a `sig` https://srb.help/7017
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:36: Inserted `sig {returns(NilClass)}
-`
+    suggest-sig.rb:36: Inserted `sig {returns(NilClass)}`
     36 |protected def root_protected; end
         ^
 
@@ -120,8 +112,7 @@ suggest-sig.rb:46: This function does not have a `sig` https://srb.help/7017
     46 |def foo(a)
         ^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:46: Inserted `sig {params(a: Integer).returns(Integer)}
-`
+    suggest-sig.rb:46: Inserted `sig {params(a: Integer).returns(Integer)}`
     46 |def foo(a)
         ^
 
@@ -129,8 +120,7 @@ suggest-sig.rb:56: This function does not have a `sig` https://srb.help/7017
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:56: Inserted `sig {params(a: T.any(Integer, String), cond: T.untyped).void}
-`
+    suggest-sig.rb:56: Inserted `sig {params(a: T.any(Integer, String), cond: T.untyped).void}`
     56 |def fooCond(a, cond)
         ^
 
@@ -138,8 +128,7 @@ suggest-sig.rb:64: This function does not have a `sig` https://srb.help/7017
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:64: Inserted `sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
-`
+    suggest-sig.rb:64: Inserted `sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}`
     64 |def fooWhile(a, cond1, cond2)
         ^
 
@@ -147,8 +136,7 @@ suggest-sig.rb:74: This function does not have a `sig` https://srb.help/7017
     74 |def takesBlock
         ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:74: Inserted `sig {returns(Integer)}
-`
+    suggest-sig.rb:74: Inserted `sig {returns(Integer)}`
     74 |def takesBlock
         ^
 
@@ -156,8 +144,7 @@ suggest-sig.rb:79: This function does not have a `sig` https://srb.help/7017
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:79: Inserted `sig {returns(T::Array[T.untyped])}
-`
+    suggest-sig.rb:79: Inserted `sig {returns(T::Array[T.untyped])}`
     79 |def list_ints_or_empty_list
         ^
 
@@ -207,8 +194,7 @@ suggest-sig.rb:84: This function does not have a `sig` https://srb.help/7017
     84 |def dead(x)
         ^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:84: Inserted `sig {params(x: Integer).void}
-`
+    suggest-sig.rb:84: Inserted `sig {params(x: Integer).void}`
     84 |def dead(x)
         ^
 
@@ -216,8 +202,7 @@ suggest-sig.rb:92: This function does not have a `sig` https://srb.help/7017
     92 |def with_block
         ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:92: Inserted `sig {returns(NilClass)}
-`
+    suggest-sig.rb:92: Inserted `sig {returns(NilClass)}`
     92 |def with_block
         ^
 
@@ -233,8 +218,7 @@ suggest-sig.rb:118: This function does not have a `sig` https://srb.help/7017
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:118: Inserted `sig {params(a: T.untyped).returns(Integer)}
-`
+    suggest-sig.rb:118: Inserted `sig {params(a: T.untyped).returns(Integer)}`
      118 |def cantRun(a)
           ^
 
@@ -242,8 +226,7 @@ suggest-sig.rb:155: This function does not have a `sig` https://srb.help/7017
      155 |def explicitly_named_block_parameter(&blk)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:155: Inserted `sig {params(blk: T.untyped).returns(Integer)}
-`
+    suggest-sig.rb:155: Inserted `sig {params(blk: T.untyped).returns(Integer)}`
      155 |def explicitly_named_block_parameter(&blk)
           ^
 
@@ -275,8 +258,7 @@ suggest-sig.rb:41: This function does not have a `sig` https://srb.help/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:41: Inserted `sig {returns(NilClass)}
-  `
+    suggest-sig.rb:41: Inserted `sig {returns(NilClass)}`
     41 |  private def a_private; end
           ^
 
@@ -284,8 +266,7 @@ suggest-sig.rb:43: This function does not have a `sig` https://srb.help/7017
     43 |  protected def a_protected; end
                     ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:43: Inserted `sig {returns(NilClass)}
-  `
+    suggest-sig.rb:43: Inserted `sig {returns(NilClass)}`
     43 |  protected def a_protected; end
           ^
 
@@ -309,12 +290,10 @@ suggest-sig.rb:112: This function does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:112: Inserted `sig {params(merchant: TestCarash::Merchant).returns(Integer)}
-  `
+    suggest-sig.rb:112: Inserted `sig {params(merchant: TestCarash::Merchant).returns(Integer)}`
      112 |  def self.load_account_business_profile(merchant)
             ^
-    suggest-sig.rb:105: Inserted `  extend T::Sig
-`
+    suggest-sig.rb:105: Inserted `extend T::Sig`
      105 |  class Merchant
           ^
 
@@ -322,8 +301,7 @@ suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http
      108 |  sig {params(merchant: Merchant).void}
             ^^^
   Autocorrect: Done
-    suggest-sig.rb:105: Inserted `  extend T::Sig
-`
+    suggest-sig.rb:105: Inserted `extend T::Sig`
      105 |  class Merchant
           ^
 
@@ -335,8 +313,7 @@ suggest-sig.rb:166: This function does not have a `sig` https://srb.help/7017
      166 |  def self.test1(x:, y:)
             ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:166: Inserted `sig {params(x: Integer, y: String).void}
-  `
+    suggest-sig.rb:166: Inserted `sig {params(x: Integer, y: String).void}`
      166 |  def self.test1(x:, y:)
             ^
 
@@ -344,8 +321,7 @@ suggest-sig.rb:170: This function does not have a `sig` https://srb.help/7017
      170 |  def self.test2(x:, y:)
             ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:170: Inserted `sig {params(x: Integer, y: String).void}
-  `
+    suggest-sig.rb:170: Inserted `sig {params(x: Integer, y: String).void}`
      170 |  def self.test2(x:, y:)
             ^
 
@@ -353,8 +329,7 @@ suggest-sig.rb:174: This function does not have a `sig` https://srb.help/7017
      174 |  def self.test3(x:, y:)
             ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:174: Inserted `sig {params(x: Integer, y: T.untyped).void}
-  `
+    suggest-sig.rb:174: Inserted `sig {params(x: Integer, y: T.untyped).void}`
      174 |  def self.test3(x:, y:)
             ^
 
@@ -362,8 +337,7 @@ suggest-sig.rb:186: This function does not have a `sig` https://srb.help/7017
      186 |  def self.test1(y)
             ^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:186: Inserted `sig {params(y: T.untyped).void}
-  `
+    suggest-sig.rb:186: Inserted `sig {params(y: T.untyped).void}`
      186 |  def self.test1(y)
             ^
 
@@ -371,8 +345,7 @@ suggest-sig.rb:191: This function does not have a `sig` https://srb.help/7017
      191 |  def self.test2(y)
             ^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:191: Inserted `sig {params(y: T.untyped).void}
-  `
+    suggest-sig.rb:191: Inserted `sig {params(y: T.untyped).void}`
      191 |  def self.test2(y)
             ^
 
@@ -380,8 +353,7 @@ suggest-sig.rb:204: This function does not have a `sig` https://srb.help/7017
      204 |  def returns_int; 42; end
             ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:204: Inserted `sig(:final) {returns(Integer)}
-  `
+    suggest-sig.rb:204: Inserted `sig(:final) {returns(Integer)}`
      204 |  def returns_int; 42; end
             ^
 Errors: 47

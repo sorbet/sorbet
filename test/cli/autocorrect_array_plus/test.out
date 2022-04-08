@@ -121,7 +121,7 @@ autocorrect_array_plus.rb:18: Expected `T::Enumerable[Integer]` but found `T::Ar
   Note:
     If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
   Autocorrect: Done
-    autocorrect_array_plus.rb:18: Replaced with ` = ints.concat(strings)`
+    autocorrect_array_plus.rb:18: Replaced with `= ints.concat(strings)`
     18 |ints += strings
             ^^^^^^^^^^^
 
@@ -139,7 +139,7 @@ autocorrect_array_plus.rb:19: Expected `T::Enumerable[Integer]` but found `T::Ar
   Note:
     If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
   Autocorrect: Done
-    autocorrect_array_plus.rb:19: Replaced with ` = ints.concat(strings)`
+    autocorrect_array_plus.rb:19: Replaced with `= ints.concat(strings)`
     19 |ints += strings
             ^^^^^^^^^^^
 
@@ -157,7 +157,7 @@ autocorrect_array_plus.rb:20: Expected `T::Enumerable[Integer]` but found `T::Ar
   Note:
     If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
   Autocorrect: Done
-    autocorrect_array_plus.rb:20: Replaced with ` = ints.concat(strings)`
+    autocorrect_array_plus.rb:20: Replaced with `= ints.concat(strings)`
     20 |ints += strings
             ^^^^^^^^^^^
 

@@ -17,8 +17,7 @@ foo/foo.rb:14: Unable to resolve constant `UnexportedClass` https://srb.help/500
     14 |  class UnexportedClass; end
           ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    bar/__package.rb:9: Insert `
-  export Project::Bar::UnexportedClass`
+    bar/__package.rb:9: Insert `export Project::Bar::UnexportedClass`
      9 |  export Project::Bar::BarMethods
                                          ^
 Errors: 2

@@ -34,7 +34,7 @@ suggest_t_must.rb:8: Method `even?` does not exist on `NilClass` component of `T
      8 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                               ^
   Autocorrect: Done
-    suggest_t_must.rb:8: Replaced with ` {|x| T.must(x).even?}`
+    suggest_t_must.rb:8: Replaced with `{|x| T.must(x).even?}`
      8 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                             ^^^^^^^^^
 

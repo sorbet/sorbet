@@ -41,7 +41,7 @@ autocorrect-cast-untyped.rb:27: Please use `T.unsafe` to cast to `T.untyped` htt
     28 |  nil, T.untyped)
   Autocorrect: Done
     autocorrect-cast-untyped.rb:27: Replaced with `T.unsafe(
-  nil)`
+      nil)`
     27 |_w = T.cast(
     28 |  nil, T.untyped)
 Errors: 7
