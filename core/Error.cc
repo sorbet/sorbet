@@ -1,6 +1,8 @@
 // has to go first as it violates our poisons
 #include "rang.hpp"
 
+#include "absl/strings/escaping.h"
+#include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "core/Context.h"
 #include "core/Error.h"
@@ -15,6 +17,8 @@ template class std::unique_ptr<sorbet::core::Error>;
 namespace sorbet::core {
 
 using namespace std;
+
+namespace {
 
 constexpr auto ERROR_COLOR = rang::fg::red;
 constexpr auto LOW_NOISE_COLOR = rang::fgB::black;
@@ -35,6 +39,12 @@ constexpr string_view REVERT_COLOR_SIGIL = "@@<<``\t\v\b\r\aYOU_FORGOT_TO_CALL r
 string _replaceAll(string_view inWhat, string_view from, string_view to) {
     return absl::StrReplaceAll(inWhat, {{from, to}});
 }
+
+string prettyPrintEditReplacement(string_view it) {
+    return _replaceAll(absl::StripAsciiWhitespace(it), "\n", "\n    ");
+}
+
+} // namespace
 
 string ErrorColors::replaceAll(string_view inWhat, string_view from, string_view to) {
     return _replaceAll(inWhat, from, to);
@@ -152,18 +162,18 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
 
     std::vector<ErrorLine> messages;
     for (auto &edit : autocorrect.edits) {
+        auto isInsert = edit.replacement == "";
         uint32_t n = edit.loc.endPos() - edit.loc.beginPos();
         if (gs.autocorrect) {
-            auto line =
-                edit.replacement == ""
-                    ? ErrorLine::from(edit.loc, "Deleted")
-                    : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with", edit.replacement);
+            auto line = isInsert ? ErrorLine::from(edit.loc, "Deleted")
+                                 : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with",
+                                                   prettyPrintEditReplacement(edit.replacement));
 
             messages.emplace_back(std::move(line));
         } else {
-            auto line = edit.replacement == "" ? ErrorLine::from(edit.loc, "Delete")
-                                               : ErrorLine::from(edit.loc, "{} `{}`",
-                                                                 n == 0 ? "Insert" : "Replace with", edit.replacement);
+            auto line = isInsert ? ErrorLine::from(edit.loc, "Delete")
+                                 : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Insert" : "Replace with",
+                                                   prettyPrintEditReplacement(edit.replacement));
 
             messages.emplace_back(std::move(line));
         }
