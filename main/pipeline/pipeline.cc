@@ -276,16 +276,14 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 }
 
 // TODO: Deduplicate implementation with incrementalResolve using is_const_v-ish tricks
-vector<ast::ParsedFile> incrementalResolveWithoutStateMutation(const core::GlobalState &gs,
-                                                               vector<ast::ParsedFile> what,
-                                                               const options::Options &opts) {
+vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> what,
+                                                     const options::Options &opts) {
     try {
 #ifndef SORBET_REALMAIN_MIN
-        // TODO: Figure out how to run the packager
-        // if (opts.stripePackages) {
-        //     Timer timeit(gs.tracer(), "incremental_packager");
-        //     what = packager::Packager::runIncremental(gs, move(what));
-        // }
+        if (opts.stripePackages) {
+            Timer timeit(gs.tracer(), "incremental_packager");
+            what = packager::Packager::runIncrementalBestEffort(gs, move(what));
+        }
 #endif
         {
             Timer timeit(gs.tracer(), "incremental_naming");
@@ -306,7 +304,7 @@ vector<ast::ParsedFile> incrementalResolveWithoutStateMutation(const core::Globa
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what));
+            auto result = sorbet::resolver::Resolver::runIncrementalBestEffort(gs, move(what));
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());

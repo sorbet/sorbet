@@ -815,7 +815,7 @@ std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<
         }
     }
 
-    return pipeline::incrementalResolveWithoutStateMutation(gs, move(updatedIndexed), config->opts);
+    return pipeline::incrementalResolveBestEffort(gs, move(updatedIndexed), config->opts);
 }
 
 const core::GlobalState &LSPStaleTypechecker::state() const {
