@@ -337,6 +337,7 @@ NameDef names[] = {
     {"kwargs", "<kwargs>"},
     {"blkArg", "<blk>"},
     {"blockGiven_p", "block_given?"},
+    {"anonymousBlock", "<anonymous-block>"},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end
