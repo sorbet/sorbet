@@ -82,52 +82,39 @@ public:
             addMissingExportForTestSuggestion(e, match);
             return;
         }
-        vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
-        lines.emplace_back(core::ErrorLine::from(srcPkg.declLoc(), "Do you need to `{} {}` in package `{}`?",
-                                                 core::Names::export_().show(ctx), match.symbol.show(ctx),
-                                                 formatPackageName(srcPkg)));
-        lines.emplace_back(
-            core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
-        e.addErrorSection(core::ErrorSection(lines));
-
-        maybeAddErrorHint(e);
 
         if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, /* isPrivateTestExport */ false)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
+        e.addErrorLine(match.symbol.loc(ctx), "Defined here");
+
+        maybeAddErrorHint(e);
     }
 
     void addMissingExportForTestSuggestion(core::ErrorBuilder &e,
                                            core::packages::PackageInfo::MissingExportMatch match) {
-        vector<core::ErrorLine> lines;
         auto &srcPkg = db().getPackageInfo(match.srcPkg);
-        lines.emplace_back(core::ErrorLine::from(
-            srcPkg.declLoc(),
-            "To expose this name to a package's own tests it must be exported. Do you need to `{} {}` in this package?",
-            core::Names::export_for_test().show(ctx), match.symbol.show(ctx)));
-        lines.emplace_back(
-            core::ErrorLine::from(match.symbol.loc(ctx), "Constant `{}` is defined here:", match.symbol.show(ctx)));
-        e.addErrorSection(core::ErrorSection(lines));
 
         if (auto autocorrect = srcPkg.addExport(ctx, match.symbol, /* isPrivateTestExport */ true)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
-        maybeAddErrorHint(e);
+        e.addErrorLine(match.symbol.loc(ctx), "Defined here");
+
+        auto extraContext = "To expose a name to a package's own tests it must be exported using export_for_tests.\n";
+        maybeAddErrorHint(e, extraContext);
     }
 
     void addMissingImportSuggestions(core::ErrorBuilder &e, PackageMatch &match) {
         vector<core::ErrorLine> lines;
         auto &otherPkg = db().getPackageInfo(match.mangledName);
         bool isTestFile = ctx.file.data(ctx).isPackagedTest();
-        auto importName = isTestFile ? core::Names::test_import() : core::Names::import();
 
-        lines.emplace_back(core::ErrorLine::from(otherPkg.declLoc(), "Do you need to `{}` package `{}`?",
-                                                 importName.show(ctx), formatPackageName(otherPkg)));
-        e.addErrorSection(core::ErrorSection(lines));
         if (auto autocorrect = currentPkg.addImport(ctx, otherPkg, isTestFile)) {
             e.addAutocorrect(std::move(*autocorrect));
         }
+        e.addErrorLine(otherPkg.declLoc(), "Defined here");
+
         maybeAddErrorHint(e);
     }
 
@@ -257,11 +244,11 @@ private:
         e.addErrorSection(core::ErrorSection(lines));
     }
 
-    void maybeAddErrorHint(core::ErrorBuilder &e) {
+    void maybeAddErrorHint(core::ErrorBuilder &e, string_view extraContext = "") {
         if (db().errorHint().empty()) {
             return;
         }
-        e.addErrorNote("{}", db().errorHint());
+        e.addErrorNote("{}{}", extraContext, db().errorHint());
     }
 
     string formatPackageName(const core::packages::PackageInfo &pkg) const {
