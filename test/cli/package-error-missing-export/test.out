@@ -1,64 +1,52 @@
 foo_class.rb:10: Unable to resolve constant `NotExported` https://srb.help/5002
     10 |      Foo::Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Do you need to `export Foo::Bar::OtherPackage::NotExported` in package `Foo::Bar::OtherPackage`?
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/other_class.rb:7: Constant `Foo::Bar::OtherPackage::NotExported` is defined here:
-     7 |  class NotExported
-          ^^^^^^^^^^^^^^^^^
-  Note:
-    Try running generate-packages.sh
   Autocorrect: Use `-a` to autocorrect
     other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::NotExported`
      4 |  export Foo::Bar::OtherPackage::OtherClass
                                                    ^
+    other/other_class.rb:7: Defined here
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+  Note:
+    Try running generate-packages.sh
 
 foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
     11 |      Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Do you need to `export Foo::Bar::OtherPackage::NotExported` in package `Foo::Bar::OtherPackage`?
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/other_class.rb:7: Constant `Foo::Bar::OtherPackage::NotExported` is defined here:
-     7 |  class NotExported
-          ^^^^^^^^^^^^^^^^^
-  Note:
-    Try running generate-packages.sh
   Autocorrect: Use `-a` to autocorrect
     other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::NotExported`
      4 |  export Foo::Bar::OtherPackage::OtherClass
                                                    ^
+    other/other_class.rb:7: Defined here
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+  Note:
+    Try running generate-packages.sh
 
 foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
     12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Do you need to `export Foo::Bar::OtherPackage::Inner` in package `Foo::Bar::OtherPackage`?
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/other_class.rb:10: Constant `Foo::Bar::OtherPackage::Inner` is defined here:
-    10 |  class Inner::AlsoNotExported
-                ^^^^^
-  Note:
-    Try running generate-packages.sh
   Autocorrect: Use `-a` to autocorrect
     other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::Inner`
      4 |  export Foo::Bar::OtherPackage::OtherClass
                                                    ^
+    other/other_class.rb:10: Defined here
+    10 |  class Inner::AlsoNotExported
+                ^^^^^
+  Note:
+    Try running generate-packages.sh
 
 foo_class.rb:13: Unable to resolve constant `Inner` https://srb.help/5002
     13 |      Bar::OtherPackage::Inner::AlsoNotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Do you need to `export Foo::Bar::OtherPackage::Inner` in package `Foo::Bar::OtherPackage`?
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/other_class.rb:10: Constant `Foo::Bar::OtherPackage::Inner` is defined here:
-    10 |  class Inner::AlsoNotExported
-                ^^^^^
-  Note:
-    Try running generate-packages.sh
   Autocorrect: Use `-a` to autocorrect
     other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::Inner`
      4 |  export Foo::Bar::OtherPackage::OtherClass
                                                    ^
+    other/other_class.rb:10: Defined here
+    10 |  class Inner::AlsoNotExported
+                ^^^^^
+  Note:
+    Try running generate-packages.sh
 Errors: 4
