@@ -111,10 +111,18 @@ genrule(
         "lsp_messages_enums_gen.h",
         "lsp_messages_enums_gen.cc",
     ],
-    cmd = "$(location :generate_lsp_messages) $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) \
-             $(location lsp_messages_enums_gen.h) $(location lsp_messages_enums_gen.cc) && \
-             $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) \
-             $(location lsp_messages_enums_gen.h) $(location lsp_messages_enums_gen.cc)",
+    cmd = """
+    set -euo pipefail
+
+    $(location :generate_lsp_messages) \
+        $(location lsp_messages_enums_gen.h) \
+        $(location lsp_messages_enums_gen.cc) \
+        $(location lsp_messages_gen.h) \
+        $(location lsp_messages_gen.cc)
+
+    $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) \
+        $(location lsp_messages_enums_gen.h) $(location lsp_messages_enums_gen.cc)
+    """,
     tools = [
         ":generate_lsp_messages",
         "//tools:clang-format",
