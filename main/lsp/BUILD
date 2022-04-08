@@ -8,10 +8,7 @@ cc_library(
         "notifications/*.cc",
         "watchman/*.cc",
     ]) + [
-        "lsp_messages_gen.h",
-        "lsp_messages_gen.cc",
-        "lsp_messages_enums_gen.h",
-        "lsp_messages_enums_gen.cc",
+        ":lsp_messages",
         "LSPFileUpdates.h",
         "DefLocSaver.h",
         "watchman/WatchmanProcess.h",
@@ -103,14 +100,30 @@ cc_binary(
     ],
 )
 
+LSP_MESSAGES_SHARDS = [
+    "lsp_messages_gen_1.cc",
+    "lsp_messages_gen_2.cc",
+    "lsp_messages_gen_3.cc",
+    "lsp_messages_gen_4.cc",
+    "lsp_messages_gen_5.cc",
+]
+
+filegroup(
+    name = "lsp_messages",
+    srcs = [
+        "lsp_messages_gen.h",
+        "lsp_messages_enums_gen.h",
+        "lsp_messages_enums_gen.cc",
+    ] + LSP_MESSAGES_SHARDS,
+)
+
 genrule(
     name = "generate_lsp_messages_h",
     outs = [
-        "lsp_messages_gen.h",
-        "lsp_messages_gen.cc",
         "lsp_messages_enums_gen.h",
         "lsp_messages_enums_gen.cc",
-    ],
+        "lsp_messages_gen.h",
+    ] + LSP_MESSAGES_SHARDS,
     cmd = """
     set -euo pipefail
 
@@ -118,11 +131,14 @@ genrule(
         $(location lsp_messages_enums_gen.h) \
         $(location lsp_messages_enums_gen.cc) \
         $(location lsp_messages_gen.h) \
-        $(location lsp_messages_gen.cc)
+        {shards}
 
-    $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) \
-        $(location lsp_messages_enums_gen.h) $(location lsp_messages_enums_gen.cc)
-    """,
+    $(location //tools:clang-format) -i \
+        $(location lsp_messages_enums_gen.h) \
+        $(location lsp_messages_enums_gen.cc) \
+        $(location lsp_messages_gen.h) \
+        {shards}
+    """.format(shards = " ".join(["$(location {})".format(file) for file in LSP_MESSAGES_SHARDS])),
     tools = [
         ":generate_lsp_messages",
         "//tools:clang-format",
