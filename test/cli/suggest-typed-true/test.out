@@ -9,8 +9,7 @@ suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022
      1 |def true_func
         ^
   Autocorrect: Use `-a` to autocorrect
-    suggest-typed-true.rb:1: Insert `# typed: true
-`
+    suggest-typed-true.rb:1: Insert `# typed: true`
      1 |def true_func
         ^
 Errors: 1
@@ -19,8 +18,7 @@ suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022
      1 |def true_func
         ^
   Autocorrect: Use `-a` to autocorrect
-    suggest-typed-true.rb:1: Insert `# typed: true
-`
+    suggest-typed-true.rb:1: Insert `# typed: true`
      1 |def true_func
         ^
 Errors: 1
@@ -29,8 +27,7 @@ suggest-typed-ignore.rb:1: You could add `# typed: ignore` https://srb.help/7022
      1 |Foo
         ^
   Autocorrect: Done
-    suggest-typed-ignore.rb:1: Inserted `# typed: ignore
-`
+    suggest-typed-ignore.rb:1: Inserted `# typed: ignore`
      1 |Foo
         ^
 Errors: 1
@@ -42,8 +39,7 @@ suggest-typed-false.rb:1: You could add `# typed: false` https://srb.help/7022
      1 |false_func
         ^
   Autocorrect: Done
-    suggest-typed-false.rb:1: Inserted `# typed: false
-`
+    suggest-typed-false.rb:1: Inserted `# typed: false`
      1 |false_func
         ^
 Errors: 1
@@ -55,8 +51,7 @@ suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022
      1 |def true_func
         ^
   Autocorrect: Done
-    suggest-typed-true.rb:1: Inserted `# typed: true
-`
+    suggest-typed-true.rb:1: Inserted `# typed: true`
      1 |def true_func
         ^
 Errors: 1
@@ -69,8 +64,7 @@ suggest-typed-strict.rb:1: You could add `# typed: strict` https://srb.help/7022
      1 |extend T::Sig
         ^
   Autocorrect: Done
-    suggest-typed-strict.rb:1: Inserted `# typed: strict
-`
+    suggest-typed-strict.rb:1: Inserted `# typed: strict`
      1 |extend T::Sig
         ^
 Errors: 1
@@ -86,8 +80,7 @@ suggest-typed-strong.rb:1: You could add `# typed: strict` https://srb.help/7022
      1 |1
         ^
   Autocorrect: Done
-    suggest-typed-strong.rb:1: Inserted `# typed: strict
-`
+    suggest-typed-strong.rb:1: Inserted `# typed: strict`
      1 |1
         ^
 Errors: 1
@@ -99,8 +92,7 @@ empty.rb:1: You could add `# typed: strict` https://srb.help/7022
      1 |
         ^
   Autocorrect: Use `-a` to autocorrect
-    empty.rb:1: Insert `# typed: strict
-`
+    empty.rb:1: Insert `# typed: strict`
      1 |
         ^
 Errors: 1
@@ -109,8 +101,7 @@ suggest-typed-with-too-low.rb:2: You could add `# typed: strict` https://srb.hel
      2 |# typed: false
      3 |
   Autocorrect: Done
-    suggest-typed-with-too-low.rb:2: Replaced with `# typed: strict
-`
+    suggest-typed-with-too-low.rb:2: Replaced with `# typed: strict`
      2 |# typed: false
      3 |
 Errors: 1
@@ -131,8 +122,7 @@ suggest-typed-shabang.rb:2: You could add `# typed: true` https://srb.help/7022
      2 |def true_func
         ^
   Autocorrect: Done
-    suggest-typed-shabang.rb:2: Inserted `# typed: true
-`
+    suggest-typed-shabang.rb:2: Inserted `# typed: true`
      2 |def true_func
         ^
 Errors: 1

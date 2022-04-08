@@ -2,8 +2,7 @@ suggest-sig-literal.rb:2: This function does not have a `sig` https://srb.help/7
      2 |def index_for_live(fields)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig-literal.rb:2: Inserted `sig {params(fields: T.untyped).returns(T::Array[T::Array[T.any(Symbol, Integer)]])}
-`
+    suggest-sig-literal.rb:2: Inserted `sig {params(fields: T.untyped).returns(T::Array[T::Array[T.any(Symbol, Integer)]])}`
      2 |def index_for_live(fields)
         ^
 Errors: 1

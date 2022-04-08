@@ -30,7 +30,7 @@ type_argument_suggest_unsafe.rb:41: Call to method `foo` on unconstrained generi
     41 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                   ^
   Autocorrect: Done
-    type_argument_suggest_unsafe.rb:41: Replaced with ` {|x| T.unsafe(x).foo}`
+    type_argument_suggest_unsafe.rb:41: Replaced with `{|x| T.unsafe(x).foo}`
     41 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                 ^^^^^^^
 Errors: 3

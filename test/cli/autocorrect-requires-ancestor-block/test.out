@@ -15,7 +15,7 @@ autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` only accepts a bl
     Use --isolate-error-code 5062 -a --typed true to auto-correct using the new syntax
   Autocorrect: Done
     autocorrect-requires-ancestor-block.rb:13: Replaced with `requires_ancestor { RA2 }
-  requires_ancestor { RA3 }`
+      requires_ancestor { RA3 }`
     13 |  requires_ancestor RA2, RA3
           ^^^^^^^^^^^^^^^^^^^^^^^^^^
 

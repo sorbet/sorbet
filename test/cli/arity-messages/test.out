@@ -8,7 +8,7 @@ arity-messages.rb:4: Too many positional arguments provided for method `Object#f
      4 |foo 1
             ^
   Autocorrect: Done
-    arity-messages.rb:4: Inserted `x: `
+    arity-messages.rb:4: Inserted `x:`
      4 |foo 1
             ^
 
@@ -26,7 +26,7 @@ arity-messages.rb:8: Too many positional arguments provided for method `Object#b
      8 |bar(5, x: 8)
             ^
   Autocorrect: Done
-    arity-messages.rb:8: Inserted `y: `
+    arity-messages.rb:8: Inserted `y:`
      8 |bar(5, x: 8)
             ^
 
@@ -50,7 +50,7 @@ arity-messages.rb:12: Too many positional arguments provided for method `Object#
     12 |baz 7
             ^
   Autocorrect: Done
-    arity-messages.rb:12: Inserted `x: `
+    arity-messages.rb:12: Inserted `x:`
     12 |baz 7
             ^
 
@@ -114,7 +114,7 @@ arity-messages.rb:30: Too many positional arguments provided for method `Object#
     30 |paperino(2, 3, z: 4)
                     ^
   Autocorrect: Done
-    arity-messages.rb:30: Inserted `y: `
+    arity-messages.rb:30: Inserted `y:`
     30 |paperino(2, 3, z: 4)
                     ^
 Errors: 12

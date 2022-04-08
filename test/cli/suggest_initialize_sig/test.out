@@ -13,9 +13,9 @@ test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:16: The initialize met
     19 |    .returns(Integer)
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:16: Replace with `params(
-      x: Integer
-    )
-    .void`
+          x: Integer
+        )
+        .void`
     16 |    params(
     17 |      x: Integer
     18 |    )
@@ -28,9 +28,9 @@ test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:30: The initialize met
     33 |    .returns(T::Array[T.any(String, T::Enum)])
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:30: Replace with `params(
-      x: T::Array[T.any(String, T::Enum)]
-    )
-    .void`
+          x: T::Array[T.any(String, T::Enum)]
+        )
+        .void`
     30 |    params(
     31 |      x: T::Array[T.any(String, T::Enum)]
     32 |    )
@@ -61,11 +61,11 @@ test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:71: The initialize met
     76 |    .checked(:tests)
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:71: Replace with `params(
-      path: String,
-      key: String
-    )
-    .void
-    .checked(:tests)`
+          path: String,
+          key: String
+        )
+        .void
+        .checked(:tests)`
     71 |    params(
     72 |      path: String,
     73 |      key: String
@@ -81,10 +81,10 @@ test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:86: The initialize met
     90 |    .returns(T.self_type).checked(:tests)
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest_initialize_sig/suggest_initialize_sig.rb:86: Replace with `params(
-      path: String,
-      key: String
-    )
-    .void.checked(:tests)`
+          path: String,
+          key: String
+        )
+        .void.checked(:tests)`
     86 |    params(
     87 |      path: String,
     88 |      key: String

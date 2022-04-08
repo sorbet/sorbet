@@ -8,8 +8,7 @@ foo_bar/thing.test.rb:5: Unable to resolve constant `Thing` https://srb.help/500
      3 |class Foo::Bar::Exported
               ^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    foo_bar/__package.rb:4: Insert `
-  export_for_test Foo::Bar`
+    foo_bar/__package.rb:4: Insert `export_for_test Foo::Bar`
      4 |  export Foo::Bar::Exported
                                    ^
 
@@ -23,8 +22,7 @@ other/other.test.rb:5: Unable to resolve constant `Thing` https://srb.help/5002
      3 |class Foo::Bar::Thing
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    foo_bar/__package.rb:4: Insert `
-  export Foo::Bar::Thing`
+    foo_bar/__package.rb:4: Insert `export Foo::Bar::Thing`
      4 |  export Foo::Bar::Exported
                                    ^
 Errors: 2

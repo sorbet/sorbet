@@ -2,8 +2,7 @@ autocorrect-helpers.rb:4: Method `interface!` does not exist on `T.class_of(S1)`
      4 |  interface!
           ^^^^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:4: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:4: Inserted `extend T::Helpers`
      4 |  interface!
         ^
 
@@ -11,8 +10,7 @@ autocorrect-helpers.rb:8: Method `abstract!` does not exist on `T.class_of(S2)` 
      8 |  abstract!
           ^^^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:8: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:8: Inserted `extend T::Helpers`
      8 |  abstract!
         ^
 
@@ -20,8 +18,7 @@ autocorrect-helpers.rb:12: Method `final!` does not exist on `T.class_of(S3)` ht
     12 |  final!
           ^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:12: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:12: Inserted `extend T::Helpers`
     12 |  final!
         ^
 
@@ -29,8 +26,7 @@ autocorrect-helpers.rb:16: Method `sealed!` does not exist on `T.class_of(S4)` h
     16 |  sealed!
           ^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:16: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:16: Inserted `extend T::Helpers`
     16 |  sealed!
         ^
   Did you mean:
@@ -42,8 +38,7 @@ autocorrect-helpers.rb:20: Method `interface!` does not exist on `T.class_of(S5)
     20 |  interface!
           ^^^^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:20: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:20: Inserted `extend T::Helpers`
     20 |  interface!
         ^
 
@@ -51,8 +46,7 @@ autocorrect-helpers.rb:21: Method `final!` does not exist on `T.class_of(S5)` ht
     21 |  final!
           ^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:20: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:20: Inserted `extend T::Helpers`
     20 |  interface!
         ^
 
@@ -60,8 +54,7 @@ autocorrect-helpers.rb:25: Method `abstract!` does not exist on `T.class_of(S6)`
     25 |  abstract!
           ^^^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:25: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:25: Inserted `extend T::Helpers`
     25 |  abstract!
         ^
 
@@ -69,8 +62,7 @@ autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` h
     26 |  sealed!
           ^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:25: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:25: Inserted `extend T::Helpers`
     25 |  abstract!
         ^
   Did you mean:
@@ -82,8 +74,7 @@ autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.
     30 |  mixes_in_class_methods(S1)
           ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect-helpers.rb:30: Inserted `  extend T::Helpers
-`
+    autocorrect-helpers.rb:30: Inserted `extend T::Helpers`
     30 |  mixes_in_class_methods(S1)
         ^
   Did you mean:

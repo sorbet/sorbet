@@ -111,9 +111,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` 
     68 |  sig {void}
           ^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Insert `  extend T::Sig
-
-`
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Insert `extend T::Sig`
     68 |  sig {void}
         ^
 
@@ -129,9 +127,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` 
     69 |  sig {void}
           ^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Insert `  extend T::Sig
-
-`
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Insert `extend T::Sig`
     69 |  sig {void}
         ^
 

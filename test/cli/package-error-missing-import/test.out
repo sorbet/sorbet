@@ -5,8 +5,7 @@ foo_class.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
-  import Foo::Bar::OtherPackage`
+    __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
   Note:
@@ -19,8 +18,7 @@ foo_class.rb:8: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
-  import Foo::Bar::OtherPackage`
+    __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
   Note:
@@ -33,8 +31,7 @@ foo_class.rb:14: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
-  import Foo::Bar::OtherPackage`
+    __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
   Note:
@@ -47,8 +44,7 @@ foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `
-  test_import Foo::Bar::OtherPackage`
+    __package.rb:6: Insert `test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
   Note:

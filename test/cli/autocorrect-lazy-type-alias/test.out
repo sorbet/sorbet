@@ -29,11 +29,11 @@ autocorrect-lazy-type-alias.rb:9: No block given to `T.type_alias` https://srb.h
     12 |    ))
   Autocorrect: Done
     autocorrect-lazy-type-alias.rb:9: Replaced with `T.type_alias do
-      T.any(
-        String,
-        Integer
-      )
-    end`
+          T.any(
+            String,
+            Integer
+          )
+        end`
      9 |    Multiline = T.type_alias(T.any(
     10 |      String,
     11 |      Integer
@@ -46,11 +46,11 @@ autocorrect-lazy-type-alias.rb:14: No block given to `T.type_alias` https://srb.
     17 |    )
   Autocorrect: Done
     autocorrect-lazy-type-alias.rb:14: Replaced with `T.type_alias do
-      {
-        foo: String,
-        bar: T.nilable(Integer)
-      }
-    end`
+          {
+            foo: String,
+            bar: T.nilable(Integer)
+          }
+        end`
     14 |    MyType = T.type_alias(
     15 |      foo: String,
     16 |      bar: T.nilable(Integer),

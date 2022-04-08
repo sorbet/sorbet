@@ -2,9 +2,7 @@ autocorrect.rb:8: Method `sig` does not exist on `T.class_of(<root>)` https://sr
      8 |sig {params(a: String).void}
         ^^^
   Autocorrect: Done
-    autocorrect.rb:8: Inserted `extend T::Sig
-
-`
+    autocorrect.rb:8: Inserted `extend T::Sig`
      8 |sig {params(a: String).void}
         ^
 
@@ -16,9 +14,7 @@ autocorrect.rb:19: Method `sig` does not exist on `T.class_of(<root>)` https://s
     19 |sig {params(a: T.nilable(Integer)).void}
         ^^^
   Autocorrect: Done
-    autocorrect.rb:19: Inserted `extend T::Sig
-
-`
+    autocorrect.rb:19: Inserted `extend T::Sig`
     19 |sig {params(a: T.nilable(Integer)).void}
         ^
 

@@ -2,12 +2,10 @@ test/cli/isolate-error-code/isolate-error-code.rb:6: This function does not have
      6 | def foo
          ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig {returns(Integer)}
- `
+    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig {returns(Integer)}`
      6 | def foo
          ^
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `  extend T::Sig
-`
+    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `extend T::Sig`
      6 | def foo
         ^
 Errors: 1
@@ -16,12 +14,10 @@ test/cli/isolate-error-code/isolate-error-code.rb:6: This function does not have
      6 | def foo
          ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig {returns(Integer)}
- `
+    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig {returns(Integer)}`
      6 | def foo
          ^
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `  extend T::Sig
-`
+    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `extend T::Sig`
      6 | def foo
         ^
 Errors: 1
