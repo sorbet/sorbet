@@ -128,8 +128,8 @@ public:
         }
     }
 
-    void checkExpectations(string prefix = "") {
-        for (auto &gotPhase : got) {
+    void checkExpectations(string prefix = "") const {
+        for (const auto &gotPhase : got) {
             auto expectation = test.expectations.find(gotPhase.first);
             REQUIRE_MESSAGE(expectation != test.expectations.end(),
                             prefix << "missing expectation for " << gotPhase.first);
@@ -697,35 +697,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         extension->finishTypecheck(*gs);
     }
 
-    handler.checkExpectations();
-
-    if (test.expectations.contains("symbol-table")) {
-        string table = gs->toString() + '\n';
-        CHECK_EQ_DIFF(handler.got["symbol-table"], table, "symbol-table should not be mutated by CFG+inference");
-    }
-
-    if (test.expectations.contains("symbol-table-raw")) {
-        string table = gs->showRaw() + '\n';
-        CHECK_EQ_DIFF(handler.got["symbol-table-raw"], table,
-                      "symbol-table-raw should not be mutated by CFG+inference");
-    }
-
-    // Check warnings and errors
-    {
-        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
-        for (auto &error : handler.errors) {
-            if (error->isSilenced) {
-                continue;
-            }
-            auto diag = errorToDiagnostic(*gs, *error);
-            ENFORCE(diag != nullptr, "Error was given no valid location - '{}'", error->toString(*gs));
-
-            auto path = error->loc.file().data(*gs).path();
-            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
-        }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
-    }
-
     // Check autocorrects
     {
         auto autocorrects = vector<core::AutocorrectSuggestion>{};
@@ -766,6 +737,33 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     handler.checkExpectations();
+
+    if (test.expectations.contains("symbol-table")) {
+        string table = gs->toString() + '\n';
+        CHECK_EQ_DIFF(handler.got["symbol-table"], table, "symbol-table should not be mutated by CFG+inference");
+    }
+
+    if (test.expectations.contains("symbol-table-raw")) {
+        string table = gs->showRaw() + '\n';
+        CHECK_EQ_DIFF(handler.got["symbol-table-raw"], table,
+                      "symbol-table-raw should not be mutated by CFG+inference");
+    }
+
+    // Check warnings and errors
+    {
+        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+        for (auto &error : handler.errors) {
+            if (error->isSilenced) {
+                continue;
+            }
+            auto diag = errorToDiagnostic(*gs, *error);
+            ENFORCE(diag != nullptr, "Error was given no valid location - '{}'", error->toString(*gs));
+
+            auto path = error->loc.file().data(*gs).path();
+            diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
+        }
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+    }
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->flushAllErrors(*gs);
