@@ -78,27 +78,20 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @.str.10 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @"stackFramePrecomputed_func_<root>.17<static-init>$153" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
-@"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"rubyStrFrozen_test/testdata/compiler/class.rb" = internal unnamed_addr global i64 0, align 8
-@"str_test/testdata/compiler/class.rb" = private unnamed_addr constant [32 x i8] c"test/testdata/compiler/class.rb\00", align 1
 @iseqEncodedArray = internal global [10 x i64] zeroinitializer
 @fileLineNumberInfo = internal global %struct.SorbetLineNumberInfo zeroinitializer
-@str_Foo = private unnamed_addr constant [4 x i8] c"Foo\00", align 1
-@str_Baz = private unnamed_addr constant [4 x i8] c"Baz\00", align 1
 @"stackFramePrecomputed_func_Foo.13<static-init>" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<module:Foo>" = internal unnamed_addr global i64 0, align 8
-@"str_<module:Foo>" = private unnamed_addr constant [13 x i8] c"<module:Foo>\00", align 1
 @"rubyStrFrozen_<module:Foo>" = internal unnamed_addr global i64 0, align 8
-@str_Bar = private unnamed_addr constant [4 x i8] c"Bar\00", align 1
 @"stackFramePrecomputed_func_Foo::Bar.13<static-init>" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<class:Foo::Bar>" = internal unnamed_addr global i64 0, align 8
-@"str_<class:Foo::Bar>" = private unnamed_addr constant [17 x i8] c"<class:Foo::Bar>\00", align 1
 @"rubyStrFrozen_<class:Foo::Bar>" = internal unnamed_addr global i64 0, align 8
 @"stackFramePrecomputed_func_Baz.13<static-init>" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @"rubyIdPrecomputed_<class:Baz>" = internal unnamed_addr global i64 0, align 8
-@"str_<class:Baz>" = private unnamed_addr constant [12 x i8] c"<class:Baz>\00", align 1
 @"rubyStrFrozen_<class:Baz>" = internal unnamed_addr global i64 0, align 8
+@sorbet_moduleStringTable = internal unnamed_addr constant [117 x i8] c"<top (required)>\00test/testdata/compiler/class.rb\00Foo\00Baz\00Object\00master\00<module:Foo>\00Bar\00<class:Foo::Bar>\00<class:Baz>\00", align 1
 @guard_epoch_Foo = linkonce local_unnamed_addr global i64 0
 @guarded_const_Foo = linkonce local_unnamed_addr global i64 0
 @rb_cObject = external local_unnamed_addr constant i64
@@ -180,7 +173,7 @@ entryInitializers:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyIdPrecomputed_<top (required)>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 noundef 16) #8
+  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 0), i64 noundef 16) #8
   store i64 %0, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   ret void
 }
@@ -188,7 +181,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyStrFrozen_<top (required)>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 noundef 16) #8
+  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 0), i64 noundef 16) #8
   tail call void @rb_gc_register_mark_object(i64 %0) #8
   store i64 %0, i64* @"rubyStrFrozen_<top (required)>", align 8
   ret void
@@ -197,7 +190,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyStrFrozen_test/testdata/compiler/class.rb"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([32 x i8], [32 x i8]* @"str_test/testdata/compiler/class.rb", i64 0, i64 0), i64 noundef 31) #8
+  %0 = tail call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 17), i64 noundef 31) #8
   tail call void @rb_gc_register_mark_object(i64 %0) #8
   store i64 %0, i64* @"rubyStrFrozen_test/testdata/compiler/class.rb", align 8
   ret void
@@ -222,7 +215,7 @@ entry:
   tail call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %0, %struct.rb_control_frame_struct* %2, %struct.rb_iseq_struct* %stackFrame.i) #8
   %8 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 0
   store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 4), i64** %8, align 8, !dbg !19, !tbaa !10
-  %9 = tail call i64 @rb_define_module(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0)) #8, !dbg !24
+  %9 = tail call i64 @rb_define_module(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 49)) #8, !dbg !24
   %10 = tail call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %9) #8, !dbg !24
   %stackFrame.i1.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo.13<static-init>", align 8
   %11 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
@@ -254,7 +247,7 @@ entry:
   %guardUpdated = icmp eq i64 %25, %26, !dbg !28
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !28
   %27 = load i64, i64* @rb_cObject, align 8, !dbg !28
-  %28 = tail call i64 @rb_define_class_under(i64 %24, i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_Bar, i64 0, i64 0), i64 %27) #8, !dbg !28
+  %28 = tail call i64 @rb_define_class_under(i64 %24, i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 84), i64 %27) #8, !dbg !28
   %29 = tail call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %28) #8, !dbg !28
   %stackFrame.i.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo::Bar.13<static-init>", align 8
   %30 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
@@ -273,7 +266,7 @@ entry:
   tail call void @sorbet_popFrame() #8, !dbg !28
   tail call void @sorbet_popFrame() #8, !dbg !24
   store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %8, align 8, !dbg !24, !tbaa !10
-  %39 = tail call i64 @rb_define_class(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz, i64 0, i64 0), i64 %27) #8, !dbg !35
+  %39 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 53), i64 %27) #8, !dbg !35
   %40 = tail call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %39) #8, !dbg !35
   %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Baz.13<static-init>", align 8
   %41 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
@@ -308,7 +301,7 @@ entryInitializers:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyIdPrecomputed_<module:Foo>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<module:Foo>", i64 0, i64 0), i64 noundef 12) #8
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 71), i64 noundef 12) #8
   store i64 %0, i64* @"rubyIdPrecomputed_<module:Foo>", align 8
   ret void
 }
@@ -316,7 +309,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyStrFrozen_<module:Foo>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<module:Foo>", i64 0, i64 0), i64 noundef 12) #8
+  %0 = tail call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 71), i64 noundef 12) #8
   tail call void @rb_gc_register_mark_object(i64 %0) #8
   store i64 %0, i64* @"rubyStrFrozen_<module:Foo>", align 8
   ret void
@@ -337,7 +330,7 @@ entryInitializers:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyIdPrecomputed_<class:Foo::Bar>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<class:Foo::Bar>", i64 0, i64 0), i64 noundef 16) #8
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 88), i64 noundef 16) #8
   store i64 %0, i64* @"rubyIdPrecomputed_<class:Foo::Bar>", align 8
   ret void
 }
@@ -345,7 +338,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyStrFrozen_<class:Foo::Bar>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<class:Foo::Bar>", i64 0, i64 0), i64 noundef 16) #8
+  %0 = tail call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 88), i64 noundef 16) #8
   tail call void @rb_gc_register_mark_object(i64 %0) #8
   store i64 %0, i64* @"rubyStrFrozen_<class:Foo::Bar>", align 8
   ret void
@@ -366,7 +359,7 @@ entryInitializers:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyIdPrecomputed_<class:Baz>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([12 x i8], [12 x i8]* @"str_<class:Baz>", i64 0, i64 0), i64 noundef 11) #8
+  %0 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 105), i64 noundef 11) #8
   store i64 %0, i64* @"rubyIdPrecomputed_<class:Baz>", align 8
   ret void
 }
@@ -374,7 +367,7 @@ constr:
 ; Function Attrs: nounwind ssp
 define internal fastcc void @"Constr_rubyStrFrozen_<class:Baz>"() unnamed_addr #4 {
 constr:
-  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([12 x i8], [12 x i8]* @"str_<class:Baz>", i64 0, i64 0), i64 noundef 11) #8
+  %0 = tail call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 105), i64 noundef 11) #8
   tail call void @rb_gc_register_mark_object(i64 %0) #8
   store i64 %0, i64* @"rubyStrFrozen_<class:Baz>", align 8
   ret void
@@ -385,7 +378,7 @@ declare void @llvm.assume(i1 noundef) #6
 
 ; Function Attrs: ssp
 define linkonce void @const_recompute_Foo() local_unnamed_addr #3 {
-  %1 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0), i64 3)
+  %1 = tail call i64 @sorbet_getConstant(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 49), i64 3)
   store i64 %1, i64* @guarded_const_Foo, align 8
   %2 = load i64, i64* @ruby_vm_global_constant_state, align 8, !tbaa !29
   store i64 %2, i64* @guard_epoch_Foo, align 8
