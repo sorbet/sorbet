@@ -2268,7 +2268,6 @@ private:
                               bool isPrivateOk, bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
-        // I don't think untyped matters here because of the T.any at the end
         if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
             nonNilBlockType = TypeAndOrigins{Types::dropNil(gs, blockType.type), blockType.origins};
             typeIsNilable = true;
