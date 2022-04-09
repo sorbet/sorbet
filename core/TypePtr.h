@@ -42,6 +42,7 @@ public:
         BlamedUntyped,
         UnresolvedClassType,
         UnresolvedAppliedType,
+        LiteralIntegerType,
     };
 
     // A mapping from type to its corresponding tag.

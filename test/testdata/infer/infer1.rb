@@ -32,7 +32,7 @@ def baz6(cond)
  else
    b = "foo"
  end
- b = "foo".getbyte(b) # error: Expected `Integer` but found `T.any(Integer, String)` for argument `arg0`
+ b = "foo".getbyte(b) # error: Expected `Integer` but found `T.any(String, Integer)` for argument `arg0`
 end
 
 def baz7(cond)

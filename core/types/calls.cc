@@ -41,6 +41,10 @@ bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klas
     return underlying(gs).derivesFrom(gs, klass);
 }
 
+bool LiteralIntegerType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
+    return underlying(gs).derivesFrom(gs, klass);
+}
+
 bool ShapeType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying(gs).derivesFrom(gs, klass);
 }
@@ -50,6 +54,10 @@ bool TupleType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass)
 }
 
 DispatchResult LiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return dispatchCallProxyType(gs, underlying(gs), args);
+}
+
+DispatchResult LiteralIntegerType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
@@ -498,7 +506,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<LiteralType>(tp)) {
+    } else if (isa_type<LiteralType>(tp) || isa_type<LiteralIntegerType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
         }
@@ -1237,6 +1245,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
+                        if (!isa_type<LiteralType>(litType)) {
+                            return false;
+                        }
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
@@ -2090,7 +2101,8 @@ public:
         ENFORCE(args.args.size() % 2 == 0);
 
         for (int i = 0; i < args.args.size(); i += 2) {
-            if (!isa_type<LiteralType>(args.args[i]->type)) {
+            if (!isa_type<LiteralType>(args.args[i]->type) &&
+                !isa_type<LiteralIntegerType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -2179,15 +2191,15 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        auto beforeLit = cast_type_nonnull<LiteralType>(args.args[1]->type);
-        auto afterLit = cast_type_nonnull<LiteralType>(args.args[2]->type);
-        if (!(beforeLit.underlying(gs).derivesFrom(gs, Symbols::Integer()) &&
-              afterLit.underlying(gs).derivesFrom(gs, Symbols::Integer()))) {
+        if (!(isa_type<LiteralIntegerType>(args.args[1]->type) &&
+              isa_type<LiteralIntegerType>(args.args[2]->type))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit.asInteger();
-        int after = (int)afterLit.asInteger();
+        auto &beforeLit = cast_type_nonnull<LiteralIntegerType>(args.args[1]->type);
+        auto &afterLit = cast_type_nonnull<LiteralIntegerType>(args.args[2]->type);
+        int before = (int)beforeLit.value;
+        int after = (int)afterLit.value;
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -2939,16 +2951,13 @@ public:
         if (args.args.size() == 1) {
             argType = args.args.front()->type;
         }
-        if (!isa_type<LiteralType>(argType)) {
+        if (!isa_type<LiteralIntegerType>(argType)) {
             return;
         }
 
-        auto lit = cast_type_nonnull<LiteralType>(argType);
-        if (!lit.underlying(gs).derivesFrom(gs, Symbols::Integer())) {
-            return;
-        }
+        auto &lit = cast_type_nonnull<LiteralIntegerType>(argType);
 
-        auto idx = lit.asInteger();
+        auto idx = lit.value;
         if (idx < 0) {
             idx = tuple->elems.size() + idx;
         }
@@ -3192,7 +3201,12 @@ public:
         auto values = shape->values;
         auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
             auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) { return key.equals(cast_type_nonnull<LiteralType>(lit)); });
+                absl::c_find_if(keys, [&key](auto &lit) {
+                        if (!isa_type<LiteralType>(lit)) {
+                            return false;
+                        }
+                        return key.equals(cast_type_nonnull<LiteralType>(lit));
+                    });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
@@ -3219,6 +3233,9 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
+                if (!isa_type<LiteralType>(keyType)) {
+                    return;
+                }
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
@@ -3460,18 +3477,17 @@ public:
             ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
                     args.locs.args.size());
 
-            if (!isa_type<LiteralType>(argTyp)) {
+            if (!isa_type<LiteralIntegerType>(argTyp)) {
                 if (auto e = gs.beginError(args.argLoc(0), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
             }
 
-            auto lt = cast_type_nonnull<LiteralType>(argTyp);
-            ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
+            auto &lt = cast_type_nonnull<LiteralIntegerType>(argTyp);
 
-            if (lt.asInteger() >= 0) {
-                depth = lt.asInteger();
+            if (lt.value >= 0) {
+                depth = lt.value;
             } else {
                 // Negative values behave like no depth was given
                 depth = MAX_DEPTH;

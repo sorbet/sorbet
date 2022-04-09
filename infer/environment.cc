@@ -920,7 +920,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     auto mapType = core::Types::arrayOf(ctx, returnType);
 
     const core::TypeAndOrigins recvType = {mapType, {loc}};
-    core::TypeAndOrigins arg{core::make_type<core::LiteralType>((int64_t)flattenDepth), recvType.origins};
+    core::TypeAndOrigins arg{core::make_type<core::LiteralIntegerType>((int64_t)flattenDepth), recvType.origins};
     InlinedVector<const core::TypeAndOrigins *, 2> args{&arg};
 
     InlinedVector<core::LocOffsets, 2> argLocs{loc.offsets()};
@@ -1275,7 +1275,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 // Fetch the type for the argument out of the parameters for the block
                 // by simulating a blockParam[i] call.
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
-                core::TypePtr argType = core::make_type<core::LiteralType>((int64_t)i.argId);
+                core::TypePtr argType = core::make_type<core::LiteralIntegerType>((int64_t)i.argId);
 
                 core::TypeAndOrigins arg;
                 arg.type = argType;

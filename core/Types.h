@@ -214,6 +214,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::AndType:
             return true;
         case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::LiteralIntegerType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
@@ -233,6 +234,7 @@ inline bool is_proxy_type(const TypePtr &what) {
     }
     switch (what.tag()) {
         case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::LiteralIntegerType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
@@ -475,15 +477,13 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 
 TYPE_INLINED(LiteralType) final {
     union {
-        const int64_t value;
         const double floatval;
         const NameRef name;
     };
 
 public:
-    enum class LiteralTypeKind : uint8_t { Integer, String, Symbol, Float };
+    enum class LiteralTypeKind : uint8_t { String, Symbol, Float };
     const LiteralTypeKind literalKind;
-    LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
@@ -517,19 +517,6 @@ template <> inline TypePtr make_type<LiteralType, double>(double &&val) {
                    absl::bit_cast<uint64_t>(val));
 }
 
-template <> inline TypePtr make_type<LiteralType, int64_t>(int64_t &&val) {
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(LiteralType::LiteralTypeKind::Integer),
-                   absl::bit_cast<uint64_t>(val));
-}
-
-template <> inline TypePtr make_type<LiteralType, long &>(long &val) {
-    return make_type<LiteralType>(static_cast<int64_t>(val));
-}
-
-template <> inline TypePtr make_type<LiteralType, long long &>(long long &val) {
-    return make_type<LiteralType>(static_cast<int64_t>(val));
-}
-
 template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
     return make_type<LiteralType>(static_cast<double>(val));
 }
@@ -550,13 +537,45 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::Float:
             return LiteralType(absl::bit_cast<double>(what.value));
-        case LiteralType::LiteralTypeKind::Integer:
-            return LiteralType(absl::bit_cast<int64_t>(what.value));
         case LiteralType::LiteralTypeKind::String:
             return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
         case LiteralType::LiteralTypeKind::Symbol:
             return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
     }
+}
+
+TYPE(LiteralIntegerType) final {
+public:
+    const int64_t value;
+
+    LiteralIntegerType(int64_t val);
+    TypePtr underlying(const GlobalState &gs) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
+
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
+    std::string showValue(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
+
+    bool equals(const LiteralIntegerType &rhs) const;
+    void _sanityCheck(const GlobalState &gs) const;
+};
+CheckSize(LiteralIntegerType, 8, 8);
+
+template <> inline TypePtr make_type<LiteralIntegerType, int64_t>(int64_t &&val) {
+    return make_type<LiteralIntegerType>(absl::bit_cast<uint64_t>(val));
+}
+
+template <> inline TypePtr make_type<LiteralIntegerType, long &>(long &val) {
+    return make_type<LiteralIntegerType>(static_cast<int64_t>(val));
+}
+
+template <> inline TypePtr make_type<LiteralIntegerType, long long &>(long long &val) {
+    return make_type<LiteralIntegerType>(static_cast<int64_t>(val));
 }
 
 /*
@@ -713,6 +732,7 @@ public:
 
     std::optional<size_t> indexForKey(const TypePtr &t) const;
     std::optional<size_t> indexForKey(const LiteralType &lit) const;
+    std::optional<size_t> indexForKey(const LiteralIntegerType &lit) const;
 };
 CheckSize(ShapeType, 48, 8);
 

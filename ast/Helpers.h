@@ -221,7 +221,7 @@ public:
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
-        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralIntegerType>(val));
     }
 
     static ExpressionPtr Float(core::LocOffsets loc, double val) {

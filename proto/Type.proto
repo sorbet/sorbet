@@ -20,6 +20,7 @@ message Type {
 
     message Literal {
         enum Kind {
+            // Unused, but kept for backwards compatibility (?)
             INTEGER = 0;
             STRING = 1;
             SYMBOL = 2;
@@ -43,6 +44,10 @@ message Type {
         repeated Type elems = 2;
     }
 
+    message LiteralInteger {
+        int64 integer = 1;
+    }
+
     enum Kind {
         // We only currently support simple types, because this is all we need
         // at this time. Others will show up as "UNKNOWN".
@@ -56,6 +61,8 @@ message Type {
         // skip a few
         OR = 10;
         AND = 11;
+        // skip some more
+        LITERALINTEGER = 13;
     }
 
     Kind kind = 1;
@@ -68,5 +75,6 @@ message Type {
         Shape shape = 104;
         Literal literal = 105;
         Tuple tuple = 106;
+        LiteralInteger literalinteger= 107;
     }
 }

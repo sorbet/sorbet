@@ -436,6 +436,18 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         result = lub(gs, l1.underlying(gs), t2.underlying(gs));
                     }
                 },
+                [&](const LiteralIntegerType &l1) {
+                    if (isa_type<LiteralIntegerType>(t2)) {
+                        auto l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                        if (l1.equals(l2)) {
+                            result = t1;
+                        } else {
+                            result = l1.underlying(gs);
+                        }
+                    } else {
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
+                    }
+                },
                 [&](const MetaType &m1) {
                     if (auto *m2 = cast_type<MetaType>(t2)) {
                         if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
@@ -774,6 +786,14 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         } else {
                             result = Types::bottom();
                         }
+                    } else {
+                        result = Types::bottom();
+                    }
+                },
+                [&](const LiteralIntegerType &l1) {
+                    auto l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                    if (l1.equals(l2)) {
+                        result = t1;
                     } else {
                         result = Types::bottom();
                     }
@@ -1235,6 +1255,16 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     }
 
                     auto l2 = cast_type_nonnull<LiteralType>(t2);
+                    result = l1.equals(l2);
+                },
+                [&](const LiteralIntegerType &l1) {
+                    if (!isa_type<LiteralIntegerType>(t2)) {
+                        // is a literal a subtype of a different kind of proxy
+                        result = false;
+                        return;
+                    }
+
+                    auto l2 = cast_type_nonnull<LiteralIntegerType>(t2);
                     result = l1.equals(l2);
                 },
                 [&](const MetaType &m1) {

@@ -279,6 +279,10 @@ public:
             return true;
         }
 
+        if (core::isa_type<core::LiteralIntegerType>(t)) {
+            return true;
+        }
+
         // IREmitterHelpers::emitLiteralish knows that its TypePtr argument is
         // restricted.  We have no such guarantees, so we have to be more defensive.
         if (t.hasUntyped()) {

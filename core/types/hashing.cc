@@ -41,11 +41,22 @@ uint32_t LiteralType::hash(const GlobalState &gs) const {
         case LiteralType::LiteralTypeKind::Float:
             rawValue = absl::bit_cast<uint64_t>(asFloat());
             break;
-        case LiteralType::LiteralTypeKind::Integer:
-            rawValue = absl::bit_cast<uint64_t>(asInteger());
-            break;
     }
 
+    uint32_t topBits = static_cast<uint32_t>(rawValue >> 32);
+    uint32_t bottomBits = static_cast<uint32_t>(rawValue & 0xFFFFFFFF);
+    result = mix(result, topBits);
+    result = mix(result, bottomBits);
+    return result;
+}
+
+uint32_t LiteralIntegerType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::LiteralIntegerType);
+    auto underlying = this->underlying(gs);
+    ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
+    result = mix(result, undSymbol.id());
+
+    uint64_t rawValue = this->value;
     uint32_t topBits = static_cast<uint32_t>(rawValue >> 32);
     uint32_t bottomBits = static_cast<uint32_t>(rawValue & 0xFFFFFFFF);
     result = mix(result, topBits);

@@ -257,6 +257,10 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
         auto a = cast_type_nonnull<LiteralType>(tp);
         return a.underlying(gs);
     }
+    if (isa_type<LiteralIntegerType>(tp)) {
+        auto &i = cast_type_nonnull<LiteralIntegerType>(tp);
+        return i.underlying(gs);
+    }
     return tp;
 }
 
@@ -309,10 +313,6 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
 }
 } // namespace
 
-LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
-    categoryCounterInc("types.allocated", "literaltype.integer");
-}
-
 LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKind::Float) {
     categoryCounterInc("types.allocated", "literaltype.double");
 }
@@ -325,11 +325,6 @@ LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
         categoryCounterInc("types.allocated", "literaltype.symbol");
     }
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
-}
-
-int64_t LiteralType::asInteger() const {
-    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Integer);
-    return value;
 }
 
 double LiteralType::asFloat() const {
@@ -349,8 +344,6 @@ core::NameRef LiteralType::unsafeAsName() const {
 
 TypePtr LiteralType::underlying(const GlobalState &gs) const {
     switch (literalKind) {
-        case LiteralTypeKind::Integer:
-            return Types::Integer();
         case LiteralTypeKind::Float:
             return Types::Float();
         case LiteralTypeKind::String:
@@ -359,6 +352,14 @@ TypePtr LiteralType::underlying(const GlobalState &gs) const {
             return Types::Symbol();
     }
     Exception::raise("should never be reached");
+}
+
+LiteralIntegerType::LiteralIntegerType(int64_t val) : value(val) {
+    categoryCounterInc("types.allocated", "literalintegertype");
+}
+
+TypePtr LiteralIntegerType::underlying(const GlobalState &gs) const {
+    return Types::Integer();
 }
 
 TupleType::TupleType(vector<TypePtr> elements) : elems(move(elements)) {
@@ -381,12 +382,18 @@ bool LiteralType::equals(const LiteralType &rhs) const {
     switch (this->literalKind) {
         case LiteralTypeKind::Float:
             return this->floatval == rhs.floatval;
-        case LiteralTypeKind::Integer:
-            return this->value == rhs.value;
         case LiteralTypeKind::Symbol:
         case LiteralTypeKind::String:
             return this->name == rhs.name;
     }
+}
+
+void LiteralIntegerType::_sanityCheck(const GlobalState &gs) const {
+    sanityCheckProxyType(gs, underlying(gs));
+}
+
+bool LiteralIntegerType::equals(const LiteralIntegerType &rhs) const {
+    return this->value == rhs.value;
 }
 
 OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
@@ -402,7 +409,7 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 }
 
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
-    DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k)); };);
+    DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k) || isa_type<LiteralIntegerType>(k)); };);
     categoryCounterInc("types.allocated", "shapetype");
     histogramInc("shapetype.keys", this->keys.size());
 }
@@ -414,7 +421,11 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
 std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
     if (isa_type<LiteralType>(t)) {
         const auto &lit = cast_type_nonnull<LiteralType>(t);
-        return indexForKey(lit);
+        return this->indexForKey(lit);
+    }
+    if (isa_type<LiteralIntegerType>(t)) {
+        auto &lit = cast_type_nonnull<LiteralIntegerType>(t);
+        return this->indexForKey(lit);
     }
     return std::nullopt;
 }
@@ -427,6 +438,20 @@ std::optional<size_t> ShapeType::indexForKey(const LiteralType &lit) const {
         const auto &candlit = cast_type_nonnull<LiteralType>(candidate);
         return candlit.equals(lit);
     });
+    if (fnd == this->keys.end()) {
+        return std::nullopt;
+    }
+    return std::distance(this->keys.begin(), fnd);
+}
+
+std::optional<size_t> ShapeType::indexForKey(const LiteralIntegerType &lit) const {
+    auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
+            if (!isa_type<LiteralIntegerType>(candidate)) {
+                return false;
+            }
+            const auto &candlit = cast_type_nonnull<LiteralIntegerType>(candidate);
+            return candlit.equals(lit);
+        });
     if (fnd == this->keys.end()) {
         return std::nullopt;
     }
@@ -765,6 +790,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
         [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
         [&](const LiteralType &lit) { ret = type; },
+        [&](const LiteralIntegerType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },

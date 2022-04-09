@@ -19,7 +19,7 @@ T.reveal_type(Array('a'..'z')) # error: Revealed type: `T::Array[String]`
 
 T.reveal_type(Array(1..10)) # error: Revealed type: `T::Array[Integer]`
 
-T.reveal_type(Array([1, 'a', 3])) # error: Revealed type: `T::Array[T.any(Integer, String)]`
+T.reveal_type(Array([1, 'a', 3])) # error: Revealed type: `T::Array[T.any(String, Integer)]`
 
 maybe_x = T.let(nil, T.nilable(String))
 res = Array(maybe_x)
