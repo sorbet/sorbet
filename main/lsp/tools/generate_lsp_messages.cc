@@ -5,7 +5,7 @@ using namespace std;
 
 const string JSONArrayType::arrayVar = "a";
 
-bool writeFile(char *path, fmt::memory_buffer &buffer) {
+bool writeFile(const char *path, fmt::memory_buffer &buffer) {
     ofstream stream(path, ios::trunc);
     if (!stream.good()) {
         cerr << "unable to open " << path << '\n';
@@ -17,8 +17,18 @@ bool writeFile(char *path, fmt::memory_buffer &buffer) {
 
 int main(int argc, char **argv) {
     if (argc < 5) {
-        cerr << "Error: Expected 4 input files\n";
+        cerr << "Error: Expected at least 4 input files\n";
         return 1;
+    }
+
+    auto enumHeader = argv[1];
+    auto msgHeader = argv[3];
+
+    std::vector<const char *> enumSource{argv[2]};
+
+    std::vector<const char *> msgSources;
+    for (auto i = 4; i < argc; i++) {
+        msgSources.push_back(argv[i]);
     }
 
     vector<std::shared_ptr<JSONClassType>> enumTypes;
@@ -28,48 +38,70 @@ int main(int argc, char **argv) {
     // Emit enums.
     {
         fmt::memory_buffer enumHeaderBuffer;
-        fmt::memory_buffer enumClassFileBuffer;
+        std::vector<fmt::memory_buffer> enumClassFileBuffer(enumSource.size());
 
-        fmt::format_to(std::back_inserter(enumClassFileBuffer), "#include \"main/lsp/json_types.h\"\n");
-        fmt::format_to(std::back_inserter(enumClassFileBuffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
-        fmt::format_to(std::back_inserter(enumClassFileBuffer), "namespace sorbet::realmain::lsp {{\n");
+        for (auto &buffer : enumClassFileBuffer) {
+            fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/json_types.h\"\n");
+            fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
+            fmt::format_to(std::back_inserter(buffer), "namespace sorbet::realmain::lsp {{\n");
+        }
 
         // Emits enums before class definitions themselves.
+        int i = 0;
         for (auto &enumType : enumTypes) {
-            enumType->emit(enumHeaderBuffer, enumClassFileBuffer);
+            auto &buffer = enumClassFileBuffer[i++ % enumClassFileBuffer.size()];
+            enumType->emit(enumHeaderBuffer, buffer);
         }
-        fmt::format_to(std::back_inserter(enumClassFileBuffer), "}}\n");
 
-        if (!writeFile(argv[3], enumHeaderBuffer)) {
+        for (auto &buffer : enumClassFileBuffer) {
+            fmt::format_to(std::back_inserter(buffer), "}}\n");
+        }
+
+        if (!writeFile(enumHeader, enumHeaderBuffer)) {
             return 1;
         }
 
-        if (!writeFile(argv[4], enumClassFileBuffer)) {
-            return 1;
+        for (auto i = 0; i < enumSource.size(); i++) {
+            auto *source = enumSource[i];
+            auto &buffer = enumClassFileBuffer[i];
+            if (!writeFile(source, buffer)) {
+                return 1;
+            }
         }
     }
 
     // Emit classes.
     {
         fmt::memory_buffer headerBuffer;
-        fmt::memory_buffer classFileBuffer;
+        std::vector<fmt::memory_buffer> classFileBuffer(msgSources.size());
 
-        fmt::format_to(std::back_inserter(classFileBuffer), "#include \"main/lsp/json_types.h\"\n");
-        fmt::format_to(std::back_inserter(classFileBuffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
-        fmt::format_to(std::back_inserter(classFileBuffer), "namespace sorbet::realmain::lsp {{\n");
-
-        for (auto &classType : classTypes) {
-            classType->emit(headerBuffer, classFileBuffer);
+        for (auto &buffer : classFileBuffer) {
+            fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/json_types.h\"\n");
+            fmt::format_to(std::back_inserter(buffer), "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
+            fmt::format_to(std::back_inserter(buffer), "namespace sorbet::realmain::lsp {{\n");
         }
-        fmt::format_to(std::back_inserter(classFileBuffer), "}}\n");
+
+        int i = 0;
+        for (auto &classType : classTypes) {
+            auto &buffer = classFileBuffer[i++ % classFileBuffer.size()];
+            classType->emit(headerBuffer, buffer);
+        }
+
+        for (auto &buffer : classFileBuffer) {
+            fmt::format_to(std::back_inserter(buffer), "}}\n");
+        }
 
         // Output buffers to files.
-        if (!writeFile(argv[1], headerBuffer)) {
+        if (!writeFile(msgHeader, headerBuffer)) {
             return 1;
         }
 
-        if (!writeFile(argv[2], classFileBuffer)) {
-            return 1;
+        for (auto i = 0; i < msgSources.size(); i++) {
+            auto *source = msgSources[i];
+            auto &buffer = classFileBuffer[i];
+            if (!writeFile(source, buffer)) {
+                return 1;
+            }
         }
     }
 
