@@ -2343,10 +2343,6 @@ private:
                              shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc, Loc blockLoc,
                              DispatchResult &res) {
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
-        for (auto &err : dispatched.main.errors) {
-            res.main.errors.emplace_back(std::move(err));
-        }
-        dispatched.main.errors.clear();
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
         auto &constr = dispatched.main.constr;
@@ -2408,7 +2404,7 @@ private:
                 if (auto e = gs.beginError(callLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                     e.setHeader("Could not find valid instantiation of type parameters");
                 }
-                res.returnType = core::Types::untypedUntracked();
+                dispatched.returnType = core::Types::untypedUntracked();
             }
 
             if (!constr->isEmpty() && constr->isSolved()) {
