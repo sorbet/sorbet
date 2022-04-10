@@ -2034,16 +2034,18 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
-        vector<TypePtr> keys;
-        vector<TypePtr> values;
-        keys.reserve(args.args.size() / 2);
-        values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
             if (!isa_type<LiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
+        }
 
+        vector<TypePtr> keys;
+        vector<TypePtr> values;
+        keys.reserve(args.args.size() / 2);
+        values.reserve(args.args.size() / 2);
+        for (int i = 0; i < args.args.size(); i += 2) {
             keys.emplace_back(args.args[i]->type);
             values.emplace_back(args.args[i + 1]->type);
         }
