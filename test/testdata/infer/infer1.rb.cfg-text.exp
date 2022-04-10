@@ -96,10 +96,10 @@ bb3[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb2(rubyRegionId=0)
 # - bb3(rubyRegionId=0)
-bb4[rubyRegionId=0, firstDead=5](b: T.any(Integer, String)):
-    <statTemp>$5: T.any(Integer, String) = b
+bb4[rubyRegionId=0, firstDead=5](b: T.any(String, Integer)):
+    <statTemp>$5: T.any(String, Integer) = b
     <statTemp>$6: Integer(1) = 1
-    b: T.untyped = <statTemp>$5: T.any(Integer, String).getbyte(<statTemp>$6: Integer(1))
+    b: T.untyped = <statTemp>$5: T.any(String, Integer).getbyte(<statTemp>$6: Integer(1))
     <returnMethodTemp>$2: T.untyped = b
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -133,10 +133,10 @@ bb3[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb2(rubyRegionId=0)
 # - bb3(rubyRegionId=0)
-bb4[rubyRegionId=0, firstDead=5](b: T.any(Integer, String)):
+bb4[rubyRegionId=0, firstDead=5](b: T.any(String, Integer)):
     <statTemp>$5: String("foo") = "foo"
-    <statTemp>$6: T.any(Integer, String) = b
-    b: T.nilable(Integer) = <statTemp>$5: String("foo").getbyte(<statTemp>$6: T.any(Integer, String))
+    <statTemp>$6: T.any(String, Integer) = b
+    b: T.nilable(Integer) = <statTemp>$5: String("foo").getbyte(<statTemp>$6: T.any(String, Integer))
     <returnMethodTemp>$2: T.nilable(Integer) = b
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
     <unconditional> -> bb1
