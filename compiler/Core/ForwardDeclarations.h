@@ -8,6 +8,7 @@ class DIBuilder;
 class DICompileUnit;
 class Function;
 class FunctionType;
+class GlobalVariable;
 class IRBuilderBase;
 class LLVMContext;
 class Module;

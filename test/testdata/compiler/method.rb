@@ -13,5 +13,6 @@ end
 hello("sorbet")
 
 # INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>
-# INITIAL: call void @sorbet_defineMethod({{.*@str_hello}}
+# INITIAL: [[VAR:%[a-zA-Z0-9_]+]] = load i8*, i8** @addr_str_hello{{.*}}
+# INITIAL: call void @sorbet_defineMethod({{.*}}[[VAR]]
 # INITIAL{LITERAL}: }

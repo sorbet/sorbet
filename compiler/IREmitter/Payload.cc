@@ -226,25 +226,16 @@ llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, ll
 }
 
 llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuilderBase &builder) {
-    llvm::StringRef valueRef(str.data(), str.length());
-    auto globalName = "addr_str_" + string(str);
-    auto globalDeclaration =
-        static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(globalName, builder.getInt8PtrTy(), [&] {
-            auto valueGlobal = builder.CreateGlobalString(valueRef, llvm::Twine("str_") + valueRef);
-            auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-            llvm::Constant *indicesString[] = {zero, zero};
-            auto addrGlobalInitializer =
-                llvm::ConstantExpr::getInBoundsGetElementPtr(valueGlobal->getValueType(), valueGlobal, indicesString);
-            auto addrGlobal =
-                new llvm::GlobalVariable(*cs.module, builder.getInt8PtrTy(), true,
-                                         llvm::GlobalVariable::InternalLinkage, addrGlobalInitializer, globalName);
-            addrGlobal->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-            addrGlobal->setAlignment(llvm::MaybeAlign(8));
-
-            return addrGlobal;
-        }));
-
-    return builder.CreateLoad(globalDeclaration);
+    // We know that this load will always return the same reference at runtime, but
+    // the actual contents of the string table reference won't be filled in until
+    // later (see the code in CompilerState for why).  But we want LLVM to know
+    // that the load always returns the same thing: such knowledge is important for
+    // transformations involving identical sorbet_i_getRuby{Class,Constant} calls
+    // and eliminating unnecessary type tests.  So mark the load as `!invariant.load`.
+    auto *load = builder.CreateLoad(cs.stringTableRef(str));
+    auto *MD = llvm::MDNode::get(cs, llvm::None);
+    load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    return load;
 }
 
 namespace {

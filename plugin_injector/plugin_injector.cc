@@ -80,6 +80,8 @@ public:
     // The basic-block that holds the initialization of string constants.
     llvm::BasicBlock *allocRubyIdsEntry = nullptr;
 
+    compiler::StringTable stringTable;
+
     // The function that holds calls to global constructors
     //
     // This works as a replacement to llvm.global_ctors so that we can delay initialization until after
@@ -239,6 +241,7 @@ public:
                 isOptimized, "", runtimeVersion);
 
             threadState->file = cfg.file;
+            threadState->stringTable.clear();
 
             {
                 auto linkageType = llvm::Function::InternalLinkage;
@@ -257,7 +260,8 @@ public:
         }
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
-                                      threadState->allocRubyIdsEntry, threadState->globalConstructorsEntry);
+                                      threadState->allocRubyIdsEntry, threadState->globalConstructorsEntry,
+                                      threadState->stringTable);
         absl::Cleanup dropInternalState = [&] {
             threadState->aborted = true;
             module = nullptr;
@@ -323,6 +327,8 @@ public:
 
             builder.SetInsertPoint(threadState->globalConstructorsEntry);
             builder.CreateRetVoid();
+
+            threadState->stringTable.defineGlobalVariables(lctx, *module);
         }
 
         threadState->globalConstructorsEntry = nullptr;
