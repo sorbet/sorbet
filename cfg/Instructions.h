@@ -216,7 +216,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
     LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
-        categoryCounterInc("cfg", "loadarg");
+        categoryCounterInc("cfg", "loadyieldparams");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
@@ -228,7 +228,7 @@ public:
     uint16_t argId;
 
     YieldParamPresent(uint16_t argId) : argId{argId} {
-        categoryCounterInc("cfg", "argpresent");
+        categoryCounterInc("cfg", "yieldparampresent");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
