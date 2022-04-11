@@ -271,7 +271,7 @@ private:
         if (sym->flags.isOverride) {
             flags.emplace_back("override");
         }
-        for (auto ta : method.data(gs)->typeArguments) {
+        for (auto ta : method.data(gs)->typeArguments()) {
             typeArguments.emplace_back(absl::StrCat(":", ta.data(gs)->name.show(gs)));
         }
         for (auto &argSym : method.data(gs)->arguments) {

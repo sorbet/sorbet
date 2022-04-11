@@ -157,10 +157,30 @@ public:
     uint16_t intrinsicOffset = INVALID_INTRINSIC_OFFSET;
     TypePtr resultType;
     ArgumentsStore arguments;
-    InlinedVector<TypeArgumentRef, 4> typeArguments;
+
+    InlinedVector<TypeArgumentRef, 4> &getOrCreateTypeArguments() {
+        if (typeArgs) {
+            return *typeArgs;
+        }
+        typeArgs = std::make_unique<InlinedVector<TypeArgumentRef, 4>>();
+        return *typeArgs;
+    }
+
+    absl::Span<const TypeArgumentRef> typeArguments() const {
+        if (typeArgs) {
+            return *typeArgs;
+        }
+        return {};
+    }
+
+    InlinedVector<TypeArgumentRef, 4> &existingTypeArguments() {
+        ENFORCE(typeArgs != nullptr);
+        return *typeArgs;
+    }
 
 private:
     InlinedVector<Loc, 2> locs_;
+    std::unique_ptr<InlinedVector<TypeArgumentRef, 4>> typeArgs;
 };
 CheckSize(Method, 176, 8);
 

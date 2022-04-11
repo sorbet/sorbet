@@ -543,8 +543,8 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.name.rawId());
     p.putU4(what.rebind.id());
     p.putU4(what.flags.serialize());
-    p.putU4(what.typeArguments.size());
-    for (auto s : what.typeArguments) {
+    p.putU4(what.typeArguments().size());
+    for (auto s : what.typeArguments()) {
         p.putU4(s.id());
     }
     p.putU4(what.arguments.size());
@@ -571,9 +571,11 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     result.flags = flags;
 
     int typeParamsSize = p.getU4();
-    result.typeArguments.reserve(typeParamsSize);
-    for (int i = 0; i < typeParamsSize; i++) {
-        result.typeArguments.emplace_back(TypeArgumentRef::fromRaw(p.getU4()));
+    if (typeParamsSize != 0) {
+        auto &vec = result.getOrCreateTypeArguments();
+        for (int i = 0; i < typeParamsSize; i++) {
+            vec.emplace_back(TypeArgumentRef::fromRaw(p.getU4()));
+        }
     }
 
     int argsSize = p.getU4();

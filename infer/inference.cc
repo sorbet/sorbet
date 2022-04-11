@@ -25,7 +25,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     if (cfg->symbol.data(ctx)->flags.isGenericMethod) {
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
-        for (core::SymbolRef typeArgument : cfg->symbol.data(ctx)->typeArguments) {
+        for (core::SymbolRef typeArgument : cfg->symbol.data(ctx)->typeArguments()) {
             constr->rememberIsSubtype(ctx, typeArgument.asTypeArgumentRef().data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(typeArgument));
         }
