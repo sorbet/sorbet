@@ -209,28 +209,30 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 break;
             }
             for (auto &arg : tsend->posArgs()) {
-                if (auto c = ast::cast_tree<ast::Literal>(arg)) {
-                    if (c->isSymbol(ctx)) {
-                        auto name = c->asSymbol(ctx);
-                        auto &typeArgSpec = sig.enterTypeArgByName(name);
-                        if (typeArgSpec.type) {
-                            if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                                e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig",
-                                            name.show(ctx));
-                            }
-                        }
-                        typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
-                        typeArgSpec.loc = ctx.locAt(arg.loc());
-                    } else {
-                        if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
-                        }
-                    }
-                } else {
+                auto *c = ast::cast_tree<ast::Literal>(arg);
+                if (c == nullptr) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Unexpected `{}`: Type parameters are specified with symbols", arg.nodeName());
                     }
+                    continue;
                 }
+
+                if (!c->isSymbol(ctx)) {
+                    if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
+                    }
+                    continue;
+                }
+
+                auto name = c->asSymbol(ctx);
+                auto &typeArgSpec = sig.enterTypeArgByName(name);
+                if (typeArgSpec.type) {
+                    if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig", name.show(ctx));
+                    }
+                }
+                typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
+                typeArgSpec.loc = ctx.locAt(arg.loc());
             }
 
             const auto numKwArgs = tsend->numKwArgs();
