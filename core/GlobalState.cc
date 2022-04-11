@@ -1094,7 +1094,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
     wasModified_ = true;
 
-    auto &members = owner.dataAllowingNone(*this)->typeMembers();
+    auto &members = owner.dataAllowingNone(*this)->getOrCreateTypeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }

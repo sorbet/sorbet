@@ -375,12 +375,27 @@ public:
     // Add a placeholder for a mixin and return index in mixins()
     uint16_t addMixinPlaceholder(const GlobalState &gs);
 
-    inline InlinedVector<TypeMemberRef, 4> &typeMembers() {
-        return typeParams;
+    inline InlinedVector<TypeMemberRef, 4> &getOrCreateTypeMembers() {
+        ENFORCE(isClassOrModule());
+        if (typeParams) {
+            return *typeParams;
+        }
+        typeParams = std::make_unique<InlinedVector<TypeMemberRef, 4>>();
+        return *typeParams;
     }
 
-    inline const InlinedVector<TypeMemberRef, 4> &typeMembers() const {
-        return typeParams;
+    inline absl::Span<const TypeMemberRef> typeMembers() const {
+        ENFORCE(isClassOrModule());
+        if (typeParams) {
+            return *typeParams;
+        }
+        return {};
+    }
+
+    inline InlinedVector<TypeMemberRef, 4> &existingTypeMembers() {
+        ENFORCE(isClassOrModule());
+        ENFORCE(typeParams != nullptr);
+        return *typeParams;
     }
 
     // Return the number of type parameters that must be passed to instantiate
@@ -550,7 +565,7 @@ private:
 
     /** For Class or module - ordered type members of the class,
      */
-    InlinedVector<TypeMemberRef, 4> typeParams;
+    std::unique_ptr<InlinedVector<TypeMemberRef, 4>> typeParams;
     InlinedVector<Loc, 2> locs_;
 
     // Record a required ancestor for this class of module in a magic property

@@ -509,7 +509,8 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
 
     if (what == asIf || (asIf.data(gs)->isClass() && what.data(gs)->isClass() &&
                          asIf.data(gs)->typeMembers().size() == what.data(gs)->typeMembers().size())) {
-        currentAlignment = what.data(gs)->typeMembers();
+        auto members = what.data(gs)->typeMembers();
+        currentAlignment.assign(members.begin(), members.end());
     } else {
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
         for (auto originalTp : asIf.data(gs)->typeMembers()) {

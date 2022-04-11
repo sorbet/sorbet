@@ -599,9 +599,11 @@ void SerializerImpl::pickle(Pickler &p, const ClassOrModule &what) {
         p.putU4(s.id());
     }
 
-    p.putU4(what.typeParams.size());
-    for (auto s : what.typeParams) {
-        p.putU4(s.id());
+    if (what.isClassOrModule()) {
+        p.putU4(what.typeMembers().size());
+        for (auto s : what.typeMembers()) {
+            p.putU4(s.id());
+        }
     }
 
     p.putU4(what.members().size());
@@ -641,11 +643,16 @@ ClassOrModule SerializerImpl::unpickleClassOrModule(UnPickler &p, const GlobalSt
         result.mixins_.emplace_back(ClassOrModuleRef::fromRaw(p.getU4()));
     }
 
-    int typeParamsSize = p.getU4();
+    if (result.isClassOrModule()) {
+        int typeParamsSize = p.getU4();
 
-    result.typeParams.reserve(typeParamsSize);
-    for (int i = 0; i < typeParamsSize; i++) {
-        result.typeParams.emplace_back(TypeMemberRef::fromRaw(p.getU4()));
+        if (typeParamsSize != 0) {
+            auto &vec = result.getOrCreateTypeMembers();
+            vec.reserve(typeParamsSize);
+            for (int i = 0; i < typeParamsSize; i++) {
+                vec.emplace_back(TypeMemberRef::fromRaw(p.getU4()));
+            }
+        }
     }
 
     int membersSize = p.getU4();

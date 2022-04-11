@@ -1342,9 +1342,12 @@ class SymbolDefiner {
                 emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), oldSym, existingTypeMember);
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
-            ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
-                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
-                    }) != onSymbol.data(ctx)->typeMembers().end());
+            if (::sorbet::debug_mode) {
+                auto members = onSymbol.data(ctx)->typeMembers();
+                ENFORCE(absl::c_find_if(members, [&](auto mem) {
+                            return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
+                        }) != members.end());
+            }
             sym = existingTypeMember;
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
