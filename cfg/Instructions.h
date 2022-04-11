@@ -56,15 +56,13 @@ class Instruction;
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
-public:
-    bool isSynthetic = false;
-
 protected:
     Instruction() = default;
     ~Instruction() = default;
 
 private:
     friend InstructionPtr;
+    bool isSynthetic = false;
 };
 
 #define INSN(name)                                                                  \
@@ -375,6 +373,14 @@ public:
         ENFORCE(ptr != 0);
 
         return static_cast<Tag>(ptr & TAG_MASK);
+    }
+
+    bool isSynthetic() const noexcept {
+        return this->get()->isSynthetic;
+    }
+
+    void setSynthetic() noexcept {
+        this->get()->isSynthetic = true;
     }
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;

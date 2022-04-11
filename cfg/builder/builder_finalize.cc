@@ -204,7 +204,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             }
 
             /* dealias */
-            if (!bind.value->isSynthetic) {
+            if (!bind.value.isSynthetic()) {
                 // we don't allow dealiasing values into synthetic instructions
                 // as otherwise it fools dead code analysis.
                 if (auto *v = cast_instruction<Ident>(bind.value)) {

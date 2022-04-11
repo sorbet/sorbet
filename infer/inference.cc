@@ -145,7 +145,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                 if (absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
                     for (auto &expr : bb->exprs) {
-                        if (expr.value->isSynthetic) {
+                        if (expr.value.isSynthetic()) {
                             continue;
                         }
                         if (cfg::isa_instruction<cfg::TAbsurd>(expr.value)) {
@@ -263,7 +263,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     // this can also be result of evaluating an instruction, e.g. an always false hard_assert
                     bb->firstDeadInstructionIdx = i;
                 }
-            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !bind.value->isSynthetic) {
+            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !bind.value.isSynthetic()) {
                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");
                     e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");

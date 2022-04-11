@@ -1095,7 +1095,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
 
-                if (lspQueryMatch && !bind.value->isSynthetic) {
+                if (lspQueryMatch && !bind.value.isSynthetic()) {
                     core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc),
                                                                                               i.what.data(inWhat), tp,
                                                                                               ctx.owner.asMethodRef()));
@@ -1455,7 +1455,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                         }
                     }
-                } else if (!c.isSynthetic) {
+                } else if (!bind.value.isSynthetic()) {
                     if (castType.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
