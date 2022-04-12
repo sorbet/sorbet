@@ -1,4 +1,4 @@
-test/cli/folder-input/foo.rb:4: Expected `Integer` but found `String("foo.rb")` for argument `arg0` https://srb.help/7002
+test/cli/folder-input/folder-input.rb:4: Expected `Integer` but found `String("foo.rb")` for argument `arg0` https://srb.help/7002
      4 |1 + "foo.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
@@ -6,7 +6,7 @@ test/cli/folder-input/foo.rb:4: Expected `Integer` but found `String("foo.rb")` 
      148 |        arg0: Integer,
                   ^^^^
   Got `String("foo.rb")` originating from:
-    test/cli/folder-input/foo.rb:4:
+    test/cli/folder-input/folder-input.rb:4:
      4 |1 + "foo.rb"
             ^^^^^^^^
 
@@ -22,7 +22,7 @@ test/cli/folder-input/input/subfolder/baz.rb:4: Expected `Integer` but found `St
      4 |1 + "baz.rb"
             ^^^^^^^^
 
-test/cli/folder-input/input/bar.rb:3: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
+test/cli/folder-input/input/input.rb:3: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
      3 |1 + "bar.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
@@ -30,7 +30,7 @@ test/cli/folder-input/input/bar.rb:3: Expected `Integer` but found `String("bar.
      148 |        arg0: Integer,
                   ^^^^
   Got `String("bar.rb")` originating from:
-    test/cli/folder-input/input/bar.rb:3:
+    test/cli/folder-input/input/input.rb:3:
      3 |1 + "bar.rb"
             ^^^^^^^^
 Errors: 3
