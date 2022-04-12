@@ -739,57 +739,56 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
-                    for (auto alternative : alternatives) {
-                        auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() &&
-                            (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
-                            continue;
+                for (auto alternative : alternatives) {
+                    auto possibleSymbol = alternative.symbol;
+                    if (!possibleSymbol.isClassOrModule() &&
+                        (!possibleSymbol.isMethod() ||
+                         (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                        continue;
+                    }
+
+                    auto suggestedName = possibleSymbol.isClassOrModule() ? alternative.symbol.show(gs) + ".new"
+                                                                          : alternative.symbol.show(gs);
+
+                    if (!args.funLoc().exists()) {
+                        e.addErrorLine(alternative.symbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                        continue;
+                    }
+
+                    bool addedAutocorrect = false;
+                    if (possibleSymbol.isClassOrModule()) {
+                        // TODO(jez) Use Loc::adjust here?
+                        const auto replacement = possibleSymbol.name(gs).show(gs);
+                        const auto loc = args.callLoc();
+                        const auto toReplace = args.name.toString(gs);
+                        // This is a bit hacky but the loc corresponding to the send isn't available here and until
+                        // it is, this verifies that the methodLoc below exists.
+                        if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
+                            const auto methodLoc =
+                                Loc{loc.file(), loc.beginPos(), (uint32_t)(loc.beginPos() + toReplace.length())};
+                            e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
+                                          replacement);
+                            addedAutocorrect = true;
                         }
-
-                        auto suggestedName = possibleSymbol.isClassOrModule() ? alternative.symbol.show(gs) + ".new"
-                                                                              : alternative.symbol.show(gs);
-
-                        if (!args.funLoc().exists()) {
-                            e.addErrorLine(alternative.symbol.loc(gs), "Did you mean: `{}`", suggestedName);
-                            continue;
-                        }
-
-                        bool addedAutocorrect = false;
-                        if (possibleSymbol.isClassOrModule()) {
-                            // TODO(jez) Use Loc::adjust here?
-                            const auto replacement = possibleSymbol.name(gs).show(gs);
-                            const auto loc = args.callLoc();
-                            const auto toReplace = args.name.toString(gs);
-                            // This is a bit hacky but the loc corresponding to the send isn't available here and until
-                            // it is, this verifies that the methodLoc below exists.
-                            if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
-                                const auto methodLoc =
-                                    Loc{loc.file(), loc.beginPos(), (uint32_t)(loc.beginPos() + toReplace.length())};
-                                e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
+                    } else {
+                        const auto replacement = possibleSymbol.name(gs).toString(gs);
+                        const auto toReplace = args.name.toString(gs);
+                        if (replacement != toReplace) {
+                            const auto recvLoc = args.receiverLoc();
+                            const auto callLoc = args.callLoc();
+                            // See comment above.
+                            // TODO(jez) Use adjust loc here?
+                            if (recvLoc.exists() && callLoc.exists() &&
+                                absl::StartsWith(callLoc.source(gs).value(),
+                                                 fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
+                                const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
+                                                           (uint32_t)(recvLoc.endPos() + 1 + toReplace.length())};
+                                e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
                                               replacement);
                                 addedAutocorrect = true;
                             }
-                        } else {
-                            const auto replacement = possibleSymbol.name(gs).toString(gs);
-                            const auto toReplace = args.name.toString(gs);
-                            if (replacement != toReplace) {
-                                const auto recvLoc = args.receiverLoc();
-                                const auto callLoc = args.callLoc();
-                                // See comment above.
-                                // TODO(jez) Use adjust loc here?
-                                if (recvLoc.exists() && callLoc.exists() &&
-                                    absl::StartsWith(callLoc.source(gs).value(),
-                                                     fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
-                                    const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
-                                                               (uint32_t)(recvLoc.endPos() + 1 + toReplace.length())};
-                                    e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
-                                                  replacement);
-                                    addedAutocorrect = true;
-                                }
-                            }
                         }
-
+                    }
                 }
             }
         }
