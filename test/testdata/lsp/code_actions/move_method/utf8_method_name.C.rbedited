@@ -3,27 +3,27 @@
 #
 # Test asserts that non-alphanumeric characters doesn't appear in the new module name
 
-module Module1
+module MethodWithModule
   extend T::Sig
   sig {void}
-  def self.ж; end
+  def self.method_with_?; end
 end
 
 module Foo
   extend T::Sig
+  sig {void}
+  def self.ж; end
      # ^ apply-code-action: [A] Move method to a new module
 
   sig {void}
   def self.😱; end
      # ^ apply-code-action: [B] Move method to a new module
 
-  sig {void}
-  def self.method_with_?; end
      # ^ apply-code-action: [C] Move method to a new module
 
 end
 
 
-Module1.ж
+Foo.ж
 Foo.😱
-Foo.method_with_?
+MethodWithModule.method_with_?
