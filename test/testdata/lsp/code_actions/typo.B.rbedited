@@ -18,9 +18,5 @@ def test
 
   Boo.new
 # ^^^ error: Unable to resolve constant `Boo`
-# ^^^ apply-code-action: [D] Replace with `Foo`
-
-  Boo(1)
-# ^^^    error: Method `Boo` does not exist on `Object`
-# ^^^    apply-code-action: [C] Replace with `Foo.new`
+# ^^^ apply-code-action: [C] Replace with `Foo`
 end

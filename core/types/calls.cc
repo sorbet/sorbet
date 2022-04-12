@@ -691,36 +691,35 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             args.fullType.type.show(gs));
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
-
-                // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
-                // suggest adding `extend T::Helpers`.
-                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
-                    args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
-                    args.name == core::Names::mixesInClassMethods() ||
-                    (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
-                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                    if (auto suggestion =
-                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Helpers())) {
-                        e.addAutocorrect(std::move(*suggestion));
-                    }
-                } else if (args.name == core::Names::sig()) {
-                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                    if (auto suggestion =
-                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Sig())) {
-                        e.addAutocorrect(std::move(*suggestion));
-                    }
-                }
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
-            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
-                                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+
+            // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
+            // suggest adding `extend T::Helpers`.
+            if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
+                args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
+                args.name == core::Names::mixesInClassMethods() ||
+                (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
+                auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                if (auto suggestion =
+                        maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Helpers())) {
+                    e.addAutocorrect(std::move(*suggestion));
+                }
+            } else if (args.name == core::Names::sig()) {
+                auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                if (auto suggestion =
+                        maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Sig())) {
+                    e.addAutocorrect(std::move(*suggestion));
+                }
+            } else if (args.receiverLoc().exists() &&
+                       (gs.suggestUnsafe.has_value() ||
+                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                if (receiverLoc.empty()) {
+                if (args.receiverLoc().empty()) {
                     auto shortName = args.name.shortName(gs);
                     auto beginAdjust = -2;                     // (&
                     auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+                    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
                     if (blockPassLoc.exists()) {
                         auto blockPassSource = blockPassLoc.source(gs).value();
                         if (blockPassSource == fmt::format("(&:{})", shortName)) {
@@ -731,10 +730,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 } else if (errLoc == args.funLoc() &&
                            args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
                     e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
-                                  receiverLoc.source(gs).value(), args.name.shortName(gs));
+                                  args.receiverLoc().source(gs).value(), args.name.shortName(gs));
                 } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
-                                  receiverLoc.source(gs).value());
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
+                                  args.receiverLoc().source(gs).value());
                 }
             } else {
                 if (symbol.data(gs)->isModule()) {
@@ -745,61 +744,57 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
-                if (!alternatives.empty()) {
-                    vector<ErrorLine> lines;
-                    lines.reserve(alternatives.size());
-                    for (auto alternative : alternatives) {
-                        auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() &&
-                            (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
-                            continue;
-                        }
-
-                        auto suggestedName = possibleSymbol.isClassOrModule() ? alternative.symbol.show(gs) + ".new"
-                                                                              : alternative.symbol.show(gs);
-
-                        bool addedAutocorrect = false;
-                        if (possibleSymbol.isClassOrModule()) {
-                            // TODO(jez) Use Loc::adjust here?
-                            const auto replacement = possibleSymbol.name(gs).show(gs);
-                            const auto loc = args.callLoc();
-                            const auto toReplace = args.name.toString(gs);
-                            // This is a bit hacky but the loc corresponding to the send isn't available here and until
-                            // it is, this verifies that the methodLoc below exists.
-                            if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
-                                const auto methodLoc =
-                                    Loc{loc.file(), loc.beginPos(), (uint32_t)(loc.beginPos() + toReplace.length())};
-                                e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
-                                              replacement);
-                                addedAutocorrect = true;
-                            }
-                        } else {
-                            const auto replacement = possibleSymbol.name(gs).toString(gs);
-                            const auto toReplace = args.name.toString(gs);
-                            if (replacement != toReplace) {
-                                const auto recvLoc = args.receiverLoc();
-                                const auto callLoc = args.callLoc();
-                                // See comment above.
-                                // TODO(jez) Use adjust loc here?
-                                if (recvLoc.exists() && callLoc.exists() &&
-                                    absl::StartsWith(callLoc.source(gs).value(),
-                                                     fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
-                                    const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
-                                                               (uint32_t)(recvLoc.endPos() + 1 + toReplace.length())};
-                                    e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
-                                                  replacement);
-                                    addedAutocorrect = true;
-                                }
-                            }
-                        }
-
-                        if (!addedAutocorrect) {
-                            lines.emplace_back(ErrorLine::from(alternative.symbol.loc(gs), "`{}`", suggestedName));
-                        }
+                for (auto alternative : alternatives) {
+                    auto possibleSymbol = alternative.symbol;
+                    if (!possibleSymbol.isClassOrModule() &&
+                        (!possibleSymbol.isMethod() ||
+                         (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                        continue;
                     }
-                    if (!lines.empty()) {
-                        e.addErrorSection(ErrorSection("Did you mean:", lines));
+
+                    const auto toReplace = args.name.toString(gs);
+                    if (args.funLoc().source(gs) != toReplace) {
+                        auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
+                                                                              : possibleSymbol.show(gs);
+                        e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                        continue;
+                    }
+
+                    if (possibleSymbol.isClassOrModule()) {
+                        e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                        e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                        continue;
+                    }
+
+                    const auto replacement = possibleSymbol.name(gs).toString(gs);
+                    if (replacement != toReplace) {
+                        e.didYouMean(replacement, args.funLoc());
+                        e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
+                        continue;
+                    }
+
+                    auto possibleSymbolOwner = possibleSymbol.asMethodRef().data(gs)->owner;
+                    if (possibleSymbolOwner.data(gs)->lookupSingletonClass(gs) == symbol) {
+                        auto defKeyword = "def ";
+                        auto defKeywordLen = char_traits<char>::length(defKeyword);
+                        auto prefixLen = defKeywordLen + toReplace.size();
+                        auto declLocPrefix = possibleSymbol.loc(gs).adjustLen(gs, 0, prefixLen);
+                        e.addErrorNote("Did you mean to define `{}` as a singleton class method?", toReplace);
+                        if (declLocPrefix.source(gs) == fmt::format("{}{}", defKeyword, toReplace)) {
+                            e.replaceWith("Define method with `self.`",
+                                          possibleSymbol.loc(gs).adjustLen(gs, defKeywordLen, 0), "self.");
+                        } else {
+                            e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
+                        }
+                    } else if (symbol.data(gs)->lookupSingletonClass(gs) == possibleSymbolOwner) {
+                        e.addErrorNote("Did you mean to call `{}` which is a singleton class method?",
+                                       possibleSymbol.show(gs));
+                        if (args.receiverLoc().empty()) {
+                            e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
+                        } else {
+                            e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
+                        }
+                        e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
                     }
                 }
             }

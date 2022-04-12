@@ -1,24 +1,75 @@
-test/cli/suggest-singleton/suggest-singleton.rb:9: Method `foo` does not exist on `T.class_of(A)` https://srb.help/7003
-     9 |A.foo
+suggest-singleton.rb:12: Method `foo` does not exist on `T.class_of(A)` https://srb.help/7003
+    12 |A.foo
           ^^^
   Got `T.class_of(A)` originating from:
-    test/cli/suggest-singleton/suggest-singleton.rb:9:
-     9 |A.foo
+    suggest-singleton.rb:12:
+    12 |A.foo
         ^
-  Did you mean:
-    test/cli/suggest-singleton/suggest-singleton.rb:3: `A#foo`
+  Note:
+    Did you mean to define `foo` as a singleton class method?
+  Autocorrect: Done
+    suggest-singleton.rb:3: Inserted `self.`
      3 |  def foo
-          ^^^^^^^
+              ^
 
-test/cli/suggest-singleton/suggest-singleton.rb:10: Method `bar` does not exist on `A` https://srb.help/7003
-    10 |A.new.bar
+suggest-singleton.rb:13: Method `bar` does not exist on `A` https://srb.help/7003
+    13 |A.new.bar
               ^^^
   Got `A` originating from:
-    test/cli/suggest-singleton/suggest-singleton.rb:10:
-    10 |A.new.bar
+    suggest-singleton.rb:13:
+    13 |A.new.bar
         ^^^^^
-  Did you mean:
-    test/cli/suggest-singleton/suggest-singleton.rb:5: `A.bar`
+  Note:
+    Did you mean to call `A.bar` which is a singleton class method?
+  Autocorrect: Done
+    suggest-singleton.rb:13: Inserted `.class`
+    13 |A.new.bar
+             ^
+    suggest-singleton.rb:5: `bar` defined here
      5 |  def self.bar
           ^^^^^^^^^^^^
-Errors: 2
+
+suggest-singleton.rb:14: Method `my_attribute` does not exist on `T.class_of(A)` https://srb.help/7003
+    14 |A.my_attribute
+          ^^^^^^^^^^^^
+  Got `T.class_of(A)` originating from:
+    suggest-singleton.rb:14:
+    14 |A.my_attribute
+        ^
+  Note:
+    Did you mean to define `my_attribute` as a singleton class method?
+    suggest-singleton.rb:8: `my_attribute` defined here
+     8 |  attr_reader :my_attribute
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+suggest-singleton.rb:15: Method `too_many_spaces` does not exist on `T.class_of(A)` https://srb.help/7003
+    15 |A.too_many_spaces
+          ^^^^^^^^^^^^^^^
+  Got `T.class_of(A)` originating from:
+    suggest-singleton.rb:15:
+    15 |A.too_many_spaces
+        ^
+  Note:
+    Did you mean to define `too_many_spaces` as a singleton class method?
+    suggest-singleton.rb:9: `too_many_spaces` defined here
+     9 |  def  too_many_spaces; end
+          ^^^^^^^^^^^^^^^^^^^^
+Errors: 4
+
+--------------------------------------------------------------------------
+
+# typed: true
+class A
+  def self.foo
+  end
+  def self.bar
+  end
+
+  attr_reader :my_attribute
+  def  too_many_spaces; end
+end
+
+A.foo
+A.new.class.bar
+A.my_attribute
+A.too_many_spaces
