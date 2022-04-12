@@ -1833,7 +1833,14 @@ public:
                 return ast::MK::EmptyTree();
             }
 
-            if (send->hasKwArgs()) {
+            // TODO(jez) Delete the code to parse hasKwArgs and just emit an autocorrect if they're present
+            if (send->hasKwArgs() || send->block() != nullptr) {
+                if (send->hasKwArgs() && send->block()) {
+                    if (auto e = ctx.beginError(send->block()->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("`{}` must not have both keyword args and a block", send->fun.show(ctx));
+                    }
+                }
+
                 bool fixed = false;
                 bool bounded = false;
 
@@ -1850,6 +1857,40 @@ public:
                             case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
+                        }
+                    }
+                }
+
+                if (send->block() != nullptr) {
+                    if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                        for (const auto &keyExpr : hash->keys) {
+                            const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                            if (key == nullptr || !key->isSymbol(ctx)) {
+                                if (auto e =
+                                        ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                                    e.setHeader("Hash provided in block to `{}` must have symbol keys",
+                                                send->fun.show(ctx));
+                                }
+                                return tree;
+                            }
+
+                            switch (key->asSymbol(ctx).rawId()) {
+                                case core::Names::fixed().rawId():
+                                    fixed = true;
+                                    break;
+
+                                case core::Names::lower().rawId():
+                                case core::Names::upper().rawId():
+                                    bounded = true;
+                                    break;
+                            }
+                        }
+                    } else {
+                        if (auto e =
+                                ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                            e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
+                                        "Hash");
+                            return tree;
                         }
                     }
                 }

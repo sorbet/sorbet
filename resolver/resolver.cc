@@ -2176,10 +2176,11 @@ class ResolveTypeMembersAndFieldsWalk {
         data->resultType = lambdaParam;
         auto *memberType = core::cast_type<core::LambdaParam>(lambdaParam);
 
+        // TODO(jez) Delete the code to parse hasKwArgs eventually, and only look at the block.
         // When no args are supplied, this implies that the upper and lower
         // bounds of the type parameter are top and bottom.
-        const auto numKwArgs = rhs->numKwArgs();
-        if (numKwArgs > 0) {
+        if (rhs->hasKwArgs() || rhs->block() != nullptr) {
+            const auto numKwArgs = rhs->numKwArgs();
             for (auto i = 0; i < numKwArgs; ++i) {
                 auto &keyExpr = rhs->getKwKey(i);
 
@@ -2207,6 +2208,47 @@ class ResolveTypeMembersAndFieldsWalk {
                         case core::Names::upper().rawId():
                             memberType->upperBound = resTy;
                             break;
+                    }
+                }
+            }
+
+            // An error was already emitted in namer if both were passed, but we might not have
+            // fixed up the tree. Should be fine, because this code to handle both keyword args and
+            // blocks is temporary.
+            if (!rhs->hasKwArgs() && rhs->block() != nullptr) {
+                if (const auto *hash = ast::cast_tree<ast::Hash>(rhs->block()->body)) {
+                    int i = -1;
+                    for (const auto &keyExpr : hash->keys) {
+                        i++;
+                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        if (key == nullptr || !key->isSymbol(ctx)) {
+                            // Namer reported an error already
+                            continue;
+                        }
+
+                        const auto &value = hash->values[i];
+
+                        ParsedSig emptySig;
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto allowTypeMember = false;
+                        core::TypePtr resTy = TypeSyntax::getResultType(
+                            ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+
+                        switch (key->asSymbol(ctx).rawId()) {
+                            case core::Names::fixed().rawId():
+                                memberType->lowerBound = resTy;
+                                memberType->upperBound = resTy;
+                                break;
+
+                            case core::Names::lower().rawId():
+                                memberType->lowerBound = resTy;
+                                break;
+
+                            case core::Names::upper().rawId():
+                                memberType->upperBound = resTy;
+                                break;
+                        }
                     }
                 }
             }
