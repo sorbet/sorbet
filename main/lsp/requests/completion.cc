@@ -88,7 +88,7 @@ const RubyKeyword rubyKeywords[] = {
 vector<core::ClassOrModuleRef> ancestorsImpl(const core::GlobalState &gs, core::ClassOrModuleRef sym,
                                              vector<core::ClassOrModuleRef> &&acc) {
     // The implementation here is similar to Symbols::derivesFrom.
-    ENFORCE(sym.data(gs)->isClassOrModuleLinearizationComputed());
+    ENFORCE(sym.data(gs)->flags.isLinearizationComputed);
     acc.emplace_back(sym);
 
     for (auto mixin : sym.data(gs)->mixins()) {
@@ -427,14 +427,14 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
 
     if (what.isClassOrModule()) {
         auto whatKlass = what.asClassOrModuleRef();
-        if (whatKlass.data(gs)->isClassOrModuleClass()) {
+        if (whatKlass.data(gs)->isClass()) {
             if (whatKlass.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
                 item->kind = CompletionItemKind::Enum;
             } else {
                 item->kind = CompletionItemKind::Class;
             }
         } else {
-            if (whatKlass.data(gs)->isClassOrModuleAbstract() || whatKlass.data(gs)->isClassOrModuleInterface()) {
+            if (whatKlass.data(gs)->flags.isAbstract || whatKlass.data(gs)->flags.isInterface) {
                 item->kind = CompletionItemKind::Interface;
             } else {
                 item->kind = CompletionItemKind::Module;

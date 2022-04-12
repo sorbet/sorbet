@@ -304,7 +304,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
 core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
                                        core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
-    ENFORCE(enclosingClass->isClassOrModuleLinearizationComputed(), "Should have been linearized by resolver");
+    ENFORCE(enclosingClass->flags.isLinearizationComputed, "Should have been linearized by resolver");
 
     for (const auto &mixin : enclosingClass->mixins()) {
         auto mixinMethod = mixin.data(ctx)->findMethod(ctx, name);
@@ -418,7 +418,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     fmt::format_to(std::back_inserter(ss), "sig");
-    if (enclosingClass.data(ctx)->isClassOrModuleFinal()) {
+    if (enclosingClass.data(ctx)->flags.isFinal) {
         fmt::format_to(std::back_inserter(ss), "(:final)");
     }
     fmt::format_to(std::back_inserter(ss), " {{");

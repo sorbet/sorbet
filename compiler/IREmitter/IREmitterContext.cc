@@ -742,8 +742,7 @@ string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
         enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
         ENFORCE(enclosingClassRef.exists());
         const auto &enclosingClass = enclosingClassRef.data(cs);
-        return fmt::format("<{}:{}>", enclosingClass->isClassOrModuleClass() ? "class"sv : "module"sv,
-                           enclosingClassRef.show(cs));
+        return fmt::format("<{}:{}>", enclosingClass->isClass() ? "class"sv : "module"sv, enclosingClassRef.show(cs));
     } else if (IREmitterHelpers::isFileStaticInit(cs, symbol)) {
         return string("<top (required)>"sv);
     } else {

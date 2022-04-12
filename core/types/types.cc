@@ -187,14 +187,13 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
                 result = from;
             } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
-            } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
+            } else if (c.symbol.data(gs)->isClass() && klass.data(gs)->isClass() &&
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
                 // We have two classes (not modules), and if the class we're
                 // removing doesn't derive from `c`, there's nothing to do,
                 // because of ruby having single inheretance.
                 result = from;
-            } else if (cdata->isClassOrModuleSealed() &&
-                       (cdata->isClassOrModuleAbstract() || cdata->isClassOrModuleModule())) {
+            } else if (cdata->flags.isSealed && (cdata->flags.isAbstract || cdata->isModule())) {
                 auto subclasses = cdata->sealedSubclassesToUnion(gs);
                 ENFORCE(!Types::equiv(gs, subclasses, from), "sealedSubclassesToUnion about to cause infinte loop");
                 result = dropSubtypesOf(gs, subclasses, klass);
@@ -508,7 +507,7 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.data(gs)->isClassOrModuleClass() && what.data(gs)->isClassOrModuleClass() &&
+    if (what == asIf || (asIf.data(gs)->isClass() && what.data(gs)->isClass() &&
                          asIf.data(gs)->typeMembers().size() == what.data(gs)->typeMembers().size())) {
         currentAlignment = what.data(gs)->typeMembers();
     } else {

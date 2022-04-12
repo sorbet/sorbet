@@ -455,7 +455,7 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
         auto tm = typeMember;
-        if (tm.data(gs)->isFixed()) {
+        if (tm.data(gs)->flags.isFixed) {
             it = targs.erase(it);
         } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
@@ -476,7 +476,7 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto defName = this->definition.toStringFullName(gs);
     auto upperStr = this->upperBound.toString(gs);
-    if (this->definition.data(gs)->isFixed()) {
+    if (this->definition.data(gs)->flags.isFixed) {
         return fmt::format("LambdaParam({}, fixed={})", defName, upperStr);
     } else {
         auto lowerStr = this->lowerBound.toString(gs);

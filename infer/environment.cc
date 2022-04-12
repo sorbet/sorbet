@@ -494,14 +494,13 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
     }
 
     // attachedClass on untyped symbol is defined to return itself
-    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() &&
-        sym.data(ctx)->isClassOrModuleFinal()) {
+    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() && sym.data(ctx)->flags.isFinal) {
         // This is a Ruby singleton class object
         return true;
     }
 
     // The Ruby stdlib has a Singleton module which lets people invent their own singletons.
-    return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->isClassOrModuleFinal());
+    return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->flags.isFinal);
 }
 
 } // namespace
@@ -1119,7 +1118,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (resultType != nullptr) {
                         if (symbol.isTypeMember()) {
                             auto tm = symbol.asTypeMemberRef();
-                            if (tm.data(ctx)->isFixed()) {
+                            if (tm.data(ctx)->flags.isFixed) {
                                 // pick the upper bound here, as
                                 // isFixed() => lowerBound == upperBound.
                                 auto lambdaParam = core::cast_type<core::LambdaParam>(resultType);

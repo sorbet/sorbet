@@ -56,7 +56,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
         }
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
-        typeMember.data(gs)->setFixed();
+        typeMember.data(gs)->flags.isFixed = true;
         auto untyped = core::Types::untyped(gs, sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
         return false;
@@ -67,7 +67,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         }
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
-        typeMember.data(gs)->setFixed();
+        typeMember.data(gs)->flags.isFixed = true;
         auto untyped = core::Types::untyped(gs, sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
         return false;
@@ -143,7 +143,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         }
     }
 
-    if (sym.data(gs)->isClassOrModuleClass()) {
+    if (sym.data(gs)->isClass()) {
         for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
             auto tm = tp.asTypeMemberRef();
             // AttachedClass is covariant, but not controlled by the user.
@@ -206,11 +206,11 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
 
             // allow us to catch undeclared modules in LSP fast path, so we can report ambiguous
             // definition errors.
-            ref.data(gs)->setClassModuleUndeclared();
+            ref.data(gs)->flags.isUndeclared = true;
         }
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
-            if (ref.data(gs)->isClassOrModuleClass()) {
+            if (ref.data(gs)->isClass()) {
                 classCount++;
             } else {
                 moduleCount++;
@@ -241,7 +241,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(singleton);
             }
         } else {
-            if (ref.data(gs)->isClassOrModuleClass()) {
+            if (ref.data(gs)->isClass()) {
                 if (!core::Symbols::Object().data(gs)->derivesFrom(gs, ref) && core::Symbols::Object() != ref) {
                     ref.data(gs)->setSuperClass(core::Symbols::Object());
                 }

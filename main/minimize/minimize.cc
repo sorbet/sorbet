@@ -94,7 +94,7 @@ void writeClassDef(const core::GlobalState &rbiGS, options::PrinterConfig &outfi
     while (rbiEntry.data(rbiGS)->isSingletonClass(rbiGS)) {
         rbiEntry = rbiEntry.data(rbiGS)->attachedClass(rbiGS);
     }
-    auto defType = rbiEntry.data(rbiGS)->isClassOrModuleClass() ? "class" : "module";
+    auto defType = rbiEntry.data(rbiGS)->isClass() ? "class" : "module";
     auto fullName = rbiEntry.show(rbiGS);
     auto cbase = outputCategoryFromClassName(fullName) == OutputCategory::External ? "::" : "";
     // TODO: The old Ruby-powered version did not emit superclasses. Eventually, we might want to
@@ -191,7 +191,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                 continue;
             }
 
-            if (sourceClass.data(sourceGS)->isClassOrModuleAbstract() && rbiEntryName == core::Names::initialize()) {
+            if (sourceClass.data(sourceGS)->flags.isAbstract && rbiEntryName == core::Names::initialize()) {
                 // `abstract!` will define `initialize` in the class to raise unconditionally
                 // https://github.com/sorbet/sorbet/blob/026c60bf719d/gems/sorbet-runtime/lib/types/private/abstract/declare.rb#L37-L42
                 // Which is not useful to include in the minimized output.

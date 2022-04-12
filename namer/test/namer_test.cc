@@ -66,7 +66,7 @@ TEST_CASE("namer tests") {
         }
 
         const auto &objectScope = core::Symbols::Object().data(gs);
-        REQUIRE_EQ(core::Symbols::root(), objectScope->owner.asClassOrModuleRef());
+        REQUIRE_EQ(core::Symbols::root(), objectScope->owner);
 
         REQUIRE_EQ(4, objectScope->members().size());
         auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world")).asMethodRef();
