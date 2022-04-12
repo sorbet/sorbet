@@ -861,7 +861,9 @@ void GlobalState::initEmpty() {
 }
 
 void GlobalState::installIntrinsics() {
-    for (auto &entry : intrinsicMethods) {
+    int offset = -1;
+    for (auto &entry : intrinsicMethods()) {
+        ++offset;
         ClassOrModuleRef symbol;
         switch (entry.singleton) {
             case Intrinsic::Kind::Instance:
@@ -873,7 +875,7 @@ void GlobalState::installIntrinsics() {
         }
         auto countBefore = methodsUsed();
         auto method = enterMethodSymbol(Loc::none(), symbol, entry.method);
-        method.data(*this)->intrinsic = entry.impl;
+        method.data(*this)->intrinsicOffset = offset + Method::FIRST_VALID_INTRINSIC_OFFSET;
         if (countBefore != methodsUsed()) {
             auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
             blkArg.flags.isBlock = true;
@@ -942,7 +944,7 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
         if (resSym.isMethod()) {
             auto resMethod = resSym.asMethodRef().data(*this);
             if (resMethod->methodArgumentHash(*this) == methodHash ||
-                (resMethod->intrinsic != nullptr && !resMethod->hasSig())) {
+                (resMethod->hasIntrinsic() && !resMethod->hasSig())) {
                 return resSym.asMethodRef();
             }
         }

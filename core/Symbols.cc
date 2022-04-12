@@ -2030,7 +2030,7 @@ Method Method::deepCopy(const GlobalState &to) const {
         store.name = NameRef(to, mem.name);
     }
     result.rebind = this->rebind;
-    result.intrinsic = this->intrinsic;
+    result.intrinsicOffset = this->intrinsicOffset;
     return result;
 }
 
@@ -2546,5 +2546,17 @@ const TypeParameter *ConstTypeParameterData::operator->() const {
     runDebugOnlyCheck();
     return &typeParam;
 };
+
+bool Method::hasIntrinsic() const {
+    return this->intrinsicOffset != INVALID_INTRINSIC_OFFSET;
+}
+
+const IntrinsicMethod *Method::getIntrinsic() const {
+    if (this->intrinsicOffset == INVALID_INTRINSIC_OFFSET) {
+        return nullptr;
+    }
+
+    return intrinsicMethods()[this->intrinsicOffset - FIRST_VALID_INTRINSIC_OFFSET].impl;
+}
 
 } // namespace sorbet::core

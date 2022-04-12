@@ -762,7 +762,7 @@ class SymbolDefiner {
     // Allow stub symbols created to hold intrinsics to be filled in
     // with real types from code
     bool isIntrinsic(const core::MethodData &data) {
-        return data->intrinsic != nullptr && !data->hasSig();
+        return data->hasIntrinsic() && !data->hasSig();
     }
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::Loc errorLoc, std::string constantName,
