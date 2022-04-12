@@ -1191,8 +1191,8 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
     auto membersSpan = sym->typeMembers();
     InlinedVector<TypeMemberRef, 4> typeMembers;
     typeMembers.assign(membersSpan.begin(), membersSpan.end());
-    auto it =
-        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
+    auto it = remove_if(typeMembers.begin(), typeMembers.end(),
+                        [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
@@ -1288,8 +1288,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     InlinedVector<TypeArgumentRef, 4> typeMembers;
     typeMembers.assign(sym->typeArguments().begin(), sym->typeArguments().end());
-    auto it =
-        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
+    auto it = remove_if(typeMembers.begin(), typeMembers.end(),
+                        [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
     typeMembers.erase(it, typeMembers.end());
     if (!typeMembers.empty()) {
         fmt::format_to(std::back_inserter(buf), "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
