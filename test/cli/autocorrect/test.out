@@ -93,8 +93,7 @@ autocorrect.rb:12: Method `bar=` does not exist on `String` component of `T.nila
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: `Kernel#warn`
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: Did you mean: `Kernel#warn`
     2718 |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
@@ -137,8 +136,7 @@ autocorrect.rb:13: Method `bar=` does not exist on `String` component of `T.nila
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: `Kernel#warn`
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: Did you mean: `Kernel#warn`
     2718 |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
@@ -181,8 +179,7 @@ autocorrect.rb:14: Method `bar=` does not exist on `String` component of `T.nila
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: `Kernel#warn`
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: Did you mean: `Kernel#warn`
     2718 |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
@@ -225,8 +222,7 @@ autocorrect.rb:15: Method `bar=` does not exist on `String` component of `T.nila
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: `Kernel#warn`
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2718: Did you mean: `Kernel#warn`
     2718 |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 

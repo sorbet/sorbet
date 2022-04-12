@@ -118,8 +118,11 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
     68 |  sig {void}
                ^^^^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1561: `Kernel#load`
+  Did you mean `load`? Use `-a` to autocorrect
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Replace with `load`
+    68 |  sig {void}
+               ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1561: Defined here
     1561 |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -134,8 +137,11 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
     69 |  sig {void}
                ^^^^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1561: `Kernel#load`
+  Did you mean `load`? Use `-a` to autocorrect
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Replace with `load`
+    69 |  sig {void}
+               ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1561: Defined here
     1561 |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 10
