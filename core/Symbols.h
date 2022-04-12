@@ -140,6 +140,8 @@ public:
 
     // Equivalent to `getIntrinsic() != nullptr`, but potentially more efficient.
     bool hasIntrinsic() const;
+    // All `IntrinsicMethod`s in sorbet should be statically allocated, which is
+    // why raw pointers are safe.
     const IntrinsicMethod *getIntrinsic() const;
 
     ClassOrModuleRef owner;
