@@ -739,9 +739,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
-                if (!alternatives.empty()) {
-                    vector<ErrorLine> lines;
-                    lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
                         if (!possibleSymbol.isClassOrModule() &&
@@ -752,6 +749,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         auto suggestedName = possibleSymbol.isClassOrModule() ? alternative.symbol.show(gs) + ".new"
                                                                               : alternative.symbol.show(gs);
+
+                        if (!args.funLoc().exists()) {
+                            e.addErrorLine(alternative.symbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                            continue;
+                        }
 
                         bool addedAutocorrect = false;
                         if (possibleSymbol.isClassOrModule()) {
@@ -788,13 +790,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             }
                         }
 
-                        if (!addedAutocorrect) {
-                            lines.emplace_back(ErrorLine::from(alternative.symbol.loc(gs), "`{}`", suggestedName));
-                        }
-                    }
-                    if (!lines.empty()) {
-                        e.addErrorSection(ErrorSection("Did you mean:", lines));
-                    }
                 }
             }
         }
