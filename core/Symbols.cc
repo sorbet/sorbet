@@ -2227,11 +2227,9 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
-    if (isClassOrModule()) {
-        for (const auto &e : typeMembers()) {
-            if (e.exists()) {
-                result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
-            }
+    for (const auto &e : typeMembers()) {
+        if (e.exists()) {
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
 

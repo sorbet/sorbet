@@ -396,7 +396,6 @@ public:
     uint16_t addMixinPlaceholder(const GlobalState &gs);
 
     inline InlinedVector<TypeMemberRef, 4> &getOrCreateTypeMembers() {
-        ENFORCE(isClassOrModule());
         if (typeParams) {
             return *typeParams;
         }
@@ -405,7 +404,6 @@ public:
     }
 
     inline absl::Span<const TypeMemberRef> typeMembers() const {
-        ENFORCE(isClassOrModule());
         if (typeParams) {
             return *typeParams;
         }
@@ -413,7 +411,6 @@ public:
     }
 
     inline InlinedVector<TypeMemberRef, 4> &existingTypeMembers() {
-        ENFORCE(isClassOrModule());
         ENFORCE(typeParams != nullptr);
         return *typeParams;
     }
