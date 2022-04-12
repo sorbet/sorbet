@@ -13,7 +13,7 @@ main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader:outpu
   --autogen-autoloader-exclude-require=byebug \
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
-  test/cli/autogen-autoloader/{foo,bar,bar2,errors}.rb \
+  test/cli/autogen-autoloader/{example1,example2,example3,errors}.rb \
   test/cli/autogen-autoloader/scripts/baz.rb 2>&1
 
 for file in $(find output -type f | sort | grep -v "_mtime_stamp"); do
