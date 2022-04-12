@@ -16,11 +16,7 @@ def test
 #     ^^^ error: Method `net` does not exist on `T.class_of(Foo)`
 #     ^^^ apply-code-action: [B] Replace with `new`
 
-  Boo.new
+  Foo.new
 # ^^^ error: Unable to resolve constant `Boo`
-# ^^^ apply-code-action: [D] Replace with `Foo`
-
-  Foo.new(1)
-# ^^^    error: Method `Boo` does not exist on `Object`
-# ^^^    apply-code-action: [C] Replace with `Foo.new`
+# ^^^ apply-code-action: [C] Replace with `Foo`
 end
