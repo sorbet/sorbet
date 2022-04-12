@@ -824,7 +824,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (data->flags.isGenericMethod) {
-        constr->defineDomain(gs, data->typeArguments);
+        constr->defineDomain(gs, data->typeArguments());
     }
     auto posArgs = args.numPosArgs;
     bool hasKwargs = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });

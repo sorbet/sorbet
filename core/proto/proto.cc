@@ -147,7 +147,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             *symbolProto.add_children() = toProto(gs, pair.second, showFull);
         }
     } else if (sym.isMethod()) {
-        for (auto typeArg : sym.asMethodRef().data(gs)->typeArguments) {
+        for (auto typeArg : sym.asMethodRef().data(gs)->typeArguments()) {
             if (!typeArg.exists()) {
                 continue;
             }
