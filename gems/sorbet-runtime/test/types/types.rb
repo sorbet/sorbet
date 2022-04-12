@@ -1445,8 +1445,7 @@ module Opus::Types::Test
 
       Elem = type_member {{fixed: Integer}}
       sig {params(x: Elem).void}
-      def foo(x)
-      end
+      def foo(x); end
     end
 
     class GenericSingleton
