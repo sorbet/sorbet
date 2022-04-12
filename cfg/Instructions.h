@@ -56,9 +56,6 @@ class Instruction;
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
-public:
-    bool isSynthetic = false;
-
 protected:
     Instruction() = default;
     ~Instruction() = default;
@@ -92,7 +89,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Alias, 16, 8);
+CheckSize(Alias, 8, 8);
 
 INSN(SolveConstraint) : public Instruction {
 public:
@@ -138,7 +135,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Return, 40, 8);
+CheckSize(Return, 32, 8);
 
 INSN(BlockReturn) : public Instruction {
 public:
@@ -149,7 +146,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(BlockReturn, 48, 8);
+CheckSize(BlockReturn, 40, 8);
 
 INSN(LoadSelf) : public Instruction {
 public:
@@ -169,7 +166,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Literal, 24, 8);
+CheckSize(Literal, 16, 8);
 
 INSN(GetCurrentException) : public Instruction {
 public:
@@ -221,7 +218,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(LoadYieldParams, 24, 8);
+CheckSize(LoadYieldParams, 16, 8);
 
 INSN(YieldParamPresent) : public Instruction {
 public:
@@ -276,14 +273,16 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(TAbsurd, 32, 8);
+CheckSize(TAbsurd, 24, 8);
 
 class InstructionPtr final {
     using tagged_storage = uint64_t;
 
-    static constexpr tagged_storage TAG_MASK = 0xffff;
-
-    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+    static constexpr tagged_storage TAG_MASK = 0xff;
+    static constexpr tagged_storage FLAG_MASK = 0xff00;
+    static constexpr tagged_storage SYNTHETIC_FLAG = 0x0100;
+    static_assert((TAG_MASK & FLAG_MASK) == 0, "no bits should be shared between tags and flags");
+    static constexpr tagged_storage PTR_MASK = ~(FLAG_MASK | TAG_MASK);
 
     tagged_storage ptr;
 
@@ -375,6 +374,14 @@ public:
         ENFORCE(ptr != 0);
 
         return static_cast<Tag>(ptr & TAG_MASK);
+    }
+
+    bool isSynthetic() const noexcept {
+        return (this->ptr & SYNTHETIC_FLAG) != 0;
+    }
+
+    void setSynthetic() noexcept {
+        this->ptr |= SYNTHETIC_FLAG;
     }
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
