@@ -2547,4 +2547,16 @@ const TypeParameter *ConstTypeParameterData::operator->() const {
     return &typeParam;
 };
 
+bool Method::hasIntrinsic() const {
+    return this->intrinsicOffset != INVALID_INTRINSIC_OFFSET;
+}
+
+const IntrinsicMethod *Method::getIntrinsic() const {
+    if (this->intrinsicOffset == INVALID_INTRINSIC_OFFSET) {
+        return nullptr;
+    }
+
+    return intrinsicMethods()[this->intrinsicOffset - FIRST_VALID_INTRINSIC_OFFSET].impl;
+}
+
 } // namespace sorbet::core
