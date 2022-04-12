@@ -148,6 +148,10 @@ public:
     NameRef name;
     ClassOrModuleRef rebind;
     Flags flags;
+    // We store an offset into the intrinsic table used by calls.cc; the only
+    // wrinkle is that our offset here is the offset of the intrinsic + 1, so
+    // zero represents "no intrinsic".  This storage system assumes we will
+    // always have < 2^16 intrinsics, which ought to be enough for anybody.
     const static uint16_t INVALID_INTRINSIC_OFFSET = 0;
     const static uint16_t FIRST_VALID_INTRINSIC_OFFSET = 1;
     uint16_t intrinsicOffset = INVALID_INTRINSIC_OFFSET;
