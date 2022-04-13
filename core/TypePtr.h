@@ -275,6 +275,8 @@ public:
 
     bool isNilClass() const;
 
+    bool isTop() const;
+
     bool isBottom() const;
 
     // Used in subtyping.cc to order types.
