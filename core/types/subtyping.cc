@@ -1366,41 +1366,6 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     // Note: order of cases here matters! We can't loose "and" information in t1 early and we can't
     // loose "or" information in t2 early.
     if (auto *o1 = cast_type<OrType>(t1)) { // 7, 8, 9
-        // T.nilable(Integer) <: T.nilable(T.type_parameter(:T))
-        //
-        // ==> NilClass <: T.nilable(T.type_parameter(:T)) &&
-        //     Integer <: T.nilable(T.type_parameter(:T))
-        //
-        // ==> (NilClass <: NilClass ||
-        //      NilClass <: T.type_parameter(:T)) &&      This should not remember `NilClass` as lower bound
-        //     (Integer <: NilClass ||
-        //      Integer <: T.type_parameter(:T))          This should remember `Integer` as lower bound
-        //
-        //
-        // T.any(Integer, NilClass) <: T.nilable(T.type_parameter(:T))
-        //
-        // ==> Integer <: T.nilable(T.type_parameter(:T)) &&
-        //     NilClass <: T.nilable(T.type_parameter(:T))
-        //
-        // ==> (Integer <: NilClass ||
-        //      Integer <: T.type_parameter(:T)) &&
-        //     (NilClass <: NilClass ||
-        //      NilClass <: T.type_paramater(:T))
-        //
-        // T.any(Integer, NilClass) <: T.any(T.type_paramater(:T), NilClass)
-        //
-        // ==> Integer <: T.any(T.type_parameter(:T), NilClass) &&
-        //     NilClass <: T.any(T.type_parameter(:T), NilClass)
-        //
-        // ==> (Integer <: T.type_parameter(:T) ||
-        //      Integer <: NilClass) &&
-        //     (NilClass <: T.type_parameter(:T) ||
-        //      NilClass <: NilClass)
-        //
-        // T.untyped <: T.nilable(T.type_parameter(:T))
-        //
-        // ==> T.untyped <: NilClass ||
-        //     T.untyped <: T.type_parameter(:T)          This should also remember `T.untyped` as lower bound
         return Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode) &&
                Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode);
     }
@@ -1466,14 +1431,14 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
             return constr.rememberIsSubtype(gs, t1, t2);
         }
 
-        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
-
         // This is a hack. isSubTypeUnderConstraint is trying to do double duty as constraint generation and constraint
         // solving. It essentially implements a greedy algorithm despite no greedy algorithm being correct.
         // There are a handful of places where we try to work around those hacks with more hacks, and this is one of
         // them.
         //
         // Concretely, it's still possible to come up with cases where this heuristic isn't good enough.
+        // For more, see the comment in `no_short_circuit_type_constraint.rb`
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
         auto stillNeedToCheckRight = t1.isUntyped() && o2->left.isFullyDefined() && !o2->right.isFullyDefined();
         if (leftIsSubType && !stillNeedToCheckRight) {
             // Short circuit to save time
@@ -1481,30 +1446,6 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else {
             return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
         }
-
-        // if (!leftIsSubType) {
-        //     return false;
-        // } else if () {
-        //     return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
-        // } else {
-        //     return false;
-        // }
-
-        // if (t1.isUntyped()) {
-        //     auto leftIsSubTypeUnderConstraint = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
-        //     auto rightIsSubTypeUnderConstraint = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
-        //     return leftIsSubTypeUnderConstraint || rightIsSubTypeUnderConstraint;
-        // } else {
-        //     return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode) ||
-        //            Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
-        // }
-        // return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode) ||
-        //        Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
-
-        // TODO(jez) Clearly there is some amount of ordering to blame.
-        // For example, checking `right` before `left` here breaks.
-        // return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode) ||
-        //        Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
     }
     if (a1 != nullptr) { // 4
         if (isa_type<TypeVar>(t2) && !constr.isSolved()) {
