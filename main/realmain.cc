@@ -356,6 +356,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 // Returns `true` if the constant hash information provided tells us
 // we can exit `autogen` early, and `false` otherwise.
 bool autogenCanExitEarly(shared_ptr<spd::logger> &logger, options::Options &opts) {
+    Timer timeit(logger, "autogenCanExitEarly");
+
     if (opts.autogenConstantCacheFile.empty()) {
         return false;
     }

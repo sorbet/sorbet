@@ -15,21 +15,13 @@ public:
     // the output of autogen. This means we can always be conservative: it's okay if this returns `false` in places
     // where it could return `true`, because that'll be correct but slower.
     static bool canSkipAutogen(core::GlobalState &gs, std::string_view cachePath,
-                               std::vector<std::string> &changedFiles);
+                               const std::vector<std::string> &changedFiles);
 
-    static AutogenCache unpackForFiles(std::string_view path, UnorderedSet<std::string> &changedFiles);
-    static AutogenCache merge(std::vector<AutogenCache> &caches) {
-        AutogenCache cache;
-
-        for (auto &c : caches) {
-            cache._constantHashMap.insert(c.constantHashMap().begin(), c.constantHashMap().end());
-        }
-
-        return cache;
-    }
+    static AutogenCache unpackForFiles(std::string_view path, const UnorderedSet<std::string> &changedFiles);
 
     AutogenCache(UnorderedMap<std::string, unsigned int> constantHashMap) : _constantHashMap(constantHashMap){};
     AutogenCache() = default;
+    AutogenCache(AutogenCache&&) = default;
     AutogenCache(const AutogenCache &) = delete;
     AutogenCache &operator=(const AutogenCache &) = delete;
 
