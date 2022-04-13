@@ -412,7 +412,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
       child = Class.new(parent) do
         extend T::Sig
-        tpl = type_template(fixed: Integer)
+        tpl = type_template {{fixed: Integer}}
 
         sig {override.returns(tpl)}
         def load_one

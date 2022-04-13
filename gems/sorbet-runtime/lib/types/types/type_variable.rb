@@ -10,7 +10,10 @@ module T::Types
     VALID_VARIANCES = %i[in out invariant].freeze
 
     def initialize(variance)
-      if !VALID_VARIANCES.include?(variance)
+      case variance
+      when Hash then raise ArgumentError.new("Pass bounds using a block. Got: #{variance}")
+      when *VALID_VARIANCES then nil
+      else
         raise TypeError.new("invalid variance #{variance}")
       end
       @variance = variance
