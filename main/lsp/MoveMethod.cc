@@ -65,6 +65,8 @@ string snakeToCamelCase(string_view name) {
     for (int i = 0; i < originalSize; i++) {
         if (name.at(i) == '_') {
             shouldCapitalize = true;
+        }
+        if (!isalnum(name.at(i))) {
             continue;
         }
         res += shouldCapitalize ? toupper(name[i]) : name[i];
