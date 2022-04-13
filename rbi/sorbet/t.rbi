@@ -71,8 +71,8 @@ end
 module T::Generic
   include T::Helpers
 
-  def type_member(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject); end
-  def type_template(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject); end
+  def type_member(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject, &blk); end
+  def type_template(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject, &blk); end
   def [](*types); end
 end
 

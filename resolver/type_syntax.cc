@@ -39,13 +39,13 @@ ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, cons
     return result;
 }
 
-core::TypePtr TypeSyntax::getResultType(core::Context ctx, ast::ExpressionPtr &expr, const ParsedSig &sigBeingParsed,
-                                        TypeSyntaxArgs args) {
+core::TypePtr TypeSyntax::getResultType(core::Context ctx, const ast::ExpressionPtr &expr,
+                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     return core::Types::unwrapSelfTypeParam(
         ctx, getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, ast::ExpressionPtr &expr,
+TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, const ast::ExpressionPtr &expr,
                                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
     result.type = core::Types::unwrapSelfTypeParam(ctx, result.type);
