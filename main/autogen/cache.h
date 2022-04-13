@@ -21,10 +21,9 @@ public:
 
     AutogenCache(UnorderedMap<std::string, unsigned int> constantHashMap) : _constantHashMap(constantHashMap){};
     AutogenCache() = default;
-    AutogenCache(AutogenCache&&) = default;
+    AutogenCache(AutogenCache &&) = default;
     AutogenCache(const AutogenCache &) = delete;
     AutogenCache &operator=(const AutogenCache &) = delete;
-
 
     void add(std::string path, unsigned int hash) {
         _constantHashMap.emplace(path, hash);
