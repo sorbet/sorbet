@@ -125,7 +125,7 @@ AutogenCache AutogenCache::unpackForFiles(string_view file_contents, const Unord
     return cache;
 }
 
-string AutogenCache::pack() {
+string AutogenCache::pack() const {
     char *data;
     size_t size;
     mpack_writer_t writer;

@@ -733,7 +733,7 @@ int realmain(int argc, char *argv[]) {
 
             if (!opts.autogenConstantCacheFile.empty()) {
                 // we should regenerate the constant cache here
-                indexed = pipeline::autogenCacheFiles(*gs, opts.autogenConstantCacheFile, move(indexed), *workers);
+                indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheFile, move(indexed), *workers);
             }
 
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);

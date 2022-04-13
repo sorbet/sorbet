@@ -30,7 +30,7 @@ public:
         _constantHashMap.emplace(path, hash);
     };
 
-    std::string pack();
+    std::string pack() const;
 
     const UnorderedMap<std::string, unsigned int> &constantHashMap() const {
         return _constantHashMap;

@@ -40,7 +40,7 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedF
 ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 WorkerPool &workers);
 
-std::vector<ast::ParsedFile> autogenCacheFiles(const core::GlobalState &gs, std::string_view cachePath,
+std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string_view cachePath,
                                                std::vector<ast::ParsedFile> what, WorkerPool &workers);
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
