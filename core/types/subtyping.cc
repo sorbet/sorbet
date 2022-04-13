@@ -1379,6 +1379,9 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (isa_type<TypeVar>(t2) && !constr.isSolved()) {
             return constr.rememberIsSubtype(gs, t1, t2);
         }
+        if (!a1->left.isFullyDefined() || !a1->right.isFullyDefined()) {
+            Exception::raise("t1={}, t2={}", t1.show(gs), t2.show(gs));
+        }
         return Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode) ||
                Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
     }
