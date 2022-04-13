@@ -1466,28 +1466,30 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
             return constr.rememberIsSubtype(gs, t1, t2);
         }
 
-        // auto leftIsSubtype = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
-        // auto rightIsSubtype = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
-        // return leftIsSubtype || rightIsSubtype;
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
 
-        // If this doesn't work, I think we want to ask isSubTypeUnderConstraint but temporarily freeze constr.
-
-        auto leftIsSubType =
-            Types::isSubTypeUnderConstraint(gs, constr.isSolved() ? constr : *constr.deepCopy(), t1, o2->left, mode);
-        auto rightIsSubType =
-            Types::isSubTypeUnderConstraint(gs, constr.isSolved() ? constr : *constr.deepCopy(), t1, o2->right, mode);
-
-        if (leftIsSubType && rightIsSubType && !t1.isUntyped() && !t2.isUntyped()) {
+        // This is a hack. isSubTypeUnderConstraint is trying to do double duty as constraint generation and constraint
+        // solving. It essentially implements a greedy algorithm despite no greedy algorithm being correct.
+        // There are a handful of places where we try to work around those hacks with more hacks, and this is one of
+        // them.
+        //
+        // Concretely, it's still possible to come up with cases where this heuristic isn't good enough.
+        auto stillNeedToCheckRight = t1.isUntyped() && o2->left.isFullyDefined() && !o2->right.isFullyDefined();
+        if (leftIsSubType && !stillNeedToCheckRight) {
+            // Short circuit to save time
             return true;
         } else {
-            auto leftIsSubTypeUnderConstraint = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
-            auto rightIsSubTypeUnderConstraint = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
-            return leftIsSubTypeUnderConstraint || rightIsSubTypeUnderConstraint;
+            return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
         }
 
-        // TODO(jez) Yes technically this works, but it's really just an accident, because the
-        // problem *can* manifest with non-untyped types, but we're lucky that Sorbet's type syntax
-        // parsing right now doesn't make that case happen (unclear why it parses that way)
+        // if (!leftIsSubType) {
+        //     return false;
+        // } else if () {
+        //     return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
+        // } else {
+        //     return false;
+        // }
+
         // if (t1.isUntyped()) {
         //     auto leftIsSubTypeUnderConstraint = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
         //     auto rightIsSubTypeUnderConstraint = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
