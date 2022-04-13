@@ -1883,6 +1883,14 @@ public:
                                 case core::Names::upper().rawId():
                                     bounded = true;
                                     break;
+
+                                default:
+                                    if (auto e =
+                                            ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                                        e.setHeader("Unknown key `{}` provided in block to `{}`",
+                                                    key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
+                                    }
+                                    return tree;
                             }
                         }
                     } else {

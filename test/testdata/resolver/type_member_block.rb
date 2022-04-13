@@ -29,3 +29,9 @@ module IBox5
   X = type_member(:out) {x = 1; p(x); {upper: Integer}}
   #                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Block given to `type_member` must contain a single `Hash` literal
 end
+
+module IBox6
+  extend T::Generic
+  X = type_member(:out) {{unknown: Integer}}
+  #                       ^^^^^^^ error: Unknown key `unknown` provided in block to `type_member`
+end
