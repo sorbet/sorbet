@@ -12,7 +12,7 @@ class Invalids
   Mama = type_member("mama") # error: Invalid param, must be a :symbol
   One = type_member(1) # error: Invalid param, must be a :symbol
   ArrOne = type_member([1]) # error: Invalid param, must be a :symbol
-  BadArg = type_member(junk: 1)
+  BadArg = type_member {{junk: 1}}
          # ^^^^^^^^^^^^^^^^^^^^ error: Missing required param `fixed`
          # ^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `junk` passed for method
                            # ^ error: Unsupported literal in type syntax
@@ -22,7 +22,7 @@ module TypeParamDependsOnTypeParam
   extend T::Generic
 
   # ResolveTypeMembersWalk corner case: The type of this type member depends on a class with a type parameter.
-  Test = type_member(:out, upper: Parent[Integer])
+  Test = type_member(:out) {{upper: Parent[Integer]}}
 end
 
 module TypeAliasDependsOnTypeParam

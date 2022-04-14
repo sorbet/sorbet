@@ -19,7 +19,7 @@ class A
   extend T::Sig
   extend T::Generic
 
-  X = type_member(fixed: Integer)
+  X = type_member {{fixed: Integer}}
 
   sig {returns(X)}
   def test_X
@@ -31,7 +31,7 @@ end
 class B; end
 
 class A
-  Y = type_member(fixed: String)
+  Y = type_member {{fixed: String}}
 
   sig {returns(Y)}
   def test_Y

@@ -11,7 +11,7 @@ class A
 
   include M
 
-  Args = type_member(fixed: NilClass)
+  Args = type_member {{fixed: NilClass}}
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
 end
@@ -21,7 +21,7 @@ class B
   extend T::Generic
   extend M
 
-  Args = type_template(fixed: NilClass)
+  Args = type_template {{fixed: NilClass}}
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
 end
@@ -29,7 +29,7 @@ end
 module M
   extend T::Generic
 
-  Args = type_member(upper: Foo, lower: Bar)
+  Args = type_member {{upper: Foo, lower: Bar}}
 end
 
 class C
@@ -37,6 +37,6 @@ class C
 
   include M
 
-  Args = type_member(upper:Foo, lower: Baz)
+  Args = type_member {{upper:Foo, lower: Baz}}
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `Baz`
 end

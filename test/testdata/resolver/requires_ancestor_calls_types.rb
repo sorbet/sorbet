@@ -188,7 +188,7 @@ module Test9
   class C1
     extend T::Generic
     extend T::Sig
-    Elem = type_member(upper: M1)
+    Elem = type_member {{upper: M1}}
 
     sig { params(m1: Elem).returns(Elem) }
     def elem(m1)

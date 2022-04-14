@@ -4,7 +4,7 @@ require_relative '../../t'
 class PreChild < Parent
   extend T::Generic
 
-  Elem = type_member(fixed: String)
+  Elem = type_member {{fixed: String}}
 end
 
 class Parent
@@ -21,7 +21,7 @@ end
 
 class Child < Parent
   extend T::Generic
-  Elem = type_member(fixed: String)
+  Elem = type_member {{fixed: String}}
 
   def use_foo
     T.assert_type!(foo("foo"), String)
@@ -42,7 +42,7 @@ end
 class WithMixin
   extend T::Generic
   include Mixin
-  Elem = type_member(fixed: String)
+  Elem = type_member {{fixed: String}}
 end
 
 class NotATypeVar
@@ -65,21 +65,21 @@ end
 
 class HalfChild < ParentWithMultiple
   extend T::Generic
-  K = type_member(fixed: Integer)
+  K = type_member {{fixed: Integer}}
   V = type_member
 end
 
 class HalfChildOther < ParentWithMultiple
   extend T::Generic
   K = type_member
-  V = type_member(fixed: Integer)
+  V = type_member {{fixed: Integer}}
 end
 
 class FullChild < HalfChild
   extend T::Generic
   extend T::Sig
-  K = type_member(fixed: Integer)
-  V = type_member(fixed: String)
+  K = type_member {{fixed: Integer}}
+  V = type_member {{fixed: String}}
 
   sig {params(f: FullChild).returns(FullChild[])}
   def f(f); f; end
@@ -98,7 +98,7 @@ end
 
 class ChildEnumerable < ParentEnumerable
   extend T::Generic
-  K = type_member(fixed: String)
+  K = type_member {{fixed: String}}
   V = type_member
   Elem = type_member
 end

@@ -5,7 +5,7 @@ class Cat < Animal; end
 
 class A
   extend T::Generic
-  X = type_member(lower: Cat, upper: Animal)
+  X = type_member {{lower: Cat, upper: Animal}}
 end
 
 class Test
