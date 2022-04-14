@@ -39,12 +39,12 @@ autocorrect-nilable-untyped.rb:9: `T.nilable(T.untyped)` is the same as `T.untyp
                     ^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-nilable-untyped.rb:34: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
-    34 |  Elem = type_member(upper: T.nilable(T.untyped))
-                                    ^^^^^^^^^^^^^^^^^^^^
+    34 |  Elem = type_member {{upper: T.nilable(T.untyped)}}
+                                      ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-nilable-untyped.rb:34: Replaced with `T.untyped`
-    34 |  Elem = type_member(upper: T.nilable(T.untyped))
-                                    ^^^^^^^^^^^^^^^^^^^^
+    34 |  Elem = type_member {{upper: T.nilable(T.untyped)}}
+                                      ^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-nilable-untyped.rb:18: `T.nilable(T.untyped)` is the same as `T.untyped` https://srb.help/5070
     18 |    res = T.let('hi', T.nilable(T.untyped))
@@ -114,6 +114,6 @@ class B
   extend T::Sig
   extend T::Generic
 
-  Elem = type_member(upper: T.untyped)
+  Elem = type_member {{upper: T.untyped}}
 
 end
