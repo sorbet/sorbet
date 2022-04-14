@@ -15,9 +15,9 @@ end
 
 module IBox3
   extend T::Generic
-  X = type_member(:out, fixed: Integer) {{upper: T.any(Integer, String)}}
-  #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `type_member` must not have both keyword args and a block
-  #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member is defined with bounds and `fixed`
+  X = type_member(:out) {{upper: T.any(Integer, String)}}
+  #                     ^^^^^^^^^^^^^^ error: The `type_member` syntax for bounds has changed to use a block instead of keyword args
+  #                     ^^^^^^^^^^^^^^ error: Too many arguments
 end
 
 module IBox4
