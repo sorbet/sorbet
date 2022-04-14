@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "absl/strings/match.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -1833,6 +1834,44 @@ public:
             if (!sym.exists()) {
                 ENFORCE(this->bestEffort);
                 return ast::MK::EmptyTree();
+            }
+
+            if (send->hasKwArgs()) {
+                const auto numKwArgs = send->numKwArgs();
+                auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
+                if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
+                    e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
+                                send->fun.show(ctx));
+
+                    if (kwArgsLoc.exists()) {
+                        auto deleteLoc = kwArgsLoc;
+                        auto prefix = deleteLoc.adjustLen(ctx, -2, 2);
+                        if (prefix.source(ctx) == ", ") {
+                            deleteLoc = prefix.join(deleteLoc);
+                        }
+
+                        auto surroundingLoc = deleteLoc.adjust(ctx, -1, 1);
+                        auto surroundingSrc = surroundingLoc.source(ctx);
+                        if (surroundingSrc.has_value() && absl::StartsWith(surroundingSrc.value(), "(") &&
+                            absl::EndsWith(surroundingSrc.value(), ")")) {
+                            deleteLoc = surroundingLoc;
+                        }
+
+                        auto edits = vector<core::AutocorrectSuggestion::Edit>{};
+                        edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
+                        if (send->block() == nullptr) {
+                            edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                                ctx.locAt(send->loc).copyEndWithZeroLength(),
+                                fmt::format(" {{{{{}}}}}", kwArgsLoc.source(ctx).value())});
+                        }
+                        e.addAutocorrect(core::AutocorrectSuggestion{
+                            fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
+                            move(edits),
+                        });
+                    }
+                } else {
+                    e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
+                }
             }
 
             if (send->block() != nullptr) {
