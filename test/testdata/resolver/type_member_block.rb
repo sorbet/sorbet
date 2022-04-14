@@ -1,4 +1,5 @@
 # typed: true
+extend T::Sig
 
 module IBox1
   extend T::Generic
@@ -34,4 +35,16 @@ module IBox6
   extend T::Generic
   X = type_member(:out) {{unknown: Integer}}
   #                       ^^^^^^^ error: Unknown key `unknown` provided in block to `type_member`
+end
+
+class IntBox
+  extend T::Sig
+  extend T::Generic
+
+  Elem = type_member {{fixed: Integer}}
+end
+
+sig {returns(IntBox)}
+def example1
+  IntBox.new
 end

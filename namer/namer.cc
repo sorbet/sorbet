@@ -651,7 +651,7 @@ public:
             return foundDefs->addStaticField(move(staticField));
         }
 
-        if (send->hasPosArgs() || send->hasKwArgs()) {
+        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
@@ -670,6 +670,21 @@ public:
                         case core::Names::fixed().rawId():
                             found.isFixed = true;
                             break;
+                    }
+                }
+            }
+
+            if (send->block()) {
+                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                    for (const auto &keyExpr : hash->keys) {
+                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        if (key != nullptr && key->isSymbol(ctx)) {
+                            switch (key->asSymbol(ctx).rawId()) {
+                                case core::Names::fixed().rawId():
+                                    found.isFixed = true;
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -1809,7 +1824,7 @@ public:
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
-        if (send->hasPosArgs() || send->hasKwArgs()) {
+        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             if (send->numPosArgs() > 1) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
@@ -1953,7 +1968,6 @@ public:
 
         switch (send->fun.rawId()) {
             case core::Names::typeTemplate().rawId():
-                return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             case core::Names::typeMember().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             default:
