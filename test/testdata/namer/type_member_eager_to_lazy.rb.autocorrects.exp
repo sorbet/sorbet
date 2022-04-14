@@ -11,10 +11,10 @@ module A
   A5 = type_member {{lower: Integer, upper: Integer}} # error: syntax for bounds has changed
 
   B1 = type_member
-  B2 = type_member  {{fixed: Integer}} # error: syntax for bounds has changed
-  B3 = type_member  {{lower: Integer}} # error: syntax for bounds has changed
-  B4 = type_member  {{upper: Integer}} # error: syntax for bounds has changed
-  B5 = type_member  {{lower: Integer, upper: Integer}} # error: syntax for bounds has changed
+  B2 = type_member {{fixed: Integer}} # error: syntax for bounds has changed
+  B3 = type_member {{lower: Integer}} # error: syntax for bounds has changed
+  B4 = type_member {{upper: Integer}} # error: syntax for bounds has changed
+  B5 = type_member {{lower: Integer, upper: Integer}} # error: syntax for bounds has changed
 
   C1 = type_member(:out)
   C2 = type_member(:out) {{fixed: Integer}} # error: syntax for bounds has changed

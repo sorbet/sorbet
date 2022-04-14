@@ -1843,10 +1843,14 @@ public:
                     e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
                                 send->fun.show(ctx));
 
-                    if (kwArgsLoc.exists()) {
+                    if (kwArgsLoc.exists() && send->block() == nullptr) {
                         auto deleteLoc = kwArgsLoc;
                         auto prefix = deleteLoc.adjustLen(ctx, -2, 2);
                         if (prefix.source(ctx) == ", ") {
+                            deleteLoc = prefix.join(deleteLoc);
+                        }
+                        prefix = deleteLoc.adjustLen(ctx, -1, 1);
+                        if (prefix.source(ctx) == " ") {
                             deleteLoc = prefix.join(deleteLoc);
                         }
 
@@ -1859,11 +1863,9 @@ public:
 
                         auto edits = vector<core::AutocorrectSuggestion::Edit>{};
                         edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
-                        if (send->block() == nullptr) {
-                            edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                                ctx.locAt(send->loc).copyEndWithZeroLength(),
-                                fmt::format(" {{{{{}}}}}", kwArgsLoc.source(ctx).value())});
-                        }
+                        edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                            ctx.locAt(send->loc).copyEndWithZeroLength(),
+                            fmt::format(" {{{{{}}}}}", kwArgsLoc.source(ctx).value())});
                         e.addAutocorrect(core::AutocorrectSuggestion{
                             fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
                             move(edits),
