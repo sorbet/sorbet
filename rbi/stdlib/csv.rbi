@@ -212,7 +212,7 @@ class CSV < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T::Array[T.nilable(String)])
+  Elem = type_member(:out) {{fixed: T::Array[T.nilable(String)]}}
 
   # The options used when no overrides are given by calling code. They are:
   #
@@ -941,7 +941,7 @@ class CSV::Row < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Construct a new
   # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) from
@@ -1166,7 +1166,7 @@ end
 # :   The header for the column, when available.
 class CSV::FieldInfo < Struct
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 end
 
 # The error thrown when the parser encounters illegal
@@ -1189,7 +1189,7 @@ class CSV::Table < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T.any(CSV::Row, T::Array[T.untyped]))
+  Elem = type_member(:out) {{fixed: T.any(CSV::Row, T::Array[T.untyped])}}
 
   # Constructs a new
   # [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html) from

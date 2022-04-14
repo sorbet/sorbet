@@ -118,7 +118,7 @@ class IO < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   APPEND = T.let(T.unsafe(nil), Integer)
   BINARY = T.let(T.unsafe(nil), Integer)

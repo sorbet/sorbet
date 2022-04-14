@@ -116,7 +116,7 @@ end
 class Sorbet::Private::Static::ENVClass
   extend T::Generic
   include Enumerable
-  Elem = type_member(:out, fixed: [String, T.nilable(String)])
+  Elem = type_member(:out) {{fixed: [String, T.nilable(String)]}}
 
   sig do
     params(

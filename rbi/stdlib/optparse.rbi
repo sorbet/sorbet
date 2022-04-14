@@ -981,9 +981,9 @@ class OptionParser
   class OptionMap < Hash
     include OptionParser::Completion
 
-    K = type_member(fixed: T.untyped)
-    V = type_member(fixed: T.untyped)
-    Elem = type_member(fixed: T.untyped)
+    K = type_member {{fixed: T.untyped}}
+    V = type_member {{fixed: T.untyped}}
+    Elem = type_member {{fixed: T.untyped}}
 
     sig {params(key: T.untyped, icase: T.untyped, pat: T.untyped).returns(T.untyped)}
     def candidate(key, icase = false, pat = nil); end
@@ -1568,9 +1568,9 @@ class OptionParser
   # [`OptionParser::Completion`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Completion.html).
   class CompletingHash < Hash
     include OptionParser::Completion
-    K = type_member(fixed: T.untyped)
-    V = type_member(fixed: T.untyped)
-    Elem = type_member(fixed: T.untyped)
+    K = type_member {{fixed: T.untyped}}
+    V = type_member {{fixed: T.untyped}}
+    Elem = type_member {{fixed: T.untyped}}
 
     # Completion for hash key.
     sig {params(key: T.untyped).returns(T.untyped)}

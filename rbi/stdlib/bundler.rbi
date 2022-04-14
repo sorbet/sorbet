@@ -4130,7 +4130,7 @@ end
 
 class Bundler::GemHelpers::PlatformMatch < Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   EXACT_MATCH = ::T.let(nil, T.untyped)
   WORST_MATCH = ::T.let(nil, T.untyped)
@@ -4606,7 +4606,7 @@ class Bundler::LazySpecification::Identifier < Struct
   include ::Comparable
   extend ::T::Generic
 
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig do
     params(
@@ -5417,7 +5417,7 @@ end
 # @attr [Object] requirement The requirement the directed edge represents
 class Bundler::Molinillo::DependencyGraph::Edge < Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig {returns(T.untyped)}
   def destination(); end
@@ -5476,7 +5476,7 @@ end
 class Bundler::Molinillo::DependencyGraph::Log
   extend T::Enumerable
 
-  Elem = type_template(fixed: T.untyped)
+  Elem = type_template {{fixed: T.untyped}}
 
   # @macro action
   sig do
@@ -5917,7 +5917,7 @@ end
 # possibilities
 class Bundler::Molinillo::DependencyState < Bundler::Molinillo::ResolutionState
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # Removes a possibility from `self` @return [PossibilityState] a state with a
   # single possibility,
@@ -5977,12 +5977,12 @@ end
 # {#requirement}
 class Bundler::Molinillo::PossibilityState < Bundler::Molinillo::ResolutionState
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 end
 
 class Bundler::Molinillo::ResolutionState < Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig {returns(T.untyped)}
   def activated(); end
@@ -6240,7 +6240,7 @@ end
 
 class Bundler::Molinillo::Resolver::Resolution::Conflict < Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig {returns(T.untyped)}
   def activated_by_name(); end
@@ -6356,7 +6356,7 @@ end
 
 class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig {returns(T.untyped)}
   def dependencies(); end
@@ -6412,7 +6412,7 @@ end
 class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
   include ::Comparable
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # We compare
   # [`UnwindDetails`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/Resolver/Resolution/UnwindDetails.html)
@@ -8609,7 +8609,7 @@ end
 
 class Bundler::Settings::Path < Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig {returns(T.untyped)}
   def append_ruby_scope(); end

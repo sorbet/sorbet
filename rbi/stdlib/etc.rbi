@@ -564,10 +564,10 @@ end
 #     containing the short login names of the members of the group.
 class Etc::Group < Struct
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
   class << self
     extend T::Generic
-    Elem = type_member(fixed: T.untyped)
+    Elem = type_member {{fixed: T.untyped}}
   end
 end
 
@@ -622,7 +622,7 @@ end
 #     `HAVE_STRUCT_PASSWD_PW_EXPIRE`
 class Etc::Passwd < Struct
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Contains the short login name of the user as a String.
   sig { returns(String) }
@@ -653,6 +653,6 @@ class Etc::Passwd < Struct
 
   class << self
     extend T::Generic
-    Elem = type_member(fixed: T.untyped)
+    Elem = type_member {{fixed: T.untyped}}
   end
 end

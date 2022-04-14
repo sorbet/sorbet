@@ -678,7 +678,7 @@ end
 # cookie1.httponly = true
 # ```
 class CGI::Cookie < Array
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Domain for which this cookie applies, as a `String`
   sig {returns(::T.untyped)}

@@ -77,7 +77,7 @@ class File < IO
   Separator = T.let(T.unsafe(nil), String)
 
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Converts a pathname to an absolute pathname. Relative paths are referenced
   # from the current working directory of the process unless *dir\_string* is
