@@ -13,9 +13,8 @@ class Invalids
   One = type_member(1) # error: Invalid param, must be a :symbol
   ArrOne = type_member([1]) # error: Invalid param, must be a :symbol
   BadArg = type_member {{junk: 1}}
-         # ^^^^^^^^^^^^^^^^^^^^ error: Missing required param `fixed`
-         # ^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `junk` passed for method
-                           # ^ error: Unsupported literal in type syntax
+  #                      ^^^^ error: Unknown key `junk` provided in block to `type_member`
+  #                            ^ error: Unsupported literal in type syntax
 end
 
 module TypeParamDependsOnTypeParam

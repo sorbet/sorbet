@@ -20,8 +20,8 @@ end
 class B2 < A
   extend T::Generic
   T1 = type_member {{fixed: String}}
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Serval` is not a subtype of lower bound `String`
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `String` is not a subtype of parent upper bound `Animal`
+     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Serval` is not a subtype of lower bound `String`
+     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `String` is not a subtype of parent upper bound `Animal`
 end
 
 # should pass: the bounds are a refinement of the ones on A
@@ -34,7 +34,7 @@ end
 class C2 < A
   extend T::Generic
   T1 = type_member {{lower: Serval, upper: Object}}
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `Object` is not a subtype of parent upper bound `Animal`
+     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `Object` is not a subtype of parent upper bound `Animal`
 end
 
 # should fail: the implicit bounds of top and bottom are too wide for T1

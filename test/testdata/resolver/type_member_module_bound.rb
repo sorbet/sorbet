@@ -12,8 +12,8 @@ class A
   include M
 
   Args = type_member {{fixed: NilClass}}
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
 end
 
 # Ensure that type_templates depend on the singleton mixins
@@ -22,8 +22,8 @@ class B
   extend M
 
   Args = type_template {{fixed: NilClass}}
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
 end
 
 module M
@@ -38,5 +38,5 @@ class C
   include M
 
   Args = type_member {{upper:Foo, lower: Baz}}
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `Baz`
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `Baz`
 end

@@ -20,7 +20,7 @@ class A
   extend T::Generic
 
   X = type_member {{upper: T.nilable(T.untyped)}}
-  #                      ^^^^^^^^^^^^^^^^^^^^ error: `T.nilable(T.untyped)` is the same as `T.untyped`
+  #                        ^^^^^^^^^^^^^^^^^^^^ error: `T.nilable(T.untyped)` is the same as `T.untyped`
 
   sig {params(x: T.nilable(T.untyped)).void}
   #              ^^^^^^^^^^^^^^^^^^^^ error: `T.nilable(T.untyped)` is the same as `T.untyped`

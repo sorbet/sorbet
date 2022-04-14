@@ -6,7 +6,7 @@ class A
   extend T::Generic
 
   X = type_member {{fixed: B}}
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member `A::X` is involved in a cycle
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member `A::X` is involved in a cycle
 end
 
 class B
@@ -14,7 +14,7 @@ class B
   extend T::Generic
 
   X = type_member {{fixed: A}}
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member `B::X` is involved in a cycle
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member `B::X` is involved in a cycle
 
   sig {returns(X)}
   def test
