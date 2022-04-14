@@ -1,5 +1,6 @@
 #include "namer/namer.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -1788,6 +1789,63 @@ public:
         return tree;
     }
 
+    void lazyTypeMemberAutocorrect(core::Context ctx, core::ErrorBuilder &e, const ast::Send *send,
+                                   core::Loc kwArgsLoc) {
+        auto deleteLoc = kwArgsLoc;
+        auto prefix = deleteLoc.adjustLen(ctx, -2, 2);
+        if (prefix.source(ctx) == ", ") {
+            deleteLoc = prefix.join(deleteLoc);
+        }
+        prefix = deleteLoc.adjustLen(ctx, -1, 1);
+        if (prefix.source(ctx) == " ") {
+            deleteLoc = prefix.join(deleteLoc);
+        }
+
+        auto surroundingLoc = deleteLoc.adjust(ctx, -1, 1);
+        auto surroundingSrc = surroundingLoc.source(ctx);
+        if (surroundingSrc.has_value() && absl::StartsWith(surroundingSrc.value(), "(") &&
+            absl::EndsWith(surroundingSrc.value(), ")")) {
+            deleteLoc = surroundingLoc;
+        }
+
+        auto multiline = false;
+        auto indent = ""s;
+        auto sendLoc = ctx.locAt(send->loc);
+        auto [beginDetail, endDetail] = sendLoc.position(ctx);
+        if (endDetail.line > beginDetail.line && send->funLoc.exists() && !send->funLoc.empty() &&
+            send->numPosArgs() == 0) {
+            deleteLoc = core::Loc(ctx.file, send->funLoc.endPos(), send->loc.endPos());
+            multiline = true;
+            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfLine(ctx);
+            indent = string(indentLen, ' ');
+        }
+
+        auto edits = vector<core::AutocorrectSuggestion::Edit>{};
+        edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
+        auto insertLoc = ctx.locAt(send->loc).copyEndWithZeroLength();
+        auto kwArgsSource = kwArgsLoc.source(ctx).value();
+        if (multiline) {
+            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.position(ctx);
+            if (kwEndDetail.line > kwBeginDetail.line) {
+                auto reindentedSource = absl::StrReplaceAll(kwArgsSource, {{"\n", "\n  "}});
+                if (kwBeginDetail.line == beginDetail.line) {
+                    reindentedSource = absl::StrReplaceAll(reindentedSource, {{"\n", "\n  "}});
+                }
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertLoc, fmt::format(" do\n{0}  {{\n{0}    {1},\n{0}  }}\n{0}end", indent, reindentedSource)});
+            } else {
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertLoc, fmt::format(" do\n{0}  {{{1}}}\n{0}end", indent, kwArgsSource)});
+            }
+        } else {
+            edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, fmt::format(" {{{{{}}}}}", kwArgsSource)});
+        }
+        e.addAutocorrect(core::AutocorrectSuggestion{
+            fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
+            move(edits),
+        });
+    }
+
     ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
                                                   const ast::UnresolvedConstantLit *typeName) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
@@ -1844,35 +1902,10 @@ public:
                                 send->fun.show(ctx));
 
                     if (kwArgsLoc.exists() && send->block() == nullptr) {
-                        auto deleteLoc = kwArgsLoc;
-                        auto prefix = deleteLoc.adjustLen(ctx, -2, 2);
-                        if (prefix.source(ctx) == ", ") {
-                            deleteLoc = prefix.join(deleteLoc);
-                        }
-                        prefix = deleteLoc.adjustLen(ctx, -1, 1);
-                        if (prefix.source(ctx) == " ") {
-                            deleteLoc = prefix.join(deleteLoc);
-                        }
-
-                        auto surroundingLoc = deleteLoc.adjust(ctx, -1, 1);
-                        auto surroundingSrc = surroundingLoc.source(ctx);
-                        if (surroundingSrc.has_value() && absl::StartsWith(surroundingSrc.value(), "(") &&
-                            absl::EndsWith(surroundingSrc.value(), ")")) {
-                            deleteLoc = surroundingLoc;
-                        }
-
-                        auto edits = vector<core::AutocorrectSuggestion::Edit>{};
-                        edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
-                        edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                            ctx.locAt(send->loc).copyEndWithZeroLength(),
-                            fmt::format(" {{{{{}}}}}", kwArgsLoc.source(ctx).value())});
-                        e.addAutocorrect(core::AutocorrectSuggestion{
-                            fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
-                            move(edits),
-                        });
+                        lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
+                    } else {
+                        e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
                     }
-                } else {
-                    e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
                 }
             }
 
