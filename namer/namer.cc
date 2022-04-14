@@ -651,7 +651,7 @@ public:
             return foundDefs->addStaticField(move(staticField));
         }
 
-        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
+        if (send->hasPosArgs() || send->block() != nullptr) {
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
@@ -661,20 +661,7 @@ public:
                 }
             }
 
-            const auto numKwArgs = send->numKwArgs();
-            // Walk over the keyword args to find bounds annotations
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto *key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
-                if (key != nullptr && key->isSymbol(ctx)) {
-                    switch (key->asSymbol(ctx).rawId()) {
-                        case core::Names::fixed().rawId():
-                            found.isFixed = true;
-                            break;
-                    }
-                }
-            }
-
-            if (send->block()) {
+            if (send->block() != nullptr) {
                 if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
                     for (const auto &keyExpr : hash->keys) {
                         const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
@@ -1848,21 +1835,21 @@ public:
                 return ast::MK::EmptyTree();
             }
 
-            // TODO(jez) Delete the code to parse hasKwArgs and just emit an autocorrect if they're present
-            if (send->hasKwArgs() || send->block() != nullptr) {
-                if (send->hasKwArgs() && send->block()) {
-                    if (auto e = ctx.beginError(send->block()->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("`{}` must not have both keyword args and a block", send->fun.show(ctx));
-                    }
-                }
-
+            if (send->block() != nullptr) {
                 bool fixed = false;
                 bool bounded = false;
 
-                const auto numKwArgs = send->numKwArgs();
-                for (auto i = 0; i < numKwArgs; ++i) {
-                    auto key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
-                    if (key != nullptr && key->isSymbol(ctx)) {
+                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                    for (const auto &keyExpr : hash->keys) {
+                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        if (key == nullptr || !key->isSymbol(ctx)) {
+                            if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                                e.setHeader("Hash provided in block to `{}` must have symbol keys",
+                                            send->fun.show(ctx));
+                            }
+                            return tree;
+                        }
+
                         switch (key->asSymbol(ctx).rawId()) {
                             case core::Names::fixed().rawId():
                                 fixed = true;
@@ -1872,49 +1859,22 @@ public:
                             case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
-                        }
-                    }
-                }
 
-                if (send->block() != nullptr) {
-                    if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
-                        for (const auto &keyExpr : hash->keys) {
-                            const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                            if (key == nullptr || !key->isSymbol(ctx)) {
+                            default:
                                 if (auto e =
                                         ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                    e.setHeader("Hash provided in block to `{}` must have symbol keys",
-                                                send->fun.show(ctx));
+                                    e.setHeader("Unknown key `{}` provided in block to `{}`",
+                                                key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
                                 }
                                 return tree;
-                            }
-
-                            switch (key->asSymbol(ctx).rawId()) {
-                                case core::Names::fixed().rawId():
-                                    fixed = true;
-                                    break;
-
-                                case core::Names::lower().rawId():
-                                case core::Names::upper().rawId():
-                                    bounded = true;
-                                    break;
-
-                                default:
-                                    if (auto e =
-                                            ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                        e.setHeader("Unknown key `{}` provided in block to `{}`",
-                                                    key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
-                                    }
-                                    return tree;
-                            }
                         }
-                    } else {
-                        if (auto e =
-                                ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                            e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
-                                        "Hash");
-                            return tree;
-                        }
+                    }
+                } else {
+                    if (auto e =
+                            ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
+                                    "Hash");
+                        return tree;
                     }
                 }
 
