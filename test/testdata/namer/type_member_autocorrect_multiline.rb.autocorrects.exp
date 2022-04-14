@@ -1,8 +1,8 @@
 # -- test/testdata/namer/type_member_autocorrect_multiline.rb --
-# typed: true
+# typed: false
 extend T::Sig
 
-class Example
+module Example
   extend T::Sig
   extend T::Generic
 
@@ -13,30 +13,30 @@ class Example
   end
   A2 = type_member do
     {
-      lower: Integer,
+      lower: Integer, # error: syntax for bounds has changed
       upper: T.any(Integer, String),
     }
   end
 
   B1 = type_member(
     :out,
-   
+    # error: syntax for bounds has changed
   ) {{fixed: Integer}}
   B2 = type_member(
     :out,
    
-  ) {{lower: Integer,
+  ) {{lower: Integer, # error: syntax for bounds has changed
     upper: T.any(Integer, String)}}
 
   C1 = type_member do
     {
-      fixed: T.any(
+      fixed: T.any( # error: syntax for bounds has changed
         Integer,
         String
       ),
     }
   end
-  C2 = type_member(:out) {{fixed: T.any(
+  C2 = type_member(:out) {{fixed: T.any( # error: syntax for bounds has changed
     Integer,
     String
   )}}
