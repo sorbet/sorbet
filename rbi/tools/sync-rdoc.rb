@@ -239,7 +239,7 @@ end
 
 # Fix generation of nested markup <code>foo<em>bar</em>baz</code>
 module FormatterTagPatch
-   {{TagRange = Struct.new(:tag, :begin, :end)}}
+  TagRange = Struct.new(:tag, :begin, :end)
 
   def convert_flow(flow)
     tag_ranges = []
@@ -375,7 +375,7 @@ end
 module DocDiff
   def self.render_lines(lines)
     md = lines.map {|l| l.gsub(/\A\s*# /, '')}.join
-    html = OptionParser.render_html(md, :DEFAULT)
+    html = CommonMarker.render_html(md, :DEFAULT)
     root = Nokogiri::HTML.fragment(html)
     root.text
       .tr("“”‘’", %q{""''})
@@ -385,7 +385,7 @@ module DocDiff
   end
 
   def self.diff(old, new)
-    Dir::LCS::sdiff(render_lines(old), render_lines(new))
+    Diff::LCS::sdiff(render_lines(old), render_lines(new))
   end
 
   def self.render_diff(diff)
@@ -395,12 +395,12 @@ module DocDiff
       action, chunk = action_chunk
       case action
       when '+'
-        parts << OpenSSL::PKey::EC::Point[chunk.map(&:new_element).join(" "), :green]
+        parts << Paint[chunk.map(&:new_element).join(" "), :green]
       when '-'
-        parts << OpenSSL::PKey::EC::Point[chunk.map(&:old_element).join(" "), :red, :inverse, :bold]
+        parts << Paint[chunk.map(&:old_element).join(" "), :red, :inverse, :bold]
       when '!'
-        parts << OpenSSL::PKey::EC::Point[chunk.map(&:old_element).join(" "), :red, :inverse, :bold]
-        parts << OpenSSL::PKey::EC::Point[chunk.map(&:new_element).join(" "), :green]
+        parts << Paint[chunk.map(&:old_element).join(" "), :red, :inverse, :bold]
+        parts << Paint[chunk.map(&:new_element).join(" "), :green]
       when '='
         context_start = 0
         context_end = chunk.length
@@ -409,14 +409,14 @@ module DocDiff
         context_end -= word_context unless i == diff_chunks.length - 1
         omit_range = (context_start...context_end)
         if omit_range.size == 0
-          parts << OpenSSL::PKey::EC::Point[chunk.map(&:old_element).join(" "), :faint]
+          parts << Paint[chunk.map(&:old_element).join(" "), :faint]
         else
           start_range = (0...omit_range.begin)
           end_range = (omit_range.end...)
           if start_range.size > 0
-            parts << OpenSSL::PKey::EC::Point[chunk[start_range].map(&:old_element).join(" "), :faint]
+            parts << Paint[chunk[start_range].map(&:old_element).join(" "), :faint]
           end
-          parts << OpenSSL::PKey::EC::Point["...", :faint]
+          parts << Paint["...", :faint]
           if end_range.size > 0
             parts << Paint[chunk[end_range].map(&:old_element).join(" "), :faint]
           end
