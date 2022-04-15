@@ -77,7 +77,7 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
 
         auto &expectedElementType = expected->targs[0];
         auto &actualElementType = actual->targs[0];
-        auto actualWithoutNil = Types::approximateSubtract(gs, actualElementType, Types::nilClass());
+        auto actualWithoutNil = Types::dropNil(gs, actualElementType);
         if (!actualWithoutNil.isBottom() &&
             Types::isSubTypeUnderConstraint(gs, constr, actualWithoutNil, expectedElementType,
                                             UntypedMode::AlwaysCompatible)) {
