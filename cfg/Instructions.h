@@ -254,7 +254,8 @@ public:
     core::LocOffsets valueLoc;
     core::TypePtr type;
 
-    Cast(LocalRef value, core::LocOffsets valueLoc, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), valueLoc(valueLoc), type(type) {
+    Cast(LocalRef value, core::LocOffsets valueLoc, const core::TypePtr &type, core::NameRef cast)
+        : cast(cast), value(value), valueLoc(valueLoc), type(type) {
         categoryCounterInc("cfg", "cast");
     }
 

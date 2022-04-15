@@ -170,7 +170,8 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 
     if (argInfo.type != nullptr) {
         auto tmp = cctx.newTemporary(core::Names::castTemp());
-        synthesizeExpr(defaultNext, tmp, defLoc, make_insn<Cast>(result, core::LocOffsets::none(), argInfo.type, core::Names::let()));
+        synthesizeExpr(defaultNext, tmp, defLoc,
+                       make_insn<Cast>(result, core::LocOffsets::none(), argInfo.type, core::Names::let()));
         cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
     }
 
@@ -787,12 +788,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (c.cast == core::Names::bind()) {
                     if (c.arg.isSelfReference()) {
                         auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
-                        current->exprs.emplace_back(self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
+                        current->exprs.emplace_back(self, c.loc,
+                                                    make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
                         current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
 
                         if (cctx.rescueScope) {
-                            cctx.rescueScope->exprs.emplace_back(self, c.loc,
-                                                                 make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
+                            cctx.rescueScope->exprs.emplace_back(
+                                self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
                             cctx.rescueScope->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
                         }
                     } else {
