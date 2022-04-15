@@ -14,36 +14,57 @@ autocorrect-cast-untyped.rb:5: Please use `T.unsafe` to cast to `T.untyped` http
      5 |_x = T.cast(nil, T.untyped)
              ^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-cast-untyped.rb:9: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
-     9 |T.cast(
-    10 |  nil,
-    11 |  T.untyped)
-
-autocorrect-cast-untyped.rb:13: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
-    13 |_y = T.cast(
-    14 |  nil,
-    15 |  T.untyped)
-
-autocorrect-cast-untyped.rb:17: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
-    17 |T.cast(
-    18 |  nil,
-    19 |  T.untyped
-    20 |)
-
-autocorrect-cast-untyped.rb:22: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
-    22 |_z = T.cast(
-    23 |  nil,
-    24 |  T.untyped
-    25 |)
-
-autocorrect-cast-untyped.rb:27: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
-    27 |_w = T.cast(
-    28 |  nil, T.untyped)
+autocorrect-cast-untyped.rb:7: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
+     7 |T.cast(
+     8 |  nil,
+     9 |  T.untyped)
   Autocorrect: Done
-    autocorrect-cast-untyped.rb:27: Replaced with `T.unsafe(
-      nil)`
-    27 |_w = T.cast(
-    28 |  nil, T.untyped)
+    autocorrect-cast-untyped.rb:7: Replaced with `T.unsafe(nil)`
+     7 |T.cast(
+     8 |  nil,
+     9 |  T.untyped)
+
+autocorrect-cast-untyped.rb:11: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
+    11 |_y = T.cast(
+    12 |  nil,
+    13 |  T.untyped)
+  Autocorrect: Done
+    autocorrect-cast-untyped.rb:11: Replaced with `T.unsafe(nil)`
+    11 |_y = T.cast(
+    12 |  nil,
+    13 |  T.untyped)
+
+autocorrect-cast-untyped.rb:15: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
+    15 |T.cast(
+    16 |  nil,
+    17 |  T.untyped
+    18 |)
+  Autocorrect: Done
+    autocorrect-cast-untyped.rb:15: Replaced with `T.unsafe(nil)`
+    15 |T.cast(
+    16 |  nil,
+    17 |  T.untyped
+    18 |)
+
+autocorrect-cast-untyped.rb:20: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
+    20 |_z = T.cast(
+    21 |  nil,
+    22 |  T.untyped
+    23 |)
+  Autocorrect: Done
+    autocorrect-cast-untyped.rb:20: Replaced with `T.unsafe(nil)`
+    20 |_z = T.cast(
+    21 |  nil,
+    22 |  T.untyped
+    23 |)
+
+autocorrect-cast-untyped.rb:25: Please use `T.unsafe` to cast to `T.untyped` https://srb.help/7015
+    25 |_w = T.cast(
+    26 |  nil, T.untyped)
+  Autocorrect: Done
+    autocorrect-cast-untyped.rb:25: Replaced with `T.unsafe(nil)`
+    25 |_w = T.cast(
+    26 |  nil, T.untyped)
 Errors: 7
 
 --------------------------------------------------------------------------
@@ -54,25 +75,12 @@ T.unsafe(nil)
 
 _x = T.unsafe(nil)
 
-# ----- multi-line is not handled unless it matches an unlikely pattern -----
+T.unsafe(nil)
 
-T.cast(
-  nil,
-  T.untyped)
+_y = T.unsafe(nil)
 
-_y = T.cast(
-  nil,
-  T.untyped)
+T.unsafe(nil)
 
-T.cast(
-  nil,
-  T.untyped
-)
+_z = T.unsafe(nil)
 
-_z = T.cast(
-  nil,
-  T.untyped
-)
-
-_w = T.unsafe(
-  nil)
+_w = T.unsafe(nil)
