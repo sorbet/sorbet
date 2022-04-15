@@ -623,6 +623,15 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
     return scope;
 }
 
+ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
+    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+        lastConstLit = constLit;
+    }
+    lastConstLit->scope = name2Expr(prefix, move(lastConstLit->scope));
+    return scope;
+}
+
 ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
@@ -1128,6 +1137,13 @@ struct PackageInfoFinder {
                         e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), send.fun.toString(ctx));
                     }
                 }
+
+                // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
+                auto importArg = move(send.getPosArg(0));
+                send.removePosArg(0);
+                ENFORCE(send.numPosArgs() == 0);
+                send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
+
                 info->importedPackageNames.emplace_back(move(name.value()), method2ImportType(send));
             }
         }
@@ -1191,6 +1207,10 @@ struct PackageInfoFinder {
 
             info->loc = ctx.locAt(classDef.loc);
             info->declLoc_ = ctx.locAt(classDef.declLoc);
+
+            // `class Foo < PackageSpace` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+            // This removes the PackageSpec's themselves from the top-level namespace
+            classDef.name = prependName(move(classDef.name), core::Names::Constants::PackageSpecRegistry());
         } else {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
