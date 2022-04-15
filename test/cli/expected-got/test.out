@@ -130,6 +130,10 @@ test/cli/expected-got/expected-got.rb:63: `T.cast` is useless because `Integer(1
     test/cli/expected-got/expected-got.rb:63:
     63 |T.cast(1, Integer)
                ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/expected-got/expected-got.rb:63: Replace with `1`
+    63 |T.cast(1, Integer)
+        ^^^^^^^^^^^^^^^^^^
 
 test/cli/expected-got/expected-got.rb:68: Cannot call method `foo` on void type https://srb.help/7003
     68 |returns_void.foo
