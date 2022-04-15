@@ -1,9 +1,9 @@
 # -- test/testdata/packager/simple_test_import/main_lib/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C MainLib><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Project>::<C Util>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C MainLib><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Util>)
 
-    <self>.test_import(<emptyTree>::<C Project>::<C TestOnly>)
+    <self>.test_import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C TestOnly>)
 
     <self>.export_for_test(<emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib>::<C Lib>)
   end
@@ -70,7 +70,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/test_only/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C TestOnly><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C TestOnly><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>)
   end
 
@@ -101,7 +101,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_test_import/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>)
 
     <self>.export(<emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
