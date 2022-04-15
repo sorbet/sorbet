@@ -9,6 +9,10 @@ autocorrect-array-compact.rb:12: Expected `T::Array[Integer]` but found `T::Arra
     autocorrect-array-compact.rb:11:
     11 |def takes_nilable_int_list(xs)
                                    ^^
+  Autocorrect: Done
+    autocorrect-array-compact.rb:12: Inserted `.compact`
+    12 |  takes_int_list(xs)
+                           ^
 Errors: 1
 
 --------------------------------------------------------------------------
@@ -24,5 +28,5 @@ end
 
 sig {params(xs: T::Array[T.nilable(Integer)]).void}
 def takes_nilable_int_list(xs)
-  takes_int_list(xs)
+  takes_int_list(xs.compact)
 end
