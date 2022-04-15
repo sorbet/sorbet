@@ -562,6 +562,10 @@ public:
     }
 
     unique_ptr<Node> blockPass(const token *amper, unique_ptr<Node> arg) {
+        if (arg == nullptr) {
+            return make_unique<BlockPass>(tokLoc(amper), nullptr);
+        }
+
         return make_unique<BlockPass>(tokLoc(amper).join(arg->loc), std::move(arg));
     }
 

@@ -1811,6 +1811,14 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.build.blockPass(self, $1, $2);
                     }
+                | tAMPER
+                    {
+                      if (!driver.lex.is_declared_anonymous_args()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousBlockArg, $1);
+                      }
+
+                      $$ = driver.build.blockPass(self, $1, nullptr);
+                    }
 
    opt_block_arg: tCOMMA block_arg
                     {
@@ -4113,6 +4121,14 @@ f_opt_paren_args: f_paren_args
                       driver.lex.declare(ident->view());
 
                       auto blockarg = driver.build.blockarg(self, $1, ident);
+
+                      $$ = driver.alloc.node_list(blockarg);
+                    }
+                | blkarg_mark
+                    {
+                      driver.lex.declare_anonymous_args();
+
+                      auto blockarg = driver.build.blockarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(blockarg);
                     }
