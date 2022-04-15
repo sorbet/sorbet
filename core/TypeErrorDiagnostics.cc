@@ -31,8 +31,9 @@ namespace {
     return true;
 }
 
-[[nodiscard]] bool maybeAddArrayCompactAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
-                                                   const TypePtr &expectedType, const TypePtr &actualType) {
+[[nodiscard]] bool maybeAddArrayCompactAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc,
+                                                   TypeConstraint &constr, const TypePtr &expectedType,
+                                                   const TypePtr &actualType) {
     // If we expected an array of T, but got an array of nilable T, add an autocorrect
     // to add .compact.
     auto arrayOfUntyped = Types::arrayOfUntyped();
