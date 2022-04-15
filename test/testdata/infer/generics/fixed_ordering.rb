@@ -14,7 +14,7 @@ class Fixed
   include Enumerable
   extend T::Generic
 
-  Elem = type_member(fixed: String)
+  Elem = type_member {{fixed: String}}
 
   def each(&blk); end
 end

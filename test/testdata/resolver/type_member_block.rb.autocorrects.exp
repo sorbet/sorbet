@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/type_member_block.rb --
 # typed: true
 extend T::Sig
 
@@ -14,7 +15,7 @@ end
 
 module IBox3
   extend T::Generic
-  X = type_member(:out, fixed: Integer) {{upper: T.any(Integer, String)}}
+  X = type_member(:out) {{upper: T.any(Integer, String)}}
   #                     ^^^^^^^^^^^^^^ error: The `type_member` syntax for bounds has changed to use a block instead of keyword args
   #                     ^^^^^^^^^^^^^^ error: Too many arguments
 end
@@ -48,3 +49,4 @@ sig {returns(IntBox)}
 def example1
   IntBox.new
 end
+# ------------------------------

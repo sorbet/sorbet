@@ -21,7 +21,7 @@ end
 
 class StringBox < Box
   extend T::Sig
-  Elem = type_member(fixed: String)
+  Elem = type_member {{fixed: String}}
 
   sig {params(x: Elem).void}
   def bar(x)

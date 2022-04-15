@@ -23,6 +23,7 @@ constexpr ErrorClass DynamicConstantAssignment{4017, StrictLevel::False};
 // constexpr ErrorClass RepeatedArgument{4018, StrictLevel::False};
 constexpr ErrorClass MultipleBehaviorDefs{4019, StrictLevel::False};
 constexpr ErrorClass YAMLSyntaxError{4020, StrictLevel::False};
+constexpr ErrorClass OldTypeMemberSyntax{4021, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif

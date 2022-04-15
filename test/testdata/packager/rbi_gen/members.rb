@@ -251,12 +251,12 @@ module RBIGen::Public
   class ClassWithTypeParams
     extend T::Generic
 
-    A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
+    A = type_template {{fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate}}
     B = type_template()
     C = type_member()
-    D = type_member(upper: Parent)
-    E = type_member(lower: Child)
-    F = type_member(upper: Parent, lower: Child)
+    D = type_member {{upper: Parent}}
+    E = type_member {{lower: Child}}
+    F = type_member {{upper: Parent, lower: Child}}
   end
 
   module ModuleWithTypeParams
@@ -264,15 +264,15 @@ module RBIGen::Public
 
     A = type_member(:in)
     B = type_member(:out)
-    C = type_member(upper: Parent)
-    D = type_member(lower: Child)
-    E = type_member(upper: Parent, lower: Child)
-    F = type_member(:in, upper: Parent)
-    G = type_member(:in, lower: Child)
-    H = type_member(:in, upper: Parent, lower: Child)
-    I = type_member(:out, upper: Parent)
-    J = type_member(:out, lower: Child)
-    K = type_member(:out, upper: Parent, lower: Child)
+    C = type_member {{upper: Parent}}
+    D = type_member {{lower: Child}}
+    E = type_member {{upper: Parent, lower: Child}}
+    F = type_member(:in) {{upper: Parent}}
+    G = type_member(:in) {{lower: Child}}
+    H = type_member(:in) {{upper: Parent, lower: Child}}
+    I = type_member(:out) {{upper: Parent}}
+    J = type_member(:out) {{lower: Child}}
+    K = type_member(:out) {{upper: Parent, lower: Child}}
   end
 
   module VariousMethods

@@ -575,7 +575,7 @@ end
 # [`Socket`](https://docs.ruby-lang.org/en/2.7.0/Socket.html) classes.
 class BasicSocket < IO
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Disallows further read using shutdown system call.
   #
@@ -1270,7 +1270,7 @@ end
 # [`UDPSocket`](https://docs.ruby-lang.org/en/2.7.0/UDPSocket.html).
 class IPSocket < BasicSocket
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Returns the local address as an array which contains address\_family, port,
   # hostname and numeric\_address.
@@ -1510,7 +1510,7 @@ end
 # Ruby* from The Pragmatic Bookshelf.
 class Socket < BasicSocket
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # AppleTalk protocol
   AF_APPLETALK = ::T.let(nil, ::T.untyped)
@@ -4838,7 +4838,7 @@ end
 # ```
 class TCPServer < TCPSocket
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Accepts an incoming connection. It returns a new
   # [`TCPSocket`](https://docs.ruby-lang.org/en/2.7.0/TCPSocket.html) object.
@@ -5031,7 +5031,7 @@ end
 # ```
 class TCPSocket < IPSocket
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   sig do
     params(
@@ -5167,7 +5167,7 @@ end
 # UDP/IP socket.
 class UDPSocket < IPSocket
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Binds *udpsocket* to *host*:*port*.
   #
@@ -5315,7 +5315,7 @@ end
 # [`UNIXServer`](https://docs.ruby-lang.org/en/2.7.0/UNIXServer.html) represents
 # a UNIX domain stream server socket.
 class UNIXServer < UNIXSocket
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Accepts an incoming connection. It returns a new
   # [`UNIXSocket`](https://docs.ruby-lang.org/en/2.7.0/UNIXSocket.html) object.
@@ -5501,7 +5501,7 @@ end
 # a UNIX domain stream client socket.
 class UNIXSocket < BasicSocket
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
+  Elem = type_member(:out) {{fixed: String}}
 
   # Returns the local address as an array which contains address\_family and
   # unix\_path.

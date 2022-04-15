@@ -1460,7 +1460,7 @@ module Opus::Types::Test
     end
 
     class GenericSingletonChild < GenericSingleton
-      SingletonTP = type_template(fixed: String)
+      SingletonTP = type_template {{fixed: String}}
     end
 
     describe "generics" do

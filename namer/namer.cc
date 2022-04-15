@@ -1,4 +1,6 @@
 #include "namer/namer.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -651,7 +653,7 @@ public:
             return foundDefs->addStaticField(move(staticField));
         }
 
-        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
+        if (send->hasPosArgs() || send->block() != nullptr) {
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
@@ -661,20 +663,7 @@ public:
                 }
             }
 
-            const auto numKwArgs = send->numKwArgs();
-            // Walk over the keyword args to find bounds annotations
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto *key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
-                if (key != nullptr && key->isSymbol(ctx)) {
-                    switch (key->asSymbol(ctx).rawId()) {
-                        case core::Names::fixed().rawId():
-                            found.isFixed = true;
-                            break;
-                    }
-                }
-            }
-
-            if (send->block()) {
+            if (send->block() != nullptr) {
                 if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
                     for (const auto &keyExpr : hash->keys) {
                         const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
@@ -1800,6 +1789,63 @@ public:
         return tree;
     }
 
+    void lazyTypeMemberAutocorrect(core::Context ctx, core::ErrorBuilder &e, const ast::Send *send,
+                                   core::Loc kwArgsLoc) {
+        auto deleteLoc = kwArgsLoc;
+        auto prefix = deleteLoc.adjustLen(ctx, -2, 2);
+        if (prefix.source(ctx) == ", ") {
+            deleteLoc = prefix.join(deleteLoc);
+        }
+        prefix = deleteLoc.adjustLen(ctx, -1, 1);
+        if (prefix.source(ctx) == " ") {
+            deleteLoc = prefix.join(deleteLoc);
+        }
+
+        auto surroundingLoc = deleteLoc.adjust(ctx, -1, 1);
+        auto surroundingSrc = surroundingLoc.source(ctx);
+        if (surroundingSrc.has_value() && absl::StartsWith(surroundingSrc.value(), "(") &&
+            absl::EndsWith(surroundingSrc.value(), ")")) {
+            deleteLoc = surroundingLoc;
+        }
+
+        auto multiline = false;
+        auto indent = ""s;
+        auto sendLoc = ctx.locAt(send->loc);
+        auto [beginDetail, endDetail] = sendLoc.position(ctx);
+        if (endDetail.line > beginDetail.line && send->funLoc.exists() && !send->funLoc.empty() &&
+            send->numPosArgs() == 0) {
+            deleteLoc = core::Loc(ctx.file, send->funLoc.endPos(), send->loc.endPos());
+            multiline = true;
+            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfLine(ctx);
+            indent = string(indentLen, ' ');
+        }
+
+        auto edits = vector<core::AutocorrectSuggestion::Edit>{};
+        edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
+        auto insertLoc = ctx.locAt(send->loc).copyEndWithZeroLength();
+        auto kwArgsSource = kwArgsLoc.source(ctx).value();
+        if (multiline) {
+            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.position(ctx);
+            if (kwEndDetail.line > kwBeginDetail.line) {
+                auto reindentedSource = absl::StrReplaceAll(kwArgsSource, {{"\n", "\n  "}});
+                if (kwBeginDetail.line == beginDetail.line) {
+                    reindentedSource = absl::StrReplaceAll(reindentedSource, {{"\n", "\n  "}});
+                }
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertLoc, fmt::format(" do\n{0}  {{\n{0}    {1},\n{0}  }}\n{0}end", indent, reindentedSource)});
+            } else {
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertLoc, fmt::format(" do\n{0}  {{{1}}}\n{0}end", indent, kwArgsSource)});
+            }
+        } else {
+            edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, fmt::format(" {{{{{}}}}}", kwArgsSource)});
+        }
+        e.addAutocorrect(core::AutocorrectSuggestion{
+            fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
+            move(edits),
+        });
+    }
+
     ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
                                                   const ast::UnresolvedConstantLit *typeName) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
@@ -1848,21 +1894,36 @@ public:
                 return ast::MK::EmptyTree();
             }
 
-            // TODO(jez) Delete the code to parse hasKwArgs and just emit an autocorrect if they're present
-            if (send->hasKwArgs() || send->block() != nullptr) {
-                if (send->hasKwArgs() && send->block()) {
-                    if (auto e = ctx.beginError(send->block()->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("`{}` must not have both keyword args and a block", send->fun.show(ctx));
+            if (send->hasKwArgs()) {
+                const auto numKwArgs = send->numKwArgs();
+                auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
+                if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
+                    e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
+                                send->fun.show(ctx));
+
+                    if (kwArgsLoc.exists() && send->block() == nullptr) {
+                        lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
+                    } else {
+                        e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
                     }
                 }
+            }
 
+            if (send->block() != nullptr) {
                 bool fixed = false;
                 bool bounded = false;
 
-                const auto numKwArgs = send->numKwArgs();
-                for (auto i = 0; i < numKwArgs; ++i) {
-                    auto key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
-                    if (key != nullptr && key->isSymbol(ctx)) {
+                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                    for (const auto &keyExpr : hash->keys) {
+                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        if (key == nullptr || !key->isSymbol(ctx)) {
+                            if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                                e.setHeader("Hash provided in block to `{}` must have symbol keys",
+                                            send->fun.show(ctx));
+                            }
+                            return tree;
+                        }
+
                         switch (key->asSymbol(ctx).rawId()) {
                             case core::Names::fixed().rawId():
                                 fixed = true;
@@ -1872,49 +1933,22 @@ public:
                             case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
-                        }
-                    }
-                }
 
-                if (send->block() != nullptr) {
-                    if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
-                        for (const auto &keyExpr : hash->keys) {
-                            const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                            if (key == nullptr || !key->isSymbol(ctx)) {
+                            default:
                                 if (auto e =
                                         ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                    e.setHeader("Hash provided in block to `{}` must have symbol keys",
-                                                send->fun.show(ctx));
+                                    e.setHeader("Unknown key `{}` provided in block to `{}`",
+                                                key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
                                 }
                                 return tree;
-                            }
-
-                            switch (key->asSymbol(ctx).rawId()) {
-                                case core::Names::fixed().rawId():
-                                    fixed = true;
-                                    break;
-
-                                case core::Names::lower().rawId():
-                                case core::Names::upper().rawId():
-                                    bounded = true;
-                                    break;
-
-                                default:
-                                    if (auto e =
-                                            ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                        e.setHeader("Unknown key `{}` provided in block to `{}`",
-                                                    key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
-                                    }
-                                    return tree;
-                            }
                         }
-                    } else {
-                        if (auto e =
-                                ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                            e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
-                                        "Hash");
-                            return tree;
-                        }
+                    }
+                } else {
+                    if (auto e =
+                            ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
+                                    "Hash");
+                        return tree;
                     }
                 }
 

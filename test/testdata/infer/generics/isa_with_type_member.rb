@@ -7,7 +7,7 @@ end
 
 class Child < Parent
   extend T::Generic
-  X = type_member(fixed: String)
+  X = type_member {{fixed: String}}
 end
 
 class Test
@@ -76,7 +76,7 @@ end
 
 class Nil
   extend T::Generic
-  Elem = type_member(fixed: T.noreturn)
+  Elem = type_member {{fixed: T.noreturn}}
 end
 
 class Cons

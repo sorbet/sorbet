@@ -5,14 +5,14 @@ Alias2 = T.type_alias {B}
 
 class A
   extend T::Generic
-  X = type_member(fixed: B)
+  X = type_member {{fixed: B}}
 end
 
 class B
   extend T::Sig
   extend T::Generic
 
-  X = type_member(fixed: Integer)
+  X = type_member {{fixed: Integer}}
 
   sig {returns(X)}
   def test

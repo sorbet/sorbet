@@ -12,7 +12,7 @@ T.reveal_type(Child.new) # error: Revealed type: `Child`
 Child.new.hello
 
 class B < Struct
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
   def initialize
   end
 end

@@ -2053,7 +2053,7 @@ end
 
 class Process::Tms < Struct
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def cstime; end
 

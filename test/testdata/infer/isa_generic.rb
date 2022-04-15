@@ -8,7 +8,7 @@ end
 
 class Concrete < Base
   extend T::Generic
-  Klass = type_template(fixed: String)
+  Klass = type_template {{fixed: String}}
 end
 
 class Other

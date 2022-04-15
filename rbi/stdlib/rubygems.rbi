@@ -1313,7 +1313,7 @@ end
 # for restrictions on the format and size of metadata items you may add to a
 # specification.
 class Gem::Specification < Gem::BasicSpecification
-  Elem = type_template(fixed: T.untyped)
+  Elem = type_template {{fixed: T.untyped}}
 
   CURRENT_SPECIFICATION_VERSION = T.let(T.unsafe(nil), Integer)
   EMPTY = T.let(T.unsafe(nil), T::Array[T.untyped])
@@ -2868,7 +2868,7 @@ end
 class Gem::Package::TarReader
   include Enumerable
 
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   def initialize(io); end
 
@@ -3249,7 +3249,7 @@ end
 class Gem::AvailableSet
   include Enumerable
 
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   def <<(o); end
 
@@ -3311,7 +3311,7 @@ class Gem::AvailableSet
 end
 
 class Gem::AvailableSet::Tuple < Struct
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def source(); end
 
@@ -3964,7 +3964,7 @@ class Gem::DependencyList
   include Enumerable
   include ::TSort
 
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # Adds `gemspecs` to the dependency list.
   def add(*gemspecs); end
@@ -5065,7 +5065,7 @@ class Gem::RequestSet::Lockfile::Tokenizer
 end
 
 class Gem::RequestSet::Lockfile::Tokenizer::Token < Struct
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def column(); end
 
@@ -5599,7 +5599,7 @@ class Gem::Resolver::Molinillo::DependencyGraph
   include Enumerable
   include ::TSort
 
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # @return [Boolean] whether the two dependency graphs are equal, determined
   #
@@ -5774,7 +5774,7 @@ end
 # directed edge @attr [Vertex] destination The destination of the directed edge
 # @attr [Object] requirement The requirement the directed edge represents
 class Gem::Resolver::Molinillo::DependencyGraph::Edge < Struct
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def destination(); end
 
@@ -5960,7 +5960,7 @@ end
 # A state that encapsulates a set of {#requirements} with an {Array} of
 # possibilities
 class Gem::Resolver::Molinillo::DependencyState < Gem::Resolver::Molinillo::ResolutionState
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Removes a possibility from `self` @return [PossibilityState] a state with a
   # single possibility,
@@ -5993,11 +5993,11 @@ end
 # A state that encapsulates a single possibility to fulfill the given
 # {#requirement}
 class Gem::Resolver::Molinillo::PossibilityState < Gem::Resolver::Molinillo::ResolutionState
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 end
 
 class Gem::Resolver::Molinillo::ResolutionState < Struct
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def activated(); end
 
@@ -6157,7 +6157,7 @@ end
 #
 # @attr [{String=>Object}] activated\_by\_name the already-activated specs.
 class Gem::Resolver::Molinillo::Resolver::Resolution::Conflict < Struct
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def activated_by_name(); end
 
@@ -6375,7 +6375,7 @@ end
 class Gem::Resolver::RequirementList
   include Enumerable
 
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # Adds Resolver::DependencyRequest `req` to this requirements list.
   def add(req); end
@@ -6591,7 +6591,7 @@ class Gem::S3URISigner::InstanceProfileError < Gem::Exception
 end
 
 class Gem::S3URISigner::S3Config < Struct
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def access_key_id(); end
 

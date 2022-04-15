@@ -31,6 +31,6 @@ class B
   extend T::Sig
   extend T::Generic
 
-  Elem = type_member(upper: T.nilable(T.untyped))
+  Elem = type_member {{upper: T.nilable(T.untyped)}}
 
 end

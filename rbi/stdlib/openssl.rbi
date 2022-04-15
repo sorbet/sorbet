@@ -1344,7 +1344,7 @@ end
 # ```
 class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   include ::Enumerable
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
   # Calls the given block once for each element in self, passing that element as
   # parameter *asn1*. If no block is given, an enumerator is returned instead.
   #
@@ -1612,11 +1612,11 @@ class OpenSSL::ASN1::PrintableString < OpenSSL::ASN1::Primitive
 end
 
 class OpenSSL::ASN1::Sequence < OpenSSL::ASN1::Constructive
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 end
 
 class OpenSSL::ASN1::Set < OpenSSL::ASN1::Constructive
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 end
 
 class OpenSSL::ASN1::T61String < OpenSSL::ASN1::Primitive
@@ -2045,7 +2045,7 @@ end
 # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html).
 module OpenSSL::Buffering
   include ::Enumerable
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # Default size to read from or write to the SSLSocket for buffer operations.
   BLOCK_SIZE = ::T.let(nil, ::T.untyped)
@@ -3134,7 +3134,7 @@ end
 # See also http://www.openssl.org/docs/apps/config.html
 class OpenSSL::Config
   include ::Enumerable
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   # The default system configuration file for openssl
   DEFAULT_CONFIG_FILE = ::T.let(nil, ::T.untyped)
@@ -8349,7 +8349,7 @@ class OpenSSL::SSL::SSLServer
 end
 
 class OpenSSL::SSL::SSLSocket
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   include ::OpenSSL::SSL::SocketForwarder
   include ::OpenSSL::Buffering

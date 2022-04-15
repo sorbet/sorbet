@@ -48,7 +48,7 @@ module ARGF
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(fixed: String)
+  Elem = type_member {{fixed: String}}
 
   # ARGF.to_s  -> String
   #
