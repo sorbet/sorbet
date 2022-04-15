@@ -30,6 +30,43 @@ namespace {
         gotStr, expectedStr, expectedStr, gotStr);
     return true;
 }
+
+[[nodiscard]] bool maybeAddArrayCompactAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
+                                                   const TypePtr &expectedType, const TypePtr &actualType) {
+    // If we expected an array of T, but got an array of nilable T, add an autocorrect
+    // to add .compact.
+    auto arrayOfUntyped = Types::arrayOfUntyped();
+    auto *expected = core::cast_type<AppliedType>(expectedType);
+    auto *actual = core::cast_type<AppliedType>(actualType);
+    if (!expected || !actual) {
+        return false;
+    }
+
+    if (!expected->derivesFrom(gs, core::Symbols::Array()) || !actual->derivesFrom(gs, core::Symbols::Array())) {
+        return false;
+    }
+
+    if (expected->targs.size() != 1 || actual->targs.size() != 1) {
+        return false;
+    }
+
+    auto &expectedElementType = expected->targs[0];
+    auto &actualElementType = actual->targs[0];
+    auto actualWithoutNil = Types::dropNil(gs, actualElementType);
+    if (actualWithoutNil.isBottom()) {
+        return false;
+    }
+
+    if (!Types::isSubTypeUnderConstraint(gs, constr, actualWithoutNil, expectedElementType,
+                                         UntypedMode::AlwaysCompatible)) {
+        return false;
+    }
+
+    LocOffsets zeroLengthEnd = {loc.offsets().endPos(), loc.offsets().endPos()};
+    e.replaceWith("Add `.compact`", core::Loc{loc.file(), zeroLengthEnd}, ".compact");
+    return true;
+}
+
 } // namespace
 
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
@@ -61,29 +98,7 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
         return;
     }
 
-    // If we expected an array of T, but got an array of nilable T, add an autocorrect
-    // to add .compact.
-    auto arrayOfUntyped = Types::arrayOfUntyped();
-    if (Types::isSubType(gs, expectedType, arrayOfUntyped) && Types::isSubType(gs, actualType, arrayOfUntyped)) {
-        auto *expected = core::cast_type<AppliedType>(expectedType);
-        auto *actual = core::cast_type<AppliedType>(actualType);
-        if (!expected || !actual) {
-            return;
-        }
-
-        if (expected->targs.size() != 1 || actual->targs.size() != 1) {
-            return;
-        }
-
-        auto &expectedElementType = expected->targs[0];
-        auto &actualElementType = actual->targs[0];
-        auto actualWithoutNil = Types::dropNil(gs, actualElementType);
-        if (!actualWithoutNil.isBottom() &&
-            Types::isSubTypeUnderConstraint(gs, constr, actualWithoutNil, expectedElementType,
-                                            UntypedMode::AlwaysCompatible)) {
-            LocOffsets zeroLengthEnd = {loc.offsets().endPos(), loc.offsets().endPos()};
-            e.replaceWith("Add `.compact`", core::Loc{loc.file(), zeroLengthEnd}, ".compact");
-        }
+    if (maybeAddArrayCompactAutocorrect(gs, e, loc, constr, expectedType, actualType)) {
         return;
     }
 
