@@ -4,8 +4,6 @@ T.cast(nil, T.untyped)
 
 _x = T.cast(nil, T.untyped)
 
-# ----- multi-line is not handled unless it matches an unlikely pattern -----
-
 T.cast(
   nil,
   T.untyped)

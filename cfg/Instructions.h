@@ -251,16 +251,18 @@ INSN(Cast) : public Instruction {
 public:
     core::NameRef cast;
     VariableUseSite value;
+    core::LocOffsets valueLoc;
     core::TypePtr type;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {
+    Cast(LocalRef value, core::LocOffsets valueLoc, const core::TypePtr &type, core::NameRef cast)
+        : cast(cast), value(value), valueLoc(valueLoc), type(type) {
         categoryCounterInc("cfg", "cast");
     }
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Cast, 48, 8);
+CheckSize(Cast, 56, 8);
 
 INSN(TAbsurd) : public Instruction {
 public:
