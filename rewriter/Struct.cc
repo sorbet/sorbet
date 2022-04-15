@@ -144,7 +144,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                                                     ast::MK::RaiseUnimplemented(loc)));
     }
 
-    // Elem = type_member(fixed: T.untyped)
+    // Elem = type_member {{fixed: T.untyped}}
     {
         auto typeMember = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength());
         ast::cast_tree_nonnull<ast::Send>(typeMember)
