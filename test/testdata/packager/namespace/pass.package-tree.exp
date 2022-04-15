@@ -1,6 +1,6 @@
 # -- test/testdata/packager/namespace/aaa/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C AAA><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C AAA><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1>::<C AAA>::<C AClass>)
   end
 
@@ -34,8 +34,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/namespace/bbb/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C BBB><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C AAA>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C BBB><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C AAA>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
