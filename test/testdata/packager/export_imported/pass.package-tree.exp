@@ -1,7 +1,7 @@
 # -- test/testdata/packager/export_imported/a/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C B>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C B>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C B>::<C BClass>)
   end
@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_imported/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>)
   end
 
