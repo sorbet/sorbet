@@ -438,6 +438,7 @@ NameDef names[] = {
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
     {"PackageTests", "<PackageTests>", true},
+    {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 
     // Compiler
     {"runningCompiled_p", "running_compiled?"},
