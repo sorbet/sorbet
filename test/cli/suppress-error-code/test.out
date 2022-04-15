@@ -17,6 +17,10 @@ test/cli/suppress-error-code/suppress-error-code.rb:4: `T.cast` is useless becau
     test/cli/suppress-error-code/suppress-error-code.rb:4:
      4 |T.cast(1, T.nilable(Integer))
                ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suppress-error-code/suppress-error-code.rb:4: Replace with `1`
+     4 |T.cast(1, T.nilable(Integer))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 2
 test/cli/suppress-error-code/suppress-error-code.rb:4: `T.cast` is useless because `Integer(1)` is already a subtype of `T.nilable(Integer)` https://srb.help/7015
      4 |T.cast(1, T.nilable(Integer))
@@ -25,6 +29,10 @@ test/cli/suppress-error-code/suppress-error-code.rb:4: `T.cast` is useless becau
     test/cli/suppress-error-code/suppress-error-code.rb:4:
      4 |T.cast(1, T.nilable(Integer))
                ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suppress-error-code/suppress-error-code.rb:4: Replace with `1`
+     4 |T.cast(1, T.nilable(Integer))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
 `--error-black-list` is deprecated; please use `--suppress-error-code` instead
 test/cli/suppress-error-code/suppress-error-code.rb:4: `T.cast` is useless because `Integer(1)` is already a subtype of `T.nilable(Integer)` https://srb.help/7015
@@ -34,4 +42,8 @@ test/cli/suppress-error-code/suppress-error-code.rb:4: `T.cast` is useless becau
     test/cli/suppress-error-code/suppress-error-code.rb:4:
      4 |T.cast(1, T.nilable(Integer))
                ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suppress-error-code/suppress-error-code.rb:4: Replace with `1`
+     4 |T.cast(1, T.nilable(Integer))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

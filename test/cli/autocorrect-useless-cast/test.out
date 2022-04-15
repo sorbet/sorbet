@@ -1,0 +1,80 @@
+autocorrect-useless-cast.rb:3: `T.cast` is useless because `String("from")` is already a subtype of `String` https://srb.help/7015
+     3 |T.cast("from", String)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  Got `String("from")` originating from:
+    autocorrect-useless-cast.rb:3:
+     3 |T.cast("from", String)
+               ^^^^^^
+  Autocorrect: Done
+    autocorrect-useless-cast.rb:3: Replaced with `"from"`
+     3 |T.cast("from", String)
+        ^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-useless-cast.rb:5: `T.cast` is useless because `String("multiline1")` is already a subtype of `String` https://srb.help/7015
+     5 |T.cast(
+     6 |  "multiline1",
+     7 |  String
+     8 |)
+  Got `String("multiline1")` originating from:
+    autocorrect-useless-cast.rb:6:
+     6 |  "multiline1",
+          ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-useless-cast.rb:5: Replaced with `"multiline1"`
+     5 |T.cast(
+     6 |  "multiline1",
+     7 |  String
+     8 |)
+
+autocorrect-useless-cast.rb:10: `T.cast` is useless because `String("multiline2")` is already a subtype of `String` https://srb.help/7015
+    10 |T.cast(
+    11 |  "multiline2",
+    12 |  String)
+  Got `String("multiline2")` originating from:
+    autocorrect-useless-cast.rb:11:
+    11 |  "multiline2",
+          ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-useless-cast.rb:10: Replaced with `"multiline2"`
+    10 |T.cast(
+    11 |  "multiline2",
+    12 |  String)
+
+autocorrect-useless-cast.rb:14: `T.cast` is useless because `String("multiline3")` is already a subtype of `String` https://srb.help/7015
+    14 |T.cast("multiline3",
+    15 |       String)
+  Got `String("multiline3")` originating from:
+    autocorrect-useless-cast.rb:14:
+    14 |T.cast("multiline3",
+               ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-useless-cast.rb:14: Replaced with `"multiline3"`
+    14 |T.cast("multiline3",
+    15 |       String)
+
+autocorrect-useless-cast.rb:17: `T.cast` is useless because `Float(1.500000)` is already a subtype of `Float` https://srb.help/7015
+    17 |T.cast(1.5, Float)
+        ^^^^^^^^^^^^^^^^^^
+  Got `Float(1.500000)` originating from:
+    autocorrect-useless-cast.rb:17:
+    17 |T.cast(1.5, Float)
+               ^^^
+  Autocorrect: Done
+    autocorrect-useless-cast.rb:17: Replaced with `1.5`
+    17 |T.cast(1.5, Float)
+        ^^^^^^^^^^^^^^^^^^
+Errors: 5
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+"from"
+
+"multiline1"
+
+"multiline2"
+
+"multiline3"
+
+1.5

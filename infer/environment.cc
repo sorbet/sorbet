@@ -1469,6 +1469,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                         ty.type.show(ctx), castType.show(ctx));
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                            auto argLoc = core::Loc{ctx.file, c.valueLoc};
+                            if (argLoc.exists()) {
+                                e.replaceWith("Delete `T.cast`", ctx.locAt(bind.loc), "{}",
+                                              argLoc.source(ctx).value());
+                            }
                         }
                     }
                 }
