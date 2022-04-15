@@ -1,0 +1,28 @@
+autocorrect-array-compact.rb:12: Expected `T::Array[Integer]` but found `T::Array[T.nilable(Integer)]` for argument `xs` https://srb.help/7002
+    12 |  takes_int_list(xs)
+                         ^^
+  Expected `T::Array[Integer]` for argument `xs` of method `Object#takes_int_list`:
+    autocorrect-array-compact.rb:4:
+     4 |sig {params(xs: T::Array[Integer]).returns(T::Array[Integer])}
+                    ^^
+  Got `T::Array[T.nilable(Integer)]` originating from:
+    autocorrect-array-compact.rb:11:
+    11 |def takes_nilable_int_list(xs)
+                                   ^^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+sig {params(xs: T::Array[Integer]).returns(T::Array[Integer])}
+def takes_int_list(xs)
+  result = xs.concat([nil])
+  result.compact
+end
+
+sig {params(xs: T::Array[T.nilable(Integer)]).void}
+def takes_nilable_int_list(xs)
+  takes_int_list(xs)
+end
