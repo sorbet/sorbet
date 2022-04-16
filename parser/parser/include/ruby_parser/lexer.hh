@@ -197,15 +197,22 @@ public:
     // Main interface consumed by yylex function in parser
     token_t advance();
 
+    // Opposite of `advance` method. Used to put an already-lexed token into the token_queue again.
+    // Useful for certain kinds of syntax error recovery (grep for examples).
+    void unadvance(token_t token);
+
     std::string_view tok_view_from_offsets(size_t start, size_t end) const;
 
     // Useful for error recovery. Manually sets `_p` so that the next call to `advance` starts
-    // from the desired location. If you're using this, you likely want to set the lexer state
-    // menually with one of the below helpers.
+    // from the desired location, and resets some state to trick the lexer into thinking it's in the
+    // expr_end state.
     //
     // Note: this method has only been tested for a limited number of error recovery use cases.
     // Using it for new use cases might require expanding the pieces of state it has to reset.
     void rewind_and_reset_to_expr_end(size_t newPos);
+
+    // Similar to rewind_and_reset_to_expr_end, but less common. Comes with the same caveats.
+    void rewind_and_reset_to_expr_beg(size_t newPos);
 
     int compare_indent_level(token_t left, token_t right);
 

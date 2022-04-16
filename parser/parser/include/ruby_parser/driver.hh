@@ -351,6 +351,13 @@ public:
     // expr_end state.
     void rewind_and_reset(size_t newPos);
 
+    // Similar in spirit to rewind_and_reset, but resets to the expr_beg state.
+    // This is less common--usually it's common to recover from an error by placing the lexer
+    // position directly on top of the location of a known punctuation_end token, like `tNL` or
+    // `tCOMMA` (which, after being lexed in the expr_end state, the lexer will transition itself to
+    // expr_beg). Sometimes that is not possible, and we want to forcibly transition to expr_beg.
+    void rewind_and_reset_to_beg(size_t newPos);
+
     // When recovering from errors, sometimes we'd like to force a production rule to become an
     // error if indentation didn't match, so that hopefully a token that would have been eagerly
     // consumed can be delayed until a later production rule.
