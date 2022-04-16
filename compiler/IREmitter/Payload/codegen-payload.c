@@ -175,7 +175,7 @@ struct IDDescriptor {
 };
 
 SORBET_ALIVE(void, sorbet_vm_intern_ids,
-             (ID *idTable, struct IDDescriptor *idDescriptors, unsigned int numIDs, const char *stringTable));
+             (ID * idTable, struct IDDescriptor *idDescriptors, unsigned int numIDs, const char *stringTable));
 
 SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
 SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_get,

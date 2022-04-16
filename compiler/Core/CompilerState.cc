@@ -36,22 +36,20 @@ void CompilerState::trace(string_view msg) const {
 }
 
 namespace {
-llvm::GlobalVariable *declareNullptrPlaceholder(llvm::Module &module,
-                                                llvm::Type *type,
-                                                const string &name) {
+llvm::GlobalVariable *declareNullptrPlaceholder(llvm::Module &module, llvm::Type *type, const string &name) {
     // This variable is conceptually `const` (even though we're going to change its
     // initializer during compilation, at runtime its value doesn't change), but
     // if we declare that up front, LLVM will fold loads of its value, which
     // causes problems.  So save declaring it as `const` until later.
     const auto isConstant = false;
     llvm::Constant *initializer = llvm::Constant::getNullValue(type);
-    auto *global = new llvm::GlobalVariable(module, type, isConstant, llvm::GlobalVariable::InternalLinkage,
-                                            initializer, name);
+    auto *global =
+        new llvm::GlobalVariable(module, type, isConstant, llvm::GlobalVariable::InternalLinkage, initializer, name);
     global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
     global->setAlignment(llvm::MaybeAlign(8));
     return global;
 }
-}
+} // namespace
 
 StringTable::StringTableEntry CompilerState::insertIntoStringTable(std::string_view str) {
     auto it = this->stringTable.map.find(str);
@@ -139,7 +137,7 @@ void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &m
 }
 
 void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder) {
-    vector <pair<string_view, IDTable::IDTableEntry>> tableElements;
+    vector<pair<string_view, IDTable::IDTableEntry>> tableElements;
     tableElements.reserve(this->map.size());
     absl::c_copy(this->map, std::back_inserter(tableElements));
     fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
@@ -173,7 +171,8 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
     ENFORCE(func != nullptr);
     auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
     auto *descLengthTy = descOffsetTy;
-    auto *structType = llvm::dyn_cast<llvm::StructType>(func->getType()->getElementType()->getFunctionParamType(1)->getPointerElementType());
+    auto *structType = llvm::dyn_cast<llvm::StructType>(
+        func->getType()->getElementType()->getFunctionParamType(1)->getPointerElementType());
     ENFORCE(structType != nullptr);
     auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
     const auto isConstant = true;
@@ -198,7 +197,8 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
     auto *stringTable = module.getGlobalVariable("sorbet_moduleStringTable", allowInternal);
     ENFORCE(stringTable != nullptr);
     builder.CreateCall(func, {builder.CreateConstGEP2_32(nullptr, table, 0, 0),
-                              builder.CreateConstGEP2_32(nullptr, descTable, 0, 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), this->map.size()),
+                              builder.CreateConstGEP2_32(nullptr, descTable, 0, 0),
+                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), this->map.size()),
                               builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
 }
 
