@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def call<<todo method>>(build_group, filter:, &<blk>)
+    <emptyTree>
+  end
+end
