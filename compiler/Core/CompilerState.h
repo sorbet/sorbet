@@ -39,7 +39,7 @@ struct IDTable {
         this->map.clear();
     }
 
-    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module);
+    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder);
 };
 
 // Like GlobalState, but for the Sorbet Compiler.
@@ -48,7 +48,7 @@ public:
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
     CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, llvm::DIBuilder *,
                   llvm::DICompileUnit *, core::FileRef, llvm::BasicBlock *allocRubyIdsEntry,
-                  llvm::BasicBlock *globalConstructorsEntry, StringTable &stringTable);
+                  llvm::BasicBlock *globalConstructorsEntry, StringTable &stringTable, IDTable &idTable);
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
@@ -68,6 +68,7 @@ public:
 
     core::FileRef file;
     StringTable &stringTable;
+    IDTable &idTable;
 
     llvm::Value *stringTableRef(std::string_view str);
 
