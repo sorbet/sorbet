@@ -75,6 +75,7 @@ private:
 
 public:
     llvm::Value *stringTableRef(std::string_view str);
+    llvm::Value *idTableRef(std::string_view str);
 
     // useful apis for getting common types
 
