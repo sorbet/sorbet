@@ -53,7 +53,7 @@ llvm::GlobalVariable *declareNullptrPlaceholder(llvm::Module &module,
 }
 }
 
-llvm::Value *CompilerState::stringTableRef(std::string_view str) {
+StringTable::StringTableEntry CompilerState::insertIntoStringTable(std::string_view str) {
     auto it = this->stringTable.map.find(str);
 
     // We would like to return &sorbet_moduleStringTable[offset], but that would
@@ -66,18 +66,24 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     // table with the proper length (i.e. type) and go back and properly initialize
     // all of the temporary variables we created along the way.
     if (it != this->stringTable.map.end()) {
-        return it->second.addrVar;
+        return it->second;
     }
 
     auto offset = this->stringTable.size;
     auto globalName = fmt::format("addr_str_{}", str);
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
-    this->stringTable.map[str] = StringTable::StringTableEntry{offset, global};
+    auto &entry = this->stringTable.map[str];
+    entry = StringTable::StringTableEntry{offset, global};
     // +1 for the null terminator.
     this->stringTable.size += str.size() + 1;
 
-    return global;
+    return entry;
+}
+
+llvm::Value *CompilerState::stringTableRef(std::string_view str) {
+    auto entry = this->insertIntoStringTable(str);
+    return entry.addrVar;
 }
 
 void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module) {

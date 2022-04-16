@@ -70,6 +70,10 @@ public:
     StringTable &stringTable;
     IDTable &idTable;
 
+private:
+    StringTable::StringTableEntry insertIntoStringTable(std::string_view str);
+
+public:
     llvm::Value *stringTableRef(std::string_view str);
 
     // useful apis for getting common types
