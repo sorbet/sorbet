@@ -1147,6 +1147,13 @@ struct PackageInfoFinder {
                 info->importedPackageNames.emplace_back(move(name.value()), method2ImportType(send));
             }
         }
+        if (send.fun == core::Names::restrict_to_service() && send.numPosArgs() == 1) {
+            // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
+            auto importArg = move(send.getPosArg(0));
+            send.removePosArg(0);
+            ENFORCE(send.numPosArgs() == 0);
+            send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
+        }
 
         return tree;
     }
