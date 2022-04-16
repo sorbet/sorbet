@@ -27,10 +27,12 @@ constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
-    if (!owner.exists() || owner == Symbols::root() || owner.name(gs).isPackagerName(gs)) {
+    if (!owner.exists() || owner == Symbols::root() || owner.name(gs).isPackagerName(gs) ||
+        owner == core::Symbols::PackageSpecRegistry()) {
         return name.show(gs);
     }
     ENFORCE(owner != core::Symbols::PackageRegistry());
+    ENFORCE(owner != core::Symbols::PackageSpecRegistry());
     return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
 } // namespace
@@ -1012,7 +1014,8 @@ string SymbolRef::showFullNameWithoutPackagePrefix(const GlobalState &gs) const 
     vector<std::string> parts;
     auto curSym = *this;
     while (curSym.exists() && curSym.owner(gs) != core::Symbols::PackageRegistry() &&
-           curSym.owner(gs) != core::Symbols::PackageTests() && curSym != core::Symbols::root()) {
+           curSym.owner(gs) != core::Symbols::PackageTests() &&
+           curSym.owner(gs) != core::Symbols::PackageSpecRegistry() && curSym != core::Symbols::root()) {
         parts.emplace_back(curSym.name(gs).show(gs));
         curSym = curSym.owner(gs);
     }
