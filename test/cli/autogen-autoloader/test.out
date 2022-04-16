@@ -42,7 +42,7 @@ Opus::Require.on_autoload('Foo::Bar::Jazz')
 class Foo::Bar::Jazz < Foo::Bar::Quuz
 end
 
-Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/foo.rb")
+Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/example1.rb")
 
 --- output/Foo/Bar/Quuz.rb
 # frozen_string_literal: true
@@ -56,7 +56,7 @@ Opus::Require.on_autoload('Foo::Bar::Quuz')
 class Foo::Bar::Quuz
 end
 
-Opus::Require.for_autoload(Foo::Bar::Quuz, "test/cli/autogen-autoloader/foo.rb")
+Opus::Require.for_autoload(Foo::Bar::Quuz, "test/cli/autogen-autoloader/example1.rb")
 
 --- output/Foo/Dabba.rb
 # frozen_string_literal: true
@@ -66,7 +66,7 @@ require 'in_class'
 require 'in_method'
 require 'my_gem'
 
-Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/foo.rb", [Foo, :Dabba])
+Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/example1.rb", [Foo, :Dabba])
 
 --- output/Foo/Errors.rb
 # frozen_string_literal: true
@@ -124,7 +124,7 @@ require 'in_class'
 require 'in_method'
 require 'my_gem'
 
-Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/foo.rb", [Foo, :TOP_LEVEL_CONST])
+Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/example1.rb", [Foo, :TOP_LEVEL_CONST])
 
 --- output/Yabba.rb
 # frozen_string_literal: true
@@ -164,7 +164,7 @@ Opus::Require.on_autoload('Yabba::Dabba::Bar2')
 class Yabba::Dabba::Bar2
 end
 
-Opus::Require.for_autoload(Yabba::Dabba::Bar2, "test/cli/autogen-autoloader/bar2.rb")
+Opus::Require.for_autoload(Yabba::Dabba::Bar2, "test/cli/autogen-autoloader/example3.rb")
 
 --- output/Yabba/Dabba/Jazz.rb
 # frozen_string_literal: true
@@ -188,7 +188,7 @@ Opus::Require.on_autoload('Yabba::Dabba::Jazz::JazBaz')
 class Yabba::Dabba::Jazz::JazBaz
 end
 
-Opus::Require.for_autoload(Yabba::Dabba::Jazz::JazBaz, "test/cli/autogen-autoloader/bar.rb")
+Opus::Require.for_autoload(Yabba::Dabba::Jazz::JazBaz, "test/cli/autogen-autoloader/example2.rb")
 
 --- output/Yabba/Dabba/NoBehavior.rb
 # frozen_string_literal: true
@@ -199,7 +199,7 @@ Opus::Require.on_autoload('Yabba::Dabba::NoBehavior')
 class Yabba::Dabba::NoBehavior
 end
 
-Opus::Require.for_autoload(Yabba::Dabba::NoBehavior, "test/cli/autogen-autoloader/bar2.rb")
+Opus::Require.for_autoload(Yabba::Dabba::NoBehavior, "test/cli/autogen-autoloader/example3.rb")
 
 --- output/Yabba/Dabba/Quuz.rb
 # frozen_string_literal: true
@@ -210,7 +210,7 @@ Opus::Require.on_autoload('Yabba::Dabba::Quuz')
 class Yabba::Dabba::Quuz < AWS::String
 end
 
-Opus::Require.for_autoload(Yabba::Dabba::Quuz, "test/cli/autogen-autoloader/bar.rb")
+Opus::Require.for_autoload(Yabba::Dabba::Quuz, "test/cli/autogen-autoloader/example2.rb")
 
 --- output/root.rb
 # frozen_string_literal: true
