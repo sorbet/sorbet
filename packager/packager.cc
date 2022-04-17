@@ -1722,7 +1722,7 @@ private:
             return;
         }
 
-        // Use the loc from the import in the module name and declaration to get the
+        // Use the loc from the import in the assignment name and declaration to get the
         // following jump to definition behavior in the case of enumerated imports:
         // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
         //                     ^^^^^^^^       jump to the import statement
