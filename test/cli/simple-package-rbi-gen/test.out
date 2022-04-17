@@ -1,6 +1,12 @@
 No errors! Great job.
 # typed: true
 
+module ::Project
+end
+
+module ::Project::Foo
+end
+
 class ::Project::Foo::FooClass
   extend ::T::Sig
   def dynamically_defined_method(); end
