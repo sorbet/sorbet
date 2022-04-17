@@ -203,9 +203,8 @@ public:
     // from the desired location. If you're using this, you likely want to set the lexer state
     // menually with one of the below helpers.
     //
-    // Note: this method is experimental--it should only be used for error recovery, and might not
-    // actually reset all the state it needs to yet.
-    // TODO(jez, 2022-04-02) Determine whether this is still experimental
+    // Note: this method has only been tested for a limited number of error recovery use cases.
+    // Using it for new use cases might require expanding the pieces of state it has to reset.
     void rewind_and_reset_to_expr_end(size_t newPos);
 
     int compare_indent_level(token_t left, token_t right);
