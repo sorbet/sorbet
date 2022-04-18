@@ -406,7 +406,7 @@ module T::Private::Methods
 
     # If Sorbet's wrapper was overridden, we don't want to try to unwrap the registered signature
     unless !@was_ever_final_names[method_name] && original_method != maybe_wrapped_method &&
-           maybe_wrapped_method.source_location.first != WRAPPER_METHOD_SOURCE_FILE
+           maybe_wrapped_method.source_location&.first != WRAPPER_METHOD_SOURCE_FILE
       maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     end
 
