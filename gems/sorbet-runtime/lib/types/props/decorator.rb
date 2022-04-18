@@ -22,7 +22,7 @@ class T::Props::Decorator
 
   sig {params(klass: T.untyped).void.checked(:never)}
   def initialize(klass)
-    @class = T.let(klass, T.all(Module, T::Props::ClassMethods))
+    @class = T.let(klass, T.all(Module, T::Props::Common::ClassMethods))
     @class.plugins.each do |mod|
       T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
@@ -80,7 +80,7 @@ class T::Props::Decorator
   end
 
   # checked(:never) - O(prop accesses)
-  sig {returns(T.all(Module, T::Props::ClassMethods)).checked(:never)}
+  sig {returns(T.all(Module, T::Props::Common::ClassMethods)).checked(:never)}
   def decorated_class
     @class
   end
@@ -598,8 +598,7 @@ class T::Props::Decorator
   # prepended, or inherited.
   sig {params(child: Module).void.checked(:never)}
   def model_inherited(child)
-    child.extend(T::Props::ClassMethods)
-    child = T.cast(child, T.all(Module, T::Props::ClassMethods))
+    child = T.cast(child, T.all(Module, T::Props::Common::ClassMethods))
 
     child.plugins.concat(decorated_class.plugins)
     decorated_class.plugins.each do |mod|

@@ -11,7 +11,7 @@ module T::Props
 
       sig do
         params(
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(Module, T::Props::Common::ClassMethods),
           prop: Symbol,
           rules: T::Hash[Symbol, T.untyped]
         )
@@ -53,7 +53,7 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: Module,
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(Module, T::Props::Common::ClassMethods),
         )
         .returns(SetterProc)
       end
@@ -76,7 +76,7 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: T::Types::Base,
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(Module, T::Props::Common::ClassMethods),
           validate: T.nilable(ValidateProc)
         )
         .returns(SetterProc)
@@ -107,7 +107,7 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: Module,
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(Module, T::Props::Common::ClassMethods),
         )
         .returns(SetterProc)
       end
@@ -134,7 +134,7 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: T::Types::Base,
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(Module, T::Props::Common::ClassMethods),
           validate: T.nilable(ValidateProc),
         )
         .returns(SetterProc)
@@ -165,7 +165,7 @@ module T::Props
 
       sig do
         params(
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(Module, T::Props::Common::ClassMethods),
           prop: Symbol,
           type: T.any(T::Types::Base, Module),
           val: T.untyped,

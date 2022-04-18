@@ -2,7 +2,7 @@
 # typed: false
 
 module T::Props::Plugin
-  include T::Props
+  include T::Props::Common
   extend T::Helpers
 
   module ClassMethods

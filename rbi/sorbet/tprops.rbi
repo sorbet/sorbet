@@ -17,11 +17,22 @@ module T::Props
   mixes_in_class_methods(T::Props::ClassMethods)
 end
 
-module T::Props::ClassMethods
-  sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
-  def const(name, cls_or_args, args={}, &blk); end
+module T::Props::Prop::ClassMethods
   sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
   def prop(name, cls, rules = nil); end
+end
+
+module T::Props::Const
+  extend T::Helpers
+  mixes_in_class_methods(T::Props::Const::ClassMethods)
+end
+
+module T::Props::Const::ClassMethods
+  sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
+  def const(name, cls_or_args, args={}, &blk); end
+end
+
+module T::Props::Common::ClassMethods
   def decorator; end
   def decorator_class; end
   def plugin(mod); end
@@ -29,6 +40,12 @@ module T::Props::ClassMethods
   def props; end
   def reload_decorator!; end
   def validate_prop_value(prop, val); end
+end
+
+module T::Props::ClassMethods
+  include T::Props::Prop::ClassMethods
+  include T::Props::Const::ClassMethods
+  include T::Props::Common::ClassMethods
 end
 
 module T::Props::CustomType
@@ -89,7 +106,7 @@ end
 
 module T::Props::Plugin
   extend T::Helpers
-  include T::Props
+  include T::Props::Common
   mixes_in_class_methods(T::Props::Plugin::ClassMethods)
 end
 
