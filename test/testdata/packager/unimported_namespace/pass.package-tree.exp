@@ -1,4 +1,4 @@
-# -- test/testdata/packager/namespace/aaa/__package.rb --
+# -- test/testdata/packager/unimported_namespace/aaa/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C AAA><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1>::<C AAA>::<C AClass>)
@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
-# -- test/testdata/packager/namespace/aaa/a_class.rb --
+# -- test/testdata/packager/unimported_namespace/aaa/a_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C AAA>::<C AClass><<C <todo sym>>> < (::<todo sym>)
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
-# -- test/testdata/packager/namespace/bbb/__package.rb --
+# -- test/testdata/packager/unimported_namespace/bbb/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C BBB><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C AAA>)
