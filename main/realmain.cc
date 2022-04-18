@@ -8,6 +8,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/cache.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
 #include "main/autogen/packages.h"
@@ -351,6 +352,36 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
 }
+
+// Returns `true` if the constant hash information provided tells us
+// we can exit `autogen` early, and `false` otherwise.
+bool autogenCanExitEarly(shared_ptr<spd::logger> &logger, options::Options &opts) {
+    Timer timeit(logger, "autogenCanExitEarly");
+
+    if (opts.autogenConstantCacheFile.empty()) {
+        return false;
+    }
+
+    if (opts.autogenChangedFiles.empty()) {
+        return false;
+    }
+
+    logger->info("Checking {} changed files", opts.autogenChangedFiles.size());
+    // this global state should only ever be used for a very small
+    // number of files and will never progress past the desugar phase,
+    // so the fact that we're making a fresh empty one shouldn't hurt
+    // us here.
+    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+    core::GlobalState minGs(errorQueue);
+    minGs.initEmpty();
+    if (autogen::AutogenCache::canSkipAutogen(minGs, opts.autogenConstantCacheFile, opts.autogenChangedFiles)) {
+        logger->info("All constant hashes unchanged; exiting");
+        return true;
+    }
+
+    logger->info("Autogen still needs rerunning");
+    return false;
+}
 #endif
 
 int realmain(int argc, char *argv[]) {
@@ -374,6 +405,12 @@ int realmain(int argc, char *argv[]) {
         // spin
     }
 #ifndef SORBET_REALMAIN_MIN
+    // this is all about making sure we exit as quickly as possible,
+    // so test this as soon as we can: i.e. after we have parsed
+    // `opts`.
+    if (autogenCanExitEarly(logger, opts)) {
+        return 0;
+    }
     StatsD::addExtraTags(opts.metricsExtraTags);
 #endif
     if (opts.stdoutHUPHack) {
@@ -693,6 +730,12 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Autogen is disabled in sorbet-orig for faster builds");
             return 1;
 #else
+
+            if (!opts.autogenConstantCacheFile.empty()) {
+                // we should regenerate the constant cache here
+                indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheFile, move(indexed), *workers);
+            }
+
             gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);

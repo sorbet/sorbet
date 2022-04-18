@@ -28,6 +28,7 @@ cc_library(
         "//definition_validator",
         "//infer",
         "//local_vars",
+        "//main/autogen",
         "//main/options",
         "//namer",
         "//packager",
