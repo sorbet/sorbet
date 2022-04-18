@@ -1,7 +1,7 @@
 # -- test/testdata/packager/nested_inner_namespaces/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C RootPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C RootPackage>::<C Foo>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C RootPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C RootPackage>::<C Foo>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -46,7 +46,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/nested_inner_namespaces/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C RootPackage>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C RootPackage>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Constant>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>)

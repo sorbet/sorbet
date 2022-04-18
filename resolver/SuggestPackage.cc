@@ -194,7 +194,7 @@ private:
     void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
         auto &scope = unresolved.scope;
         // by default, we'll try to search for a matching package in the root scope
-        core::SymbolRef searchScope = core::Symbols::root();
+        core::SymbolRef searchScope = core::Symbols::PackageSpecRegistry();
         // but if our parent is something that _was_ resolved, we can
         // search in that scope instead
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(scope)) {

@@ -170,8 +170,8 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Project::Bar)
-          ::Sorbet::Private::Static.keep_for_ide(::Project::Bar)
+          ::<Magic>.<define-top-class-or-module>(::<PackageSpecRegistry>::Project::Bar)
+          ::Sorbet::Private::Static.keep_for_ide(::<PackageSpecRegistry>::Project::Bar)
           ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
           <emptyTree>
         end
@@ -199,10 +199,10 @@ begin
       end
     end
   end
-  class ::Project::Bar<<C Bar>> < (::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::Bar<<C Bar>> < (::PackageSpec)
     def self.<static-init>(<blk>)
       begin
-        <self>.import(::Project::Foo)
+        <self>.import(::<PackageSpecRegistry>::Project::Foo)
         <self>.export(::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::Bar)
         <self>.export(::<PackageRegistry>::Project_Bar_Package_Private::Project::Bar::CallsFoo)
         <emptyTree>
@@ -246,8 +246,8 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Project::Foo)
-          ::Sorbet::Private::Static.keep_for_ide(::Project::Foo)
+          ::<Magic>.<define-top-class-or-module>(::<PackageSpecRegistry>::Project::Foo)
+          ::Sorbet::Private::Static.keep_for_ide(::<PackageSpecRegistry>::Project::Foo)
           ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
           <emptyTree>
         end
@@ -275,10 +275,10 @@ begin
       end
     end
   end
-  class ::Project::Foo<<C Foo>> < (::PackageSpec)
+  class ::<PackageSpecRegistry>::Project::Foo<<C Foo>> < (::PackageSpec)
     def self.<static-init>(<blk>)
       begin
-        <self>.import(::Project::Bar)
+        <self>.import(::<PackageSpecRegistry>::Project::Bar)
         <self>.export(::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::Foo)
         <self>.export(::<PackageRegistry>::Project_Foo_Package_Private::Project::Foo::CallsBar)
         <emptyTree>
