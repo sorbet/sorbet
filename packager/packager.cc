@@ -624,7 +624,8 @@ ast::ExpressionPtr prependPackageScope(const core::GlobalState &gs, ast::Express
 }
 
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
-    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
+    auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    ENFORCE(lastConstLit != nullptr);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
         lastConstLit = constLit;
     }
@@ -1215,7 +1216,7 @@ struct PackageInfoFinder {
             info->loc = ctx.locAt(classDef.loc);
             info->declLoc_ = ctx.locAt(classDef.declLoc);
 
-            // `class Foo < PackageSpace` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+            // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
             // This removes the PackageSpec's themselves from the top-level namespace
             classDef.name = prependName(move(classDef.name), core::Names::Constants::PackageSpecRegistry());
         } else {
