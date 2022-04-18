@@ -44,4 +44,53 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  describe "immutable structs" do
+    it "errors when using prop" do
+      assert_raises(NoMethodError) do
+        Class.new(T::ImmutableStruct) do
+          prop :foo, Integer
+        end
+      end
+    end
+
+    it "produces frozen objects" do
+      klass = Class.new(T::ImmutableStruct) do
+        const :foo, Integer
+      end
+
+      object = klass.new(foo: 5)
+
+      assert_raises(FrozenError) do
+        object.instance_variable_set(:@foo, 3)
+      end
+    end
+
+    it "cannot include prop" do
+      klass = Class.new(T::ImmutableStruct) do
+        const :foo, Integer
+      end
+
+      assert_raises(RuntimeError, "#{klass.name} is a subclass of T::ImmutableStruct and cannot include T::Props") do
+        klass.include T::Props
+      end
+
+      assert_raises(RuntimeError, "#{klass.name} is a subclass of T::ImmutableStruct and cannot include T::Props") do
+        klass.include T::Props::Prop
+      end
+    end
+
+    it "can include other arbitrary modules" do
+      klass = Class.new(T::ImmutableStruct) do
+        const :foo, Integer
+      end
+      mod = Module.new do
+        def bar; end
+      end
+
+      klass.include mod
+      assert_includes(klass.ancestors, mod)
+      assert_respond_to(klass.new(foo: 5), :bar)
+    end
+  end
 end
