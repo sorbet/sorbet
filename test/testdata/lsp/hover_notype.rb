@@ -1,5 +1,3 @@
-# typed: false
-
 class Foo 
     # ^ hover: # No hover information available
     # ^ hover: ---
