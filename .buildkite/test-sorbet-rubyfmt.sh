@@ -33,7 +33,7 @@ test_args=(
   "$CONFIG_OPTS"
   "--config=rubyfmt"
   //main:sorbet
-  //experiments/rubyfmt:rubyfmt_test
+  //experimental/rubyfmt/...
 )
 
 ./bazel test \
