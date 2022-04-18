@@ -23,6 +23,26 @@ module Opus::Types::Test
       assert_equal("OK", klass.new.double_definition)
     end
 
+    it "respects the latest override of a method for native methods" do
+      # When a method is implemented in C, it does not have a source_location. Take the original C implementation of
+      # `chars`, replace it with a method with a signature and then replace back the original C implementation. This is
+      # equivalent to having an original Ruby method with a signature that gets overridden by a native method without
+      # one.
+      original_c_method = String.instance_method(:chars)
+      String.class_eval do
+        extend T::Sig
+
+        sig {returns(String)}
+        def chars
+          "FAIL"
+        end
+      end
+      String.define_method(:chars, original_c_method)
+
+      unwrap_signature("chars")
+      assert_equal(%w[H e l l o], "Hello".chars)
+    end
+
     it "respects the latest override of a method if it has a signature" do
       klass = Class.new do
         extend T::Sig
