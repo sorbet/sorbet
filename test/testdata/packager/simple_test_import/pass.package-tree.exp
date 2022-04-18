@@ -9,27 +9,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>
-    end
+    <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib><<C <todo sym>>> < ()
-      <emptyTree>::<C Lib> = <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib>::<C Lib>
-    end
+    <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib>::<C Lib> = <emptyTree>::<C <PackageRegistry>>::<C Project_MainLib_Package_Private$1>::<C Project>::<C MainLib>::<C Lib>
 
-    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C TestOnly> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>
-    end
+    <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project>::<C TestOnly> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>
 
-    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>
-    end
+    <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Project>::<C Util> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package$1>::<C Project>::<C Util>
 
-    module <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Test>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Util> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>
-    end
+    <emptyTree>::<C Project_MainLib_Package_Private$1>::<C Test>::<C Project>::<C Util> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -78,15 +68,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly><<C <todo sym>>> < ()
-      <emptyTree>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>
-    end
+    <emptyTree>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly><<C <todo sym>>> < ()
-      <emptyTree>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>
-    end
+    <emptyTree>::<C Project_TestOnly_Package$1>::<C Project>::<C TestOnly>::<C SomeHelper> = <emptyTree>::<C <PackageRegistry>>::<C Project_TestOnly_Package_Private$1>::<C Project>::<C TestOnly>::<C SomeHelper>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
@@ -111,21 +97,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Util_Package_Private$1>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>
-    end
+    <emptyTree>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Util_Package$1>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>
-    end
+    <emptyTree>::<C Project_Util_Package$1>::<C Project>::<C Util>::<C MyUtil> = <emptyTree>::<C <PackageRegistry>>::<C Project_Util_Package_Private$1>::<C Project>::<C Util>::<C MyUtil>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util><<C <todo sym>>> < ()
-      <emptyTree>::<C UtilHelper> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
-    end
+    <emptyTree>::<C Project_Util_Package$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper> = <emptyTree>::<C <PackageTests>>::<C Project_Util_Package_Private$1>::<C Test>::<C Project>::<C Util>::<C UtilHelper>
   end
 end
 # -- test/testdata/packager/simple_test_import/util/my_util.rb --

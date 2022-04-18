@@ -7,25 +7,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
-    end
+    <emptyTree>::<C Package_Package_Private$1>::<C Package>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>
-    end
+    <emptyTree>::<C Package_Package_Private$1>::<C Package>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>
 
-    module <emptyTree>::<C Package_Package_Private$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
-    end
+    <emptyTree>::<C Package_Package_Private$1>::<C Package>::<C Subpackage> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Package$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>
-    end
+    <emptyTree>::<C Package_Package$1>::<C Package>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package_Private$1>::<C Package>::<C PackageClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
@@ -58,25 +50,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
-    end
+    <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
-    end
+    <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
 
-    module <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
-    end
+    <emptyTree>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
-    end
+    <emptyTree>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package_Private$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()

@@ -5,15 +5,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C RootPackage_Package_Private$1>::<C RootPackage><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>
-    end
+    <emptyTree>::<C RootPackage_Package_Private$1>::<C RootPackage>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C RootPackage_Package_Private$1>::<C RootPackage><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>
-    end
+    <emptyTree>::<C RootPackage_Package_Private$1>::<C RootPackage>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
@@ -62,31 +58,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz>
-    end
+    <emptyTree>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz>
 
-    module <emptyTree>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>
-    end
+    <emptyTree>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>
 
-    module <emptyTree>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Constant>
-    end
+    <emptyTree>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Constant>
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz>
-    end
+    <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Baz>
 
-    module <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Bar><<C <todo sym>>> < ()
-      <emptyTree>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>
-    end
+    <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>
 
-    module <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Constant>
-    end
+    <emptyTree>::<C RootPackage_Foo_Package$1>::<C RootPackage>::<C Foo>::<C Constant> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package_Private$1>::<C RootPackage>::<C Foo>::<C Constant>
   end
 
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
