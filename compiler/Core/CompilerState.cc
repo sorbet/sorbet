@@ -21,10 +21,10 @@ namespace sorbet::compiler {
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
                              llvm::DIBuilder *debug, llvm::DICompileUnit *compileUnit, core::FileRef file,
                              llvm::BasicBlock *allocRubyIdsEntry, llvm::BasicBlock *globalConstructorsEntry,
-                             StringTable &stringTable)
+                             StringTable &stringTable, IDTable &idTable)
     : gs(gs), lctx(lctx), module(module), allocRubyIdsEntry(allocRubyIdsEntry),
       globalConstructorsEntry(globalConstructorsEntry), debug(debug), compileUnit(compileUnit),
-      functionEntryInitializers(nullptr), file(file), stringTable(stringTable) {}
+      functionEntryInitializers(nullptr), file(file), stringTable(stringTable), idTable(idTable) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
@@ -35,7 +35,23 @@ void CompilerState::trace(string_view msg) const {
     gs.trace(msg);
 }
 
-llvm::Value *CompilerState::stringTableRef(std::string_view str) {
+namespace {
+llvm::GlobalVariable *declareNullptrPlaceholder(llvm::Module &module, llvm::Type *type, const string &name) {
+    // This variable is conceptually `const` (even though we're going to change its
+    // initializer during compilation, at runtime its value doesn't change), but
+    // if we declare that up front, LLVM will fold loads of its value, which
+    // causes problems.  So save declaring it as `const` until later.
+    const auto isConstant = false;
+    llvm::Constant *initializer = llvm::Constant::getNullValue(type);
+    auto *global =
+        new llvm::GlobalVariable(module, type, isConstant, llvm::GlobalVariable::InternalLinkage, initializer, name);
+    global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+    global->setAlignment(llvm::MaybeAlign(8));
+    return global;
+}
+} // namespace
+
+StringTable::StringTableEntry CompilerState::insertIntoStringTable(std::string_view str) {
     auto it = this->stringTable.map.find(str);
 
     // We would like to return &sorbet_moduleStringTable[offset], but that would
@@ -48,25 +64,41 @@ llvm::Value *CompilerState::stringTableRef(std::string_view str) {
     // table with the proper length (i.e. type) and go back and properly initialize
     // all of the temporary variables we created along the way.
     if (it != this->stringTable.map.end()) {
-        return it->second.addrVar;
+        return it->second;
     }
 
     auto offset = this->stringTable.size;
     auto globalName = fmt::format("addr_str_{}", str);
-    // This variable is conceptually `const` (even though we're going to change its
-    // initializer during compilation, at runtime its value doesn't change), but
-    // if we declare that up front, LLVM will fold loads of its value, which
-    // causes problems.  So save declaring it as `const` until later.
-    const auto isConstant = false;
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
-    llvm::Constant *initializer = llvm::ConstantPointerNull::get(type);
-    auto *global = new llvm::GlobalVariable(*this->module, type, isConstant, llvm::GlobalVariable::InternalLinkage,
-                                            initializer, globalName);
-    global->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-    global->setAlignment(llvm::MaybeAlign(8));
-    this->stringTable.map[str] = StringTable::StringTableEntry{offset, global};
+    auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
+    auto &entry = this->stringTable.map[str];
+    entry = StringTable::StringTableEntry{offset, global};
     // +1 for the null terminator.
     this->stringTable.size += str.size() + 1;
+
+    return entry;
+}
+
+llvm::Value *CompilerState::stringTableRef(std::string_view str) {
+    auto entry = this->insertIntoStringTable(str);
+    return entry.addrVar;
+}
+
+llvm::Value *CompilerState::idTableRef(std::string_view str) {
+    auto it = this->idTable.map.find(str);
+
+    if (it != this->idTable.map.end()) {
+        return it->second.addrVar;
+    }
+
+    auto entry = this->insertIntoStringTable(str);
+    auto offset = static_cast<uint32_t>(this->idTable.map.size());
+    auto globalName = fmt::format("addr_id_{}", str);
+    // TODO(froydnj): IDs are 32 bits, but Payload.cc was declaring them as 64?
+    auto *type = llvm::Type::getInt64PtrTy(this->lctx);
+    auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
+    auto strSize = static_cast<uint32_t>(str.size());
+    this->idTable.map[str] = IDTable::IDTableEntry{offset, entry.offset, strSize, global};
 
     return global;
 }
@@ -102,6 +134,72 @@ void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &m
         var->setInitializer(initializer);
         var->setConstant(true);
     }
+}
+
+void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder) {
+    vector<pair<string_view, IDTable::IDTableEntry>> tableElements;
+    tableElements.reserve(this->map.size());
+    absl::c_copy(this->map, std::back_inserter(tableElements));
+    fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
+
+    llvm::GlobalVariable *table;
+
+    {
+        auto *arrayType = llvm::ArrayType::get(llvm::Type::getInt64Ty(lctx), this->map.size());
+        const auto isConstant = false;
+        auto *initializer = llvm::ConstantAggregateZero::get(arrayType);
+        table = new llvm::GlobalVariable(module, arrayType, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                         initializer, "sorbet_moduleIDTable");
+        table->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        table->setAlignment(llvm::MaybeAlign(8));
+    }
+
+    // Fill in all the addr vars that we indirected through.
+    for (auto &elem : tableElements) {
+        auto *var = elem.second.addrVar;
+        auto *zero = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0));
+        auto *index = llvm::ConstantInt::get(lctx, llvm::APInt(64, elem.second.offset));
+        llvm::Constant *indices[] = {zero, index};
+        auto *initializer = llvm::ConstantExpr::getInBoundsGetElementPtr(table->getValueType(), table, indices);
+        var->setInitializer(initializer);
+        var->setConstant(true);
+    }
+
+    // Descriptors for the runtime initialization of members of the above.
+    // These types are known to the runtime.
+    auto *func = module.getFunction("sorbet_vm_intern_ids");
+    ENFORCE(func != nullptr);
+    auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
+    auto *descLengthTy = descOffsetTy;
+    auto *structType = llvm::dyn_cast<llvm::StructType>(
+        func->getType()->getElementType()->getFunctionParamType(1)->getPointerElementType());
+    ENFORCE(structType != nullptr);
+    auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
+    const auto isConstant = true;
+    std::vector<llvm::Constant *> descsConstants;
+    descsConstants.reserve(this->map.size());
+
+    for (auto &elem : tableElements) {
+        auto *offset = llvm::ConstantInt::get(descOffsetTy, elem.second.stringTableOffset);
+        auto *length = llvm::ConstantInt::get(descLengthTy, elem.second.stringLength);
+        auto *desc = llvm::ConstantStruct::get(structType, offset, length);
+        descsConstants.push_back(desc);
+    }
+
+    auto *initializer = llvm::ConstantArray::get(arrayType, descsConstants);
+    auto *descTable = new llvm::GlobalVariable(module, arrayType, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                               initializer, "sorbet_moduleIDDescriptors");
+    descTable->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+    descTable->setAlignment(llvm::MaybeAlign(8));
+
+    // Call into the runtime to initialize everything.
+    const auto allowInternal = true;
+    auto *stringTable = module.getGlobalVariable("sorbet_moduleStringTable", allowInternal);
+    ENFORCE(stringTable != nullptr);
+    builder.CreateCall(func, {builder.CreateConstGEP2_32(nullptr, table, 0, 0),
+                              builder.CreateConstGEP2_32(nullptr, descTable, 0, 0),
+                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), this->map.size()),
+                              builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
 }
 
 llvm::FunctionType *CompilerState::getRubyFFIType() {

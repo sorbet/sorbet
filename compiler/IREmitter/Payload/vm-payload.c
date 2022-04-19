@@ -535,3 +535,16 @@ void sorbet_vm_define_prop_getter(VALUE klass, const char *name, rb_sorbet_func_
     const bool isSelf = false;
     sorbet_vm_define_method(klass, name, methodPtr, paramp, iseq, isSelf);
 }
+
+// The layout of this struct is known to the compiler.
+struct IDDescriptor {
+    unsigned int offset;
+    unsigned int length;
+};
+
+void sorbet_vm_intern_ids(ID *idTable, struct IDDescriptor *idDescriptors, size_t numIDs, const char *stringTable) {
+    for (size_t i = 0; i < numIDs; ++i) {
+        const struct IDDescriptor *desc = &idDescriptors[i];
+        idTable[i] = rb_intern2(&stringTable[desc->offset], desc->length);
+    }
+}
