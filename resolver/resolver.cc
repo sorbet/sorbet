@@ -2105,8 +2105,10 @@ class ResolveTypeMembersAndFieldsWalk {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
+        // Hoisted out here to report an error from within resolveConstantType when using
+        // `T.assert_type!` even on the fast path
+        auto resultType = resolveConstantType(ctx, asgn->rhs);
         if (data->resultType == nullptr) {
-            auto resultType = resolveConstantType(ctx, asgn->rhs);
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
