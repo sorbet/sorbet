@@ -2059,54 +2059,54 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     // Step 2:
     // * Find package files and rewrite them into virtual AST mappings.
     // * Find files within each package and rewrite each to be wrapped by their virtual package namespace.
-    {
-        Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
+    // {
+    //     Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
-        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
-        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
-        for (auto &file : files) {
-            fileq->push(move(file), 1);
-        }
+    //     auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
+    //     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
+    //     for (auto &file : files) {
+    //         fileq->push(move(file), 1);
+    //     }
 
-        workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
-            Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
-            vector<ast::ParsedFile> results;
-            uint32_t filesProcessed = 0;
-            ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    filesProcessed++;
-                    auto &file = job.file.data(gs);
-                    core::Context ctx(gs, core::Symbols::root(), job.file);
+    //     workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
+    //         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
+    //         vector<ast::ParsedFile> results;
+    //         uint32_t filesProcessed = 0;
+    //         ast::ParsedFile job;
+    //         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+    //             if (result.gotItem()) {
+    //                 filesProcessed++;
+    //                 auto &file = job.file.data(gs);
+    //                 core::Context ctx(gs, core::Symbols::root(), job.file);
 
-                    if (file.isPackage()) {
-                        job = rewritePackage(ctx, move(job));
-                    } else {
-                        job = rewritePackagedFile(ctx, move(job));
-                    }
-                    results.emplace_back(move(job));
-                }
-            }
-            if (filesProcessed > 0) {
-                resultq->push(move(results), filesProcessed);
-            }
-        });
-        files.clear();
+    //                 if (file.isPackage()) {
+    //                     job = rewritePackage(ctx, move(job));
+    //                 } else {
+    //                     job = rewritePackagedFile(ctx, move(job));
+    //                 }
+    //                 results.emplace_back(move(job));
+    //             }
+    //         }
+    //         if (filesProcessed > 0) {
+    //             resultq->push(move(results), filesProcessed);
+    //         }
+    //     });
+    //     files.clear();
 
-        {
-            vector<ast::ParsedFile> threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem()) {
-                    files.insert(files.end(), make_move_iterator(threadResult.begin()),
-                                 make_move_iterator(threadResult.end()));
-                }
-            }
-        }
-    }
+    //     {
+    //         vector<ast::ParsedFile> threadResult;
+    //         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+    //              !result.done();
+    //              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+    //             if (result.gotItem()) {
+    //                 files.insert(files.end(), make_move_iterator(threadResult.begin()),
+    //                              make_move_iterator(threadResult.end()));
+    //             }
+    //         }
+    //     }
+    // }
 
-    fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
+    // fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
     return files;
 }
