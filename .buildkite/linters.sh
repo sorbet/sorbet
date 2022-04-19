@@ -44,6 +44,13 @@ if ! ./tools/scripts/check_using_namespace_std.sh &> std_check; then
     buildkite-agent annotate --context tools/scripts/check_using_namespace_std.sh --style error --append < std_check
 fi
 
+echo "~~~ Checking ErrorClass error code numbers"
+if ! ./tools/scripts/check_error_classes.sh &> error_class_check; then
+    globalErr=1
+    echo "^^^ +++"
+    buildkite-agent annotate --context tools/scripts/check_error_classes.sh --style error --append < error_class_check
+fi
+
 echo "~~~ Running shellcheck"
 if ! ./tools/scripts/lint_sh.sh -t &> lint_sh; then
     globalErr=1
