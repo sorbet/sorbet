@@ -53,6 +53,11 @@ void base_driver::rewind_and_reset(size_t newPos) {
     this->lex.rewind_and_reset_to_expr_end(newPos);
 }
 
+void base_driver::rewind_and_reset_to_beg(size_t newPos) {
+    this->clear_lookahead();
+    this->lex.rewind_and_reset_to_expr_beg(newPos);
+}
+
 void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
     if ((force || this->indentationAware) && this->lex.compare_indent_level(token, kEND) > 0) {
         this->rewind_and_reset(kEND->start());
