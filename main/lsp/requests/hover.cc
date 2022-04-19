@@ -51,21 +51,23 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
         return response;
     }
 
-    auto &queryResponses = result.responses;
     auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
-    if (queryResponses.empty()) {
+    if (result.status == LSPQueryResult::Status::UntypedFile) {
         auto fref = config.uri2FileRef(gs, params->textDocument->uri);
         ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
-        if (level < core::StrictLevel::True) {
-            string asString = level == core::StrictLevel::Ignore ? "ignore" : "false";
-            auto text = fmt::format("# No hover information available");
-            auto explanation = fmt::format("The file is `# typed: {}`", asString);
-            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, text, explanation));
-        } else {
-            // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
-            response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
-        }
+        ENFORCE(level < core::StrictLevel::True);
+        string asString = level == core::StrictLevel::Ignore ? "ignore" : "false";
+        auto text = fmt::format("# No hover information available");
+        auto explanation = fmt::format("The file is `# typed: {}`", asString);
+        response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, text, explanation));
+        return response;
+    }
+
+    auto &queryResponses = result.responses;
+    if (queryResponses.empty()) {
+        // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
+        response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
         return response;
     }
 
