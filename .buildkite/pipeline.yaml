@@ -40,10 +40,6 @@ steps:
     artifact_paths: _out_/profile.json
     <<: *elastic
 
-  - label: ":linux: test-sorbet-rubyfmt.sh"
-    command: .buildkite/test-sorbet-rubyfmt.sh
-    <<: *elastic
-
   - label: ":linux: test-compiler.sh"
     command: .buildkite/test-compiler.sh
     artifact_paths: _out_/profile.json
@@ -122,6 +118,12 @@ steps:
 
   - label: ":linux: publish-ruby-gems.sh (non-blocking)"
     command: .buildkite/publish-ruby-gems.sh
+    <<: *elastic
+
+  - label: ":linux: test-static-sanitized.sh (rubyfmt)"
+    command: .buildkite/test-static-sanitized.sh
+    env:
+      RUBYFMT: true
     <<: *elastic
 
   - wait: ~

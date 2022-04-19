@@ -14,33 +14,44 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
+test_args=()
 
 if [[ "linux" == "$platform" ]]; then
-  CONFIG_OPTS="--config=buildfarm-sanitized-linux"
+  test_args+=("--config=buildfarm-sanitized-linux")
 elif [[ "mac" == "$platform" ]]; then
-  CONFIG_OPTS="--config=buildfarm-sanitized-mac"
+  test_args+=("--config=buildfarm-sanitized-mac")
+fi
+
+if [[ "${RUBYFMT:-}" == "true" ]]; then
+  test_args+=("--config=rubyfmt")
 fi
 
 export JOB_NAME=test-static-sanitized
 source .buildkite/tools/setup-bazel.sh
 
-echo will run with $CONFIG_OPTS
+echo -- will run with "${test_args[@]}"
 
 err=0
 
 mkdir -p _out_
 
 # NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
-test_args=(
-  "$CONFIG_OPTS"
-  "--test_tag_filters=-compiler"
-  "--build_tag_filters=-compiler"
-  "--build_tests_only"
-  "@gems//..."
-  "//gems/sorbet/test/snapshot"
-  "//gems/sorbet/test/hidden-method-finder"
-  "//..."
-)
+if [[ "${RUBYFMT:-}" == "true" ]]; then
+  test_args+=(
+    "//main:sorbet"
+    "//experimental/rubyfmt/..."
+  )
+else
+  test_args+=(
+    "--test_tag_filters=-compiler"
+    "--build_tag_filters=-compiler"
+    "--build_tests_only"
+    "@gems//..."
+    "//gems/sorbet/test/snapshot"
+    "//gems/sorbet/test/hidden-method-finder"
+    "//..."
+  )
+fi
 
 ./bazel test \
   --experimental_generate_json_trace_profile \
