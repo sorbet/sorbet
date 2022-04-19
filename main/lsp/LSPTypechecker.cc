@@ -624,7 +624,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
-    return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
+    return LSPQueryResult::success(queryCollector->drainQueryResponses());
 }
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
@@ -797,7 +797,7 @@ LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
     pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, /*presorted*/ true);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
-    return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
+    return LSPQueryResult::success(queryCollector->drainQueryResponses());
 }
 
 const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const {

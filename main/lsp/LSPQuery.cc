@@ -62,20 +62,20 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
             fmt::format("Ignored file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPQueryResult{{}, move(error)};
+        return LSPQueryResult::failure(move(error));
     }
 
     if (!fref.exists()) {
         auto error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidParams,
             fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
-        return LSPQueryResult{{}, move(error)};
+        return LSPQueryResult::failure(move(error));
     }
 
     if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
         config.logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return LSPQueryResult{{}, nullptr};
+        return LSPQueryResult::untypedFile();
     }
 
     auto loc = config.lspPos2Loc(fref, pos, gs);
@@ -84,12 +84,12 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
             // File location was not valid, but it's _probably_ not the client's fault--instead it's
             // likely that we're not running on an up-to-date file yet. Since we don't have a good
             // way to check, let's just say "no results"
-            return LSPQueryResult{{}, nullptr};
+            return LSPQueryResult::empty();
         } else {
             auto error = make_unique<ResponseError>(
                 (int)LSPErrorCodes::InvalidParams,
                 fmt::format("Position {} in {} does not correspond to a valid location", pos.showRaw(), uri));
-            return LSPQueryResult{{}, move(error)};
+            return LSPQueryResult::failure(move(error));
         }
     }
 

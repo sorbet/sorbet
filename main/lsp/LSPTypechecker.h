@@ -24,9 +24,39 @@ class InitializedTask;
 class TaskQueue;
 
 struct LSPQueryResult {
+    enum class Status {
+        Success,
+        UntypedFile,
+        Error,
+    };
+
+private:
+    LSPQueryResult(std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses)
+        : LSPQueryResult(std::move(responses), Status::Success, nullptr) {}
+    LSPQueryResult(std::unique_ptr<ResponseError> error)
+        : LSPQueryResult({}, Status::Error, std::move(error)) {}
+
+    LSPQueryResult(std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses,
+                   Status status, std::unique_ptr<ResponseError> error)
+        : responses(std::move(responses)), error(std::move(error)), status(status) {}
+public:
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
     // (Optional) Error that occurred during the query that you can pass on to the client.
     std::unique_ptr<ResponseError> error;
+    const Status status;
+
+    static LSPQueryResult success(std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses) {
+        return LSPQueryResult{std::move(responses)};
+    }
+    static LSPQueryResult empty() {
+        return success({});
+    }
+    static LSPQueryResult untypedFile() {
+        return LSPQueryResult({}, Status::UntypedFile, nullptr);
+    }
+    static LSPQueryResult failure(std::unique_ptr<ResponseError> error) {
+        return LSPQueryResult{std::move(error)};
+    }
 };
 
 class UndoState;
