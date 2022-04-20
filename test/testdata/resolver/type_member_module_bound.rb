@@ -12,8 +12,8 @@ class A
   include M
 
   Args = type_member {{fixed: NilClass}}
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
+  #                           ^^^^^^^^ error: The `fixed` type bound `NilClass` must be a supertype of the parent's `lower` type bound `Bar` for type_member `Args`
+  #                           ^^^^^^^^ error: The `fixed` type bound `NilClass` must be a subtype of the parent's `upper` type bound `Foo` for type_member `Args`
 end
 
 # Ensure that type_templates depend on the singleton mixins
@@ -22,8 +22,8 @@ class B
   extend M
 
   Args = type_template {{fixed: NilClass}}
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `NilClass`
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `NilClass` is not a subtype of parent upper bound `Foo`
+  #                             ^^^^^^^^ error: The `fixed` type bound `NilClass` must be a supertype of the parent's `lower` type bound `Bar` for type_template `Args`
+  #                             ^^^^^^^^ error: The `fixed` type bound `NilClass` must be a subtype of the parent's `upper` type bound `Foo` for type_template `Args`
 end
 
 module M
@@ -38,5 +38,5 @@ class C
   include M
 
   Args = type_member {{upper:Foo, lower: Baz}}
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Bar` is not a subtype of lower bound `Baz`
+  #                                      ^^^ error: The `lower` type bound `Baz` must be a supertype of the parent's `lower` type bound `Bar` for type_member `Args`
 end

@@ -20,8 +20,8 @@ end
 class B2 < A
   extend T::Generic
   T1 = type_member {{fixed: String}}
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: parent lower bound `Serval` is not a subtype of lower bound `String`
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `String` is not a subtype of parent upper bound `Animal`
+  #                         ^^^^^^ error: The `fixed` type bound `String` must be a supertype of the parent's `lower` type bound `Serval` for type_member `T1`
+  #                         ^^^^^^ error: The `fixed` type bound `String` must be a subtype of the parent's `upper` type bound `Animal` for type_member `T1`
 end
 
 # should pass: the bounds are a refinement of the ones on A
@@ -34,13 +34,13 @@ end
 class C2 < A
   extend T::Generic
   T1 = type_member {{lower: Serval, upper: Object}}
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: upper bound `Object` is not a subtype of parent upper bound `Animal`
+  #                                        ^^^^^^ error: The `upper` type bound `Object` must be a subtype of the parent's `upper` type bound `Animal` for type_member `T1`
 end
 
 # should fail: the implicit bounds of top and bottom are too wide for T1
 class D1 < A
   T1 = type_member
-     # ^^^^^^^^^^^ error: parent lower bound `Serval` is not a subtype of lower bound `T.noreturn`
-     # ^^^^^^^^^^^ error: upper bound `<top>` is not a subtype of parent upper bound `Animal`
+     # ^^^^^^^^^^^ error: The `lower` type bound `T.noreturn` must be a supertype of the parent's `lower` type bound `Serval` for type_member `T1`
+     # ^^^^^^^^^^^ error: The `upper` type bound `<top>` must be a subtype of the parent's `upper` type bound `Animal` for type_member `T1`
 end
 

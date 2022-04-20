@@ -26,7 +26,7 @@ class A1
 
   # should fail: the bounds are invalid
   T5 = type_member {{lower: Animal, upper: Persian}}
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Animal` is not a subtype of `Persian`
+     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The `lower` type bound `Animal` is not a subtype of the `upper` type bound `Persian` for `A1::T5`
 
   # should fail: type member used as an argument to another type
   T6 = type_member {{fixed: T::Array[T1]}}
@@ -53,7 +53,7 @@ class A1
 
   # should fail: multiple upper and lower bounds specified
   T12 = type_member {{lower: Integer, lower: String, upper: BasicObject, upper: TrueClass}}
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `String` is not a subtype of `TrueClass`
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The `lower` type bound `String` is not a subtype of the `upper` type bound `TrueClass` for `A1::T12`
                                     # ^^^^^ error: Hash key `lower` is duplicated
                                                                        # ^^^^^ error: Hash key `upper` is duplicated
 
