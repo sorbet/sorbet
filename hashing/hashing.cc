@@ -56,15 +56,18 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
                 writer.Bool(true);
 
                 writer.String("file_path");
-                writer.String(string(file.file.data(*lgs).path()));
+                auto path = file.file.data(*lgs).path();
+                writer.String(path.data(), path.size());
 
                 writer.String("contents");
-                writer.String(string(file.file.data(*lgs).source()));
+                auto source = file.file.data(*lgs).source();
+                writer.String(source.data(), source.size());
 
                 writer.EndObject();
             }
 
-            logger.debug(result.GetString());
+            auto view = string_view{result.GetString(), result.GetLength()};
+            logger.debug(view);
 
             core::GlobalStateHash invalid;
             invalid.hierarchyHash = core::GlobalStateHash::HASH_STATE_INVALID;
