@@ -2561,6 +2561,8 @@ class ResolveTypeMembersAndFieldsWalk {
         core::SymbolRef current;
         for (auto part : parts) {
             if (!current.exists()) {
+                current = core::Symbols::root();
+
                 // First iteration
                 if (!packageType) {
                     if (part != "") {
@@ -2571,7 +2573,6 @@ class ResolveTypeMembersAndFieldsWalk {
                         }
                         return;
                     }
-                    current = core::Symbols::root();
                     continue;
                 } else {
                     auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
@@ -2581,13 +2582,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     if (!mangledName.exists()) {
                         if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
                             e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        }
-                        return;
-                    }
-                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
-                    if (!current.exists()) {
-                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
                         }
                         return;
                     }

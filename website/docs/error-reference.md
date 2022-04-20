@@ -702,6 +702,68 @@ you'll get this error—the latter export is redundant, as it's implied by expor
 
 To fix this error, simply remove the more specific export.
 
+## 3717
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you're using a name that's private in another package, and
+not epxorted.
+
+To fix this error, you'll need to either export the symbol in the other package,
+or figure out a way around using it.
+
+## 3718
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you're using a symbol from a packge that's not imported.
+
+You can fix the error by adding an `import` statement for the package that's
+mentioned to your package's `__package.rb` file.
+
+## 3719
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you're using a symbol defined in a package from an
+unpackaged context.
+
+To fix this error you'll need to figure out a way around using that symbol, as
+sorbet does not allow packaged code to be used from an unpackaged context.
+
+## 3720
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you used a constant from the test namespace in a non-test
+file.
+
+To fix this error you'll need to either move the symbol out of the test
+namespace in the package it's defined, or move the code you're working on into
+the test namspace of your own package.
+
+## 3721
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you are exporting a symbol from another package. You may
+only export symbols that your package defines, so if you're trying to re-export
+a symbol you'll need to define an alias to it and then export the alias.
+
+## 3722
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error indicates that a type alias has been exported by a package. Sorbet
+does not support exporting type aliases, so you'll need to export the containing
+context to make the type alias available publicly.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in

@@ -268,6 +268,14 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
                 return what;
             }
         }
+
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+            what = packager::VisibilityChecker::runIncremental(gs, *emptyWorkers, std::move(what));
+        }
+#endif
+
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
@@ -316,6 +324,13 @@ vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs
                 return what;
             }
         }
+
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+            what = packager::VisibilityChecker::runIncremental(gs, *emptyWorkers, move(what));
+        }
+#endif
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
@@ -869,6 +884,14 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 }
                 what = move(maybeResult.result());
             }
+
+#ifndef SORBET_REALMAIN_MIN
+            if (opts.stripePackages) {
+                Timer timeit(gs->tracer(), "visibility_checker");
+                what = packager::VisibilityChecker::run(*gs, workers, std::move(what));
+            }
+#endif
+
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {

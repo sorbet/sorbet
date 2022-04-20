@@ -310,13 +310,9 @@ public:
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        while (symbol.exists() && symbol != core::Symbols::root()) {
-            if (symbol.isClassOrModule() && symbol.name(gs) == privateMangledName) {
-                return true;
-            }
-            symbol = symbol.owner(gs);
-        }
-        return false;
+        auto file = symbol.loc(gs).file();
+        auto &pkg = gs.packageDB().getPackageForFile(gs, file);
+        return this->mangledName() == pkg.mangledName();
     }
 
     PackageInfoImpl() = default;
@@ -634,6 +630,16 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
         lastConstLit = constLit;
     }
     lastConstLit->scope = name2Expr(prefix, move(lastConstLit->scope));
+    return scope;
+}
+
+ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
+    auto *lastConstLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(scope);
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+        lastConstLit = constLit;
+    }
+    auto loc = lastConstLit->scope.loc();
+    lastConstLit->scope = ast::MK::Constant(loc, core::Symbols::root());
     return scope;
 }
 
@@ -1103,16 +1109,14 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                auto &arg = send.getPosArg(0);
                 exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
-                // Transform the constant lit to refer to the target within the mangled package namespace.
-                arg = prependInternalPackageName(ctx, move(send.getPosArg(0)));
+                auto &arg = send.getPosArg(0);
+                arg = prependRoot(std::move(arg));
             }
         }
         if (send.fun == core::Names::export_for_test() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.getPosArg(0))) {
-                auto &arg = send.getPosArg(0);
                 auto fqn = getFullyQualifiedName(ctx, target);
                 ENFORCE(fqn.parts.size() > 0);
                 if (isTestNamespace(ctx.state, fqn.parts[0])) {
@@ -1122,9 +1126,9 @@ struct PackageInfoFinder {
                     }
                 } else {
                     exported.emplace_back(move(fqn), ExportType::PrivateTest);
+                    auto &arg = send.getPosArg(0);
+                    arg = prependRoot(std::move(arg));
                 }
-                // Transform the constant lit to refer to the target within the mangled package namespace.
-                arg = prependInternalPackageName(ctx, move(arg));
             }
         }
 
@@ -1834,53 +1838,10 @@ private:
     }
 };
 
-// Given a packaged file, wrap it in the _Package_Private mangled namespace of its package.
-ast::ParsedFile wrapFileInPackageModule(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName,
-                                        const PackageInfoImpl &pkg, bool isTestFile) {
-    if (ast::isa_tree<ast::EmptyTree>(file.tree)) {
-        // Nothing to wrap. This occurs when a file is marked typed: Ignore.
-        return file;
-    }
-
-    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
-    EnforcePackagePrefix enforcePrefix(ctx, pkg, isTestFile);
-    file.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(file.tree));
-
-    auto wrapperName = isTestFile ? core::Names::Constants::PackageTests() : core::Names::Constants::PackageRegistry();
-    auto moduleWrapper =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(packageMangledName, name2Expr(wrapperName)), {}, std::move(rootKlass.rhs));
-    rootKlass.rhs.clear();
-    rootKlass.rhs.emplace_back(move(moduleWrapper));
-    return file;
-}
-
 } // namespace
 
-// Add:
-//    module <PackageRegistry>::Mangled_Name_Package_Private
-//      module A::B::C
-//        D = Mangled_Imported_Package::A::B::C::D
-//      end
-//      ...
-//    end
-//
-//    for external imports, and
-//
-//    module <PackageRegistry>::Mangled_Name_Package
-//      module F
-//        G = Mangled_Name_Package_Private::G
-//      end
-//      ...
-//    end
-//
-// ...for self-mapping, to __package.rb files to set up the package namespace.
-ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
-    ast::ClassDef::RHS_store importedPackages;
-    ast::ClassDef::RHS_store testImportedPackages;
-    ast::ClassDef::RHS_store publicMapping;
-    ast::ClassDef::RHS_store publicTestMapping;
-
+// Validate that the package file is marked `# typed: strict`.
+ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, file.file);
     if (!absPkg.exists()) {
@@ -1888,7 +1849,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
         // The correct course of action is to abort the transform.
         return file;
     }
-    auto &package = PackageInfoImpl::from(absPkg);
 
     // Sanity check: __package.rb files _must_ be typed: strict
     if (file.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
@@ -1896,47 +1856,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
         }
     }
-
-    {
-        ImportTreeBuilder treeBuilder(package);
-
-        // Merge public exports of this package into tree builder in order to "self-map" them
-        // from the package's private module to its public-facing module
-        treeBuilder.mergePublicInterface(ctx, package, ExportType::Public);
-        publicMapping = treeBuilder.makeModule(ctx, ModuleType::Public);
-        publicTestMapping = treeBuilder.makeModule(ctx, ModuleType::PublicTest);
-
-        // Merge imports of package into tree builder in order to map external package modules
-        // into this package's private module
-        treeBuilder.mergeImports(ctx, package);
-        importedPackages = treeBuilder.makeModule(ctx, ModuleType::Private);
-
-        // Merge self-test exports package into tree builder in order to "self-map" them (in addition
-        // to the public exports and imports of this package) into the package's private test module
-        treeBuilder.mergePublicInterface(ctx, package, ExportType::PrivateTest);
-        testImportedPackages = treeBuilder.makeModule(ctx, ModuleType::PrivateTest);
-    }
-
-    // Create wrapper modules
-    auto packageNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
-    auto testPackageNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageTests()), {}, std::move(testImportedPackages));
-    auto publicMappingNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(publicMapping));
-    auto publicTestMappingNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageTests()), {}, std::move(publicTestMapping));
-
-    // Add wrapper modules to root of the tree
-    auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
-    rootKlass.rhs.emplace_back(move(packageNamespace));
-    rootKlass.rhs.emplace_back(move(testPackageNamespace));
-    rootKlass.rhs.emplace_back(move(publicMappingNamespace));
-    rootKlass.rhs.emplace_back(move(publicTestMappingNamespace));
 
     return file;
 }
@@ -1948,10 +1867,8 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
     if (pkg.exists()) {
         auto &pkgImpl = PackageInfoImpl::from(pkg);
 
-        // Wrap the file in a package module (ending with _Package_Private) to put it by default in the package's
-        // private namespace (private-by-default paradigm).
-        parsedFile =
-            wrapFileInPackageModule(ctx, move(parsedFile), pkgImpl.privateMangledName, pkgImpl, file.isPackagedTest());
+        EnforcePackagePrefix enforcePrefix(ctx, pkgImpl, file.isPackagedTest());
+        parsedFile.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(parsedFile.tree));
     } else {
         // Don't transform, but raise an error on the first line.
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
@@ -1987,7 +1904,7 @@ template <typename StateType> vector<ast::ParsedFile> rewriteFilesFast(StateType
                 }
             }
             // Re-write imports and exports:
-            file = rewritePackage(ctx, move(file));
+            file = validatePackage(ctx, move(file));
         } else {
             file = rewritePackagedFile(ctx, move(file));
         }
@@ -2143,7 +2060,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
                     if (file.isPackage()) {
-                        job = rewritePackage(ctx, move(job));
+                        job = validatePackage(ctx, move(job));
                     } else {
                         job = rewritePackagedFile(ctx, move(job));
                     }
