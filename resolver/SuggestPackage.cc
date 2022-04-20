@@ -295,8 +295,8 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         // going from an UnresolvedConstantLit to the full
         // (with-scope) string is actually kinda annoying, so we're
         // using the `loc` to get the original chunk of the file.
-        if (auto full_constant = ctx.locAt(unresolved.loc).source(ctx)) {
-            e.setHeader("No import provides `{}`", *full_constant);
+        if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
+            e.setHeader("No import provides `{}`", *fullConstant);
         }
         return true;
     }
@@ -310,6 +310,10 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         if (!missingExports.empty()) {
             for (auto match : missingExports) {
                 pkgCtx.addMissingExportSuggestions(e, match);
+            }
+
+            if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
+                e.setHeader("`{}` is not exported by its package", *fullConstant);
             }
             return true;
         }
