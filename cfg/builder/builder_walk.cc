@@ -44,6 +44,12 @@ void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat
 namespace {
 
 LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
+    if (what == core::Symbols::StubModule()) {
+        // We don't need all stub module assignments to alias to the same temporary.
+        // (The fact that there's a StubModule at all means an error was already reported elsewhere)
+        return cctx.newTemporary(what.name(cctx.ctx));
+    }
+
     // Note: this will add an empty local to aliases if 'what' is not there
     LocalRef &alias = cctx.aliases[what];
     if (!alias.exists()) {
