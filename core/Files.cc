@@ -248,7 +248,7 @@ bool File::isRBI() const {
 }
 
 bool File::isStdlib() const {
-    return fileStrictSigil(source()) == StrictLevel::Stdlib;
+    return this->originalSigil == StrictLevel::Stdlib;
 }
 
 bool File::isPackage() const {
