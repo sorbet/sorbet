@@ -292,12 +292,21 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
             pkgCtx.addMissingImportSuggestions(e, match);
         }
 
+        // Since we're suggesting an import, we also change the error
+        // message to point to packaging as the problem. However, the
+        // constant we're failing to resolve might _not_ be a full
+        // package: for example, if we mention `A::B` and there are
+        // two packages `A::B::Y` and `A::B::Z`, then our autocorrect
+        // might suggest both as a possibility. Consequently, the
+        // error message here is supposed to reference packaging but
+        // _not_ reference the specific packages that we might be
+        // missing, because that could be misleading.
+        //
         // going from an UnresolvedConstantLit to the full
         // (with-scope) string is actually kinda annoying, so we're
         // using the `loc` to get the original chunk of the file that
         // includes the whole constant with scope
         if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
-            // TODO (document me)
             e.setHeader("No import provides `{}`", *fullConstant);
         }
 
