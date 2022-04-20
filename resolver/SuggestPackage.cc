@@ -291,6 +291,13 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         for (auto match : missingImports) {
             pkgCtx.addMissingImportSuggestions(e, match);
         }
+
+        // going from an UnresolvedConstantLit to the full
+        // (with-scope) string is actually kinda annoying, so we're
+        // using the `loc` to get the original chunk of the file.
+        if (auto full_constant = ctx.locAt(unresolved.loc).source(ctx)) {
+            e.setHeader("No import provides `{}`", *full_constant);
+        }
         return true;
     }
 
