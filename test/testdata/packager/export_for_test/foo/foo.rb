@@ -35,7 +35,7 @@ module Opus::Foo
 
   # via test_import Opus::TestImported
   Opus::TestImported::TIClass
-# ^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestImported`
+# ^^^^^^^^^^^^^^^^^^ error: No import provides `Opus::TestImported`
   Test::Opus::TestImported::TITestClass
 # ^^^^ error: Unable to resolve constant `Test`
 
