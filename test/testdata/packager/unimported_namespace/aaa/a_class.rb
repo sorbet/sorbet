@@ -3,7 +3,7 @@
 
 class AAA::AClass
   BBB
-# ^^^ error: Unable to resolve constant `BBB`
+# ^^^ error: No import provides `BBB`
 
   C
 # ^ error: Unable to resolve constant `C`

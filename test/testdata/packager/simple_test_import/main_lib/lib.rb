@@ -6,7 +6,7 @@ class Project::MainLib::Lib
 
   # Normal code is not allowed to access names from `test_import`
   Project::TestOnly::SomeHelper.new
-# ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestOnly`
+# ^^^^^^^^^^^^^^^^^ error: No import provides `Project::TestOnly`
 
   Test::Project::Util::UtilHelper
 # ^^^^ error: Unable to resolve constant `Test`

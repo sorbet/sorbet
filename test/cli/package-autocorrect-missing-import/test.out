@@ -1,4 +1,4 @@
-foo_class.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:7: No import provides `Foo::Bar` https://srb.help/5002
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
               ^^^^^^^^
   Autocorrect: Done
@@ -9,7 +9,7 @@ foo_class.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo_class.rb:8: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:8: No import provides `Bar` https://srb.help/5002
      8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
               ^^^
   Autocorrect: Done
@@ -20,7 +20,7 @@ foo_class.rb:8: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo_class.rb:14: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:14: No import provides `Foo::Bar` https://srb.help/5002
     14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
           ^^^^^^^^
   Autocorrect: Done
@@ -31,7 +31,7 @@ foo_class.rb:14: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo_class.rb:15: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:15: No import provides `Foo::Bar` https://srb.help/5002
     15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^
   Autocorrect: Done
@@ -42,7 +42,7 @@ foo_class.rb:15: Unable to resolve constant `Bar` https://srb.help/5002
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+foo.test.rb:4: No import provides `Test::Foo::Bar` https://srb.help/5002
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^
   Autocorrect: Done

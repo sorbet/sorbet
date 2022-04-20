@@ -278,6 +278,12 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         return pkgCtx.tryPackageSpecCorrections(e, unresolved);
     }
 
+    // Something we do down below is use `setHeader` to _replace_ the
+    // original error message _if_ we find that the error appears to
+    // be explicitly package-related. We only do this if we have
+    // suggestions for how to fix it---otherwise, we leave the
+    // original "failed to resolve" error intact.
+
     vector<PackageMatch> missingImports;
     if (auto unresScope = ast::cast_tree<ast::ConstantLit>(unresolved.scope)) {
         missingImports = pkgCtx.findPossibleMissingImports({unresScope->symbol}, unresolved.cnst);
@@ -291,6 +297,25 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         for (auto match : missingImports) {
             pkgCtx.addMissingImportSuggestions(e, match);
         }
+
+        // Since we're suggesting an import, we also change the error
+        // message to point to packaging as the problem. However, the
+        // constant we're failing to resolve might _not_ be a full
+        // package: for example, if we mention `A::B` and there are
+        // two packages `A::B::Y` and `A::B::Z`, then our autocorrect
+        // might suggest both as a possibility. Consequently, the
+        // error message here is supposed to reference packaging but
+        // _not_ reference the specific packages that we might be
+        // missing, because that could be misleading.
+        //
+        // going from an UnresolvedConstantLit to the full
+        // (with-scope) string is actually kinda annoying, so we're
+        // using the `loc` to get the original chunk of the file that
+        // includes the whole constant with scope
+        if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
+            e.setHeader("No import provides `{}`", *fullConstant);
+        }
+
         return true;
     }
 
@@ -303,6 +328,23 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         if (!missingExports.empty()) {
             for (auto match : missingExports) {
                 pkgCtx.addMissingExportSuggestions(e, match);
+            }
+
+            if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
+                if (missingExports.size() == 1) {
+                    // if we have a single unambiguous export
+                    // suggestion, then we can use that information to
+                    // make the error message reference the exact
+                    // package we believe the constant came from
+                    auto missingExport = missingExports.front();
+                    auto pkgName = ctx.state.packageDB().getPackageInfo(missingExport.srcPkg).show(ctx);
+                    e.setHeader("Package `{}` does not export `{}`", pkgName, *fullConstant);
+                } else {
+                    // otherwise we should be explicit that it's
+                    // probably an export problem but be a bit cagey
+                    // about WHAT export problem it is
+                    e.setHeader("`{}` is not a public constant", *fullConstant);
+                }
             }
             return true;
         }

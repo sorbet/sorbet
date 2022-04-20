@@ -1,4 +1,4 @@
-main_lib/lib.rb:8: Unable to resolve constant `TestOnly` https://srb.help/5002
+main_lib/lib.rb:8: No import provides `Project::TestOnly` https://srb.help/5002
      8 |  Project::TestOnly::SomeHelper.new
           ^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
