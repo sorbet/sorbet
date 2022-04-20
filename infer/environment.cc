@@ -1488,6 +1488,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
                 e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
                             "members?)");
+                e.addErrorNote(
+                    "Historically, users seeing this error has represented finding a bug in Sorbet\n"
+                    "    (or at least finding a test case for which there could be a better error message).\n"
+                    "    Consider searching for similar bugs at https://github.com/sorbet/sorbet/issues\n"
+                    "    or reporting a new one.");
             }
             tp.type = core::Types::untypedUntracked();
         }

@@ -37,6 +37,26 @@ This page contains tips and tricks for common errors from `srb`.
 
 Sorbet has crashed. Please [report an issue]!
 
+## 1003
+
+Sorbet has an internal limitation on how deep a chain of class aliases can be:
+
+```ruby
+A1 = Integer
+A2 = A1
+# ...
+A42 = A41
+A43 = A42 # error: Too many alias expansions
+```
+
+It's meant to guard against cases where Sorbet might get stuck in an infinite
+loop attempting to dealias these class aliases.
+
+If you encounter this bug in the wild (i.e., not just for a contrived example,
+but a real-world use case), please share with the Sorbet team. We'd like to see
+what mode of use triggered this behavior, and either add a test to Sorbet or
+tweak how Sorbet works to support the use case.
+
 ## 1004
 
 Sorbet couldn't find a file.
@@ -551,7 +571,7 @@ with a `T.let`.
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
-See also: [6002](#6002), [7017](#7017).
+See also: [6002](#6002), [7017](#7017), [7027](#7027).
 
 ## 5034
 
@@ -962,7 +982,7 @@ variables are annotated with a `T.let`.
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
-See also: [5028](#5028), [7017](#7017).
+See also: [5028](#5028), [7017](#7017), [7028](#7028).
 
 # 6004
 
@@ -1314,7 +1334,7 @@ in the signature and the default value provided in the method.
 In this case, the signature states that `category` type is a `Category`, yet we
 try to use `nil` as default value:
 
-```rb
+```ruby
 sig { params(name: String, category: Category).void }
 def publish_item(name, category = nil) # error: Argument does not have asserted type `Category`
   # ...
@@ -1324,7 +1344,7 @@ end
 If `category` value is `nil` by default, maybe we should make it so its type is
 nilable:
 
-```rb
+```ruby
 sig { params(name: String, category: T.nilable(Category)).void }
 def publish_item(name, category = nil)
   # ...
@@ -1336,7 +1356,7 @@ end
 This error occurs when a value is used in place of a type. There are many
 different situations where this can happen; one example is given below:
 
-```
+```ruby
 class Box
   extend T::Generic
 
@@ -1346,11 +1366,78 @@ end
 Box[true].new # error: Unexpected bare `TrueClass` value found in type position
 ```
 
-To fix this error, replace the `true` value with the type `TrueClass`:
+More generally, Sorbet draws a distinction between places in a program where
+Ruby values are allowed, and places where Sorbet type syntax allowed. For
+example:
+
+```ruby
+# ----- Arbitrary type syntax allowed -----
+T.let(0, T.any(Integer, String))
+#        ^^^^^^^
+sig {returns(T.any(Integer, String))}
+#            ^^^^^^^
+T::Array[T.any(Integer, String)].new
+#        ^^^^^^^
+
+
+# ----- Arbitrary type syntax NOT allowed -----
+
+case 0
+when T.any(Integer, String)
+#    ^^^^^^^^^^^^^^^^^^^^^^
+end
+
+x.is_a?(T.any(Integer, String))
+#       ^^^^^^^^^^^^^^^^^^^^^^
+```
+
+Only valid Sorbet types are allowed in type positions. Arbitrary Sorbet types
+are not allowed in most places where Ruby expects a normal value.
+
+> **Note**: Historically this error message has been one of the more confusing
+> Sorbet errors, and over time we have added special cases to detect common
+> points of confusion. If you're reading this because you found the error
+> message confusing, please consider sharing your example with the Sorbet team
+> so we can further improve the error message.
+
+## 7010
+
+Sorbet found a reference to a generic type with the wrong number of type
+arguments.
+
+Here we defined `MyMap` as a generic class expecting two type parameters
+`KeyType` and `ValueType` but we try to instantiate it with only one type
+argument:
 
 ```rb
-Box[TrueClass].new
+class MyMap
+  extend T::Generic
+
+  KeyType = type_member
+  ValueType = type_member
+
+  # ...
+end
+
+MyMap[String].new # error: Wrong number of type parameters for `MyMap`. Expected: `2`, got: `1`
 ```
+
+Unless a type member was `fixed`, it is always required to pass the correct
+amount of type arguments. `T.untyped` can also be used if the type is not
+relevant at this point:
+
+```rb
+MyMap[String, Integer].new
+MyMap[String, String].new
+MyMap[String, T.untyped].new
+```
+
+## 7011
+
+Historically, users seeing this error has represented finding a bug in Sorbet
+(or at least finding a test case for which there could be a better error
+message). Consider searching for similar bugs at
+<https://github.com/sorbet/sorbet/issues> or reporting a new one.
 
 ## 7013
 
@@ -1386,38 +1473,6 @@ FOO = 42 # error: Expected `String("Hello, world!")` but found `Integer(42)` for
 FOO = "Hello, world!"
 ```
 
-## 7010
-
-Sorbet found a reference to a generic type with the wrong number of type
-arguments.
-
-Here we defined `MyMap` as a generic class expecting two type parameters
-`KeyType` and `ValueType` but we try to instantiate it with only one type
-argument:
-
-```rb
-class MyMap
-  extend T::Generic
-
-  KeyType = type_member
-  ValueType = type_member
-
-  # ...
-end
-
-MyMap[String].new # error: Wrong number of type parameters for `MyMap`. Expected: `2`, got: `1`
-```
-
-Unless a type member was `fixed`, it is always required to pass the correct
-amount of type arguments. `T.untyped` can also be used if the type is not
-relevant at this point:
-
-```rb
-MyMap[String, Integer].new
-MyMap[String, String].new
-MyMap[String, T.untyped].new
-```
-
 ## 7014
 
 Sorbet has a special method called `T.reveal_type` which can be useful for
@@ -1440,6 +1495,35 @@ For more information, see [Troubleshooting](troubleshooting.md).
 > Looking for how to assert that an expression has a certain type? Check out
 > [Type Assertions](type-assertions.md).
 
+## 7015
+
+Certain forms of `T.let`, `T.cast`, and `T.must` calls are redundant. Follow the
+suggestion in the error message to fix—these errors should have an autocorrect
+you can apply to automatically fix the error.
+
+## 7016
+
+Sorbet has special handling for certain methods in the standard library, like
+`Array#flatten`. This method takes an optional `depth` argument, and will only
+flatten nested arrays that deep if passed:
+
+```ruby
+[[[[1]]]].flatten(2)
+
+# ERROR
+depth = T.let(2, Integer)
+[[[[1]]]].flatten(depth)
+```
+
+Unfortunately, Sorbet can only perform this analysis when the depth is static.
+If Sorbet cannot see the exact value of the depth and instead only sees a type
+of `Integer` for the depth argument, it reports an error.
+
+Either:
+
+1.  Refactor the code so that Sorbet can see the exact depth value, or
+2.  Use `T.unsafe` to hide the method call from Sorbet.
+
 ## 7017
 
 In typed: strict files, Sorbet requires that all methods are annotated with a
@@ -1456,7 +1540,7 @@ constant and method definitions)!
 
 For how to fix, see [Method Signatures](sigs.md).
 
-See also: [5028](#5028), [6002](#6002).
+See also: [5028](#5028), [6002](#6002), [7028](#7028).
 
 ## 7018
 
@@ -1510,6 +1594,15 @@ T.unsafe(self).foo(xs)
 # ---------------------------------------------
 ```
 
+## 7020
+
+Note that method-level generics (i.e., those declared by using `type_parameters`
+inside a `sig`) are a somewhat unstable feature. If you encounter this error and
+believe it to represent a bug in Sorbet, first check the
+[Sorbet bug tracker](https://github.com/sorbet/sorbet/issues) to see if a
+similar-looking error has already been reported. If no such bug exists, feel
+free to open an issue.
+
 ## 7021
 
 The method called declares a block parameter that is not `T.nilable`, but a
@@ -1519,6 +1612,17 @@ This can be fixed by either passing a block to the method, or changing the
 method's signature for the block parameter from `T.proc...` to
 `T.nilable(T.proc...)` (and then changing the method to deal with a nilable
 block parameter).
+
+## 7022
+
+When run with the `--suggest-typed` command line argument, Sorbet will suggest
+upgrading or downgrading `# typed:` sigils in all files in the project to the
+highest level possible that would still have no errors. If the project starts
+off with no errors initially, this should have the effect of only upgrading
+sigils.
+
+Accept the provided autocorrect suggestion to commit the upgrades (using the
+`--autocorrect` flag).
 
 ## 7023
 
@@ -1584,6 +1688,16 @@ did not cover all the cases.
 
 See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
+## 7027
+
+In `# typed: strict` files, Sorbet requires that all constants are annotated
+with a `T.let`.
+
+For how to fix, see [Type Annotations](type-annotations.md), or accept the
+autocorrect suggestion associated with this error.
+
+See also: [5028](#5028), [6002](#6002), [7017](#7017).
+
 ## 7030
 
 This error is consistently used when the user is trying (implicitly or
@@ -1592,7 +1706,7 @@ which would actually return a Sorbet-runtime representation of a type.
 
 This error generally occurs when generic types are used in pattern matching:
 
-```rb
+```ruby
 def get_value(input)
   case input
   when Integer
@@ -1607,7 +1721,7 @@ Since generic types are erased at runtime, this construct would never work when
 the program executed. Replace the generic type `T::Array[Integer]` by the erased
 type `Array` so the runtime behavior is correct:
 
-```
+```ruby
 def get_value(input)
   case input
   when Integer
@@ -1617,6 +1731,98 @@ def get_value(input)
   end
 end
 ```
+
+## 7031
+
+Private methods in Ruby behave somewhat differently from private methods in
+other statically typed languages. You may want to read more about
+[method visibility in Ruby](https://www.rubyguides.com/2018/10/method-visibility/)
+first. The tl;dr is that private methods can only be called when the receiver is
+**syntactically** `self` (or omitted):
+
+```ruby
+class Parent
+  private def foo; end
+
+  def in_parent
+    foo      # OK
+    self.foo # OK
+  end
+end
+
+class Child < Parent
+  def in_child
+    foo      # OK
+    self.foo # OK
+  end
+end
+
+Parent.new.foo # error!
+Child.new.foo  # error!
+```
+
+This makes private methods in Ruby behave more like protected methods in other
+object-oriented languages.
+
+To fix this error, either:
+
+1.  Avoid calling the private method entirely, or
+2.  Update the method definition to not be private, or
+
+> **Note**: It's not possible to silence this error using `T.unsafe`. Wrapping
+> the receiver in `T.unsafe` will in fact hide the method call from Sorbet
+> statically, but because method visibility is checked **syntactically**, even
+> using `T.unsafe(self).foo` will cause a call to a private method `foo` to be
+> rejected by the Ruby VM at runtime.
+>
+> If you must call a private method and also silence any type errors from
+> calling it, you must use `self.send(:foo)` instead.
+
+## 7032
+
+When passing type arguments to generic classes, to use [shape types](shapes.md),
+use curly brackets around the keys and values of the shape type:
+
+```ruby
+# CORRECT
+T::Array[{key: Integer}].new
+
+# BAD
+T::Array[key: Integer].new
+```
+
+## 7033
+
+**Note**: this error is only reported when Sorbet is passed the
+`--ruby3-keyword-args` command line flag. For further information about Ruby 3
+and keyword args, see the
+[official blog post](https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyword-arguments-in-ruby-3-0/).
+
+```ruby
+# typed: true
+extend T::Sig
+
+sig {params(x: Integer, y:Integer).void}
+def takes_kwargs(x, y:)
+end
+
+arghash = {y: 42}
+
+# GOOD EXAMPLE
+takes_kwargs(99, **arghash)
+
+# BAD EXAMPLE
+takes_kwargs(99, arghash)
+#                ^^^^^^^ error: Keyword argument hash without `**`
+```
+
+[→ View on sorbet.run](https://sorbet.run/?arg=--ruby3-keyword-args#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Bparams%28x%3A%20Integer%2C%20y%3AInteger%29.void%7D%0Adef%20takes_kwargs%28x%2C%20y%3A%29%0Aend%0A%0Aarghash%20%3D%20%7By%3A%2042%7D%0Atakes_kwargs%2899%2C%20arghash%29)
+
+In Ruby 2.7 and earlier, Ruby allowed a positional `Hash` argument at the end of
+a method call's list of arguments to implicitly splat into the keyword
+parameters of the method. In Ruby 3.0 and later, a positional `Hash` argument is
+always treated as a positional argument. To avoid this error, prefix the `Hash`
+argument with `**`, explicitly requesting to treat it as keyword arguments.
 
 ## 7034
 
@@ -1637,6 +1843,55 @@ def foo(x, y)
   puts y&.to_s  # no error: y may be nil
 end
 ```
+
+## 7035
+
+Sorbet can sometimes detect when a method is passed a block despite not
+accepting a block.
+
+```ruby
+# typed: strict
+extend T::Sig
+
+sig {void}
+def takes_no_block; end
+
+# BAD EXAMPLE
+takes_no_block {} # error: does not take a block
+```
+
+Why only sometimes? Technically all methods in Ruby are allowed to accept
+blocks. (Unlike positional arguments, if a method does not declare that it
+accepts a block argument but a caller passes one anyways the Ruby VM does not
+raise an exception.)
+
+For historical reasons, Sorbet did not require that a `sig` mention the `blk`
+parameter if its method used `yield` from the beginning of Sorbet adoption. It
+later required this, but for reasons of backwards compatibility, it's only
+checked in `# typed: strict` or higher files.
+
+Therefore, error 7035 is somewhat special in that it can be reported in
+`# typed: true` files, but **only** if the method being passed a block is itself
+defined in a `# typed: strict` file.
+
+Regardless, to fix this error, either:
+
+1.  Remove the block from this call site (using the autocorrect), or
+2.  Update the called method's definition to mention block argument, or
+3.  Drop the strictness level of file containing the called method's definition
+    to `# typed: true` or lower (**only** as a **last resort**).
+
+## 7036
+
+Sorbet supports declaring package-private methods. These methods can only be
+called from within the package where they are declared
+
+To fix this error, either remove the `package_private` (or
+`package_private_class_method`) annotation from the method definition, or
+rewrite the code in question to not call the private method.
+
+As a **last** resort, you can use `T.unsafe` to hide the method call from
+Sorbet, silencing the error.
 
 ## 7037
 
