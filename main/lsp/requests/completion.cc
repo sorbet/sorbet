@@ -205,9 +205,7 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
 SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                                        string_view prefix) {
-    if (dispatchResult.main.receiver.isUntyped()) {
-        return SimilarMethodsByName{};
-    }
+    ENFORCE(!dispatchResult.main.receiver.isUntyped())
 
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
@@ -899,6 +897,8 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
 
 vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                                              bool isPrivateOk, string_view prefix) {
+    ENFORCE(!dispatchResult.main.receiver.isUntyped());
+
     vector<SimilarMethod> dedupedSimilarMethods;
 
     Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
@@ -1097,10 +1097,15 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     // ----- methods -----
 
     vector<SimilarMethod> dedupedSimilarMethods;
+    bool receiverIsUntyped = false;
 
     if (params.forMethods != nullopt) {
         auto &forMethods = params.forMethods.value();
-        dedupedSimilarMethods = computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
+        if (forMethods.dispatchResult->main.receiver.isUntyped()) {
+            receiverIsUntyped = true;
+        } else {
+            dedupedSimilarMethods = computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
+        }
     }
 
     // ----- final sort -----
