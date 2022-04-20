@@ -2215,16 +2215,14 @@ class ResolveTypeMembersAndFieldsWalk {
             if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
                 auto errLoc = lowerBoundTypeLoc.exists() ? lowerBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                    e.setHeader("The `{}` type bound `{}` is lower than the `{}` type bound of `{}` for {} `{}`",
-                                data->flags.isFixed ? "fixed:" : "lower:", memberType->lowerBound.show(ctx),
-                                parentData->flags.isFixed ? "fixed:" : "lower:", parentType->lowerBound.show(ctx),
+                    e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
+                                "for {} `{}`",
+                                data->flags.isFixed ? "fixed" : "lower", memberType->lowerBound.show(ctx),
+                                parentData->flags.isFixed ? "equivalent to" : "a supertype of",
+                                parentData->flags.isFixed ? "fixed" : "lower", parentType->lowerBound.show(ctx),
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
-                    if (parentData->flags.isFixed) {
-                        e.addErrorNote("Because `{}` specified `{}`, `{}` must specify an equivalent type",
-                                       parentMember.show(ctx), "fixed:", lhs.show(ctx));
-                    }
                     if (lowerBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->lowerBound;
@@ -2235,16 +2233,14 @@ class ResolveTypeMembersAndFieldsWalk {
             if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
                 auto errLoc = upperBoundTypeLoc.exists() ? upperBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                    e.setHeader("The `{}` type bound `{}` is higher than the `{}` type bound of `{}` for {} `{}`",
-                                data->flags.isFixed ? "fixed:" : "upper:", memberType->upperBound.show(ctx),
-                                parentData->flags.isFixed ? "fixed:" : "upper:", parentType->upperBound.show(ctx),
+                    e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
+                                "for {} `{}`",
+                                data->flags.isFixed ? "fixed" : "upper", memberType->upperBound.show(ctx),
+                                parentData->flags.isFixed ? "equivalent to" : "a subtype of",
+                                parentData->flags.isFixed ? "fixed" : "upper", parentType->upperBound.show(ctx),
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
-                    if (parentData->flags.isFixed) {
-                        e.addErrorNote("Because `{}` specified `{}`, `{}` must specify an equivalent type",
-                                       parentMember.show(ctx), "fixed:", lhs.show(ctx));
-                    }
                     if (upperBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->upperBound;
@@ -2258,9 +2254,8 @@ class ResolveTypeMembersAndFieldsWalk {
         // This will be a no-op in the case that the type member is fixed.
         if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
             if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
-                e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`",
-                            "lower:", memberType->lowerBound.show(ctx), "upper:", memberType->upperBound.show(ctx),
-                            lhs.show(ctx));
+                e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`", "lower",
+                            memberType->lowerBound.show(ctx), "upper", memberType->upperBound.show(ctx), lhs.show(ctx));
             }
         }
 
