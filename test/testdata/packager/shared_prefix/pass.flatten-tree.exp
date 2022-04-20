@@ -1,0 +1,213 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Foo::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Foo::Foo)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Foo::Foo<<C Foo>> < (::<todo sym>)
+    def initialize(value, <blk>)
+      @value = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
+        T.let(value, Integer)
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :initialize) do ||
+          <self>.params(:value, ::Integer).void()
+        end
+        <self>.extend(::T::Sig)
+        ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Foo<<C Foo>> < (::PackageSpec)
+    def self.<static-init>(<blk>)
+      begin
+        <self>.import(::Project::Bar)
+        <self>.export(::Project::Foo::Foo)
+        <self>.export(Unresolved: ::Project::Foo::<C CallsBar>)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Bar::That)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Bar::That)
+        ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Bar::That<<C That>> < (::PackageSpec)
+    def self.<static-init>(<blk>)
+      <self>.export(::Project::Bar::That::Thing)
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Bar::This)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Bar::This)
+        ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Bar::This<<C This>> < (::PackageSpec)
+    def self.<static-init>(<blk>)
+      <self>.export(::Project::Bar::This::Thing)
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Bar::This)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Bar::This)
+        ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Bar::This<<C This>> < (::PackageSpec)
+    def self.<static-init>(<blk>)
+      <self>.export(::Project::Bar::This::Thing)
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Bar::That)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Bar::That)
+        <emptyTree>
+      end
+    end
+  end
+  module ::Project::Bar::That<<C That>> < ()
+    def self.<static-init>(<blk>)
+      ::Project::Bar::That::Thing = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::Symbol)
+        T.let(:yeah, Symbol)
+      end
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Bar::This)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Bar::This)
+        <emptyTree>
+      end
+    end
+  end
+  module ::Project::Bar::This<<C This>> < ()
+    def self.<static-init>(<blk>)
+      ::Project::Bar::This::Thing = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::Symbol)
+        T.let(:hey, Symbol)
+      end
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Bar::This)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Bar::This)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Bar::This<<C This>> < (::<todo sym>)
+    def self.<static-init>(<blk>)
+      ::Project::Bar::This::Thing = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::Symbol)
+        T.let(:hey, Symbol)
+      end
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Foo::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Foo::Foo)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Foo::Foo<<C Foo>> < (::<todo sym>)
+    def self.<static-init>(<blk>)
+      <self>.puts(::Project::Bar::This)
+    end
+  end
+  <emptyTree>
+end
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::Project::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::Project::Foo)
+        ::Sorbet::Private::Static.keep_for_ide(::PackageSpec)
+        <emptyTree>
+      end
+    end
+  end
+  class ::Project::Foo<<C Foo>> < (::PackageSpec)
+    def self.<static-init>(<blk>)
+      <emptyTree>
+    end
+  end
+  <emptyTree>
+end

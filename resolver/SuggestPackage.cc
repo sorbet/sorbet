@@ -322,8 +322,8 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
                     // make the error message reference the exact
                     // package we believe the constant came from
                     auto missingExport = missingExports.front();
-                    auto pkgName = ctx.state.packageDB().getPackageInfo(missingExport.srcPkg);
-                    e.setHeader("Package `{}` does not export `{}`", pkgName.show(ctx), *fullConstant);
+                    auto pkgName = ctx.state.packageDB().getPackageInfo(missingExport.srcPkg).show(ctx);
+                    e.setHeader("Package `{}` does not export `{}`", pkgName, *fullConstant);
                 } else {
                     // otherwise we should be explicit that it's
                     // probably an export problem but be a bit cagey
