@@ -203,11 +203,9 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
 }
 
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
-SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
+SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                                        string_view prefix) {
-    if (dispatchResult.main.receiver.isUntyped()) {
-        return SimilarMethodsByName{};
-    }
+    ENFORCE(!dispatchResult.main.receiver.isUntyped())
 
     auto result = similarMethodsForReceiver(gs, dispatchResult.main.receiver, prefix);
 
@@ -897,10 +895,81 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
+vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
+                                            bool isPrivateOk, string_view prefix) {
+    ENFORCE(!dispatchResult.main.receiver.isUntyped());
+
+    vector<SimilarMethod> dedupedSimilarMethods;
+
+    Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
+    SimilarMethodsByName similarMethodsByName = allSimilarMethods(gs, dispatchResult, prefix);
+    for (auto &[methodName, similarMethods] : similarMethodsByName) {
+        fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+            if (left.depth != right.depth) {
+                return left.depth < right.depth;
+            }
+
+            return left.method.id() < right.method.id();
+        });
+    }
+
+    for (auto &[methodName, similarMethods] : similarMethodsByName) {
+        if (methodName.kind() == core::NameKind::UNIQUE &&
+            methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
+            // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+            // unique names, because we want each overload to show up but those use unique names.
+            continue;
+        }
+
+        // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+        auto similarMethod = similarMethods[0];
+
+        if (similarMethod.method.data(gs)->flags.isPrivate && !isPrivateOk) {
+            continue;
+        }
+
+        dedupedSimilarMethods.emplace_back(similarMethod);
+    }
+
+    fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
+        if (left.depth != right.depth) {
+            return left.depth < right.depth;
+        }
+
+        auto leftShortName = left.method.data(gs)->name.shortName(gs);
+        auto rightShortName = right.method.data(gs)->name.shortName(gs);
+        if (leftShortName != rightShortName) {
+            if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
+                return true;
+            }
+            if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
+                return false;
+            }
+
+            return leftShortName < rightShortName;
+        }
+
+        return left.method.id() < right.method.id();
+    });
+
+    return dedupedSimilarMethods;
+}
+
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
+
+unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntypedReceiver(const core::GlobalState &gs,
+                                                                               core::Loc queryLoc, size_t sortIdx) {
+    string label("(call site is T.untyped)");
+    auto item = make_unique<CompletionItem>(label);
+    item->sortText = formatSortIndex(sortIdx);
+    item->kind = CompletionItemKind::Method;
+    item->insertTextFormat = InsertTextFormat::PlainText;
+    item->textEdit = make_unique<TextEdit>(Range::fromLoc(gs, queryLoc.copyWithZeroLength()), "");
+    return item;
+}
 
 unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerInterface &typechecker, core::DispatchResult &dispatchResult,
@@ -1037,63 +1106,16 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     // ----- methods -----
 
     vector<SimilarMethod> dedupedSimilarMethods;
+    bool receiverIsUntyped = false;
 
-    {
-        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
-        SimilarMethodsByName similarMethodsByName;
-        if (params.forMethods != nullopt) {
-            similarMethodsByName = allSimilarMethods(gs, *params.forMethods->dispatchResult, params.prefix);
-            for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
-                    if (left.depth != right.depth) {
-                        return left.depth < right.depth;
-                    }
-
-                    return left.method.id() < right.method.id();
-                });
-            }
+    if (params.forMethods != nullopt) {
+        auto &forMethods = params.forMethods.value();
+        if (forMethods.dispatchResult->main.receiver.isUntyped()) {
+            receiverIsUntyped = true;
+        } else {
+            dedupedSimilarMethods =
+                computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
         }
-
-        for (auto &[methodName, similarMethods] : similarMethodsByName) {
-            if (methodName.kind() == core::NameKind::UNIQUE &&
-                methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
-                // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
-                // unique names, because we want each overload to show up but those use unique names.
-                continue;
-            }
-
-            // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-            auto similarMethod = similarMethods[0];
-
-            if (similarMethod.method.data(gs)->flags.isPrivate && !params.forMethods->isPrivateOk) {
-                continue;
-            }
-
-            dedupedSimilarMethods.emplace_back(similarMethod);
-        }
-
-        fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
-            if (left.depth != right.depth) {
-                return left.depth < right.depth;
-            }
-
-            auto leftShortName = left.method.data(gs)->name.shortName(gs);
-            auto rightShortName = right.method.data(gs)->name.shortName(gs);
-            if (leftShortName != rightShortName) {
-                if (absl::StartsWith(leftShortName, params.prefix) &&
-                    !absl::StartsWith(rightShortName, params.prefix)) {
-                    return true;
-                }
-                if (!absl::StartsWith(leftShortName, params.prefix) &&
-                    absl::StartsWith(rightShortName, params.prefix)) {
-                    return false;
-                }
-
-                return leftShortName < rightShortName;
-            }
-
-            return left.method.id() < right.method.id();
-        });
     }
 
     // ----- final sort -----
@@ -1117,19 +1139,23 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     }
     {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".method_items");
-        for (auto &similarMethod : dedupedSimilarMethods) {
-            // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
-            // completion request, those constraints are the result of solving the current method. These new methods
-            // we're about to suggest are their own methods with their own type variables, so it doesn't make sense to
-            // use the old constraint for the new methods.
-            //
-            // What this means in practice is that the prettified `sig` in the completion documentation will show
-            // `T.type_parameter(:U)` instead of a solved type.
-            auto constr = nullptr;
+        if (receiverIsUntyped) {
+            items.push_back(getCompletionItemForUntypedReceiver(gs, params.queryLoc, items.size()));
+        } else {
+            for (auto &similarMethod : dedupedSimilarMethods) {
+                // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
+                // completion request, those constraints are the result of solving the current method. These new methods
+                // we're about to suggest are their own methods with their own type variables, so it doesn't make sense
+                // to use the old constraint for the new methods.
+                //
+                // What this means in practice is that the prettified `sig` in the completion documentation will show
+                // `T.type_parameter(:U)` instead of a solved type.
+                auto constr = nullptr;
 
-            items.push_back(getCompletionItemForMethod(
-                typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
-                constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+                items.push_back(getCompletionItemForMethod(
+                    typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
+                    constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+            }
         }
     }
 
