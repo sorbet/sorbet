@@ -221,7 +221,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             {
                 absl::MutexLock lck(taskQueue->getMutex());
                 Timer timeit(logger, "idle");
-                taskQueue->getMutex()->Await(absl::Condition(taskQueue.get(), &TaskQueue::ready));
+                taskQueue->waitReady(indexer);
                 ENFORCE(!taskQueue->isPaused());
                 if (taskQueue->isTerminated()) {
                     if (taskQueue->getErrorCode() != 0) {
@@ -231,6 +231,26 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     } else if (taskQueue->tasks().empty()) {
                         // Normal termination. Wait until all pending requests finish.
                         break;
+                    }
+                }
+
+                {
+                    // Find the first task that the indexer is able to handle
+                    bool frontOfQueue = true;
+                    auto it =
+                        absl::c_find_if(taskQueue->tasks(), [&frontOfQueue, &indexer = this->indexer](auto &task) {
+                            bool canHandle = indexer.canHandleTask(frontOfQueue, *task);
+                            frontOfQueue = false;
+                            return canHandle;
+                        });
+
+                    // taskQueue->waitReady ensures that there is a task to run if the queue isn't terminated.
+                    ENFORCE(it != taskQueue->tasks().end());
+
+                    if (it != taskQueue->tasks().begin()) {
+                        auto task = std::move(*it);
+                        taskQueue->tasks().erase(it);
+                        taskQueue->tasks().emplace_front(std::move(task));
                     }
                 }
 

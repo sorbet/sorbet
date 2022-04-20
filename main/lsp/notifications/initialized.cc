@@ -11,21 +11,15 @@ InitializedTask::InitializedTask(LSPConfiguration &config)
 
 void InitializedTask::preprocess(LSPPreprocessor &preprocessor) {
     mutableConfig.markInitialized();
-    this->preprocessor = &preprocessor;
 }
 
 void InitializedTask::index(LSPIndexer &indexer) {
-    // We need to pause during indexing so that nothing else will try to give work to the index thread while its state
-    // is being initialized in the typechecker.
-    preprocessor->pause();
-
     indexer.transferInitializeState(*this);
 }
 
 void InitializedTask::run(LSPTypecheckerInterface &typechecker) {
     ENFORCE(this->gs != nullptr);
     typechecker.initialize(*this, std::move(this->gs), std::move(this->kvstore));
-    typechecker.resumeTaskQueue(*this);
 }
 
 bool InitializedTask::needsMultithreading(const LSPIndexer &indexer) const {
