@@ -3,13 +3,13 @@
 class AnImportantClass
   def important_method(important_parameter)
     important
-           # ^ completion: (nothing)
+           # ^ completion: (file is not typed)
   end
 end
 
 An # error: Unable to resolve constant
-# ^ completion: (nothing)
+# ^ completion: (file is not typed)
 
 AnImportantClass.n
-#                 ^ completion: (nothing)
+#                 ^ completion: (file is not typed)
 
