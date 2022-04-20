@@ -25,9 +25,11 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
     auto &queryResponses = result.responses;
     vector<unique_ptr<Location>> locations;
     bool notifyAboutUntypedFile = false;
+    core::FileRef fref;
     if (!queryResponses.empty()) {
+        fref = config.uri2FileRef(gs, params->textDocument->uri);
         const bool fileIsTyped =
-            config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
+            fref.data(gs).strictLevel >= core::StrictLevel::True;
         auto resp = move(queryResponses[0]);
 
         // Only support go-to-definition on constants and fields in untyped files.
