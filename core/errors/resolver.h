@@ -32,7 +32,7 @@ constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::False};
 
 // This is for type signatures that we permit at False but ban in True code
 constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::True};
-constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
+// constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
 constexpr ErrorClass RecursiveClassAlias{5030, StrictLevel::False};
 constexpr ErrorClass ConstantInTypeAlias{5031, StrictLevel::False};
 constexpr ErrorClass IncludesNonModule{5032, StrictLevel::False};
