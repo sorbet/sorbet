@@ -278,6 +278,12 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         return pkgCtx.tryPackageSpecCorrections(e, unresolved);
     }
 
+    // Something we do down below is use `setHeader` to _replace_ the
+    // original error message _if_ we find that the error appears to
+    // be explicitly package-related. We only do this if we have
+    // suggestions for how to fix it---otherwise, we leave the
+    // original "failed to resolve" error intact.
+
     vector<PackageMatch> missingImports;
     if (auto unresScope = ast::cast_tree<ast::ConstantLit>(unresolved.scope)) {
         missingImports = pkgCtx.findPossibleMissingImports({unresScope->symbol}, unresolved.cnst);
