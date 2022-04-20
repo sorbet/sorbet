@@ -896,7 +896,7 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
 }
 
 vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
-                                             bool isPrivateOk, string_view prefix) {
+                                            bool isPrivateOk, string_view prefix) {
     ENFORCE(!dispatchResult.main.receiver.isUntyped());
 
     vector<SimilarMethod> dedupedSimilarMethods;
@@ -939,12 +939,10 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
         auto leftShortName = left.method.data(gs)->name.shortName(gs);
         auto rightShortName = right.method.data(gs)->name.shortName(gs);
         if (leftShortName != rightShortName) {
-            if (absl::StartsWith(leftShortName, prefix) &&
-                !absl::StartsWith(rightShortName, prefix)) {
+            if (absl::StartsWith(leftShortName, prefix) && !absl::StartsWith(rightShortName, prefix)) {
                 return true;
             }
-            if (!absl::StartsWith(leftShortName, prefix) &&
-                absl::StartsWith(rightShortName, prefix)) {
+            if (!absl::StartsWith(leftShortName, prefix) && absl::StartsWith(rightShortName, prefix)) {
                 return false;
             }
 
@@ -962,8 +960,8 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
-unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForUntypedReceiver(const core::GlobalState &gs, core::Loc queryLoc, size_t sortIdx) {
+unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntypedReceiver(const core::GlobalState &gs,
+                                                                               core::Loc queryLoc, size_t sortIdx) {
     string label("(call site is T.untyped)");
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);
@@ -1115,7 +1113,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         if (forMethods.dispatchResult->main.receiver.isUntyped()) {
             receiverIsUntyped = true;
         } else {
-            dedupedSimilarMethods = computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
+            dedupedSimilarMethods =
+                computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
         }
     }
 
@@ -1146,8 +1145,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             for (auto &similarMethod : dedupedSimilarMethods) {
                 // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
                 // completion request, those constraints are the result of solving the current method. These new methods
-                // we're about to suggest are their own methods with their own type variables, so it doesn't make sense to
-                // use the old constraint for the new methods.
+                // we're about to suggest are their own methods with their own type variables, so it doesn't make sense
+                // to use the old constraint for the new methods.
                 //
                 // What this means in practice is that the prettified `sig` in the completion documentation will show
                 // `T.type_parameter(:U)` instead of a solved type.
