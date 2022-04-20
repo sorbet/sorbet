@@ -294,10 +294,13 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
 
         // going from an UnresolvedConstantLit to the full
         // (with-scope) string is actually kinda annoying, so we're
-        // using the `loc` to get the original chunk of the file.
+        // using the `loc` to get the original chunk of the file that
+        // includes the whole constant with scope
         if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
+            // TODO (document me)
             e.setHeader("No import provides `{}`", *fullConstant);
         }
+
         return true;
     }
 
@@ -313,7 +316,20 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
             }
 
             if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
-                e.setHeader("`{}` is not exported by its package", *fullConstant);
+                if (missingExports.size() == 1) {
+                    // if we have a single unambiguous export
+                    // suggestion, then we can use that information to
+                    // make the error message reference the exact
+                    // package we believe the constant came from
+                    auto missingExport = missingExports.front();
+                    e.setHeader("Package `{}` does not export `{}`",
+                                ctx.state.packageDB().getPackageInfo(missingExport.srcPkg).show(ctx), *fullConstant);
+                } else {
+                    // otherwise we should be explicit that it's
+                    // probably an export problem but be a bit cagey
+                    // about WHAT export problem it is
+                    e.setHeader("`{}` is not a public constant", *fullConstant);
+                }
             }
             return true;
         }

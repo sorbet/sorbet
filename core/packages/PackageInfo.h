@@ -33,6 +33,7 @@ public:
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
+    std::string show(const core::GlobalState &gs) const;
 
     virtual std::optional<ImportType> importsPackage(const PackageInfo &other) const = 0;
 

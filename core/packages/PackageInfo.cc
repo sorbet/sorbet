@@ -1,4 +1,5 @@
 #include "core/packages/PackageInfo.h"
+#include "absl/strings/str_join.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
@@ -61,6 +62,11 @@ ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInf
     }
 
     return res;
+}
+
+string PackageInfo::show(const core::GlobalState &gs) const {
+    return absl::StrJoin(fullName(),
+                         "::", [&](string *out, core::NameRef name) { absl::StrAppend(out, name.show(gs)); });
 }
 
 } // namespace sorbet::core::packages
