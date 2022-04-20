@@ -1523,17 +1523,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             tp = cur;
                         }
                         break;
-                    case cfg::CFG::MIN_LOOP_GLOBAL:
-                        if (!asGoodAs) {
-                            if (auto e =
-                                    ctx.beginError(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch)) {
-                                e.setHeader(
-                                    "Reassigning global with a value of wrong type: `{}` is not a subtype of `{}`",
-                                    tp.type.show(ctx), cur.type.show(ctx));
-                            }
-                            tp = cur;
-                        }
-                        break;
                     case cfg::CFG::MIN_LOOP_LET:
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {

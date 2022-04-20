@@ -111,8 +111,6 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_insn<Alias>(global));
         if (global.isFieldOrStaticField()) {
             res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
-        } else {
-            res->minLoops[local.id()] = CFG::MIN_LOOP_GLOBAL;
         }
     }
     for (auto kv : discoveredUndeclaredFields) {
