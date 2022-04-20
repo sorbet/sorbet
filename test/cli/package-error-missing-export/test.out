@@ -1,4 +1,4 @@
-foo_class.rb:10: Unable to resolve constant `NotExported` https://srb.help/5002
+foo_class.rb:10: Package `Foo::Bar::OtherPackage` does not export `Foo::Bar::OtherPackage::NotExported` https://srb.help/5002
     10 |      Foo::Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -11,7 +11,7 @@ foo_class.rb:10: Unable to resolve constant `NotExported` https://srb.help/5002
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
+foo_class.rb:11: Package `Foo::Bar::OtherPackage` does not export `Bar::OtherPackage::NotExported` https://srb.help/5002
     11 |      Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -24,7 +24,7 @@ foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
+foo_class.rb:12: Package `Foo::Bar::OtherPackage` does not export `Foo::Bar::OtherPackage::Inner` https://srb.help/5002
     12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -37,7 +37,7 @@ foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:13: Unable to resolve constant `Inner` https://srb.help/5002
+foo_class.rb:13: Package `Foo::Bar::OtherPackage` does not export `Bar::OtherPackage::Inner` https://srb.help/5002
     13 |      Bar::OtherPackage::Inner::AlsoNotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect

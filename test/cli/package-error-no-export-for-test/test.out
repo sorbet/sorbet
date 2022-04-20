@@ -1,4 +1,4 @@
-foo_bar/thing.test.rb:5: Unable to resolve constant `Thing` https://srb.help/5002
+foo_bar/thing.test.rb:5: Package `Foo::Bar` does not export `Foo::Bar::Thing` https://srb.help/5002
      5 |    f = Foo::Bar::Thing.new
                 ^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -9,7 +9,7 @@ foo_bar/thing.test.rb:5: Unable to resolve constant `Thing` https://srb.help/500
      3 |class Foo::Bar::Exported
               ^^^^^^^^
 
-other/other.test.rb:5: Unable to resolve constant `Thing` https://srb.help/5002
+other/other.test.rb:5: Package `Foo::Bar` does not export `Foo::Bar::Thing` https://srb.help/5002
      5 |    Foo::Bar::Thing
             ^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
