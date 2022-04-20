@@ -2,6 +2,8 @@
 #define SORBET_AST_FILES_H
 
 #include "core/CompiledLevel.h"
+#include "core/FileRef.h"
+#include "core/LocOffsets.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include <string>
@@ -9,57 +11,11 @@
 
 namespace sorbet::core {
 class GlobalState;
-class File;
 struct GlobalStateHash;
 struct FileHash;
 namespace serialize {
 class SerializerImpl;
 }
-
-class FileRef final {
-public:
-    FileRef() : _id(0){};
-    FileRef(unsigned int id);
-
-    FileRef(FileRef &f) = default;
-    FileRef(const FileRef &f) = default;
-    FileRef(FileRef &&f) = default;
-    FileRef &operator=(const FileRef &f) = default;
-    FileRef &operator=(FileRef &&f) = default;
-
-    bool operator==(const FileRef &rhs) const {
-        return _id == rhs._id;
-    }
-
-    bool operator!=(const FileRef &rhs) const {
-        return !(rhs == *this);
-    }
-
-    bool operator<(const FileRef &rhs) const {
-        return _id < rhs._id;
-    }
-
-    bool operator>(const FileRef &rhs) const {
-        return _id > rhs._id;
-    }
-
-    inline unsigned int id() const {
-        return _id;
-    }
-
-    inline bool exists() const {
-        return _id > 0;
-    }
-
-    const File &data(const GlobalState &gs) const;
-    File &data(GlobalState &gs) const;
-    const File &dataAllowingUnsafe(const GlobalState &gs) const;
-    File &dataAllowingUnsafe(GlobalState &gs) const;
-
-private:
-    uint32_t _id;
-};
-CheckSize(FileRef, 4, 4);
 
 class File final {
 public:
