@@ -963,6 +963,17 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem>
+CompletionTask::getCompletionItemForUntypedReceiver(const core::GlobalState &gs, core::Loc queryLoc, size_t sortIdx) {
+    string label("(call site is T.untyped)");
+    auto item = make_unique<CompletionItem>(label);
+    item->sortText = formatSortIndex(sortIdx);
+    item->kind = CompletionItemKind::Method;
+    item->insertTextFormat = InsertTextFormat::PlainText;
+    item->textEdit = make_unique<TextEdit>(Range::fromLoc(gs, queryLoc.copyWithZeroLength()), "");
+    return item;
+}
+
+unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerInterface &typechecker, core::DispatchResult &dispatchResult,
                                            core::MethodRef maybeAlias, const core::TypePtr &receiverType,
                                            const core::TypeConstraint *constraint, core::Loc queryLoc,
@@ -1129,19 +1140,23 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     }
     {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".method_items");
-        for (auto &similarMethod : dedupedSimilarMethods) {
-            // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
-            // completion request, those constraints are the result of solving the current method. These new methods
-            // we're about to suggest are their own methods with their own type variables, so it doesn't make sense to
-            // use the old constraint for the new methods.
-            //
-            // What this means in practice is that the prettified `sig` in the completion documentation will show
-            // `T.type_parameter(:U)` instead of a solved type.
-            auto constr = nullptr;
+        if (receiverIsUntyped) {
+            items.push_back(getCompletionItemForUntypedReceiver(gs, params.queryLoc, items.size()));
+        } else {
+            for (auto &similarMethod : dedupedSimilarMethods) {
+                // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
+                // completion request, those constraints are the result of solving the current method. These new methods
+                // we're about to suggest are their own methods with their own type variables, so it doesn't make sense to
+                // use the old constraint for the new methods.
+                //
+                // What this means in practice is that the prettified `sig` in the completion documentation will show
+                // `T.type_parameter(:U)` instead of a solved type.
+                auto constr = nullptr;
 
-            items.push_back(getCompletionItemForMethod(
-                typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
-                constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+                items.push_back(getCompletionItemForMethod(
+                    typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
+                    constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+            }
         }
     }
 
