@@ -18,14 +18,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
-# -- test/testdata/packager/shared_prefix/bar/that/__package.rb~ --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_That_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-      <self>.export(<emptyTree>::<C Project>::<C Bar>::<C This>::<C Thing>)
-    end
-  end
-end
 # -- test/testdata/packager/shared_prefix/bar/that/that.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_That_Package_Private$1><<C <todo sym>>> < ()
@@ -62,14 +54,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
-# -- test/testdata/packager/shared_prefix/bar/this/this.rb~ --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_This_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>::<C Thing> = <emptyTree>::<C T>.let(:hey, <emptyTree>::<C Symbol>)
-    end
-  end
-end
 # -- test/testdata/packager/shared_prefix/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
@@ -87,41 +71,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end
-# -- test/testdata/packager/shared_prefix/foo/__package.rb~ --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-      <self>.import(<emptyTree>::<C Project>::<C Bar>)
-
-      <self>.export(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
-
-      <self>.export(<emptyTree>::<C Project>::<C Foo>::<C CallsBar>)
-    end
-  end
-end
 # -- test/testdata/packager/shared_prefix/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1><<C <todo sym>>> < ()
     class <emptyTree>::<C Project>::<C Foo>::<C Foo><<C <todo sym>>> < (::<todo sym>)
       <self>.puts(<emptyTree>::<C Project>::<C Bar>::<C This>)
-    end
-  end
-end
-# -- test/testdata/packager/shared_prefix/foo/foo.rb~ --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Foo>::<C Foo><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.params(:value, <emptyTree>::<C Integer>).void()
-      end
-
-      def initialize<<todo method>>(value, &<blk>)
-        @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
   end
 end
