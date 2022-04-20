@@ -203,7 +203,7 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
 }
 
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.
-SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, core::DispatchResult &dispatchResult,
+SimilarMethodsByName allSimilarMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                                        string_view prefix) {
     if (dispatchResult.main.receiver.isUntyped()) {
         return SimilarMethodsByName{};
@@ -897,6 +897,66 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     return items;
 }
 
+vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
+                                             bool isPrivateOk, string_view prefix) {
+    vector<SimilarMethod> dedupedSimilarMethods;
+
+    Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
+    SimilarMethodsByName similarMethodsByName = allSimilarMethods(gs, dispatchResult, prefix);
+    for (auto &[methodName, similarMethods] : similarMethodsByName) {
+        fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
+            if (left.depth != right.depth) {
+                return left.depth < right.depth;
+            }
+
+            return left.method.id() < right.method.id();
+        });
+    }
+
+    for (auto &[methodName, similarMethods] : similarMethodsByName) {
+        if (methodName.kind() == core::NameKind::UNIQUE &&
+            methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
+            // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
+            // unique names, because we want each overload to show up but those use unique names.
+            continue;
+        }
+
+        // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
+        auto similarMethod = similarMethods[0];
+
+        if (similarMethod.method.data(gs)->flags.isPrivate && !isPrivateOk) {
+            continue;
+        }
+
+        dedupedSimilarMethods.emplace_back(similarMethod);
+    }
+
+    fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
+        if (left.depth != right.depth) {
+            return left.depth < right.depth;
+        }
+
+        auto leftShortName = left.method.data(gs)->name.shortName(gs);
+        auto rightShortName = right.method.data(gs)->name.shortName(gs);
+        if (leftShortName != rightShortName) {
+            if (absl::StartsWith(leftShortName, prefix) &&
+                !absl::StartsWith(rightShortName, prefix)) {
+                return true;
+            }
+            if (!absl::StartsWith(leftShortName, prefix) &&
+                absl::StartsWith(rightShortName, prefix)) {
+                return false;
+            }
+
+            return leftShortName < rightShortName;
+        }
+
+        return left.method.id() < right.method.id();
+    });
+
+    return dedupedSimilarMethods;
+}
+
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
@@ -1038,62 +1098,9 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
 
     vector<SimilarMethod> dedupedSimilarMethods;
 
-    {
-        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
-        SimilarMethodsByName similarMethodsByName;
-        if (params.forMethods != nullopt) {
-            similarMethodsByName = allSimilarMethods(gs, *params.forMethods->dispatchResult, params.prefix);
-            for (auto &[methodName, similarMethods] : similarMethodsByName) {
-                fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
-                    if (left.depth != right.depth) {
-                        return left.depth < right.depth;
-                    }
-
-                    return left.method.id() < right.method.id();
-                });
-            }
-        }
-
-        for (auto &[methodName, similarMethods] : similarMethodsByName) {
-            if (methodName.kind() == core::NameKind::UNIQUE &&
-                methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
-                // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
-                // unique names, because we want each overload to show up but those use unique names.
-                continue;
-            }
-
-            // Since each list is sorted by depth, taking the first elem dedups by depth within each name.
-            auto similarMethod = similarMethods[0];
-
-            if (similarMethod.method.data(gs)->flags.isPrivate && !params.forMethods->isPrivateOk) {
-                continue;
-            }
-
-            dedupedSimilarMethods.emplace_back(similarMethod);
-        }
-
-        fast_sort(dedupedSimilarMethods, [&](const auto &left, const auto &right) -> bool {
-            if (left.depth != right.depth) {
-                return left.depth < right.depth;
-            }
-
-            auto leftShortName = left.method.data(gs)->name.shortName(gs);
-            auto rightShortName = right.method.data(gs)->name.shortName(gs);
-            if (leftShortName != rightShortName) {
-                if (absl::StartsWith(leftShortName, params.prefix) &&
-                    !absl::StartsWith(rightShortName, params.prefix)) {
-                    return true;
-                }
-                if (!absl::StartsWith(leftShortName, params.prefix) &&
-                    absl::StartsWith(rightShortName, params.prefix)) {
-                    return false;
-                }
-
-                return leftShortName < rightShortName;
-            }
-
-            return left.method.id() < right.method.id();
-        });
+    if (params.forMethods != nullopt) {
+        auto &forMethods = params.forMethods.value();
+        dedupedSimilarMethods = computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
     }
 
     // ----- final sort -----
