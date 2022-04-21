@@ -154,7 +154,7 @@ private:
             auto &fullName = other.fullName();
             if (fullName.size() >= prefixSize && canImport(other) &&
                 std::equal(fullName.begin(), fullName.begin() + prefixSize, prefixBegin)) {
-                matches.emplace_back(PackageMatch{name, currentPkg.importsPackage(other)});
+                matches.emplace_back(PackageMatch{name, currentPkg.importsPackage(name)});
             }
         }
     }

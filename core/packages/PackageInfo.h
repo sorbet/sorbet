@@ -35,7 +35,7 @@ public:
     virtual bool exists() const final;
     std::string show(const core::GlobalState &gs) const;
 
-    virtual std::optional<ImportType> importsPackage(const PackageInfo &other) const = 0;
+    virtual std::optional<ImportType> importsPackage(core::NameRef mangledName) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
