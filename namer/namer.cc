@@ -1253,13 +1253,7 @@ class SymbolDefiner {
     }
 
     core::FieldRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
-        // forbid dynamic constant definition
-        if (!ctx.owner.isClassOrModule()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
-                                              core::errors::Namer::DynamicConstantAssignment)) {
-                e.setHeader("Dynamic constant assignment");
-            }
-        }
+        ENFORCE(ctx.owner.isClassOrModule());
 
         auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
                                    staticField.name, staticField.asgnLoc);

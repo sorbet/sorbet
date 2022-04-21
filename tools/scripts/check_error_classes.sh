@@ -35,7 +35,9 @@ fi
 
 while IFS= read -r error_code
 do
-  if [[ "$error_code" != 7* ]]; then
+  if [[ "$error_code" != 4* ]] && \
+    [[ "$error_code" != 6* ]] && \
+    [[ "$error_code" != 7* ]]; then
     # TODO(jez) Document all other error codes
     continue
   fi

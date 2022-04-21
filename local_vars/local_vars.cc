@@ -222,7 +222,7 @@ class LocalNameInserter {
         original.clearArgs();
 
         if (!scopeStack.back().insideMethod) {
-            if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {
+            if (auto e = ctx.beginError(original.loc, core::errors::Namer::SuperOutsideMethod)) {
                 e.setHeader("`{}` outside of method", "super");
             }
             return tree;
