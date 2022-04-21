@@ -110,6 +110,8 @@ private:
 
     Flags flags;
 
+    // NOTE: this adds some overhead even when `--stripe-packages` is disabled. In the future we may look at moving it
+    // into the PackageDB to avoid the memory overhad in non-stripe codebases.
     NameRef package = core::NameRef::noName();
 
     const std::string path_;
