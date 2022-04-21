@@ -126,7 +126,7 @@ public:
 private:
     std::shared_ptr<const FileHash> hash_;
 };
-CheckSize(File, 96, 8);
+CheckSize(File, 104, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
