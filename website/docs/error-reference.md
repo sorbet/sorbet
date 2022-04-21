@@ -73,6 +73,21 @@ and should not be reported.
 
 [#1993]: https://github.com/sorbet/sorbet/pull/1993
 
+## 2002
+
+Starting in Ruby 3.0, Ruby uses the `_1`, `_2`, etc. syntax for block arguments:
+
+```ruby
+xs.map {_1.to_s}
+
+# ^ this is equivalent to:
+
+xs.map { |x| x.to_s }
+```
+
+Because of this, `_1` and similar variables are not allowed as normal variable
+names. Pick another variable name, for example: `_x1` or `_arg1`.
+
 ## 2003
 
 If you're seeing this error code, it means that Sorbet already emitted a parse
@@ -105,6 +120,21 @@ recover from the real parse error.
 
 As with all Sorbet error messages, if one of these hint error messages is
 confusing or misleading, please [report an issue] to let us know.
+
+## 2004
+
+Starting in Ruby 3.0, Ruby uses the `_1`, `_2`, etc. syntax for block arguments:
+
+```ruby
+xs.map {_1.to_s}
+
+# ^ this is equivalent to:
+
+xs.map { |x| x.to_s }
+```
+
+Because of this, `_1` and similar variables are not allowed as normal variable
+names. Pick another variable name, for example: `_x1` or `_arg1`.
 
 ## 3001
 
@@ -161,6 +191,129 @@ A possible workaround is to use a string and `to_i`:
 puts "11377327221391349843".to_i + 1
 ```
 
+## 3003
+
+Sorbet does not support certain Ruby features, like the flip flop operator and
+the `redo` keyword. If you feel strongly that Sorbet support these features,
+please open an issue.
+
+Unfortunately, there is no workaround for this issue other than asking Sorbet to
+ignore the file (which forces the _entire_ file to be ignored, including any
+methods and constants defined in it), or rewriting the file to not use the
+unsupported Ruby feature.
+
+If you do decide to ignore the file entirely, you will likely need to use an
+[RBI file](rbi.md) to let Sorbet know about any classes and methods defined in
+the ignored file.
+
+## 3004
+
+There was an error parsing a float literal in Sorbet. Specifically, we asked a
+C++ library to parse a Ruby float literal string to a float, and it returned a
+`NaN` value.
+
+If you are seeing this error, it likely represents a bug in Sorbet. Please
+report an issue at <https://github.com/sorbet/sorbet/issues>.
+
+## 3005
+
+Sorbet does not support using operators like `&&=` or `||=` when the target of
+the operator is a constant literal.
+
+Note that Ruby itself will report a warning for such usage:
+
+```ruby
+A = nil
+A ||= 1
+# => warning: already initialized constant A
+```
+
+If you absolutely must reassign a constant using the current value of the
+constant, rewrite the code to use `const_defined?` and `const_set`:
+
+```ruby
+A = nil
+unless Object.const_defined?(:A) && A
+  Object.const_set(:A, 1)
+end
+```
+
+## 3007
+
+Using `yield` in a method body means that a method implicitly takes a block
+argument. In `# typed: strict` files, such methods are required to explicitly
+name the block argument to make the contract clear:
+
+```ruby
+def foo(&blk)
+  yield
+end
+```
+
+This is required even if the block is only ever used by way of `yield`, and
+never with something like `blk.call`.
+
+**Why?** The distinguishing factor of `# typed: strict` is that every method has
+an explicit interface with a signature. It's equally important to be explicit
+about the block argument, if present. For more, see the docs on
+[strictness levels](static.md#file-level-granularity-strictness-levels).
+
+## 3008
+
+Sorbet does not support the `undef` keyword. Sorbet assumes that the set of all
+classes, modules, methods, and constants is static throughout the lifetime of a
+program. It does not attempt to model the way that a Ruby program might mutate
+itself by deleting constants or methods at runtime.
+
+For this reason, the `undef` node is not supported.
+
+Currently, this error is only reported at `# typed: strict` or higher, though in
+the future this might move to lower strictness levels. It does mean that
+currently it's possible to silence this error by downgrading the file containing
+the `undef` to `# typed: true` or lower.
+
+Note that regardless of whether Sorbet reports an error for using `undef`, it
+has no meaning on what Sorbet considers to be defined or not defined. Sorbet
+will not report errors for calls to a method that doesn't exist because it has
+been undefined.
+
+## 3009
+
+Sorbet does not support certain kinds of complicated block parameter
+destructuring patterns. In most cases, it is possible to rewrite these to use
+destructuring assignments inside the block itself:
+
+```ruby
+# ----- BAD -----
+
+xs = [[0, 1, 2, 3], 42]
+xs.then do |(x, *args), y|
+  #             ^^^^^ error: Unsupported rest args in destructure
+  p x    # => 0
+  p args # => [1, 2, 3]
+  p y    # => 42
+end
+
+# ----- Use this instead -----
+
+xs.then do |arg0, y|
+  x, *args = arg0
+
+  p x     # => 0
+  p args  # => [1, 2, 3]
+  p y     # => 42
+end
+```
+
+## 3010
+
+Methods defined in [RBI files](rbi.md) are not allowed to have code in their
+bodies.
+
+The only exception is for instance variable assignments (like `@x = ...`), which
+are allowed so that RBI files may declare the existence of instance variables
+and their types.
+
 ## 3011
 
 There was a Hash literal with duplicated keys.
@@ -184,6 +337,203 @@ names:
 sig {params(_a: String, _b: Integer).void} # ok
 def foo(_a, _b); end
 ```
+
+## 3501
+
+Sorbet has special support for understanding Ruby's `attr_reader`,
+`attr_writer`, and `attr_accessor` methods. For this support to work, it must be
+able to see the name of the attribute **syntactically**, which means that the
+argument must be a `String` or `Symbol` literal.
+
+If you are attempting to dynamically compute the name of an `attr_*` method, you
+must either:
+
+1.  Downgrade the file to `# typed: false`, or
+2.  Hide `attr_*` method call from Sorbet by using something like
+    `public_send(:attr_reader, name)` (instead of `attr_reader name`)
+
+## 3502
+
+`T::InterfaceWrapper` is deprecated and should not be used.
+
+## 3503
+
+Ruby has separate syntax for marking instance methods and singleton class
+methods private:
+
+```ruby
+private def some_instance_method; end
+private_class_method def self.some_singleton_class_method; end
+```
+
+Note that the `self.` keyword in the method declaration changes the method from
+being an instance method to being a class method. In Ruby this `self.` prefix is
+similar to the `static` keyword on method definitions in languages like C++ or
+Java.
+
+## 3504
+
+The signature of an `attr_reader`, `attr_writer`, or `attr_accessor` method
+cannot have any `T.type_parameter` in it.
+
+These methods get and set instance variables on the underlying class, while the
+`T.type_parameter` in the signature would only be in method scope.
+
+## 3505
+
+The `module_function` helper declares that an instance method on a module should
+be duplicated onto the class's singleton class.
+
+The `module_function` must be given an argument that is **syntactically**
+either:
+
+- a method def
+- a `String` or `Symbol` literal with the name of a method
+
+This argument must be provided syntactically because Sorbet has special handling
+for `module_function`, and this special logic must be able to see the exact name
+of the method that is being defined via `module_function`.
+
+To silence this error, either:
+
+- Refactor the code to use `module_function` with only calls to method
+  definitions or literals, or
+- Downgrade the file to `# typed: false` or lower, or
+- Use `send(:module_function, ...)` to hide the call to `module_function` from
+  Sorbet.
+
+## 3506
+
+Enums declared with `T::Enum` are special. A `T::Enum` must have all of its enum
+values defined in the `enums do` block inside an enum, and it's not allowed to
+have any extra constants defined on the class (i.e., constants that don't hold
+values of the enum).
+
+**Why?** Consistency, readability, and simplicity of implementation at runtime.
+
+This includes type aliases. If you'd like to define a type alias consisting of a
+set of enum values, the type alias must be declared outside of the `T::Enum`
+subclass itself.
+
+Note that enums can still have instance variables and methods defined on them.
+For example:
+
+```ruby
+class Direction < T::Enum
+  enums do
+    Up = new
+    Down = new
+    Left = new
+    Right = new
+  end
+
+  def self.vertical
+    @vertical ||= [Up, Down].freeze
+  end
+end
+```
+
+## 3507
+
+The syntax for `test_each` looks like this:
+
+```ruby
+test_each([true, false]) do |x|
+  it 'test' do
+  end
+end
+```
+
+For more examples of valid syntax,
+[see the tests](https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb).
+
+There are some limitations on how `test_each` can be used:
+
+The block given to `test_each` must accept at least one argument (except when
+using `test_each_hash`, it must be able to take exactly two arguments).
+
+The body of the `test_each`'s block must contain only `it` blocks, because of
+limitations in Sorbet. Sorbet models `it` blocks by translating them to method
+definitions under the hood, and method definitions do not have access to
+variables outside of their scope.
+
+Usually this comes up with variable destructuring:
+
+```ruby
+# -- BAD EXAMPLE --
+test_each(values) do |value|
+  x, y = compute_x_y(value)
+  it 'example 1' do
+  end
+  it 'example 2' do
+  end
+end
+```
+
+This can be fixed by worked around by writing the assignment into each `it`
+block directly, or by computing it ahead of time:
+
+```ruby
+test_each(values) do |value|
+  it 'example 1' do
+    x, y = compute_x_y(value)
+  end
+  it 'example 2' do
+    x, y = compute_x_y(value)
+  end
+end
+```
+
+```ruby
+new_values = values.map do |value|
+  x, y = compute_x_y(value)
+  [value, x, y]
+end
+test_each(new_values) do |value, x, y|
+  it 'example 1' do
+  end
+  it 'example 2' do
+  end
+end
+```
+
+## 3508
+
+The argument to the `foreign:` attribute on a `prop` declaration must be a
+lambda function. This prevents the other model class from needing to be loaded
+eagerly. Use the autocorrect to fix the error.
+
+## 3509
+
+The argument to the `computed_by` argument on a prop must be a `Symbol` literal
+(i.e., syntactically, so that Sorbet can analyze it without performing any
+inference).
+
+## 3510
+
+The return type of the `initialize` method in Ruby is never used. Under the
+hood, a call to `new` on a class in Ruby looks something like this:
+
+```ruby
+def self.new(...)
+  instance = alloc
+  _discarded = instance.initialize(...)
+  instance
+end
+```
+
+If you'd like to make a custom factory method for your class, define a custom
+singleton class method.
+
+## 3511
+
+Accessor methods defined with `Struct.new` must not end with `=`, because the
+generated setter method will then be given an invalid name ending with `==`.
+
+## 3512
+
+`T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
+type `T.untyped` (along with all other values).
 
 ## 4001
 
