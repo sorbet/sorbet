@@ -69,10 +69,10 @@ unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message, 
     }
 }
 
-unique_ptr<LSPMessage> LSPMessage::fromClient(const string &json) {
+unique_ptr<LSPMessage> LSPMessage::fromClient(std::string_view json) {
     rapidjson::MemoryPoolAllocator<> alloc;
     rapidjson::Document d(&alloc);
-    if (d.Parse(json.c_str()).HasParseError()) {
+    if (d.Parse(json.data(), json.size()).HasParseError()) {
         return makeSorbetError(LSPErrorCodes::ParseError,
                                fmt::format("Last LSP request: `{}` is not a valid json object", json));
     }
@@ -114,10 +114,10 @@ LSPMessage::RawLSPMessage fromJSONValue(rapidjson::Document &d) {
     }
 }
 
-LSPMessage::RawLSPMessage fromJSON(const std::string &json) {
+LSPMessage::RawLSPMessage fromJSON(std::string_view json) {
     rapidjson::MemoryPoolAllocator<> alloc;
     rapidjson::Document d(&alloc);
-    d.Parse(json.c_str());
+    d.Parse(json.data(), json.size());
     return fromJSONValue(d);
 }
 
@@ -125,7 +125,7 @@ LSPMessage::LSPMessage(RawLSPMessage msg) : msg(move(msg)) {}
 
 LSPMessage::LSPMessage(rapidjson::Document &d) : LSPMessage::LSPMessage(fromJSONValue(d)) {}
 
-LSPMessage::LSPMessage(const std::string &json) : LSPMessage::LSPMessage(fromJSON(json)) {}
+LSPMessage::LSPMessage(std::string_view json) : LSPMessage::LSPMessage(fromJSON(json)) {}
 
 LSPMessage::~LSPMessage() = default;
 
