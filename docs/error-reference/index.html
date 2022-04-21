@@ -113,6 +113,16 @@ in our parser; please <a href="https://github.com/sorbet/sorbet/issues">report a
 <p>The only intentional break with Ruby compatibility is that method names that are
 keywords have some limitations with multi-line code, as explained in <a href="https://github.com/sorbet/sorbet/pull/1993">#1993</a>,
 and should not be reported.</p>
+<h2><a class="anchor" aria-hidden="true" id="2002"></a><a href="#2002" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2002</h2>
+<p>Starting in Ruby 3.0, Ruby uses the <code>_1</code>, <code>_2</code>, etc. syntax for block arguments:</p>
+<pre><code class="hljs css language-ruby">xs.map {_1.to_s}
+
+<span class="hljs-comment"># ^ this is equivalent to:</span>
+
+xs.map { <span class="hljs-params">|x|</span> x.to_s }
+</code></pre>
+<p>Because of this, <code>_1</code> and similar variables are not allowed as normal variable
+names. Pick another variable name, for example: <code>_x1</code> or <code>_arg1</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="2003"></a><a href="#2003" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2003</h2>
 <p>If you’re seeing this error code, it means that Sorbet already emitted a parse
 error for the file, but found some extra information that might help point out
@@ -138,6 +148,16 @@ actually fix the real parse error. Instead, they’re provided as a way to help
 recover from the real parse error.</p>
 <p>As with all Sorbet error messages, if one of these hint error messages is
 confusing or misleading, please <a href="https://github.com/sorbet/sorbet/issues">report an issue</a> to let us know.</p>
+<h2><a class="anchor" aria-hidden="true" id="2004"></a><a href="#2004" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>2004</h2>
+<p>Starting in Ruby 3.0, Ruby uses the <code>_1</code>, <code>_2</code>, etc. syntax for block arguments:</p>
+<pre><code class="hljs css language-ruby">xs.map {_1.to_s}
+
+<span class="hljs-comment"># ^ this is equivalent to:</span>
+
+xs.map { <span class="hljs-params">|x|</span> x.to_s }
+</code></pre>
+<p>Because of this, <code>_1</code> and similar variables are not allowed as normal variable
+names. Pick another variable name, for example: <code>_x1</code> or <code>_arg1</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3001"></a><a href="#3001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3001</h2>
 <p>Sorbet doesn’t support singleton definitions outside of the class itself:</p>
 <pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; MyClass <span class="hljs-comment"># error: `class &lt;&lt; EXPRESSION` is only supported for `class &lt;&lt; self`</span></span>
@@ -173,6 +193,96 @@ will not consider the include and provide a less accurate analysis (see also
 <p>A possible workaround is to use a string and <code>to_i</code>:</p>
 <pre><code class="hljs css language-rb">puts <span class="hljs-string">"11377327221391349843"</span>.to_i + <span class="hljs-number">1</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="3003"></a><a href="#3003" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3003</h2>
+<p>Sorbet does not support certain Ruby features, like the flip flop operator and
+the <code>redo</code> keyword. If you feel strongly that Sorbet support these features,
+please open an issue.</p>
+<p>Unfortunately, there is no workaround for this issue other than asking Sorbet to
+ignore the file (which forces the <em>entire</em> file to be ignored, including any
+methods and constants defined in it), or rewriting the file to not use the
+unsupported Ruby feature.</p>
+<p>If you do decide to ignore the file entirely, you will likely need to use an
+<a href="/docs/rbi">RBI file</a> to let Sorbet know about any classes and methods defined in
+the ignored file.</p>
+<h2><a class="anchor" aria-hidden="true" id="3004"></a><a href="#3004" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3004</h2>
+<p>There was an error parsing a float literal in Sorbet. Specifically, we asked a
+C++ library to parse a Ruby float literal string to a float, and it returned a
+<code>NaN</code> value.</p>
+<p>If you are seeing this error, it likely represents a bug in Sorbet. Please
+report an issue at <a href="https://github.com/sorbet/sorbet/issues">https://github.com/sorbet/sorbet/issues</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="3005"></a><a href="#3005" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3005</h2>
+<p>Sorbet does not support using operators like <code>&amp;&amp;=</code> or <code>||=</code> when the target of
+the operator is a constant literal.</p>
+<p>Note that Ruby itself will report a warning for such usage:</p>
+<pre><code class="hljs css language-ruby">A = <span class="hljs-literal">nil</span>
+A <span class="hljs-params">||</span>= <span class="hljs-number">1</span>
+<span class="hljs-comment"># =&gt; warning: already initialized constant A</span>
+</code></pre>
+<p>If you absolutely must reassign a constant using the current value of the
+constant, rewrite the code to use <code>const_defined?</code> and <code>const_set</code>:</p>
+<pre><code class="hljs css language-ruby">A = <span class="hljs-literal">nil</span>
+<span class="hljs-keyword">unless</span> Object.const_defined?(<span class="hljs-symbol">:A</span>) &amp;&amp; A
+  Object.const_set(<span class="hljs-symbol">:A</span>, <span class="hljs-number">1</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="3007"></a><a href="#3007" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3007</h2>
+<p>Using <code>yield</code> in a method body means that a method implicitly takes a block
+argument. In <code># typed: strict</code> files, such methods are required to explicitly
+name the block argument to make the contract clear:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(&amp;blk)</span></span>
+  <span class="hljs-keyword">yield</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This is required even if the block is only ever used by way of <code>yield</code>, and
+never with something like <code>blk.call</code>.</p>
+<p><strong>Why?</strong> The distinguishing factor of <code># typed: strict</code> is that every method has
+an explicit interface with a signature. It’s equally important to be explicit
+about the block argument, if present. For more, see the docs on
+<a href="/docs/static#file-level-granularity-strictness-levels">strictness levels</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="3008"></a><a href="#3008" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3008</h2>
+<p>Sorbet does not support the <code>undef</code> keyword. Sorbet assumes that the set of all
+classes, modules, methods, and constants is static throughout the lifetime of a
+program. It does not attempt to model the way that a Ruby program might mutate
+itself by deleting constants or methods at runtime.</p>
+<p>For this reason, the <code>undef</code> node is not supported.</p>
+<p>Currently, this error is only reported at <code># typed: strict</code> or higher, though in
+the future this might move to lower strictness levels. It does mean that
+currently it’s possible to silence this error by downgrading the file containing
+the <code>undef</code> to <code># typed: true</code> or lower.</p>
+<p>Note that regardless of whether Sorbet reports an error for using <code>undef</code>, it
+has no meaning on what Sorbet considers to be defined or not defined. Sorbet
+will not report errors for calls to a method that doesn’t exist because it has
+been undefined.</p>
+<h2><a class="anchor" aria-hidden="true" id="3009"></a><a href="#3009" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3009</h2>
+<p>Sorbet does not support certain kinds of complicated block parameter
+destructuring patterns. In most cases, it is possible to rewrite these to use
+destructuring assignments inside the block itself:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ----- BAD -----</span>
+
+xs = [[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-number">42</span>]
+xs.<span class="hljs-keyword">then</span> <span class="hljs-keyword">do</span> <span class="hljs-params">|(x, *args), y|</span>
+  <span class="hljs-comment">#             ^^^^^ error: Unsupported rest args in destructure</span>
+  p x    <span class="hljs-comment"># =&gt; 0</span>
+  p args <span class="hljs-comment"># =&gt; [1, 2, 3]</span>
+  p y    <span class="hljs-comment"># =&gt; 42</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ----- Use this instead -----</span>
+
+xs.<span class="hljs-keyword">then</span> <span class="hljs-keyword">do</span> <span class="hljs-params">|arg0, y|</span>
+  x, *args = arg<span class="hljs-number">0</span>
+
+  p x     <span class="hljs-comment"># =&gt; 0</span>
+  p args  <span class="hljs-comment"># =&gt; [1, 2, 3]</span>
+  p y     <span class="hljs-comment"># =&gt; 42</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="3010"></a><a href="#3010" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3010</h2>
+<p>Methods defined in <a href="/docs/rbi">RBI files</a> are not allowed to have code in their
+bodies.</p>
+<p>The only exception is for instance variable assignments (like <code>@x = ...</code>), which
+are allowed so that RBI files may declare the existence of instance variables
+and their types.</p>
 <h2><a class="anchor" aria-hidden="true" id="3011"></a><a href="#3011" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3011</h2>
 <p>There was a Hash literal with duplicated keys.</p>
 <pre><code class="hljs css language-ruby">{<span class="hljs-symbol">my_key:</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">my_key:</span> <span class="hljs-number">2</span>} <span class="hljs-comment"># error: `my_key` is duplicated</span>
@@ -187,6 +297,295 @@ names:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">_a:</span> String, <span class="hljs-symbol">_b:</span> Integer).void} <span class="hljs-comment"># ok</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(_a, _b)</span></span>; <span class="hljs-keyword">end</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="3501"></a><a href="#3501" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3501</h2>
+<p>Sorbet has special support for understanding Ruby’s <code>attr_reader</code>,
+<code>attr_writer</code>, and <code>attr_accessor</code> methods. For this support to work, it must be
+able to see the name of the attribute <strong>syntactically</strong>, which means that the
+argument must be a <code>String</code> or <code>Symbol</code> literal.</p>
+<p>If you are attempting to dynamically compute the name of an <code>attr_*</code> method, you
+must either:</p>
+<ol>
+<li>Downgrade the file to <code># typed: false</code>, or</li>
+<li>Hide <code>attr_*</code> method call from Sorbet by using something like
+<code>public_send(:attr_reader, name)</code> (instead of <code>attr_reader name</code>)</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="3502"></a><a href="#3502" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3502</h2>
+<p><code>T::InterfaceWrapper</code> is deprecated and should not be used.</p>
+<h2><a class="anchor" aria-hidden="true" id="3503"></a><a href="#3503" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3503</h2>
+<p>Ruby has separate syntax for marking instance methods and singleton class
+methods private:</p>
+<pre><code class="hljs css language-ruby">private <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">some_instance_method</span>;</span> <span class="hljs-keyword">end</span>
+private_class_method <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">some_singleton_class_method</span>;</span> <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Note that the <code>self.</code> keyword in the method declaration changes the method from
+being an instance method to being a class method. In Ruby this <code>self.</code> prefix is
+similar to the <code>static</code> keyword on method definitions in languages like C++ or
+Java.</p>
+<h2><a class="anchor" aria-hidden="true" id="3504"></a><a href="#3504" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3504</h2>
+<p>The signature of an <code>attr_reader</code>, <code>attr_writer</code>, or <code>attr_accessor</code> method
+cannot have any <code>T.type_parameter</code> in it.</p>
+<p>These methods get and set instance variables on the underlying class, while the
+<code>T.type_parameter</code> in the signature would only be in method scope.</p>
+<h2><a class="anchor" aria-hidden="true" id="3505"></a><a href="#3505" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3505</h2>
+<p>The <code>module_function</code> helper declares that an instance method on a module should
+be duplicated onto the class’s singleton class.</p>
+<p>The <code>module_function</code> must be given an argument that is <strong>syntactically</strong>
+either:</p>
+<ul>
+<li>a method def</li>
+<li>a <code>String</code> or <code>Symbol</code> literal with the name of a method</li>
+</ul>
+<p>This argument must be provided syntactically because Sorbet has special handling
+for <code>module_function</code>, and this special logic must be able to see the exact name
+of the method that is being defined via <code>module_function</code>.</p>
+<p>To silence this error, either:</p>
+<ul>
+<li>Refactor the code to use <code>module_function</code> with only calls to method
+definitions or literals, or</li>
+<li>Downgrade the file to <code># typed: false</code> or lower, or</li>
+<li>Use <code>send(:module_function, ...)</code> to hide the call to <code>module_function</code> from
+Sorbet.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="3506"></a><a href="#3506" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3506</h2>
+<p>Enums declared with <code>T::Enum</code> are special. A <code>T::Enum</code> must have all of its enum
+values defined in the <code>enums do</code> block inside an enum, and it’s not allowed to
+have any extra constants defined on the class (i.e., constants that don’t hold
+values of the enum).</p>
+<p><strong>Why?</strong> Consistency, readability, and simplicity of implementation at runtime.</p>
+<p>This includes type aliases. If you’d like to define a type alias consisting of a
+set of enum values, the type alias must be declared outside of the <code>T::Enum</code>
+subclass itself.</p>
+<p>Note that enums can still have instance variables and methods defined on them.
+For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Direction</span> &lt; T::Enum</span>
+  enums <span class="hljs-keyword">do</span>
+    Up = new
+    Down = new
+    Left = new
+    Right = new
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">vertical</span></span>
+    @vertical <span class="hljs-params">||</span>= [Up, Down].freeze
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="3507"></a><a href="#3507" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3507</h2>
+<p>The syntax for <code>test_each</code> looks like this:</p>
+<pre><code class="hljs css language-ruby">test_each([<span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>]) <span class="hljs-keyword">do</span> <span class="hljs-params">|x|</span>
+  it <span class="hljs-string">'test'</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>For more examples of valid syntax,
+<a href="https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb">see the tests</a>.</p>
+<p>There are some limitations on how <code>test_each</code> can be used:</p>
+<p>The block given to <code>test_each</code> must accept at least one argument (except when
+using <code>test_each_hash</code>, it must be able to take exactly two arguments).</p>
+<p>The body of the <code>test_each</code>'s block must contain only <code>it</code> blocks, because of
+limitations in Sorbet. Sorbet models <code>it</code> blocks by translating them to method
+definitions under the hood, and method definitions do not have access to
+variables outside of their scope.</p>
+<p>Usually this comes up with variable destructuring:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- BAD EXAMPLE --</span>
+test_each(values) <span class="hljs-keyword">do</span> <span class="hljs-params">|value|</span>
+  x, y = compute_x_y(value)
+  it <span class="hljs-string">'example 1'</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">end</span>
+  it <span class="hljs-string">'example 2'</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This can be fixed by worked around by writing the assignment into each <code>it</code>
+block directly, or by computing it ahead of time:</p>
+<pre><code class="hljs css language-ruby">test_each(values) <span class="hljs-keyword">do</span> <span class="hljs-params">|value|</span>
+  it <span class="hljs-string">'example 1'</span> <span class="hljs-keyword">do</span>
+    x, y = compute_x_y(value)
+  <span class="hljs-keyword">end</span>
+  it <span class="hljs-string">'example 2'</span> <span class="hljs-keyword">do</span>
+    x, y = compute_x_y(value)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<pre><code class="hljs css language-ruby">new_values = values.map <span class="hljs-keyword">do</span> <span class="hljs-params">|value|</span>
+  x, y = compute_x_y(value)
+  [value, x, y]
+<span class="hljs-keyword">end</span>
+test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-params">|value, x, y|</span>
+  it <span class="hljs-string">'example 1'</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">end</span>
+  it <span class="hljs-string">'example 2'</span> <span class="hljs-keyword">do</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="3508"></a><a href="#3508" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3508</h2>
+<p>The argument to the <code>foreign:</code> attribute on a <code>prop</code> declaration must be a
+lambda function. This prevents the other model class from needing to be loaded
+eagerly. Use the autocorrect to fix the error.</p>
+<h2><a class="anchor" aria-hidden="true" id="3509"></a><a href="#3509" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3509</h2>
+<p>The argument to the <code>computed_by</code> argument on a prop must be a <code>Symbol</code> literal
+(i.e., syntactically, so that Sorbet can analyze it without performing any
+inference).</p>
+<h2><a class="anchor" aria-hidden="true" id="3510"></a><a href="#3510" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3510</h2>
+<p>The return type of the <code>initialize</code> method in Ruby is never used. Under the
+hood, a call to <code>new</code> on a class in Ruby looks something like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">new</span><span class="hljs-params">(...)</span></span>
+  instance = alloc
+  _discarded = instance.initialize(...)
+  instance
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>If you’d like to make a custom factory method for your class, define a custom
+singleton class method.</p>
+<h2><a class="anchor" aria-hidden="true" id="3511"></a><a href="#3511" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3511</h2>
+<p>Accessor methods defined with <code>Struct.new</code> must not end with <code>=</code>, because the
+generated setter method will then be given an invalid name ending with <code>==</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="3512"></a><a href="#3512" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3512</h2>
+<p><code>T.nilable(T.untyped)</code> is just <code>T.untyped</code>, because <code>nil</code> is a valid value of
+type <code>T.untyped</code> (along with all other values).</p>
+<h2><a class="anchor" aria-hidden="true" id="3702"></a><a href="#3702" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3702</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>Package definitions must be formatted like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Opus::Foo</span> &lt; PackageSpec</span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, <code>Opus::Foo</code> is the name of the package, and <code>PackageSpec</code>
+explicitly declares that this class definition is a package spec.</p>
+<h2><a class="anchor" aria-hidden="true" id="3703"></a><a href="#3703" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3703</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>Each package must have only one definition. A package definition is the place
+where there is a line like <code>class Opus::Foo &lt; PackageSpec</code> in a <code>__package.rb</code>
+file.</p>
+<h2><a class="anchor" aria-hidden="true" id="3704"></a><a href="#3704" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3704</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>Sorbet found an <code>import</code> in a <code>__package.rb</code> file, but the imported constant did
+not exist.</p>
+<h2><a class="anchor" aria-hidden="true" id="3705"></a><a href="#3705" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3705</h2>
+<blockquote>
+<p><strong>TODO</strong> This error code is not yet documented.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="3706"></a><a href="#3706" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3706</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>All <code>import</code> and <code>export</code> lines in a <code>__package.rb</code> file must have constant
+literals as their argument. Doing arbitrary computation of imports and exports
+is not allowed in <code>__package.rb</code> files.</p>
+<p>Also note that all <code>import</code> declarations must be unique, with no duplicated
+imports.</p>
+<h2><a class="anchor" aria-hidden="true" id="3707"></a><a href="#3707" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3707</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p><code>__package.rb</code> files must declare exactly one package.</p>
+<h2><a class="anchor" aria-hidden="true" id="3709"></a><a href="#3709" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3709</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>A package cannot import itself. Double check which files and/or packages you
+intended to modify, as you’ve likely made a typo.</p>
+<h2><a class="anchor" aria-hidden="true" id="3710"></a><a href="#3710" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3710</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>Even though <code>__package.rb</code> files use Ruby syntax, they do not allow arbitrary
+Ruby code. The fact that they use Ruby syntax is a convenience so that:</p>
+<ul>
+<li>package declarations get syntax highlighting in all Ruby editors</li>
+<li>tooling like Sorbet and RuboCop work on <code>__package.rb</code> files out of the box</li>
+<li>Sorbet can support things like jump-to-definition inside <code>__package.rb</code> files</li>
+</ul>
+<p>But despite that, <code>__package.rb</code> files must be completely statically analyzable,
+which means most forms of Ruby expressions are not allowed in these files.</p>
+<h2><a class="anchor" aria-hidden="true" id="3711"></a><a href="#3711" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3711</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>Package files must be <code># typed: strict</code>. If you are in the process of migrating
+a codebase to use the packager mode and want to sometimes ignore a
+<code>__package.rb</code> file, use the <code>--ignore=__package.rb</code> command line flag which
+will ignore all files whose name matches <code>__package.rb</code> exactly, in any folder.</p>
+<h2><a class="anchor" aria-hidden="true" id="3712"></a><a href="#3712" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3712</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>Package names must not contain underscores. Internally, the packager assumes it
+can use the underscore character to join components of a package name together.
+For example, internally the package uses names like <code>Opus_Foo</code> to represent the
+package <code>Opus::Foo</code>. If underscores were allowed in package names,
+<code>Opus_Foo_Bar</code> could represent a package called <code>Opus::Foo_Bar</code>, <code>Opus_Foo::Bar</code>
+or <code>Opus::Foo::Bar</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="3713"></a><a href="#3713" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3713</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>All code inside a package must live within the namespace declared by it’s
+enclosing <code>__package.rb</code> file. Note that since packages are allowed to nest
+inside each other, sometimes you might have attempted to add code in a folder
+that you didn’t realize was actually managed by a nested package.</p>
+<p>If you’re seeing this error and surprised, double check which folders have
+<code>__package.rb</code> files in them, and the names of the packages declared by them.</p>
+<h2><a class="anchor" aria-hidden="true" id="3714"></a><a href="#3714" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3714</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>This error arises when it’s unclear which import actually provides a constant,
+which in turn usually happens with nested packages: given a constant <code>A::B::C</code>
+and a package that imports both the packages <code>A</code> and <code>A::B</code>, it’s difficult to
+tell without deep examination which actually exports <code>A::B::C</code>.</p>
+<p>In these cases, it’s best to refactor the packages so they are clearly
+delineated: instead of <code>A</code> and <code>A::B</code>, it might be best to figure out what
+behavior lives in <code>A</code> but not <code>A::B</code> and move it to a new package entirely, like
+<code>A::X</code> (and then update the import structure as needed).</p>
+<p>This error can also be produced when trying to import a name which is a prefix
+of the nested package: for example, importing <code>A</code> when your package name is
+<code>A::B</code>.</p>
+<p>Again, this probably implies you should try to move away from the nested package
+structure, and move the contents of <code>A</code> that aren’t in a nested package into
+another less ambiguous package.</p>
+<h2><a class="anchor" aria-hidden="true" id="3715"></a><a href="#3715" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3715</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>The <code>export_for_test</code> directive is used to say, “Make this constant from the
+non-test namespace available in the test namespace for the same package.” That
+means it only makes sense to <code>export_for_test</code> constants from the non-test
+namespace.</p>
+<p>Trying to apply this directive to a constant defined in the <code>Test::</code> namespace
+will result in this error.</p>
+<p>If you’re trying to export a constant from the test namespace to be used in
+other packages, then just use <code>export</code>. Otherwise, these lines can be safely
+deleted.</p>
+<h2><a class="anchor" aria-hidden="true" id="3716"></a><a href="#3716" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3716</h2>
+<blockquote>
+<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> definition. If
+you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+</blockquote>
+<p>This error means that you’re exporting a constant redundantly. In Stripe
+Packages mode, exporting a constant <code>A::B</code> will export anything accessible
+underneath <code>A::B</code>. That means that if you try to export <code>A::B</code> and <code>A::B::C</code>,
+you’ll get this error—the latter export is redundant, as it’s implied by export
+<code>A::B</code>.</p>
+<p>To fix this error, simply remove the more specific export.</p>
 <h2><a class="anchor" aria-hidden="true" id="4001"></a><a href="#4001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4001</h2>
 <p>Sorbet parses the syntax of <code>include</code> and <code>extend</code> declarations, even in
 <code># typed: false</code> files. Recall from the
@@ -1735,7 +2134,7 @@ sig <span class="hljs-keyword">do</span>
 implemented in a given class.</p>
 <!-- -->
 <script src="/js/error-reference.js"></script>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#1003">1003</a></li><li><a href="#1004">1004</a></li><li><a href="#2001">2001</a></li><li><a href="#2003">2003</a></li><li><a href="#3001">3001</a></li><li><a href="#3002">3002</a></li><li><a href="#3011">3011</a></li><li><a href="#4001">4001</a></li><li><a href="#4002">4002</a></li><li><a href="#4003">4003</a></li><li><a href="#4006">4006</a></li><li><a href="#4010">4010</a></li><li><a href="#4011">4011</a></li><li><a href="#4012">4012</a></li><li><a href="#4013">4013</a></li><li><a href="#4014">4014</a></li><li><a href="#4015">4015</a></li><li><a href="#4016">4016</a></li><li><a href="#4019">4019</a></li><li><a href="#4021">4021</a></li><li><a href="#5001">5001</a></li><li><a href="#5002">5002</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5023">5023</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#5035">5035</a></li><li><a href="#5036">5036</a></li><li><a href="#5037">5037</a></li><li><a href="#5041">5041</a></li><li><a href="#5046">5046</a></li><li><a href="#5047">5047</a></li><li><a href="#5048">5048</a></li><li><a href="#5054">5054</a></li><li><a href="#5056">5056</a></li><li><a href="#5057">5057</a></li><li><a href="#5058">5058</a></li><li><a href="#5064">5064</a></li><li><a href="#5068">5068</a></li><li><a href="#6001">6001</a></li><li><a href="#6002">6002</a></li><li><a href="#6004">6004</a></li><li><a href="#6005">6005</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7004">7004</a></li><li><a href="#7005">7005</a></li><li><a href="#7006">7006</a></li><li><a href="#7007">7007</a></li><li><a href="#7009">7009</a></li><li><a href="#7010">7010</a></li><li><a href="#7011">7011</a></li><li><a href="#7013">7013</a></li><li><a href="#7014">7014</a></li><li><a href="#7015">7015</a></li><li><a href="#7016">7016</a></li><li><a href="#7017">7017</a></li><li><a href="#7018">7018</a></li><li><a href="#7019">7019</a></li><li><a href="#7020">7020</a></li><li><a href="#7021">7021</a></li><li><a href="#7022">7022</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li><li><a href="#7026">7026</a></li><li><a href="#7027">7027</a></li><li><a href="#7030">7030</a></li><li><a href="#7031">7031</a></li><li><a href="#7032">7032</a></li><li><a href="#7033">7033</a></li><li><a href="#7034">7034</a></li><li><a href="#7035">7035</a></li><li><a href="#7036">7036</a></li><li><a href="#7037">7037</a></li><li><a href="#7038">7038</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#1003">1003</a></li><li><a href="#1004">1004</a></li><li><a href="#2001">2001</a></li><li><a href="#2002">2002</a></li><li><a href="#2003">2003</a></li><li><a href="#2004">2004</a></li><li><a href="#3001">3001</a></li><li><a href="#3002">3002</a></li><li><a href="#3003">3003</a></li><li><a href="#3004">3004</a></li><li><a href="#3005">3005</a></li><li><a href="#3007">3007</a></li><li><a href="#3008">3008</a></li><li><a href="#3009">3009</a></li><li><a href="#3010">3010</a></li><li><a href="#3011">3011</a></li><li><a href="#3501">3501</a></li><li><a href="#3502">3502</a></li><li><a href="#3503">3503</a></li><li><a href="#3504">3504</a></li><li><a href="#3505">3505</a></li><li><a href="#3506">3506</a></li><li><a href="#3507">3507</a></li><li><a href="#3508">3508</a></li><li><a href="#3509">3509</a></li><li><a href="#3510">3510</a></li><li><a href="#3511">3511</a></li><li><a href="#3512">3512</a></li><li><a href="#3702">3702</a></li><li><a href="#3703">3703</a></li><li><a href="#3704">3704</a></li><li><a href="#3705">3705</a></li><li><a href="#3706">3706</a></li><li><a href="#3707">3707</a></li><li><a href="#3709">3709</a></li><li><a href="#3710">3710</a></li><li><a href="#3711">3711</a></li><li><a href="#3712">3712</a></li><li><a href="#3713">3713</a></li><li><a href="#3714">3714</a></li><li><a href="#3715">3715</a></li><li><a href="#3716">3716</a></li><li><a href="#4001">4001</a></li><li><a href="#4002">4002</a></li><li><a href="#4003">4003</a></li><li><a href="#4006">4006</a></li><li><a href="#4010">4010</a></li><li><a href="#4011">4011</a></li><li><a href="#4012">4012</a></li><li><a href="#4013">4013</a></li><li><a href="#4014">4014</a></li><li><a href="#4015">4015</a></li><li><a href="#4016">4016</a></li><li><a href="#4019">4019</a></li><li><a href="#4021">4021</a></li><li><a href="#5001">5001</a></li><li><a href="#5002">5002</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5023">5023</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#5035">5035</a></li><li><a href="#5036">5036</a></li><li><a href="#5037">5037</a></li><li><a href="#5041">5041</a></li><li><a href="#5046">5046</a></li><li><a href="#5047">5047</a></li><li><a href="#5048">5048</a></li><li><a href="#5054">5054</a></li><li><a href="#5056">5056</a></li><li><a href="#5057">5057</a></li><li><a href="#5058">5058</a></li><li><a href="#5064">5064</a></li><li><a href="#5068">5068</a></li><li><a href="#6001">6001</a></li><li><a href="#6002">6002</a></li><li><a href="#6004">6004</a></li><li><a href="#6005">6005</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7004">7004</a></li><li><a href="#7005">7005</a></li><li><a href="#7006">7006</a></li><li><a href="#7007">7007</a></li><li><a href="#7009">7009</a></li><li><a href="#7010">7010</a></li><li><a href="#7011">7011</a></li><li><a href="#7013">7013</a></li><li><a href="#7014">7014</a></li><li><a href="#7015">7015</a></li><li><a href="#7016">7016</a></li><li><a href="#7017">7017</a></li><li><a href="#7018">7018</a></li><li><a href="#7019">7019</a></li><li><a href="#7020">7020</a></li><li><a href="#7021">7021</a></li><li><a href="#7022">7022</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li><li><a href="#7026">7026</a></li><li><a href="#7027">7027</a></li><li><a href="#7030">7030</a></li><li><a href="#7031">7031</a></li><li><a href="#7032">7032</a></li><li><a href="#7033">7033</a></li><li><a href="#7034">7034</a></li><li><a href="#7035">7035</a></li><li><a href="#7036">7036</a></li><li><a href="#7037">7037</a></li><li><a href="#7038">7038</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
