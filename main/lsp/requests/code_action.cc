@@ -70,9 +70,16 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
         return response;
     }
 
+    auto maybeLoc = params->range->toLoc(gs, file);
+    if (!maybeLoc.has_value()) {
+        // VSCode has been observed to send bad ranges for rubocop autofixes.  It's
+        // not clear whose fault that is, but we shouldn't send an error for that.
+        response->result = move(result);
+        return response;
+    }
+    auto loc = maybeLoc.value();
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto errors = typechecker.retypecheck({file});
-    auto loc = params->range->toLoc(gs, file);
     vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &error : errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {

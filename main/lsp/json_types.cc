@@ -107,19 +107,16 @@ unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
                               make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
-core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
+std::optional<core::Loc> Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(start->line >= 0);
     ENFORCE(start->character >= 0);
     ENFORCE(end->line >= 0);
     ENFORCE(end->character >= 0);
 
-    auto sPos = core::Loc::pos2Offset(file.data(gs),
-                                      core::Loc::Detail{(uint32_t)start->line + 1, (uint32_t)start->character + 1});
-    auto ePos =
-        core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(uint32_t)end->line + 1, (uint32_t)end->character + 1});
+    core::Loc::Detail sDetail{(uint32_t)start->line + 1, (uint32_t)start->character + 1};
+    core::Loc::Detail eDetail{(uint32_t)end->line + 1, (uint32_t)end->character + 1};
 
-    // These offsets are non-nullopt assuming the input Range is valid
-    return core::Loc(file, sPos.value(), ePos.value());
+    return core::Loc::fromDetails(gs, file, sDetail, eDetail);
 }
 
 int Range::cmp(const Range &b) const {
