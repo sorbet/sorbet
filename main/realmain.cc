@@ -736,7 +736,6 @@ int realmain(int argc, char *argv[]) {
                 indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheFile, move(indexed), *workers);
             }
 
-            gs->suppressErrorClass(core::errors::Namer::MethodNotFound.code);
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);

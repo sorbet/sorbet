@@ -12,7 +12,7 @@ constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::True};
 // constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
 constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::True};
 // constexpr ErrorClass InvalidAttr{5009, StrictLevel::True};
-constexpr ErrorClass InvalidCast{5010, StrictLevel::False};
+// constexpr ErrorClass InvalidCast{5010, StrictLevel::False};
 constexpr ErrorClass CircularDependency{5011, StrictLevel::False};
 constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::False};
 constexpr ErrorClass ConstantAssertType{5013, StrictLevel::False};
