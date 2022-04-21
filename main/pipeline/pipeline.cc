@@ -541,7 +541,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                             auto file = tree.file;
                             if (!file.data(cgs).cached()) {
                                 core::MutableContext ctx(cgs, core::Symbols::root(), file);
-                                tree.tree = ast::Substitute::run(ctx, *job.subst, move(tree.tree));
+                                tree = ast::Substitute::run(ctx, *job.subst, move(tree));
                             }
                         }
                     }

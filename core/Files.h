@@ -65,6 +65,12 @@ public:
     bool cached() const;
     void setCached(bool value);
 
+    // Fetch the mangled name of the package that this file belongs to.
+    NameRef getPackage() const;
+
+    // Set the mangled name of the package that this file belongs to.
+    void setPackage(NameRef mangledName);
+
     File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
     File(const File &other) = delete;
@@ -103,6 +109,8 @@ private:
     CheckSize(Flags, 1, 1);
 
     Flags flags;
+
+    NameRef package = core::NameRef::noName();
 
     const std::string path_;
     const std::string source_;
