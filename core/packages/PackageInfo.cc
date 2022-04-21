@@ -44,13 +44,11 @@ ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInf
     auto &db = gs.packageDB();
 
     for (auto pkg : db.packages()) {
-        auto &pkgInfo = db.getPackageInfo(pkg);
-        if (!info.importsPackage(pkgInfo)) {
+        if (!info.importsPackage(pkg)) {
             continue;
         }
 
-        auto &fullName = pkgInfo.fullName();
-
+        auto &fullName = db.getPackageInfo(pkg).fullName();
         if (thisName.size() >= fullName.size()) {
             if (std::equal(fullName.begin(), fullName.end(), thisName.begin())) {
                 res.parentImports.emplace_back(pkg);

@@ -457,13 +457,17 @@ public:
         return rv;
     }
 
-    std::optional<core::packages::ImportType> importsPackage(const PackageInfo &other) const {
-        ENFORCE(other.exists());
+    std::optional<core::packages::ImportType> importsPackage(core::NameRef mangledName) const {
+        if (!mangledName.exists()) {
+            return std::nullopt;
+        }
+
         auto imp =
-            absl::c_find_if(importedPackageNames, [&](auto &i) { return i.name.mangledName == other.mangledName(); });
+            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.name.mangledName == mangledName; });
         if (imp == importedPackageNames.end()) {
             return nullopt;
         }
+
         switch (imp->type) {
             case ImportType::Normal:
                 return core::packages::ImportType::Normal;

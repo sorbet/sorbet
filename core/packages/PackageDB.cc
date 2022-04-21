@@ -76,7 +76,7 @@ public:
         return vector<vector<core::NameRef>>();
     }
 
-    std::optional<ImportType> importsPackage(const PackageInfo &other) const {
+    std::optional<ImportType> importsPackage(core::NameRef mangledName) const {
         notImplemented();
         return nullopt;
     }
