@@ -485,6 +485,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             // RBI generation
             {
                 packageTrees = packager::Packager::findPackages(*rbiGenGs, *workers, move(packageTrees));
+                packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
                 auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*rbiGenGs, *workers);
                 for (auto &package : rbiGenGs->packageDB().packages()) {
                     auto output = packager::RBIGenerator::runOnce(*rbiGenGs, package, packageNamespaces);

@@ -65,6 +65,12 @@ public:
     bool cached() const;
     void setCached(bool value);
 
+    // Fetch the mangled name of the package that this file belongs to.
+    NameRef getPackage() const;
+
+    // Set the mangled name of the package that this file belongs to.
+    void setPackage(NameRef mangledName);
+
     File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
     File(const File &other) = delete;
@@ -104,6 +110,10 @@ private:
 
     Flags flags;
 
+    // NOTE: this adds some overhead even when `--stripe-packages` is disabled. In the future we may look at moving it
+    // into the PackageDB to avoid the memory overhad in non-stripe codebases.
+    NameRef package = core::NameRef::noName();
+
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
@@ -118,7 +128,7 @@ public:
 private:
     std::shared_ptr<const FileHash> hash_;
 };
-CheckSize(File, 96, 8);
+CheckSize(File, 104, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());

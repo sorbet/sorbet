@@ -2044,10 +2044,49 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
     return files;
 }
 
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
+    // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
+    // no symbols will be allocated.
+    auto &packageDB = gs.packageDB();
+    for (auto &f : files) {
+        f.file.data(gs).setPackage(core::NameRef::noName());
+
+        auto &pkg = packageDB.getPackageForFile(gs, f.file);
+        if (!pkg.exists()) {
+            continue;
+        }
+
+        f.file.data(gs).setPackage(pkg.mangledName());
+    }
+
+    return;
+}
+
+// NOTE: we use `dataAllowingUnsafe` here, as determining the package for a file is something that can be done from its
+// path alone.
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::FileRef> &files) {
+    // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
+    // no symbols will be allocated.
+    auto &packageDB = gs.packageDB();
+    for (auto file : files) {
+        file.dataAllowingUnsafe(gs).setPackage(core::NameRef::noName());
+
+        auto &pkg = packageDB.getPackageForFile(gs, file);
+        if (!pkg.exists()) {
+            continue;
+        }
+
+        file.dataAllowingUnsafe(gs).setPackage(pkg.mangledName());
+    }
+
+    return;
+}
+
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager");
 
     files = findPackages(gs, workers, std::move(files));
+    setPackageNameOnFiles(gs, files);
     if (gs.runningUnderAutogen) {
         // Autogen only requires package metadata. Remove the package files.
         auto it = std::remove_if(files.begin(), files.end(),
@@ -2084,6 +2123,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     } else {
                         job = rewritePackagedFile(ctx, move(job));
                     }
+
                     results.emplace_back(move(job));
                 }
             }
@@ -2127,7 +2167,9 @@ template <typename StateType> vector<ast::ParsedFile> runIncrementalImpl(StateTy
 } // namespace
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
-    return runIncrementalImpl(gs, move(files));
+    files = runIncrementalImpl(gs, move(files));
+    Packager::setPackageNameOnFiles(gs, files);
+    return files;
 }
 
 vector<ast::ParsedFile> Packager::runIncrementalBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> files) {

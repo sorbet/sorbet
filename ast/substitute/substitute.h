@@ -11,8 +11,8 @@ class LazyNameSubstitution;
 namespace sorbet::ast {
 class Substitute {
 public:
-    static ExpressionPtr run(core::MutableContext ctx, const core::NameSubstitution &subst, ExpressionPtr what);
-    static ExpressionPtr run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ExpressionPtr what);
+    static ParsedFile run(core::MutableContext ctx, const core::NameSubstitution &subst, ParsedFile what);
+    static ParsedFile run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ParsedFile what);
 };
 } // namespace sorbet::ast
 #endif // SORBET_SUBSTITUTE_H

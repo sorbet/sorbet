@@ -1020,7 +1020,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
                         if (klass.exists()) {
-                            const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+                            const auto &curPkg = ctx.state.packageDB().getPackageInfo(ctx.file.data(ctx).getPackage());
                             if (curPkg.exists() && !curPkg.ownsSymbol(ctx, klass)) {
                                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
                                     auto &curPkgName = curPkg.fullName();

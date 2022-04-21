@@ -72,11 +72,11 @@ struct TestPackageFile {
     }
 
     const core::packages::PackageInfo &targetPackage(core::GlobalState &gs) const {
-        return gs.packageDB().getPackageForFile(gs, targetParsedFile.file);
+        return gs.packageDB().getPackageInfo(targetParsedFile.file.data(gs).getPackage());
     }
 
     const core::packages::PackageInfo &newPackage(core::GlobalState &gs) const {
-        return gs.packageDB().getPackageForFile(gs, newParsedFile.file);
+        return gs.packageDB().getPackageInfo(newParsedFile.file.data(gs).getPackage());
     }
 
     const core::SymbolRef getConstantRef(core::GlobalState &gs, vector<string> rawName) const {

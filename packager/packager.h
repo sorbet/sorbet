@@ -99,6 +99,12 @@ public:
 
     static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 
+    // For each file, set its package name.
+    static void setPackageNameOnFiles(core::GlobalState &gs, const std::vector<ast::ParsedFile> &files);
+
+    // For each file, set its package name.
+    static void setPackageNameOnFiles(core::GlobalState &gs, const std::vector<core::FileRef> &files);
+
     Packager() = delete;
 };
 } // namespace sorbet::packager

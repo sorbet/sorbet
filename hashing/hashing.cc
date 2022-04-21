@@ -24,7 +24,7 @@ pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &origi
     core::LazyNameSubstitution subst(originalGS, newGS);
     core::MutableContext ctx(newGS, core::Symbols::root(), newFref);
     core::UnfreezeNameTable nameTableAccess(newGS);
-    rewritten.tree = ast::Substitute::run(ctx, subst, move(rewritten.tree));
+    rewritten = ast::Substitute::run(ctx, subst, move(rewritten));
     return make_pair<ast::ParsedFile, core::UsageHash>(move(rewritten), subst.getAllNames());
 }
 
@@ -110,7 +110,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     // when fromGS == toGS (hence we intentionally do not unfreeze name table).
     core::LazyNameSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
-    ast.tree = ast::Substitute::run(ctx, subst, move(ast.tree));
+    ast = ast::Substitute::run(ctx, subst, move(ast));
     return computeFileHashForAST(logger, lgs, subst.getAllNames(), move(ast));
 }
 }; // namespace

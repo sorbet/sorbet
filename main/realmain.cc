@@ -670,6 +670,9 @@ int realmain(int argc, char *argv[]) {
 
             packages = packager::Packager::findPackages(*gs, *workers, move(packages));
 
+            packager::Packager::setPackageNameOnFiles(*gs, packages);
+            packager::Packager::setPackageNameOnFiles(*gs, inputFiles);
+
             if (!opts.singlePackage.empty()) {
                 Timer singlePackageTimer(logger, "singlePackage.setup");
 
@@ -682,10 +685,9 @@ int realmain(int argc, char *argv[]) {
                 auto info = core::packages::ImportInfo::fromPackage(*gs, pkg);
 
                 // Only keep inputs that are part of the package whose interface we're generating
-                auto &db = gs->packageDB();
-                auto it = std::remove_if(inputFiles.begin(), inputFiles.end(), [&gs = *gs, &db, &info](auto file) {
-                    auto &pkg = db.getPackageForFile(gs, file);
-                    return pkg.exists() && pkg.mangledName() != info.package;
+                auto it = std::remove_if(inputFiles.begin(), inputFiles.end(), [&gs = *gs, &info](auto file) {
+                    // NOTE: the files haven't been read at this point, but their package will be known.
+                    return info.package != file.dataAllowingUnsafe(gs).getPackage();
                 });
                 inputFiles.erase(it, inputFiles.end());
 
