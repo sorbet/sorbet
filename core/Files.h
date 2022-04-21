@@ -19,7 +19,7 @@ class SerializerImpl;
 
 class File final {
 public:
-    enum class Type {
+    enum class Type : uint8_t {
         NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
@@ -115,7 +115,7 @@ public:
 
     const CompiledLevel compiledLevel;
 };
-CheckSize(File, 120, 8);
+CheckSize(File, 112, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
