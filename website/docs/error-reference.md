@@ -577,9 +577,9 @@ not exist.
 > This error is specific to Stripe's custom `--stripe-packages` definition. If
 > you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-All `import` and `export` lines in a `__package.rb` file must have
-constant literals as their argument. Doing arbitrary computation of imports and
-exports is not allowed in `__package.rb` files.
+All `import` and `export` lines in a `__package.rb` file must have constant
+literals as their argument. Doing arbitrary computation of imports and exports
+is not allowed in `__package.rb` files.
 
 Also note that all `import` declarations must be unique, with no duplicated
 imports.
@@ -633,8 +633,8 @@ Package names must not contain underscores. Internally, the packager assumes it
 can use the underscore character to join components of a package name together.
 For example, internally the package uses names like `Opus_Foo` to represent the
 package `Opus::Foo`. If underscores were allowed in package names,
-`Opus_Foo_Bar` could represent  a package called `Opus::Foo_Bar`,
-`Opus_Foo::Bar` or `Opus::Foo::Bar`.
+`Opus_Foo_Bar` could represent a package called `Opus::Foo_Bar`, `Opus_Foo::Bar`
+or `Opus::Foo::Bar`.
 
 ## 3713
 
@@ -655,9 +655,9 @@ If you're seeing this error and surprised, double check which folders have
 > you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 This error arises when it's unclear which import actually provides a constant,
-which in turn usually happens with nested packages: given a constant
-`A::B::C` and a package that imports both the packages `A` and `A::B`, it's
-difficult to tell without deep examination which actually exports `A::B::C`.
+which in turn usually happens with nested packages: given a constant `A::B::C`
+and a package that imports both the packages `A` and `A::B`, it's difficult to
+tell without deep examination which actually exports `A::B::C`.
 
 In these cases, it's best to refactor the packages so they are clearly
 delineated: instead of `A` and `A::B`, it might be best to figure out what
@@ -682,7 +682,7 @@ non-test namespace available in the test namespace for the same package." That
 means it only makes sense to `export_for_test` constants from the non-test
 namespace.
 
-Trying to apply this directive to a constant defined in the `Test::`  namespace
+Trying to apply this directive to a constant defined in the `Test::` namespace
 will result in this error.
 
 If you're trying to export a constant from the test namespace to be used in
@@ -697,11 +697,10 @@ deleted.
 This error means that you're exporting a constant redundantly. In Stripe
 Packages mode, exporting a constant `A::B` will export anything accessible
 underneath `A::B`. That means that if you try to export `A::B` and `A::B::C`,
-you'll get this error—the latter export is redundant, as it's implied by
-export `A::B`.
+you'll get this error—the latter export is redundant, as it's implied by export
+`A::B`.
 
 To fix this error, simply remove the more specific export.
-
 
 ## 4001
 
