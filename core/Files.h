@@ -35,6 +35,7 @@ public:
     friend class ::sorbet::core::serialize::SerializerImpl;
 
     static StrictLevel fileStrictSigil(std::string_view source);
+    static LocOffsets locStrictSigil(std::string_view source);
     static CompiledLevel fileCompiledSigil(std::string_view source);
 
     std::string_view path() const;
