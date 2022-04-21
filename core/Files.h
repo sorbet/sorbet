@@ -19,7 +19,7 @@ class SerializerImpl;
 
 class File final {
 public:
-    enum class Type {
+    enum class Type : uint8_t {
         NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
@@ -107,14 +107,17 @@ private:
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
-    std::shared_ptr<const FileHash> hash_;
 
 public:
     const StrictLevel originalSigil;
     StrictLevel strictLevel;
 
     const CompiledLevel compiledLevel;
+
+private:
+    std::shared_ptr<const FileHash> hash_;
 };
+CheckSize(File, 96, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
