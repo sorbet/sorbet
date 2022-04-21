@@ -73,6 +73,21 @@ and should not be reported.
 
 [#1993]: https://github.com/sorbet/sorbet/pull/1993
 
+## 2002
+
+Starting in Ruby 3.0, Ruby uses the `_1`, `_2`, etc. syntax for block arguments:
+
+```ruby
+xs.map {_1.to_s}
+
+# ^ this is equivalent to:
+
+xs.map { |x| x.to_s }
+```
+
+Because of this, `_1` and similar variables are not allowed as normal variable
+names. Pick another variable name, for example: `_x1` or `_arg1`.
+
 ## 2003
 
 If you're seeing this error code, it means that Sorbet already emitted a parse
@@ -105,6 +120,21 @@ recover from the real parse error.
 
 As with all Sorbet error messages, if one of these hint error messages is
 confusing or misleading, please [report an issue] to let us know.
+
+## 2004
+
+Starting in Ruby 3.0, Ruby uses the `_1`, `_2`, etc. syntax for block arguments:
+
+```ruby
+xs.map {_1.to_s}
+
+# ^ this is equivalent to:
+
+xs.map { |x| x.to_s }
+```
+
+Because of this, `_1` and similar variables are not allowed as normal variable
+names. Pick another variable name, for example: `_x1` or `_arg1`.
 
 ## 3001
 
@@ -161,6 +191,129 @@ A possible workaround is to use a string and `to_i`:
 puts "11377327221391349843".to_i + 1
 ```
 
+## 3003
+
+Sorbet does not support certain Ruby features, like the flip flop operator and
+the `redo` keyword. If you feel strongly that Sorbet support these features,
+please open an issue.
+
+Unfortunately, there is no workaround for this issue other than asking Sorbet to
+ignore the file (which forces the _entire_ file to be ignored, including any
+methods and constants defined in it), or rewriting the file to not use the
+unsupported Ruby feature.
+
+If you do decide to ignore the file entirely, you will likely need to use an
+[RBI file](rbi.md) to let Sorbet know about any classes and methods defined in
+the ignored file.
+
+## 3004
+
+There was an error parsing a float literal in Sorbet. Specifically, we asked a
+C++ library to parse a Ruby float literal string to a float, and it returned a
+`NaN` value.
+
+If you are seeing this error, it likely represents a bug in Sorbet. Please
+report an issue at <https://github.com/sorbet/sorbet/issues>.
+
+## 3005
+
+Sorbet does not support using operators like `&&=` or `||=` when the target of
+the operator is a constant literal.
+
+Note that Ruby itself will report a warning for such usage:
+
+```ruby
+A = nil
+A ||= 1
+# => warning: already initialized constant A
+```
+
+If you absolutely must reassign a constant using the current value of the
+constant, rewrite the code to use `const_defined?` and `const_set`:
+
+```ruby
+A = nil
+unless Object.const_defined?(:A) && A
+  Object.const_set(:A, 1)
+end
+```
+
+## 3007
+
+Using `yield` in a method body means that a method implicitly takes a block
+argument. In `# typed: strict` files, such methods are required to explicitly
+name the block argument to make the contract clear:
+
+```ruby
+def foo(&blk)
+  yield
+end
+```
+
+This is required even if the block is only ever used by way of `yield`, and
+never with something like `blk.call`.
+
+**Why?** The distinguishing factor of `# typed: strict` is that every method has
+an explicit interface with a signature. It's equally important to be explicit
+about the block argument, if present. For more, see the docs on
+[strictness levels](static.md#file-level-granularity-strictness-levels).
+
+## 3008
+
+Sorbet does not support the `undef` keyword. Sorbet assumes that the set of all
+classes, modules, methods, and constants is static throughout the lifetime of a
+program. It does not attempt to model the way that a Ruby program might mutate
+itself by deleting constants or methods at runtime.
+
+For this reason, the `undef` node is not supported.
+
+Currently, this error is only reported at `# typed: strict` or higher, though in
+the future this might move to lower strictness levels. It does mean that
+currently it's possible to silence this error by downgrading the file containing
+the `undef` to `# typed: true` or lower.
+
+Note that regardless of whether Sorbet reports an error for using `undef`, it
+has no meaning on what Sorbet considers to be defined or not defined. Sorbet
+will not report errors for calls to a method that doesn't exist because it has
+been undefined.
+
+## 3009
+
+Sorbet does not support certain kinds of complicated block parameter
+destructuring patterns. In most cases, it is possible to rewrite these to use
+destructuring assignments inside the block itself:
+
+```ruby
+# ----- BAD -----
+
+xs = [[0, 1, 2, 3], 42]
+xs.then do |(x, *args), y|
+  #             ^^^^^ error: Unsupported rest args in destructure
+  p x    # => 0
+  p args # => [1, 2, 3]
+  p y    # => 42
+end
+
+# ----- Use this instead -----
+
+xs.then do |arg0, y|
+  x, *args = arg0
+
+  p x     # => 0
+  p args  # => [1, 2, 3]
+  p y     # => 42
+end
+```
+
+## 3010
+
+Methods defined in [RBI files](rbi.md) are not allowed to have code in their
+bodies.
+
+The only exception is for instance variable assignments (like `@x = ...`), which
+are allowed so that RBI files may declare the existence of instance variables
+and their types.
+
 ## 3011
 
 There was a Hash literal with duplicated keys.
@@ -184,6 +337,370 @@ names:
 sig {params(_a: String, _b: Integer).void} # ok
 def foo(_a, _b); end
 ```
+
+## 3501
+
+Sorbet has special support for understanding Ruby's `attr_reader`,
+`attr_writer`, and `attr_accessor` methods. For this support to work, it must be
+able to see the name of the attribute **syntactically**, which means that the
+argument must be a `String` or `Symbol` literal.
+
+If you are attempting to dynamically compute the name of an `attr_*` method, you
+must either:
+
+1.  Downgrade the file to `# typed: false`, or
+2.  Hide `attr_*` method call from Sorbet by using something like
+    `public_send(:attr_reader, name)` (instead of `attr_reader name`)
+
+## 3502
+
+`T::InterfaceWrapper` is deprecated and should not be used.
+
+## 3503
+
+Ruby has separate syntax for marking instance methods and singleton class
+methods private:
+
+```ruby
+private def some_instance_method; end
+private_class_method def self.some_singleton_class_method; end
+```
+
+Note that the `self.` keyword in the method declaration changes the method from
+being an instance method to being a class method. In Ruby this `self.` prefix is
+similar to the `static` keyword on method definitions in languages like C++ or
+Java.
+
+## 3504
+
+The signature of an `attr_reader`, `attr_writer`, or `attr_accessor` method
+cannot have any `T.type_parameter` in it.
+
+These methods get and set instance variables on the underlying class, while the
+`T.type_parameter` in the signature would only be in method scope.
+
+## 3505
+
+The `module_function` helper declares that an instance method on a module should
+be duplicated onto the class's singleton class.
+
+The `module_function` must be given an argument that is **syntactically**
+either:
+
+- a method def
+- a `String` or `Symbol` literal with the name of a method
+
+This argument must be provided syntactically because Sorbet has special handling
+for `module_function`, and this special logic must be able to see the exact name
+of the method that is being defined via `module_function`.
+
+To silence this error, either:
+
+- Refactor the code to use `module_function` with only calls to method
+  definitions or literals, or
+- Downgrade the file to `# typed: false` or lower, or
+- Use `send(:module_function, ...)` to hide the call to `module_function` from
+  Sorbet.
+
+## 3506
+
+Enums declared with `T::Enum` are special. A `T::Enum` must have all of its enum
+values defined in the `enums do` block inside an enum, and it's not allowed to
+have any extra constants defined on the class (i.e., constants that don't hold
+values of the enum).
+
+**Why?** Consistency, readability, and simplicity of implementation at runtime.
+
+This includes type aliases. If you'd like to define a type alias consisting of a
+set of enum values, the type alias must be declared outside of the `T::Enum`
+subclass itself.
+
+Note that enums can still have instance variables and methods defined on them.
+For example:
+
+```ruby
+class Direction < T::Enum
+  enums do
+    Up = new
+    Down = new
+    Left = new
+    Right = new
+  end
+
+  def self.vertical
+    @vertical ||= [Up, Down].freeze
+  end
+end
+```
+
+## 3507
+
+The syntax for `test_each` looks like this:
+
+```ruby
+test_each([true, false]) do |x|
+  it 'test' do
+  end
+end
+```
+
+For more examples of valid syntax,
+[see the tests](https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb).
+
+There are some limitations on how `test_each` can be used:
+
+The block given to `test_each` must accept at least one argument (except when
+using `test_each_hash`, it must be able to take exactly two arguments).
+
+The body of the `test_each`'s block must contain only `it` blocks, because of
+limitations in Sorbet. Sorbet models `it` blocks by translating them to method
+definitions under the hood, and method definitions do not have access to
+variables outside of their scope.
+
+Usually this comes up with variable destructuring:
+
+```ruby
+# -- BAD EXAMPLE --
+test_each(values) do |value|
+  x, y = compute_x_y(value)
+  it 'example 1' do
+  end
+  it 'example 2' do
+  end
+end
+```
+
+This can be fixed by worked around by writing the assignment into each `it`
+block directly, or by computing it ahead of time:
+
+```ruby
+test_each(values) do |value|
+  it 'example 1' do
+    x, y = compute_x_y(value)
+  end
+  it 'example 2' do
+    x, y = compute_x_y(value)
+  end
+end
+```
+
+```ruby
+new_values = values.map do |value|
+  x, y = compute_x_y(value)
+  [value, x, y]
+end
+test_each(new_values) do |value, x, y|
+  it 'example 1' do
+  end
+  it 'example 2' do
+  end
+end
+```
+
+## 3508
+
+The argument to the `foreign:` attribute on a `prop` declaration must be a
+lambda function. This prevents the other model class from needing to be loaded
+eagerly. Use the autocorrect to fix the error.
+
+## 3509
+
+The argument to the `computed_by` argument on a prop must be a `Symbol` literal
+(i.e., syntactically, so that Sorbet can analyze it without performing any
+inference).
+
+## 3510
+
+The return type of the `initialize` method in Ruby is never used. Under the
+hood, a call to `new` on a class in Ruby looks something like this:
+
+```ruby
+def self.new(...)
+  instance = alloc
+  _discarded = instance.initialize(...)
+  instance
+end
+```
+
+If you'd like to make a custom factory method for your class, define a custom
+singleton class method.
+
+## 3511
+
+Accessor methods defined with `Struct.new` must not end with `=`, because the
+generated setter method will then be given an invalid name ending with `==`.
+
+## 3512
+
+`T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
+type `T.untyped` (along with all other values).
+
+## 3702
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package definitions must be formatted like this:
+
+```ruby
+class Opus::Foo < PackageSpec
+  # ...
+end
+```
+
+In this example, `Opus::Foo` is the name of the package, and `PackageSpec`
+explicitly declares that this class definition is a package spec.
+
+## 3703
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Each package must have only one definition. A package definition is the place
+where there is a line like `class Opus::Foo < PackageSpec` in a `__package.rb`
+file.
+
+## 3704
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Sorbet found an `import` in a `__package.rb` file, but the imported constant did
+not exist.
+
+## 3705
+
+> **TODO** This error code is not yet documented.
+
+## 3706
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+All `import` and `export` lines in a `__package.rb` file must have constant
+literals as their argument. Doing arbitrary computation of imports and exports
+is not allowed in `__package.rb` files.
+
+Also note that all `import` declarations must be unique, with no duplicated
+imports.
+
+## 3707
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`__package.rb` files must declare exactly one package.
+
+## 3709
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A package cannot import itself. Double check which files and/or packages you
+intended to modify, as you've likely made a typo.
+
+## 3710
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary
+Ruby code. The fact that they use Ruby syntax is a convenience so that:
+
+- package declarations get syntax highlighting in all Ruby editors
+- tooling like Sorbet and RuboCop work on `__package.rb` files out of the box
+- Sorbet can support things like jump-to-definition inside `__package.rb` files
+
+But despite that, `__package.rb` files must be completely statically analyzable,
+which means most forms of Ruby expressions are not allowed in these files.
+
+## 3711
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package files must be `# typed: strict`. If you are in the process of migrating
+a codebase to use the packager mode and want to sometimes ignore a
+`__package.rb` file, use the `--ignore=__package.rb` command line flag which
+will ignore all files whose name matches `__package.rb` exactly, in any folder.
+
+## 3712
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package names must not contain underscores. Internally, the packager assumes it
+can use the underscore character to join components of a package name together.
+For example, internally the package uses names like `Opus_Foo` to represent the
+package `Opus::Foo`. If underscores were allowed in package names,
+`Opus_Foo_Bar` could represent a package called `Opus::Foo_Bar`, `Opus_Foo::Bar`
+or `Opus::Foo::Bar`.
+
+## 3713
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+All code inside a package must live within the namespace declared by it's
+enclosing `__package.rb` file. Note that since packages are allowed to nest
+inside each other, sometimes you might have attempted to add code in a folder
+that you didn't realize was actually managed by a nested package.
+
+If you're seeing this error and surprised, double check which folders have
+`__package.rb` files in them, and the names of the packages declared by them.
+
+## 3714
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error arises when it's unclear which import actually provides a constant,
+which in turn usually happens with nested packages: given a constant `A::B::C`
+and a package that imports both the packages `A` and `A::B`, it's difficult to
+tell without deep examination which actually exports `A::B::C`.
+
+In these cases, it's best to refactor the packages so they are clearly
+delineated: instead of `A` and `A::B`, it might be best to figure out what
+behavior lives in `A` but not `A::B` and move it to a new package entirely, like
+`A::X` (and then update the import structure as needed).
+
+This error can also be produced when trying to import a name which is a prefix
+of the nested package: for example, importing `A` when your package name is
+`A::B`.
+
+Again, this probably implies you should try to move away from the nested package
+structure, and move the contents of `A` that aren't in a nested package into
+another less ambiguous package.
+
+## 3715
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The `export_for_test` directive is used to say, "Make this constant from the
+non-test namespace available in the test namespace for the same package." That
+means it only makes sense to `export_for_test` constants from the non-test
+namespace.
+
+Trying to apply this directive to a constant defined in the `Test::` namespace
+will result in this error.
+
+If you're trying to export a constant from the test namespace to be used in
+other packages, then just use `export`. Otherwise, these lines can be safely
+deleted.
+
+## 3716
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you're exporting a constant redundantly. In Stripe
+Packages mode, exporting a constant `A::B` will export anything accessible
+underneath `A::B`. That means that if you try to export `A::B` and `A::B::C`,
+you'll get this error—the latter export is redundant, as it's implied by export
+`A::B`.
+
+To fix this error, simply remove the more specific export.
 
 ## 4001
 

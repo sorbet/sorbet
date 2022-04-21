@@ -1671,6 +1671,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     val = numeric_limits<double>::quiet_NaN();
                     if (auto e = dctx.ctx.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
                         e.setHeader("Unsupported float literal: `{}`", floatNode->val);
+                        e.addErrorNote("This likely represents a bug in Sorbet. Please report an issue:\n"
+                                       "    https://github.com/sorbet/sorbet/issues");
                     }
                 }
 
