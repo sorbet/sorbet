@@ -5,7 +5,7 @@
 namespace sorbet::core::errors::Packager {
 // Packaging errors are fatal (they prevent packaging from working at runtime!), and should not be silenceable.
 // Thus, all of these errors fire on typed: false and above.
-constexpr ErrorClass MustBeTypedStrict{3701, StrictLevel::False};
+// constexpr ErrorClass MustBeTypedStrict{3701, StrictLevel::False};
 constexpr ErrorClass InvalidPackageDefinition{3702, StrictLevel::False};
 constexpr ErrorClass RedefinitionOfPackage{3703, StrictLevel::False};
 constexpr ErrorClass PackageNotFound{3704, StrictLevel::False};

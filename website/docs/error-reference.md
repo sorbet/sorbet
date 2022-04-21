@@ -535,6 +535,174 @@ generated setter method will then be given an invalid name ending with `==`.
 `T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
 type `T.untyped` (along with all other values).
 
+## 3702
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package definitions must be formatted like this:
+
+```ruby
+class Opus::Foo < PackageSpec
+  # ...
+end
+```
+
+In this example, `Opus::Foo` is the name of the package, and `PackageSpec`
+explicitly declares that this class definition is a package spec.
+
+## 3703
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Each package must have only one definition. A package definition is the place
+where there is a line like `class Opus::Foo < PackageSpec` in a `__package.rb`
+file.
+
+## 3704
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Sorbet found an `import` in a `__package.rb` file, but the imported constant did
+not exist.
+
+## 3705
+
+> **TODO** This error code is not yet documented.
+
+## 3706
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+All `import` and `export` lines in a `__package.rb` file must have
+constant literals as their argument. Doing arbitrary computation of imports and
+exports is not allowed in `__package.rb` files.
+
+Also note that all `import` declarations must be unique, with no duplicated
+imports.
+
+## 3707
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`__package.rb` files must declare exactly one package.
+
+## 3709
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A package cannot import itself. Double check which files and/or packages you
+intended to modify, as you've likely made a typo.
+
+## 3710
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary
+Ruby code. The fact that they use Ruby syntax is a convenience so that:
+
+- package declarations get syntax highlighting in all Ruby editors
+- tooling like Sorbet and RuboCop work on `__package.rb` files out of the box
+- Sorbet can support things like jump-to-definition inside `__package.rb` files
+
+But despite that, `__package.rb` files must be completely statically analyzable,
+which means most forms of Ruby expressions are not allowed in these files.
+
+## 3711
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package files must be `# typed: strict`. If you are in the process of migrating
+a codebase to use the packager mode and want to sometimes ignore a
+`__package.rb` file, use the `--ignore=__package.rb` command line flag which
+will ignore all files whose name matches `__package.rb` exactly, in any folder.
+
+## 3712
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package names must not contain underscores. Internally, the packager assumes it
+can use the underscore character to join components of a package name together.
+For example, internally the package uses names like `Opus_Foo` to represent the
+package `Opus::Foo`. If underscores were allowed in package names,
+`Opus_Foo_Bar` could represent  a package called `Opus::Foo_Bar`,
+`Opus_Foo::Bar` or `Opus::Foo::Bar`.
+
+## 3713
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+All code inside a package must live within the namespace declared by it's
+enclosing `__package.rb` file. Note that since packages are allowed to nest
+inside each other, sometimes you might have attempted to add code in a folder
+that you didn't realize was actually managed by a nested package.
+
+If you're seeing this error and surprised, double check which folders have
+`__package.rb` files in them, and the names of the packages declared by them.
+
+## 3714
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error arises when it's unclear which import actually provides a constant,
+which in turn usually happens with nested packages: given a constant
+`A::B::C` and a package that imports both the packages `A` and `A::B`, it's
+difficult to tell without deep examination which actually exports `A::B::C`.
+
+In these cases, it's best to refactor the packages so they are clearly
+delineated: instead of `A` and `A::B`, it might be best to figure out what
+behavior lives in `A` but not `A::B` and move it to a new package entirely, like
+`A::X` (and then update the import structure as needed).
+
+This error can also be produced when trying to import a name which is a prefix
+of the nested package: for example, importing `A` when your package name is
+`A::B`.
+
+Again, this probably implies you should try to move away from the nested package
+structure, and move the contents of `A` that aren't in a nested package into
+another less ambiguous package.
+
+## 3715
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The `export_for_test` directive is used to say, "Make this constant from the
+non-test namespace available in the test namespace for the same package." That
+means it only makes sense to `export_for_test` constants from the non-test
+namespace.
+
+Trying to apply this directive to a constant defined in the `Test::`  namespace
+will result in this error.
+
+If you're trying to export a constant from the test namespace to be used in
+other packages, then just use `export`. Otherwise, these lines can be safely
+deleted.
+
+## 3716
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error means that you're exporting a constant redundantly. In Stripe
+Packages mode, exporting a constant `A::B` will export anything accessible
+underneath `A::B`. That means that if you try to export `A::B` and `A::B::C`,
+you'll get this error—the latter export is redundant, as it's implied by
+export `A::B`.
+
+To fix this error, simply remove the more specific export.
+
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
