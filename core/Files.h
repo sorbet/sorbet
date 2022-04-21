@@ -107,15 +107,18 @@ private:
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
-    std::shared_ptr<const FileHash> hash_;
 
 public:
     const StrictLevel originalSigil;
     StrictLevel strictLevel;
 
     const CompiledLevel compiledLevel;
+
+private:
+    std::shared_ptr<const FileHash> hash_;
+
 };
-CheckSize(File, 104, 8);
+CheckSize(File, 96, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
