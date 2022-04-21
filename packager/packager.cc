@@ -2167,7 +2167,9 @@ template <typename StateType> vector<ast::ParsedFile> runIncrementalImpl(StateTy
 } // namespace
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
-    return runIncrementalImpl(gs, move(files));
+    files = runIncrementalImpl(gs, move(files));
+    Packager::setPackageNameOnFiles(gs, files);
+    return files;
 }
 
 vector<ast::ParsedFile> Packager::runIncrementalBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
