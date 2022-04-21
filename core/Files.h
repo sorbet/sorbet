@@ -115,6 +115,7 @@ public:
 
     const CompiledLevel compiledLevel;
 };
+CheckSize(File, 120, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
