@@ -15,7 +15,7 @@ constexpr ErrorClass OverloadedArgumentCountMismatch{7008, StrictLevel::True};
 constexpr ErrorClass BareTypeUsage{7009, StrictLevel::True};
 constexpr ErrorClass GenericArgumentCountMismatch{7010, StrictLevel::True};
 constexpr ErrorClass IncompleteType{7011, StrictLevel::True};
-constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::True};
+// constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::True};
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, StrictLevel::True};
 // constexpr ErrorClass GenericMethodConstraintUnsolved{7013, StrictLevel::True};
 constexpr ErrorClass RevealType{7014, StrictLevel::True};
