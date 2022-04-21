@@ -275,8 +275,8 @@ the previous method's arity exactly. A method's arity includes how many
 positional arguments a method has, which keyword arguments it takes, etc.
 
 Determining the arity of the previous method can sometimes be tricky, especially
-when the previous method came was defined dynamically by a DSL. In these cases,
-the easiest way to determine a method's arity is to find a place whether that
+when the previous method was defined dynamically by a DSL. In these cases,
+the easiest way to determine a method's arity is to find a place where that
 method is **called**, hover over it using Sorbet's
 [editor integration](vscode.md), and copy the displayed method definition.
 
@@ -401,12 +401,12 @@ either on Slack or Stack Overflow.
 
 **Why is it this way?** Sorbet has a simple architecture which has been chosen
 to optimize for performance in large codebases. Specifically, Sorbet only knows
-which method is being called during it's inference phase. The inference phase
+which method is being called during its inference phase. The inference phase
 requires that a complete symbol table (listing all classes, all the methods that
 class owns, and all the methods' types) has been built already. Thus building
 this symbol table cannot depend on knowing which methods are defined.
 
-This is also a philosophical believe that Ruby codebases are easier for
+This is also a philosophical belief that Ruby codebases are easier for
 programmers to understand when constant references are simple.
 
 ## 4015
@@ -434,7 +434,7 @@ file—instead they must be used inside a class or module definition.
 This error is only reported when running Sorbet with the `--stripe-mode` command
 line flag.
 
-A class defines behavior in multiple files when two files would need to be run
+A class defines behavior in multiple files when at least two files would need to be run
 in order to completely load that class. A class definition that only serves as a
 namespace for inner definitions is not considered to have behavior. For example,
 in this example module `A` has behavior in two files:
@@ -1584,7 +1584,7 @@ Box[true].new # error: Unexpected bare `TrueClass` value found in type position
 ```
 
 More generally, Sorbet draws a distinction between places in a program where
-Ruby values are allowed, and places where Sorbet type syntax allowed. For
+Ruby values are allowed, and places where Sorbet type syntax is allowed. For
 example:
 
 ```ruby
