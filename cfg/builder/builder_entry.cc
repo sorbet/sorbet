@@ -117,7 +117,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             // members (in namer). If this ENFORCE fails, we might have to resurrect the old logic
             // we had for handling MIN_LOOP_GLOBAL (or at least, add some tests that would trigger
             // pinning errors).
-            // ENFORCE(global.isTypeMember());
+            ENFORCE(global.isTypeMember());
         }
     }
     for (auto kv : discoveredUndeclaredFields) {
