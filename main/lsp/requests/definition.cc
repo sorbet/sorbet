@@ -70,10 +70,15 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
         }
     }
     if (notifyAboutUntypedFile) {
+        auto offsets = core::File::locStrictSigil(fref.data(gs).source());
+        core::Loc loc{fref, offsets};
         auto msg = fmt::format("Could not go to definition because the file is not at least `# typed: true`");
         auto params = make_unique<ShowMessageParams>(MessageType::Info, msg);
         this->config.output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
+        // Jump the user to the sigil location.
+        ENFORCE(locations.empty());
+        addLocIfExists(gs, locations, loc);
     }
     response->result = move(locations);
     return response;
