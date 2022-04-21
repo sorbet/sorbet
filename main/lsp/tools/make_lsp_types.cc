@@ -99,19 +99,20 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    "std::string showRaw() const;",
                                });
 
-    auto Range = makeObject("Range",
-                            {
-                                makeField("start", Position),
-                                makeField("end", Position),
-                            },
-                            classTypes,
-                            {
-                                "// Returns nullptr if loc does not exist",
-                                "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
-                                "core::Loc toLoc(const core::GlobalState &gs, core::FileRef file) const;",
-                                "int cmp(const Range &b) const;",
-                                "std::unique_ptr<Range> copy() const;",
-                            });
+    auto Range =
+        makeObject("Range",
+                   {
+                       makeField("start", Position),
+                       makeField("end", Position),
+                   },
+                   classTypes,
+                   {
+                       "// Returns nullptr if loc does not exist",
+                       "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
+                       "std::optional<core::Loc> toLoc(const core::GlobalState &gs, core::FileRef file) const;",
+                       "int cmp(const Range &b) const;",
+                       "std::unique_ptr<Range> copy() const;",
+                   });
 
     auto Location = makeObject("Location",
                                {
