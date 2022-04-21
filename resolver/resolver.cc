@@ -2328,10 +2328,6 @@ class ResolveTypeMembersAndFieldsWalk {
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
         ENFORCE(job.lhs.isTypeAlias(ctx) || job.lhs.isTypeMember());
 
-        if (isLHSResolved(ctx, job.lhs)) {
-            return true;
-        }
-
         auto it = std::remove_if(job.dependencies.begin(), job.dependencies.end(), [&](core::SymbolRef dep) {
             if (isGenericResolved(ctx, dep)) {
                 if (dep.isClassOrModule()) {
@@ -2349,7 +2345,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
         if (job.lhs.isTypeMember()) {
             resolveTypeMember(ctx.withOwner(job.owner), job.lhs.asTypeMemberRef(), job.rhs, resolvedAttachedClasses);
-        } else {
+        } else if (!isLHSResolved(ctx, job.lhs)) {
             resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
         }
 

@@ -1,5 +1,4 @@
 # typed: strict
-# disable-fast-path: true
 
 class Foo; end
 class Bar < Foo; end

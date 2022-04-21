@@ -1,7 +1,4 @@
 # typed: false
-#
-# The type_member errors don't get re-raised in the fast-path
-# disable-fast-path: true
 
 
 Bad = T.type_alias {T.nilable(T.untyped)}

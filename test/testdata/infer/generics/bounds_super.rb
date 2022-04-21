@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 
 class Animal; end
 class Cat < Animal; end
