@@ -116,7 +116,6 @@ public:
 
 private:
     std::shared_ptr<const FileHash> hash_;
-
 };
 CheckSize(File, 96, 8);
 
