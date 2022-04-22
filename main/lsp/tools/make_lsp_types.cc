@@ -87,17 +87,19 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    },
                                    classTypes);
 
-    auto Position = makeObject("Position",
-                               {
-                                   makeField("line", JSONInt),
-                                   makeField("character", JSONInt),
-                               },
-                               classTypes,
-                               {
-                                   "int cmp(const Position &b) const;",
-                                   "std::unique_ptr<Position> copy() const;",
-                                   "std::string showRaw() const;",
-                               });
+    auto Position =
+        makeObject("Position",
+                   {
+                       makeField("line", JSONInt),
+                       makeField("character", JSONInt),
+                   },
+                   classTypes,
+                   {
+                       "int cmp(const Position &b) const;",
+                       "std::unique_ptr<Position> copy() const;",
+                       "std::string showRaw() const;",
+                       "std::optional<core::Loc> asLoc(const core::GlobalState &gs, core::FileRef fref) const;",
+                   });
 
     auto Range =
         makeObject("Range",

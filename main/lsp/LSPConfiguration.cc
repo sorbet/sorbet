@@ -113,27 +113,6 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
     this->clientConfig = clientConfig;
 }
 
-// LSP Spec: line / col in Position are 0-based
-// Sorbet:   line / col in core::Loc are 1-based (like most editors)
-// LSP Spec: distinguishes Position (zero-width) and Range (start & end)
-// Sorbet:   zero-width core::Loc is a Position
-//
-// https://microsoft.github.io/language-server-protocol/specification#text-documents
-//
-// Returns nullopt if the position does not represent a valid location.
-optional<core::Loc> LSPConfiguration::lspPos2Loc(const core::FileRef fref, const Position &pos,
-                                                 const core::GlobalState &gs) const {
-    core::Loc::Detail reqPos;
-    reqPos.line = pos.line + 1;
-    reqPos.column = pos.character + 1;
-    if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
-        auto offset = maybeOffset.value();
-        return core::Loc{fref, offset, offset};
-    } else {
-        return nullopt;
-    }
-}
-
 string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
     assertHasClientConfig();
