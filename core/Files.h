@@ -110,13 +110,15 @@ private:
 
     Flags flags;
 
-    // NOTE: this adds some overhead even when `--stripe-packages` is disabled. In the future we may look at moving it
-    // into the PackageDB to avoid the memory overhad in non-stripe codebases.
-    NameRef package = core::NameRef::noName();
-
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
+
+    // NOTE: this currently is overhead neutral even when `--stripe-packages` is disabled.
+    // Depending on what `File` requires in the future, we may look at moving it into the
+    // PackageDB to avoid memory overhead in non-Stripe codebases.
+    NameRef package = core::NameRef::noName();
+
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
 
 public:
@@ -128,7 +130,7 @@ public:
 private:
     std::shared_ptr<const FileHash> hash_;
 };
-CheckSize(File, 104, 8);
+CheckSize(File, 96, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
