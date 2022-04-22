@@ -60,10 +60,11 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
 
     ENFORCE(buffer.length() >= length);
 
-    string json = buffer.substr(0, length);
-    buffer.erase(0, length);
+    string_view json{buffer.data(), static_cast<size_t>(length)};
     logger->debug("Read: {}\n", json);
-    return ReadOutput{FileOps::ReadResult::Success, LSPMessage::fromClient(json)};
+    auto msg = LSPMessage::fromClient(json);
+    buffer.erase(0, length);
+    return ReadOutput{FileOps::ReadResult::Success, move(msg)};
 }
 
 LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
