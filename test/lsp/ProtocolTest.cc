@@ -237,6 +237,35 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
     return {};
 }
 
+void ProtocolTest::assertDefinitionJumpsToUntypedSigil(std::string_view uri, int line, int column,
+                                                       const Range &sigilRange) {
+    // `send` will eat the notifications, so send the message manually.
+    auto defRequest = getDefinition(uri, line, column);
+    auto results = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(defRequest->toJSON())));
+    const auto numResponses = absl::c_count_if(results, [](const auto &m) { return m->isResponse(); });
+    REQUIRE_EQ(1, numResponses);
+    const auto numRequests = absl::c_count_if(results, [](const auto &m) { return m->isRequest(); });
+    REQUIRE_EQ(0, numRequests);
+    // Ensure the lone response is at the front.
+    absl::c_partition(results, [](const auto &m) { return m->isResponse(); });
+    auto &responseMsg = results.at(0);
+    REQUIRE(responseMsg->isResponse());
+    auto &response = responseMsg->asResponse();
+    REQUIRE(response.result.has_value());
+    auto &defResult = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(response.result.value());
+    auto locs = move(get<vector<unique_ptr<Location>>>(defResult));
+    REQUIRE_EQ(locs.size(), 1);
+    auto &loc = locs.at(0);
+    REQUIRE_EQ(loc->range->cmp(sigilRange), 0);
+    REQUIRE_EQ(results.size() - numResponses, 1);
+    auto &notificationMsg = results.at(1);
+    REQUIRE(notificationMsg->isNotification());
+    auto &notification = notificationMsg->asNotification();
+    auto *showMessageParams = get_if<std::unique_ptr<ShowMessageParams>>(&notification.params);
+    REQUIRE_NE(showMessageParams, nullptr);
+    REQUIRE_EQ((*showMessageParams)->type, MessageType::Info);
+}
+
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
     for (auto &msg : messages) {
         // Ignore typecheck run and sorbet/fence messages. They do not impact semantics.
