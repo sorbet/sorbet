@@ -237,7 +237,8 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
     return {};
 }
 
-void ProtocolTest::assertDefinitionJumpsToUntypedSigil(std::string_view uri, int line, int column, const Range &sigilRange) {
+void ProtocolTest::assertDefinitionJumpsToUntypedSigil(std::string_view uri, int line, int column,
+                                                       const Range &sigilRange) {
     // `send` will eat the notifications, so send the message manually.
     auto defRequest = getDefinition(uri, line, column);
     auto results = verify(getLSPResponsesFor(*lspWrapper, LSPMessage::fromClient(defRequest->toJSON())));
