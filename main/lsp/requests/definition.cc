@@ -25,11 +25,12 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
     auto &queryResponses = result.responses;
     vector<unique_ptr<Location>> locations;
     bool notifyAboutUntypedFile = false;
-    core::FileRef fref;
+    core::FileRef fref = config.uri2FileRef(gs, params->textDocument->uri);
+    bool fileIsTyped = false;
+    if (fref.exists()) {
+        fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
+    }
     if (!queryResponses.empty()) {
-        fref = config.uri2FileRef(gs, params->textDocument->uri);
-        const bool fileIsTyped =
-            fref.data(gs).strictLevel >= core::StrictLevel::True;
         auto resp = move(queryResponses[0]);
 
         // Only support go-to-definition on constants and fields in untyped files.
@@ -68,8 +69,15 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
                 }
             }
         }
+    } else if (fref.exists() && !fileIsTyped) {
+        // The first check ensures that the file actually exists (and therefore
+        // we could have gotten responses) and the second check is what we are
+        // actually interested in.
+        notifyAboutUntypedFile = true;
     }
+
     if (notifyAboutUntypedFile) {
+        ENFORCE(fref.exists());
         auto offsets = core::File::locStrictSigil(fref.data(gs).source());
         core::Loc loc{fref, offsets};
         auto msg = fmt::format("Could not go to definition because the file is not at least `# typed: true`");
