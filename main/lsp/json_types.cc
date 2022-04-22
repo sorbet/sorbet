@@ -159,6 +159,24 @@ string Position::showRaw() const {
     return fmt::format("Position{{.line={}, .character={}}}", this->line, this->character);
 }
 
+// LSP Spec: line / col in Position are 0-based
+// Sorbet:   line / col in core::Loc are 1-based (like most editors)
+// LSP Spec: distinguishes Position (zero-width) and Range (start & end)
+// Sorbet:   zero-width core::Loc is a Position
+//
+// https://microsoft.github.io/language-server-protocol/specification#text-documents
+//
+// Returns nullopt if the position does not represent a valid location.
+optional<core::Loc> Position::asLoc(const core::GlobalState &gs, const core::FileRef fref) const {
+    core::Loc::Detail reqPos{static_cast<uint32_t>(this->line + 1), static_cast<uint32_t>(this->character + 1)};
+    if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
+        auto offset = maybeOffset.value();
+        return core::Loc{fref, offset, offset};
+    } else {
+        return nullopt;
+    }
+}
+
 unique_ptr<DiagnosticRelatedInformation> DiagnosticRelatedInformation::copy() const {
     return make_unique<DiagnosticRelatedInformation>(location->copy(), message);
 }

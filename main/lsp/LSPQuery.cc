@@ -78,7 +78,7 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
         return LSPQueryResult{{}, nullptr};
     }
 
-    auto loc = config.lspPos2Loc(fref, pos, gs);
+    auto loc = pos.asLoc(gs, fref);
     if (!loc.has_value()) {
         if (typechecker.isStale()) {
             // File location was not valid, but it's _probably_ not the client's fault--instead it's
