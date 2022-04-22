@@ -89,22 +89,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
     REQUIRE_EQ(requestIds.size(), 0);
 }
 
-// Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
-TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
-    auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
-    INFO("Expected a single response to a definition request to an untyped document.");
-    REQUIRE_EQ(defResponses.size(), 1);
-    assertResponseMessage(nextId - 1, *defResponses.at(0));
-
-    auto &respMsg = defResponses.at(0)->asResponse();
-    REQUIRE(respMsg.result);
-    auto &result = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*(respMsg.result));
-    auto &array = get<vector<unique_ptr<Location>>>(result);
-    REQUIRE_EQ(array.size(), 0);
-}
-
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
 TEST_CASE_FIXTURE(ProtocolTest, "MergeDidChangeAfterCancellation") {
     assertDiagnostics(initializeLSP(), {});
