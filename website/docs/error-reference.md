@@ -1120,8 +1120,8 @@ Parent::MY_CONST   # ok
 
 ## 5003
 
-Sorbet failed to parse a method signature. For more documentation on 
-valid `sig` syntax, see [Method Signatures](sigs.md).
+Sorbet failed to parse a method signature. For more documentation on valid `sig`
+syntax, see [Method Signatures](sigs.md).
 
 ## 5004
 
@@ -1418,8 +1418,7 @@ So you do not need to manually insert a `raise` inside the body of an abstract
 method.
 
 If you would like to define a method in an abstract class or interface with a
-default implementation, use the `overridable` annotation on the
-signature:
+default implementation, use the `overridable` annotation on the signature:
 
 ```ruby
 class AbstractService
@@ -1444,8 +1443,8 @@ There are a few constraints around how methods like `include`, `extend`,
     defined in `*.rb` or `*.rbi` files that are not being ignored, or
   - Hide the `include` or `extend` invocations from Sorbet by using
     [`# typed: ignore` sigils](static.md) to ignore the entire file, or
-  - Hide only the individual call from Sorbet statically using something
-    like `send(:include, ...)`.
+  - Hide only the individual call from Sorbet statically using something like
+    `send(:include, ...)`.
 - `mixes_in_class_methods` and `requires_ancestor` must only be declared in a
   `module`, not a `class`. Classes are never mixed into other classes or
   modules, so these methods would have no meaning in a class.
