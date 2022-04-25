@@ -76,7 +76,7 @@ void WatchmanProcess::start() {
             rapidjson::MemoryPoolAllocator<> alloc;
             rapidjson::Document d(&alloc);
             logger->debug(line);
-            if (d.Parse(line.c_str()).HasParseError()) {
+            if (d.Parse(line.c_str(), line.size()).HasParseError()) {
                 logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
             } else if (d.HasMember("is_fresh_instance")) {
                 try {
