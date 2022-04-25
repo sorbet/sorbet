@@ -86,6 +86,32 @@ Since `Child#takes_integer_or_string` has been defined in a way that breaks that
 contract that it's "at least as good" as the parent class definition, Sorbet
 must report an error where the invalid override happens.
 
+When considering that the return type is "at least as good" as the parent, the
+subtyping relationship is flipped. Here's an example of incorrect return type
+variance:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {overridable.returns(Numeric)}
+  def returns_at_most_numeric; end
+end
+
+class Child < Parent
+  sig {override.returns(T.any(Numeric, String))}
+  def returns_at_most_numeric; end # error
+end
+```
+
+In this example, the `Parent` definition declares that `returns_at_most_numeric`
+will only ever return at most an `Numeric`, so that all callers will be able to
+assume that they'll only be given an `Numeric` back (including maybe a subclass
+of `Numeric`, like `Integer` or `Float`), but never something else, like a
+`String`. So the above definition of `Child#returns_at_most_numeric` is an
+invalid override, because it attempts to widen the method's declared return type
+to something wider than what the parent specified.
+
 ## What's next?
 
 - [Final Methods, Classes, and Modules](final.md)
