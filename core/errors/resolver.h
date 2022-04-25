@@ -70,7 +70,7 @@ constexpr ErrorClass InvalidRequiredAncestor{5062, StrictLevel::True};
 constexpr ErrorClass UselessRequiredAncestor{5063, StrictLevel::True};
 constexpr ErrorClass UnsatisfiedRequiredAncestor{5064, StrictLevel::True};
 constexpr ErrorClass UnsatisfiableRequiredAncestor{5065, StrictLevel::True};
-constexpr ErrorClass ExperimentalRequiredAncestor{5066, StrictLevel::False};
+// constexpr ErrorClass ExperimentalRequiredAncestor{5066, StrictLevel::False};
 constexpr ErrorClass NonClassSuperclass{5067, StrictLevel::False};
 constexpr ErrorClass AmbiguousDefinitionError{5068, StrictLevel::False};
 constexpr ErrorClass MultipleStatementsInSig{5069, StrictLevel::False};

@@ -41,6 +41,77 @@ Note that the **absence** of `abstract` or `overridable` does **not** mean that
 a method is never overridden. To declare that a method can never be overridden,
 look into [final methods](final.md).
 
+## A note on variance
+
+When overriding a method, the override must accept at all the same things that
+the parent method accepts, and return at most what the parent method returns but
+no more.
+
+This is very abstract so let's make it concrete with some examples:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {overridable.params(x: T.any(Integer, String)).void}
+  def takes_integer_or_string; end
+end
+
+class Child < Parent
+  sig {override.params(x: Integer).void}
+  def takes_integer_or_string; end # error
+end
+```
+
+This code has an error because the child class overrides
+`takes_integer_or_string` but narrows the input type. It's important to reject
+overrides like this, because otherwise Sorbet would not be able to catch errors
+like this:
+
+```ruby
+sig {params(parent: Parent).void}
+def example(parent)
+  parent.takes_integer_or_string('some string')
+end
+
+example(Child.new) # throws at runtime!
+```
+
+In this example, since `Child.new` is an instance of `Parent` (via inheritance),
+Sorbet allows call to `example`. Inside `example`, Sorbet assumes that it is
+safe to call all methods on `Parent`, regardless of whether they're implemented
+by `Parent` or `Child`.
+
+Since `Child#takes_integer_or_string` has been defined in a way that breaks that
+contract that it's "at least as good" as the parent class definition, Sorbet
+must report an error where the invalid override happens.
+
+When considering that the return type is "at least as good" as the parent, the
+subtyping relationship is flipped. Here's an example of incorrect return type
+variance:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {overridable.returns(Numeric)}
+  def returns_at_most_numeric; end
+end
+
+class Child < Parent
+  sig {override.returns(T.any(Numeric, String))}
+  def returns_at_most_numeric; end # error
+end
+```
+
+In this example, the `Parent` definition declares that `returns_at_most_numeric`
+will only ever return at most an `Numeric`, so that all callers will be able to
+assume that they'll only be given an `Numeric` back (including maybe a subclass
+of `Numeric`, like `Integer` or `Float`), but never something else, like a
+`String`. So the above definition of `Child#returns_at_most_numeric` is an
+invalid override, because it attempts to widen the method's declared return type
+to something wider than what the parent specified.
+
 ## What's next?
 
 - [Final Methods, Classes, and Modules](final.md)
