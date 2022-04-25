@@ -974,7 +974,7 @@ void logEmptyCompletion(const core::GlobalState &gs, core::FileRef fref, core::L
         writer.String(path.data(), path.size());
 
         writer.String("query_pos");
-        writer.String(queryLoc.offsets().showRaw());
+        writer.Uint(queryLoc.offsets().beginPos());
 
         writer.String("contents");
         auto source = fref.data(gs).source();
