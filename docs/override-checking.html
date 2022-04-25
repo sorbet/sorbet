@@ -102,6 +102,63 @@ methods don’t need the <code>override</code> annotation.</li>
 <p>Note that the <strong>absence</strong> of <code>abstract</code> or <code>overridable</code> does <strong>not</strong> mean that
 a method is never overridden. To declare that a method can never be overridden,
 look into <a href="/docs/final">final methods</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="a-note-on-variance"></a><a href="#a-note-on-variance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>A note on variance</h2>
+<p>When overriding a method, the override must accept at all the same things that
+the parent method accepts, and return at most what the parent method returns but
+no more.</p>
+<p>This is very abstract so let’s make it concrete with some examples:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {overridable.params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  sig {override.params(<span class="hljs-symbol">x:</span> Integer).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This code has an error because the child class overrides
+<code>takes_integer_or_string</code> but narrows the input type. It’s important to reject
+overrides like this, because otherwise Sorbet would not be able to catch errors
+like this:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">parent:</span> Parent).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(parent)</span></span>
+  parent.takes_integer_or_string(<span class="hljs-string">'some string'</span>)
+<span class="hljs-keyword">end</span>
+
+example(Child.new) <span class="hljs-comment"># throws at runtime!</span>
+</code></pre>
+<p>In this example, since <code>Child.new</code> is an instance of <code>Parent</code> (via inheritance),
+Sorbet allows call to <code>example</code>. Inside <code>example</code>, Sorbet assumes that it is
+safe to call all methods on <code>Parent</code>, regardless of whether they’re implemented
+by <code>Parent</code> or <code>Child</code>.</p>
+<p>Since <code>Child#takes_integer_or_string</code> has been defined in a way that breaks that
+contract that it’s “at least as good” as the parent class definition, Sorbet
+must report an error where the invalid override happens.</p>
+<p>When considering that the return type is “at least as good” as the parent, the
+subtyping relationship is flipped. Here’s an example of incorrect return type
+variance:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {overridable.returns(Numeric)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  sig {override.returns(T.any(Numeric, String))}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, the <code>Parent</code> definition declares that <code>returns_at_most_numeric</code>
+will only ever return at most an <code>Numeric</code>, so that all callers will be able to
+assume that they’ll only be given an <code>Numeric</code> back (including maybe a subclass
+of <code>Numeric</code>, like <code>Integer</code> or <code>Float</code>), but never something else, like a
+<code>String</code>. So the above definition of <code>Child#returns_at_most_numeric</code> is an
+invalid override, because it attempts to widen the method’s declared return type
+to something wider than what the parent specified.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/final">Final Methods, Classes, and Modules</a></p>
@@ -112,7 +169,7 @@ class level.</p></li>
 a powerful tool for code organization and correctness. Learn more about
 Sorbet’s support for abstract classes and interfaces.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/final"><span class="arrow-prev">← </span><span>Final Methods &amp; Classes</span></a><a class="docs-next button" href="/docs/sealed"><span>Sealed Classes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/final"><span class="arrow-prev">← </span><span>Final Methods &amp; Classes</span></a><a class="docs-next button" href="/docs/sealed"><span>Sealed Classes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-note-on-variance">A note on variance</a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

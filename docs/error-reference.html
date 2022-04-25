@@ -899,6 +899,13 @@ we can set up an explicit alias:</p>
 Child::MY_CONST    <span class="hljs-comment"># ok</span>
 Parent::MY_CONST   <span class="hljs-comment"># ok</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5003"></a><a href="#5003" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5003</h2>
+<p>Sorbet failed to parse a method signature. For more documentation on valid <code>sig</code>
+syntax, see <a href="/docs/sigs">Method Signatures</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5004"></a><a href="#5004" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5004</h2>
+<p>Sorbet failed to parse a Ruby expression as a valid Sorbet type annotation.
+Sorbet supports many type annotations—use the sidebar to find relevant docs on
+the kinds of valid Sorbet type annotations.</p>
 <h2><a class="anchor" aria-hidden="true" id="5005"></a><a href="#5005" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5005</h2>
 <p>A class or instance variable is defined in the wrong context.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
@@ -998,6 +1005,164 @@ the cast result to an intermediate variable:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>The same thing holds for type templates.</p>
+<h2><a class="anchor" aria-hidden="true" id="5015"></a><a href="#5015" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5015</h2>
+<p><a href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)">Variance</a>
+is a type system concept that controls how generics interact with subtyping.</p>
+<p>If a <code>type_member</code> is declared as covariant (<code>:out</code>) in a parent class or
+module, it must be declared as either covariant or invariant in any children of
+that class or module. (A <code>type_member</code> with no variance annotation is
+invariant.)</p>
+<p>Similarly if a <code>type_member</code> is declared as contravariant (<code>:in</code>) in a parent
+class or module, it must be declared as either contravariant or invariant in any
+children.</p>
+<p>To see why, consider this example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Parent</span></span>
+  extend T::Generic
+  X = type_member(<span class="hljs-symbol">:out</span>)
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Child</span></span>
+  extend T::Generic
+  <span class="hljs-keyword">include</span> Parent
+
+  X = type_member(<span class="hljs-symbol">:in</span>) <span class="hljs-comment"># error: variance mismatch</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>If Sorbet were to allow this, Sorbet would fail to catch type errors that it
+would need to be able to catch. To see why, consider this chain of <code>T.let</code>
+statements, all of which have no error:</p>
+<pre><code class="hljs css language-ruby">x1 = Child[T.any(String, Symbol)].new
+
+<span class="hljs-comment"># `Child::X` is contravariant, so "String &lt;: T.any(String, Symbol)"</span>
+<span class="hljs-comment"># implies "Child[T.any(String, Symbol)] &lt;: Child[String]"</span>
+x2 = T.let(x1, Child[String])
+
+<span class="hljs-comment"># `String` is equivalent to `String`, so Child[String] &lt;: Parent[String]</span>
+x3 = T.let(x2, Parent[String])
+
+<span class="hljs-comment"># `Parent::X` is covariant, so "String &lt;: T.any(String, Integer)"</span>
+<span class="hljs-comment"># implies "Parent[String] &lt;: Parent[T.any(String, Integer)]"</span>
+x4 = T.let(x3, Parent[T.any(Integer, String)])
+</code></pre>
+<p>Given the above definitions, with <code>Parent::X</code> being covariant and <code>Child::X</code>
+being contravariant, each subsequent <code>T.let</code> checks out, with the reasons being
+specified.</p>
+<p>But that’s a contradiction! We were able to make a conclusion that we know is
+false. If we had jumped straight from where we started to where we finished,
+Sorbet would report an error:</p>
+<pre><code class="hljs css language-ruby">y1 = Child[T.any(String, Symbol)].new
+T.let(y1, Parent[T.any(Integer, String)])
+<span class="hljs-comment">#     ^^ error: Argument does not have asserted type</span>
+</code></pre>
+<p>This is because <code>T.any(Integer, String)</code> is neither a subtype nor a supertype of
+<code>T.any(Symbol, String)</code>, the types are completely incompatible.</p>
+<p>To avoid introducing contradictions like this into the type system, Sorbet
+requires that the variance on parent and child classes matches.</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Parent%0A%20%20extend%20T%3A%3AGeneric%0A%20%20X%20%3D%20type_member%28%3Aout%29%0Aend%0A%0Amodule%20Child%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20Parent%0A%0A%20%20X%20%3D%20type_member%28%3Ain%29%0Aend%0A%0Ax1%20%3D%20Child%5BT.any%28String%2C%20Symbol%29%5D.new%0A%0A%23%20%60Child%3A%3AX%60%20is%20contravariant%2C%20so%20%22String%20%3C%3A%20T.any%28String%2C%20Symbol%29%22%0A%23%20implies%20%22Child%5BT.any%28String%2C%20Symbol%29%5D%20%3C%3A%20Child%5BString%5D%22%0Ax2%20%3D%20T.let%28x1%2C%20Child%5BString%5D%29%0A%0A%23%20%60String%60%20is%20equivalent%20to%20%60String%60%2C%20so%20Child%5BString%5D%20%3C%3A%20Parent%5BString%5D%0Ax3%20%3D%20T.let%28x2%2C%20Parent%5BString%5D%29%0A%0A%23%20%60Parent%3A%3AX%60%20is%20covariant%2C%20so%20%22String%20%3C%3A%20T.any%28String%2C%20Integer%29%22%0A%23%20implies%20%22Parent%5BString%5D%20%3C%3A%20Parent%5BT.any%28String%2C%20Integer%29%5D%22%0Ax4%20%3D%20T.let%28x3%2C%20Parent%5BT.any%28Integer%2C%20String%29%5D%29%0A%0Ay1%20%3D%20Child%5BT.any%28String%2C%20Symbol%29%5D.new%0AT.let%28y1%2C%20Parent%5BT.any%28Integer%2C%20String%29%5D%29">→ View full example on sorbet.run</a></p>
+<h2><a class="anchor" aria-hidden="true" id="5016"></a><a href="#5016" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5016</h2>
+<p>Sorbet does not allow classes to be covariant nor contravariant.</p>
+<p><strong>Why?</strong> The design of generic classes and interfaces in Sorbet was heavily
+inspired by the design of C#. This exact question has been answered for C# by
+Eric Lippert, who worked on the design and implementation of C# for many years.</p>
+<p>→
+<a href="https://stackoverflow.com/questions/2733346/why-isnt-there-generic-variance-for-classes-in-c-sharp-4-0/2734070#2734070">Why isn’t there variance for generic classes?</a></p>
+<p>The answer concludes that the main selling point of having covariant classes is
+to make immutable generic classes, at the cost of a more complex implementation
+of generics.</p>
+<h2><a class="anchor" aria-hidden="true" id="5017"></a><a href="#5017" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5017</h2>
+<p>The <code>type_member</code> and <code>type_template</code> declarations from a parent class must all
+be repeated in the same order in a child class (and before any newly-added type
+members belonging only to the child class).</p>
+<p>One non-obvious way this error can manifest is via code generation tooling. If a
+tool attempts to generate <code>type_member</code> declarations using runtime reflection,
+but does them out of order, that will confuse Sorbet. Ask the owner of the code
+generator for help resolving the problem.</p>
+<h2><a class="anchor" aria-hidden="true" id="5018"></a><a href="#5018" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5018</h2>
+<p>A child class defined a normal constant with a name that was already in use as a
+<code>type_member</code> in the parent class. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Generic
+
+  X = type_member
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  X = <span class="hljs-number">0</span> <span class="hljs-comment"># error!</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, since <code>X</code> is declared as a <code>type_member</code> in the parent, it must
+also be declared as a <code>type_member</code> in the child, and cannot be changed to some
+other kind of constant in the child.</p>
+<h2><a class="anchor" aria-hidden="true" id="5019"></a><a href="#5019" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5019</h2>
+<p>Abstract methods must not have bodies. For more information, see
+<a href="/docs/abstract">Abstract Classes and Interfaces</a>. Despite these methods not having
+a body, Sorbet’s <a href="/docs/runtime">runtime support</a> via the <code>sorbet-runtime</code> gem will
+convert these methods to raise. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IService</span></span>
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  sig {abstract.returns(String)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">port</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyService</span></span>
+  <span class="hljs-keyword">include</span> IService
+  <span class="hljs-comment"># For sake of example, let's "forget" to implement `port`</span>
+  <span class="hljs-comment"># (Sorbet would report a static error here)</span>
+<span class="hljs-keyword">end</span>
+
+MyService.new.port <span class="hljs-comment"># raises an exception at runtime:</span>
+
+<span class="hljs-comment"># example.rb:16:</span>
+<span class="hljs-comment">#   The method `port` on `IService` is declared as `abstract`.</span>
+<span class="hljs-comment">#   It does not have an implementation.</span>
+</code></pre>
+<p>So you do not need to manually insert a <code>raise</code> inside the body of an abstract
+method.</p>
+<p>If you would like to define a method in an abstract class or interface with a
+default implementation, use the <code>overridable</code> annotation on the signature:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractService</span></span>
+  extend T::Sig
+
+  <span class="hljs-comment"># Default port of 8080, but can be overridden in the child class.</span>
+  sig {overridable.returns(String)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">port</span>;</span> <span class="hljs-string">'8080'</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5020"></a><a href="#5020" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5020</h2>
+<p>There are a few constraints around how methods like <code>include</code>, <code>extend</code>,
+<code>mixes_in_class_methods</code> <a href="/docs/abstractd">(docs)</a>, and <code>requires_ancestor</code>
+<a href="/docs/requires-ancestor">(docs)</a> work.</p>
+<ul>
+<li><code>include</code> and <code>extend</code> must be given a constant that Sorbet can <em>statically</em>
+see resolve to a <code>module</code>. If a codebase is using metaprogramming to define
+constants that are later mixed with these methods, the codebase must either:
+<ul>
+<li>Ensure that all relevant <code>include</code> and <code>extend</code> targets are statically
+defined in <code>*.rb</code> or <code>*.rbi</code> files that are not being ignored, or</li>
+<li>Hide the <code>include</code> or <code>extend</code> invocations from Sorbet by using
+<a href="/docs/static"><code># typed: ignore</code> sigils</a> to ignore the entire file, or</li>
+<li>Hide only the individual call from Sorbet statically using something like
+<code>send(:include, ...)</code>.</li>
+</ul></li>
+<li><code>mixes_in_class_methods</code> and <code>requires_ancestor</code> must only be declared in a
+<code>module</code>, not a <code>class</code>. Classes are never mixed into other classes or
+modules, so these methods would have no meaning in a class.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="5021"></a><a href="#5021" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5021</h2>
+<p>Sorbet requires that classes or modules which define <code>abstract</code> methods are also
+marked as abstract using either <code>abstract!</code> or <code>interface!</code>.</p>
+<p>For more information, see <a href="/docs/abstract">Abstract Classes and Interfaces</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5022"></a><a href="#5022" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5022</h2>
+<p>Sorbet requires that modules marked <code>interface!</code> must only have abstract
+methods. To have a module with some abstract methods and some implemented
+methods, use <code>abstract!</code> in the module instead.</p>
+<p>Apart from this error message, there is otherwise essentially no difference
+between abstract modules and interface modules. <code>interface!</code> is provided mostly
+as a way for the author of a piece of code to declare intent to the reader more
+than anything else.</p>
 <h2><a class="anchor" aria-hidden="true" id="5023"></a><a href="#5023" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5023</h2>
 <p>Some modules require specific functionality in the receiving class to work. For
 example <code>Enumerable</code> needs a <code>each</code> method in the target class.</p>
@@ -1018,11 +1183,90 @@ the required functionality.</p>
   <span class="hljs-symbol">end</span>
 <span class="hljs-symbol">end</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5024"></a><a href="#5024" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5024</h2>
+<p>This error usually happens when attempting to define a cyclic type alias:</p>
+<pre><code class="hljs css language-ruby">X = T.type_alias {X} <span class="hljs-comment"># error: Unable to resolve right hand side of type alias</span>
+</code></pre>
+<p>Note that Sorbet does not support making recursive type aliases. To make a
+recursively-defined data structure, see
+<a href="/docs/sealed#approximating-algebraic-data-types">Approximating algebraic data types</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5025"></a><a href="#5025" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5025</h2>
+<p>Sorbet does not currently support type aliases in generic classes.</p>
+<p>This limitation was crafted early in the development of Sorbet to entirely
+sidestep problems that can arise in the design of a type system leading to
+unsoundness. (Sorbet users curious about type system design may wish to read
+<a href="https://lptk.github.io/programming/2019/09/13/type-projection.html">What is Type Projection in Scala, and Why is it Unsound?</a>.)</p>
+<p>We are likely to reconsider lifting this limitation in the future, but have no
+immediate plans yet.</p>
+<p>As a workaround, define type aliases somewhere else. Unfortunately this does
+mean it is not currently possible to define type aliases that reference type
+members defined by a generic class.</p>
+<h2><a class="anchor" aria-hidden="true" id="5026"></a><a href="#5026" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5026</h2>
+<p>Various classes in the standard library have been defined as generic classes
+retroactively, not via Sorbet’s built-in support for generics. Sorbet’s usual
+mechanism for defining custom generic classes is to define the <code>[]</code> method on
+the generic class’s singleton class, so that syntax like
+<code>MyGenericClass[Integer]</code> is valid code at runtime.</p>
+<p>However for various stdlib generic classes, this syntax is already taken. For
+example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># BAD EXAMPLE</span>
+
+Array[Integer]
+<span class="hljs-comment"># =&gt; evaluates at runtime to `[Integer]`</span>
+<span class="hljs-comment"># (i.e. a list with one element: the `Integer` class object)</span>
+</code></pre>
+<p>To use these standard library classes in type annotations, prefix the generic
+class’s name with <code>T::</code>, like this:</p>
+<pre><code class="hljs css language-ruby">sig {returns(T::Array[Integer])}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> [<span class="hljs-number">0</span>]; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>For more information, see
+<a href="/docs/stdlib-generics">Arrays, Hashes, and Generics in the Standard Library</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="5028"></a><a href="#5028" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5028</h2>
 <p>In <code># typed: strict</code> files, Sorbet requires that all constants are annotated
 with a <code>T.let</code>.</p>
 <p>For how to fix, see <a href="/docs/type-annotations">Type Annotations</a>.</p>
 <p>See also: <a href="#6002">6002</a>, <a href="#7017">7017</a>, <a href="#7027">7027</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5030"></a><a href="#5030" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5030</h2>
+<p>A constant cannot store a reference to itself, like this:</p>
+<pre><code class="hljs css language-ruby">X = X
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5031"></a><a href="#5031" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5031</h2>
+<p>Constants are not allowed to resolve through type aliases. For example, this is
+an error:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  X = <span class="hljs-number">0</span>
+<span class="hljs-keyword">end</span>
+
+AliasToA = T.type_alias {A}
+
+AliasToA::X <span class="hljs-comment"># error: not allowed</span>
+</code></pre>
+<p><strong>Why</strong>? A number of reasons:</p>
+<ul>
+<li><p>Type aliases do not always store references to plain classes. For example,
+sometimes type aliases store references to types like <code>T.nilable(A)</code>. Sorbet
+doesn’t allow resolving constants through type aliases for the same reason
+that it doesn’t allow writing <code>T.nilable(A)::X</code>.</p></li>
+<li><p>The runtime representation of type aliases do not behave like constants at
+runtime, so <code>AliasToA::X</code> would not actually resolve to <code>A::X</code> at runtime.</p></li>
+</ul>
+<p>If the type alias is merely an alternate name for an existing constant, use a
+class alias not a type alias:</p>
+<pre><code class="hljs css language-ruby">AliasToA = A
+AliasToA::A <span class="hljs-comment"># allowed</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5032"></a><a href="#5032" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5032</h2>
+<p>See the docs for error code <a href="#5020">5020</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5033"></a><a href="#5033" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5033</h2>
+<p>Final methods cannot be overridden by definition. See
+<a href="/docs/final">Final Methods, Classes, and Modules</a> for more information.</p>
+<p>The error code 5033 is raised only statically, but it is worth noting that
+attempting to the override of a final method statically but still have the
+method overridden at runtime will not work—Sorbet’s runtime support for <code>final</code>
+methods prevents methods from being overridden at runtime as well. This is
+intentional. Final methods cannot even be overridden or redefined by mocks or
+stubs in a test suite.</p>
 <h2><a class="anchor" aria-hidden="true" id="5034"></a><a href="#5034" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5034</h2>
 <p>Sorbet does not support creating normal Ruby constant aliases to type aliases.
 Once a type alias is created, all subsequent aliases must also be type aliases.</p>
@@ -1042,7 +1286,7 @@ intent to create a new type alias.)</p>
 class’s ancestors that would be overridden. Ensure that the method being
 overridden exists in the ancestors of the class defining the <code>override</code> method,
 or remove <code>override</code> from the signature that’s raising the error. See
-<a href="override-checking">Override Checking</a> for more information about <code>override</code>.</p>
+<a href="/docs/override-checking">Override Checking</a> for more information about <code>override</code>.</p>
 <p>If the parent method definitely exists at runtime, it might be hidden in a
 <a href="static#file-level-granularity-strictness-levels"><code># typed: ignore</code></a> file.
 Sorbet will not see it and this error will be raised. In that case you will need
@@ -1057,7 +1301,7 @@ reported in <code># typed: strict</code>).</p>
 <p>Sorbet must be able to statically resolve a method to create an alias to it.</p>
 <p>Here, the method is created through a DSL called <code>data_accessor</code> which defines
 methods at runtime through meta-programming:</p>
-<pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Base</span></span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Base</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">data_accessor</span><span class="hljs-params">(key)</span></span>
     define_method(key) <span class="hljs-keyword">do</span>
       data[key]
@@ -1076,7 +1320,7 @@ methods at runtime through meta-programming:</p>
 <p>One way to make those methods visible statically is to add a declaration for
 them in an <a href="https://sorbet.org/docs/rbi">RBI file</a>. For example, we can write
 our definitions as RBI under <code>sorbet/rbi/shims/foo.rbi</code>:</p>
-<pre><code class="hljs css language-rb"><span class="hljs-comment"># sorbet/rbi/shims/foo.rbi</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># sorbet/rbi/shims/foo.rbi</span>
 <span class="hljs-comment"># typed: true</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Foo</span></span>
@@ -1086,7 +1330,7 @@ our definitions as RBI under <code>sorbet/rbi/shims/foo.rbi</code>:</p>
 <p>Sometimes, Sorbet will complain about an alias to a method coming from an
 included modules. For example, here <code>bar</code> is coming from the inclusion of <code>Bar</code>
 but Sorbet will complain about the method not existing anyway:</p>
-<pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bar</span></span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bar</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -1101,7 +1345,7 @@ see an example of this behaviour
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Bar%0A%20%20def%20bar%3B%20end%0Aend%0A%0Amodule%20Foo%0A%20%20include%20Bar%0A%0A%20%20alias_method%20%3Afoo%2C%20%3Abar%20%23%20aliases%20are%20resolved%20before%20includes%2C%20so%20%60bar%60%20is%20not%20found%20yet%0A%0A%20%20def%20baz%0A%20%20%20%20bar%20%23%20includes%20are%20resolved%20when%20we%20analyze%20this%20code%0A%20%20end%0Aend">here</a>.
 To workaround this limitation, we can replace the <code>alias_method</code> by a real
 method definition:</p>
-<pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   <span class="hljs-keyword">include</span> Bar
 
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
@@ -1109,6 +1353,118 @@ method definition:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5038"></a><a href="#5038" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5038</h2>
+<p>When Sorbet detects that a file is using <code>sig</code> syntax for methods, it requires
+an explicit <code># typed:</code> sigil. The default <code># typed:</code> sigil in Sorbet is
+<code># typed: false</code>, so if you would like to add signatures in a method but change
+nothing else about how Sorbet checks your codebase, add <code># typed: false</code> to the
+top of the file.</p>
+<p>However, note that Sorbet will not check the method body’s implementation
+against the signature at <code># typed: false</code>. When you see this error, it’s
+<strong>strongly recommended</strong> that you additionally upgrade the file to at least
+<code># typed: true</code>.</p>
+<p>Regardless of whether the file where this error was reported is <code># typed: false</code>
+or <code># typed: true</code>, all other <code># typed: true</code> files in the codebase where Sorbet
+detects a call to this method will still be checked against this method’s
+signature.</p>
+<p>To summarize:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- a.rb --</span>
+<span class="hljs-comment"># typed: false</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+  sig {params(<span class="hljs-symbol">x:</span> Integer).returns(String)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">int_to_string</span><span class="hljs-params">(x)</span></span>
+    x <span class="hljs-comment"># no static error!</span>
+      <span class="hljs-comment"># (this file is `# typed: false`)</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># -- b.rb --</span>
+<span class="hljs-comment"># typed: true</span>
+
+a = A.new
+res = a.int_to_string(<span class="hljs-string">'not an int'</span>) <span class="hljs-comment"># error: Expected `Integer` but got `String`</span>
+
+res + <span class="hljs-number">1</span> <span class="hljs-comment"># error: Expected `String` but found `Integer`</span>
+</code></pre>
+<p>For more information on these typedness levels, see
+<a href="/docs/static">Enabling Static Checks</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5039"></a><a href="#5039" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5039</h2>
+<p>Sorbet relies on running inference in a method to be able to reveal the type of
+an expression with <code>T.reveal_type</code>. For performance reasons, Sorbet skips
+running inference in any file that is <code># typed: false</code>, because none of the
+other inference-related errors will be reported at that typedness level.</p>
+<p>To use <code>T.reveal_type</code> in a file, upgrade the file to <code># typed: true</code> or above.</p>
+<p>For more information on typedness levels, see
+<a href="/docs/static">Enabling Static Checks</a>.<br>
+For more information on <code>T.reveal_type</code>, see <a href="/docs/troubleshooting">Troubleshooting</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5040"></a><a href="#5040" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5040</h2>
+<p>Overloading a method (by providing multiple signatures for the method) is only
+allowed for methods defined in the Ruby standard library. The definitions for
+the Ruby standard library live inside Sorbet’s textual and binary payload, and
+cannot be updated by Sorbet end-users except by sending a pull request to Sorbet
+(see
+<a href="/docs/faq#it-looks-like-sorbets-types-for-the-stdlib-are-wrong">this FAQ entry for more</a>).</p>
+<p>Note that even within the type definitions for the Ruby standard library,
+overloads in Sorbet come with substantial and somewhat fundamental limitations.</p>
+<p>When attempting to define methods that would require overloading to properly
+type them, users are strongly recommended to instead define multiple separate
+methods. For example, instead of defining a method like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># BAD example, will not typecheck</span>
+
+sig {params(<span class="hljs-symbol">idx:</span> Integer, <span class="hljs-symbol">raise_if_not_found:</span> TrueClass).returns(String)}
+sig {params(<span class="hljs-symbol">idx:</span> Integer).returns(T.nilable(String))}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_element</span><span class="hljs-params">(idx, raise_if_not_found)</span></span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This attempts to define a <code>get_element</code> method that normally returns
+<code>T.nilable(String)</code> when called like <code>get_element(0)</code>, but will instead always
+return <code>String</code> or raise an exception if called like <code>get_element(0, true)</code>.</p>
+<p>The idea is that these are conceptually two different methods, which is the
+suggestion for how to refactor the code:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">idx:</span> Integer).returns(T.nilable(String))}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_element</span><span class="hljs-params">(idx)</span></span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(idx).returns(String)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_element_or_raise</span><span class="hljs-params">(idx)</span></span>
+  elem = get_element(idx)
+  <span class="hljs-keyword">case</span> elem
+  <span class="hljs-keyword">when</span> NilClass <span class="hljs-keyword">then</span> raise <span class="hljs-string">"No element found at index <span class="hljs-subst">#{idx}</span>"</span>
+  <span class="hljs-keyword">else</span> elem
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>We recommend such a refactoring even when attempting to write sigs for methods
+defined in gems outside the standard library.</p>
+<p>If this workaround will not work in your case, the final alternative is to
+either omit a signature for the method in question (or define an explicit
+signature where all parameters that cannot be typed accurately use <code>T.untyped</code>).</p>
+<p><strong>Why are overloads not well-supported in Sorbet?</strong></p>
+<p>Consider how overloading works in typed, compiled languages like C++ or Java;
+each overload is a separate method. They actually have separate implementations,
+are type checked separately, compile (with link-time name mangling) to separate
+symbols in the compiled object, and the compiler knows how to resolve each call
+site to a specific overload ahead of time, either statically or dynamically via
+virtual dispatch.</p>
+<p>Meanwhile, Ruby itself doesn’t have overloading—there’s only ever one method
+registered with a given name in the VM, regardless of what arguments it accepts.
+That complicates things. It becomes unclear how Sorbet should typecheck the body
+of the method (against all sigs? against one sig? against the component-wise
+union of their arguments?). There’s no clear answer, and anything we choose will
+be bound to confuse or surprise someone.</p>
+<p>Also because Sorbet doesn’t control whether the method can be dispatched to,
+even if it were going to make a static claim about whether the code type checks,
+it doesn’t get to control which (fake) overload will get dispatched to at the
+call site (again: there’s only one version of the method in the VM).</p>
+<p>Finally this choice is somewhat philosophical: codebases that make heavy use of
+overloading (even in typed languages where overloading is supported) tend to be
+harder for readers to understand at a glance. The above workaround of defining
+multiple methods with unique names solves this readability problem, because now
+each overload has a descriptive name.</p>
 <h2><a class="anchor" aria-hidden="true" id="5041"></a><a href="#5041" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5041</h2>
 <p>Sorbet does not allow inheriting from a class which inherits from <code>T::Struct</code>.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">S</span> &lt; T::Struct</span>
@@ -1150,6 +1506,108 @@ declares some common props, and children structs declare their own props.</p>
   prop <span class="hljs-symbol">:quz</span>, Symbol
 <span class="hljs-keyword">end</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5042"></a><a href="#5042" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5042</h2>
+<p>Sorbet does not allow defining a <code>private</code> method in an <code>interface!</code>. Note that
+this limitation is lifted if the <code>module</code> is declared <code>abstract!</code> not
+<code>interface</code>.</p>
+<p>The justification for why this is an error has been lost to the sands of time.
+It seems reasonable to implement support for this.</p>
+<p><a href="https://github.com/sorbet/sorbet/issues/5687">https://github.com/sorbet/sorbet/issues/5687</a></p>
+<h2><a class="anchor" aria-hidden="true" id="5043"></a><a href="#5043" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5043</h2>
+<p>The syntax for declaring type aliases has changed. What used to be written like
+this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># BAD</span>
+X = T.type_alias(Integer)
+</code></pre>
+<p>must now be written like this, with a block argument instead of a positional
+argument:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># GOOD</span>
+X = T.type_alias {Integer}
+</code></pre>
+<p>The new syntax avoids incurring eagerly evaluating the right-hand side of the
+type alias, potentially forcing one or more constants to be autoloaded before
+they would otherwise be required. This improves load-time performance in
+lazily-loaded environments (usually: development environments) and also prevents
+certain Sorbet usage patterns from introducing load-time cyclic references.</p>
+<h2><a class="anchor" aria-hidden="true" id="5044"></a><a href="#5044" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5044</h2>
+<p>As background reading, you may first want to read more about variance—see the
+docs for error code <a href="#5015">5015</a> and <a href="#5016">5016</a>.</p>
+<p>When a type member is declared normally, without any variance annotation, it is
+invariant. It can then appear either in the <code>params</code> list or the <code>returns</code> of a
+method’s signature, but then prevents using subtyping on that type member. For
+example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IBox</span></span>
+  extend T::Generic
+  Elem = type_member
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">x:</span> IBox[Integer]).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
+  T.let(x, IBox[T.any(Integer, String)]) <span class="hljs-comment"># error: Argument does not have asserted type</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, even though <code>Integer</code> is a subtype of <code>T.any(Integer, String)</code>,
+<code>IBox[Integer]</code> is not a subtype of <code>IBox[T.any(Integer, String)]</code> because
+<code>Elem</code> has not been declared as <code>:out</code> nor <code>:in</code>, and is thus <strong>invariant</strong>.</p>
+<p>To allow code like this, we can declare <code>Elem</code> using <code>:out</code>, but this comes at
+the restriction of only being able to use <code>Elem</code> in <strong>out positions</strong>. An out
+position is named as such because it’s the position of a method’s output, like a
+method signature’s <code>returns</code>, though there are other out positions as well. As
+an intuition, all positions in a signature where the value is produced by a
+method are out positions. This includes values yielded to lambda functions and
+block arguments.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ...</span>
+
+  Elem = type_member(<span class="hljs-symbol">:out</span>)
+
+  sig {abstract.returns(Elem)}
+  <span class="hljs-comment">#                     ^^^^ out position</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> <span class="hljs-keyword">end</span>
+
+  sig <span class="hljs-keyword">do</span>
+    type_parameters(<span class="hljs-symbol">:U</span>)
+      .params(
+        <span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">val:</span> Elem).returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+      )
+      .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">with_value</span><span class="hljs-params">(&amp;blk)</span></span>
+    <span class="hljs-keyword">yield</span> value
+  <span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># ...</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20IImmutableBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20type_parameters%28%3AU%29%0A%20%20%20%20%20%20.params%28%0A%20%20%20%20%20%20%20%20blk%3A%20T.proc.params%28val%3A%20Elem%29.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%20%20%29%0A%20%20%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0A%20%20end%0A%20%20def%20with_value%28%26blk%29%0A%20%20%20%20yield%20value%0A%20%20end%0Aend%0A%0Aclass%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20IImmutableBox%0A%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%29%0A%20%20%20%20%40value%20%3D%20value%0A%20%20end%0A%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0Aend%0A%0Asig%20%7Bparams%28immutable_box%3A%20IImmutableBox%5BInteger%5D%29.void%7D%0Adef%20example%28immutable_box%29%0A%20%20x%20%3D%20immutable_box.value%0A%20%20T.reveal_type%28x%29%0A%0A%20%20immutable_box.with_value%20do%20%7Celem%7C%0A%20%20%20%20T.reveal_type%28elem%29%0A%20%20end%0Aend">→ View full example on sorbet.run</a></p>
+<p>The intuition for <strong>in positions</strong> is flipped: they’re all positions that would
+correspond to an input to the function, instead of all things that the function
+produces. This includes the direct arguments of the method, as well as the
+return values of any lambda functions or blocks passed into the method.</p>
+<p>If it helps, some type system actually formalize the type of a function as a
+generic something like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Fn</span></span>
+  extend T::Sig
+  extend T::Generic
+  interface!
+
+  Input = type_member(<span class="hljs-symbol">:in</span>)
+  Output = type_member(<span class="hljs-symbol">:out</span>)
+
+  sig {abstract.params(<span class="hljs-symbol">input:</span> Input).returns(Oputput)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Recall that only modules (not classes) may have covariant and contravariant type
+members—classes are limited to only invariant type members. For more, see the
+docs for error code <a href="#5016">5016</a>.</p>
+<blockquote>
+<p><strong>Note</strong> that <code>T.attached_class</code> is actually modeled as a covariant (<code>:out</code>)
+<code>type_template</code> defined automatically on all singleton classes, which means
+that <code>T.attached_class</code> can only be used in <code>:out</code> positions.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="5045"></a><a href="#5045" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5045</h2>
+<p>This error regards misuse of user-defined generic classes. This error is
+reported even at <code># typed: true</code>. Otherwise, the error explanation is the same
+as for error code <a href="#5046">5046</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="5046"></a><a href="#5046" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5046</h2>
 <p>Generic classes must be passed all their generic type arguments when being used
 as types. For example:</p>
@@ -1160,11 +1618,11 @@ T.let([], T::Array[Integer])  <span class="hljs-comment"># ok</span>
 (<a href="/docs/stdlib-generics">see here</a>), and must be passed type arguments, including
 <code>Array</code> and <code>Hash</code>. Any user-defined generic classes must similarly be provided
 type arguments when used.</p>
-<p>For legacy reasons relating to the intial rollout of Sorbet, this error is only
-reported at <code># typed: strict</code> for standard library generic classes and
-<code># typed: true</code> for all user-defined generic classes. (In an ideal world, it
-would have always been reported at <code># typed: true</code>, and we might change this in
-the future.)</p>
+<p>For legacy reasons relating to the initial rollout of Sorbet, misuse of generics
+defined in the standard library error are only reported at <code># typed: strict</code>,
+despite being reported at <code># typed: true</code> for all user-defined generic classes.
+(In an ideal world, it would have always been reported at <code># typed: true</code>, and
+we might change this in the future.)</p>
 <h2><a class="anchor" aria-hidden="true" id="5047"></a><a href="#5047" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5047</h2>
 <p>A class or module tried to inherit, include, or extend a final class or module.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Final</span></span>
@@ -1192,12 +1650,83 @@ not explicitly declared as final with a final <code>sig</code>.</p>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">final_sig</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># good</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5049"></a><a href="#5049" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5049</h2>
+<p>Parameters given type annotations in a method signature must be provided in the
+same order they appear in the method definition, even for keyword parameters for
+which order would not usually be required. This is for readability and
+consistency.</p>
+<p>Also, all optional keyword parameters must come after all required keyword
+parameters.</p>
+<h2><a class="anchor" aria-hidden="true" id="5050"></a><a href="#5050" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5050</h2>
+<p>Sealed classes (or modules) can only be inherited (or included/extended) in the
+same file as the parent.</p>
+<p>For more information, see <a href="/docs/sealed">Sealed Classes</a></p>
+<h2><a class="anchor" aria-hidden="true" id="5051"></a><a href="#5051" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5051</h2>
+<p>See <a href="/docs/override-checking">Override Checking</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5052"></a><a href="#5052" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5052</h2>
+<p>When providing bounds for a type member with <code>lower</code> and <code>upper</code>, the lower type
+bound must be a subtype of (or equivalent to) the <code>upper</code> type bound.</p>
+<p>Otherwise, it would never be possible to instantiate the generic type because
+the bounds would never be satisfiable.</p>
+<h2><a class="anchor" aria-hidden="true" id="5053"></a><a href="#5053" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5053</h2>
+<p>For classes that subclass generic classes, the child’s lower and upper bound
+must still be within the lower and upper bound range specified by the parent
+class.</p>
+<p>This problem can come up from time to time when the parent class uses <code>fixed</code>
+when it meant to use <code>upper</code>. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntOrStringBox</span></span>
+  extend T::Generic
+  Elem = type_member {{<span class="hljs-symbol">fixed:</span> T.any(Integer, String)}}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntBox</span> &lt; IntOrStringBox</span>
+  Elem = type_member {{<span class="hljs-symbol">fixed:</span> Integer}} <span class="hljs-comment"># error, incompatible bound</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this case we’d like <code>IntBox</code> to be a subclass of <code>IntOrString</code> box, but since
+we’re using <code>fixed</code> Sorbet prevents us.</p>
+<p>A fix is to use only <code>upper</code> instead:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntOrStringBox</span></span>
+  extend T::Generic
+  Elem = type_member {{<span class="hljs-symbol">upper:</span> T.any(Integer, String)}}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntBox</span> &lt; IntOrStringBox</span>
+  Elem = type_member {{<span class="hljs-symbol">upper:</span> Integer}}
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>But this does come at the slight cost that now all type annotations that used to
+be using <code>IntOrStringBox</code> without any generic type arguments must now provide
+one:</p>
+<pre><code class="hljs css language-ruby">T.let(IntBox[Integer].new, IntOrStringBox) <span class="hljs-comment"># error: Generic class without type arguments</span>
+</code></pre>
+<p>The fix is to change all occurrences of <code>IntOrStringBox</code> without type arguments
+to specify <code>IntOrStringBox[T.any(Integer, String)]</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="5054"></a><a href="#5054" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5054</h2>
 <p>Use of <code>implementation</code> has been replaced by <code>override</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5055"></a><a href="#5055" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5055</h2>
+<p>Sorbet does not consider a class “fully resolved” until all of its type members
+have also been fully resolved. Sorbet cannot fully resolve a type member in a
+class until all constants mentioned in its right-hand side have been fully
+resolved. So if any of those right-hand-side constants are themselves generic
+classes, Sorbet will detect a loop and report this error. Concretely:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+  extend T::Generic
+
+  X = type_member {{<span class="hljs-symbol">fixed:</span> B}} <span class="hljs-comment"># error: A::X is involved in a cycle</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">B</span></span>
+  extend T::Sig
+  extend T::Generic
+
+  X = type_member {{<span class="hljs-symbol">fixed:</span> A}} <span class="hljs-comment"># error: B::X is involved in a cycle</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="5056"></a><a href="#5056" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5056</h2>
-<p>The <code>generated</code> annotation in method signatures is deprecated.</p>
-<p>For alternatives, see <a href="/docs/runtime">Enabling Runtime Checks</a> which talks about
-how to change the runtime behavior when method signatures encounter a problem.</p>
+<p>The <code>T.experimental_attached_class</code> syntax has been stabilized and is now
+<code>T.attached_class</code>. Use the provided autocorrect to migrate.</p>
 <h2><a class="anchor" aria-hidden="true" id="5057"></a><a href="#5057" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5057</h2>
 <p>Static methods (like <code>self.foo</code>) can never be mixed into another class or
 module. Both <code>include</code> and <code>extend</code> only mix that module’s <em>instance</em> methods
@@ -1229,12 +1758,51 @@ module.</p></li>
 parameters. See the
 <a href="/docs/attached-class#tattached_class-as-an-argument">T.attached_class</a>
 documentation for a more thorough description of why this is.</p>
+<h2><a class="anchor" aria-hidden="true" id="5059"></a><a href="#5059" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5059</h2>
+<p>The syntax for the second argument to <code>T::NonForcingConstants.non_forcing_is_a?</code>
+is much more constrained than what Sorbet allows for when resolving arbitrary
+constant literals.</p>
+<p>For more information, see <a href="/docs/non-forcing-constants">T::NonForcingConstants</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5060"></a><a href="#5060" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5060</h2>
+<p>When applying a type argument to a generic class, the type argument must be
+between any <code>lower</code> and <code>upper</code> bound declared by the <code>type_member</code> (or
+<code>type_template</code>) declaration for that type parameter.</p>
+<h2><a class="anchor" aria-hidden="true" id="5061"></a><a href="#5061" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5061</h2>
+<p>A constant was marked private with Ruby’s <code>private_constant</code> method, which means
+it’s only valid to access that constant directly, with no constant literal
+prefix scope:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  X = <span class="hljs-number">0</span>
+  private_constant <span class="hljs-symbol">:X</span>
+
+  X <span class="hljs-comment"># ok</span>
+
+  <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Inner</span></span>
+    X <span class="hljs-comment"># ok</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+A::X <span class="hljs-comment"># error</span>
+</code></pre>
+<p>If you must access the private constant, you will have to use <code>.const_get</code> to
+both hide the constant access from Sorbet and appease the Ruby VM:</p>
+<pre><code class="hljs css language-ruby">A.const_get(<span class="hljs-symbol">:X</span>)
+</code></pre>
+<p>Note that this technique should be used very sparingly, and many codebases have
+lint rules or other coding conventions discouraging or even preventing the use
+of <code>const_get</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="5062"></a><a href="#5062" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5062</h2>
+<p>Invalid syntax for <code>requires_ancestor</code>. See
+<a href="/docs/requires-ancestor">Requiring Ancestors</a> for more information.</p>
+<h2><a class="anchor" aria-hidden="true" id="5063"></a><a href="#5063" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5063</h2>
+<p>Useless <code>requires_ancestor</code>, because the given class or module is already an
+ancestor. See <a href="/docs/requires-ancestor">Requiring Ancestors</a> for more information.</p>
 <h2><a class="anchor" aria-hidden="true" id="5064"></a><a href="#5064" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5064</h2>
 <p>Using the <code>requires_ancestor</code> method, module <code>Bar</code> has indicated to Sorbet that
 it can only work properly if it is explicitly included along module <code>Foo</code>. In
 this example, we see that while module <code>Bar</code> is included in <code>MyClass</code>, <code>MyClass</code>
 does not include <code>Foo</code>.</p>
-<pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Foo</span></span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Foo</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
@@ -1253,19 +1821,19 @@ does not include <code>Foo</code>.</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>The solution is to include <code>Foo</code> in <code>MyClass</code>:</p>
-<pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
   <span class="hljs-keyword">include</span> Foo
   <span class="hljs-keyword">include</span> Bar
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Other potential (albeit less common) sources of this error code are classes that
 are required to have some class as an ancestor:</p>
-<pre><code class="hljs"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>; <span class="hljs-keyword">end</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Bar</span></span>
-  <span class="hljs-keyword">extend</span> <span class="hljs-symbol">T:</span>:Helpers
+  extend T::Helpers
 
   requires_ancestor { Foo }
 
@@ -1275,17 +1843,17 @@ are required to have some class as an ancestor:</p>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MySuperClass</span></span>
-  <span class="hljs-keyword">extend</span> <span class="hljs-symbol">T:</span>:Helpers
+  extend T::Helpers
   <span class="hljs-keyword">include</span> Bar
 
-  <span class="hljs-keyword">abstract</span>!
+  abstract!
 <span class="hljs-keyword">end</span>
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span> &lt; <span class="hljs-title">MySuperClass</span> <span class="hljs-comment"># error: `MyClass` must inherit `Foo` (required by `Bar`)</span></span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span> &lt; MySuperClass <span class="hljs-comment"># error: `MyClass` must inherit `Foo` (required by `Bar`)</span></span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Ensuring <code>MyClass</code> inherits from <code>Foo</code> at some point will fix the error:</p>
-<pre><code class="hljs css language-rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MySuperClass</span> &lt; Foo</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MySuperClass</span> &lt; Foo</span>
   extend T::Helpers
   <span class="hljs-keyword">include</span> Bar
 
@@ -1295,10 +1863,16 @@ are required to have some class as an ancestor:</p>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span> &lt; MySuperClass</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="5065"></a><a href="#5065" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5065</h2>
+<p>Unsatisfiable <code>requires_ancestor</code>. See
+<a href="/docs/requires-ancestor">Requiring Ancestors</a> for more information.</p>
+<h2><a class="anchor" aria-hidden="true" id="5067"></a><a href="#5067" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5067</h2>
+<p>A class’s superclass (the <code>Parent</code> in <code>class Child &lt; Parent</code>) must be statically
+resolvable to a class, not a module.</p>
 <h2><a class="anchor" aria-hidden="true" id="5068"></a><a href="#5068" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5068</h2>
 <p>Sorbet requires that class or module definitions be namespaced unambiguously.
 For example, in this code:</p>
-<pre><code class="hljs"><span class="hljs-comment"># typed: true</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
 <span class="hljs-keyword">end</span>
@@ -1312,7 +1886,7 @@ For example, in this code:</p>
 <p>The definition B::C is ambiguous. In Ruby’s runtime, it resolves to B::C (and
 not A::B::C). However, things are different in the presence of a pre-declared
 filler namespace like below:</p>
-<pre><code class="hljs"><span class="hljs-comment"># typed: true</span>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
 <span class="hljs-keyword">end</span>
@@ -1335,6 +1909,50 @@ Sorbet’s own autoloader generation to pre-declare filler namespaces, keeping t
 Ruby runtime’s behavior equivalent to Sorbet. However, the autoloader has some
 edge cases, which can often cause deviations between Ruby’s runtime and Sorbet.
 This error helps guard against these issues.</p>
+<h2><a class="anchor" aria-hidden="true" id="5069"></a><a href="#5069" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5069</h2>
+<p>There must be exactly one statement in a method signature (possibly a single
+chain of methods).</p>
+<p>Sorbet used to allow syntax like</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(<span class="hljs-symbol">x:</span> Integer)
+  returns(Integer)
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; x; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>where the body of the <code>sig</code> block was allowed to have multiple methods not
+connected by a method call chain.</p>
+<p>Use the provided autocorrect to convert the old syntax to the new syntax.</p>
+<h2><a class="anchor" aria-hidden="true" id="5070"></a><a href="#5070" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5070</h2>
+<p><code>T.nilable(T.untyped)</code> is just <code>T.untyped</code>, because <code>nil</code> is a valid value of
+type <code>T.untyped</code> (along with all other values).</p>
+<h2><a class="anchor" aria-hidden="true" id="5071"></a><a href="#5071" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5071</h2>
+<p>Providing a <code>.bind</code> when using <code>T.proc</code> is only valid on a method’s single block
+argument (<code>&amp;blk</code>), not on all arguments. The <code>.bind</code> is not actually a type
+annotation, but instead an instruction to the type inference algorithm about how
+to typecheck the body of the block. Type checking for the body of the block
+provided to a method call happens <strong>after</strong> type checking all other arguments,
+while type checking for lambda functions and procs passed as positional or
+keyword arguments happens <strong>before</strong> the proc value is checked against the
+<code>T.proc</code> type. For example:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">f:</span> T.proc.returns(Integer),
+    <span class="hljs-symbol">blk:</span> T.proc.returns(Integer),
+  )
+  .void
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(f, &amp;blk)</span></span>
+<span class="hljs-keyword">end</span>
+
+f = -&gt;() {<span class="hljs-number">0</span>} <span class="hljs-comment"># lambda is type checked here, before running type inference on</span>
+             <span class="hljs-comment"># the `example` call below.</span>
+example(f) <span class="hljs-keyword">do</span> <span class="hljs-comment"># call to `example` is typechecked next</span>
+  <span class="hljs-number">1</span> <span class="hljs-comment"># block body is typechecked last</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Since the definition of the lambda <code>f</code> is typechecked entirely before the call
+to <code>example</code> is typechecked, no <code>.bind</code> annotation on any of <code>example</code>'s
+positional or keyword arguments would actually affect how the lambda is
+typechecked.</p>
 <h2><a class="anchor" aria-hidden="true" id="6001"></a><a href="#6001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>6001</h2>
 <p>Certain Ruby keywords like <code>break</code>, <code>next</code>, and <code>retry</code> can only be used inside
 a Ruby block.</p>
@@ -2134,7 +2752,7 @@ sig <span class="hljs-keyword">do</span>
 implemented in a given class.</p>
 <!-- -->
 <script src="/js/error-reference.js"></script>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#1003">1003</a></li><li><a href="#1004">1004</a></li><li><a href="#2001">2001</a></li><li><a href="#2002">2002</a></li><li><a href="#2003">2003</a></li><li><a href="#2004">2004</a></li><li><a href="#3001">3001</a></li><li><a href="#3002">3002</a></li><li><a href="#3003">3003</a></li><li><a href="#3004">3004</a></li><li><a href="#3005">3005</a></li><li><a href="#3007">3007</a></li><li><a href="#3008">3008</a></li><li><a href="#3009">3009</a></li><li><a href="#3010">3010</a></li><li><a href="#3011">3011</a></li><li><a href="#3501">3501</a></li><li><a href="#3502">3502</a></li><li><a href="#3503">3503</a></li><li><a href="#3504">3504</a></li><li><a href="#3505">3505</a></li><li><a href="#3506">3506</a></li><li><a href="#3507">3507</a></li><li><a href="#3508">3508</a></li><li><a href="#3509">3509</a></li><li><a href="#3510">3510</a></li><li><a href="#3511">3511</a></li><li><a href="#3512">3512</a></li><li><a href="#3702">3702</a></li><li><a href="#3703">3703</a></li><li><a href="#3704">3704</a></li><li><a href="#3705">3705</a></li><li><a href="#3706">3706</a></li><li><a href="#3707">3707</a></li><li><a href="#3709">3709</a></li><li><a href="#3710">3710</a></li><li><a href="#3711">3711</a></li><li><a href="#3712">3712</a></li><li><a href="#3713">3713</a></li><li><a href="#3714">3714</a></li><li><a href="#3715">3715</a></li><li><a href="#3716">3716</a></li><li><a href="#4001">4001</a></li><li><a href="#4002">4002</a></li><li><a href="#4003">4003</a></li><li><a href="#4006">4006</a></li><li><a href="#4010">4010</a></li><li><a href="#4011">4011</a></li><li><a href="#4012">4012</a></li><li><a href="#4013">4013</a></li><li><a href="#4014">4014</a></li><li><a href="#4015">4015</a></li><li><a href="#4016">4016</a></li><li><a href="#4019">4019</a></li><li><a href="#4021">4021</a></li><li><a href="#5001">5001</a></li><li><a href="#5002">5002</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5023">5023</a></li><li><a href="#5028">5028</a></li><li><a href="#5034">5034</a></li><li><a href="#5035">5035</a></li><li><a href="#5036">5036</a></li><li><a href="#5037">5037</a></li><li><a href="#5041">5041</a></li><li><a href="#5046">5046</a></li><li><a href="#5047">5047</a></li><li><a href="#5048">5048</a></li><li><a href="#5054">5054</a></li><li><a href="#5056">5056</a></li><li><a href="#5057">5057</a></li><li><a href="#5058">5058</a></li><li><a href="#5064">5064</a></li><li><a href="#5068">5068</a></li><li><a href="#6001">6001</a></li><li><a href="#6002">6002</a></li><li><a href="#6004">6004</a></li><li><a href="#6005">6005</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7004">7004</a></li><li><a href="#7005">7005</a></li><li><a href="#7006">7006</a></li><li><a href="#7007">7007</a></li><li><a href="#7009">7009</a></li><li><a href="#7010">7010</a></li><li><a href="#7011">7011</a></li><li><a href="#7013">7013</a></li><li><a href="#7014">7014</a></li><li><a href="#7015">7015</a></li><li><a href="#7016">7016</a></li><li><a href="#7017">7017</a></li><li><a href="#7018">7018</a></li><li><a href="#7019">7019</a></li><li><a href="#7020">7020</a></li><li><a href="#7021">7021</a></li><li><a href="#7022">7022</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li><li><a href="#7026">7026</a></li><li><a href="#7027">7027</a></li><li><a href="#7030">7030</a></li><li><a href="#7031">7031</a></li><li><a href="#7032">7032</a></li><li><a href="#7033">7033</a></li><li><a href="#7034">7034</a></li><li><a href="#7035">7035</a></li><li><a href="#7036">7036</a></li><li><a href="#7037">7037</a></li><li><a href="#7038">7038</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/faq"><span class="arrow-prev">← </span><span>FAQ</span></a><a class="docs-next button" href="/docs/sigs"><span>Signatures</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#1001">1001</a></li><li><a href="#1003">1003</a></li><li><a href="#1004">1004</a></li><li><a href="#2001">2001</a></li><li><a href="#2002">2002</a></li><li><a href="#2003">2003</a></li><li><a href="#2004">2004</a></li><li><a href="#3001">3001</a></li><li><a href="#3002">3002</a></li><li><a href="#3003">3003</a></li><li><a href="#3004">3004</a></li><li><a href="#3005">3005</a></li><li><a href="#3007">3007</a></li><li><a href="#3008">3008</a></li><li><a href="#3009">3009</a></li><li><a href="#3010">3010</a></li><li><a href="#3011">3011</a></li><li><a href="#3501">3501</a></li><li><a href="#3502">3502</a></li><li><a href="#3503">3503</a></li><li><a href="#3504">3504</a></li><li><a href="#3505">3505</a></li><li><a href="#3506">3506</a></li><li><a href="#3507">3507</a></li><li><a href="#3508">3508</a></li><li><a href="#3509">3509</a></li><li><a href="#3510">3510</a></li><li><a href="#3511">3511</a></li><li><a href="#3512">3512</a></li><li><a href="#3702">3702</a></li><li><a href="#3703">3703</a></li><li><a href="#3704">3704</a></li><li><a href="#3705">3705</a></li><li><a href="#3706">3706</a></li><li><a href="#3707">3707</a></li><li><a href="#3709">3709</a></li><li><a href="#3710">3710</a></li><li><a href="#3711">3711</a></li><li><a href="#3712">3712</a></li><li><a href="#3713">3713</a></li><li><a href="#3714">3714</a></li><li><a href="#3715">3715</a></li><li><a href="#3716">3716</a></li><li><a href="#4001">4001</a></li><li><a href="#4002">4002</a></li><li><a href="#4003">4003</a></li><li><a href="#4006">4006</a></li><li><a href="#4010">4010</a></li><li><a href="#4011">4011</a></li><li><a href="#4012">4012</a></li><li><a href="#4013">4013</a></li><li><a href="#4014">4014</a></li><li><a href="#4015">4015</a></li><li><a href="#4016">4016</a></li><li><a href="#4019">4019</a></li><li><a href="#4021">4021</a></li><li><a href="#5001">5001</a></li><li><a href="#5002">5002</a></li><li><a href="#5003">5003</a></li><li><a href="#5004">5004</a></li><li><a href="#5005">5005</a></li><li><a href="#5006">5006</a></li><li><a href="#5008">5008</a></li><li><a href="#5011">5011</a></li><li><a href="#5012">5012</a></li><li><a href="#5013">5013</a></li><li><a href="#5014">5014</a></li><li><a href="#5015">5015</a></li><li><a href="#5016">5016</a></li><li><a href="#5017">5017</a></li><li><a href="#5018">5018</a></li><li><a href="#5019">5019</a></li><li><a href="#5020">5020</a></li><li><a href="#5021">5021</a></li><li><a href="#5022">5022</a></li><li><a href="#5023">5023</a></li><li><a href="#5024">5024</a></li><li><a href="#5025">5025</a></li><li><a href="#5026">5026</a></li><li><a href="#5028">5028</a></li><li><a href="#5030">5030</a></li><li><a href="#5031">5031</a></li><li><a href="#5032">5032</a></li><li><a href="#5033">5033</a></li><li><a href="#5034">5034</a></li><li><a href="#5035">5035</a></li><li><a href="#5036">5036</a></li><li><a href="#5037">5037</a></li><li><a href="#5038">5038</a></li><li><a href="#5039">5039</a></li><li><a href="#5040">5040</a></li><li><a href="#5041">5041</a></li><li><a href="#5042">5042</a></li><li><a href="#5043">5043</a></li><li><a href="#5044">5044</a></li><li><a href="#5045">5045</a></li><li><a href="#5046">5046</a></li><li><a href="#5047">5047</a></li><li><a href="#5048">5048</a></li><li><a href="#5049">5049</a></li><li><a href="#5050">5050</a></li><li><a href="#5051">5051</a></li><li><a href="#5052">5052</a></li><li><a href="#5053">5053</a></li><li><a href="#5054">5054</a></li><li><a href="#5055">5055</a></li><li><a href="#5056">5056</a></li><li><a href="#5057">5057</a></li><li><a href="#5058">5058</a></li><li><a href="#5059">5059</a></li><li><a href="#5060">5060</a></li><li><a href="#5061">5061</a></li><li><a href="#5062">5062</a></li><li><a href="#5063">5063</a></li><li><a href="#5064">5064</a></li><li><a href="#5065">5065</a></li><li><a href="#5067">5067</a></li><li><a href="#5068">5068</a></li><li><a href="#5069">5069</a></li><li><a href="#5070">5070</a></li><li><a href="#5071">5071</a></li><li><a href="#6001">6001</a></li><li><a href="#6002">6002</a></li><li><a href="#6004">6004</a></li><li><a href="#6005">6005</a></li><li><a href="#7001">7001</a></li><li><a href="#7002">7002</a></li><li><a href="#7003">7003</a></li><li><a href="#7004">7004</a></li><li><a href="#7005">7005</a></li><li><a href="#7006">7006</a></li><li><a href="#7007">7007</a></li><li><a href="#7009">7009</a></li><li><a href="#7010">7010</a></li><li><a href="#7011">7011</a></li><li><a href="#7013">7013</a></li><li><a href="#7014">7014</a></li><li><a href="#7015">7015</a></li><li><a href="#7016">7016</a></li><li><a href="#7017">7017</a></li><li><a href="#7018">7018</a></li><li><a href="#7019">7019</a></li><li><a href="#7020">7020</a></li><li><a href="#7021">7021</a></li><li><a href="#7022">7022</a></li><li><a href="#7023">7023</a></li><li><a href="#7024">7024</a></li><li><a href="#7026">7026</a></li><li><a href="#7027">7027</a></li><li><a href="#7030">7030</a></li><li><a href="#7031">7031</a></li><li><a href="#7032">7032</a></li><li><a href="#7033">7033</a></li><li><a href="#7034">7034</a></li><li><a href="#7035">7035</a></li><li><a href="#7036">7036</a></li><li><a href="#7037">7037</a></li><li><a href="#7038">7038</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
