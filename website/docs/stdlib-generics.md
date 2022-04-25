@@ -18,6 +18,7 @@ namespace to represent them:
 - `T::Set[Type]`
 - `T::Enumerable[Type]`
 - `T::Enumerator[Type]`
+- `T::Enumerator::Lazy[Type]`
 - `T::Range[Type]`
 
 Inside a sig, just writing `Array` or `Hash` will be treated as

@@ -41,6 +41,51 @@ Note that the **absence** of `abstract` or `overridable` does **not** mean that
 a method is never overridden. To declare that a method can never be overridden,
 look into [final methods](final.md).
 
+## A note on variance
+
+When overriding a method, the override must accept at all the same things that
+the parent method accepts, and return at most what the parent method returns but
+no more.
+
+This is very abstract so let's make it concrete with some examples:
+
+```ruby
+class Parent
+  extend T::Sig
+
+  sig {overridable.params(x: T.any(Integer, String)).void}
+  def takes_integer_or_string; end
+end
+
+class Child < Parent
+  sig {override.params(x: Integer).void}
+  def takes_integer_or_string; end # error
+end
+```
+
+This code has an error because the child class overrides
+`takes_integer_or_string` but narrows the input type. It's important to reject
+overrides like this, because otherwise Sorbet would not be able to catch errors
+like this:
+
+```ruby
+sig {params(parent: Parent).void}
+def example(parent)
+  parent.takes_integer_or_string('some string')
+end
+
+example(Child.new) # throws at runtime!
+```
+
+In this example, since `Child.new` is an instance of `Parent` (via inheritance),
+Sorbet allows call to `example`. Inside `example`, Sorbet assumes that it is
+safe to call all methods on `Parent`, regardless of whether they're implemented
+by `Parent` or `Child`.
+
+Since `Child#takes_integer_or_string` has been defined in a way that breaks that
+contract that it's "at least as good" as the parent class definition, Sorbet
+must report an error where the invalid override happens.
+
 ## What's next?
 
 - [Final Methods, Classes, and Modules](final.md)
