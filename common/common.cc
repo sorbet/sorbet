@@ -175,7 +175,7 @@ sorbet::FileOps::ReadLineOutput sorbet::FileOps::readLineFromFd(int fd, string &
         // Edge case: Last time this was called, we read multiple lines.
         string line = buffer.substr(0, bufferFnd);
         buffer.erase(0, bufferFnd + 1);
-        return ReadLineOutput{ReadResult::Success, line};
+        return ReadLineOutput{ReadResult::Success, std::move(line)};
     }
 
     constexpr int BUFF_SIZE = 1024 * 8;
@@ -193,14 +193,14 @@ sorbet::FileOps::ReadLineOutput sorbet::FileOps::readLineFromFd(int fd, string &
     const auto fnd = std::find(buf.begin(), end, '\n');
     if (fnd != end) {
         buffer.append(buf.begin(), fnd);
-        string line = buffer;
+        string line = std::move(buffer);
         buffer.clear();
         if (fnd + 1 != end) {
             // If we read beyond the line, store extra stuff we read into the string buffer.
             // Skip over the newline.
             buffer.append(fnd + 1, end);
         }
-        return ReadLineOutput{ReadResult::Success, line};
+        return ReadLineOutput{ReadResult::Success, std::move(line)};
     } else {
         buffer.append(buf.begin(), end);
         return ReadLineOutput{ReadResult::Timeout};
