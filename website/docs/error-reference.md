@@ -1120,7 +1120,7 @@ Parent::MY_CONST   # ok
 
 ## 5003
 
-Sorbet failed to parse a method signature. For more documentation on what's
+Sorbet failed to parse a method signature. For more documentation on 
 valid `sig` syntax, see [Method Signatures](sigs.md).
 
 ## 5004
@@ -1348,14 +1348,14 @@ Eric Lippert, who worked on the design and implementation of C# for many years.
 →
 [Why isn't there variance for generic classes?](https://stackoverflow.com/questions/2733346/why-isnt-there-generic-variance-for-classes-in-c-sharp-4-0/2734070#2734070)
 
-The answer concludes that the main selling point of having covariant classes it
+The answer concludes that the main selling point of having covariant classes is
 to make immutable generic classes, at the cost of a more complex implementation
 of generics.
 
 ## 5017
 
 The `type_member` and `type_template` declarations from a parent class must all
-be repeated in the same order a child class (and before any newly-added type
+be repeated in the same order in a child class (and before any newly-added type
 members belonging only to the child class).
 
 One non-obvious way this error can manifest is via code generation tooling. If a
@@ -1388,7 +1388,7 @@ other kind of constant in the child.
 
 Abstract methods must not have bodies. For more information, see
 [Abstract Classes and Interfaces](abstract.md). Despite these methods not having
-a body, Sorbet's [runtime support](runtime.md) via the `sorbet-runtime` will
+a body, Sorbet's [runtime support](runtime.md) via the `sorbet-runtime` gem will
 convert these methods to raise. For example:
 
 ```ruby
@@ -1418,7 +1418,7 @@ So you do not need to manually insert a `raise` inside the body of an abstract
 method.
 
 If you would like to define a method in an abstract class or interface with a
-default implementation, feel free to use the `overridable` annotation on the
+default implementation, use the `overridable` annotation on the
 signature:
 
 ```ruby
@@ -1444,7 +1444,7 @@ There are a few constraints around how methods like `include`, `extend`,
     defined in `*.rb` or `*.rbi` files that are not being ignored, or
   - Hide the `include` or `extend` invocations from Sorbet by using
     [`# typed: ignore` sigils](static.md) to ignore the entire file, or
-  - Hide hiding only the individual call from Sorbet statically using something
+  - Hide only the individual call from Sorbet statically using something
     like `send(:include, ...)`.
 - `mixes_in_class_methods` and `requires_ancestor` must only be declared in a
   `module`, not a `class`. Classes are never mixed into other classes or
@@ -1961,7 +1961,7 @@ The new syntax avoids incurring eagerly evaluating the right-hand side of the
 type alias, potentially forcing one or more constants to be autoloaded before
 they would otherwise be required. This improves load-time performance in
 lazily-loaded environments (usually: development environments) and also prevents
-certain modes of use of Sorbet to introduce load-time cyclic references.
+certain Sorbet usage patterns from introducing load-time cyclic references.
 
 ## 5044
 
@@ -2054,7 +2054,7 @@ docs for error code [5016](#5016).
 
 ## 5045
 
-This error is regards misuse of user-defined generic classes. This error is
+This error regards misuse of user-defined generic classes. This error is
 reported even at `# typed: true`. Otherwise, the error explanation is the same
 as for error code [5046](#5046).
 
@@ -2454,7 +2454,7 @@ either case.
 
 In Stripe's codebase, this is generally not a problem at runtime, as we use
 Sorbet's own autoloader generation to pre-declare filler namespaces, keeping the
-Ruby runtime es behavior equivalent to Sorbet. However, the autoloader has some
+Ruby runtime's behavior equivalent to Sorbet. However, the autoloader has some
 edge cases, which can often cause deviations between Ruby's runtime and Sorbet.
 This error helps guard against these issues.
 
