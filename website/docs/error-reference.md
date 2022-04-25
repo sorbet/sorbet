@@ -1118,6 +1118,17 @@ Child::MY_CONST    # ok
 Parent::MY_CONST   # ok
 ```
 
+## 5003
+
+Sorbet failed to parse a method signature. For more documentation on what's
+valid `sig` syntax, see [Method Signatures](sigs.md).
+
+## 5004
+
+Sorbet failed to parse a Ruby expression as a valid Sorbet type annotation.
+Sorbet supports many type annotations—use the sidebar to find relevant docs on
+the kinds of valid Sorbet type annotations.
+
 ## 5005
 
 A class or instance variable is defined in the wrong context.
@@ -1255,6 +1266,208 @@ end
 
 The same thing holds for type templates.
 
+## 5015
+
+[Variance](<https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)>)
+is a type system concept that controls how generics interact with subtyping.
+
+If a `type_member` is declared as covariant (`:out`) in a parent class or
+module, it must be declared as either covariant or invariant in any children of
+that class or module. (A `type_member` with no variance annotation is
+invariant.)
+
+Similarly if a `type_member` is declared as contravariant (`:in`) in a parent
+class or module, it must be declared as either contravariant or invariant in any
+children.
+
+To see why, consider this example:
+
+```ruby
+module Parent
+  extend T::Generic
+  X = type_member(:out)
+end
+
+module Child
+  extend T::Generic
+  include Parent
+
+  X = type_member(:in) # error: variance mismatch
+end
+```
+
+If Sorbet were to allow this, Sorbet would fail to catch type errors that it
+would need to be able to catch. To see why, consider this chain of `T.let`
+statements, all of which have no error:
+
+```ruby
+x1 = Child[T.any(String, Symbol)].new
+
+# `Child::X` is contravariant, so "String <: T.any(String, Symbol)"
+# implies "Child[T.any(String, Symbol)] <: Child[String]"
+x2 = T.let(x1, Child[String])
+
+# `String` is equivalent to `String`, so Child[String] <: Parent[String]
+x3 = T.let(x2, Parent[String])
+
+# `Parent::X` is covariant, so "String <: T.any(String, Integer)"
+# implies "Parent[String] <: Parent[T.any(String, Integer)]"
+x4 = T.let(x3, Parent[T.any(Integer, String)])
+```
+
+Given the above definitions, with `Parent::X` being covariant and `Child::X`
+being contravariant, each subsequent `T.let` checks out, with the reasons being
+specified.
+
+But that's a contradiction! We were able to make a conclusion that we know is
+false. If we had jumped straight from where we started to where we finished,
+Sorbet would report an error:
+
+```ruby
+y1 = Child[T.any(String, Symbol)].new
+T.let(y1, Parent[T.any(Integer, String)])
+#     ^^ error: Argument does not have asserted type
+```
+
+This is because `T.any(Integer, String)` is neither a subtype nor a supertype of
+`T.any(Symbol, String)`, the types are completely incompatible.
+
+To avoid introducing contradictions like this into the type system, Sorbet
+requires that the variance on parent and child classes matches.
+
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Parent%0A%20%20extend%20T%3A%3AGeneric%0A%20%20X%20%3D%20type_member%28%3Aout%29%0Aend%0A%0Amodule%20Child%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20Parent%0A%0A%20%20X%20%3D%20type_member%28%3Ain%29%0Aend%0A%0Ax1%20%3D%20Child%5BT.any%28String%2C%20Symbol%29%5D.new%0A%0A%23%20%60Child%3A%3AX%60%20is%20contravariant%2C%20so%20%22String%20%3C%3A%20T.any%28String%2C%20Symbol%29%22%0A%23%20implies%20%22Child%5BT.any%28String%2C%20Symbol%29%5D%20%3C%3A%20Child%5BString%5D%22%0Ax2%20%3D%20T.let%28x1%2C%20Child%5BString%5D%29%0A%0A%23%20%60String%60%20is%20equivalent%20to%20%60String%60%2C%20so%20Child%5BString%5D%20%3C%3A%20Parent%5BString%5D%0Ax3%20%3D%20T.let%28x2%2C%20Parent%5BString%5D%29%0A%0A%23%20%60Parent%3A%3AX%60%20is%20covariant%2C%20so%20%22String%20%3C%3A%20T.any%28String%2C%20Integer%29%22%0A%23%20implies%20%22Parent%5BString%5D%20%3C%3A%20Parent%5BT.any%28String%2C%20Integer%29%5D%22%0Ax4%20%3D%20T.let%28x3%2C%20Parent%5BT.any%28Integer%2C%20String%29%5D%29%0A%0Ay1%20%3D%20Child%5BT.any%28String%2C%20Symbol%29%5D.new%0AT.let%28y1%2C%20Parent%5BT.any%28Integer%2C%20String%29%5D%29)
+
+## 5016
+
+Sorbet does not allow classes to be covariant nor contravariant.
+
+**Why?** The design of generic classes and interfaces in Sorbet was heavily
+inspired by the design of C#. This exact question has been answered for C# by
+Eric Lippert, who worked on the design and implementation of C# for many years.
+
+→
+[Why isn't there variance for generic classes?](https://stackoverflow.com/questions/2733346/why-isnt-there-generic-variance-for-classes-in-c-sharp-4-0/2734070#2734070)
+
+The answer concludes that the main selling point of having covariant classes it
+to make immutable generic classes, at the cost of a more complex implementation
+of generics.
+
+## 5017
+
+The `type_member` and `type_template` declarations from a parent class must all
+be repeated in the same order a child class (and before any newly-added type
+members belonging only to the child class).
+
+One non-obvious way this error can manifest is via code generation tooling. If a
+tool attempts to generate `type_member` declarations using runtime reflection,
+but does them out of order, that will confuse Sorbet. Ask the owner of the code
+generator for help resolving the problem.
+
+## 5018
+
+A child class defined a normal constant with a name that was already in use as a
+`type_member` in the parent class. For example:
+
+```ruby
+class Parent
+  extend T::Generic
+
+  X = type_member
+end
+
+class Child < Parent
+  X = 0 # error!
+end
+```
+
+In this example, since `X` is declared as a `type_member` in the parent, it must
+also be declared as a `type_member` in the child, and cannot be changed to some
+other kind of constant in the child.
+
+## 5019
+
+Abstract methods must not have bodies. For more information, see
+[Abstract Classes and Interfaces](abstract.md). Despite these methods not having
+a body, Sorbet's [runtime support](runtime.md) via the `sorbet-runtime` will
+convert these methods to raise. For example:
+
+```ruby
+module IService
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  sig {abstract.returns(String)}
+  def port; end
+end
+
+class MyService
+  include IService
+  # For sake of example, let's "forget" to implement `port`
+  # (Sorbet would report a static error here)
+end
+
+MyService.new.port # raises an exception at runtime:
+
+# example.rb:16:
+#   The method `port` on `IService` is declared as `abstract`.
+#   It does not have an implementation.
+```
+
+So you do not need to manually insert a `raise` inside the body of an abstract
+method.
+
+If you would like to define a method in an abstract class or interface with a
+default implementation, feel free to use the `overridable` annotation on the
+signature:
+
+```ruby
+class AbstractService
+  extend T::Sig
+
+  # Default port of 8080, but can be overridden in the child class.
+  sig {overridable.returns(String)}
+  def port; '8080'; end
+end
+```
+
+## 5020
+
+There are a few constraints around how methods like `include`, `extend`,
+`mixes_in_class_methods` [(docs)](abstract.mdd), and `requires_ancestor`
+[(docs)](requires-ancestor.md) work.
+
+- `include` and `extend` must be given a constant that Sorbet can _statically_
+  see resolve to a `module`. If a codebase is using metaprogramming to define
+  constants that are later mixed with these methods, the codebase must either:
+  - Ensure that all relevant `include` and `extend` targets are statically
+    defined in `*.rb` or `*.rbi` files that are not being ignored, or
+  - Hide the `include` or `extend` invocations from Sorbet by using
+    [`# typed: ignore` sigils](static.md) to ignore the entire file, or
+  - Hide hiding only the individual call from Sorbet statically using something
+    like `send(:include, ...)`.
+- `mixes_in_class_methods` and `requires_ancestor` must only be declared in a
+  `module`, not a `class`. Classes are never mixed into other classes or
+  modules, so these methods would have no meaning in a class.
+
+## 5021
+
+Sorbet requires that classes or modules which define `abstract` methods are also
+marked as abstract using either `abstract!` or `interface!`.
+
+For more information, see [Abstract Classes and Interfaces](abstract.md).
+
+## 5022
+
+Sorbet requires that modules marked `interface!` must only have abstract
+methods. To have a module with some abstract methods and some implemented
+methods, use `abstract!` in the module instead.
+
+Apart from this error message, there is otherwise essentially no difference
+between abstract modules and interface modules. `interface!` is provided mostly
+as a way for the author of a piece of code to declare intent to the reader more
+than anything else.
+
 ## 5023
 
 Some modules require specific functionality in the receiving class to work. For
@@ -1284,6 +1497,64 @@ class Example
 end
 ```
 
+## 5024
+
+This error usually happens when attempting to define a cyclic type alias:
+
+```ruby
+X = T.type_alias {X} # error: Unable to resolve right hand side of type alias
+```
+
+Note that Sorbet does not support making recursive type aliases. To make a
+recursively-defined data structure, see
+[Approximating algebraic data types](sealed.md#approximating-algebraic-data-types).
+
+## 5025
+
+Sorbet does not currently support type aliases in generic classes.
+
+This limitation was crafted early in the development of Sorbet to entirely
+sidestep problems that can arise in the design of a type system leading to
+unsoundness. (Sorbet users curious about type system design may wish to read
+[What is Type Projection in Scala, and Why is it Unsound?](https://lptk.github.io/programming/2019/09/13/type-projection.html).)
+
+We are likely to reconsider lifting this limitation in the future, but have no
+immediate plans yet.
+
+As a workaround, define type aliases somewhere else. Unfortunately this does
+mean it is not currently possible to define type aliases that reference type
+members defined by a generic class.
+
+## 5026
+
+Various classes in the standard library have been defined as generic classes
+retroactively, not via Sorbet's built-in support for generics. Sorbet's usual
+mechanism for defining custom generic classes is to define the `[]` method on
+the generic class's singleton class, so that syntax like
+`MyGenericClass[Integer]` is valid code at runtime.
+
+However for various stdlib generic classes, this syntax is already taken. For
+example:
+
+```ruby
+# BAD EXAMPLE
+
+Array[Integer]
+# => evaluates at runtime to `[Integer]`
+# (i.e. a list with one element: the `Integer` class object)
+```
+
+To use these standard library classes in type annotations, prefix the generic
+class's name with `T::`, like this:
+
+```ruby
+sig {returns(T::Array[Integer])}
+def foo; [0]; end
+```
+
+For more information, see
+[Arrays, Hashes, and Generics in the Standard Library](stdlib-generics.md).
+
 ## 5028
 
 In `# typed: strict` files, Sorbet requires that all constants are annotated
@@ -1292,6 +1563,63 @@ with a `T.let`.
 For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [6002](#6002), [7017](#7017), [7027](#7027).
+
+## 5030
+
+A constant cannot store a reference to itself, like this:
+
+```ruby
+X = X
+```
+
+## 5031
+
+Constants are not allowed to resolve through type aliases. For example, this is
+an error:
+
+```ruby
+class A
+  X = 0
+end
+
+AliasToA = T.type_alias {A}
+
+AliasToA::X # error: not allowed
+```
+
+**Why**? A number of reasons:
+
+- Type aliases do not always store references to plain classes. For example,
+  sometimes type aliases store references to types like `T.nilable(A)`. Sorbet
+  doesn't allow resolving constants through type aliases for the same reason
+  that it doesn't allow writing `T.nilable(A)::X`.
+
+- The runtime representation of type aliases do not behave like constants at
+  runtime, so `AliasToA::X` would not actually resolve to `A::X` at runtime.
+
+If the type alias is merely an alternate name for an existing constant, use a
+class alias not a type alias:
+
+```ruby
+AliasToA = A
+AliasToA::A # allowed
+```
+
+## 5032
+
+See the docs for error code [5020](#5020).
+
+## 5033
+
+Final methods cannot be overridden by definition. See
+[Final Methods, Classes, and Modules](final.md) for more information.
+
+The error code 5033 is raised only statically, but it is worth noting that
+attempting to the override of a final method statically but still have the
+method overridden at runtime will not work—Sorbet's runtime support for `final`
+methods prevents methods from being overridden at runtime as well. This is
+intentional. Final methods cannot even be overridden or redefined by mocks or
+stubs in a test suite.
 
 ## 5034
 
@@ -1322,7 +1650,7 @@ A method was marked `override`, but sorbet was unable to find a method in the
 class's ancestors that would be overridden. Ensure that the method being
 overridden exists in the ancestors of the class defining the `override` method,
 or remove `override` from the signature that's raising the error. See
-[Override Checking](override-checking) for more information about `override`.
+[Override Checking](override-checking.md) for more information about `override`.
 
 If the parent method definitely exists at runtime, it might be hidden in a
 [`# typed: ignore`](static#file-level-granularity-strictness-levels) file.
@@ -1344,7 +1672,7 @@ Sorbet must be able to statically resolve a method to create an alias to it.
 Here, the method is created through a DSL called `data_accessor` which defines
 methods at runtime through meta-programming:
 
-```rb
+```ruby
 class Base
   def self.data_accessor(key)
     define_method(key) do
@@ -1366,7 +1694,7 @@ One way to make those methods visible statically is to add a declaration for
 them in an [RBI file](https://sorbet.org/docs/rbi). For example, we can write
 our definitions as RBI under `sorbet/rbi/shims/foo.rbi`:
 
-```rb
+```ruby
 # sorbet/rbi/shims/foo.rbi
 # typed: true
 
@@ -1379,7 +1707,7 @@ Sometimes, Sorbet will complain about an alias to a method coming from an
 included modules. For example, here `bar` is coming from the inclusion of `Bar`
 but Sorbet will complain about the method not existing anyway:
 
-```rb
+```ruby
 module Bar
   def bar; end
 end
@@ -1397,7 +1725,7 @@ see an example of this behaviour
 To workaround this limitation, we can replace the `alias_method` by a real
 method definition:
 
-```rb
+```ruby
 class Foo
   include Bar
 
@@ -1406,6 +1734,147 @@ class Foo
   end
 end
 ```
+
+## 5038
+
+When Sorbet detects that a file is using `sig` syntax for methods, it requires
+an explicit `# typed:` sigil. The default `# typed:` sigil in Sorbet is
+`# typed: false`, so if you would like to add signatures in a method but change
+nothing else about how Sorbet checks your codebase, add `# typed: false` to the
+top of the file.
+
+However, note that Sorbet will not check the method body's implementation
+against the signature at `# typed: false`. When you see this error, it's
+**strongly recommended** that you additionally upgrade the file to at least
+`# typed: true`.
+
+Regardless of whether the file where this error was reported is `# typed: false`
+or `# typed: true`, all other `# typed: true` files in the codebase where Sorbet
+detects a call to this method will still be checked against this method's
+signature.
+
+To summarize:
+
+```ruby
+# -- a.rb --
+# typed: false
+
+class A
+  extend T::Sig
+  sig {params(x: Integer).returns(String)}
+  def int_to_string(x)
+    x # no static error!
+      # (this file is `# typed: false`)
+  end
+end
+
+# -- b.rb --
+# typed: true
+
+a = A.new
+res = a.int_to_string('not an int') # error: Expected `Integer` but got `String`
+
+res + 1 # error: Expected `String` but found `Integer`
+```
+
+For more information on these typedness levels, see
+[Enabling Static Checks](static.md).
+
+## 5039
+
+Sorbet relies on running inference in a method to be able to reveal the type of
+an expression with `T.reveal_type`. For performance reasons, Sorbet skips
+running inference in any file that is `# typed: false`, because none of the
+other inference-related errors will be reported at that typedness level.
+
+To use `T.reveal_type` in a file, upgrade the file to `# typed: true` or above.
+
+For more information on typedness levels, see
+[Enabling Static Checks](static.md).\
+For more information on `T.reveal_type`, see [Troubleshooting](troubleshooting.md).
+
+## 5040
+
+Overloading a method (by providing multiple signatures for the method) is only
+allowed for methods defined in the Ruby standard library. The definitions for
+the Ruby standard library live inside Sorbet's textual and binary payload, and
+cannot be updated by Sorbet end-users except by sending a pull request to Sorbet
+(see
+[this FAQ entry for more](faq.md#it-looks-like-sorbets-types-for-the-stdlib-are-wrong)).
+
+Note that even within the type definitions for the Ruby standard library,
+overloads in Sorbet come with substantial and somewhat fundamental limitations.
+
+When attempting to define methods that would require overloading to properly
+type them, users are strongly recommended to instead define multiple separate
+methods. For example, instead of defining a method like this:
+
+```ruby
+# BAD example, will not typecheck
+
+sig {params(idx: Integer, raise_if_not_found: TrueClass).returns(String)}
+sig {params(idx: Integer).returns(T.nilable(String))}
+def get_element(idx, raise_if_not_found)
+  # ...
+end
+```
+
+This attempts to define a `get_element` method that normally returns
+`T.nilable(String)` when called like `get_element(0)`, but will instead always
+return `String` or raise an exception if called like `get_element(0, true)`.
+
+The idea is that these are conceptually two different methods, which is the
+suggestion for how to refactor the code:
+
+```ruby
+sig {params(idx: Integer).returns(T.nilable(String))}
+def get_element(idx)
+  # ...
+end
+
+sig {params(idx).returns(String)}
+def get_element_or_raise(idx)
+  elem = get_element(idx)
+  case elem
+  when NilClass then raise "No element found at index #{idx}"
+  else elem
+  end
+end
+```
+
+We recommend such a refactoring even when attempting to write sigs for methods
+defined in gems outside the standard library.
+
+If this workaround will not work in your case, the final alternative is to
+either omit a signature for the method in question (or define an explicit
+signature where all parameters that cannot be typed accurately use `T.untyped`).
+
+**Why are overloads not well-supported in Sorbet?**
+
+Consider how overloading works in typed, compiled languages like C++ or Java;
+each overload is a separate method. They actually have separate implementations,
+are type checked separately, compile (with link-time name mangling) to separate
+symbols in the compiled object, and the compiler knows how to resolve each call
+site to a specific overload ahead of time, either statically or dynamically via
+virtual dispatch.
+
+Meanwhile, Ruby itself doesn't have overloading—there's only ever one method
+registered with a given name in the VM, regardless of what arguments it accepts.
+That complicates things. It becomes unclear how Sorbet should typecheck the body
+of the method (against all sigs? against one sig? against the component-wise
+union of their arguments?). There's no clear answer, and anything we choose will
+be bound to confuse or surprise someone.
+
+Also because Sorbet doesn't control whether the method can be dispatched to,
+even if it were going to make a static claim about whether the code type checks,
+it doesn't get to control which (fake) overload will get dispatched to at the
+call site (again: there's only one version of the method in the VM).
+
+Finally this choice is somewhat philosophical: codebases that make heavy use of
+overloading (even in typed languages where overloading is supported) tend to be
+harder for readers to understand at a glance. The above workaround of defining
+multiple methods with unique names solves this readability problem, because now
+each overload has a descriptive name.
 
 ## 5041
 
@@ -1459,6 +1928,136 @@ class ChildTwo < T::Struct
 end
 ```
 
+## 5042
+
+Sorbet does not allow defining a `private` method in an `interface!`. Note that
+this limitation is lifted if the `module` is declared `abstract!` not
+`interface`.
+
+The justification for why this is an error has been lost to the sands of time.
+It seems reasonable to implement support for this.
+
+<https://github.com/sorbet/sorbet/issues/5687>
+
+## 5043
+
+The syntax for declaring type aliases has changed. What used to be written like
+this:
+
+```ruby
+# BAD
+X = T.type_alias(Integer)
+```
+
+must now be written like this, with a block argument instead of a positional
+argument:
+
+```ruby
+# GOOD
+X = T.type_alias {Integer}
+```
+
+The new syntax avoids incurring eagerly evaluating the right-hand side of the
+type alias, potentially forcing one or more constants to be autoloaded before
+they would otherwise be required. This improves load-time performance in
+lazily-loaded environments (usually: development environments) and also prevents
+certain modes of use of Sorbet to introduce load-time cyclic references.
+
+## 5044
+
+As background reading, you may first want to read more about variance—see the
+docs for error code [5015](#5015) and [5016](#5016).
+
+When a type member is declared normally, without any variance annotation, it is
+invariant. It can then appear either in the `params` list or the `returns` of a
+method's signature, but then prevents using subtyping on that type member. For
+example:
+
+```ruby
+module IBox
+  extend T::Generic
+  Elem = type_member
+end
+
+sig {params(x: IBox[Integer]).void}
+def example(x)
+  T.let(x, IBox[T.any(Integer, String)]) # error: Argument does not have asserted type
+end
+```
+
+In this example, even though `Integer` is a subtype of `T.any(Integer, String)`,
+`IBox[Integer]` is not a subtype of `IBox[T.any(Integer, String)]` because
+`Elem` has not been declared as `:out` nor `:in`, and is thus **invariant**.
+
+To allow code like this, we can declare `Elem` using `:out`, but this comes at
+the restriction of only being able to use `Elem` in **out positions**. An out
+position is named as such because it's the position of a method's output, like a
+method signature's `returns`, though there are other out positions as well. As
+an intuition, all positions in a signature where the value is produced by a
+method are out positions. This includes values yielded to lambda functions and
+block arguments.
+
+```ruby
+# ...
+
+  Elem = type_member(:out)
+
+  sig {abstract.returns(Elem)}
+  #                     ^^^^ out position
+  def value; end
+
+  sig do
+    type_parameters(:U)
+      .params(
+        blk: T.proc.params(val: Elem).returns(T.type_parameter(:U))
+      )
+      .returns(T.type_parameter(:U))
+  end
+  def with_value(&blk)
+    yield value
+  end
+
+# ...
+```
+
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20IImmutableBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20type_parameters%28%3AU%29%0A%20%20%20%20%20%20.params%28%0A%20%20%20%20%20%20%20%20blk%3A%20T.proc.params%28val%3A%20Elem%29.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%20%20%29%0A%20%20%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0A%20%20end%0A%20%20def%20with_value%28%26blk%29%0A%20%20%20%20yield%20value%0A%20%20end%0Aend%0A%0Aclass%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20IImmutableBox%0A%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%29%0A%20%20%20%20%40value%20%3D%20value%0A%20%20end%0A%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0Aend%0A%0Asig%20%7Bparams%28immutable_box%3A%20IImmutableBox%5BInteger%5D%29.void%7D%0Adef%20example%28immutable_box%29%0A%20%20x%20%3D%20immutable_box.value%0A%20%20T.reveal_type%28x%29%0A%0A%20%20immutable_box.with_value%20do%20%7Celem%7C%0A%20%20%20%20T.reveal_type%28elem%29%0A%20%20end%0Aend)
+
+The intuition for **in positions** is flipped: they're all positions that would
+correspond to an input to the function, instead of all things that the function
+produces. This includes the direct arguments of the method, as well as the
+return values of any lambda functions or blocks passed into the method.
+
+If it helps, some type system actually formalize the type of a function as a
+generic something like this:
+
+```ruby
+module Fn
+  extend T::Sig
+  extend T::Generic
+  interface!
+
+  Input = type_member(:in)
+  Output = type_member(:out)
+
+  sig {abstract.params(input: Input).returns(Oputput)}
+  def call(input); end
+end
+```
+
+Recall that only modules (not classes) may have covariant and contravariant type
+members—classes are limited to only invariant type members. For more, see the
+docs for error code [5016](#5016).
+
+> **Note** that `T.attached_class` is actually modeled as a covariant (`:out`)
+> `type_template` defined automatically on all singleton classes, which means
+> that `T.attached_class` can only be used in `:out` positions.
+
+## 5045
+
+This error is regards misuse of user-defined generic classes. This error is
+reported even at `# typed: true`. Otherwise, the error explanation is the same
+as for error code [5046](#5046).
+
 ## 5046
 
 Generic classes must be passed all their generic type arguments when being used
@@ -1474,11 +2073,11 @@ Many classes in the standard library are generic classes
 `Array` and `Hash`. Any user-defined generic classes must similarly be provided
 type arguments when used.
 
-For legacy reasons relating to the intial rollout of Sorbet, this error is only
-reported at `# typed: strict` for standard library generic classes and
-`# typed: true` for all user-defined generic classes. (In an ideal world, it
-would have always been reported at `# typed: true`, and we might change this in
-the future.)
+For legacy reasons relating to the initial rollout of Sorbet, misuse of generics
+defined in the standard library error are only reported at `# typed: strict`,
+despite being reported at `# typed: true` for all user-defined generic classes.
+(In an ideal world, it would have always been reported at `# typed: true`, and
+we might change this in the future.)
 
 ## 5047
 
@@ -1515,16 +2114,114 @@ class C
 end
 ```
 
+## 5049
+
+Parameters given type annotations in a method signature must be provided in the
+same order they appear in the method definition, even for keyword parameters for
+which order would not usually be required. This is for readability and
+consistency.
+
+Also, all optional keyword parameters must come after all required keyword
+parameters.
+
+## 5050
+
+Sealed classes (or modules) can only be inherited (or included/extended) in the
+same file as the parent.
+
+For more information, see [Sealed Classes](sealed.md)
+
+## 5051
+
+See [Override Checking](override-checking.md).
+
+## 5052
+
+When providing bounds for a type member with `lower` and `upper`, the lower type
+bound must be a subtype of (or equivalent to) the `upper` type bound.
+
+Otherwise, it would never be possible to instantiate the generic type because
+the bounds would never be satisfiable.
+
+## 5053
+
+For classes that subclass generic classes, the child's lower and upper bound
+must still be within the lower and upper bound range specified by the parent
+class.
+
+This problem can come up from time to time when the parent class uses `fixed`
+when it meant to use `upper`. For example:
+
+```ruby
+class IntOrStringBox
+  extend T::Generic
+  Elem = type_member {{fixed: T.any(Integer, String)}}
+end
+
+class IntBox < IntOrStringBox
+  Elem = type_member {{fixed: Integer}} # error, incompatible bound
+end
+```
+
+In this case we'd like `IntBox` to be a subclass of `IntOrString` box, but since
+we're using `fixed` Sorbet prevents us.
+
+A fix is to use only `upper` instead:
+
+```ruby
+class IntOrStringBox
+  extend T::Generic
+  Elem = type_member {{upper: T.any(Integer, String)}}
+end
+
+class IntBox < IntOrStringBox
+  Elem = type_member {{upper: Integer}}
+end
+```
+
+But this does come at the slight cost that now all type annotations that used to
+be using `IntOrStringBox` without any generic type arguments must now provide
+one:
+
+```ruby
+T.let(IntBox[Integer].new, IntOrStringBox) # error: Generic class without type arguments
+```
+
+The fix is to change all occurrences of `IntOrStringBox` without type arguments
+to specify `IntOrStringBox[T.any(Integer, String)]`.
+
 ## 5054
 
 Use of `implementation` has been replaced by `override`.
 
+## 5055
+
+Sorbet does not consider a class "fully resolved" until all of its type members
+have also been fully resolved. Sorbet cannot fully resolve a type member in a
+class until all constants mentioned in its right-hand side have been fully
+resolved. So if any of those right-hand-side constants are themselves generic
+classes, Sorbet will detect a loop and report this error. Concretely:
+
+```ruby
+class A
+  extend T::Sig
+  extend T::Generic
+
+  X = type_member {{fixed: B}} # error: A::X is involved in a cycle
+end
+
+class B
+  extend T::Sig
+  extend T::Generic
+
+  X = type_member {{fixed: A}} # error: B::X is involved in a cycle
+end
+```
+
 ## 5056
 
-The `generated` annotation in method signatures is deprecated.
-
-For alternatives, see [Enabling Runtime Checks](runtime.md) which talks about
-how to change the runtime behavior when method signatures encounter a problem.
+The `T.experimental_attached_class` syntax has been stabilized and is now
+`T.attached_class`. Use the provided autocorrect to migrate.
 
 ## 5057
 
@@ -1566,6 +2263,62 @@ parameters. See the
 [T.attached_class](attached-class.md#tattached_class-as-an-argument)
 documentation for a more thorough description of why this is.
 
+## 5059
+
+The syntax for the second argument to `T::NonForcingConstants.non_forcing_is_a?`
+is much more constrained than what Sorbet allows for when resolving arbitrary
+constant literals.
+
+For more information, see [T::NonForcingConstants](non-forcing-constants.md).
+
+## 5060
+
+When applying a type argument to a generic class, the type argument must be
+between any `lower` and `upper` bound declared by the `type_member` (or
+`type_template`) declaration for that type parameter.
+
+## 5061
+
+A constant was marked private with Ruby's `private_constant` method, which means
+it's only valid to access that constant directly, with no constant literal
+prefix scope:
+
+```ruby
+class A
+  X = 0
+  private_constant :X
+
+  X # ok
+
+  module Inner
+    X # ok
+  end
+end
+
+A::X # error
+```
+
+If you must access the private constant, you will have to use `.const_get` to
+both hide the constant access from Sorbet and appease the Ruby VM:
+
+```ruby
+A.const_get(:X)
+```
+
+Note that this technique should be used very sparingly, and many codebases have
+lint rules or other coding conventions discouraging or even preventing the use
+of `const_get`.
+
+## 5062
+
+Invalid syntax for `requires_ancestor`. See
+[Requiring Ancestors](requires-ancestor.md) for more information.
+
+## 5063
+
+Useless `requires_ancestor`, because the given class or module is already an
+ancestor. See [Requiring Ancestors](requires-ancestor.md) for more information.
+
 ## 5064
 
 Using the `requires_ancestor` method, module `Bar` has indicated to Sorbet that
@@ -1573,7 +2326,7 @@ it can only work properly if it is explicitly included along module `Foo`. In
 this example, we see that while module `Bar` is included in `MyClass`, `MyClass`
 does not include `Foo`.
 
-```rb
+```ruby
 module Foo
   def foo; end
 end
@@ -1595,7 +2348,7 @@ end
 
 The solution is to include `Foo` in `MyClass`:
 
-```rb
+```ruby
 class MyClass
   include Foo
   include Bar
@@ -1605,7 +2358,7 @@ end
 Other potential (albeit less common) sources of this error code are classes that
 are required to have some class as an ancestor:
 
-```
+```ruby
 class Foo
   def foo; end
 end
@@ -1633,7 +2386,7 @@ end
 
 Ensuring `MyClass` inherits from `Foo` at some point will fix the error:
 
-```rb
+```ruby
 class MySuperClass < Foo
   extend T::Helpers
   include Bar
@@ -1645,12 +2398,22 @@ class MyClass < MySuperClass
 end
 ```
 
+## 5065
+
+Unsatisfiable `requires_ancestor`. See
+[Requiring Ancestors](requires-ancestor.md) for more information.
+
+## 5067
+
+A class's superclass (the `Parent` in `class Child < Parent`) must be statically
+resolvable to a class, not a module.
+
 ## 5068
 
 Sorbet requires that class or module definitions be namespaced unambiguously.
 For example, in this code:
 
-```
+```ruby
 # typed: true
 
 module B
@@ -1667,7 +2430,7 @@ The definition B::C is ambiguous. In Ruby's runtime, it resolves to B::C (and
 not A::B::C). However, things are different in the presence of a pre-declared
 filler namespace like below:
 
-```
+```ruby
 # typed: true
 
 module B
@@ -1691,9 +2454,67 @@ either case.
 
 In Stripe's codebase, this is generally not a problem at runtime, as we use
 Sorbet's own autoloader generation to pre-declare filler namespaces, keeping the
-Ruby runtime's behavior equivalent to Sorbet. However, the autoloader has some
+Ruby runtime es behavior equivalent to Sorbet. However, the autoloader has some
 edge cases, which can often cause deviations between Ruby's runtime and Sorbet.
 This error helps guard against these issues.
+
+## 5069
+
+There must be exactly one statement in a method signature (possibly a single
+chain of methods).
+
+Sorbet used to allow syntax like
+
+```ruby
+sig do
+  params(x: Integer)
+  returns(Integer)
+end
+def foo(x); x; end
+```
+
+where the body of the `sig` block was allowed to have multiple methods not
+connected by a method call chain.
+
+Use the provided autocorrect to convert the old syntax to the new syntax.
+
+## 5070
+
+`T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
+type `T.untyped` (along with all other values).
+
+## 5071
+
+Providing a `.bind` when using `T.proc` is only valid on a method's single block
+argument (`&blk`), not on all arguments. The `.bind` is not actually a type
+annotation, but instead an instruction to the type inference algorithm about how
+to typecheck the body of the block. Type checking for the body of the block
+provided to a method call happens **after** type checking all other arguments,
+while type checking for lambda functions and procs passed as positional or
+keyword arguments happens **before** the proc value is checked against the
+`T.proc` type. For example:
+
+```ruby
+sig do
+  params(
+    f: T.proc.returns(Integer),
+    blk: T.proc.returns(Integer),
+  )
+  .void
+def example(f, &blk)
+end
+
+f = ->() {0} # lambda is type checked here, before running type inference on
+             # the `example` call below.
+example(f) do # call to `example` is typechecked next
+  1 # block body is typechecked last
+end
+```
+
+Since the definition of the lambda `f` is typechecked entirely before the call
+to `example` is typechecked, no `.bind` annotation on any of `example`'s
+positional or keyword arguments would actually affect how the lambda is
+typechecked.
 
 ## 6001
 
