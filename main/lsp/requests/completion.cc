@@ -1213,7 +1213,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         return response;
     }
     auto pos = *params->position;
-    auto maybeQueryLoc = pos.asLoc(gs, fref);
+    auto maybeQueryLoc = pos.toLoc(gs, fref);
     if (!maybeQueryLoc.has_value()) {
         response->result = std::move(emptyResult);
         return response;

@@ -167,7 +167,7 @@ string Position::showRaw() const {
 // https://microsoft.github.io/language-server-protocol/specification#text-documents
 //
 // Returns nullopt if the position does not represent a valid location.
-optional<core::Loc> Position::asLoc(const core::GlobalState &gs, const core::FileRef fref) const {
+optional<core::Loc> Position::toLoc(const core::GlobalState &gs, const core::FileRef fref) const {
     core::Loc::Detail reqPos{static_cast<uint32_t>(this->line + 1), static_cast<uint32_t>(this->character + 1)};
     if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
         auto offset = maybeOffset.value();
