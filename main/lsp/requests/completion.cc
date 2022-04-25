@@ -992,9 +992,9 @@ void logEmptyCompletion(const core::GlobalState &gs, core::FileRef fref, core::L
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
-unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntypedReceiver(const core::GlobalState &gs,
-                                                                               core::Loc queryLoc, size_t sortIdx) {
-    string label("(call site is T.untyped)");
+unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const core::GlobalState &gs, core::Loc queryLoc,
+                                                                       size_t sortIdx, std::string_view message) {
+    string label(message);
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);
     item->kind = CompletionItemKind::Method;
@@ -1172,7 +1172,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     {
         Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".method_items");
         if (receiverIsUntyped) {
-            items.push_back(getCompletionItemForUntypedReceiver(gs, params.queryLoc, items.size()));
+            items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
             for (auto &similarMethod : dedupedSimilarMethods) {
                 // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
@@ -1239,6 +1239,14 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
                 response->result = make_unique<CompletionList>(false, move(items));
                 return response;
             }
+        }
+
+        ENFORCE(fref.exists());
+        auto level = fref.data(gs).strictLevel;
+        if (level < core::StrictLevel::True) {
+            items.emplace_back(getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
+            response->result = make_unique<CompletionList>(false, move(items));
+            return response;
         }
 
         logEmptyCompletion(gs, fref, queryLoc, "no query result");
