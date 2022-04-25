@@ -1,4 +1,4 @@
-test/cli/type-member-template/type-member-template.rb:10: `type_template` type `Template` used in an instance method definition https://srb.help/5027
+test/cli/type-member-template/type-member-template.rb:10: `type_template` type `Template` used in an instance method definition https://srb.help/5004
     10 |  sig {returns(Template)}
                        ^^^^^^^^
     test/cli/type-member-template/type-member-template.rb:8: `Template` defined here
@@ -7,7 +7,7 @@ test/cli/type-member-template/type-member-template.rb:10: `type_template` type `
   Note:
     Only a `type_member` can be used in an instance method definition.
 
-test/cli/type-member-template/type-member-template.rb:13: `type_member` type `Member` used in a singleton method definition https://srb.help/5027
+test/cli/type-member-template/type-member-template.rb:13: `type_member` type `Member` used in a singleton method definition https://srb.help/5004
     13 |  sig {returns(Member)}
                        ^^^^^^
     test/cli/type-member-template/type-member-template.rb:7: `Member` defined here
