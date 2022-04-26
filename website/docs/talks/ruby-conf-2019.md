@@ -4,7 +4,7 @@ title: Sorbet: A type checker for Ruby 3 you can use today!
 sidebar_label: RubyConf 2019
 ---
 
-- [→ Talk page](https://rubyconf.org/program#session-908)
+- [→ Talk page](https://rubyconf.org/2019/program.html#session-908)
 - [→ Video](https://www.youtube.com/watch?v=jielBIZ40mw)
 - [→ Slides](https://sorbet.run/talks/RubyConf2019/#/)
 
