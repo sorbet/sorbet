@@ -54,7 +54,8 @@ string tryConvertToStringConstant(optional<const rapidjson::Value *> value, stri
     return strValue;
 }
 
-optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, const string &name) {
+optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, string_view nameStr) {
+    rapidjson::Value name(rapidjson::StringRef(nameStr.data(), nameStr.size()));
     auto iter = value.FindMember(name);
     if (iter == value.MemberEnd()) {
         return nullopt;
