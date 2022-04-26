@@ -58,9 +58,9 @@ the features Sorbet provides.
         Ruby has <a href="/docs/class-types">separate classes</a> for different
         numeric types. <code>number</code> in JavaScript is most closely
         <code>Float</code> in Ruby, but unlike in JavaScript, integers and
-        floating points numbers are not transparently compatible with each
-        other. To convert between different types, Ruby provides various "to_i"
-        and "to_f" methods. See the Ruby docs for more.
+        floating-point numbers are not transparently compatible with each
+        other. To convert between different types, Ruby provides various <code>to_i</code>
+        and <code>to_f</code> methods. See the Ruby docs for more.
       </td>
     </tr>
     <tr>
