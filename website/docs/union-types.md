@@ -1,7 +1,7 @@
 ---
 id: union-types
 title: Union Types
-sidebar_label: T.any
+sidebar_label: Union Types (T.any)
 ---
 
 Union types are how we merge the values of a set of types into one new type. The
