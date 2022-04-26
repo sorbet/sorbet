@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Arrays, Hashes, and Generics in the Standard Library · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; TODO: This page is still a fragment. Contributions welcome!"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Arrays, Hashes, and Generics in the Standard Library · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; TODO: This page is still a fragment. Contributions welcome!"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Arrays, Hashes, and Generics in the Standard Library · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The Sorbet syntax for type annotations representing arrays, hash maps, and other"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Arrays, Hashes, and Generics in the Standard Library · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="The Sorbet syntax for type annotations representing arrays, hash maps, and other"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -6,7 +6,7 @@
 
               ga('create', 'UA-119877071-2', 'auto');
               ga('send', 'pageview');
-            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Type System</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li><li class="navListItem"><a class="navItem" href="/docs/from-typescript">TypeScript ↔ Sorbet</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -62,55 +62,110 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/stdlib-generics.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Arrays, Hashes, and Generics in the Standard Library</h1></header><article><div><span><blockquote>
-<p>TODO: This page is still a fragment. Contributions welcome!</p>
-</blockquote>
-<p>Sorbet supports generic types. The syntax looks likes <code>MyClass[Elem]</code>. For user
-defined generic classes, it’s possible to make this valid Ruby syntax.</p>
-<p>However, it’s not possible to change the syntax for classes in the Ruby standard
-library that should be generic. To make up for this, we use wrappers in the <code>T</code>
-namespace to represent them:</p>
-<ul>
-<li><code>T::Array[Type]</code></li>
-<li><code>T::Hash[KeyType, ValueType]</code></li>
-<li><code>T::Set[Type]</code></li>
-<li><code>T::Enumerable[Type]</code></li>
-<li><code>T::Enumerator[Type]</code></li>
-<li><code>T::Enumerator::Lazy[Type]</code></li>
-<li><code>T::Range[Type]</code></li>
-</ul>
-<p>Inside a sig, just writing <code>Array</code> or <code>Hash</code> will be treated as
-<code>T::Array[T.untyped]</code> and <code>T::Hash[T.untyped, T.untyped]</code> respectively.</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-extend T::Sig
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/stdlib-generics.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Arrays, Hashes, and Generics in the Standard Library</h1></header><article><div><span><p>The Sorbet syntax for type annotations representing arrays, hash maps, and other
+containers defined in the Ruby standard library looks different from other
+<a href="/docs/class-types">class types</a> despite the fact that Ruby uses classes to
+represent these values, too. Here’s the syntax Sorbet uses:</p>
+<table>
+<thead>
+<tr><th>Type</th><th>Example value</th></tr>
+</thead>
+<tbody>
+<tr><td><code>T::Array[Integer]</code></td><td><code>[1, 2, 3]</code></td></tr>
+<tr><td><code>T::Array[String]</code></td><td><code>[&quot;hello&quot;, &quot;goodbye&quot;]</code></td></tr>
+<tr><td><code>T::Hash[Symbol, Integer]</code></td><td><code>{key: 0}</code></td></tr>
+<tr><td><code>T::Hash[String, Float]</code></td><td><code>{&quot;key&quot; =&gt; 0.0}</code></td></tr>
+<tr><td><code>T::Set[Integer]</code></td><td><code>Set[1, 2, 3]</code></td></tr>
+<tr><td><code>T::Range[Integer]</code></td><td><code>0..10</code></td></tr>
+<tr><td><code>T::Enumerable[Integer]</code></td><td><em>interface implemented by many types</em></td></tr>
+<tr><td><code>T::Enumerator[Integer]</code></td><td>[1, 2, 3].each</td></tr>
+<tr><td><code>T::Enumerator::Lazy[Integer]</code></td><td>[1, 2, 3].each.lazy</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="why-the-t-prefix"></a><a href="#why-the-t-prefix" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why the <code>T::</code> prefix?</h2>
+<!-- TODO(jez) Wrap "generic classes" with link to docs for user-defined generic classes once it's written. -->
+<p>Sorbet uses syntax like <code>MyClass[Elem]</code> for type arguments passed to generic
+classes. All Sorbet type annotations are backwards compatible with normal Ruby
+syntax, and this is no exception. In normal Ruby, <code>MyClass[Elem]</code> would
+correspond to a call to a method named <code>[]</code> defined on <code>MyClass</code>.</p>
+<p>When creating user-defined generic classes, the <code>sorbet-runtime</code> gem
+automatically defines this method so that the type annotation syntax works at
+runtime.</p>
+<p>But for classes in the Ruby standard library that Sorbet retroactively defined
+as generic classes, the <code>[]</code> method will not always be defined at runtime. One
+potential option would have been to use <code>sorbet-runtime</code> to monkey patch the
+standard library so that the <code>[]</code> method is defined for generic classes, but
+some of these Ruby standard library classes <strong>already</strong> define a meaningful <code>[]</code>
+method. For example:</p>
+<pre><code class="hljs css language-ruby">Array[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+<span class="hljs-comment"># =&gt; evaluates to the array `[1, 2, 3]`</span>
 
-sig {returns(Array)}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
-  [<span class="hljs-number">1</span>, <span class="hljs-string">"heh"</span>]
-<span class="hljs-keyword">end</span>
+Set[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+<span class="hljs-comment"># =&gt; evaluates to the set containing 1, 2, and 3o</span>
 
-T.reveal_type(foo.first) <span class="hljs-comment"># Revealed type: T.untyped</span>
-
-sig {returns(T::Array[T.any(Integer, String)])}
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span></span>
-  [<span class="hljs-number">1</span>, <span class="hljs-string">"heh"</span>]
-<span class="hljs-keyword">end</span>
-
-T.reveal_type(bar.first) <span class="hljs-comment"># Revealed type: T.nilable(T.any(Integer, String))</span>
+Hash[<span class="hljs-symbol">:key1</span>, <span class="hljs-number">1</span>, <span class="hljs-symbol">:key2</span>, <span class="hljs-number">2</span>]
+<span class="hljs-comment"># =&gt; evaluates to the hash `{key1: 1, key2: 2}`</span>
 </code></pre>
-<p>The type parameters for the generic types provided by the standard library are
-only used as hints for the static type system, and are ignored entirely by the
-runtime type system.</p>
+<p>To avoid clobbering any existing <code>[]</code> method on these standard library classes,
+Sorbet defines classes in the <code>T::</code> namespace that mirror the names of classes
+in the standard library.</p>
 <blockquote>
-<p><strong>Note</strong>: Sorbet used to take these type parameters into account during
-runtime type-checking, but this turned out to be a common and
-difficult-to-debug source of performance problems: In order to verify that an
-array contained the values it claimed it did, the Sorbet runtime used to
-recursively check the type of every member of a collection, which would take a
-long time for arrays or hashes of a sufficiently large size. Consequently,
-this behavior was eventually removed.</p>
+<p>Note that this mapping is not automatic: Sorbet has special-cased each
+individual class in the table above inside Sorbet (it is not possible to use
+merely prepend <code>T::</code> to the name of any class that has been defined as a
+generic type in an <a href="/docs/rbi">RBI file</a>).</p>
 </blockquote>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/class-of"><span class="arrow-prev">← </span><span>T.class_of</span></a><a class="docs-next button" href="/docs/self-type"><span>T.self_type</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="generic-class-without-type-arguments"></a><a href="#generic-class-without-type-arguments" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>“Generic class without type arguments”</h2>
+<p>For backwards compatibility reasons during Sorbet’s original rollout, Sorbet
+sometimes allows generic classes defined in the Ruby standard library to appear
+in type annotations <em>without</em> being provided type arguments:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+<span class="hljs-comment">#        ^^^^ important</span>
+
+T.let([], Array) <span class="hljs-comment"># no error</span>
+</code></pre>
+<p>versus:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+
+T.let([], Array)
+<span class="hljs-comment">#         ^^^^^ error: Generic class without type arguments</span>
+</code></pre>
+<p>When this happens, Sorbet defaults all missing type arguments to <code>T.untyped</code>.</p>
+<p>This exception is made only for classes in the Ruby standard library. For all
+other generic classes, Sorbet requires that a generic class is provided all of
+its required type arguments, even in <code># typed: false</code> files.</p>
+<p>This behavior may change in the future, and we strongly discourage relying on it
+intentionally.</p>
+<h2><a class="anchor" aria-hidden="true" id="generics-and-runtime-checks"></a><a href="#generics-and-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Generics and runtime checks</h2>
+<p>Recall that Sorbet is not only a static type checker, but also a system for
+<a href="/docs/runtime">validating types at runtime</a>.</p>
+<p>However, Sorbet completely erases <em>generic type arguments</em> at runtime. When
+Sorbet sees a signature like <code>T::Array[Integer]</code>, at runtime it will <strong>only</strong>
+check whether an argument has class <code>Array</code>, but not whether every element of
+that array is also an <code>Integer</code> at runtime.</p>
+<p>This also means that if the element type of an array has type
+<a href="/docs/untyped"><code>T.untyped</code></a>, Sorbet will not report a static error, nor will
+Sorbet report a runtime error.</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">xs:</span> T::Array[Integer]).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(xs)</span></span>; <span class="hljs-keyword">end</span>
+
+untyped_str_array = T::Array[T.untyped].new(<span class="hljs-string">'first'</span>, <span class="hljs-string">'second'</span>)
+foo(untyped_str_array)
+<span class="hljs-comment">#   ^^^^^^^^^^^^^^^^^ no static error, AND no runtime error!</span>
+</code></pre>
+<p>(Also note that unlike other languages that implement generics via type erasure,
+Sorbet does not insert runtime casts that preserve type safety at runtime.)</p>
+<blockquote>
+<p><strong>Note</strong>: Sorbet used to take these type arguments into account during runtime
+type-checking, but this turned out to be a common and difficult-to-debug
+source of performance problems, frequently turning a fast, constant-time
+algorithm (e.g., <code>Hash</code> lookup) into a linear scan checking all element types.</p>
+<p>In order to verify that an array contained the values it claimed it did, the
+Sorbet runtime used to recursively check the type of every member of a
+collection, which would take a long time for arrays or hashes of a
+sufficiently large size. Consequently, this behavior has been removed.</p>
+</blockquote>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/class-types"><span class="arrow-prev">← </span><span>Class Types</span></a><a class="docs-next button" href="/docs/nilable-types"><span>Nilable Types</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#why-the-t-prefix">Why the <code>T::</code> prefix?</a></li><li><a href="#generic-class-without-type-arguments">&quot;Generic class without type arguments&quot;</a></li><li><a href="#generics-and-runtime-checks">Generics and runtime checks</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;

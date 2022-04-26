@@ -1,0 +1,422 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>TypeScript ↔ Sorbet Reference · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Many people learning Sorbet for the first time come from a TypeScript"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="TypeScript ↔ Sorbet Reference · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Many people learning Sorbet for the first time come from a TypeScript"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Getting Started</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/from-typescript">TypeScript ↔ Sorbet</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">Signatures</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">Type Assertions</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow Sensitivity</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">Type Aliases</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/from-typescript.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">TypeScript ↔ Sorbet Reference</h1></header><article><div><span><p>Many people learning Sorbet for the first time come from a TypeScript
+background. We’ve built this quick reference table mapping some common
+TypeScript features to the corresponding feature in Sorbet. (This is not a
+document about automatically interoperating between Sorbet and TypeScript; it is
+merely provided for educational purposes.)</p>
+<p>Note that Sorbet is not affiliated with TypeScript in any official way, and the
+information in this table may become out of date as TypeScript evolves
+independently of Sorbet. Please use the “Edit” button at the top of the page to
+help correct inaccuracies.</p>
+<p>Also note that Sorbet features do not always map to an exactly equivalent
+TypeScript feature. Be sure to read the relevant Sorbet docs to learn more about
+the features Sorbet provides.</p>
+<table>
+  <thead>
+    <tr>
+      <th>
+        TypeScript
+      </th>
+      <th>
+        Sorbet
+      </th>
+      <th>
+        Notes
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>String</code>
+      </td>
+      <td>
+        Ruby strings are represented by <a href="/docs/class-types">Class
+        Types</a>. All values in Ruby are instances of a particular class,
+        including strings.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>Integer</code>, <code>Float</code>, <code>Numeric</code>
+      </td>
+      <td>
+        Ruby has <a href="/docs/class-types">separate classes</a> for different
+        numeric types. <code>number</code> in JavaScript is most closely
+        <code>Float</code> in Ruby, but unlike in JavaScript, integers and
+        floating-point numbers are not transparently compatible with each
+        other. To convert between different types, Ruby provides various
+        <code>to_i</code> and <code>to_f</code> methods. See the Ruby docs for
+        more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>T::Boolean</code> (also: <code>TrueClass</code>,
+        <code>FalseClass</code>)
+      </td>
+      <td>
+        JavaScript has boolean true and false as a primitive boolean type. Ruby
+        has true as an instance of the Ruby <code>TrueClass</code> class and
+        false as an instance of the <code>FalseClass</code> class (these are
+        normal <a href="/docs/class-types">Class Types</a>). Sorbet then
+        uses a <a href="/docs/union-types">Union Type</a> to define a <a
+        href="/docs/type-aliases">Type Alias</a> called <code>T::Boolean</code>
+        inside the <code>sorbet-runtime</code> gem.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>string[]</code>
+      </td>
+      <td>
+        <code>T::Array[String]</code>
+      </td>
+      <td>
+        There is more information about why Sorbet uses this syntax in <a
+        href="/docs/stdlib-generics">Arrays, Hashes, and Generics in the Standard
+        Library</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>any</code>
+      </td>
+      <td>
+        <code>T.untyped</code>
+      </td>
+      <td>
+        See <a href="/docs/untyped">T.untyped</a> and <a href="../gradual">Gradual
+        Type Checking</a> for more information.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>noImplicitAny</code>
+      </td>
+      <td>
+        <code># typed: strict</code>
+      </td>
+      <td>
+        TypeScript uses the <code>noImplicitAny</code> command line flag to
+        prevent accidentally inferring <code>any</code> at function boundaries.
+        Sorbet instead uses <a href="/docs/static">Strictness Levels</a>, which are
+        controlled by comments that live at the top of individual files.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre><code class="hljs">function f(
+  x: number
+): string {...}</code></pre>
+      </td>
+      <td>
+        <pre><code class="hljs">sig do
+  params(x: Integer)
+  .returns(String)
+end
+def f(x); ...; end</code></pre>
+      </td>
+      <td>
+        See <a href="/docs/sigs">Method Signatures</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre><code class="hljs">let myName: string = "Alice"</code></pre>
+      </td>
+      <td>
+        <pre><code class="hljs">my_name = T.let("Alice", String)</code></pre>
+      </td>
+      <td>
+        Unlike in TypeScript, this will do <strong>both</strong> a static and
+        <a href="/docs/runtime">runtime type check</a>. See <a
+        href="/docs/type-annotations">Type Annotations</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>number | string</code>
+      </td>
+      <td>
+        <code>T.any(Integer, String)</code>
+      </td>
+      <td>
+        Sorbet uses <code>T.any(...)</code> to declare <a
+        href="/docs/union-types">Union types</a>. Do not confuse this with
+        TypeScript's <code>any</code>, which corresponds to Sorbet's
+        <code>T.untyped</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>x?: string</code>,<br>
+        <code>x: string | null</code>
+      </td>
+      <td>
+        <code>T.nilable(String)</code>
+      </td>
+      <td>
+        Ruby does has only <code>nil</code>, while JavaScript has both
+        <code>null</code> and <code>undefined</code>. See <a
+        href="/docs/nilable">Nilable Types</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>if (typeof x === "string")</code>,<br>
+        <code>if (x instanceof Date)</code>
+      </td>
+      <td>
+        <pre><code class="hljs">if x.is_a?(String)
+# or
+case x
+when String then # ...
+end</code></pre>
+      </td>
+      <td>
+        All Ruby objects are instances of a class, so the comparison for
+        JavaScript's <code>typeof</code> operator is replaced by
+        <code>is_a?</code> in Ruby. See <a
+        href="/docs/flow-sensitive">Flow-Sensitive Typing</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>if (x == null)</code>
+      </td>
+      <td>
+        <code>if x.nil?</code>
+      </td>
+      <td>
+        See <a href="/docs/flow-sensitive">Flow-Sensitive Typing</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre><code class="hljs">type AorB = A | B
+</code></pre>
+      </td>
+      <td>
+        <pre><code class="hljs">AorB = T.type_alias {T.any(A, B)}</code></pre>
+      </td>
+      <td>
+        See <a href="/docs/type-aliases">Type Aliases</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <pre><code class="hljs">{
+  x: number,
+  y?: string,
+}</code></pre>
+      </td>
+      <td>
+        <pre><code class="hljs">class Thing < T::Struct
+  prop :x, Integer
+  prop :y, T.nilable(String)
+end</code></pre>
+      </td>
+      <td>
+        Sorbet uses <a href="/docs/tstruct">T::Struct</a> subclasses where
+        TypeScript uses what it calls object types.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>let x = expr as Type</code>
+      </td>
+      <td>
+        <code>x = T.cast(expr, Type)</code>
+      </td>
+      <td>
+        Unlike in TypeScript, this will do <strong>both</strong> a static and
+        <a href="/docs/runtime">runtime type check</a>. See <a
+        href="/docs/type-annotations">Type Annotations</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>let x = expr as any</code>
+      </td>
+      <td>
+        <code>x = T.unsafe(expr)</code>
+      </td>
+      <td>
+        See <a href="/docs/type-annotations">Type Annotations</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">Literal Types</a>,
+        like <code>"foo"</code>
+      </td>
+      <td>
+        none
+      </td>
+      <td>
+        Sorbet has no exact equivalent for TypeScript's literal types. Consider
+        using <a href="/docs/tenum">Typed Enums</a> instead.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>x!.foo</code>
+      </td>
+      <td>
+        <code>T.must(x).foo</code>
+      </td>
+      <td>
+        See <a href="/docs/type-assertions">Type Assertions</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>unknown</code>
+      </td>
+      <td>
+        <code>BasicObject</code>
+      </td>
+      <td>
+        See <a href="/docs/class-types">Class Types</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>never</code>
+      </td>
+      <td>
+        <code>T.noreturn</code>
+      </td>
+      <td>
+        See <a href="/docs/noreturn">T.noreturn</a> and <a
+        href="/docs/exhaustiveness">Exhaustiveness Checking</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>pet is Fish</code> (<a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates">Type Predicates</a>)
+      </td>
+      <td>
+        none
+      </td>
+      <td>
+        Sorbet does not have anything like TypeScript's type predicates feature.
+        Instead, consider using something like <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20Follows%20the%20example%20defined%20here%3A%0A%23%20https%3A%2F%2Fwww.typescriptlang.org%2Fdocs%2Fhandbook%2F2%2Fnarrowing.html%23using-type-predicates%0A%0A%0Aclass%20Fish%0A%20%20def%20swim%3B%20end%0Aend%0Aclass%20Bird%0A%20%20def%20fly%3B%20end%0Aend%0APet%20%3D%20T.type_alias%20%7BT.any%28Fish%2C%20Bird%29%7D%0A%0A%23%20--%20TypeScript%20--%0A%23%20function%20isFish%28pet%3A%20Fish%20%7C%20Bird%29%3A%20pet%20is%20Fish%20%7B%0A%23%20%20%20return%20%28pet%20as%20Fish%29.swim%20!%3D%3D%20undefined%3B%0A%23%20%7D%0A%0Asig%20%7Bparams%28pet%3A%20Pet%29.returns%28T.nilable%28Fish%29%29%7D%0Adef%20as_fish%28pet%29%0A%20%20if%20pet.is_a%3F%28Fish%29%0A%20%20%20%20pet%0A%20%20else%0A%20%20%20%20nil%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28zoo%3A%20T%3A%3AArray%5BPet%5D%29.void%7D%0Adef%20example%28zoo%29%0A%20%20%23%20--%20TypeScript%20--%0A%20%20%23%20const%20underWater%3A%20Fish%5B%5D%20%3D%20zoo.filter%28isFish%29%3B%0A%0A%20%20under_water%20%3D%20zoo.map%20%7B%7Cpet%7C%20as_fish%28pet%29%7D.compact%0A%20%20T.let%28under_water%2C%20T%3A%3AArray%5BFish%5D%29%0Aend">this approach.</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions">Discriminated Unions</a>
+      </td>
+      <td>
+        <a href="/docs/sealed">Sealed Classes and Modules</a>
+      </td>
+      <td>
+        &nbsp;
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>This table is unfortunately not exhaustive. If you were looking for something in
+this table but couldn’t find it, please either use the “Edit” button above to
+add it, or reach out to a member of the Sorbet team asking whether it can be
+updated.</p>
+<!--
+  NOTE!
+  The below script will delete the on-page nav to make room for the table.
+  Using headings will not show up in a sidebar.
+-->
+<script src="/js/from-typescript.js"></script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/vscode"><span class="arrow-prev">← </span><span>Visual Studio Code</span></a><a class="docs-next button" href="/docs/gradual"><span>Gradual Type Checking</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
