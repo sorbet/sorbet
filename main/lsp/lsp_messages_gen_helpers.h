@@ -22,8 +22,7 @@ std::string tryConvertToString(std::optional<const rapidjson::Value *> value, st
 std::string tryConvertToStringConstant(std::optional<const rapidjson::Value *> value, std::string_view constantValue,
                                        std::string_view name);
 
-// N.B.: Uses a string reference since rapidjson APIs require a C string.
-std::optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, const std::string &name);
+std::optional<const rapidjson::Value *> maybeGetJSONField(const rapidjson::Value &value, std::string_view name);
 
 const rapidjson::Value &assertJSONField(std::optional<const rapidjson::Value *> maybeValue, std::string_view name);
 
