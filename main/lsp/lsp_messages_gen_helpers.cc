@@ -42,7 +42,7 @@ string tryConvertToString(optional<const rapidjson::Value *> value, string_view 
     if (!realValue.IsString()) {
         throw JSONTypeError(name, "string", realValue);
     }
-    return realValue.GetString();
+    return string(realValue.GetString(), realValue.GetStringLength());
 }
 
 string tryConvertToStringConstant(optional<const rapidjson::Value *> value, string_view constantValue,
