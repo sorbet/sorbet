@@ -23,15 +23,6 @@ struct MessageQueueState {
     CounterState counters;
 };
 
-struct TaskQueueState {
-    std::deque<std::unique_ptr<LSPTask>> pendingTasks;
-    bool terminate = false;
-    bool paused = false;
-    int errorCode = 0;
-    // Counters collected from preprocessor thread
-    CounterState counters;
-};
-
 class TaskQueue final {
     absl::Mutex stateMutex;
 

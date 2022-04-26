@@ -167,7 +167,7 @@ class LSPIndexer;
 class TaskQueue;
 
 /**
- * Represents a preemption task. When run, it will run all tasks at the head of TaskQueueState that can preempt.
+ * Represents a preemption task. When run, it will run all tasks at the head of `taskQueue` that can preempt.
  */
 class LSPQueuePreemptionTask final : public LSPTask {
     absl::Notification &finished;
