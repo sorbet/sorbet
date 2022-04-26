@@ -12,13 +12,13 @@
       "gradual",
       "static",
       "runtime",
-      "why-type-annotations",
       "rbi",
       "cli",
       "tconfiguration"
     ],
     "Troubleshooting": [
       "troubleshooting",
+      "why-type-annotations",
       "faq",
       "error-reference"
     ],
