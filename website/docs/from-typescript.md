@@ -59,8 +59,9 @@ the features Sorbet provides.
         numeric types. <code>number</code> in JavaScript is most closely
         <code>Float</code> in Ruby, but unlike in JavaScript, integers and
         floating-point numbers are not transparently compatible with each
-        other. To convert between different types, Ruby provides various <code>to_i</code>
-        and <code>to_f</code> methods. See the Ruby docs for more.
+        other. To convert between different types, Ruby provides various
+        <code>to_i</code> and <code>to_f</code> methods. See the Ruby docs for
+        more.
       </td>
     </tr>
     <tr>
@@ -307,6 +308,29 @@ end</code></pre>
       <td>
         See <a href="/docs/noreturn">T.noreturn</a> and <a
         href="/docs/exhaustiveness">Exhaustiveness Checking</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>pet is Fish</code> (<a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates">Type Predicates</a>)
+      </td>
+      <td>
+        none
+      </td>
+      <td>
+        Sorbet does not have anything like TypeScript's type predicates feature.
+        Instead, consider using something like <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0A%23%20Follows%20the%20example%20defined%20here%3A%0A%23%20https%3A%2F%2Fwww.typescriptlang.org%2Fdocs%2Fhandbook%2F2%2Fnarrowing.html%23using-type-predicates%0A%0A%0Aclass%20Fish%0A%20%20def%20swim%3B%20end%0Aend%0Aclass%20Bird%0A%20%20def%20fly%3B%20end%0Aend%0APet%20%3D%20T.type_alias%20%7BT.any%28Fish%2C%20Bird%29%7D%0A%0A%23%20--%20TypeScript%20--%0A%23%20function%20isFish%28pet%3A%20Fish%20%7C%20Bird%29%3A%20pet%20is%20Fish%20%7B%0A%23%20%20%20return%20%28pet%20as%20Fish%29.swim%20!%3D%3D%20undefined%3B%0A%23%20%7D%0A%0Asig%20%7Bparams%28pet%3A%20Pet%29.returns%28T.nilable%28Fish%29%29%7D%0Adef%20as_fish%28pet%29%0A%20%20if%20pet.is_a%3F%28Fish%29%0A%20%20%20%20pet%0A%20%20else%0A%20%20%20%20nil%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28zoo%3A%20T%3A%3AArray%5BPet%5D%29.void%7D%0Adef%20example%28zoo%29%0A%20%20%23%20--%20TypeScript%20--%0A%20%20%23%20const%20underWater%3A%20Fish%5B%5D%20%3D%20zoo.filter%28isFish%29%3B%0A%0A%20%20under_water%20%3D%20zoo.map%20%7B%7Cpet%7C%20as_fish%28pet%29%7D.compact%0A%20%20T.let%28under_water%2C%20T%3A%3AArray%5BFish%5D%29%0Aend">this approach.</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions">Discriminated Unions</a>
+      </td>
+      <td>
+        <a href="/docs/sealed">Sealed Classes and Modules</a>
+      </td>
+      <td>
+        &nbsp;
       </td>
     </tr>
   </tbody>
