@@ -12,6 +12,7 @@
       "gradual",
       "static",
       "runtime",
+      "why-type-annotations",
       "rbi",
       "cli",
       "tconfiguration"

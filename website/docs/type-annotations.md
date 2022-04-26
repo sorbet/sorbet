@@ -1,32 +1,35 @@
 ---
 id: type-annotations
-title: Why type annotations?
+title: Declaring types for non-methods
+sidebar_label: Type Annotations (non-sig)
 ---
 
 Sorbet provides the most value when it has a wealth of programmer-supplied
-static types. However, because Sorbet implements a
-[gradual type system](gradual.md), it treats most definitions without explicit
-annotations as [untyped](untyped.md). This means that Sorbet can only use static
-types for methods, constants, instance variables, and class variables if they
-are accompanied with explicit static types.
+static types.
 
-The exceptions to the above list are that Sorbet does not need type annotations
-for local variables or in some simple cases for instance variables. In the
-absence of a type annotation, Sorbet will infer the type of a local variable
-based on how the variable is initialized. It is still possible to provide type
-annotations in these instances.
+However, because Sorbet implements a [gradual type system](gradual.md), it
+treats most definitions without explicit annotations as [untyped](untyped.md).
+This means that Sorbet can only use static types for methods, constants,
+instance variables, and class variables if they are accompanied with explicit
+static types.
+
+For more information on why type annotations are required in Sorbet, see
+[Why does Sorbet sometimes need type annotations?](why-type-annotations.md).
 
 Type annotations for methods are provided using a `sig` before the method
 definition. Method type annotations are
-[described in great detail on the Method Signatures](sigs.md). Other type
-annotations are provided using the `T.let` [type assertion](type-assertions.md).
+[described in great detail on the Method Signatures](sigs.md).
 
-## When Are Type Annotations Optional?
+Other type annotations are provided using the `T.let`
+[type assertion](type-assertions.md).
 
-Sorbet does not need type annotations for local variables, as it can infer the
-type of the local variable based on how it is initialized. For example, in the
-following program, Sorbet can tell `x` is an `Integer` based on the fact that it
-is initialized with an expression that evaluates to an `Integer`:
+## Annotating local variables
+
+Sorbet does not usually need type annotations for local variables, as it can
+infer the type of the local variable based on how it is initialized. For
+example, in the following program, Sorbet can tell `x` is an `Integer` based on
+the fact that it is initialized with an expression that evaluates to an
+`Integer`:
 
 ```ruby
 x = 2 + 3
@@ -45,23 +48,6 @@ x = T.let(nil, T.nilable(Integer))
   x = n if n % 3 == 0
 end
 ```
-
-Sorbet can also infer the types of instance variables in some limited
-situations, specifically when the instance variable is initialized with the
-value of a parameter of the constructor:
-
-```ruby
-class MyObj
-  sig {params(x: Integer).void}
-  def initialize(x)
-    @y = x  # y has the inferred type Integer
-  end
-end
-```
-
-For more details on why Sorbet can only infer the types of instance variables in
-relatively narrow situations, see the section below about the
-[limitations on instance variable inference](#limitations-on-instance-variable-inference).
 
 ## Annotating constants
 
@@ -170,25 +156,3 @@ instance variables.
 > variables are defined. Sorbet resolves this cyclical dependency by either
 > using types that you have explicitly defined with `T.let`, or by relying on
 > simple code patterns like the one described above.
-
-## Type annotations and strictness levels
-
-Sorbet allows the programmer to opt-in to greater levels of static type rigor.
-At lower [strictness modes](static.md), Sorbet allows definitions to be untyped,
-but at `# typed: strict`, Sorbet requires explicit type annotations on any
-definitions where it would have assumed `T.untyped` without an annotation
-before. Specifically, in a `# typed: strict` file it's an error to omit type
-annotations for:
-
-- methods
-- instance variables
-- class variables
-- constants
-
-It may seem counterintuitive that Sorbet does _not_ require type annotations in
-a file marked `# typed: true`, but this is an intentional part of Sorbet's
-implementation of [gradual typing](gradual.md). In the `# typed: true`
-strictness level, unannotated methods, instance variables, and constants are
-assumed to be `T.untyped`. This allows a programmer to write untyped or
-partially-typed definitions while still benefiting from type checking when
-static type information is present.
