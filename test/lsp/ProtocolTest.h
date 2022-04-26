@@ -99,8 +99,6 @@ protected:
 
     std::vector<std::unique_ptr<Location>> getDefinitions(std::string_view uri, int line, int character);
 
-    void assertDefinitionJumpsToUntypedSigil(std::string_view uri, int line, int column, const Range &sigilRange);
-
     /**
      * ProtocolTest maintains the latest diagnostics for files received over a session, as LSP is not required to
      * re-send diagnostics that have not changed. send() automatically updates diagnostics, but if a test manually

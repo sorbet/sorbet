@@ -5,7 +5,6 @@
 #include "absl/strings/str_replace.h"
 #include "common/common.h"
 #include "test/helpers/lsp.h"
-#include "test/helpers/position_assertions.h"
 
 namespace sorbet::test::lsp {
 using namespace std;
@@ -87,6 +86,29 @@ TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
         assertResponseError(-32800, "cancel", *errorMsg);
     }
     REQUIRE_EQ(requestIds.size(), 0);
+}
+
+// Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
+TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
+    assertDiagnostics(initializeLSP(), {});
+    assertDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
+    auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
+    INFO("Expected a single response to a definition request to an untyped document.");
+    const auto numResponses = absl::c_count_if(defResponses, [](const auto &m) { return m->isResponse(); });
+    REQUIRE_EQ(1, numResponses);
+    const auto numRequests = absl::c_count_if(defResponses, [](const auto &m) { return m->isRequest(); });
+    REQUIRE_EQ(0, numRequests);
+    const auto numNotifications = absl::c_count_if(defResponses, [](const auto &m) { return m->isNotification(); });
+    REQUIRE_EQ(1, numNotifications);
+    // Ensure the lone response is at the front.
+    absl::c_partition(defResponses, [](const auto &m) { return m->isResponse(); });
+    assertResponseMessage(nextId - 1, *defResponses.at(0));
+
+    auto &respMsg = defResponses.at(0)->asResponse();
+    REQUIRE(respMsg.result);
+    auto &result = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(*(respMsg.result));
+    auto &array = get<vector<unique_ptr<Location>>>(result);
+    REQUIRE_EQ(array.size(), 0);
 }
 
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
@@ -649,52 +671,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "syntax_error"), 1);
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "changed_definition"), 0);
-}
-
-// We're writing this as a protocol test because the model for jump-to-def on
-// methods in untyped files doesn't really fit the regular testsuite: we want to
-// make sure that we jump to the typed sigil, but that doesn't represent a
-// definition, nor can (or do) we want to go from the "definition" to all the uses.
-// Furthermore, we also want to find a "definition" for e.g. method sends and
-// things that wouldn't normally get definitions from untyped files.
-TEST_CASE_FIXTURE(ProtocolTest, "UntypedFileMethodJumpToDef") {
-    assertDiagnostics(initializeLSP(), {});
-
-    // Create a new file.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: false\n"
-                                               "class A\n"
-                                               "def method_with_posarg(x)\n"
-                                               "  x\n"
-                                               "end\n"
-                                               "def method_with_optarg(y='optional')\n"
-                                               "  y\n"
-                                               "end\n"
-                                               "def method_with_kwarg(kw:)\n"
-                                               "  kw\n"
-                                               "end\n"
-                                               "def method_with_rest_arg(*arg)\n"
-                                               "  arg\n"
-                                               "end\n"
-                                               "end\n"
-                                               "\n"
-                                               "A.new.method")),
-                      {});
-
-    const auto falseSigilLine = 0, falseSigilStart = 9, falseSigilEnd = 14;
-    auto falseSigilRangePtr = RangeAssertion::makeRange(falseSigilLine, falseSigilStart, falseSigilEnd);
-    const auto &falseSigilRange = *falseSigilRangePtr;
-    // Positional arg
-    assertDefinitionJumpsToUntypedSigil("foo.rb", 3, 2, falseSigilRange);
-    // Optional arg
-    assertDefinitionJumpsToUntypedSigil("foo.rb", 6, 2, falseSigilRange);
-    // Keyword arg
-    assertDefinitionJumpsToUntypedSigil("foo.rb", 9, 2, falseSigilRange);
-    // Rest arg
-    assertDefinitionJumpsToUntypedSigil("foo.rb", 12, 2, falseSigilRange);
-    // `new` send, which wouldn't normally get caught, since we're in an untyped file.
-    assertDefinitionJumpsToUntypedSigil("foo.rb", 16, 2, falseSigilRange);
-    // `method` send
-    assertDefinitionJumpsToUntypedSigil("foo.rb", 16, 6, falseSigilRange);
 }
 
 } // namespace sorbet::test::lsp
