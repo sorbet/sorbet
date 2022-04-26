@@ -1243,7 +1243,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
 
         ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
-        if (level < core::StrictLevel::True) {
+        if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {
             items.emplace_back(getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
             response->result = make_unique<CompletionList>(false, move(items));
             return response;
