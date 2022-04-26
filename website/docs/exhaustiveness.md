@@ -1,6 +1,6 @@
 ---
 id: exhaustiveness
-title: Exhaustiveness Checking
+title: Exhaustiveness (T.absurd)
 ---
 
 **Exhaustiveness checking** is a feature of a language where the type checker

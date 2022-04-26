@@ -1,6 +1,7 @@
 ---
 id: type-assertions
 title: Type Assertions
+sidebar_label: T.let, T.cast, T.must, T.bind
 ---
 
 There are five ways to assert the types of expressions in Sorbet:

@@ -1,6 +1,6 @@
 ---
 id: type-annotations
-title: Type Annotations
+title: Why type annotations?
 ---
 
 Sorbet provides the most value when it has a wealth of programmer-supplied

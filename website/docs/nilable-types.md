@@ -1,6 +1,7 @@
 ---
 id: nilable-types
 title: Nilable Types
+sidebar_label: Nilable Types (T.nilable)
 ---
 
 Sorbet can track when a value is allowed to be `nil`, or when a value of a

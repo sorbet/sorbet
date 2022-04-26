@@ -1,7 +1,7 @@
 ---
 id: flow-sensitive
 title: Flow-Sensitive Typing
-sidebar_label: Flow Sensitivity
+sidebar_label: Flow-Sensitivity (is_a?, nil?)
 ---
 
 Sorbet implements a **control flow-sensitive** type system. It models control

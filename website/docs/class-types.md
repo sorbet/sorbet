@@ -1,6 +1,7 @@
 ---
 id: class-types
 title: Class Types
+sidebar_label: Class Types (Integer, String)
 ---
 
 > **Note**: Class types are used to describe values that are instances of a
