@@ -504,9 +504,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
     const int id = nextId++;
     auto responses = getLSPResponsesFor(lspWrapper, makeDefinitionRequest(id, queryLoc.uri, line, character));
     {
-        INFO("Unexpected number of responses to a `textDocument/definition` request.\n"
-             "If you are seeing this error in an untyped file, please convert this\n"
-             "test to a protocol test.");
+        INFO("Unexpected number of responses to a `textDocument/definition` request.");
         REQUIRE_EQ(1, responses.size());
     }
     assertResponseMessage(id, *responses.at(0));
