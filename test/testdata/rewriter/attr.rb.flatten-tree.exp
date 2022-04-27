@@ -24,6 +24,18 @@ begin
           ::Sorbet::Private::Static.keep_for_typechecking(::String)
           T.let("", String)
         end
+        @strv7 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Float)
+          T.let(0.000000, Float)
+        end
+        @strv8 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Float)
+          T.let(0.000000, Float)
+        end
+        @strv9 = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(::Float)
+          T.let(0.000000, Float)
+        end
       end
     end
 
@@ -55,6 +67,22 @@ begin
       @v5 = v5
     end
 
+    def strv7(<blk>)
+      @strv7
+    end
+
+    def strv8=(strv8, <blk>)
+      @strv8 = strv8
+    end
+
+    def strv9(<blk>)
+      @strv9
+    end
+
+    def strv9=("strv9", <blk>)
+      @strv9 = strv9
+    end
+
     def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :initialize) do ||
@@ -75,6 +103,18 @@ begin
         ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :v3) do ||
           <self>.returns(::String)
         end
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :strv7) do ||
+          <self>.returns(::Float)
+        end
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :strv8=) do ||
+          <self>.params(:strv8, ::Float).returns(::Float)
+        end
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :strv9) do ||
+          <self>.returns(::Float)
+        end
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :strv9=) do ||
+          <self>.params(:strv9, ::Float).returns(::Float)
+        end
         <self>.extend(::T::Sig)
         ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
         ::Sorbet::Private::Static.keep_def(<self>, :v1, :normal)
@@ -84,6 +124,10 @@ begin
         ::Sorbet::Private::Static.keep_def(<self>, :v3, :normal)
         ::Sorbet::Private::Static.keep_def(<self>, :v4=, :normal)
         ::Sorbet::Private::Static.keep_def(<self>, :v5=, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :strv7, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :strv8=, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :strv9, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :strv9=, :normal)
         <emptyTree>
       end
     end
