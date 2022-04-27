@@ -1286,7 +1286,7 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
                                                             int assertionLine, string_view assertionContents,
                                                             string_view assertionType) {
     static const regex newNameRegex(
-        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:invalid:\s+(true))??\s?(?:expectedErrorMessage:\s+(.+))?)$)");
+        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:invalid:\s+(true))?\s?(?:expectedErrorMessage:\s+(.+))?)$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
