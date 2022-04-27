@@ -137,7 +137,7 @@ if we did it the other way, sometimes requiring people to explicitly annotate
 ## Type annotations and strictness levels
 
 Sorbet allows the programmer to opt-in to greater levels of static type rigor.
-At lower [strictness modes](static.md), Sorbet allows definitions to be
+At lower [strictness levels](static.md), Sorbet allows definitions to be
 implicitly untyped and therefor doesn't require type annotations.
 
 At the `# typed: strict` level, Sorbet starts requiring explicit type

@@ -1,6 +1,6 @@
 ---
 id: intersection-types
-title: T.all
+title: Intersection Types (T.all)
 ---
 
 > TODO: This page is still a fragment. Contributions welcome!

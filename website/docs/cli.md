@@ -100,8 +100,8 @@ and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.
 
 ## Accepting autocorrect suggestions
 
-From time to time, Sorbet suggests autocorrects that can be accepted to
-automatically fix certain errors. For example:
+For certain errors, Sorbet suggests autocorrects that can be accepted to
+automatically fix those errors. For example:
 
 ```ruby
 sig {params(xs: T::Array[Integer]).void}
@@ -119,7 +119,7 @@ because `xs[0]` might be `nil` if the `xs` list is empty.
 
 In this example, though, we know that the `xs` array will always be non-empty.
 If, as the programmer, we know this invariant will always hold, we can use
-`T.must` to fix the problem. Sorbet even suggests that the error message:
+`T.must` to fix the problem. Sorbet even suggests that in the error message:
 
 ```
 editor.rb:6: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
@@ -158,8 +158,8 @@ The `--isolate-error-code` option can be repeated with different error codes to
 have Sorbet apply autocorrects for all the mentioned error codes, but no others.
 
 There is no way to have Sorbet **only** apply autocorrect suggestions in a given
-file. Instead, use a version control system to undo changes autocorrect changes
-Sorbet makes in files that should not be changed.
+file. Instead, use a version control system to undo autocorrect changes Sorbet
+makes in files that should not be changed.
 
 ### Silencing errors in bulk
 
@@ -248,9 +248,9 @@ end
 ```
 
 A method named like this sticks out in the codebase as a flag to potential
-developers that something has been automatically silenced vs been manually
-silenced. Placing a comment on the method shows the contextual message when
-people hover over any call site.
+developers that something has been automatically silenced instead of being
+manually silenced. Placing a comment on the method shows the contextual message
+when people hover over any call site.
 
 ## Overriding strictness levels
 
