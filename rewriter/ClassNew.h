@@ -27,7 +27,7 @@ namespace sorbet::rewriter {
  *
  * Are rewritten into
  *
- *   c = Class.new(Parent)
+ *   c = Class.new(Parent) do
  *     T.bind(self, T.class_of(Parent))
  *     ...
  *   end
@@ -40,7 +40,7 @@ namespace sorbet::rewriter {
  *
  * Are rewritten into
  *
- *   Class.new(Parent)
+ *   Class.new(Parent) do
  *     T.bind(self, T.class_of(Parent))
  *     ...
  *   end
