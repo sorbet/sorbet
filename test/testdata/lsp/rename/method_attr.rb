@@ -4,6 +4,7 @@
 class Foo
   attr_reader :foo
 #              ^ apply-rename: [A] invalid: true
+# ^ apply-rename: [E] invalid: true
   attr_writer :bar
 #              ^ apply-rename: [C] invalid: true
   attr_accessor :baz
