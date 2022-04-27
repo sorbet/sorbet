@@ -79,7 +79,7 @@ begin
       @strv9
     end
 
-    def strv9=("strv9", <blk>)
+    def strv9=(strv9, <blk>)
       @strv9 = strv9
     end
 
