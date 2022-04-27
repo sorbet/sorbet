@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Why does Sorbet sometimes need type annotations? · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## ... for methods?"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Why does Sorbet sometimes need type annotations? · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="## ... for methods?"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Troubleshooting</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li><li class="navListItem"><a class="navItem" href="/docs/from-typescript">TypeScript ↔ Sorbet</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/why-type-annotations">Why type annotations?</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">sig</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations (non-sig)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">T.let, T.cast, T.must, T.bind</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types (Integer, String)</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types (T.nilable)</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types (T.any)</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow-Sensitivity (is_a?, nil?)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">T.type_alias</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness (T.absurd)</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types (T.all)</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/why-type-annotations.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Why does Sorbet sometimes need type annotations?</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="-for-methods"></a><a href="#-for-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>… for methods?</h2>
+<p>Sorbet never attempts to infer types for methods. This is a key part of what
+allows Sorbet to type check a codebase quickly. It means that the result of
+doing inference on one method can never affect the result of doing inference on
+another method, meaning that all methods can be typechecked entirely in
+parallel.</p>
+<p>In <a href="/docs/static"><code># typed: strict</code></a> files, Sorbet requires type annotations for
+methods, so that programmers have an explicit reminder that Sorbet does not do
+method signature type inference.</p>
+<h2><a class="anchor" aria-hidden="true" id="-for-constants"></a><a href="#-for-constants" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>… for constants?</h2>
+<p>Similarly, Sorbet only attempts to do type inference for constants when the type
+of the constant is knowable without needing to do type inference.</p>
+<p>This means that simple constants like <code>X = &quot;&quot;</code> or <code>Y = 1</code> do not need type
+annotations—Sorbet can syntactically see that the type of these constants are
+<code>String</code> and <code>Integer</code> respectively.</p>
+<p>However, to know the type of constant assignments like <code>A = MyClass.new</code> or
+<code>B = 1 + 1</code>, Sorbet needs to know the result type of the <code>new</code> and <code>+</code> methods,
+respectively. To know a method’s result type, Sorbet has to do type inference,
+and Sorbet does not do type inference until all constants have been given type
+annotations (which would be a cycle). Keep in mind that Sorbet respects
+overloaded and redefined methods, so even simple expressions like these do not
+always have well-known result types.</p>
+<h2><a class="anchor" aria-hidden="true" id="-for-instance-variables"></a><a href="#-for-instance-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>… for instance variables?</h2>
+<p>Sorbet always requires type annotations for instance and class variables, with a
+similar justification as the previous point for constants.</p>
+<p>There is one exception, which is when an instance variable is declared in the
+body of an <code>initialize</code> method by being assigned a variable whose type was
+mentioned in the signature for <code>initialize</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  sig {params(<span class="hljs-symbol">x:</span> Integer).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x)</span></span>
+    @x = x
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In cases like these, Sorbet infers that the type of <code>@x</code> should be <code>Integer</code>,
+without needing an explicit annotation. This means that if <code>@x</code> should be
+allowed to store more types than just <code>Integer</code> (for example, maybe it should
+also be allowed to store <code>nil</code>), an explicit annotation becomes required.</p>
+<h2><a class="anchor" aria-hidden="true" id="-for-local-variables"></a><a href="#-for-local-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>… for local variables?</h2>
+<p>Sorbet requires type annotations when widening the type of a variable within a
+loop. This, again, is for performance. Sorbet’s inference algorithm is very
+simplistic—it examines each expression in a method body at most once. (Other
+inference algorithms use separate type constraint generation and type constraint
+solving passes over a method body to infer types, leading to fewer required type
+annotations but potentially slower performance.)</p>
+<p>Because real-world code has branches and loops, and Sorbet must pick a single
+order to examine each individual expression in, Sorbet sometimes type checks
+statements before knowing any updates that might happen to that variable.
+Concretely:</p>
+<pre><code class="hljs css language-ruby">x = <span class="hljs-number">123</span>
+<span class="hljs-number">2</span>.times <span class="hljs-keyword">do</span>
+  x + <span class="hljs-number">1</span>
+  x = <span class="hljs-literal">nil</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>By the time Sorbet typechecks the <code>x + 1</code> line, Sorbet thinks that <code>x</code> has type
+<code>Integer</code>, and says that expression has no error. Then on the next line, the
+type of <code>x</code> is changed to <code>nil</code>, which would then introduce a runtime exception
+when the <code>x + 1</code> is encountered on the second iteration of the loop. Since
+Sorbet decides whether <code>x + 1</code> typechecks before looking at the <code>x = nil</code>
+assignment, it has to report an error on <code>x = nil</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="couldnt-sorbet-at-least-special-case-true-and-false"></a><a href="#couldnt-sorbet-at-least-special-case-true-and-false" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Couldn’t Sorbet at least special case <code>true</code> and <code>false</code>?</h3>
+<p>Sorbet’s type inference system is smart enough track things like this:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">banking_account:</span> String).returns(T::Boolean)}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_risky_merchant</span><span class="hljs-params">(banking_account)</span></span>; ...; <span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">banking_account:</span> T.nilable(String)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(banking_account)</span></span>
+  should_check_balance = <span class="hljs-literal">false</span>
+
+  <span class="hljs-keyword">if</span> banking_account &amp;&amp; is_risky_merchant(banking_account)
+    should_check_balance = <span class="hljs-literal">true</span>
+  <span class="hljs-keyword">end</span>
+
+  <span class="hljs-keyword">if</span> should_check_balance
+    T.reveal_type(banking_account) <span class="hljs-comment"># error: `String`</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7Breturns%28T%3A%3ABoolean%29%7D%0Adef%20boolean_true%3B%20true%3B%20end%0Asig%20%7Breturns%28T%3A%3ABoolean%29%7D%0Adef%20boolean_false%3B%20false%3B%20end%0A%0Asig%20%7Bparams%28banking_account%3A%20String%29.returns%28T%3A%3ABoolean%29%7D%0Adef%20is_risky_merchant%28banking_account%29%3B%20true%3B%20end%0A%0Asig%20%7Bparams%28banking_account%3A%20T.nilable%28String%29%29.void%7D%0Adef%20desired_behavior%28banking_account%29%0A%20%20should_check_balance%20%3D%20false%0A%0A%20%20if%20banking_account%20%26%26%20is_risky_merchant%28banking_account%29%0A%20%20%20%20should_check_balance%20%3D%20true%0A%20%20end%0A%0A%20%20if%20should_check_balance%0A%20%20%20%20T.reveal_type%28banking_account%29%20%23%20error%3A%20%60String%60%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28banking_account%3A%20T.nilable%28String%29%29.void%7D%0Adef%20incorrect_behavior%28banking_account%29%0A%20%20should_check_balance%20%3D%20boolean_false%0A%0A%20%20if%20banking_account%20%26%26%20is_risky_merchant%28banking_account%29%0A%20%20%20%20should_check_balance%20%3D%20boolean_true%0A%20%20end%0A%0A%20%20if%20should_check_balance%0A%20%20%20%20T.reveal_type%28banking_account%29%20%23%20error%3A%20%60String%60%0A%20%20end%0Aend">→ View full example on sorbet.run</a></p>
+<p>In this example, Sorbet knows that <code>banking_account</code> on the indicated line
+actually has type <code>String</code>, not type <code>T.nilable(String)</code>. It knows this despite
+the <code>if</code> guard checking whether the <code>should_check_balance</code> variable is <code>true</code>,
+not whether the <code>banking_account</code> is non-<code>nil</code>. To achieve this, Sorbet
+maintains sophisticated sets of implications saying “if we’re in an environment
+where a certain variable is truthy, then another variable must have a certain
+type.”</p>
+<p>If Sorbet blindly assumed that <code>false</code> and <code>true</code> literals had type
+<code>T::Boolean</code>, it would forget in which individual branches the variable had type
+<code>TrueClass</code> or <code>FalseClass</code>, and be unable to maintain these knowledge sets.
+Real-world code depends on patterns like this surprisingly frequently.</p>
+<p>We have decided that the error message for changing a variable in a loop is very
+clear, has an autocorrect, and the resulting <code>T.let</code>'d code is very obvious. But
+if we did it the other way, sometimes requiring people to explicitly annotate
+<code>T.let(true, TrueClass)</code>:</p>
+<ol>
+<li>this pattern would look odd (“of course <code>true</code> has type <code>TrueClass</code>, isn’t
+this annotation useless?”), and also</li>
+<li>we wouldn’t be able to easily build good error messages to suggest people to
+do this in the first place. Instead, the error messages would be reported far
+downstream from where the error actually happened, and be reported as
+something confusing like “this thing might sometimes be <code>nil</code>.”</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="type-annotations-and-strictness-levels"></a><a href="#type-annotations-and-strictness-levels" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type annotations and strictness levels</h2>
+<p>Sorbet allows the programmer to opt-in to greater levels of static type rigor.
+At lower <a href="/docs/static">strictness levels</a>, Sorbet allows definitions to be
+implicitly untyped and therefor doesn’t require type annotations.</p>
+<p>At the <code># typed: strict</code> level, Sorbet starts requiring explicit type
+annotations on any definitions where it would have otherwise assumed a type of
+<code>T.untyped</code>. (This is similar to TypeScript’s <code>noImplicitAny</code> flag, for those
+familiar with it.)</p>
+<p>Specifically, in a <code># typed: strict</code> file it’s an error to omit type annotations
+for:</p>
+<ul>
+<li>methods</li>
+<li>instance variables</li>
+<li>class variables</li>
+<li>constants</li>
+</ul>
+<p>It may seem counterintuitive that Sorbet does <em>not</em> require type annotations in
+a file marked <code># typed: true</code>, but this is an intentional part of Sorbet’s
+implementation of <a href="/docs/gradual">gradual typing</a>. In the <code># typed: true</code>
+strictness level, unannotated methods, instance variables, and constants are
+assumed to be <code>T.untyped</code>. This allows a programmer to write untyped or
+partially-typed definitions while still benefiting from type checking when
+static type information is present.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/troubleshooting"><span class="arrow-prev">← </span><span>Troubleshooting</span></a><a class="docs-next button" href="/docs/faq"><span>FAQ</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#-for-methods">... for methods?</a></li><li><a href="#-for-constants">... for constants?</a></li><li><a href="#-for-instance-variables">... for instance variables?</a></li><li><a href="#-for-local-variables">... for local variables?</a><ul class="toc-headings"><li><a href="#couldnt-sorbet-at-least-special-case-true-and-false">Couldn't Sorbet at least special case <code>true</code> and <code>false</code>?</a></li></ul></li><li><a href="#type-annotations-and-strictness-levels">Type annotations and strictness levels</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
