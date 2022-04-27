@@ -1,6 +1,7 @@
 ---
 id: type-aliases
 title: Type Aliases
+sidebar_label: T.type_alias
 ---
 
 ```ruby

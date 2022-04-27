@@ -18,6 +18,7 @@
     ],
     "Troubleshooting": [
       "troubleshooting",
+      "why-type-annotations",
       "faq",
       "error-reference"
     ],

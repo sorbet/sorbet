@@ -1,7 +1,7 @@
 ---
 id: sigs
 title: Method Signatures
-sidebar_label: Signatures
+sidebar_label: sig
 ---
 
 > This page describes the syntax of method signatures, or `sig`s. For a complete
