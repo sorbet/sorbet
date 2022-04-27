@@ -98,7 +98,6 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
         return response;
     }
     auto resp = move(queryResponses[0]);
-    // We support rename requests from constants, class definitions, and methods.
     if (auto constResp = resp->isConstant()) {
         response->result = getPrepareRenameResult(gs, constResp->symbol);
     } else if (auto defResp = resp->isMethodDef()) {
