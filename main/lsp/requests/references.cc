@@ -32,9 +32,12 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
     // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
     response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
     auto &queryResponses = result.responses;
+    core::FileRef fref = config.uri2FileRef(gs, params->textDocument->uri);
+    bool fileIsTyped = false;
+    if (fref.exists()) {
+        fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
+    }
     if (!queryResponses.empty()) {
-        const bool fileIsTyped =
-            config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
         auto resp = move(queryResponses[0]);
         // N.B.: Ignores literals.
         // If file is untyped, only supports find reference requests from constants and class definitions.
