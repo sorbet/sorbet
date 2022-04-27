@@ -24,18 +24,15 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
 
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
 getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::IdentResponse *identResp) {
-    auto identNameLoc = identResp->getIdentNameLoc(gs);
-    if (!identNameLoc) {
-        return JSONNullObject();
-    }
+    ENFORCE(identResp->termLoc.exists());
 
-    auto range = Range::fromLoc(gs, identNameLoc.value());
+    auto range = Range::fromLoc(gs, identResp->termLoc);
     if (range == nullptr) {
         return JSONNullObject();
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    result->placeholder = identNameLoc.value().source(gs);
+    result->placeholder = identResp->termLoc.source(gs);
     return result;
 }
 

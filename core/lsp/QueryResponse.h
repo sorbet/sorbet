@@ -38,8 +38,6 @@ public:
     const core::LocalVariable variable;
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
-
-    const std::optional<core::Loc> getIdentNameLoc(const core::GlobalState &gs) const;
 };
 CheckSize(IdentResponse, 64, 8);
 
