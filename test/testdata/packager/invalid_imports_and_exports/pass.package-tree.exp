@@ -19,74 +19,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<self>.method())
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>)
+    <self>.export(::<root>::<C A>::<C REFERENCE>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>)
+    <self>.export(::<root>::<C A>::<C AClass>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C A_Package_Private$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    <emptyTree>::<C A_Package_Private$1>::<C A>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
-
-    <emptyTree>::<C A_Package_Private$1>::<C A>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
-
-    <emptyTree>::<C A_Package_Private$1>::<C A>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
-
-    <emptyTree>::<C A_Package_Private$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C A_Package$1>::<C A>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AClass>
-
-    <emptyTree>::<C A_Package$1>::<C A>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C AModule>
-
-    <emptyTree>::<C A_Package$1>::<C A>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C A>::<C REFERENCE>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <self>.export(::<root>::<C A>::<C AModule>)
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/a.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1><<C <todo sym>>> < ()
-    module <emptyTree>::<C A><<C <todo sym>>> < ()
-      <emptyTree>::<C REFERENCE> = <emptyTree>::<C ASecondClass>
+  module <emptyTree>::<C A><<C <todo sym>>> < ()
+    <emptyTree>::<C REFERENCE> = <emptyTree>::<C ASecondClass>
 
-      class <emptyTree>::<C ASecondClass><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C ASecondClass><<C <todo sym>>> < (::<todo sym>)
+    end
+
+    class <emptyTree>::<C AClass><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C AClass>)
       end
 
-      class <emptyTree>::<C AClass><<C <todo sym>>> < (::<todo sym>)
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.returns(<emptyTree>::<C AClass>)
-        end
-
-        def get_a<<todo method>>(&<blk>)
-          <emptyTree>::<C B>::<C BModule>.get_a()
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        ::Sorbet::Private::Static.keep_def(<self>, :get_a, :normal)
+      def get_a<<todo method>>(&<blk>)
+        <emptyTree>::<C B>::<C BModule>.get_a()
       end
 
-      module <emptyTree>::<C AModule><<C <todo sym>>> < ()
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.returns(<emptyTree>::<C Integer>)
-        end
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        def self.one<<todo method>>(&<blk>)
-          1
-        end
+      ::Sorbet::Private::Static.keep_def(<self>, :get_a, :normal)
+    end
 
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        ::Sorbet::Private::Static.keep_self_def(<self>, :one, :normal)
+    module <emptyTree>::<C AModule><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Integer>)
       end
+
+      def self.one<<todo method>>(&<blk>)
+        1
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :one, :normal)
     end
   end
 end
@@ -95,63 +68,40 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C A>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>)
+    <self>.export(::<root>::<C B>::<C BClass>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C B_Package_Private$1>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    <emptyTree>::<C B_Package_Private$1>::<C A> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>
-
-    <emptyTree>::<C B_Package_Private$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
-
-    <emptyTree>::<C B_Package_Private$1>::<C B>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C B_Package$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
-
-    <emptyTree>::<C B_Package$1>::<C B>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BModule>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <self>.export(::<root>::<C B>::<C BModule>)
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1><<C <todo sym>>> < ()
-    module <emptyTree>::<C B><<C <todo sym>>> < ()
-      class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.returns(<emptyTree>::<C Integer>)
-        end
-
-        def get_one<<todo method>>(&<blk>)
-          <emptyTree>::<C A>::<C AModule>.one()
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        ::Sorbet::Private::Static.keep_def(<self>, :get_one, :normal)
+  module <emptyTree>::<C B><<C <todo sym>>> < ()
+    class <emptyTree>::<C BClass><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      module <emptyTree>::<C BModule><<C <todo sym>>> < ()
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.returns(<emptyTree>::<C A>::<C AClass>)
-        end
-
-        def self.get_a<<todo method>>(&<blk>)
-          <emptyTree>::<C A>::<C AClass>.new()
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        ::Sorbet::Private::Static.keep_self_def(<self>, :get_a, :normal)
+      def get_one<<todo method>>(&<blk>)
+        <emptyTree>::<C A>::<C AModule>.one()
       end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :get_one, :normal)
+    end
+
+    module <emptyTree>::<C BModule><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C A>::<C AClass>)
+      end
+
+      def self.get_a<<todo method>>(&<blk>)
+        <emptyTree>::<C A>::<C AClass>.new()
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :get_a, :normal)
     end
   end
 end

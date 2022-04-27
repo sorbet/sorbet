@@ -3,48 +3,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C B>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C B>::<C BClass>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C A_Package_Private$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    <emptyTree>::<C A_Package_Private$1>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C A_Package$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package_Private$1>::<C B>::<C BClass>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <self>.export(::<root>::<C B>::<C BClass>)
   end
 end
 # -- test/testdata/packager/export_imported/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    <emptyTree>::<C B_Package_Private$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C B_Package$1>::<C B>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1>::<C B>::<C BClass>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <self>.export(::<root>::<C B>::<C BClass>)
   end
 end
 # -- test/testdata/packager/export_imported/b/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C B_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C B>::<C BClass><<C <todo sym>>> < (::<todo sym>)
-    end
+  class <emptyTree>::<C B>::<C BClass><<C <todo sym>>> < (::<todo sym>)
   end
 end
