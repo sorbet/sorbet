@@ -11,6 +11,18 @@ namespace sorbet::realmain::lsp {
 namespace {
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(const core::GlobalState &gs,
                                                                                 core::SymbolRef symbol) {
+    if (symbol.isMethod()) {
+        auto def = symbol.loc(gs).source(gs);
+        if (def.has_value()) {
+            const vector<string> unsupportedDefPrefixes{"attr_reader", "attr_accessor", "attr_writer"};
+            for (auto u : unsupportedDefPrefixes) {
+                if (absl::StartsWith(*def, u)) {
+                    return JSONNullObject();
+                }
+            }
+        }
+    }
+
     auto range = Range::fromLoc(gs, symbol.loc(gs));
     if (range == nullptr) {
         return JSONNullObject();
