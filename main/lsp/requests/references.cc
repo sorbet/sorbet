@@ -67,7 +67,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
                 auto loc = identResp->termLoc;
                 if (loc.exists()) {
                     auto run2 = typechecker.query(
-                                                  core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable), {loc.file()});
+                        core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
+                        {loc.file()});
                     response->result = extractLocations(gs, run2.responses);
                 }
             } else {
@@ -80,9 +81,9 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         // This could be a `prop` or `attr_*`, which has multiple associated symbols.
-                        responses =
-                            getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), start->main.method),
-                                                    start->main.method, move(responses));
+                        responses = getReferencesToAccessor(typechecker,
+                                                            getAccessorInfo(typechecker.state(), start->main.method),
+                                                            start->main.method, move(responses));
                     }
                     start = start->secondary.get();
                 }
