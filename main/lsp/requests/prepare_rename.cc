@@ -26,6 +26,19 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
 getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::IdentResponse *identResp) {
     ENFORCE(identResp->termLoc.exists());
 
+    // The loc for the instance variable local in `attr_reader :foo`
+    // corresponds to `foo`, but we don't want to permit renames on such
+    // things.  This is a heuristic to rule out such cases.
+    auto adjusted = identResp->termLoc.adjust(gs, -1, 0);
+    if (adjusted.exists()) {
+        auto source = adjusted.source(gs);
+        // Check for symbols and strings.
+        if (source.has_value() &&
+            (source.value()[0] == ':' || source.value()[0] == '"')) {
+            return JSONNullObject();
+        }
+    }
+
     auto range = Range::fromLoc(gs, identResp->termLoc);
     if (range == nullptr) {
         return JSONNullObject();
