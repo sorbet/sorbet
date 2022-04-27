@@ -1,5 +1,6 @@
 #include "main/lsp/requests/references.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
@@ -32,9 +33,13 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
     // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
     response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
     auto &queryResponses = result.responses;
+    bool notifyAboutUntypedFile = false;
+    core::FileRef fref = config.uri2FileRef(gs, params->textDocument->uri);
+    bool fileIsTyped = false;
+    if (fref.exists()) {
+        fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
+    }
     if (!queryResponses.empty()) {
-        const bool fileIsTyped =
-            config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
         auto resp = move(queryResponses[0]);
         // N.B.: Ignores literals.
         // If file is untyped, only supports find reference requests from constants and class definitions.
@@ -54,30 +59,55 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
                     typechecker.state(),
                     getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), defResp->symbol),
                                             defResp->symbol));
+            } else {
+                notifyAboutUntypedFile = true;
             }
-        } else if (fileIsTyped && resp->isIdent()) {
-            auto identResp = resp->isIdent();
-            auto loc = identResp->termLoc;
-            if (loc.exists()) {
-                auto run2 = typechecker.query(
-                    core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable), {loc.file()});
-                response->result = extractLocations(gs, run2.responses);
-            }
-        } else if (fileIsTyped && resp->isSend()) {
-            auto sendResp = resp->isSend();
-            auto start = sendResp->dispatchResult.get();
-            vector<unique_ptr<core::lsp::QueryResponse>> responses;
-            while (start != nullptr) {
-                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    // This could be a `prop` or `attr_*`, which has multiple associated symbols.
-                    responses =
-                        getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), start->main.method),
-                                                start->main.method, move(responses));
+        } else if (auto identResp = resp->isIdent()) {
+            if (fileIsTyped) {
+                auto loc = identResp->termLoc;
+                if (loc.exists()) {
+                    auto run2 = typechecker.query(
+                        core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
+                        {loc.file()});
+                    response->result = extractLocations(gs, run2.responses);
                 }
-                start = start->secondary.get();
+            } else {
+                notifyAboutUntypedFile = true;
             }
-            response->result = extractLocations(typechecker.state(), responses);
+        } else if (auto sendResp = resp->isSend()) {
+            if (fileIsTyped) {
+                auto start = sendResp->dispatchResult.get();
+                vector<unique_ptr<core::lsp::QueryResponse>> responses;
+                while (start != nullptr) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                        // This could be a `prop` or `attr_*`, which has multiple associated symbols.
+                        responses = getReferencesToAccessor(typechecker,
+                                                            getAccessorInfo(typechecker.state(), start->main.method),
+                                                            start->main.method, move(responses));
+                    }
+                    start = start->secondary.get();
+                }
+                response->result = extractLocations(typechecker.state(), responses);
+            } else {
+                notifyAboutUntypedFile = true;
+            }
         }
+    } else if (fref.exists() && !fileIsTyped) {
+        // The first check ensures that the file actually exists (and therefore
+        // we could have gotten responses) and the second check is what we are
+        // actually interested in.
+        notifyAboutUntypedFile = true;
+    }
+
+    if (notifyAboutUntypedFile) {
+        ENFORCE(fref.exists());
+        auto level = fref.data(gs).strictLevel;
+        ENFORCE(level < core::StrictLevel::True);
+        string asString = level == core::StrictLevel::Ignore ? "ignore" : "false";
+        auto msg = fmt::format("File is `# typed: {}`, could not determine references", asString);
+        auto params = make_unique<ShowMessageParams>(MessageType::Info, msg);
+        this->config.output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
     }
     return response;
 }
