@@ -45,8 +45,7 @@ getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::Ide
     if (adjusted.exists()) {
         auto source = adjusted.source(gs);
         // Check for symbols and strings.
-        if (source.has_value() &&
-            (source.value()[0] == ':' || source.value()[0] == '"' || source.value()[0] == '\'')) {
+        if (source.has_value() && (source.value()[0] == ':' || source.value()[0] == '"' || source.value()[0] == '\'')) {
             return JSONNullObject();
         }
     }

@@ -310,7 +310,8 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
                 locations.emplace_back(reference->getLoc());
             }
 
-            shared_ptr<AbstractRenamer> renamer = make_shared<LocalRenamer>(gs, config, localName.show(gs), params->newName, locations);
+            shared_ptr<AbstractRenamer> renamer =
+                make_shared<LocalRenamer>(gs, config, localName.show(gs), params->newName, locations);
             renamer->rename(resp, core::SymbolRef{});
             enrichResponse(response, renamer);
         }
