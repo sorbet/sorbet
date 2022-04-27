@@ -45,7 +45,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
                 auto source = l.source(ctx).value();
                 ENFORCE(source.size() > 2);
                 ENFORCE(source[0] == '"' || source[0] == '\'');
-                auto lastChar = source[source.size()-1];
+                auto lastChar = source[source.size() - 1];
                 ENFORCE(lastChar == '"' || lastChar == '\'');
             }
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos() - 1};
