@@ -184,6 +184,26 @@ TEST_CASE("FileIsCompiled") { // NOLINT
     }
 }
 
+struct FileIsPackagedCase {
+    string_view src;
+    PackagedLevel packaged;
+};
+
+TEST_CASE("FileIsPackaged") { // NOLINT
+    vector<FileIsPackagedCase> cases = {
+        {"", PackagedLevel::None},
+        {"# packaged: true", PackagedLevel::True},
+        {"\n# packaged: true\n", PackagedLevel::True},
+        {"\n# packaged: false\n", PackagedLevel::False},
+        {"not a packaged: sigil\n# packaged: true\n", PackagedLevel::True},
+        {"packaged:\n# packaged: nonsense\n", PackagedLevel::None},
+        {"packaged: true\n", PackagedLevel::None},
+    };
+    for (auto &tc : cases) {
+        CHECK_EQ(tc.packaged, File::filePackagedSigil(tc.src));
+    }
+}
+
 TEST_CASE("Substitute") { // NOLINT
     GlobalState gs1(errorQueue);
     gs1.initEmpty();
