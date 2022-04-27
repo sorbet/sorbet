@@ -39,7 +39,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
                 res = core::Names::empty();
             }
             loc = lit->loc;
-            if (::sorbet::debug_mode) {
+            DEBUG_ONLY({
                 auto l = ctx.locAt(loc);
                 ENFORCE(l.exists());
                 auto source = l.source(ctx).value();
@@ -47,7 +47,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
                 ENFORCE(source[0] == '"' || source[0] == '\'');
                 auto lastChar = source[source.size() - 1];
                 ENFORCE(lastChar == '"' || lastChar == '\'');
-            }
+            });
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos() - 1};
         }
     }
