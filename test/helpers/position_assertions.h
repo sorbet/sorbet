@@ -345,7 +345,8 @@ public:
                          LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
 
     ApplyRenameAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                         std::string_view version, std::string newName, std::string placeholderText, bool invalid, std::string expectedErrorMessage);
+                         std::string_view version, std::string newName, std::string placeholderText, bool invalid,
+                         std::string expectedErrorMessage);
 
     // The part between [..] in the assertion which specifies which `.[..].rbedited` file to compare against
     const std::string version;
