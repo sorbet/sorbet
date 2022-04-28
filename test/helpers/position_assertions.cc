@@ -1294,23 +1294,30 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
                                                             int assertionLine, string_view assertionContents,
                                                             string_view assertionType) {
     static const regex newNameRegex(
-        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:invalid:\s+(true))?\s?(?:expectedErrorMessage:\s+(.+))?)$)");
+        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:placeholderText:\s+([^ ]+))?\s?(?:invalid:\s+(true))?\s?(?:expectedErrorMessage:\s+(.+))?)$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
     if (regex_search(assertionContentsString, matches, newNameRegex)) {
         auto version = matches[1].str();
         auto newName = matches[2].str();
-        auto invalid = !matches[3].str().empty();
-        auto expectedErrorMessage = matches[4].str();
-        if (!newName.empty() || invalid) {
-            return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName, invalid,
+        auto placeholderText = matches[3].str();
+        if (!newName.empty() && placeholderText.empty()) {
+            ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                              "placeholderText must be provided if newName is provided");
+            return nullptr;
+        }
+
+        auto invalid = !matches[4].str().empty();
+        auto expectedErrorMessage = matches[5].str();
+        if ((!newName.empty() && !placeholderText.empty()) || invalid) {
+            return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName, placeholderText, invalid,
                                                      expectedErrorMessage);
         }
     }
 
     ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
-                      fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> "
+                      fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> placeholderText: <name> "
                                   "(invalid: true) (expectedErrorMessage: <message>)'. Found '{}' in file {}",
                                   assertionContents, filename));
 
@@ -1318,9 +1325,9 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
 }
 
 ApplyRenameAssertion::ApplyRenameAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                           string_view version, string newName, bool invalid,
+                                           string_view version, string newName, string placeholderText, bool invalid,
                                            string expectedErrorMessage)
-    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName), invalid(invalid),
+    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName), placeholderText(placeholderText), invalid(invalid),
       expectedErrorMessage(expectedErrorMessage) {}
 
 void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
