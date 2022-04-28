@@ -1,18 +1,15 @@
 # typed: ignore
 
-class Foo 
-    # ^ hover: # No hover information available
-    # ^ hover: ---
-    # ^ hover: The file is `# typed: ignore`
+class Foo
+    # ^ hover: This file is `# typed: ignore`
+    # ^ hover: Hover, Go To Definition, and other features are disabled in this file.
 
   def foo
-    # ^ hover: # No hover information available
-    # ^ hover: ---
-    # ^ hover: The file is `# typed: ignore`
+    # ^ hover: This file is `# typed: ignore`
+    # ^ hover: Hover, Go To Definition, and other features are disabled in this file.
     x = 10
-  # ^ hover: # No hover information available
-  # ^ hover: ---
-  # ^ hover: The file is `# typed: ignore`
+  # ^ hover: This file is `# typed: ignore`
+  # ^ hover: Hover, Go To Definition, and other features are disabled in this file.
     x
   end
 end
