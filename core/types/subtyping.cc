@@ -42,6 +42,7 @@ bool compositeTypeDeepRefEqual(const OrType &o1, const OrType &o2) {
 } // namespace
 
 TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+TypePtr lubProxyNonProxy(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
 TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto ret = lub(gs, t1, t2);
@@ -398,7 +399,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                     differ1 = differ1 || inserted != h1.values[fnd - h1.keys.begin()];
                                     differ2 = differ2 || inserted != h2->values[i];
                                 } else {
-                                    result = Types::hashOfUntyped();
+                                    result = OrType::make_shared(t1, t2);
                                     return;
                                 }
                             }
@@ -410,7 +411,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<ShapeType>(h2->keys, move(valueLubs));
                             }
                         } else {
-                            result = Types::hashOfUntyped();
+                            result = OrType::make_shared(t1, t2);
                         }
                     } else {
                         bool allowProxyInLub = isa_type<TupleType>(t2);
@@ -453,29 +454,12 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             ENFORCE(result != nullptr);
             return result;
         } else {
-            bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
             // only 1st is proxy
-            TypePtr und = t1.underlying(gs);
-            if (isSubType(gs, und, t2)) {
-                return t2;
-            } else if (allowProxyInLub) {
-                return OrType::make_shared(t1, t2);
-            } else {
-                return lub(gs, t2, und);
-            }
+            return lubProxyNonProxy(gs, t1, t2);
         }
     } else if (is_proxy_type(t2)) {
         // only 2nd is proxy
-        bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
-        // only 1st is proxy
-        TypePtr und = t2.underlying(gs);
-        if (isSubType(gs, und, t1)) {
-            return t1;
-        } else if (allowProxyInLub) {
-            return OrType::make_shared(t1, t2);
-        } else {
-            return lub(gs, t1, und);
-        }
+        return lubProxyNonProxy(gs, t2, t1);
     }
 
     {
@@ -517,6 +501,20 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     // none is proxy
     return lubGround(gs, t1, t2);
+}
+
+TypePtr lubProxyNonProxy(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
+    TypePtr und = t1.underlying(gs);
+    if (Types::isSubType(gs, und, t2)) {
+        return t2;
+    } else if (allowProxyInLub) {
+        if (isa_type<OrType>(t2)) {
+            return lubDistributeOr(gs, t2, t1);
+        }
+        return OrType::make_shared(t1, t2);
+    }
+    return Types::lub(gs, t2, und);
 }
 
 TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
