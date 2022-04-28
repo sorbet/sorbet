@@ -140,12 +140,20 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto DiagnosticTag = makeIntEnum("DiagnosticTag", {{"Unnecessary", 1}, {"Deprecated", 2}}, enumTypes);
 
+    auto CodeDescription = makeObject("CodeDescription",
+                                      {
+                                          // URI
+                                          makeField("href", JSONString),
+                                      },
+                                      classTypes);
+
     auto Diagnostic =
         makeObject("Diagnostic",
                    {
                        makeField("range", Range),
                        makeField("severity", makeOptional(DiagnosticSeverity)),
                        makeField("code", makeOptional(makeVariant({JSONInt, JSONString}))),
+                       makeField("codeDescription", makeOptional(CodeDescription)),
                        makeField("source", makeOptional(JSONString)),
                        makeField("message", JSONString),
                        makeField("relatedInformation", makeOptional(makeArray(DiagnosticRelatedInformation))),
