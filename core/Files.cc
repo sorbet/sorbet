@@ -245,9 +245,9 @@ File::Flags::Flags(string_view path)
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
-    : epoch(epoch), sourceType(sourceType), flags(path_), path_(move(path_)), source_(move(source_)),
-      originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
-      compiledLevel(fileCompiledSigil(this->source_)), packagedLevel{File::filePackagedSigil(this->source_)} {}
+    : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
+      path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
+      strictLevel(originalSigil), compiledLevel(fileCompiledSigil(this->source_)) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;

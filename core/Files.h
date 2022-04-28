@@ -115,6 +115,10 @@ private:
 
     Flags flags;
 
+private:
+    const PackagedLevel packagedLevel;
+
+public:
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
@@ -131,14 +135,12 @@ public:
     StrictLevel strictLevel;
 
     const CompiledLevel compiledLevel;
-    const PackagedLevel packagedLevel;
 
 private:
     std::shared_ptr<const FileHash> hash_;
 };
 
-// TODO: see if we can pack `packagedLevel` in a bit better to get this back down to 96
-CheckSize(File, 104, 8);
+CheckSize(File, 96, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
