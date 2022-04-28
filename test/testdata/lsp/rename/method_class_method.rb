@@ -3,7 +3,7 @@
 
 class Foo
   def self.foo
-#          ^ apply-rename: [A] newName: bar
+#          ^ apply-rename: [A] newName: bar placeholderText: foo
   end
 
   def foo

@@ -2,13 +2,13 @@
 # frozen_string_literal: true
 
 FOO = 1
-# ^ apply-rename: [C] newName: BAZ
+# ^ apply-rename: [C] newName: BAZ placeholderText: FOO
 
 class Bar
-#     ^ apply-rename: [B] newName: foo invalid: true
+#     ^ apply-rename: [B] newName: foo placeholderText: Foo invalid: true
   class Foo
   end
 end
 
 foo = Bar.new
-#     ^ apply-rename: [A] newName: Bar
+#     ^ apply-rename: [A] newName: Bar placeholderText: Foo

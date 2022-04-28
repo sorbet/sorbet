@@ -1,7 +1,7 @@
 # typed: true
 
 def origin(x = nil); end
-#   ^ apply-rename: [A] newName: ORIGIN
+#   ^ apply-rename: [A] newName: ORIGIN placeholderText: origin
 
 origin()
 

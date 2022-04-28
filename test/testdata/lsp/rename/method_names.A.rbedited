@@ -6,7 +6,7 @@ class C1
 
   sig { returns(C1) }
   def m2
-#     ^ apply-rename: [A] newName: m2
+#     ^ apply-rename: [A] newName: m2 placeholderText: m1
     self
   end
 
