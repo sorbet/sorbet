@@ -58,10 +58,10 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
         ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
         if (level < core::StrictLevel::True) {
-            string asString = level == core::StrictLevel::Ignore ? "ignore" : "false";
-            auto text = fmt::format("# No hover information available");
-            auto explanation = fmt::format("The file is `# typed: {}`", asString);
-            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, text, explanation));
+            auto text = fmt::format("This file is `# typed: {}`.\n"
+                                    "Hover, Go To Definition, and other features are disabled in this file.",
+                                    level == core::StrictLevel::Ignore ? "ignore" : "false");
+            response->result = make_unique<Hover>(make_unique<MarkupContent>(clientHoverMarkupKind, text));
         } else {
             // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
             response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
