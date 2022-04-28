@@ -3,6 +3,7 @@
 
 class Test::Krabappel::Popquiz
                      # ^^^^^^^ def: popquiz
+                     # ^^^^^^^ symbol-search: "Popquiz", name = "Test::Krabappel::Popquiz", container = "Test::Krabappel"
 
     extend T::Sig
 
