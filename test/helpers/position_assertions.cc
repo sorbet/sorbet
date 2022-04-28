@@ -1343,13 +1343,16 @@ void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &as
 void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                  LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
     auto prepareRenameResponse = doTextDocumentPrepareRename(wrapper, *this->range, nextId, this->filename);
-    // TODO: test placeholder in prepareRenameResponse
 
     // A rename at an invalid position
     if (newName.empty() && invalid) {
         REQUIRE_EQ(prepareRenameResponse, nullptr);
     } else {
         REQUIRE_NE(prepareRenameResponse, nullptr);
+        auto &optPlaceholder = prepareRenameResponse->placeholder;
+        REQUIRE(optPlaceholder.has_value());
+        auto &placeholder = *optPlaceholder;
+        REQUIRE_EQ(this->placeholderText, placeholder);
     }
 
     auto workspaceEdits =
