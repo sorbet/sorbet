@@ -514,7 +514,16 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
         // We would like to verify the number of notifications here, but the number
         // of notifications depends on the typed-ness of the file as well as the
         // particular kind of query we're running, and we don't have access to the
-        // latter here.
+        // latter here.  We can definitely assert that typed files have no notifications,
+        // though.
+        auto foundFile = sourceFileContents.find(locFilename);
+        REQUIRE_NE(sourceFileContents.end(), foundFile);
+        auto &file = foundFile->second;
+        if (file->strictLevel >= core::StrictLevel::True) {
+            const auto numNotifications =
+                absl::c_count_if(responses, [](const auto &m) { return m->isNotification(); });
+            REQUIRE_EQ(0, numNotifications);
+        }
     }
     assertResponseMessage(id, *responses.at(0));
 
@@ -600,7 +609,16 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         // We would like to verify the number of notifications here, but the number
         // of notifications depends on the typed-ness of the file as well as the
         // particular kind of query we're running, and we don't have access to the
-        // latter here.
+        // latter here.  We can definitely assert that typed files have no notifications,
+        // though.
+        auto foundFile = sourceFileContents.find(locFilename);
+        REQUIRE_NE(sourceFileContents.end(), foundFile);
+        auto &file = foundFile->second;
+        if (file->strictLevel >= core::StrictLevel::True) {
+            const auto numNotifications =
+                absl::c_count_if(responses, [](const auto &m) { return m->isNotification(); });
+            REQUIRE_EQ(0, numNotifications);
+        }
     }
 
     assertResponseMessage(id, *responses.at(0));
