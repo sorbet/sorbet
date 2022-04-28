@@ -1964,6 +1964,14 @@ certain Sorbet usage patterns from introducing load-time cyclic references.
 
 ## 5044
 
+<!--
+TODO(jez) Also audit the other generics-related error codes for redundancy and
+missing links.
+-->
+
+In addition to the docs below, consider reading Sorbet's docs on
+[generic classes](generics.md).
+
 As background reading, you may first want to read more about variance—see the
 docs for error code [5015](#5015) and [5016](#5016).
 
@@ -1989,59 +1997,9 @@ In this example, even though `Integer` is a subtype of `T.any(Integer, String)`,
 `Elem` has not been declared as `:out` nor `:in`, and is thus **invariant**.
 
 To allow code like this, we can declare `Elem` using `:out`, but this comes at
-the restriction of only being able to use `Elem` in **out positions**. An out
-position is named as such because it's the position of a method's output, like a
-method signature's `returns`, though there are other out positions as well. As
-an intuition, all positions in a signature where the value is produced by a
-method are out positions. This includes values yielded to lambda functions and
-block arguments.
-
-```ruby
-# ...
-
-  Elem = type_member(:out)
-
-  sig {abstract.returns(Elem)}
-  #                     ^^^^ out position
-  def value; end
-
-  sig do
-    type_parameters(:U)
-      .params(
-        blk: T.proc.params(val: Elem).returns(T.type_parameter(:U))
-      )
-      .returns(T.type_parameter(:U))
-  end
-  def with_value(&blk)
-    yield value
-  end
-
-# ...
-```
-
-[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20IImmutableBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20type_parameters%28%3AU%29%0A%20%20%20%20%20%20.params%28%0A%20%20%20%20%20%20%20%20blk%3A%20T.proc.params%28val%3A%20Elem%29.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%20%20%29%0A%20%20%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0A%20%20end%0A%20%20def%20with_value%28%26blk%29%0A%20%20%20%20yield%20value%0A%20%20end%0Aend%0A%0Aclass%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20IImmutableBox%0A%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%29%0A%20%20%20%20%40value%20%3D%20value%0A%20%20end%0A%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0Aend%0A%0Asig%20%7Bparams%28immutable_box%3A%20IImmutableBox%5BInteger%5D%29.void%7D%0Adef%20example%28immutable_box%29%0A%20%20x%20%3D%20immutable_box.value%0A%20%20T.reveal_type%28x%29%0A%0A%20%20immutable_box.with_value%20do%20%7Celem%7C%0A%20%20%20%20T.reveal_type%28elem%29%0A%20%20end%0Aend)
-
-The intuition for **in positions** is flipped: they're all positions that would
-correspond to an input to the function, instead of all things that the function
-produces. This includes the direct arguments of the method, as well as the
-return values of any lambda functions or blocks passed into the method.
-
-If it helps, some type system actually formalize the type of a function as a
-generic something like this:
-
-```ruby
-module Fn
-  extend T::Sig
-  extend T::Generic
-  interface!
-
-  Input = type_member(:in)
-  Output = type_member(:out)
-
-  sig {abstract.params(input: Input).returns(Oputput)}
-  def call(input); end
-end
-```
+the restriction of only being able to use `Elem` in **out positions**. See
+[Input and output positions](generics.md#input-and-output-positions) for more
+information.
 
 Recall that only modules (not classes) may have covariant and contravariant type
 members—classes are limited to only invariant type members. For more, see the
