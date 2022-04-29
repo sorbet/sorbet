@@ -131,24 +131,12 @@ public:
 ParsedFile Substitute::run(core::MutableContext ctx, const core::NameSubstitution &subst, ParsedFile what) {
     SubstWalk walk(subst);
     what.tree = TreeMap::apply(ctx, walk, std::move(what.tree));
-
-    auto pkg = what.file.data(ctx).getPackage();
-    if (pkg.exists()) {
-        what.file.data(ctx).setPackage(subst.substitute(pkg));
-    }
-
     return what;
 }
 
 ParsedFile Substitute::run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ParsedFile what) {
     SubstWalk walk(subst);
     what.tree = TreeMap::apply(ctx, walk, std::move(what.tree));
-
-    auto pkg = what.file.data(ctx).getPackage();
-    if (pkg.exists()) {
-        what.file.data(ctx).setPackage(subst.substitute(pkg));
-    }
-
     return what;
 }
 

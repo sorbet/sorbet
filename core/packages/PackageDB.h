@@ -24,6 +24,13 @@ class PackageDB final {
 public:
     NameRef enterPackage(std::unique_ptr<PackageInfo> pkg);
 
+    // Fetch the mangled package name for a file, returning a core::NameRef::noName() that doesn't exist if there is no
+    // associated packge for the file.
+    const NameRef getPackageNameForFile(FileRef file) const;
+
+    // Set the associated package for the file.
+    void setPackageNameForFile(FileRef file, NameRef mangledName);
+
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
     const PackageInfo &getPackageInfo(core::NameRef mangledName) const;
 
@@ -55,6 +62,11 @@ private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
     std::string errorHint_;
+
+    // This vector is kept in sync with the size of the file table in the global state by
+    // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having
+    // no associated package.
+    std::vector<NameRef> packageForFile_;
 
     UnorderedMap<core::NameRef, std::unique_ptr<packages::PackageInfo>> packages_;
     UnorderedMap<std::string, core::NameRef> packagesByPathPrefix;

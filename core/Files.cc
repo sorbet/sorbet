@@ -412,14 +412,6 @@ void File::setCached(bool value) {
     flags.cached = value;
 }
 
-NameRef File::getPackage() const {
-    return this->package;
-}
-
-void File::setPackage(NameRef mangledName) {
-    this->package = mangledName;
-}
-
 bool File::isPackaged() const {
     switch (this->packagedLevel) {
         case PackagedLevel::False:
