@@ -99,7 +99,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
     const auto numRequests = absl::c_count_if(defResponses, [](const auto &m) { return m->isRequest(); });
     REQUIRE_EQ(0, numRequests);
     const auto numNotifications = absl::c_count_if(defResponses, [](const auto &m) { return m->isNotification(); });
-    REQUIRE_EQ(1, numNotifications);
+    REQUIRE_EQ(0, numNotifications);
     // Ensure the lone response is at the front.
     absl::c_partition(defResponses, [](const auto &m) { return m->isResponse(); });
     assertResponseMessage(nextId - 1, *defResponses.at(0));
