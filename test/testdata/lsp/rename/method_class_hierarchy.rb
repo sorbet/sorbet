@@ -12,7 +12,7 @@ end
 
 class A < BaseWithMethod
   def foo
-#     ^ apply-rename: [A] newName: bar
+#     ^ apply-rename: [A] newName: bar placeholderText: foo
   end
 end
 

@@ -19,7 +19,7 @@ end
 f = M::Foo.new
 f.baz(f.x)
 f.baz
-# ^ apply-rename: [A] newName: baz
+# ^ apply-rename: [A] newName: baz placeholderText: bar
 f  .  baz  (   )
 
 M::Foo.new.baz 3

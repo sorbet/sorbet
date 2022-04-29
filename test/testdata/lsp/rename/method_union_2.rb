@@ -10,5 +10,5 @@ end
 
 animal = T.let(Cat.new, T.any(Dog, Cat))
 animal.sound
-#      ^ apply-rename: [A] newName: sound_new
+#      ^ apply-rename: [A] newName: sound_new placeholderText: sound
 
