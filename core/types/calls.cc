@@ -187,9 +187,16 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
         result.main.errors.emplace_back(e.build());
         return result;
     } else {
-        // TODO: https://github.com/sorbet/sorbet/issues/1731
-        auto untypedUntracked = Types::untypedUntracked();
-        return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
+        ENFORCE(this->definition.isTypeMember());
+        auto typeMember = this->definition.asTypeMemberRef();
+        auto lambdaParam = cast_type_nonnull<LambdaParam>(typeMember.data(gs)->resultType);
+
+        // TODO(jez) Specific error message (short-circuit) when upperBound is top
+        // TODO(jez) Might be worth documenting what <top> is (it's not BasicObject)
+
+        auto upperBound = lambdaParam.upperBound;
+
+        return upperBound.dispatchCall(gs, args.withThisRef(upperBound));
     }
 }
 
