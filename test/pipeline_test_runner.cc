@@ -425,14 +425,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                                    "PACKAGE_ERROR_HINT");
         }
 
-        // Packager runs over all trees.
-        trees = packager::Packager::run(*gs, *workers, move(trees));
-        for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() {
-                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
-            });
-        }
-
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
@@ -507,6 +499,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     }
                 }
             }
+        }
+
+        // Packager runs over all trees, and sets the package on the file associated with every tree. As we share the
+        // file entries with the forked global state used in the rbi generation tests above, we run the packager on this
+        // global state after that test to overwrite its changes to the shared file entries.
+        trees = packager::Packager::run(*gs, *workers, move(trees));
+        for (auto &tree : trees) {
+            handler.addObserved(*gs, "package-tree", [&]() {
+                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+            });
         }
     }
 
