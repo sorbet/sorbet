@@ -39,8 +39,7 @@ public:
     core::Context ctx;
     const core::packages::PackageInfo &currentPkg;
 
-    PackageContext(core::Context ctx)
-        : ctx(ctx), currentPkg(ctx.state.packageDB().getPackageInfo(ctx.file.data(ctx).getPackage())) {}
+    PackageContext(core::Context ctx) : ctx(ctx), currentPkg(ctx.state.packageDB().getPackageForFile(ctx, ctx.file)) {}
 
     const core::packages::PackageDB &db() const {
         return ctx.state.packageDB();

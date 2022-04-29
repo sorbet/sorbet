@@ -133,8 +133,31 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
+const NameRef PackageDB::getPackageNameForFile(FileRef file) const {
+    if (this->packageForFile_.size() <= file.id()) {
+        return NameRef::noName();
+    }
+
+    return this->packageForFile_[file.id()];
+}
+
+void PackageDB::setPackageNameForFile(FileRef file, NameRef mangledName) {
+    if (this->packageForFile_.size() <= file.id()) {
+        this->packageForFile_.resize(file.id() + 1, NameRef::noName());
+    }
+
+    this->packageForFile_[file.id()] = mangledName;
+}
+
 const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(frozen);
+
+    // If we already have the package name cached, we can skip the slow path below. As this function is const, we cannot
+    // update the vector if we fall back on the slow path.
+    auto name = this->getPackageNameForFile(file);
+    if (name.exists()) {
+        return this->getPackageInfo(name);
+    }
 
     // Note about safety: we're only using the file data for two pieces of information: the file path and the
     // sourceType. The path is present even on unloaded files, and the sourceType we're interested in is `Package`,

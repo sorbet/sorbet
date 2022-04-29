@@ -685,10 +685,10 @@ int realmain(int argc, char *argv[]) {
                 auto info = core::packages::ImportInfo::fromPackage(*gs, pkg);
 
                 // Only keep inputs that are part of the package whose interface we're generating
-                auto it = std::remove_if(inputFiles.begin(), inputFiles.end(), [&gs = *gs, &info](auto file) {
-                    // NOTE: the files haven't been read at this point, but their package will be known.
-                    return info.package != file.dataAllowingUnsafe(gs).getPackage();
-                });
+                auto it =
+                    std::remove_if(inputFiles.begin(), inputFiles.end(), [&db = gs->packageDB(), &info](auto file) {
+                        return info.package != db.getPackageNameForFile(file);
+                    });
                 inputFiles.erase(it, inputFiles.end());
 
                 // Record parent information in GlobalState to guide the resolver when stubbing out constants that come

@@ -2051,16 +2051,10 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
     // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
     // no symbols will be allocated.
-    auto &packageDB = gs.packageDB();
+    auto packages = gs.unfreezePackages();
     for (auto &f : files) {
-        f.file.data(gs).setPackage(core::NameRef::noName());
-
-        auto &pkg = packageDB.getPackageForFile(gs, f.file);
-        if (!pkg.exists()) {
-            continue;
-        }
-
-        f.file.data(gs).setPackage(pkg.mangledName());
+        auto &pkg = packages.db.getPackageForFile(gs, f.file);
+        packages.db.setPackageNameForFile(f.file, pkg.mangledName());
     }
 
     return;
@@ -2071,16 +2065,10 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::Pa
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::FileRef> &files) {
     // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
     // no symbols will be allocated.
-    auto &packageDB = gs.packageDB();
+    auto packages = gs.unfreezePackages();
     for (auto file : files) {
-        file.dataAllowingUnsafe(gs).setPackage(core::NameRef::noName());
-
-        auto &pkg = packageDB.getPackageForFile(gs, file);
-        if (!pkg.exists()) {
-            continue;
-        }
-
-        file.dataAllowingUnsafe(gs).setPackage(pkg.mangledName());
+        auto &pkg = packages.db.getPackageForFile(gs, file);
+        packages.db.setPackageNameForFile(file, pkg.mangledName());
     }
 
     return;

@@ -67,12 +67,6 @@ public:
     bool cached() const;
     void setCached(bool value);
 
-    // Fetch the mangled name of the package that this file belongs to.
-    NameRef getPackage() const;
-
-    // Set the mangled name of the package that this file belongs to.
-    void setPackage(NameRef mangledName);
-
     // Returns whether or not this file is considered to be packaged.
     bool isPackaged() const;
 
@@ -122,11 +116,6 @@ public:
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
-
-    // NOTE: this currently is overhead neutral even when `--stripe-packages` is disabled.
-    // Depending on what `File` requires in the future, we may look at moving it into the
-    // PackageDB to avoid memory overhead in non-Stripe codebases.
-    NameRef package = core::NameRef::noName();
 
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
 
