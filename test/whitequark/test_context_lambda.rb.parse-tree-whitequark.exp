@@ -20,12 +20,4 @@ s(:begin,
           s(:begin,
             s(:begin,
               s(:return),
-              s(:int, "1"))))), nil)),
-  s(:block,
-    s(:send,
-      s(:const, nil, :Kernel), :lambda),
-    s(:args,
-      s(:arg, :a)),
-    s(:module,
-      s(:const, nil, :M),
-      s(:send, nil, :_1))))
+              s(:int, "1"))))), nil)))

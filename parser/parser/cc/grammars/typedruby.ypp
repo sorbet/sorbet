@@ -924,6 +924,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inDef = true;
+                      driver.lex.context.allowNumparams = false;
                     }
 
         defn_head: k_def def_name
@@ -962,6 +963,7 @@ lbrace_cmd_block_start:
                   tLBRACE_ARG
                     {
                       driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                     }
  cmd_brace_block: lbrace_cmd_block_start brace_body tRCURLY
@@ -2194,6 +2196,7 @@ array_premature_end: eof
                 | k_class cpath superclass
                     {
                       driver.lex.context.inClass = true;
+                      driver.lex.context.allowNumparams = false;
                       driver.local_push();
                     }
                     bodystmt kend_or_eof
@@ -2239,6 +2242,7 @@ array_premature_end: eof
                 | k_module cpath
                     {
                       driver.lex.context.inClass = true;
+                      driver.lex.context.allowNumparams = false;
                       driver.local_push();
                     }
                     bodystmt kend_or_eof
@@ -2349,18 +2353,21 @@ array_premature_end: eof
                     {
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
                     }
 
       k_do_block: kDO_BLOCK
                     {
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
                     }
 
      k_do_lambda: kDO_LAMBDA
                     {
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inLambda = true;
+                      driver.lex.context.allowNumparams = true;
                     }
 
             then: term
@@ -2717,6 +2724,7 @@ opt_block_args_tail:
                       driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inLambda = true;
+                      driver.lex.context.allowNumparams = true;
                     }
 
      f_larglist: tLPAREN2 f_args opt_bv_decl tRPAREN
@@ -2756,6 +2764,7 @@ opt_block_args_tail:
                     {
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inLambda = true;
+                      driver.lex.context.allowNumparams = true;
                     }
 
         do_block: k_do_block do_body kend_or_eof
@@ -2880,6 +2889,7 @@ lcurly_block_start:
                     {
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
                     }
      brace_block: lcurly_block_start brace_body tRCURLY
                     {

@@ -16,10 +16,7 @@ public:
     bool inClass = false;
     bool inBlock = false;
     bool inLambda = false;
-
-    bool inDynamicBlock() {
-        return inBlock || inLambda;
-    }
+    bool allowNumparams = false; // Implicitly checks inBlock or inLambda is the last flag to be set
 
     Context dup() const {
         Context ctx;

@@ -187,7 +187,7 @@ public:
             ENFORCE(id->name.kind() == core::NameKind::UTF8);
             // Because of the above enforce, we can use shortName here instead of show.
             auto name_str = id->name.shortName(gs_);
-            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+            if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
@@ -1810,7 +1810,7 @@ public:
     }
 
     void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
-        if (driver_->lex.context.inDynamicBlock() && isNumberedParameterName(name) &&
+        if (driver_->lex.context.allowNumparams && isNumberedParameterName(name) &&
             driver_->numparam_stack.seen_numparams()) {
             std::cout << "Assignment error" << std::endl;
             core::Loc location = core::Loc(file_, loc);
