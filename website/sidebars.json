@@ -51,6 +51,7 @@
     "Experimental Features": [
       "tuples",
       "shapes",
+      "generics",
       "requires-ancestor"
     ]
   },

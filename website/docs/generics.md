@@ -215,6 +215,11 @@ module Example
 end
 ```
 
+For those who have never encountered variance in a type system before, it may be
+useful to skip down to
+[Why does tracking variance matter?](why-does-tracking-variance-matter), which
+motivates why type systems (Sorbet included) place such emphasis on variance.
+
 ### Invariance
 
 By default, type members are invariant. Here is an example of what that means.
@@ -230,8 +235,7 @@ end
 
 int_box = Box[Integer].new
 
-# Integer <: Numeric, because Integer inherits from
-# Numeric, however:
+# Integer <: Numeric, because Integer inherits from Numeric, however:
 T.let(int_box, Box[Numeric])
 # ^ error: Argument does not have asserted type
 
@@ -257,7 +261,7 @@ contravariant type members.
 > in a Ruby `module` are allowed to be covariant or contravariant. See the docs
 > for error code [5016](error-reference.md#5016) for more information.
 
-### Covariance
+### Covariance (`:out`)
 
 Covariant type members preserve the subtyping relationship. Specifically, if the
 type `Child` is a subtype of the type `Parent`, then the type `A[Child]` is a
@@ -328,8 +332,8 @@ class Box
   sig {override.returns(Elem)}
   def value; @value; end
 
-  # Add the ability to update the value (allowed
-  # because `Elem` is invariant within this class)
+  # Add the ability to update the value
+  # (allowed because `Elem` is invariant within this class)
   sig {params(value: Elem).returns(Elem)}
   def value=(value); @value = value; end
 end
@@ -344,7 +348,7 @@ copy the parent's specified variance or redeclare it as invariant in the child
 (the latter is the _only_ option when the child is a child `class`, not a child
 `module`).
 
-### Contravariance
+### Contravariance (`:in`)
 
 Contravariant type parameters **reverse** the subtyping relationship.
 Specifically, if the type `Child` is a subtype of the type `Parent`, then type
@@ -352,7 +356,7 @@ Specifically, if the type `Child` is a subtype of the type `Parent`, then type
 contravariant. In symbols:
 
 ```
-Child <: Parent  ==>   A[Parent] <: A[Child]
+Child <: Parent  ==>  A[Parent] <: A[Child]
 ```
 
 Contravariance is **quite** unintuitive for most people. Luckily, contravariance
@@ -635,7 +639,115 @@ This is what variance checks buy in a type system: they prevent abstractions
 from being misused in ways that would otherwise compromise the integrity of the
 type checker's predictions.
 
-## bounds
+## Bounds on type members (`fixed`, `upper`, `lower`)
+
+So far, the discussion in this guide has focused on `type_member`s, which tend
+to be most useful for building things like generic containers.
+
+The use cases for `type_template`s tend to look different: they tend to be used
+when a class wants to have something like an "abstract" type that is filled in
+by child classes. Here's an example of an abstract RPC (remote procedure call)
+interface:
+
+```ruby
+module AbstractRPCMethod
+  extend T::Sig
+  extend T::Generic
+
+  abstract!
+
+  # Note how these use `type_member` in this interface module
+  # They become `type_template` because we `extend` this module
+  # in the child class
+  RPCInput = type_member
+  RPCOutput = type_member
+
+  sig {abstract.params(input: RPCInput).returns(RPCOutput)}
+  def run(input); end
+end
+
+class TextDocumentHoverMethod
+  extend T::Sig
+  extend T::Generic
+
+  # Use `extend` to start implementing the interface
+  extend AbstractRPCMethod
+
+  # The `type_member` become `type_template` because of the `extend`
+  # We're using `fixed` to "fill in" the type_template. Read more below.
+  RPCInput = type_template {{fixed: TextDocumentPositionParams}}
+  RPCOutput = type_template {{fixed: HoverResponse}}
+
+  sig {override.params(input: RPCInput).returns(RPCOutput)}
+  def self.run(input)
+    puts "Computing hover request at #{input.position}"
+    # ...
+  end
+end
+```
+
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20---%20plain%20old%20data%20structures%20use%20for%20input%20and%20output%20types%20---%0Aclass%20Position%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Aline%2C%20Integer%0A%20%20const%20%3Acharacter%2C%20Integer%0Aend%0A%0Aclass%20TextDocumentPositionParams%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Atext_document%2C%20String%0A%20%20const%20%3Aposition%2C%20Position%0Aend%0A%0Aclass%20MarkupKind%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20PlainText%20%3D%20new%28'plaintext'%29%0A%20%20%20%20Markdown%20%3D%20new%28'markdown'%29%0A%20%20end%0Aend%0A%0Aclass%20MarkupContent%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Akind%2C%20MarkupKind%0A%20%20const%20%3Avalue%2C%20String%0Aend%0A%0Aclass%20HoverResponse%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Acontents%2C%20MarkupContent%0Aend%0A%23%20----------------------------------------------------------------%0A%0Amodule%20AbstractRPCMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20abstract!%0A%0A%20%20RPCInput%20%3D%20type_member%0A%20%20RPCOutput%20%3D%20type_member%0A%0A%20%20sig%20%7Babstract.returns%28String%29%7D%0A%20%20def%20method_name%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private%20def%20deserialize_impl%28raw_input%29%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private%20def%20run_impl%28input%29%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20params%28%0A%20%20%20%20%20%20raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.nilable%28RPCOutput%29%29%0A%20%20end%0A%20%20def%20run%28raw_input%29%0A%20%20%20%20input%20%3D%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20%23%20Could%20extend%20this%20example%20to%20use%20something%20richer%20for%20conveying%20an%20error%0A%20%20%20%20%23%20%28currently%20just%20returns%20nil%29%0A%20%20%20%20return%20unless%20input%0A%20%20%20%20run_impl%28input%29%0A%20%20end%0Aend%0A%0Aclass%20TextDocumentHoverMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20extend%20AbstractRPCMethod%0A%20%20final!%0A%0A%20%20RPCInput%20%3D%20type_template%20%7B%7Bfixed%3A%20TextDocumentPositionParams%7D%7D%0A%20%20RPCOutput%20%3D%20type_template%20%7B%7Bfixed%3A%20HoverResponse%7D%7D%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.returns%28String%29%7D%0A%20%20def%20self.method_name%3B%20'textDocument%2Fhover'%3B%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private_class_method%20def%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20begin%0A%20%20%20%20%20%20TextDocumentPositionParams.from_hash%28raw_input%29%0A%20%20%20%20rescue%20TypeError%0A%20%20%20%20%20%20nil%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private_class_method%20def%20self.run_impl%28input%29%0A%20%20%20%20puts%20%22Computing%20hover%20request%20at%20%23%7Binput.position%7D%22%0A%20%20%20%20raise%20%22TODO%22%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28raw_request%3A%20String%29.returns%28String%29%7D%0Adef%20handle_rpc_request%28raw_request%29%0A%20%20parsed_request%20%3D%20JSON.parse%28raw_request%29%0A%20%20params%20%3D%20parsed_request%5B'params'%5D%0A%0A%20%20output%20%3D%20case%20%28method%20%3D%20parsed_request%5B'method'%5D%29%0A%20%20when%20TextDocumentHoverMethod.method_name%0A%20%20%20%20TextDocumentHoverMethod.run%28params%29%0A%20%20else%0A%20%20%20%20raise%20%22Unknown%20method%3A%20%23%7Bmethod%7D%22%0A%20%20end%0A%0A%20%20if%20output%0A%20%20%20%20output.serialize%0A%20%20else%0A%20%20%20%20raise%20%22Error%20when%20running%20method%22%0A%20%20end%0Aend)
+
+The snippet above is a heavily abbreviated snippet to introduce two concepts
+(`type_template` and `fixed`). The full example on sorbet.run contains many more
+details, and it's strongly recommended reading.
+
+There are a couple interesting things happening in the snippet above:
+
+- We have a generic interface `AbstractRPCMethod` which says that is generic in
+  `RPCInput` and `RPCOutput`. It then mentions these types in the abstract `run`
+  method. The example uses `type_member` to declare these generic types.
+
+- The interface is implemented by a class that uses `extend` to implement the
+  interface using the singleton class of `TextDocumentHoverMethod`. As we know
+  from [Abstract Classes and Interfaces](abstract.md), that means
+  `TextDocumentHoverMethod` must implement `def self.run`, _not_ `def run`.
+
+  In the same way, the `type_member` variables declared by the parent must be
+  redeclared by the implementing class, where they then become `type_template`.
+  Recall from [`type_member` & `type_template`](#type_member--type_template)
+  that the scope of a `type_member` is all singleton class methods on the given
+  class.
+
+- In the implementation, `TextDocumentHoverMethod` chooses to provided a `fixed`
+  annotation on the `type_template` definitions. This effectively says that
+  `TextDocumentHoverMethod` **always** conforms to the type
+  `AbstractRPCMethod[TextDocumentPositionParams, HoverResponse]`.
+
+  Then when implementing the `def self.run` method, it can assume that
+  `RPCInput` is equivalent to `TextDocumentPositionParams`. This allows it to
+  access `input.position` in the implementation, a method that only exists on
+  `TextDocumentPositionParams` (but not necessarily on every input to an
+  `AbstractRPCMethod`).
+
+The `fixed` annotation above places **bounds** on type members (specifically,
+`type_template`s in the above example). There are three annotations for
+providing bounds to a type member:
+
+- **upper**: Places an upper bound on types that can be applied to a given type
+  member. Only that are subtypes of that upper bound are valid.
+
+- **lower**: The opposite—places a lower bound, thus requiring only supertypes
+  of that bound.
+
+- **fixed**: Syntactic sugar for specifying both **lower** and **upper** at the
+  same time. Effectively requires that an equivalent type be applied to the type
+  member.
+
+```ruby
+class NumericBox
+  extend T::Generic
+  Elem = type_member {{upper: Numeric}}
+end
+
+NumericBox[Integer].new # OK, Integer <: Numeric
+NumericBox[String].new
+#          ^^^^^^ error: `String` is not a subtype of upper bound of `Elem`
+```
+
+<!-- TODO(jez) realistic example with lower bounds? -->
+
+<!-- TODO(jez) worth saying something about when to use type member bounds vs when to use T.all on individual methods? -->
 
 ## What's next?
 
@@ -654,41 +766,3 @@ type checker's predictions.
   https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
 [covariant-ibox]:
   https://sorbet.run/#%23%20typed%3A%20strict%0A%0Amodule%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20%23%20Covariant%20type%20member%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20%23%20Elem%20can%20only%20be%20used%20in%20output%20position%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0Aend%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20%23%20Implement%20the%20%60IBox%60%20interface%0A%20%20include%20IBox%0A%0A%20%20%23%20Redeclare%20the%20type%20member%2C%20to%20be%20compatible%20with%20%60IBox%60%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20%23%20Within%20this%20class%2C%20%60Elem%60%20is%20invariant%2C%20so%20it%20can%20also%20be%20used%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%3A%29%3B%20%40value%20%3D%20value%3B%20end%0A%0A%20%20%23%20Implement%20the%20%60value%60%20method%20from%20%60IBox%60%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0A%0A%20%20%23%20Add%20the%20ability%20to%20update%20the%20value%20%28allowed%0A%20%20%23%20because%20%60Elem%60%20is%20invariant%20within%20this%20class%29%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20value%3D%28value%29%3B%20%40value%20%3D%20value%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28value%3A%200%29%0A%0A%23%20not%20allowed%20%28attempts%20to%20widen%20type%2C%0A%23%20but%20%60Box%3A%3AElem%60%20is%20invariant%29%0Aint_or_str_box%20%3D%20T.let%28int_box%2C%20Box%5BT.any%28Integer%2C%20String%29%5D%29%0A%0A%23%20no%20error%20reported%20here%0Aint_or_str_box.value%20%3D%20''%0A%0AT.reveal_type%28int_box.value%29%0A%23%20Sorbet%20reveals%3A%20%60Integer%60%0A%23%20Actual%20type%20at%20runtime%3A%20%60String%60
-
-<!--
-
-type_member
-type_template
-type_parameters, T.proc
-"abstract vs fixed" (??)
-type_template vs type_member (description below)
-you can sometimes fake bounded method generics with `T.all`
-defaulting type_templates
-erased at runtime
-can't be implemented in runtime (no compiler)
-covariant arrays and hashes
-links to the bugs
-how to prototype things that use generics
-consider not using generics; alternatives
-variance
-leverage and/or replace error-reference docs
-redeclare type member by parent
-type_member in module becomes type_template in child if using `extend` not `include`
-
-
-
-> `type_member` and `type_template` are ways of defining type variables.
-> Type variables (like normal term variables) have a scope.
->
-> The scope of a `type_member` variable is a single instance of a class.
-> The scope of a `type_template` varaible is the singleton object of a class.
->
-> Concretely, `T::Array` uses a `type_member`. This means each array has its own
-> `Elem` type variable (since the scope is a single instance of an `Array`).
->
-> On the other hand, `DataView` uses a `type_template`. This means that all
-> instances of a dataview subclass have to agree on the `DataViewModel` and
-> `DataViewInstance` type variables (since these are sccoped to the singleton
-> class of each dataview subclass).
-
--->

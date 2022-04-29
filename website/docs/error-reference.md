@@ -878,6 +878,8 @@ class Main
 end
 ```
 
+For more information, see the docs for [Generics](generics.md).
+
 ## 4012
 
 A `class` was redefined as a `module` or _vice versa_ in two separate locations.
@@ -1241,11 +1243,10 @@ Given code like this:
 # typed: true
 class Parent
   extend T::Generic
-  Foo = type_member
+  X = type_member
 end
 
 class Child < Parent
-  extend T::Generic
 end
 ```
 
@@ -1255,16 +1256,39 @@ We need to change our code to redeclare the type member in the child class too:
 # typed: true
 class Parent
   extend T::Generic
-  Foo = type_member
+  X = type_member
 end
 
 class Child < Parent
-  extend T::Generic
-  Foo = type_member
+  X = type_member
 end
 ```
 
 The same thing holds for type templates.
+
+Note that when the ancestor is a `module` that has added to a child class using
+`extend`, the child class will need to use `type_template` to redeclare the
+module's type members
+
+```ruby
+# typed: true
+module IFoo
+  extend T::Generic
+  X = type_member
+end
+
+class A
+  extend T::Generic
+  extend IFoo
+  X = type_template
+end
+```
+
+The intuition here is similar to how using `extend` on an interface requires
+implementing its abstract methods as singleton class methods (`def self.foo`)
+instead of instance methods (`def foo`).
+
+For more information, see the docs for [Generics](generics.md).
 
 ## 5015
 
@@ -1969,11 +1993,8 @@ TODO(jez) Also audit the other generics-related error codes for redundancy and
 missing links.
 -->
 
-In addition to the docs below, consider reading Sorbet's docs on
-[generic classes](generics.md).
-
-As background reading, you may first want to read more about variance—see the
-docs for error code [5015](#5015) and [5016](#5016).
+As background reading, you may first want to read more about
+[variance](generics.md#in-out-and-variance).
 
 When a type member is declared normally, without any variance annotation, it is
 invariant. It can then appear either in the `params` list or the `returns` of a
