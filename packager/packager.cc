@@ -2049,12 +2049,28 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
+    std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
+    mapping.reserve(files.size());
+
     // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
     // no symbols will be allocated.
-    auto packages = gs.unfreezePackages();
-    for (auto &f : files) {
-        auto &pkg = packages.db.getPackageForFile(gs, f.file);
-        packages.db.setPackageNameForFile(f.file, pkg.mangledName());
+    {
+        auto &db = gs.packageDB();
+        for (auto &f : files) {
+            auto &pkg = db.getPackageForFile(gs, f.file);
+            if (!pkg.exists()) {
+                continue;
+            }
+
+            mapping.emplace_back(f.file, pkg.mangledName());
+        }
+    }
+
+    {
+        auto packages = gs.unfreezePackages();
+        for (auto [file, package] : mapping) {
+            packages.db.setPackageNameForFile(file, package);
+        }
     }
 
     return;
@@ -2063,12 +2079,28 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::Pa
 // NOTE: we use `dataAllowingUnsafe` here, as determining the package for a file is something that can be done from its
 // path alone.
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::FileRef> &files) {
+    std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
+    mapping.reserve(files.size());
+
     // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
     // no symbols will be allocated.
-    auto packages = gs.unfreezePackages();
-    for (auto file : files) {
-        auto &pkg = packages.db.getPackageForFile(gs, file);
-        packages.db.setPackageNameForFile(file, pkg.mangledName());
+    {
+        auto &db = gs.packageDB();
+        for (auto &f : files) {
+            auto &pkg = db.getPackageForFile(gs, f);
+            if (!pkg.exists()) {
+                continue;
+            }
+
+            mapping.emplace_back(f, pkg.mangledName());
+        }
+    }
+
+    {
+        auto packages = gs.unfreezePackages();
+        for (auto [file, package] : mapping) {
+            packages.db.setPackageNameForFile(file, package);
+        }
     }
 
     return;
