@@ -23,12 +23,11 @@ represent these values, too. Here's the syntax Sorbet uses:
 
 ## Why the `T::` prefix?
 
-<!-- TODO(jez) Wrap "generic classes" with link to docs for user-defined generic classes once it's written. -->
-
-Sorbet uses syntax like `MyClass[Elem]` for type arguments passed to generic
-classes. All Sorbet type annotations are backwards compatible with normal Ruby
-syntax, and this is no exception. In normal Ruby, `MyClass[Elem]` would
-correspond to a call to a method named `[]` defined on `MyClass`.
+Sorbet uses syntax like `MyClass[Elem]` for type arguments passed to
+[generic classes](generics.md). All Sorbet type annotations are backwards
+compatible with normal Ruby syntax, and this is no exception. In normal Ruby,
+`MyClass[Elem]` would correspond to a call to a method named `[]` defined on
+`MyClass`.
 
 When creating user-defined generic classes, the `sorbet-runtime` gem
 automatically defines this method so that the type annotation syntax works at

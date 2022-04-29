@@ -176,7 +176,7 @@ Type variables, like normal Ruby variables, have a scope:
   child class to pick a specific type that all instances agree on.
 
 One way to think about it is that `type_template` is merely a shorter name for
-something which could have also been named `singleton_class_type_member`. In
+something which could have also been named `'singleton_class_type_member`. In
 Sorbet's implementation, `type_member` and `type_template` are treated almost
 exactly the same.
 
@@ -639,15 +639,15 @@ This is what variance checks buy in a type system: they prevent abstractions
 from being misused in ways that would otherwise compromise the integrity of the
 type checker's predictions.
 
-## Bounds on type members (`fixed`, `upper`, `lower`)
+## A `type_template` example
 
-So far, the discussion in this guide has focused on `type_member`s, which tend
+So far, the discussion in this guide has focused on `type_member`'s, which tend
 to be most useful for building things like generic containers.
 
-The use cases for `type_template`s tend to look different: they tend to be used
+The use cases for `type_template`'s tend to look different: they tend to be used
 when a class wants to have something like an "abstract" type that is filled in
 by child classes. Here's an example of an abstract RPC (remote procedure call)
-interface:
+interface, which uses `type_template`:
 
 ```ruby
 module AbstractRPCMethod
@@ -686,17 +686,17 @@ class TextDocumentHoverMethod
 end
 ```
 
-[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20---%20plain%20old%20data%20structures%20use%20for%20input%20and%20output%20types%20---%0Aclass%20Position%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Aline%2C%20Integer%0A%20%20const%20%3Acharacter%2C%20Integer%0Aend%0A%0Aclass%20TextDocumentPositionParams%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Atext_document%2C%20String%0A%20%20const%20%3Aposition%2C%20Position%0Aend%0A%0Aclass%20MarkupKind%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20PlainText%20%3D%20new%28'plaintext'%29%0A%20%20%20%20Markdown%20%3D%20new%28'markdown'%29%0A%20%20end%0Aend%0A%0Aclass%20MarkupContent%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Akind%2C%20MarkupKind%0A%20%20const%20%3Avalue%2C%20String%0Aend%0A%0Aclass%20HoverResponse%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Acontents%2C%20MarkupContent%0Aend%0A%23%20----------------------------------------------------------------%0A%0Amodule%20AbstractRPCMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20abstract!%0A%0A%20%20RPCInput%20%3D%20type_member%0A%20%20RPCOutput%20%3D%20type_member%0A%0A%20%20sig%20%7Babstract.returns%28String%29%7D%0A%20%20def%20method_name%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private%20def%20deserialize_impl%28raw_input%29%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private%20def%20run_impl%28input%29%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20params%28%0A%20%20%20%20%20%20raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.nilable%28RPCOutput%29%29%0A%20%20end%0A%20%20def%20run%28raw_input%29%0A%20%20%20%20input%20%3D%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20%23%20Could%20extend%20this%20example%20to%20use%20something%20richer%20for%20conveying%20an%20error%0A%20%20%20%20%23%20%28currently%20just%20returns%20nil%29%0A%20%20%20%20return%20unless%20input%0A%20%20%20%20run_impl%28input%29%0A%20%20end%0Aend%0A%0Aclass%20TextDocumentHoverMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20extend%20AbstractRPCMethod%0A%20%20final!%0A%0A%20%20RPCInput%20%3D%20type_template%20%7B%7Bfixed%3A%20TextDocumentPositionParams%7D%7D%0A%20%20RPCOutput%20%3D%20type_template%20%7B%7Bfixed%3A%20HoverResponse%7D%7D%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.returns%28String%29%7D%0A%20%20def%20self.method_name%3B%20'textDocument%2Fhover'%3B%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private_class_method%20def%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20begin%0A%20%20%20%20%20%20TextDocumentPositionParams.from_hash%28raw_input%29%0A%20%20%20%20rescue%20TypeError%0A%20%20%20%20%20%20nil%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private_class_method%20def%20self.run_impl%28input%29%0A%20%20%20%20puts%20%22Computing%20hover%20request%20at%20%23%7Binput.position%7D%22%0A%20%20%20%20raise%20%22TODO%22%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28raw_request%3A%20String%29.returns%28String%29%7D%0Adef%20handle_rpc_request%28raw_request%29%0A%20%20parsed_request%20%3D%20JSON.parse%28raw_request%29%0A%20%20params%20%3D%20parsed_request%5B'params'%5D%0A%0A%20%20output%20%3D%20case%20%28method%20%3D%20parsed_request%5B'method'%5D%29%0A%20%20when%20TextDocumentHoverMethod.method_name%0A%20%20%20%20TextDocumentHoverMethod.run%28params%29%0A%20%20else%0A%20%20%20%20raise%20%22Unknown%20method%3A%20%23%7Bmethod%7D%22%0A%20%20end%0A%0A%20%20if%20output%0A%20%20%20%20output.serialize%0A%20%20else%0A%20%20%20%20raise%20%22Error%20when%20running%20method%22%0A%20%20end%0Aend)
+[→ View full example on sorbet.run][abstract_rpc_method]
 
-The snippet above is a heavily abbreviated snippet to introduce two concepts
-(`type_template` and `fixed`). The full example on sorbet.run contains many more
-details, and it's strongly recommended reading.
+The snippet above is heavily abbreviated (`type_template` and `fixed`). The full
+example on sorbet.run contains many more details, and it's strongly recommended
+reading.
 
 There are a couple interesting things happening in the snippet above:
 
-- We have a generic interface `AbstractRPCMethod` which says that is generic in
-  `RPCInput` and `RPCOutput`. It then mentions these types in the abstract `run`
-  method. The example uses `type_member` to declare these generic types.
+- We have a generic interface `AbstractRPCMethod` which says that it's generic
+  in `RPCInput` and `RPCOutput`. It then mentions these types in the abstract
+  `run` method. The example uses `type_member` to declare these generic types.
 
 - The interface is implemented by a class that uses `extend` to implement the
   interface using the singleton class of `TextDocumentHoverMethod`. As we know
@@ -709,8 +709,9 @@ There are a couple interesting things happening in the snippet above:
   that the scope of a `type_member` is all singleton class methods on the given
   class.
 
-- In the implementation, `TextDocumentHoverMethod` chooses to provided a `fixed`
-  annotation on the `type_template` definitions. This effectively says that
+- In the implementation, `TextDocumentHoverMethod` chooses to provided a
+  [`fixed` annotation](#bounds-on-type-members-fixed-upper-lower) on the
+  `type_template` definitions. This effectively says that
   `TextDocumentHoverMethod` **always** conforms to the type
   `AbstractRPCMethod[TextDocumentPositionParams, HoverResponse]`.
 
@@ -720,18 +721,23 @@ There are a couple interesting things happening in the snippet above:
   `TextDocumentPositionParams` (but not necessarily on every input to an
   `AbstractRPCMethod`).
 
-The `fixed` annotation above places **bounds** on type members (specifically,
-`type_template`s in the above example). There are three annotations for
-providing bounds to a type member:
+Again, for more information, be sure to view [the full
+example][abstract_rpc_method].
 
-- **upper**: Places an upper bound on types that can be applied to a given type
+## Bounds on type members (`fixed`, `upper`, `lower`)
+
+The `fixed` annotation in the [example above](#type_templates-and-bounds) places
+**bounds** on type members (specifically, `type_template`'s in the above
+example). There are three annotations for providing bounds to a type member:
+
+- `upper`: Places an upper bound on types that can be applied to a given type
   member. Only that are subtypes of that upper bound are valid.
 
-- **lower**: The opposite—places a lower bound, thus requiring only supertypes
-  of that bound.
+- `lower`: The opposite—places a lower bound, thus requiring only supertypes of
+  that bound.
 
-- **fixed**: Syntactic sugar for specifying both **lower** and **upper** at the
-  same time. Effectively requires that an equivalent type be applied to the type
+- `fixed`: Syntactic sugar for specifying both `lower` and `upper` at the same
+  time. Effectively requires that an equivalent type be applied to the type
   member.
 
 ```ruby
@@ -745,9 +751,10 @@ NumericBox[String].new
 #          ^^^^^^ error: `String` is not a subtype of upper bound of `Elem`
 ```
 
-<!-- TODO(jez) realistic example with lower bounds? -->
+Placing the bound on the type member makes it an error to ever instantiate a
+class with that member outside the given bound.
 
-<!-- TODO(jez) worth saying something about when to use type member bounds vs when to use T.all on individual methods? -->
+<!-- TODO(jez) realistic example with lower bounds? -->
 
 ## What's next?
 
@@ -766,3 +773,5 @@ NumericBox[String].new
   https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
 [covariant-ibox]:
   https://sorbet.run/#%23%20typed%3A%20strict%0A%0Amodule%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20%23%20Covariant%20type%20member%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20%23%20Elem%20can%20only%20be%20used%20in%20output%20position%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0Aend%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20%23%20Implement%20the%20%60IBox%60%20interface%0A%20%20include%20IBox%0A%0A%20%20%23%20Redeclare%20the%20type%20member%2C%20to%20be%20compatible%20with%20%60IBox%60%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20%23%20Within%20this%20class%2C%20%60Elem%60%20is%20invariant%2C%20so%20it%20can%20also%20be%20used%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%3A%29%3B%20%40value%20%3D%20value%3B%20end%0A%0A%20%20%23%20Implement%20the%20%60value%60%20method%20from%20%60IBox%60%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0A%0A%20%20%23%20Add%20the%20ability%20to%20update%20the%20value%20%28allowed%0A%20%20%23%20because%20%60Elem%60%20is%20invariant%20within%20this%20class%29%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20value%3D%28value%29%3B%20%40value%20%3D%20value%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28value%3A%200%29%0A%0A%23%20not%20allowed%20%28attempts%20to%20widen%20type%2C%0A%23%20but%20%60Box%3A%3AElem%60%20is%20invariant%29%0Aint_or_str_box%20%3D%20T.let%28int_box%2C%20Box%5BT.any%28Integer%2C%20String%29%5D%29%0A%0A%23%20no%20error%20reported%20here%0Aint_or_str_box.value%20%3D%20''%0A%0AT.reveal_type%28int_box.value%29%0A%23%20Sorbet%20reveals%3A%20%60Integer%60%0A%23%20Actual%20type%20at%20runtime%3A%20%60String%60
+[abstract_rpc_method]:
+  https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20---%20plain%20old%20data%20structures%20use%20for%20input%20and%20output%20types%20---%0Aclass%20Position%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Aline%2C%20Integer%0A%20%20const%20%3Acharacter%2C%20Integer%0Aend%0A%0Aclass%20TextDocumentPositionParams%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Atext_document%2C%20String%0A%20%20const%20%3Aposition%2C%20Position%0Aend%0A%0Aclass%20MarkupKind%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20PlainText%20%3D%20new%28'plaintext'%29%0A%20%20%20%20Markdown%20%3D%20new%28'markdown'%29%0A%20%20end%0Aend%0A%0Aclass%20MarkupContent%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Akind%2C%20MarkupKind%0A%20%20const%20%3Avalue%2C%20String%0Aend%0A%0Aclass%20HoverResponse%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Acontents%2C%20MarkupContent%0Aend%0A%23%20----------------------------------------------------------------%0A%0Amodule%20AbstractRPCMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20abstract!%0A%0A%20%20RPCInput%20%3D%20type_member%0A%20%20RPCOutput%20%3D%20type_member%0A%0A%20%20sig%20%7Babstract.returns%28String%29%7D%0A%20%20def%20method_name%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private%20def%20deserialize_impl%28raw_input%29%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private%20def%20run_impl%28input%29%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20params%28%0A%20%20%20%20%20%20raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.nilable%28RPCOutput%29%29%0A%20%20end%0A%20%20def%20run%28raw_input%29%0A%20%20%20%20input%20%3D%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20%23%20Could%20extend%20this%20example%20to%20use%20something%20richer%20for%20conveying%20an%20error%0A%20%20%20%20%23%20%28currently%20just%20returns%20nil%29%0A%20%20%20%20return%20unless%20input%0A%20%20%20%20run_impl%28input%29%0A%20%20end%0Aend%0A%0Aclass%20TextDocumentHoverMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20extend%20AbstractRPCMethod%0A%20%20final!%0A%0A%20%20RPCInput%20%3D%20type_template%20%7B%7Bfixed%3A%20TextDocumentPositionParams%7D%7D%0A%20%20RPCOutput%20%3D%20type_template%20%7B%7Bfixed%3A%20HoverResponse%7D%7D%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.returns%28String%29%7D%0A%20%20def%20self.method_name%3B%20'textDocument%2Fhover'%3B%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private_class_method%20def%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20begin%0A%20%20%20%20%20%20TextDocumentPositionParams.from_hash%28raw_input%29%0A%20%20%20%20rescue%20TypeError%0A%20%20%20%20%20%20nil%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private_class_method%20def%20self.run_impl%28input%29%0A%20%20%20%20puts%20%22Computing%20hover%20request%20at%20%23%7Binput.position%7D%22%0A%20%20%20%20raise%20%22TODO%22%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28raw_request%3A%20String%29.returns%28String%29%7D%0Adef%20handle_rpc_request%28raw_request%29%0A%20%20parsed_request%20%3D%20JSON.parse%28raw_request%29%0A%20%20params%20%3D%20parsed_request%5B'params'%5D%0A%0A%20%20output%20%3D%20case%20%28method%20%3D%20parsed_request%5B'method'%5D%29%0A%20%20when%20TextDocumentHoverMethod.method_name%0A%20%20%20%20TextDocumentHoverMethod.run%28params%29%0A%20%20else%0A%20%20%20%20raise%20%22Unknown%20method%3A%20%23%7Bmethod%7D%22%0A%20%20end%0A%0A%20%20if%20output%0A%20%20%20%20output.serialize%0A%20%20else%0A%20%20%20%20raise%20%22Error%20when%20running%20method%22%0A%20%20end%0Aend
