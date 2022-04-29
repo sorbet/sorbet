@@ -5,6 +5,7 @@
 #include "core/FileRef.h"
 #include "core/LocOffsets.h"
 #include "core/Names.h"
+#include "core/PackagedLevel.h"
 #include "core/StrictLevel.h"
 #include <string>
 #include <string_view>
@@ -37,6 +38,7 @@ public:
     static StrictLevel fileStrictSigil(std::string_view source);
     static LocOffsets locStrictSigil(std::string_view source);
     static CompiledLevel fileCompiledSigil(std::string_view source);
+    static PackagedLevel filePackagedSigil(std::string_view source);
 
     std::string_view path() const;
     std::string_view source() const;
@@ -70,6 +72,9 @@ public:
 
     // Set the mangled name of the package that this file belongs to.
     void setPackage(NameRef mangledName);
+
+    // Returns whether or not this file is considered to be packaged.
+    bool isPackaged() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
@@ -110,6 +115,10 @@ private:
 
     Flags flags;
 
+private:
+    const PackagedLevel packagedLevel;
+
+public:
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
@@ -130,6 +139,7 @@ public:
 private:
     std::shared_ptr<const FileHash> hash_;
 };
+
 CheckSize(File, 96, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {

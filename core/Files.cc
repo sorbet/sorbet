@@ -164,6 +164,65 @@ CompiledLevel File::fileCompiledSigil(string_view source) {
     }
 }
 
+PackagedLevel File::filePackagedSigil(string_view source) {
+    size_t start = 0;
+    while (true) {
+        start = source.find("packaged:", start);
+        if (start == string_view::npos) {
+            return PackagedLevel::None;
+        }
+
+        auto comment_start = start;
+        while (comment_start > 0) {
+            --comment_start;
+            auto c = source[comment_start];
+            if (c == ' ') {
+                continue;
+            } else {
+                break;
+            }
+        }
+
+        if (source[comment_start] != '#') {
+            ++start;
+            continue;
+        }
+
+        start += 9;
+        while (start < source.size() && source[start] == ' ') {
+            ++start;
+        }
+
+        if (start >= source.size()) {
+            return PackagedLevel::None;
+        }
+
+        auto end = start + 1;
+        while (end < source.size() && source[end] != ' ' && source[end] != '\n') {
+            ++end;
+        }
+        if (source[end - 1] == '\r') {
+            end -= 1;
+        }
+
+        string_view suffix = source.substr(start, end - start);
+        if (suffix == "false") {
+            return PackagedLevel::False;
+        } else if (suffix == "true") {
+            return PackagedLevel::True;
+        } else {
+            // TODO(nelhage): We should report an error here to help catch
+            // typos. This would require refactoring so this function has
+            // access to GlobalState or can return errors to someone who
+            // does.
+        }
+
+        start = end;
+    }
+
+    return PackagedLevel::None;
+}
+
 bool isTestPath(string_view path) {
     return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
@@ -186,9 +245,9 @@ File::Flags::Flags(string_view path)
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
-    : epoch(epoch), sourceType(sourceType), flags(File::Flags(path_)), path_(move(path_)), source_(move(source_)),
-      originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil),
-      compiledLevel(fileCompiledSigil(this->source_)) {}
+    : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
+      path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
+      strictLevel(originalSigil), compiledLevel(fileCompiledSigil(this->source_)) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
@@ -359,6 +418,19 @@ NameRef File::getPackage() const {
 
 void File::setPackage(NameRef mangledName) {
     this->package = mangledName;
+}
+
+bool File::isPackaged() const {
+    switch (this->packagedLevel) {
+        case PackagedLevel::False:
+            return false;
+
+        case PackagedLevel::True:
+            return true;
+
+        case PackagedLevel::None:
+            return !this->isRBI();
+    }
 }
 
 } // namespace sorbet::core
