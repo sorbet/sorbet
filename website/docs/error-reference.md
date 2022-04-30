@@ -3552,6 +3552,45 @@ end
 Remember that in Sorbet, [interfaces](abstract.md) must be explicitly
 implemented in a given class.
 
+## 7039
+
+<!-- TODO(jez) Link to generic docs once written -->
+
+Consider this example:
+
+```ruby
+class A
+  def only_on_a; end
+end
+
+class Box
+  extend T::Sig
+  extend T::Generic
+  Elem = type_member
+
+  sig {params(x: Elem).void}
+  def initialize(x)
+    x.only_on_a # error, see below for fix
+  end
+end
+```
+
+In this example, we're trying to to call the method `only_on_a`, but we haven't
+specified any type bounds on the `Elem` type parameter, which means we can't
+make any assumption about what methods it might have.
+
+If we want to always be able to call the method `only_on_a`, we can place a
+upper bound on `Elem`:
+
+```ruby
+# ...
+  Elem = type_member {{upper: A}}
+# ...
+```
+
+This will guarantee that `Elem` is always at least `A`, which will let Sorbet
+allow the call to `x.only_on_a`.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
