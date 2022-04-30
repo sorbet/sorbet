@@ -143,6 +143,8 @@ module T::Types
         else
           T::Range[type_from_instances(typeable_objects)]
         end
+      when Enumerator::Yielder
+        T::Enumerator::Yielder[type_from_instances(obj)]
       when Enumerator::Lazy
         T::Enumerator::Lazy[type_from_instances(obj)]
       when Enumerator

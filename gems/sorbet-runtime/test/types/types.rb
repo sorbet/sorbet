@@ -616,6 +616,9 @@ module Opus::Types::Test
         end.to_a)
       end
     end
+    describe "TypedEnumerator" do
+      # TODO(jez) sorbet-runtime test for T::Enumerator::Yielder
+    end
 
     describe "TypedRange" do
       it 'describes ranges' do

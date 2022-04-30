@@ -296,6 +296,16 @@ module T
         end
       end
     end
+
+    module Yielder
+      def self.[](type)
+        if type.is_a?(T::Types::Untyped)
+          T::Types::TypedEnumeratorYielder::Untyped.new
+        else
+          T::Types::TypedEnumeratorYielder.new(type)
+        end
+      end
+    end
   end
 
   module Range

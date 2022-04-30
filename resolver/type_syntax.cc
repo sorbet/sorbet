@@ -869,11 +869,11 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 auto klass = sym.asClassOrModuleRef();
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
                 // same way that we check against types like `Array`
-                bool isBuiltinGeneric = klass == core::Symbols::T_Hash() || klass == core::Symbols::T_Array() ||
-                                        klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
-                                        klass == core::Symbols::T_Enumerable() ||
-                                        klass == core::Symbols::T_Enumerator() ||
-                                        klass == core::Symbols::T_Enumerator_Lazy();
+                bool isBuiltinGeneric =
+                    klass == core::Symbols::T_Hash() || klass == core::Symbols::T_Array() ||
+                    klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
+                    klass == core::Symbols::T_Enumerable() || klass == core::Symbols::T_Enumerator() ||
+                    klass == core::Symbols::T_Enumerator_Lazy() || klass == core::Symbols::T_Enumerator_Yielder();
 
                 if (isBuiltinGeneric || klass.data(ctx)->typeArity(ctx) > 0) {
                     // This set **should not** grow over time.
@@ -1139,6 +1139,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 corrected = core::Symbols::T_Enumerator();
             } else if (recvi->symbol == core::Symbols::Enumerator_Lazy()) {
                 corrected = core::Symbols::T_Enumerator_Lazy();
+            } else if (recvi->symbol == core::Symbols::Enumerator_Yielder()) {
+                corrected = core::Symbols::T_Enumerator_Yielder();
             } else if (recvi->symbol == core::Symbols::Range()) {
                 corrected = core::Symbols::T_Range();
             } else if (recvi->symbol == core::Symbols::Set()) {

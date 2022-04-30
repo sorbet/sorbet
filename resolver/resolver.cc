@@ -2737,6 +2737,8 @@ public:
                     klass = core::Symbols::Enumerator();
                 } else if (klass == core::Symbols::T_Enumerator_Lazy()) {
                     klass = core::Symbols::Enumerator_Lazy();
+                } else if (klass == core::Symbols::T_Enumerator_Yielder()) {
+                    klass = core::Symbols::Enumerator_Yielder();
                 } else if (klass == core::Symbols::T_Range()) {
                     klass = core::Symbols::Range();
                 } else if (klass == core::Symbols::T_Set()) {

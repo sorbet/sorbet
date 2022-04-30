@@ -194,7 +194,7 @@ class Enumerator < Object
   sig do
     params(
       arg0: T.any(Integer, T.proc.returns(Integer)),
-      blk: T.proc.params(arg0: Enumerator::Yielder).void
+      blk: T.proc.params(arg0: T::Enumerator::Yielder[Elem]).void
     )
       .void
   end
@@ -885,9 +885,11 @@ end
 
 # [`Yielder`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Yielder.html)
 class Enumerator::Yielder < Object
+  extend T::Generic
+  Elem = type_member
   sig do
     params(
-      arg0: BasicObject
+      arg0: Elem
     )
       .void
   end
@@ -895,9 +897,15 @@ class Enumerator::Yielder < Object
 
   sig do
     params(
-      arg0: BasicObject
+      arg0: Elem
     )
       .void
   end
   def yield(*arg0); end
+
+  sig {params(blk: T.proc.params(arg0: Elem).returns(T.untyped)).void}
+  def initialize(&blk); end
+
+  sig {returns(T.proc.params(arg0: Elem).returns(T.untyped))}
+  def to_proc; end
 end

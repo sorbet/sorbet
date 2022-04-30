@@ -403,6 +403,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
         fmt::format_to(std::back_inserter(buf), "T::Enumerator");
     } else if (this->klass == Symbols::Enumerator_Lazy()) {
         fmt::format_to(std::back_inserter(buf), "T::Enumerator::Lazy");
+    } else if (this->klass == Symbols::Enumerator_Yielder()) {
+        fmt::format_to(std::back_inserter(buf), "T::Enumerator::Yielder");
     } else if (this->klass == Symbols::Range()) {
         fmt::format_to(std::back_inserter(buf), "T::Range");
     } else if (this->klass == Symbols::Set()) {
