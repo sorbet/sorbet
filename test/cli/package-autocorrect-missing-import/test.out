@@ -1,57 +1,52 @@
-foo_class.rb:7: No import provides `Foo::Bar` https://srb.help/5002
-     7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
-              ^^^^^^^^
-  Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
-                                                     ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-foo_class.rb:8: No import provides `Bar` https://srb.help/5002
-     8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
-              ^^^
-  Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
-                                                     ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-foo_class.rb:14: No import provides `Foo::Bar` https://srb.help/5002
-    14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
-          ^^^^^^^^
-  Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
-                                                     ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-foo_class.rb:15: No import provides `Foo::Bar` https://srb.help/5002
+foo_class.rb:15: Unable to resolve constant `MyClass` https://srb.help/5002
     15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^
+          ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    foo_class.rb:15: Replaced with `Class`
+    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: `Class` defined here
+    71 |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    foo_class.rb:15: Replaced with `Digest::Class`
+    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/digest.rbi#L176: `Digest::Class` defined here
+     176 |class Digest::Class
+          ^^^^^^^^^^^^^^^^^^^
+
+foo_class.rb:7: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
+     7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.test.rb:4: No import provides `Test::Foo::Bar` https://srb.help/5002
+foo_class.rb:8: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
+     8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
+     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+                                                     ^
+
+foo_class.rb:14: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
+    14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
+     6 |  # import Foo::Bar::OtherPackage ## MISSING!
+                                                     ^
+
+foo.test.rb:4: No import provides `Test::Foo::Bar::OtherPackage::TestUtil` https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     __package.rb:6: Inserted `test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 5
 
 --------------------------------------------------------------------------

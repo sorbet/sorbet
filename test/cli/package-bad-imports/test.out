@@ -1,19 +1,3 @@
-example/__package.rb:5: Cannot find package `NonexistentPackage` https://srb.help/3704
-     5 |  import NonexistentPackage
-                 ^^^^^^^^^^^^^^^^^^
-
-example/__package.rb:7: Cannot find package `DoNot::SUggestThis` https://srb.help/3704
-     7 |  import DoNot::SUggestThis
-                 ^^^^^^^^^^^^^^^^^^
-
-example/__package.rb:9: Cannot find package `SUggestion` https://srb.help/3704
-     9 |  import SUggestion
-                 ^^^^^^^^^^
-
-example/__package.rb:11: Cannot find package `A::B::C` https://srb.help/3704
-    11 |  import A::B::C
-                 ^^^^^^^
-
 example/__package.rb:5: Unable to resolve constant `NonexistentPackage` https://srb.help/5002
      5 |  import NonexistentPackage
                  ^^^^^^^^^^^^^^^^^^
@@ -43,4 +27,20 @@ example/__package.rb:9: Unable to resolve constant `SUggestion` https://srb.help
 example/__package.rb:11: Unable to resolve constant `A` https://srb.help/5002
     11 |  import A::B::C
                  ^
+
+example/__package.rb:5: Cannot find package `NonexistentPackage` https://srb.help/3704
+     5 |  import NonexistentPackage
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+example/__package.rb:7: Cannot find package `DoNot::SUggestThis` https://srb.help/3704
+     7 |  import DoNot::SUggestThis
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+example/__package.rb:9: Cannot find package `SUggestion` https://srb.help/3704
+     9 |  import SUggestion
+          ^^^^^^^^^^^^^^^^^
+
+example/__package.rb:11: Cannot find package `A::B::C` https://srb.help/3704
+    11 |  import A::B::C
+          ^^^^^^^^^^^^^^
 Errors: 8
