@@ -1,7 +1,5 @@
 # typed: true
 
-# https://github.com/sorbet/sorbet/issues/1731
-
 class Box
   extend T::Sig
   extend T::Generic
@@ -10,12 +8,8 @@ class Box
 
   sig {params(x: Elem).void}
   def foo(x)
-    # correct
     T.reveal_type(x) # error: `Box::Elem`
-
-    # incorrect--no error for method not existing
-    len = x.length
-    T.reveal_type(len) # error: `T.untyped`
+    x.length  # error: Call to method `length` on unbounded type member `Box::Elem`
   end
 end
 
@@ -25,13 +19,10 @@ class StringBox < Box
 
   sig {params(x: Elem).void}
   def bar(x)
-    # correct
     T.reveal_type(x) # error: `String`
-
-    # probably correct to say that method exists?
-    len = x.length
-    T.reveal_type(len) # error: `Integer`
+    T.reveal_type(x.length) # error: `Integer`
   end
 end
 
+Box[Integer].new.foo(0) # would not have `length` method
 StringBox.new.foo('')
