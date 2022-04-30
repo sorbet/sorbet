@@ -1,4 +1,4 @@
-test.rb:20: Call to method `only_on_a` on unbounded type member `Box::Elem` https://srb.help/7038
+test.rb:20: Call to method `only_on_a` on unbounded type member `Box::Elem` https://srb.help/7039
     20 |    x.only_on_a
               ^^^^^^^^^
   Got `Box::Elem` originating from:
@@ -22,7 +22,7 @@ test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help
     19 |  def initialize(x)
                          ^
 
-test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7038
+test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7039
     52 |    model.class.props
                   ^^^^^
   Got `T.class_of(DataView)::DataViewModelBad` originating from:
@@ -120,7 +120,7 @@ end
 
 --------------------------------------------------------------------------
 
-test.rb:20: Call to method `only_on_a` on unbounded type member `Box::Elem` https://srb.help/7038
+test.rb:20: Call to method `only_on_a` on unbounded type member `Box::Elem` https://srb.help/7039
     20 |    x.only_on_a
               ^^^^^^^^^
   Got `Box::Elem` originating from:
@@ -152,7 +152,7 @@ test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help
     21 |    takes_a(x)
                     ^
 
-test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7038
+test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7039
     52 |    model.class.props
                   ^^^^^
   Got `T.class_of(DataView)::DataViewModelBad` originating from:

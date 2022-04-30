@@ -177,7 +177,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
         }
         auto funLoc = args.funLoc();
         auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
-        auto e = gs.beginError(errLoc, errors::Infer::CallOnUnboundedTypeMember);
+        auto e = gs.beginError(errLoc, errors::Infer::CallOnTypeArgument);
         if (e) {
             auto thisStr = args.thisType.show(gs);
             if (args.fullType.type != args.thisType) {
@@ -203,7 +203,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
 
             auto funLoc = args.funLoc();
             auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
-            auto e = gs.beginError(errLoc, errors::Infer::CallOnTypeArgument);
+            auto e = gs.beginError(errLoc, errors::Infer::CallOnUnboundedTypeMember);
             if (e) {
                 auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
                                   ? "template"
