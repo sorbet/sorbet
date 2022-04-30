@@ -1,3 +1,15 @@
+test.rb:20: Call to method `only_on_a` on unbounded type member `Box::Elem` https://srb.help/7038
+    20 |    x.only_on_a
+              ^^^^^^^^^
+  Got `Box::Elem` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+  Consider adding an `upper` bound to `Box::Elem` here
+    test.rb:16:
+    16 |  Elem = type_member
+          ^^^^^^^^^^^^^^^^^^
+
 test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help/7002
     21 |    takes_a(x)
                     ^
@@ -10,14 +22,34 @@ test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help
     19 |  def initialize(x)
                          ^
 
-test.rb:59: Revealed type: `T.untyped` https://srb.help/7014
+test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7038
+    52 |    model.class.props
+                  ^^^^^
+  Got `T.class_of(DataView)::DataViewModelBad` originating from:
+    test.rb:51:
+    51 |  def self.bad_from_instance(model)
+                                     ^^^^^
+  Consider adding an `upper` bound to `T.class_of(DataView)::DataViewModelBad` here
+    test.rb:47:
+    47 |  DataViewModelBad = type_template
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.rb:59: Revealed type: `T::Array[Symbol]` https://srb.help/7014
     59 |    T.reveal_type(props)
             ^^^^^^^^^^^^^^^^^^^^
-  Got `T.untyped` originating from:
+  Got `T::Array[Symbol]` originating from:
     test.rb:58:
     58 |    props = model.class.all_props
                     ^^^^^^^^^^^^^^^^^^^^^
-Errors: 2
+
+test.rb:61: Method `does_not_exist` does not exist on `ChalkODMDocument` component of `T.class_of(DataView)::DataViewModel` https://srb.help/7003
+    61 |    model.does_not_exist
+                  ^^^^^^^^^^^^^^
+  Got `T.class_of(DataView)::DataViewModel` originating from:
+    test.rb:57:
+    57 |  def self.from_instance(model)
+                                 ^^^^^
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -88,6 +120,22 @@ end
 
 --------------------------------------------------------------------------
 
+test.rb:20: Call to method `only_on_a` on unbounded type member `Box::Elem` https://srb.help/7038
+    20 |    x.only_on_a
+              ^^^^^^^^^
+  Got `Box::Elem` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+  Autocorrect: Done
+    test.rb:20: Replaced with `T.unsafe(x)`
+    20 |    x.only_on_a
+            ^
+  Consider adding an `upper` bound to `Box::Elem` here
+    test.rb:16:
+    16 |  Elem = type_member
+          ^^^^^^^^^^^^^^^^^^
+
 test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help/7002
     21 |    takes_a(x)
                     ^
@@ -104,14 +152,42 @@ test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help
     21 |    takes_a(x)
                     ^
 
-test.rb:59: Revealed type: `T.untyped` https://srb.help/7014
+test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7038
+    52 |    model.class.props
+                  ^^^^^
+  Got `T.class_of(DataView)::DataViewModelBad` originating from:
+    test.rb:51:
+    51 |  def self.bad_from_instance(model)
+                                     ^^^^^
+  Autocorrect: Done
+    test.rb:52: Replaced with `T.unsafe(model)`
+    52 |    model.class.props
+            ^^^^^
+  Consider adding an `upper` bound to `T.class_of(DataView)::DataViewModelBad` here
+    test.rb:47:
+    47 |  DataViewModelBad = type_template
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test.rb:59: Revealed type: `T::Array[Symbol]` https://srb.help/7014
     59 |    T.reveal_type(props)
             ^^^^^^^^^^^^^^^^^^^^
-  Got `T.untyped` originating from:
+  Got `T::Array[Symbol]` originating from:
     test.rb:58:
     58 |    props = model.class.all_props
                     ^^^^^^^^^^^^^^^^^^^^^
-Errors: 2
+
+test.rb:61: Method `does_not_exist` does not exist on `ChalkODMDocument` component of `T.class_of(DataView)::DataViewModel` https://srb.help/7003
+    61 |    model.does_not_exist
+                  ^^^^^^^^^^^^^^
+  Got `T.class_of(DataView)::DataViewModel` originating from:
+    test.rb:57:
+    57 |  def self.from_instance(model)
+                                 ^^^^^
+  Autocorrect: Done
+    test.rb:61: Replaced with `T.unsafe(model)`
+    61 |    model.does_not_exist
+            ^^^^^
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -134,7 +210,7 @@ class Box
 
   sig {params(x: Elem).void}
   def initialize(x)
-    x.only_on_a
+    T.unsafe(x).only_on_a
     takes_a(T.unsafe(x))
   end
 end
@@ -166,7 +242,7 @@ class DataView
 
   sig {params(model: DataViewModelBad).returns(T.attached_class)}
   def self.bad_from_instance(model)
-    model.class.props
+    T.unsafe(model).class.props
     new()
   end
 
@@ -175,7 +251,7 @@ class DataView
     props = model.class.all_props
     T.reveal_type(props)
 
-    model.does_not_exist
+    T.unsafe(model).does_not_exist
     new()
   end
 end
