@@ -217,7 +217,7 @@ end
 
 For those who have never encountered variance in a type system before, it may be
 useful to skip down to
-[Why does tracking variance matter?](why-does-tracking-variance-matter), which
+[Why does tracking variance matter?](#why-does-tracking-variance-matter), which
 motivates why type systems (Sorbet included) place such emphasis on variance.
 
 ### Invariance
@@ -756,15 +756,257 @@ class with that member outside the given bound.
 
 <!-- TODO(jez) realistic example with lower bounds? -->
 
-## What's next?
+## Generic methods
 
-- [TODO](#TODO)
+Methods can also be made generic in Sorbet:
 
-  TODO
+```ruby
+# typed: true
+extend T::Sig
 
-- [TODO](#TODO)
+sig do
+  type_parameters(:U)
+    .params(
+      blk: T.proc.returns(T.type_parameter(:U))
+    )
+    .returns(T.type_parameter(:U))
+end
+def with_timer(&blk)
+  start = Time.now
+  res = yield
+  duration = Time.now - start
+  puts "Running block took #{duration.round(1)}s"
+  res
+end
 
-  TODO
+res = with_timer do
+  sleep 2
+  puts 'hello, world!'
+  123
+end
+T.reveal_type(res) # `Integer`
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20blk%3A%20T.proc.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20with_timer%28%26blk%29%0A%20%20start%20%3D%20Time.now%0A%20%20res%20%3D%20yield%0A%20%20duration%20%3D%20Time.now%20-%20start%0A%20%20puts%20%22Running%20block%20took%20%23%7Bduration.round%281%29%7Ds%22%0A%20%20res%0Aend%0A%0Ares%20%3D%20with_timer%20do%0A%20%20sleep%202%0A%20%20puts%20'hello%2C%20world!'%0A%20%20123%0Aend%0AT.reveal_type%28res%29)
+
+The `type_parameters` method at the top-level of the `sig` block introduces
+generic type variables that can be referenced elsewhere in the signature using
+`T.type_parameter`. Names are specified as Ruby `Symbol` literals. Multiple
+symbol literals can be given to `type_parameters`, like this:
+
+```ruby
+sig do
+  type_parameters(:K, :V)
+    .params(hash: T::Hash[T.type_parameter(:K), T.type_parameter(:V)])
+    .returns([T::Array[T.type_parameter(:K)], T::Array[T.type_parameter(:V)]])
+end
+def keys_and_values(hash)
+  [hash.keys, hash.values]
+end
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AK%2C%20%3AV%29%0A%20%20%20%20.params%28hash%3A%20T%3A%3AHash%5BT.type_parameter%28%3AK%29%2C%20T.type_parameter%28%3AV%29%5D%29%0A%20%20%20%20.returns%28%5BT%3A%3AArray%5BT.type_parameter%28%3AK%29%5D%2C%20T%3A%3AArray%5BT.type_parameter%28%3AV%29%5D%5D%29%0Aend%0Adef%20keys_and_values%28hash%29%0A%20%20%5Bhash.keys%2C%20hash.values%5D%0Aend)
+
+Note Sorbet does not support return type inference. This means that doing
+something like this won't work:
+
+```ruby
+sig do
+  type_parameters(:U)
+    .returns(T.type_parameter(:U))
+end
+def returns_something
+  nil
+end
+
+x = returns_something
+puts(x) # error: This code is unreachable
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20returns_something%0A%20%20nil%0Aend%0A%0Ax%20%3D%20returns_something%0Aputs%28x%29%20%23%20error%3A%20This%20code%20is%20unreachable)
+
+In the above example, the `puts(x)` is listed as "unreachable" for a somewhat
+confusing reason:
+
+- Sorbet sees that the `T.type_parameter(:U)` in the `returns` annotation is not
+  constrained by of the arguments. It could therefore be anything.
+- The only type that is a subtype of any type in Sorbet is
+  [`T.noreturn`](noreturn.md). The only way to introduce a value of this type is
+  to raise an exception.
+- Therefore, Sorbet infers that the only valid way to implement
+  `returns_something` is by raising, which would imply that the `puts(x)` code
+  is never reached.
+
+Sorbet cannot have return type inference, because languages that implement
+return type inference take advantage of a compilation step to decide how to call
+the method. Sorbet does not have the luxury (nor the burden) of compiling a
+program before it can be run by the Ruby VM.
+
+### Placing bounds on generic methods
+
+Sorbet does not have a way to place a bound on a generic method, but it's
+usually possible to approximate it with
+[intersection types (`T.all`)](intersection-types.md):
+
+```ruby
+class A
+  extend T::Sig
+  sig {returns(Integer)}
+  def foo; 0; end
+end
+
+sig do
+  type_parameters(:U)
+    .params(x: T.type_parameter(:U))
+    .void
+end
+def bad_example(x)
+  x.foo # error!
+end
+
+sig do
+  type_parameters(:U)
+    .params(x: T.all(T.type_parameter(:U), A))
+    .returns(T.type_parameter(:U))
+end
+def example(x)
+  x.foo
+  if x.foo.even? # calls to `.foo` and `.even?` are OK
+    return x # this return is OK
+  else
+    return A.new # this return is not OK
+  end
+end
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20foo%3B%200%3B%20end%0Aend%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28x%3A%20T.type_parameter%28%3AU%29%29%0A%20%20%20%20.void%0Aend%0Adef%20bad_example%28x%29%0A%20%20x.foo%0Aend%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28x%3A%20T.all%28T.type_parameter%28%3AU%29%2C%20A%29%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20example%28x%29%0A%20%20x.foo%0A%20%20if%20x.foo.even%3F%0A%20%20%20%20return%20x%0A%20%20else%0A%20%20%20%20return%20A.new%0A%20%20end%0Aend)
+
+There are a couple of things worth pointing out here:
+
+- The `bad_example` method attempts to call `x.foo` but fails with an error. The
+  error mentions that there is a call to method `foo` on an unconstrained
+  generic type parameter. `T.type_parameter(:U)` alone means "for all types",
+  but not all types have a `foo` method.
+
+- In the `example` method, the method's signature changes to ascribe the type
+  `T.all(T.type_parameter(:U), A)` to `x`. This in essence allows Sorbet to
+  assume that there is an upper bound of `A` on the type of
+  `T.type_parameter(:U)`.
+
+- In the method body, the `T.all` is sufficient to allow the call to
+  `x.foo.even?` to type check (and to have the type of `T::Boolean` statically).
+
+- The first `return` in the method works without error: `x` has type
+  `T.all(T.type_parameter(:U), A)` which is a subtype of `T.type_parameter(:U)`,
+  so the `return x` type checks.
+
+- The second return in the method fails to type check: `A.new` has type `A` but
+  it does not have type `T.type_parameter(:U)`. This is **not** a bug. To see
+  why, consider how Sorbet will typecheck a call site to `example`:
+
+```ruby
+class ChildA < A; end
+child = example(ChildA.new)
+T.reveal_type(child) # => `ChildA`
+```
+
+In the snippet above, Sorbet knows that the method returns
+`T.type_parameter(:U)`, which is the same as whatever the type of `x` is, which
+in this case is `ChildA`.
+
+If Sorbet had allowed `return A.new` in the method body above, there would have
+been a contradiction: Sorbet would have claimed that `child` had type `ChildA`,
+but in fact it would have had type `A`, which is not a subtype of `ChildA`.
+
+**tl;dr**: The only valid way to return something of type `T.type_parameter(:U)`
+is to return one of the method's arguments (or some piece of an argument), not
+by inventing an entirely new value.
+
+### Shortcomings of generic methods
+
+The [implementation status](#implementation-status) disclaimer at the top of
+this doc mentioned that generics are quite buggy. Generic methods are one of the
+biggest areas where people run into bugs and/or missing features.
+
+Most commonly, when there is something wrong with Sorbet's support for generic
+methods, the error message mentions something about `<top>`. Here is an example:
+
+```ruby
+sig do
+  type_parameters(:U)
+    .params(
+      xs: T::Array[T.type_parameter(:U)],
+      blk: T.proc.params(arg0: T.type_parameter(:U)).void
+    )
+    .void
+end
+def yield_each_item(xs, &blk)
+  xs.each do |x|
+    yield x
+  end
+end
+
+yield_each_item([1, 2, 3]) do |item|
+  T.reveal_type(item)
+  item.even?
+end
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20xs%3A%20T%3A%3AArray%5BT.type_parameter%28%3AU%29%5D%2C%0A%20%20%20%20%20%20blk%3A%20T.proc.params%28arg0%3A%20T.type_parameter%28%3AU%29%29.void%0A%20%20%20%20%29%0A%20%20%20%20.void%0Aend%0Adef%20yield_each_item%28xs%2C%20%26blk%29%0A%20%20xs.each%20do%20%7Cx%7C%0A%20%20%20%20yield%20x%0A%20%20end%0Aend%0A%0Ayield_each_item%28%5B1%2C%202%2C%203%5D%29%20do%20%7Citem%7C%0A%20%20T.reveal_type%28item%29%0A%20%20item.even%3F%0Aend)
+
+In this example, the output as of the time of writing looks like this:
+
+```
+editor.rb:19: Revealed type: `<top>` https://srb.help/7014
+    19 |  T.reveal_type(item)
+          ^^^^^^^^^^^^^^^^^^^
+  Got <top> originating from:
+    editor.rb:18:
+    18 |yield_each_item([1, 2, 3]) do |item|
+                                       ^^^^
+
+editor.rb:20: Method `even?` does not exist on `<top>` https://srb.help/7003
+    20 |  item.even?
+               ^^^^^
+  Got `<top>` originating from:
+    editor.rb:18:
+    18 |yield_each_item([1, 2, 3]) do |item|
+                                       ^^^^
+Errors: 2
+```
+
+Whenever you see `<top>` in an error message, one of two things is happening:
+
+- There is a valid error, because the method's input type was not properly
+  constrained. Double check the previous section on
+  [placing bounds on generic methods](#placing-bounds-on-generic-methods).
+
+- There is a bug or missing feature in Sorbet. Double check the list of issues
+  in Sorbet's support for generics:
+
+  [→ Issues with generics in Sorbet][generics milestone]
+
+  If nothing in the list looks relevant to the particular behavior at hand,
+  please report a new issue. Note that we have limited resources, and may not be
+  able to prioritize fixing such issues.
+
+When encountering an error like this, there are a couple of choices:
+
+- Continue using generics, but use `T.unsafe` to silence the errors.
+
+  Note that this can be **quite** burdensome: new programmers programming
+  against the given API will be confused as to whether errors are their fault or
+  Sorbet's.
+
+- Refactor the API to use `T.untyped`. This has the benefit of having Sorbet
+  stay out of people's way, letting them write the code they'd like to be able
+  to write. It obviously comes at the cost of Sorbet not being able to provide
+  strong guarantees about correctness.
+
+- Find another way to type the API, potentially avoiding generics entirely. This
+  might entail restructuring an API in a different way, using some sort of code
+  generation, or something that merely doesn't trip the given bug. If you're
+  stuck, ask for help.
 
 [generics milestone]:
   https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+milestone%3AGenerics

@@ -126,3 +126,66 @@ Sorbet does not insert runtime casts that preserve type safety at runtime.)
 > Sorbet runtime used to recursively check the type of every member of a
 > collection, which would take a long time for arrays or hashes of a
 > sufficiently large size. Consequently, this behavior has been removed.
+
+## Standard library generics and variance
+
+Note that all the classes in the Ruby standard library that Sorbet knows about
+are **covariant** in their generic type members. Variance is is discussed in the
+docs for [Generic Classes and Methods](generics.md).
+
+Implementing covariant classes in the Ruby standard library is a compromise. It
+means that things like this typecheck:
+
+```ruby
+sig {returns(T::Array[Integer])}
+def returns_ints; [1, 2, 3]; end
+
+sig {params(xs: T::Array[T.any(Integer, String)]).void}
+def takes_ints_or_strings(xs); end
+
+xs = returns_ints
+takes_ints_or_strings(xs) # no error
+```
+
+This makes it easy to get the most common Ruby usage patterns to type check
+without jumping through hoops.
+
+**However**, having things like arrays and hash maps in Ruby be covariant means
+that the type checker wilfully says certain programs type check even when they
+have glaring type errors. For example:
+
+```ruby
+xs = T.let([0], T::Array[Integer])
+nil_xs = T.let(xs, T::Array[T.nilable(Integer)])
+nil_xs[0] = nil
+
+T.reveal_type(xs.fetch(0)) # type: Integer (!)
+puts xs.fetch(0)           # => nil        (!)
+```
+
+In this example, we start with `xs` having type `T::Array[Integer]`. We then
+upcast it to a `T::Array[T.nilable(Integer)]`. This is the power of
+covariance—this would not have been allowed had arrays been made invariant.
+
+Sorbet allows `nil_xs[0] = nil` because the type of `nil_xs` says that it's fine
+for the array to contain `nil` values.
+
+But that's a contradiction! `nil_xs` and `xs` are merely different names for the
+same underlying storage. Later if someone were to go back and read the first
+element of `xs`, Sorbet would claim that they're getting back an `Integer`, but
+in fact, they'd be getting back a `nil`.
+
+Sorbet is not the only type system to implement covariant arrays. Notably:
+TypeScript uses the same approach. This decision was largely motivated by
+getting as much Ruby code to typecheck when initially developing and rolling out
+Sorbet on large, existing codebases.
+
+## What's next?
+
+- [TODO](#TODO)
+
+  TODO
+
+- [TODO](#TODO)
+
+  TODO
