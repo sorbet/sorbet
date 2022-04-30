@@ -1729,7 +1729,7 @@ class String < Object
   # "  hello".rstrip!    #=> nil
   # "hello".rstrip!      #=> nil
   # ```
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def rstrip!(); end
 
   # Both forms iterate through *str*, matching the pattern (which may be a
@@ -2028,7 +2028,7 @@ class String < Object
   # "  hello  ".strip!  #=> "hello"
   # "hello".strip!      #=> nil
   # ```
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def strip!(); end
 
   # Returns a copy of `str` with the *first* occurrence of `pattern` replaced by
