@@ -9,6 +9,8 @@ type_argument_suggest_unsafe.rb:10: Call to method `foo` on unconstrained generi
     type_argument_suggest_unsafe.rb:10: Replaced with `T.unsafe(x)`
     10 |  x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
           ^
+  Note:
+    Consider using `T.all(T.type_parameter(:U), Constraint)` to place a constraint on this type
 
 type_argument_suggest_unsafe.rb:12: Call to method `is_a?` on unconstrained generic type `T.type_parameter(:U) (of Object#example1)` https://srb.help/7038
     12 |  if x.is_a?(Integer)
@@ -21,6 +23,8 @@ type_argument_suggest_unsafe.rb:12: Call to method `is_a?` on unconstrained gene
     type_argument_suggest_unsafe.rb:12: Replaced with `T.unsafe(x)`
     12 |  if x.is_a?(Integer)
              ^
+  Note:
+    Use `case` instead of `is_a?` to check the type of an unconstrained generic type parameter
 
 type_argument_suggest_unsafe.rb:13: Revealed type: `T.all(Integer, T.type_parameter(:U) (of Object#example1))` https://srb.help/7014
     13 |    T.reveal_type(x)
@@ -55,6 +59,8 @@ type_argument_suggest_unsafe.rb:38: Call to method `foo` on generic type `T.type
     type_argument_suggest_unsafe.rb:38: Replaced with `T.unsafe(x)`
     38 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
           ^
+  Note:
+    Consider using `T.all(T.type_parameter(:U), Constraint)` to place a constraint on this type
 
 type_argument_suggest_unsafe.rb:47: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example4)` https://srb.help/7038
     47 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
@@ -67,6 +73,8 @@ type_argument_suggest_unsafe.rb:47: Call to method `foo` on unconstrained generi
     type_argument_suggest_unsafe.rb:47: Replaced with `{|x| T.unsafe(x).foo}`
     47 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                 ^^^^^^^
+  Note:
+    Consider using `T.all(T.type_parameter(:U), Constraint)` to place a constraint on this type
 Errors: 6
 
 --------------------------------------------------------------------------

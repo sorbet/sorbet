@@ -29,10 +29,8 @@ test.rb:23: Call to method `is_a?` on unbounded type member `Box::Elem` https://
     test.rb:19:
     19 |  def initialize(x)
                          ^
-  Consider adding an `upper` bound to `Box::Elem` here
-    test.rb:16:
-    16 |  Elem = type_member
-          ^^^^^^^^^^^^^^^^^^
+  Note:
+    Use `case` instead of `is_a?` to check the type of an unconstrained generic type member
 
 test.rb:24: Revealed type: `T.all(A, Box::Elem)` https://srb.help/7014
     24 |      T.reveal_type(x)
@@ -203,10 +201,8 @@ test.rb:23: Call to method `is_a?` on unbounded type member `Box::Elem` https://
     test.rb:23: Replaced with `T.unsafe(x)`
     23 |    if x.is_a?(A)
                ^
-  Consider adding an `upper` bound to `Box::Elem` here
-    test.rb:16:
-    16 |  Elem = type_member
-          ^^^^^^^^^^^^^^^^^^
+  Note:
+    Use `case` instead of `is_a?` to check the type of an unconstrained generic type member
 
 test.rb:24: Revealed type: `T.all(A, Box::Elem)` https://srb.help/7014
     24 |      T.reveal_type(x)

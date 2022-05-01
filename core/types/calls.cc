@@ -166,6 +166,23 @@ void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, cor
         }
     }
 }
+
+void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, SymbolRef definition, NameRef methodName,
+                                    string_view genericKind) {
+    if (methodName == Names::isA_p()) {
+        e.addErrorNote("Use `{}` instead of `{}` to check the type of an unconstrained generic type {}", "case",
+                       methodName.show(gs), genericKind);
+    } else if (definition.isTypeMember()) {
+        e.addErrorSection(ErrorSection(
+            ErrorColors::format("Consider adding an `{}` bound to `{}` here", "upper", definition.show(gs)),
+            {{definition.loc(gs), ""}}));
+
+    } else {
+        auto showOptions = ShowOptions().withShowForRBI();
+        auto wrapped = fmt::format("T.all({}, Constraint)", definition.show(gs, showOptions));
+        e.addErrorNote("Consider using `{}` to place a constraint on this type", wrapped);
+    }
+}
 } // namespace
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -188,6 +205,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
             autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+            addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
         }
         emptyResult.main.errors.emplace_back(e.build());
         return emptyResult;
@@ -217,9 +235,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 }
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
                 autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
-                e.addErrorSection(ErrorSection(ErrorColors::format("Consider adding an `{}` bound to `{}` here",
-                                                                   "upper", this->definition.show(gs)),
-                                               {{this->definition.loc(gs), ""}}));
+                addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
             }
             emptyResult.main.errors.emplace_back(e.build());
             return emptyResult;
