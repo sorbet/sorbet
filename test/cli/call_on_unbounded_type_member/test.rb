@@ -19,6 +19,12 @@ class Box
   def initialize(x)
     x.only_on_a
     takes_a(x)
+
+    if x.is_a?(A)
+      T.reveal_type(x)
+    else
+      T.reveal_type(x)
+    end
   end
 end
 

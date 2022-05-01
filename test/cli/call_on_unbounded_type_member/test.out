@@ -22,34 +22,68 @@ test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help
     19 |  def initialize(x)
                          ^
 
-test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7039
-    52 |    model.class.props
+test.rb:23: Call to method `is_a?` on unbounded type member `Box::Elem` https://srb.help/7039
+    23 |    if x.is_a?(A)
+                 ^^^^^
+  Got `Box::Elem` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+  Consider adding an `upper` bound to `Box::Elem` here
+    test.rb:16:
+    16 |  Elem = type_member
+          ^^^^^^^^^^^^^^^^^^
+
+test.rb:24: Revealed type: `T.all(A, Box::Elem)` https://srb.help/7014
+    24 |      T.reveal_type(x)
+              ^^^^^^^^^^^^^^^^
+  Got `T.all(A, Box::Elem)` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+    test.rb:23:
+    23 |    if x.is_a?(A)
+               ^^^^^^^^^^
+
+test.rb:26: Revealed type: `Box::Elem` https://srb.help/7014
+    26 |      T.reveal_type(x)
+              ^^^^^^^^^^^^^^^^
+  Got `Box::Elem` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+    test.rb:23:
+    23 |    if x.is_a?(A)
+               ^^^^^^^^^^
+
+test.rb:58: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7039
+    58 |    model.class.props
                   ^^^^^
   Got `T.class_of(DataView)::DataViewModelBad` originating from:
-    test.rb:51:
-    51 |  def self.bad_from_instance(model)
+    test.rb:57:
+    57 |  def self.bad_from_instance(model)
                                      ^^^^^
   Consider adding an `upper` bound to `T.class_of(DataView)::DataViewModelBad` here
-    test.rb:47:
-    47 |  DataViewModelBad = type_template
+    test.rb:53:
+    53 |  DataViewModelBad = type_template
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test.rb:59: Revealed type: `T::Array[Symbol]` https://srb.help/7014
-    59 |    T.reveal_type(props)
+test.rb:65: Revealed type: `T::Array[Symbol]` https://srb.help/7014
+    65 |    T.reveal_type(props)
             ^^^^^^^^^^^^^^^^^^^^
   Got `T::Array[Symbol]` originating from:
-    test.rb:58:
-    58 |    props = model.class.all_props
+    test.rb:64:
+    64 |    props = model.class.all_props
                     ^^^^^^^^^^^^^^^^^^^^^
 
-test.rb:61: Method `does_not_exist` does not exist on `ChalkODMDocument` component of `T.class_of(DataView)::DataViewModel` https://srb.help/7003
-    61 |    model.does_not_exist
+test.rb:67: Method `does_not_exist` does not exist on `ChalkODMDocument` component of `T.class_of(DataView)::DataViewModel` https://srb.help/7003
+    67 |    model.does_not_exist
                   ^^^^^^^^^^^^^^
   Got `T.class_of(DataView)::DataViewModel` originating from:
-    test.rb:57:
-    57 |  def self.from_instance(model)
+    test.rb:63:
+    63 |  def self.from_instance(model)
                                  ^^^^^
-Errors: 5
+Errors: 8
 
 --------------------------------------------------------------------------
 
@@ -74,6 +108,12 @@ class Box
   def initialize(x)
     x.only_on_a
     takes_a(x)
+
+    if x.is_a?(A)
+      T.reveal_type(x)
+    else
+      T.reveal_type(x)
+    end
   end
 end
 
@@ -152,42 +192,80 @@ test.rb:21: Expected `A` but found `Box::Elem` for argument `a` https://srb.help
     21 |    takes_a(x)
                     ^
 
-test.rb:52: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7039
-    52 |    model.class.props
+test.rb:23: Call to method `is_a?` on unbounded type member `Box::Elem` https://srb.help/7039
+    23 |    if x.is_a?(A)
+                 ^^^^^
+  Got `Box::Elem` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+  Autocorrect: Done
+    test.rb:23: Replaced with `T.unsafe(x)`
+    23 |    if x.is_a?(A)
+               ^
+  Consider adding an `upper` bound to `Box::Elem` here
+    test.rb:16:
+    16 |  Elem = type_member
+          ^^^^^^^^^^^^^^^^^^
+
+test.rb:24: Revealed type: `T.all(A, Box::Elem)` https://srb.help/7014
+    24 |      T.reveal_type(x)
+              ^^^^^^^^^^^^^^^^
+  Got `T.all(A, Box::Elem)` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+    test.rb:23:
+    23 |    if x.is_a?(A)
+               ^^^^^^^^^^
+
+test.rb:26: Revealed type: `Box::Elem` https://srb.help/7014
+    26 |      T.reveal_type(x)
+              ^^^^^^^^^^^^^^^^
+  Got `Box::Elem` originating from:
+    test.rb:19:
+    19 |  def initialize(x)
+                         ^
+    test.rb:23:
+    23 |    if x.is_a?(A)
+               ^^^^^^^^^^
+
+test.rb:58: Call to method `class` on unbounded type template `T.class_of(DataView)::DataViewModelBad` https://srb.help/7039
+    58 |    model.class.props
                   ^^^^^
   Got `T.class_of(DataView)::DataViewModelBad` originating from:
-    test.rb:51:
-    51 |  def self.bad_from_instance(model)
+    test.rb:57:
+    57 |  def self.bad_from_instance(model)
                                      ^^^^^
   Autocorrect: Done
-    test.rb:52: Replaced with `T.unsafe(model)`
-    52 |    model.class.props
+    test.rb:58: Replaced with `T.unsafe(model)`
+    58 |    model.class.props
             ^^^^^
   Consider adding an `upper` bound to `T.class_of(DataView)::DataViewModelBad` here
-    test.rb:47:
-    47 |  DataViewModelBad = type_template
+    test.rb:53:
+    53 |  DataViewModelBad = type_template
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test.rb:59: Revealed type: `T::Array[Symbol]` https://srb.help/7014
-    59 |    T.reveal_type(props)
+test.rb:65: Revealed type: `T::Array[Symbol]` https://srb.help/7014
+    65 |    T.reveal_type(props)
             ^^^^^^^^^^^^^^^^^^^^
   Got `T::Array[Symbol]` originating from:
-    test.rb:58:
-    58 |    props = model.class.all_props
+    test.rb:64:
+    64 |    props = model.class.all_props
                     ^^^^^^^^^^^^^^^^^^^^^
 
-test.rb:61: Method `does_not_exist` does not exist on `ChalkODMDocument` component of `T.class_of(DataView)::DataViewModel` https://srb.help/7003
-    61 |    model.does_not_exist
+test.rb:67: Method `does_not_exist` does not exist on `ChalkODMDocument` component of `T.class_of(DataView)::DataViewModel` https://srb.help/7003
+    67 |    model.does_not_exist
                   ^^^^^^^^^^^^^^
   Got `T.class_of(DataView)::DataViewModel` originating from:
-    test.rb:57:
-    57 |  def self.from_instance(model)
+    test.rb:63:
+    63 |  def self.from_instance(model)
                                  ^^^^^
   Autocorrect: Done
-    test.rb:61: Replaced with `T.unsafe(model)`
-    61 |    model.does_not_exist
+    test.rb:67: Replaced with `T.unsafe(model)`
+    67 |    model.does_not_exist
             ^^^^^
-Errors: 5
+Errors: 8
 
 --------------------------------------------------------------------------
 
@@ -212,6 +290,12 @@ class Box
   def initialize(x)
     T.unsafe(x).only_on_a
     takes_a(T.unsafe(x))
+
+    if T.unsafe(x).is_a?(A)
+      T.reveal_type(x)
+    else
+      T.reveal_type(x)
+    end
   end
 end
 
