@@ -1988,11 +1988,6 @@ certain Sorbet usage patterns from introducing load-time cyclic references.
 
 ## 5044
 
-<!--
-TODO(jez) Also audit the other generics-related error codes for redundancy and
-missing links.
--->
-
 As background reading, you may first want to read more about
 [variance](generics.md#in-out-and-variance).
 
@@ -3484,6 +3479,9 @@ throughout the body of the `if` statement.
 
 ## 7038
 
+For more information, see the docs on
+[generic methods](generics.md#generic-methods).
+
 Consider this example:
 
 ```ruby
@@ -3553,7 +3551,8 @@ Or if it's imperative to continue using `is_a?`, change the type to
 
 ## 7039
 
-<!-- TODO(jez) Link to generic docs once written -->
+For more information, see how to place
+[bounds on type members](generics.md#bounds-on-type-members-fixed-upper-lower).
 
 Consider this example:
 

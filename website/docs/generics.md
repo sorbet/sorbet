@@ -754,8 +754,6 @@ NumericBox[String].new
 Placing the bound on the type member makes it an error to ever instantiate a
 class with that member outside the given bound.
 
-<!-- TODO(jez) realistic example with lower bounds? -->
-
 ## Generic methods
 
 Methods can also be made generic in Sorbet:
