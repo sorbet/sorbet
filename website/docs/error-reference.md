@@ -3552,6 +3552,26 @@ end
 Remember that in Sorbet, [interfaces](abstract.md) must be explicitly
 implemented in a given class.
 
+Sometimes this error happens due to a call to `is_a?` on a type parameter. To
+sidestep this error, rewrite the program to use `case`:
+
+```ruby
+# ...
+def example(x)
+  if x.is_a?(Integer) # error
+    # ...
+  end
+
+  case x
+  when Integer # OK
+    # ...
+  end
+end
+```
+
+Or if it's imperative to continue using `is_a?`, change the type to
+`T.all(Kernel, T.type_parameter(:U))`.
+
 ## 7039
 
 <!-- TODO(jez) Link to generic docs once written -->
@@ -3590,6 +3610,26 @@ upper bound on `Elem`:
 
 This will guarantee that `Elem` is always at least `A`, which will let Sorbet
 allow the call to `x.only_on_a`.
+
+Sometimes this error happens due to a call to `is_a?` on a type member. To
+sidestep this error, rewrite the program to use `case`:
+
+```ruby
+# ...
+def example(x)
+  if x.is_a?(Integer) # error
+    # ...
+  end
+
+  case x
+  when Integer # OK
+    # ...
+  end
+end
+```
+
+Or if it's imperative to continue using `is_a?`, change the type to
+`T.all(Kernel, Elem)` and/or add an upper bound of `Kernel` to the type member.
 
 <!-- -->
 
