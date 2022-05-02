@@ -68,3 +68,40 @@ my_struct.serialize # => { "foo": 4, "quz": 0.5 }
 ```
 
 Note that `bar` is skipped because it is `nil`.
+
+## Inheriting from Derived of T::Struct
+
+Trying to create a subclass of a subclass of T::Struct will result in an a 
+[5041](https://sorbet.org/docs/error-reference#5041) error. So code like this
+will create an error:
+
+```ruby
+class Parent < T::Struct
+  prop :foo, Integer
+end
+
+class ChildOne < Parent # error
+  prop :bar, Integer
+end
+
+class ChildTwo < Parent # error
+  prop :baz, Integer
+end
+```
+
+If this structure is required, then using composition is one viable solution:
+```ruby
+class Common < T::Struct
+  prop :foo, Integer
+end
+
+class ChildOne < T::Struct
+  prop :common, Common
+  prop :bar, Integer
+end
+
+class ChildTwo < T::Struct
+  prop :common, Common
+  prop :quz, Integer
+end
+```
