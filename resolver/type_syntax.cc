@@ -956,7 +956,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
                             string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 

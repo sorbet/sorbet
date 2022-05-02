@@ -8,8 +8,8 @@ Sorbet has syntax for creating generic methods, classes, and interfaces.
 
 ## Implementation status
 
-Generics are, by far, the most poorly supported feature within Sorbet. The
-implementation has many known, hard-to-fix bugs, which substantially limits
+Generics are the most poorly supported feature within Sorbet, by far. Their
+implementation has many known, complicated-to-fix bugs which substantially limit
 their utility.
 
 It is hard to overstate how buggy Sorbet's support for generics is.
@@ -34,20 +34,21 @@ should account for two main failure modes:
   provide the guarantees it should. This can give users of the generic
   abstraction false confidence in the type system.
 
-  To mitigate this, write tests using the abstraction that should not type
-  check, and double check that they don't. Get creative with these tests.
-  Consider writing tests that make uncommon use of subtyping, inheritance,
-  mutation, etc.
+  To mitigate this, write example code that should not type check and double
+  check that it doesn't. Get creative with these tests. Consider writing tests
+  that make uncommon use of subtyping, inheritance, mutation, etc.
+
+  (There is nothing built into Sorbet for writing such tests. The easiest
+  approach is to manually build small examples using the new API that don't type
+  check, but don't check the resulting files in (or check them in, but mark them
+  `# typed: ignore`, and bump the sigil up temporarily while making changes).
+  The diligent may way to automate this by running Sorbet a second time on a
+  codebase that includes extra files meant to not type check, asserting that
+  Sorbet indeed reports errors.)
 
   It can also be helpful to use `T.reveal_type` and/or `T.assert_type!` to
   inspect the types of intermediate values to see if `T.untyped` has silently
   snuck in somewhere.
-
-  (There is no method built into Sorbet for writing such tests; the best way to
-  do it is manually while making changes to the generic abstraction. The
-  diligent may way to automate this by running Sorbet a second time on a
-  codebase that includes extra files meant to not type check, and assert that
-  Sorbet indeed reports errors.)
 
 - Many things **don't type check when they should**.
 
@@ -84,7 +85,7 @@ class Box
   extend T::Sig
   extend T::Generic # Provides `type_member` helper
 
-  Elem = type_member # Makes `Box` class generic
+  Elem = type_member # Makes the `Box` class generic
 
   # References the class-level generic `Elem`
   sig {params(val: Elem).void}
@@ -131,15 +132,29 @@ T.reveal_type(string_box) # `Box[String]`
 Recall that Sorbet is not only a static type checker, but also a system for
 [validating types at runtime](runtime.md).
 
-However, Sorbet completely erases _generic type arguments_ at runtime. When
-Sorbet sees a signature like `Box[Integer]`, at runtime it will **only** check
-whether an argument has class `Box` (or a subtype of `Box`), but nothing about
-the types that argument has been applied to. Generic types are only checked
-statically.
+However, Sorbet completely erases generic types at runtime, both for classes and
+methods. When Sorbet sees a signature like `Box[Integer]`, at runtime it will
+**only** check whether an argument has class `Box` (or a subtype of `Box`), but
+nothing about the types that argument has been applied to. Generic types are
+only checked statically. Similarly, if Sorbet sees a signature like
 
-This also means that if the type argument of a generic class or module has type
-[`T.untyped`](untyped.md), Sorbet will neither report a static error nor a
-runtime error:
+```ruby
+sig do
+  type_parameters(:U)
+    .params(
+      x: T.type_parameter(:U),
+      y: T.type_parameter(:U),
+    )
+    .void
+end
+def foo(x, y); end
+```
+
+Sorbet will not check that `x` and `y` are the same class at runtime.
+
+Since generics are only checked statically, this removes using tests as a way to
+guard against misuses of [`T.untyped`](untyped.md). For example, Sorbet will
+neither report a static error nor a runtime error on this example:
 
 ```ruby
 sig {params(xs: Box[Integer]).void}
@@ -149,9 +164,6 @@ untyped_box = Box[T.untyped].new(val: 'not an int')
 foo(untyped_box)
 #   ^^^^^^^^^^^ no static error, AND no runtime error!
 ```
-
-(Also note that unlike other languages that implement generics via type erasure,
-Sorbet does not insert runtime casts that preserve type safety at runtime.)
 
 ## `type_member` & `type_template`
 
@@ -176,14 +188,18 @@ Type variables, like normal Ruby variables, have a scope:
   are usually used as a way for an abstract parent class to require a concrete
   child class to pick a specific type that all instances agree on.
 
+> These docs frequently use "type member" (two words, no code formatting) to
+> refer to either a type member declared via `type_member` or `type_template`
+> when the question of which class owns the type variable is irrelevant.
+
 One way to think about it is that `type_template` is merely a shorter name for
 something which could have also been named `'singleton_class_type_member`. In
 Sorbet's implementation, `type_member` and `type_template` are treated almost
 exactly the same.
 
-> These docs frequently use "type member" (two words, no code formatting) to
-> refer to either a type member declared via `type_member` or `type_template`
-> when the question of which class owns the type variable is irrelevant.
+Note that this means that it's not possible to refer to a `type_template`
+variable from an instance method. For a workaround, see the docs for error code
+[5072](error-reference.md#5072).
 
 ## `:in`, `:out`, and Variance
 

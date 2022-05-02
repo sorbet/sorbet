@@ -2489,6 +2489,85 @@ to `example` is typechecked, no `.bind` annotation on any of `example`'s
 positional or keyword arguments would actually affect how the lambda is
 typechecked.
 
+## 5072
+
+See [`type_member` & `type_template`](generics.md#type_member--type_template) in
+the generics docs for more.
+
+A `type_member` is limited in scope to only appear in instance methods of the
+given class. A `type_template` is limited in scope to only appear in singleton
+class methods of the given class. For example:
+
+```ruby
+class Box
+  extend T::Sig
+  extend T::Generic
+
+  Elem = type_member
+
+  sig {returns(Elem)} # error
+  def self.example
+    # ...
+  end
+end
+```
+
+This example doesn't make sense because `Elem` in this case is the element type
+of our generic `Box` type. For example, instances of `Box[Integer]` and
+`Box[String]` hold `Integer`'s and `String`'s respectively. Meanwhile, a call to
+the method `Box.example` wouldn't have a meaning, because there is no instance
+of `Box` in this call to `Box.example` whose element type should be used.
+
+Sometimes this error comes up when attempting to do something like this:
+
+```ruby
+class AbstractSerializable
+  extend T::Sig
+  extend T::Generic
+  abstract!
+  SerializeType = type_template
+
+  sig {abstract.returns(SerializeType)} # error
+  def serialize; end
+  sig do
+    abstract
+      .params(raw_input: SerializeType)
+      .returns(T.attached_class)
+  end
+  def self.deserialize(raw_input); end
+end
+
+class MyClass < AbstractSerializable
+  SerializeType = type_template {{fixed: String}}
+
+  # ... implement abstract methods ...
+end
+```
+
+In this case, the idea is that some subclasses may want to serialize to a
+`String`, some may want to serialize to an `Integer`, some may want to serialize
+to a `Symbol`, etc. and the child class should get to specify that, by using
+`fixed` on the `type_template`.
+
+Even in these cases, Sorbet does not let the `type_template` be referenced from
+an instance method. The solution is to instead specify both `type_member` and a
+`type_template`, and have the child class fix both of them:
+
+```ruby
+class AbstractSerializable
+  # ...
+  SerializeTypeMember = type_member
+  SerializeTypeTemplate = type_template
+  # ...
+end
+
+class MyClass < AbstractSerializable
+  SerializeTypeMember = type_member {{fixed: String}}
+  SerializeTypeTemplate = type_template {{fixed: String}}
+  # ...
+end
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
