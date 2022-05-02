@@ -18,15 +18,15 @@ We track known bugs in Sorbet's support for generics in the [Generics milestone]
 on Sorbet's issue tracker. Feel free to peruse the existing bugs, as well as
 report new bugs.
 
-Unfortunately, the abundance of bugs in Sorbet's generics implementation makes
-implementing sophisticated, generic abstractions in Sorbet exceedingly brittle.
+Unfortunately, this abundance of bugs makes implementing sophisticated, generic
+abstractions in Sorbet exceedingly brittle.
 
 It is imperative to thoroughly test abstractions making use of Sorbet generics.
 
 The tests you'll need to write look substantially different from other Ruby
-tests you may be accustomed to writing, because these tests will have to live
-**at the type level** (statics), not at the expression level (runtime). These
-tests should account for two main failure modes:
+tests you may be accustomed to writing, because they will have to live **at the
+type level** (statics), not at the expression level (runtime). These tests
+should account for two main failure modes:
 
 - Many things that shouldn't type check **do type check anyways**.
 
@@ -51,10 +51,11 @@ tests should account for two main failure modes:
 
 - Many things **don't type check when they should**.
 
-  This is bad because it will cause undue toil to people attempting to use the
-  generic abstraction, especially those who are new to Sorbet (or even Ruby)
-  and/or those who are not intimately familiar with the limitations of Sorbet's
-  generics.
+  This is bad because it causes confusion and frustration for people attempting
+  to use the generic abstraction, not for the person who implemented the
+  abstraction. This is especially painful for those who are new to Sorbet (or
+  even Ruby), as well as those those who are not intimately familiar with the
+  limitations of Sorbet's generics.
 
   To mitigate this, "test drive" the abstraction being built. Don't assume that
   if the implementation type checks that it will work for downstream consumers.
