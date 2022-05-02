@@ -43,6 +43,7 @@ constexpr ErrorClass TakesNoBlock{7035, StrictLevel::True};
 constexpr ErrorClass PackagePrivateMethod{7036, StrictLevel::True};
 constexpr ErrorClass CallAfterAndAnd{7037, StrictLevel::True};
 constexpr ErrorClass CallOnTypeArgument{7038, StrictLevel::True};
+constexpr ErrorClass CallOnUnboundedTypeMember{7039, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif

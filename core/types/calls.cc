@@ -143,12 +143,54 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
+namespace {
+void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc receiverLoc,
+                         core::NameRef methodName) {
+    if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
+        auto wrapInFn = gs.suggestUnsafe.value();
+        if (receiverLoc.empty()) {
+            auto shortName = methodName.shortName(gs);
+            auto beginAdjust = -2;                     // (&
+            auto endAdjust = 1 + shortName.size() + 1; // :foo)
+            auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+            if (blockPassLoc.exists()) {
+                auto blockPassSource = blockPassLoc.source(gs).value();
+                if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                    e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc, " {{|x| {}(x).{}}}",
+                                  wrapInFn, shortName);
+                }
+            }
+        } else {
+            e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
+                          receiverLoc.source(gs).value());
+        }
+    }
+}
+
+void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, SymbolRef definition, NameRef methodName,
+                                    string_view genericKind) {
+    if (methodName == Names::isA_p()) {
+        e.addErrorNote("Use `{}` instead of `{}` to check the type of an unconstrained generic type {}", "case",
+                       methodName.show(gs), genericKind);
+    } else if (definition.isTypeMember()) {
+        e.addErrorSection(ErrorSection(
+            ErrorColors::format("Consider adding an `{}` bound to `{}` here", "upper", definition.show(gs)),
+            {{definition.loc(gs), ""}}));
+
+    } else {
+        auto showOptions = ShowOptions().withShowForRBI();
+        auto wrapped = fmt::format("T.all({}, Constraint)", definition.show(gs, showOptions));
+        e.addErrorNote("Consider using `{}` to place a constraint on this type", wrapped);
+    }
+}
+} // namespace
+
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    auto emptyResult = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     if (this->definition.isTypeArgument()) {
-        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
-            return result;
+            return emptyResult;
         }
         auto funLoc = args.funLoc();
         auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
@@ -162,34 +204,44 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-
-            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
-            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
-                auto wrapInFn = gs.suggestUnsafe.value();
-                if (receiverLoc.empty()) {
-                    auto shortName = args.name.shortName(gs);
-                    auto beginAdjust = -2;                     // (&
-                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
-                    if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs).value();
-                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
-                        }
-                    }
-                } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
-                                  receiverLoc.source(gs).value());
-                }
-            }
+            autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+            addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
         }
-        result.main.errors.emplace_back(e.build());
-        return result;
+        emptyResult.main.errors.emplace_back(e.build());
+        return emptyResult;
     } else {
-        // TODO: https://github.com/sorbet/sorbet/issues/1731
-        auto untypedUntracked = Types::untypedUntracked();
-        return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
+        ENFORCE(this->definition.isTypeMember());
+        auto typeMember = this->definition.asTypeMemberRef();
+        auto lambdaParam = cast_type_nonnull<LambdaParam>(typeMember.data(gs)->resultType);
+        auto upperBound = lambdaParam.upperBound;
+        if (upperBound.isTop()) {
+            if (args.suppressErrors) {
+                return emptyResult;
+            }
+
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+            auto e = gs.beginError(errLoc, errors::Infer::CallOnUnboundedTypeMember);
+            if (e) {
+                auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
+                                  ? "template"
+                                  : "member";
+                auto thisStr = args.thisType.show(gs);
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Call to method `{}` on unbounded type {} `{}` component of `{}`", args.name.show(gs),
+                                member, thisStr, args.fullType.type.show(gs));
+                } else {
+                    e.setHeader("Call to method `{}` on unbounded type {} `{}`", args.name.show(gs), member, thisStr);
+                }
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+                addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
+            }
+            emptyResult.main.errors.emplace_back(e.build());
+            return emptyResult;
+        }
+
+        return upperBound.dispatchCall(gs, args.withThisRef(upperBound));
     }
 }
 
