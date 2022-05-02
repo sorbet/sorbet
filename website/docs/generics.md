@@ -193,7 +193,7 @@ Type variables, like normal Ruby variables, have a scope:
 > when the question of which class owns the type variable is irrelevant.
 
 One way to think about it is that `type_template` is merely a shorter name for
-something which could have also been named `'singleton_class_type_member`. In
+something which could have also been named `singleton_class_type_member`. In
 Sorbet's implementation, `type_member` and `type_template` are treated almost
 exactly the same.
 
@@ -203,15 +203,16 @@ variable from an instance method. For a workaround, see the docs for error code
 
 ## `:in`, `:out`, and Variance
 
-Understanding [variance] is important for understanding how class-level generics
+Understanding variance is important for understanding how class-level generics
 (type members) behave. Variance is a type system concept that controls how
-generics interact with subtyping. Specifically, from Wikipedia:
+generics interact with subtyping. Specifically, [from Wikipedia][variance]:
 
 _"Variance refers to how subtyping between more complex types relates to
 subtyping between their components."_
 
-Variance is a property of each type member. There are three kinds of variance
-relationships:
+Variance is a property of each type member (not the generic class itself,
+because generic classes may have more than one type member). There are three
+kinds of variance relationships:
 
 - **invariant** (subtyping relationships are ignored for this type member)
 - **covariant** (subtyping order is preserved for this type member)
@@ -222,15 +223,21 @@ Here is the syntax Sorbet uses for these concepts:
 ```ruby
 module Example
   # invariant type member
-  A = type_member
+  X = type_member
 
   # covariant type member
-  B = type_member(:out)
+  Y = type_member(:out)
 
   # contravariant type member
-  C = type_member(:in)
+  Z = type_member(:in)
 end
 ```
+
+In this example, we would say:
+
+- "`Example` is invariant in `X`",
+- "`Example` is covariant in `Y`", and
+- "`Example` is contravariant in `Z`", and
 
 For those who have never encountered variance in a type system before, it may be
 useful to skip down to
@@ -239,9 +246,10 @@ motivates why type systems (Sorbet included) place such emphasis on variance.
 
 ### Invariance
 
-By default, type members are invariant. Here is an example of what that means.
-For convenience throughout these docs, we use the annotation `<:` to claim that
-one type is a subtype of another type.
+(_For convenience throughout these docs, we use the annotation `<:` to claim
+that one type is a subtype of another type._)
+
+By default, type members are invariant. Here is an example of what that means:
 
 ```ruby
 class Box
@@ -267,26 +275,26 @@ Since `Elem` is invariant (has no explicit variance annotation), Sorbet reports
 an error on the `T.let` attempting to widen the type of `int_box` to
 `Box[Numeric]`. Two objects of a given generic class with an invariant type
 member (`Box` in this example) are only subtypes if the types bound to their
-invariant type members are equivalent.
+invariant type members are **equivalent**.
 
 Invariant type members, unlike covariant and contravariant type members, maybe
 be used in **both** input and output positions within method signatures. This
 nuance is explained in more detail in the next sections about covariant and
 contravariant type members.
 
-> **Note**: type members in a Ruby `class` must be invariant. Only type members
-> in a Ruby `module` are allowed to be covariant or contravariant. See the docs
-> for error code [5016](error-reference.md#5016) for more information.
+> **Note**: all type members in a Ruby `class` must be invariant. Only type
+> members in a Ruby `module` are allowed to be covariant or contravariant. See
+> the docs for error code [5016](error-reference.md#5016) for more information.
 
 ### Covariance (`:out`)
 
 Covariant type members preserve the subtyping relationship. Specifically, if the
-type `Child` is a subtype of the type `Parent`, then the type `A[Child]` is a
-subtype of the type `A[Parent]` if the type member of `A` is covariant. In
+type `Child` is a subtype of the type `Parent`, then the type `M[Child]` is a
+subtype of the type `M[Parent]` if the type member of `M` is covariant. In
 symbols:
 
 ```
-Child <: Parent  ==>  A[Child] <: A[Parent]
+Child <: Parent  ==>  M[Child] <: M[Parent]
 ```
 
 Note that only a Ruby `module` (not a `class`) may have a covariant type member.
@@ -307,8 +315,8 @@ def example(int_box)
 end
 ```
 
-In this case, the `T.let` assertion reports no static errors. Why?
-`Integer <: Numeric`, therefore `IBox[Integer] <: IBox[Numeric]`.
+In this case, the `T.let` assertion reports no static errors because
+`Integer <: Numeric`, and therefore `IBox[Integer] <: IBox[Numeric]`.
 
 Covariant type members may only appear in **output** positions (thus the `:out`
 annotation). For more information about what an output position is, see
@@ -359,33 +367,32 @@ end
 [→ View on sorbet.run][covariant-ibox]
 
 Note how in the above example, `Box` includes `IBox`, meaning that `Box` is a
-subclass of `IBox`. Child classes of a generic class must always redeclare any
-type members declared by the parent, in the same order. The child has to either
-copy the parent's specified variance or redeclare it as invariant in the child
-(the latter is the _only_ option when the child is a child `class`, not a child
-`module`).
+child of `IBox`. Children of a generic classes or modules must always redeclare
+any type members declared by the parent, in the same order. The child must
+either copy the parent's specified variance or redeclare it as invariant. When
+the child is a `class` (not a `module`), redeclaring it as invariant is the
+**only** option.
 
 ### Contravariance (`:in`)
 
 Contravariant type parameters **reverse** the subtyping relationship.
 Specifically, if the type `Child` is a subtype of the type `Parent`, then type
-`A[Parent]` is a subtype of the type `A[Child]` if the type member of `A` is
+`M[Parent]` is a subtype of the type `M[Child]` if the type member of `M` is
 contravariant. In symbols:
 
 ```
-Child <: Parent  ==>  A[Parent] <: A[Child]
+Child <: Parent  ==>  M[Parent] <: M[Child]
 ```
 
 Contravariance is **quite** unintuitive for most people. Luckily, contravariance
 is not unique to Sorbet—all type systems that have both subtyping relationships
 and generics must grapple with variance, contravariance included, so there is a
-lot written about it elsewhere online. Consider augmenting this doc's discussion
-of contravariance with further reading as needed. It maybe even be helpful to
-read about contravariance in a language you already have extensive familiarity
-with, as many of the concepts with transfer to Sorbet.
+lot written about it elsewhere online. It maybe even be helpful to read about
+contravariance in a language you already have extensive familiarity with, as
+many of the concepts with transfer to Sorbet.
 
 The way to understand contravariance is by understanding which function types
-are subtype of other function types. For example:
+are subtypes of other function types. For example:
 
 ```ruby
 sig do
@@ -399,31 +406,32 @@ def takes_func(f)
   f.call(GrandChild.new)
 end
 
-wants_at_least_grandchild = T.let(
-  ->(grandchild) {grandchild.on_grandchild},
-  T.proc.params(grandchild: GrandChild).void
-)
-wants_at_least_child = T.let(
-  ->(child) {child.on_child},
-  T.proc.params(child: Child).void
-)
 wants_at_least_parent = T.let(
   ->(parent) {parent.on_parent},
   T.proc.params(parent: Parent).void
 )
+takes_func(wants_at_least_parent) # OK
 
-takes_func(wants_at_least_child)
-takes_func(wants_at_least_parent)
+wants_at_least_child = T.let(
+  ->(child) {child.on_child},
+  T.proc.params(child: Child).void
+)
+takes_func(wants_at_least_child) # OK
 
+wants_at_least_grandchild = T.let(
+  ->(grandchild) {grandchild.on_grandchild},
+  T.proc.params(grandchild: GrandChild).void
+)
 takes_func(wants_at_least_grandchild) # error!
 ```
 
 [→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Parent%0A%20%20def%20on_parent%3B%20end%0Aend%0Aclass%20Child%20%3C%20Parent%0A%20%20def%20on_child%3B%20end%0Aend%0Aclass%20GrandChild%20%3C%20Child%0A%20%20def%20on_grandchild%3B%20end%0Aend%0A%0Asig%20do%0A%20%20params%28%0A%20%20%20%20f%3A%20T.proc.params%28x%3A%20Child%29.void%0A%20%20%29%0A%20%20.void%0Aend%0Adef%20takes_func%28f%29%0A%20%20f.call%28Child.new%29%0A%20%20f.call%28GrandChild.new%29%0Aend%0A%0Awants_at_least_grandchild%20%3D%20T.let%28%0A%20%20-%3E%28grandchild%29%20%7Bgrandchild.on_grandchild%7D%2C%0A%20%20T.proc.params%28grandchild%3A%20GrandChild%29.void%0A%29%0Awants_at_least_child%20%3D%20T.let%28%0A%20%20-%3E%28child%29%20%7Bchild.on_child%7D%2C%0A%20%20T.proc.params%28child%3A%20Child%29.void%0A%29%0Awants_at_least_parent%20%3D%20T.let%28%0A%20%20-%3E%28parent%29%20%7Bparent.on_parent%7D%2C%0A%20%20T.proc.params%28parent%3A%20Parent%29.void%0A%29%0A%0Atakes_func%28wants_at_least_child%29%0Atakes_func%28wants_at_least_parent%29%0A%0Atakes_func%28wants_at_least_grandchild%29%20%23%20error)
 
-In this example, `takes_func` requests that it be given an argument that, when
-called, can be given `Child` instances. As we see in the method body of
-`takes_func`, this **includes** `GrandChild` instances, because
-`class GrandChild < Child`.
+In this example, `takes_func` requests that it be given an argument `f` that,
+when called, can be given `Child` instances. As we see in the method body of
+`takes_func`, it's valid to call `f` on both `Child` and `GrandChild` instances
+(`class GrandChild < Child`, so all `GrandChild` instances are also `Child`
+instances).
 
 At the call site, both `wants_at_least_child` and `wants_at_least_parent`
 satisfy the contract that `takes_func` is asking for. In particular, the
@@ -436,6 +444,11 @@ always provide a `Child` instance, the thing provided will always have an
 For that reason, Sorbet is okay treating `T.proc.params(parent: Parent).void` as
 a subtype of `T.proc.params(child: Child).void`, even though `Child` is a
 subtype of `Parent`.
+
+Meanwhile, it's not okay to call `takes_func(wants_at_least_grandchild)`,
+because sometimes `takes_func` will only provide a `Child` instance, which would
+not have the `on_grandchild` method available to call (which is being called
+inside the `wants_at_least_grandchild` function).
 
 When it comes to user-defined generic classes using contravariant type members,
 the cases where this is useful is usually building generic abstractions that are
@@ -491,7 +504,7 @@ takes_int_task = Task[Integer].new {|param| param < 10}
 example(takes_int_task)
 ```
 
-[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20ITask%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20ParamType%20%3D%20type_member%28%3Ain%29%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task%28input%29%3B%20end%0A%0A%20%20sig%20%7Bparams%28input%3A%20T.all%28ParamType%2C%20BasicObject%29%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task_with_logging%28input%29%0A%20%20%20%20Kernel.puts%28input%29%20%20%20%20res%20%3D%20do_task%28input%29%0A%20%20%20%20Kernel.puts%28res%29%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Aclass%20Task%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20include%20ITask%0A%0A%20%20ParamType%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28fn%3A%20T.proc.params%28param%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%29.void%7D%0A%20%20def%20initialize%28%26fn%29%0A%20%20%20%20%40fn%20%3D%20fn%0A%20%20end%0A%0A%20%20sig%20%7Boverride.params%28input%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task%28input%29%3B%20%40fn.call%28input%29%3B%20end%0Aend%0A%0Asig%20%7Bparams%28task%3A%20ITask%5BInteger%5D%29.void%7D%0Adef%20example%28task%29%0A%20%20i%20%3D%200%0A%20%20while%20task.do_task_with_logging%28i%29%0A%20%20%20%20i%20%2B%3D%201%0A%20%20end%0Aend%0A%0Atakes_int_task%20%3D%20Task%5BInteger%5D.new%20%7B%7Cparam%7C%20param%20%3C%2010%7D%0A%0Aexample%28takes_int_task%29)
+[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20ITask%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20ParamType%20%3D%20type_member%28%3Ain%29%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task%28input%29%3B%20end%0A%0A%20%20sig%20%7Bparams%28input%3A%20T.all%28ParamType%2C%20BasicObject%29%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task_with_logging%28input%29%0A%20%20%20%20Kernel.puts%28input%29%0A%20%20%20%20res%20%3D%20do_task%28input%29%0A%20%20%20%20Kernel.puts%28res%29%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Aclass%20Task%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20include%20ITask%0A%0A%20%20ParamType%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28fn%3A%20T.proc.params%28param%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%29.void%7D%0A%20%20def%20initialize%28%26fn%29%0A%20%20%20%20%40fn%20%3D%20fn%0A%20%20end%0A%0A%20%20sig%20%7Boverride.params%28input%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task%28input%29%3B%20%40fn.call%28input%29%3B%20end%0Aend%0A%0Asig%20%7Bparams%28task%3A%20ITask%5BInteger%5D%29.void%7D%0Adef%20example%28task%29%0A%20%20i%20%3D%200%0A%20%20while%20task.do_task_with_logging%28i%29%0A%20%20%20%20i%20%2B%3D%201%0A%20%20end%0Aend%0A%0Atakes_int_task%20%3D%20Task%5BInteger%5D.new%20%7B%7Cparam%7C%20param%20%3C%2010%7D%0A%0Aexample%28takes_int_task%29)
 
 ### Input and output positions
 
@@ -499,12 +512,10 @@ Understanding where covariant and contravariant type members can appear requires
 knowing which places in a method signature are **output** positions, and which
 are **input** positions.
 
-An output position is named as such because it's the position of a method's
-output, like a method signature's `returns`. There are more output positions
-than just the return type of a method though. As an intuition, all positions in
-a signature where the value is produced by some computation in the method's body
-are out positions. This includes values yielded to lambda functions and block
-arguments.
+An obvious output position is a method signature's `returns` annotation, but
+there are more than just that. As an intuition, all positions in a signature
+where the value is produced by some computation in the method's body are out
+positions. This includes values yielded to lambda functions and block arguments.
 
 ```ruby
 module IBox
@@ -538,10 +549,10 @@ In this example, both the result type of the `value` method and the `val`
 parameter that will be yielded to the `blk` parameter of `with_value` are output
 positions.
 
-The intuition for input positions is flipped: they're all positions that would
+(The intuition for input positions is flipped: they're all positions that would
 correspond to an input to the function, instead of all things that the function
 produces. This includes the direct arguments of the method, as well as the
-return values of any lambda functions or blocks passed into the method.
+return values of any lambda functions or blocks passed into the method.)
 
 If it helps, some type systems actually formalize the type of a function as a
 generic something like this:
@@ -572,22 +583,22 @@ def example(fn, x)
 end
 ```
 
-In fact, Sorbet does exactly this. The `T.proc` syntax that Sorbet uses to model
-to model [procs and lambdas](procs.md) is just syntactic sugar. The type
+In the above example, `Fn[Integer, String]` is the type of a function that in
+Sorbet syntax would look like this:
 
 ```ruby
 T.proc.params(arg0: Integer).returns(String)
 ```
 
-is merely syntactic sugar for an applied generic type like this:
-
-```ruby
-Proc1[String, Integer]
-```
+In fact, Sorbet uses exactly this trick. The `T.proc` syntax that Sorbet uses to
+model to model [procs and lambdas](procs.md) is just syntactic sugar for
+something that looks like the `Fn` type above (there are some gotchas around
+functions that take zero parameters or more than one parameter, but the concept
+is the same).
 
 Another intuition which may help knowing which positions are input and output
 positions: treat function return types as `1` and function parameters as `-1`.
-As you pick apart a function type, multiple these numbers together. A positive
+As you pick apart a function type, multiply these numbers together. A positive
 result means the result is an output position, while a negative means it's an
 input.
 
@@ -705,11 +716,11 @@ end
 
 [→ View full example on sorbet.run][abstract_rpc_method]
 
-The snippet above is heavily abbreviated (`type_template` and `fixed`). The full
-example on sorbet.run contains many more details, and it's strongly recommended
-reading.
+The snippet above is heavily abbreviated to demonstrate some new concepts
+(`type_template` and `fixed`). The full example on sorbet.run contains many more
+details, and it's strongly recommended reading.
 
-There are a couple interesting things happening in the snippet above:
+There are a couple interesting things happening in the example above:
 
 - We have a generic interface `AbstractRPCMethod` which says that it's generic
   in `RPCInput` and `RPCOutput`. It then mentions these types in the abstract
@@ -722,15 +733,16 @@ There are a couple interesting things happening in the snippet above:
 
   In the same way, the `type_member` variables declared by the parent must be
   redeclared by the implementing class, where they then become `type_template`.
-  Recall from [`type_member` & `type_template`](#type_member--type_template)
-  that the scope of a `type_member` is all singleton class methods on the given
-  class.
+  Recall from the [`type_member` & `type_template`](#type_member--type_template)
+  section that the scope of a `type_template` is all singleton class methods on
+  the given class.
 
 - In the implementation, `TextDocumentHoverMethod` chooses to provided a
   [`fixed` annotation](#bounds-on-type-members-fixed-upper-lower) on the
   `type_template` definitions. This effectively says that
   `TextDocumentHoverMethod` **always** conforms to the type
-  `AbstractRPCMethod[TextDocumentPositionParams, HoverResponse]`.
+  `AbstractRPCMethod[TextDocumentPositionParams, HoverResponse]`. We'll discuss
+  `fixed` further below.
 
   Then when implementing the `def self.run` method, it can assume that
   `RPCInput` is equivalent to `TextDocumentPositionParams`. This allows it to
@@ -755,7 +767,8 @@ example). There are three annotations for providing bounds to a type member:
 
 - `fixed`: Syntactic sugar for specifying both `lower` and `upper` at the same
   time. Effectively requires that an equivalent type be applied to the type
-  member.
+  member. Sorbet then uses this fact to never require that an explicit type
+  argument be provided to the class.
 
 ```ruby
 class NumericBox
@@ -763,9 +776,17 @@ class NumericBox
   Elem = type_member {{upper: Numeric}}
 end
 
+class IntBox < NumericBox
+  Elem = type_member {{fixed: Integer}}
+end
+
 NumericBox[Integer].new # OK, Integer <: Numeric
 NumericBox[String].new
 #          ^^^^^^ error: `String` is not a subtype of upper bound of `Elem`
+
+IntBox.new
+# ^ Does not need to be invoked like `IntBox[Integer]` because Sorbet can
+#   trivially infer the type argument
 ```
 
 Placing the bound on the type member makes it an error to ever instantiate a
@@ -855,7 +876,8 @@ confusing reason:
 Sorbet cannot have return type inference, because languages that implement
 return type inference take advantage of a compilation step to decide how to call
 the method. Sorbet does not have the luxury (nor the burden) of compiling a
-program before it can be run by the Ruby VM.
+program before it can be run by the Ruby VM, so information present in the type
+system cannot inform how the method is dispatched at runtime.
 
 ### Placing bounds on generic methods
 
