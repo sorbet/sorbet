@@ -56,7 +56,7 @@ getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::Ide
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    result->placeholder = identResp->termLoc.source(gs);
+    result->placeholder = identResp->variable._name.show(gs);
     return result;
 }
 
