@@ -77,7 +77,12 @@ getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::Send
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    result->placeholder = methodNameLoc->source(gs);
+    // TODO(froydnj): this returns `FUNC=` for setters from `attr_accessor`.  we
+    // will disallow renaming such things in renaming proper, but it's not clear
+    // what to do about setters that don't result from `attr_{writer,accessor}`.
+    // Regardless, using the method name seems better than showing `FUNC =`,
+    // which is what we would get from `methodNameLoc.source(gs)`.
+    result->placeholder = sendResp->callerSideName.show(gs);
     return result;
 }
 

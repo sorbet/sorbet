@@ -36,8 +36,8 @@ f = Foo.new
 f.foo
 #  ^ apply-rename: [B] newName: bar placeholderText: foo invalid: true expectedErrorMessage: Sorbet does not support renaming `attr_reader`s
 f.bar = 5
-# ^ apply-rename: [F] newName: bar2 placeholderText: bar invalid: true
+# ^ apply-rename: [F] newName: bar2 placeholderText: bar= invalid: true
 f.baz
 #   ^ apply-rename: [G] newName: baz2 placeholderText: baz invalid: true
 f.baz = 9
-#   ^ apply-rename: [H] newName: baz2 placeholderText: baz invalid: true
+#   ^ apply-rename: [H] newName: baz2 placeholderText: baz= invalid: true
