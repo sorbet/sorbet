@@ -201,7 +201,7 @@ Note that this means that it's not possible to refer to a `type_template`
 variable from an instance method. For a workaround, see the docs for error code
 [5072](error-reference.md#5072).
 
-## `:in`, `:out`, and Variance
+## `:in`, `:out`, and variance
 
 Understanding variance is important for understanding how class-level generics
 (type members) behave. Variance is a type system concept that controls how
@@ -349,7 +349,7 @@ class Box
   # Redeclare the type member, to be compatible with `IBox`
   Elem = type_member
 
-  # Within this class, `Elem` is invariant, so it can also be used
+  # Within this class, `Elem` is invariant, so it can also be used in the input position
   sig {params(value: Elem).void}
   def initialize(value:); @value = value; end
 
