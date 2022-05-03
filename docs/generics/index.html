@@ -1,0 +1,980 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Generic Classes and Methods · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet has syntax for creating generic methods, classes, and interfaces."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Generic Classes and Methods · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet has syntax for creating generic methods, classes, and interfaces."/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Experimental Features</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li><li class="navListItem"><a class="navItem" href="/docs/from-typescript">TypeScript ↔ Sorbet</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/why-type-annotations">Why type annotations?</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">sig</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations (non-sig)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">T.let, T.cast, T.must, T.bind</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types (Integer, String)</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types (T.nilable)</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types (T.any)</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow-Sensitivity (is_a?, nil?)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">T.type_alias</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness (T.absurd)</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types (T.all)</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/generics">Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/generics.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Generic Classes and Methods</h1></header><article><div><span><p>Sorbet has syntax for creating generic methods, classes, and interfaces.</p>
+<h2><a class="anchor" aria-hidden="true" id="implementation-status"></a><a href="#implementation-status" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Implementation status</h2>
+<p>Generics are the most poorly supported feature within Sorbet, by far. Their
+implementation has many known, complicated-to-fix bugs which substantially limit
+their utility.</p>
+<p>We track known bugs in Sorbet’s support for generics in the <a href="https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+milestone%3AGenerics">Generics milestone</a>
+on Sorbet’s issue tracker. Feel free to peruse the existing bugs, as well as
+report new bugs.</p>
+<p>Unfortunately, this abundance of bugs makes implementing sophisticated, generic
+abstractions in Sorbet exceedingly brittle.</p>
+<p>It is imperative to thoroughly test abstractions making use of Sorbet generics.</p>
+<p>The tests you’ll need to write look substantially different from other Ruby
+tests you may be accustomed to writing, because the tests need to deal with what
+code should or should not typecheck, rather that code that should or should not
+run correctly. These tests</p>
+<ul>
+<li><p>Many things that shouldn’t type check <strong>do type check anyways</strong>.</p>
+<p>This is bad because the generic abstraction being built will not necessarily
+provide the guarantees it should. This can give users of the generic
+abstraction false confidence in the type system.</p>
+<p>To mitigate this, write example code that should not type check and double
+check that it doesn’t. Get creative with these tests. Consider writing tests
+that make uncommon use of subtyping, inheritance, mutation, etc.</p>
+<p>(There is nothing built into Sorbet for writing such tests. The easiest
+approach is to manually build small examples using the new API that don’t type
+check, but don’t check the resulting files in (or check them in, but mark them
+<code># typed: ignore</code>, and bump the sigil up temporarily while making changes).
+The diligent may way to automate this by running Sorbet a second time on a
+codebase that includes extra files meant to not type check, asserting that
+Sorbet indeed reports errors.)</p>
+<p>It can also be helpful to use <code>T.reveal_type</code> and/or <code>T.assert_type!</code> to
+inspect the types of intermediate values to see if <code>T.untyped</code> has silently
+snuck in somewhere.</p></li>
+<li><p>Many things <strong>don’t type check when they should</strong>.</p>
+<p>This is bad because it causes confusion and frustration for people attempting
+to use the generic abstraction, not for the person who implemented the
+abstraction. This is especially painful for those who are new to Sorbet (or
+even Ruby), as well as those those who are not intimately familiar with the
+limitations of Sorbet’s generics.</p>
+<p>To mitigate this, “test drive” the abstraction being built. Don’t assume that
+if the implementation type checks that it will work for downstream consumers.
+Get creative and write code as a user would use the abstraction. Encountering
+these errors is not only frustrating for you, but also frustrating for others,
+and incurs a real risk of making people’s first experience with Sorbet unduly
+negative.</p></li>
+</ul>
+<p>Both of these outcomes are bad, and both are unfortunately quite common. When
+building new generics abstractions, please keep these in mind. We apologize for
+the inconvenience this causes.</p>
+<p>As with all bugs in Sorbet, when you encounter them <a href="https://github.com/sorbet/sorbet/issues/new/choose">please report
+them</a>. See the list of known bugs here:</p>
+<p>→ <a href="https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+milestone%3AGenerics">Generics milestone</a></p>
+<h2><a class="anchor" aria-hidden="true" id="basic-syntax"></a><a href="#basic-syntax" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basic syntax</h2>
+<p>The basic syntax for class generics in Sorbet looks like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: strict</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span></span>
+  extend T::Sig
+  extend T::Generic <span class="hljs-comment"># Provides `type_member` helper</span>
+
+  Elem = type_member <span class="hljs-comment"># Makes the `Box` class generic</span>
+
+  <span class="hljs-comment"># References the class-level generic `Elem`</span>
+  sig {params(<span class="hljs-symbol">val:</span> Elem).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">val:</span>)</span></span>; @val = val; <span class="hljs-keyword">end</span>
+  sig {returns(Elem)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">val</span>;</span> @val; <span class="hljs-keyword">end</span>
+  sig {params(<span class="hljs-symbol">val:</span> Elem).returns(Elem)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">val=</span><span class="hljs-params">(val)</span></span>; @val = val; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+int_box = Box[Integer].new(<span class="hljs-symbol">val:</span> <span class="hljs-number">0</span>)
+T.reveal_type(int_box) <span class="hljs-comment"># `Box[Integer]`</span>
+
+T.reveal_type(int_box.val) <span class="hljs-comment"># `Integer`</span>
+
+int_box.val += <span class="hljs-number">1</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%20%23%20Provides%20%60type_member%60%20helper%0A%0A%20%20Elem%20%3D%20type_member%20%23%20Makes%20the%20%60Box%60%20class%20generic%0A%0A%20%20%23%20References%20the%20class-level%20generic%20%60Elem%60%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28val%3A%29%3B%20%40val%20%3D%20val%3B%20end%0A%20%20sig%20%7Breturns%28Elem%29%7D%0A%20%20def%20val%3B%20%40val%3B%20end%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20val%3D%28val%29%3B%20%40val%20%3D%20val%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28val%3A%200%29%0AT.reveal_type%28int_box%29%20%23%20%60Box%5BInteger%5D%60%0A%0AT.reveal_type%28int_box.val%29%20%23%20%60Integer%60%0A%0Aint_box.val%20%2B%3D%201">→ View on sorbet.run</a></p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+extend T::Sig
+
+sig <span class="hljs-keyword">do</span>
+  <span class="hljs-comment"># `extend T::Generic` is not required just to use `type_parameters`</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(
+      <span class="hljs-comment"># The block can return anything</span>
+      <span class="hljs-symbol">blk:</span> T.proc.returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+    )
+    <span class="hljs-comment"># The method returns whatever the block returns</span>
+    .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">with_timer</span><span class="hljs-params">(&amp;blk)</span></span>
+  start = Time.now
+  res = <span class="hljs-keyword">yield</span>
+  duration = Time.now - start
+  puts <span class="hljs-string">"Running block took <span class="hljs-subst">#{duration.round(<span class="hljs-number">1</span>)}</span>s"</span>
+  res
+<span class="hljs-keyword">end</span>
+
+res = with_timer <span class="hljs-keyword">do</span>
+  sleep <span class="hljs-number">2</span>
+  puts <span class="hljs-string">'hello, world!'</span>
+  <span class="hljs-comment"># Block returns an Integer</span>
+  <span class="hljs-number">123</span>
+<span class="hljs-keyword">end</span>
+<span class="hljs-comment"># ... therefore the method returns an Integer</span>
+T.reveal_type(res) <span class="hljs-comment"># `Integer`</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20blk%3A%20T.proc.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20with_timer%28%26blk%29%0A%20%20start%20%3D%20Time.now%0A%20%20res%20%3D%20yield%0A%20%20duration%20%3D%20Time.now%20-%20start%0A%20%20puts%20%22Running%20block%20took%20%23%7Bduration.round%281%29%7Ds%22%0A%20%20res%0Aend%0A%0Ares%20%3D%20with_timer%20do%0A%20%20sleep%202%0A%20%20puts%20'hello%2C%20world!'%0A%20%20123%0Aend%0AT.reveal_type%28res%29">→ View on sorbet.run</a></p>
+<h2><a class="anchor" aria-hidden="true" id="generics-and-runtime-checks"></a><a href="#generics-and-runtime-checks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Generics and runtime checks</h2>
+<p>Recall that Sorbet is not only a static type checker, but also a system for
+<a href="/docs/runtime">validating types at runtime</a>.</p>
+<p>However, Sorbet completely erases generic types at runtime, both for classes and
+methods. When Sorbet sees a signature like <code>Box[Integer]</code>, at runtime it will
+<strong>only</strong> check whether an argument has class <code>Box</code> (or a subtype of <code>Box</code>), but
+nothing about the types that argument has been applied to. Generic types are
+only checked statically. Similarly, if Sorbet sees a signature like</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(
+      <span class="hljs-symbol">x:</span> T.type_parameter(<span class="hljs-symbol">:U</span>),
+      <span class="hljs-symbol">y:</span> T.type_parameter(<span class="hljs-symbol">:U</span>),
+    )
+    .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x, y)</span></span>; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sorbet will not check that <code>x</code> and <code>y</code> are the same class at runtime.</p>
+<p>Since generics are only checked statically, this removes using tests as a way to
+guard against misuses of <a href="/docs/untyped"><code>T.untyped</code></a>. For example, Sorbet will
+neither report a static error nor a runtime error on this example:</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">xs:</span> Box[Integer]).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(xs)</span></span>; <span class="hljs-keyword">end</span>
+
+untyped_box = Box[T.untyped].new(<span class="hljs-symbol">val:</span> <span class="hljs-string">'not an int'</span>)
+foo(untyped_box)
+<span class="hljs-comment">#   ^^^^^^^^^^^ no static error, AND no runtime error!</span>
+</code></pre>
+<p>Another consequence of having erased generics is that things like this will not
+work:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-keyword">if</span> box.is_a?(Box[Integer]) <span class="hljs-comment"># error!</span>
+  <span class="hljs-comment"># do something when `box` contains an Integer</span>
+<span class="hljs-keyword">elsif</span> box.is_a?(Box[String]) <span class="hljs-comment"># error!</span>
+  <span class="hljs-comment"># do something when `box` contains a String</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Sorbet will attempt to detect cases where it looks like this is happening and
+report a static error, but it cannot do so in all cases.</p>
+<p>The workaround is to check only the class type of the generic class, and check
+any element type before it’s used:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-keyword">if</span> box.is_a?(Box)
+  val = box.val
+  <span class="hljs-keyword">if</span> val.is_a?(Integer)
+    <span class="hljs-comment"># ...</span>
+  <span class="hljs-keyword">elsif</span> val.is_a?(String)
+    <span class="hljs-comment"># ...</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="type_member--type_template"></a><a href="#type_member--type_template" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>type_member</code> &amp; <code>type_template</code></h2>
+<p>The <code>type_member</code> and <code>type_template</code> annotations declare class-level generic
+type variables.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  X = type_member
+  Y = type_template
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Type variables, like normal Ruby variables, have a scope:</p>
+<ul>
+<li><p>The scope of a <code>type_member</code> is all instance methods on the given class. They
+are most commonly used for generic container classes, because each instance of
+the class may have a separate type substituted for the type variable.</p></li>
+<li><p>The scope of a <code>type_template</code> is all singleton class methods on the given
+class. Since a class only has one singleton class, <code>type_template</code> variables
+are usually used as a way for an abstract parent class to require a concrete
+child class to pick a specific type that all instances agree on.</p></li>
+</ul>
+<p>One way to think about it is that <code>type_template</code> is merely a shorter name for
+something which could have also been named <code>singleton_class_type_member</code>. In
+Sorbet’s implementation, <code>type_member</code> and <code>type_template</code> are treated almost
+exactly the same.</p>
+<p>Note that this means that it’s not possible to refer to a <code>type_template</code>
+variable from an instance method. For a workaround, see the docs for error code
+<a href="/docs/error-reference#5072">5072</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="in-out-and-variance"></a><a href="#in-out-and-variance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>:in</code>, <code>:out</code>, and variance</h2>
+<p>Understanding variance is important for understanding how <code>type_member</code>'s and
+<code>type_template</code>'s behave. Variance is a type system concept that controls how
+generics interact with subtyping. Specifically, <a href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)">from Wikipedia</a>:</p>
+<p><em>“Variance refers to how subtyping between more complex types relates to
+subtyping between their components.”</em></p>
+<p>Variance is a property of each <code>type_member</code> and <code>type_template</code> (not the
+generic class itself, because generic classes may have more than one such type
+variable). There are three kinds of variance relationships:</p>
+<ul>
+<li><strong>invariant</strong> (subtyping relationships are ignored for this type variable)</li>
+<li><strong>covariant</strong> (subtyping order is preserved for this type variable)</li>
+<li><strong>contravariant</strong> (subtyping order is reversed for this type variable)</li>
+</ul>
+<p>Here is the syntax Sorbet uses for these concepts:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Example</span></span>
+  <span class="hljs-comment"># invariant type member</span>
+  X = type_member
+
+  <span class="hljs-comment"># covariant type member</span>
+  Y = type_member(<span class="hljs-symbol">:out</span>)
+
+  <span class="hljs-comment"># contravariant type member</span>
+  Z = type_member(<span class="hljs-symbol">:in</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, we would say:</p>
+<ul>
+<li>&quot;<code>Example</code> is invariant in <code>X</code>&quot;,</li>
+<li>&quot;<code>Example</code> is covariant in <code>Y</code>&quot;, and</li>
+<li>&quot;<code>Example</code> is contravariant in <code>Z</code>&quot;, and</li>
+</ul>
+<p>For those who have never encountered variance in a type system before, it may be
+useful to skip down to
+<a href="#why-does-tracking-variance-matter">Why does tracking variance matter?</a>, which
+motivates why type systems (Sorbet included) place such emphasis on variance.</p>
+<h3><a class="anchor" aria-hidden="true" id="invariance"></a><a href="#invariance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Invariance</h3>
+<p>(<em>For convenience throughout these docs, we use the annotation <code>&lt;:</code> to claim
+that one type is a subtype of another type.</em>)</p>
+<p>By default, <code>type_member</code>'s and <code>type_template</code>'s are invariant. Here is an
+example of what that means:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span></span>
+  extend T::Generic
+  <span class="hljs-comment"># no variance annotation, so invariant by default</span>
+  Elem = type_member
+<span class="hljs-keyword">end</span>
+
+int_box = Box[Integer].new
+
+<span class="hljs-comment"># Integer &lt;: Numeric, because Integer inherits from Numeric, however:</span>
+T.let(int_box, Box[Numeric])
+<span class="hljs-comment"># ^ error: Argument does not have asserted type</span>
+
+<span class="hljs-comment"># Elem is invariant, so the claim</span>
+<span class="hljs-comment">#   Box[Integer] &lt;: Box[Numeric]</span>
+<span class="hljs-comment"># is not true</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3AGeneric%0A%20%20%23%20no%20variance%20annotation%2C%20so%20invariant%20by%20default%0A%20%20Elem%20%3D%20type_member%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%0A%0A%23%20Integer%20%3C%3A%20Numeric%2C%20because%20Integer%20inherits%20from%0A%23%20Numeric%2C%20however%3A%0AT.let%28int_box%2C%20Box%5BNumeric%5D%29%0A%23%20%5E%20error%3A%20Argument%20does%20not%20have%20asserted%20type%0A%0A%23%20Elem%20is%20invariant%2C%20so%20the%20claim%0A%23%20%20%20Box%5BInteger%5D%20%3C%3A%20Box%5BNumeric%5D%0A%23%20is%20not%20true">→ View on sorbet.run</a></p>
+<p>Since <code>Elem</code> is invariant (has no explicit variance annotation), Sorbet reports
+an error on the <code>T.let</code> attempting to widen the type of <code>int_box</code> to
+<code>Box[Numeric]</code>. Two objects of a given generic class with an invariant type
+member (<code>Box</code> in this example) are only subtypes if the types bound to their
+invariant <code>type_member</code>'s are <strong>equivalent</strong>.</p>
+<p>Invariant <code>type_member</code>'s and <code>type_template</code>'s, unlike covariant and
+contravariant ones, may be used in <strong>both</strong> input and output positions within
+method signatures. This nuance is explained in more detail in the next sections
+about covariance and contravariance.</p>
+<blockquote>
+<p><strong>Note</strong>: all <code>type_member</code>'s and <code>type_template</code>'s in a Ruby <code>class</code> must be
+invariant. Only <code>type_member</code>'s in a Ruby <code>module</code> are allowed to be covariant
+or contravariant. See the docs for error code <a href="/docs/error-reference#5016">5016</a>
+for more information.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="covariance-out"></a><a href="#covariance-out" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Covariance (<code>:out</code>)</h3>
+<p>Covariant type variables preserve the subtyping relationship. Specifically, if
+the type <code>Child</code> is a subtype of the type <code>Parent</code>, then the type <code>M[Child]</code> is
+a subtype of the type <code>M[Parent]</code> if the type member of <code>M</code> is covariant. In
+symbols:</p>
+<pre><code class="hljs">Child &lt;: <span class="hljs-keyword">Parent</span>  ==&gt;  M[Child] &lt;: M[<span class="hljs-keyword">Parent</span>]
+</code></pre>
+<p>Note that only a Ruby <code>module</code> (not a <code>class</code>) may have a covariant
+<code>type_member</code>. (See the docs for error code <a href="/docs/error-reference#5016">5016</a> for
+more information.) Note that since <code>type_template</code> creates a type variable
+scoped to a singleton class, <code>type_template</code> can never be covariant (because all
+singleton classes are classes, even singleton classes of modules).</p>
+<p>Here’s an example of a module that has a covariant type member:</p>
+<pre><code class="hljs css language-ruby">extend T::Sig
+
+<span class="hljs-comment"># covariant `Box` interface</span>
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IBox</span></span>
+  extend T::Generic
+  <span class="hljs-comment"># `:out` declares this type member as covariant</span>
+  Elem = type_member(<span class="hljs-symbol">:out</span>)
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">int_box:</span> IBox[Integer]).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(int_box)</span></span>
+  T.let(int_box, IBox[Numeric]) <span class="hljs-comment"># OK</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this case, the <code>T.let</code> assertion reports no static errors because
+<code>Integer &lt;: Numeric</code>, and therefore <code>IBox[Integer] &lt;: IBox[Numeric]</code>.</p>
+<p>Covariant type members may only appear in <strong>output</strong> positions (thus the <code>:out</code>
+annotation). For more information about what an output position is, see
+<a href="#input-and-output-positions">Input and output positions</a> below.</p>
+<p>In practice, covariant type members are predominantly useful for creating
+interfaces that produce values of the specified type. For example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IBox</span></span>
+  extend T::Sig
+  extend T::Generic
+  abstract!
+
+  <span class="hljs-comment"># Covariant type member</span>
+  Elem = type_member(<span class="hljs-symbol">:out</span>)
+
+  <span class="hljs-comment"># Elem can only be used in output position</span>
+  sig {abstract.returns(Elem)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span></span>
+  extend T::Sig
+  extend T::Generic
+
+  <span class="hljs-comment"># Implement the `IBox` interface</span>
+  <span class="hljs-keyword">include</span> IBox
+
+  <span class="hljs-comment"># Redeclare the type member, to be compatible with `IBox`</span>
+  Elem = type_member
+
+  <span class="hljs-comment"># Within this class, `Elem` is invariant, so it can also be used in the input position</span>
+  sig {params(<span class="hljs-symbol">value:</span> Elem).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(<span class="hljs-symbol">value:</span>)</span></span>; @value = value; <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># Implement the `value` method from `IBox`</span>
+  sig {override.returns(Elem)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> @value; <span class="hljs-keyword">end</span>
+
+  <span class="hljs-comment"># Add the ability to update the value</span>
+  <span class="hljs-comment"># (allowed because `Elem` is invariant within this class)</span>
+  sig {params(<span class="hljs-symbol">value:</span> Elem).returns(Elem)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value=</span><span class="hljs-params">(value)</span></span>; @value = value; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0A%0Amodule%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20%23%20Covariant%20type%20member%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20%23%20Elem%20can%20only%20be%20used%20in%20output%20position%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0Aend%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20%23%20Implement%20the%20%60IBox%60%20interface%0A%20%20include%20IBox%0A%0A%20%20%23%20Redeclare%20the%20type%20member%2C%20to%20be%20compatible%20with%20%60IBox%60%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20%23%20Within%20this%20class%2C%20%60Elem%60%20is%20invariant%2C%20so%20it%20can%20also%20be%20used%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%3A%29%3B%20%40value%20%3D%20value%3B%20end%0A%0A%20%20%23%20Implement%20the%20%60value%60%20method%20from%20%60IBox%60%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0A%0A%20%20%23%20Add%20the%20ability%20to%20update%20the%20value%20%28allowed%0A%20%20%23%20because%20%60Elem%60%20is%20invariant%20within%20this%20class%29%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20value%3D%28value%29%3B%20%40value%20%3D%20value%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28value%3A%200%29%0A%0A%23%20not%20allowed%20%28attempts%20to%20widen%20type%2C%0A%23%20but%20%60Box%3A%3AElem%60%20is%20invariant%29%0Aint_or_str_box%20%3D%20T.let%28int_box%2C%20Box%5BT.any%28Integer%2C%20String%29%5D%29%0A%0A%23%20no%20error%20reported%20here%0Aint_or_str_box.value%20%3D%20''%0A%0AT.reveal_type%28int_box.value%29%0A%23%20Sorbet%20reveals%3A%20%60Integer%60%0A%23%20Actual%20type%20at%20runtime%3A%20%60String%60">→ View on sorbet.run</a></p>
+<p>Note how in the above example, <code>Box</code> includes <code>IBox</code>, meaning that <code>Box</code> is a
+child of <code>IBox</code>. Children of generic classes or modules must always redeclare
+any type members declared by the parent, in the same order. The child must
+either copy the parent’s specified variance or redeclare it as invariant. When
+the child is a <code>class</code> (not a <code>module</code>), redeclaring it as invariant is the
+<strong>only</strong> option.</p>
+<h3><a class="anchor" aria-hidden="true" id="contravariance-in"></a><a href="#contravariance-in" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Contravariance (<code>:in</code>)</h3>
+<p>Contravariant type parameters <strong>reverse</strong> the subtyping relationship.
+Specifically, if the type <code>Child</code> is a subtype of the type <code>Parent</code>, then type
+<code>M[Parent]</code> is a subtype of the type <code>M[Child]</code> if the type member of <code>M</code> is
+contravariant. In symbols:</p>
+<pre><code class="hljs">Child &lt;: <span class="hljs-keyword">Parent</span>  ==&gt;  M[<span class="hljs-keyword">Parent</span>] &lt;: M[Child]
+</code></pre>
+<p>Contravariance is <strong>quite</strong> unintuitive for most people. Luckily, contravariance
+is not unique to Sorbet—all type systems that have both subtyping relationships
+and generics must grapple with variance, contravariance included, so there is a
+lot written about it elsewhere online. It maybe even be helpful to read about
+contravariance in a language you already have extensive familiarity with, as
+many of the concepts will transfer to Sorbet.</p>
+<p>The way to understand contravariance is by understanding which function types
+are subtypes of other function types. For example:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">f:</span> T.proc.params(<span class="hljs-symbol">x:</span> Child).void
+  )
+  .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_func</span><span class="hljs-params">(f)</span></span>
+  f.call(Child.new)
+  f.call(GrandChild.new)
+<span class="hljs-keyword">end</span>
+
+wants_at_least_parent = T.let(
+  -&gt;(parent) {parent.on_parent},
+  T.proc.params(<span class="hljs-symbol">parent:</span> Parent).void
+)
+takes_func(wants_at_least_parent) <span class="hljs-comment"># OK</span>
+
+wants_at_least_child = T.let(
+  -&gt;(child) {child.on_child},
+  T.proc.params(<span class="hljs-symbol">child:</span> Child).void
+)
+takes_func(wants_at_least_child) <span class="hljs-comment"># OK</span>
+
+wants_at_least_grandchild = T.let(
+  -&gt;(grandchild) {grandchild.on_grandchild},
+  T.proc.params(<span class="hljs-symbol">grandchild:</span> GrandChild).void
+)
+takes_func(wants_at_least_grandchild) <span class="hljs-comment"># error!</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Parent%0A%20%20def%20on_parent%3B%20end%0Aend%0Aclass%20Child%20%3C%20Parent%0A%20%20def%20on_child%3B%20end%0Aend%0Aclass%20GrandChild%20%3C%20Child%0A%20%20def%20on_grandchild%3B%20end%0Aend%0A%0Asig%20do%0A%20%20params%28%0A%20%20%20%20f%3A%20T.proc.params%28x%3A%20Child%29.void%0A%20%20%29%0A%20%20.void%0Aend%0Adef%20takes_func%28f%29%0A%20%20f.call%28Child.new%29%0A%20%20f.call%28GrandChild.new%29%0Aend%0A%0Awants_at_least_grandchild%20%3D%20T.let%28%0A%20%20-%3E%28grandchild%29%20%7Bgrandchild.on_grandchild%7D%2C%0A%20%20T.proc.params%28grandchild%3A%20GrandChild%29.void%0A%29%0Awants_at_least_child%20%3D%20T.let%28%0A%20%20-%3E%28child%29%20%7Bchild.on_child%7D%2C%0A%20%20T.proc.params%28child%3A%20Child%29.void%0A%29%0Awants_at_least_parent%20%3D%20T.let%28%0A%20%20-%3E%28parent%29%20%7Bparent.on_parent%7D%2C%0A%20%20T.proc.params%28parent%3A%20Parent%29.void%0A%29%0A%0Atakes_func%28wants_at_least_child%29%0Atakes_func%28wants_at_least_parent%29%0A%0Atakes_func%28wants_at_least_grandchild%29%20%23%20error">→ View full example on sorbet.run</a></p>
+<p>In this example, <code>takes_func</code> requests that it be given an argument <code>f</code> that,
+when called, can be given <code>Child</code> instances. As we see in the method body of
+<code>takes_func</code>, it’s valid to call <code>f</code> on both <code>Child</code> and <code>GrandChild</code> instances
+(<code>class GrandChild &lt; Child</code>, so all <code>GrandChild</code> instances are also <code>Child</code>
+instances).</p>
+<p>At the call site, both <code>wants_at_least_child</code> and <code>wants_at_least_parent</code>
+satisfy the contract that <code>takes_func</code> is asking for. In particular, the
+<code>wants_at_least_parent</code> is fine being given <strong>any</strong> instance, as long as it’s
+okay to call of <code>parnet.on_parent</code> (because of inheritance, both <code>Child</code> and
+<code>GrandChild</code> have this method). Since <code>takes_func</code> guarantees that it will
+always provide a <code>Child</code> instance, the thing provided will always have an
+<code>on_parent</code> method defined.</p>
+<p>For that reason, Sorbet is okay treating <code>T.proc.params(parent: Parent).void</code> as
+a subtype of <code>T.proc.params(child: Child).void</code>, even though <code>Child</code> is a
+subtype of <code>Parent</code>.</p>
+<p>Meanwhile, it’s not okay to call <code>takes_func(wants_at_least_grandchild)</code>,
+because sometimes <code>takes_func</code> will only provide a <code>Child</code> instance, which would
+not have the <code>on_grandchild</code> method available to call (which is being called
+inside the <code>wants_at_least_grandchild</code> function).</p>
+<p>When it comes to user-defined generic classes using contravariant type members,
+the cases where this is useful is usually building generic abstractions that are
+“function like.” For example, maybe a generic task-processing abstraction:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">ITask</span></span>
+  extend T::Sig
+  extend T::Generic
+  abstract!
+
+  ParamType = type_member(<span class="hljs-symbol">:in</span>)
+
+  sig {abstract.params(<span class="hljs-symbol">input:</span> ParamType).returns(T::Boolean)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_task</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
+
+  sig {params(<span class="hljs-symbol">input:</span> T.all(ParamType, BasicObject)).returns(T::Boolean)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_task_with_logging</span><span class="hljs-params">(input)</span></span>
+    Kernel.puts(input)
+    res = do_task(input)
+    Kernel.puts(res)
+    res
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Task</span></span>
+  extend T::Sig
+  extend T::Generic
+
+  <span class="hljs-keyword">include</span> ITask
+
+  ParamType = type_member
+
+  sig {params(<span class="hljs-symbol">fn:</span> T.proc.params(<span class="hljs-symbol">param:</span> ParamType).returns(T::Boolean)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(&amp;fn)</span></span>
+    @fn = fn
+  <span class="hljs-keyword">end</span>
+
+  sig {override.params(<span class="hljs-symbol">input:</span> ParamType).returns(T::Boolean)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">do_task</span><span class="hljs-params">(input)</span></span>; @fn.call(input); <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">task:</span> ITask[Integer]).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(task)</span></span>
+  i = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">while</span> task.do_task_with_logging(i)
+    i += <span class="hljs-number">1</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+takes_int_task = Task[Integer].new {<span class="hljs-params">|param|</span> param &lt; <span class="hljs-number">10</span>}
+
+example(takes_int_task)
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20ITask%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20ParamType%20%3D%20type_member%28%3Ain%29%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task%28input%29%3B%20end%0A%0A%20%20sig%20%7Bparams%28input%3A%20T.all%28ParamType%2C%20BasicObject%29%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task_with_logging%28input%29%0A%20%20%20%20Kernel.puts%28input%29%0A%20%20%20%20res%20%3D%20do_task%28input%29%0A%20%20%20%20Kernel.puts%28res%29%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Aclass%20Task%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20include%20ITask%0A%0A%20%20ParamType%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28fn%3A%20T.proc.params%28param%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%29.void%7D%0A%20%20def%20initialize%28%26fn%29%0A%20%20%20%20%40fn%20%3D%20fn%0A%20%20end%0A%0A%20%20sig%20%7Boverride.params%28input%3A%20ParamType%29.returns%28T%3A%3ABoolean%29%7D%0A%20%20def%20do_task%28input%29%3B%20%40fn.call%28input%29%3B%20end%0Aend%0A%0Asig%20%7Bparams%28task%3A%20ITask%5BInteger%5D%29.void%7D%0Adef%20example%28task%29%0A%20%20i%20%3D%200%0A%20%20while%20task.do_task_with_logging%28i%29%0A%20%20%20%20i%20%2B%3D%201%0A%20%20end%0Aend%0A%0Atakes_int_task%20%3D%20Task%5BInteger%5D.new%20%7B%7Cparam%7C%20param%20%3C%2010%7D%0A%0Aexample%28takes_int_task%29">→ View full example on sorbet.run</a></p>
+<h3><a class="anchor" aria-hidden="true" id="input-and-output-positions"></a><a href="#input-and-output-positions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Input and output positions</h3>
+<p>Understanding where covariant and contravariant type members can appear requires
+knowing which places in a method signature are <strong>output</strong> positions, and which
+are <strong>input</strong> positions.</p>
+<p>An obvious output position is a method signature’s <code>returns</code> annotation, but
+there are more than just that. As an intuition, all positions in a signature
+where the value is produced by some computation in the method’s body are output
+positions. This includes values yielded to lambda functions and block arguments.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IBox</span></span>
+  extend T::Sig
+  extend T::Generic
+  abstract!
+
+  Elem = type_member(<span class="hljs-symbol">:out</span>)
+
+  sig {abstract.returns(Elem)}
+  <span class="hljs-comment">#                     ^^^^ output position</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">value</span>;</span> <span class="hljs-keyword">end</span>
+
+  sig <span class="hljs-keyword">do</span>
+    type_parameters(<span class="hljs-symbol">:U</span>)
+      .params(
+        <span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">val:</span> Elem).returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+        <span class="hljs-comment">#                       ^^^^ output position</span>
+      )
+      .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">with_value</span><span class="hljs-params">(&amp;blk)</span></span>
+    <span class="hljs-keyword">yield</span> value
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20%23%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%20output%20position%0A%20%20def%20value%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20type_parameters%28%3AU%29%0A%20%20%20%20%20%20.params%28%0A%20%20%20%20%20%20%20%20blk%3A%20T.proc.params%28val%3A%20Elem%29.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%20%20%20%20%23%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%20output%20position%0A%20%20%20%20%20%20%29%0A%20%20%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0A%20%20end%0A%20%20def%20with_value%28%26blk%29%0A%20%20%20%20yield%20value%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
+<p>In this example, both the result type of the <code>value</code> method and the <code>val</code>
+parameter that will be yielded to the <code>blk</code> parameter of <code>with_value</code> are output
+positions.</p>
+<p>(The intuition for input positions is flipped: they’re all positions that would
+correspond to an input to the function, instead of all things that the function
+produces. This includes the direct arguments of the method, as well as the
+return values of any lambda functions or blocks passed into the method.)</p>
+<p>If it helps, some type systems actually formalize the type of a function as a
+generic something like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Fn</span></span>
+  extend T::Sig
+  extend T::Generic
+  interface!
+
+  Input = type_member(<span class="hljs-symbol">:in</span>)
+  Output = type_member(<span class="hljs-symbol">:out</span>)
+
+  sig {abstract.params(<span class="hljs-symbol">input:</span> Input).returns(Oputput)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">call</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">fn:</span> Fn[Integer, String],
+    <span class="hljs-symbol">x:</span> Integer,
+  )
+  .returns(String)
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(fn, x)</span></span>
+  res = fn.call(x)
+  res
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In the above example, <code>Fn[Integer, String]</code> is the type of a function that in
+Sorbet syntax would look like this:</p>
+<pre><code class="hljs css language-ruby">T.proc.params(<span class="hljs-symbol">arg0:</span> Integer).returns(String)
+</code></pre>
+<p>In fact, Sorbet uses exactly this trick. The <code>T.proc</code> syntax that Sorbet uses to
+model to model <a href="/docs/procs">procs and lambdas</a> is just syntactic sugar for
+something that looks like the <code>Fn</code> type above (there are some gotchas around
+functions that take zero parameters or more than one parameter, but the concept
+is the same).</p>
+<p>Another intuition which may help knowing which positions are input and output
+positions: treat function return types as <code>1</code> and function parameters as <code>-1</code>.
+As you pick apart a function type, multiply these numbers together. A positive
+result means the result is an output position, while a negative means it’s an
+input.</p>
+<pre><code class="hljs css language-ruby">-<span class="hljs-number">1</span>   +<span class="hljs-number">1</span>
+ A -&gt; B
+
+┌── -<span class="hljs-number">1</span> ──┐    ┌── +<span class="hljs-number">1</span> ──┐
+ -<span class="hljs-number">1</span>   +<span class="hljs-number">1</span>       -<span class="hljs-number">1</span>   +<span class="hljs-number">1</span>
+( C -&gt; D ) -&gt; ( E -&gt; F )
+</code></pre>
+<p>In the first example, a simple function from type <code>A</code> to type <code>B</code>, <code>B</code> is the
+result of the function, so it’s clearly in an output position. Similarly, <code>A</code> is
+in an input position.</p>
+<p>The second example is the type of a function that takes a function as a
+parameter, having type <code>C -&gt; D</code>, and produces another function as its output,
+having type <code>E -&gt; F</code>. In this example, <code>C</code> is in the input position of an input
+position, making type <code>C</code> actually be in output position overall
+(<code>-1 × -1 = +1</code>). <code>D</code> is in the output position of an input position, and <code>E</code> is
+in the input position of an output position, so they’re both in input positions
+(<code>-1 × +1 = -1</code>). <code>F</code> is in the output position of an output position, so it’s
+also in output position (<code>+1 × +1 = +1</code>).</p>
+<h3><a class="anchor" aria-hidden="true" id="why-does-tracking-variance-matter"></a><a href="#why-does-tracking-variance-matter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why does tracking variance matter?</h3>
+<p>To get a sense for why these Sorbet places constraints on where covariant and
+contravariant type members can appear within signatures, consider this example,
+which continues the example from the <a href="#covariance">covariance section</a> above:</p>
+<pre><code class="hljs css language-ruby">int_box = Box[Integer].new(<span class="hljs-symbol">value:</span> <span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># not allowed (attempts to widen type,</span>
+<span class="hljs-comment"># but `Box::Elem` is invariant)</span>
+int_or_str_box = T.let(int_box, Box[T.any(Integer, String)])
+
+<span class="hljs-comment"># no error reported here</span>
+int_or_str_box.value = <span class="hljs-string">''</span>
+
+T.reveal_type(int_box.value)
+<span class="hljs-comment"># Sorbet reveals: `Integer`</span>
+<span class="hljs-comment"># Actual type at runtime: `String`</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0A%0Amodule%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20%23%20Covariant%20type%20member%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20%23%20Elem%20can%20only%20be%20used%20in%20output%20position%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0Aend%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20%23%20Implement%20the%20%60IBox%60%20interface%0A%20%20include%20IBox%0A%0A%20%20%23%20Redeclare%20the%20type%20member%2C%20to%20be%20compatible%20with%20%60IBox%60%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20%23%20Within%20this%20class%2C%20%60Elem%60%20is%20invariant%2C%20so%20it%20can%20also%20be%20used%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%3A%29%3B%20%40value%20%3D%20value%3B%20end%0A%0A%20%20%23%20Implement%20the%20%60value%60%20method%20from%20%60IBox%60%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0A%0A%20%20%23%20Add%20the%20ability%20to%20update%20the%20value%20%28allowed%0A%20%20%23%20because%20%60Elem%60%20is%20invariant%20within%20this%20class%29%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20value%3D%28value%29%3B%20%40value%20%3D%20value%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28value%3A%200%29%0A%0A%23%20not%20allowed%20%28attempts%20to%20widen%20type%2C%0A%23%20but%20%60Box%3A%3AElem%60%20is%20invariant%29%0Aint_or_str_box%20%3D%20T.let%28int_box%2C%20Box%5BT.any%28Integer%2C%20String%29%5D%29%0A%0A%23%20no%20error%20reported%20here%0Aint_or_str_box.value%20%3D%20''%0A%0AT.reveal_type%28int_box.value%29%0A%23%20Sorbet%20reveals%3A%20%60Integer%60%0A%23%20Actual%20type%20at%20runtime%3A%20%60String%60">→ View full example on sorbet.run</a></p>
+<p>The example starts with a <code>Box[Integer]</code>. Obviously, Sorbet should only allow
+this <code>Box</code> to store <code>Integer</code> values, and when reading values out of this box we
+should also be guaranteed to get an <code>Integer</code>.</p>
+<p>If Sorbet allowed widening the type with the <code>T.let</code> in the example, then
+<code>int_or_str_box</code> would have type <code>Box[T.any(Integer, String)]</code>. Sensibly, Sorbet
+allows using <code>int_or_str_box</code> to write the value <code>''</code> into the <code>value</code> attribute
+on the <code>Box</code>.</p>
+<p>But that’s a contradiction! <code>int_box</code> and <code>int_or_str_box</code> are the same value at
+runtime. The variables have different names and different types, but they’re the
+same object in memory at runtime. On the last line when we read <code>int_box.value</code>,
+instead of reading <code>0</code>, we’ll read a value of <code>''</code>, which is bad—Sorbet
+statically declares that <code>int_box.value</code> has type <code>Integer</code>, which is out of
+sync with the runtime reality.</p>
+<p>This is what variance checks buy in a type system: they prevent abstractions
+from being misused in ways that would otherwise compromise the integrity of the
+type checker’s predictions.</p>
+<h2><a class="anchor" aria-hidden="true" id="a-type_template-example"></a><a href="#a-type_template-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>A <code>type_template</code> example</h2>
+<p>So far, the discussion in this guide has focused on <code>type_member</code>'s, which tend
+to be most useful for building things like generic containers.</p>
+<p>The use cases for <code>type_template</code>'s tend to look different: they tend to be used
+when a class wants to have something like an “abstract” type that is filled in
+by child classes. Here’s an example of an abstract RPC (remote procedure call)
+interface, which uses <code>type_template</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">AbstractRPCMethod</span></span>
+  extend T::Sig
+  extend T::Generic
+
+  abstract!
+
+  <span class="hljs-comment"># Note how these use `type_member` in this interface module</span>
+  <span class="hljs-comment"># They become `type_template` because we `extend` this module</span>
+  <span class="hljs-comment"># in the child class</span>
+  RPCInput = type_member
+  RPCOutput = type_member
+
+  sig {abstract.params(<span class="hljs-symbol">input:</span> RPCInput).returns(RPCOutput)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">run</span><span class="hljs-params">(input)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TextDocumentHoverMethod</span></span>
+  extend T::Sig
+  extend T::Generic
+
+  <span class="hljs-comment"># Use `extend` to start implementing the interface</span>
+  extend AbstractRPCMethod
+
+  <span class="hljs-comment"># The `type_member` become `type_template` because of the `extend`</span>
+  <span class="hljs-comment"># We're using `fixed` to "fill in" the type_template. Read more below.</span>
+  RPCInput = type_template {{<span class="hljs-symbol">fixed:</span> TextDocumentPositionParams}}
+  RPCOutput = type_template {{<span class="hljs-symbol">fixed:</span> HoverResponse}}
+
+  sig {override.params(<span class="hljs-symbol">input:</span> RPCInput).returns(RPCOutput)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">run</span><span class="hljs-params">(input)</span></span>
+    puts <span class="hljs-string">"Computing hover request at <span class="hljs-subst">#{input.position}</span>"</span>
+    <span class="hljs-comment"># ...</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20---%20plain%20old%20data%20structures%20use%20for%20input%20and%20output%20types%20---%0Aclass%20Position%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Aline%2C%20Integer%0A%20%20const%20%3Acharacter%2C%20Integer%0Aend%0A%0Aclass%20TextDocumentPositionParams%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Atext_document%2C%20String%0A%20%20const%20%3Aposition%2C%20Position%0Aend%0A%0Aclass%20MarkupKind%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20PlainText%20%3D%20new%28'plaintext'%29%0A%20%20%20%20Markdown%20%3D%20new%28'markdown'%29%0A%20%20end%0Aend%0A%0Aclass%20MarkupContent%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Akind%2C%20MarkupKind%0A%20%20const%20%3Avalue%2C%20String%0Aend%0A%0Aclass%20HoverResponse%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Acontents%2C%20MarkupContent%0Aend%0A%23%20----------------------------------------------------------------%0A%0Amodule%20AbstractRPCMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20abstract!%0A%0A%20%20RPCInput%20%3D%20type_member%0A%20%20RPCOutput%20%3D%20type_member%0A%0A%20%20sig%20%7Babstract.returns%28String%29%7D%0A%20%20def%20method_name%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private%20def%20deserialize_impl%28raw_input%29%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private%20def%20run_impl%28input%29%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20params%28%0A%20%20%20%20%20%20raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.nilable%28RPCOutput%29%29%0A%20%20end%0A%20%20def%20run%28raw_input%29%0A%20%20%20%20input%20%3D%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20%23%20Could%20extend%20this%20example%20to%20use%20something%20richer%20for%20conveying%20an%20error%0A%20%20%20%20%23%20%28currently%20just%20returns%20nil%29%0A%20%20%20%20return%20unless%20input%0A%20%20%20%20run_impl%28input%29%0A%20%20end%0Aend%0A%0Aclass%20TextDocumentHoverMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20extend%20AbstractRPCMethod%0A%20%20final!%0A%0A%20%20RPCInput%20%3D%20type_template%20%7B%7Bfixed%3A%20TextDocumentPositionParams%7D%7D%0A%20%20RPCOutput%20%3D%20type_template%20%7B%7Bfixed%3A%20HoverResponse%7D%7D%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.returns%28String%29%7D%0A%20%20def%20self.method_name%3B%20'textDocument%2Fhover'%3B%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private_class_method%20def%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20begin%0A%20%20%20%20%20%20TextDocumentPositionParams.from_hash%28raw_input%29%0A%20%20%20%20rescue%20TypeError%0A%20%20%20%20%20%20nil%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private_class_method%20def%20self.run_impl%28input%29%0A%20%20%20%20puts%20%22Computing%20hover%20request%20at%20%23%7Binput.position%7D%22%0A%20%20%20%20raise%20%22TODO%22%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28raw_request%3A%20String%29.returns%28String%29%7D%0Adef%20handle_rpc_request%28raw_request%29%0A%20%20parsed_request%20%3D%20JSON.parse%28raw_request%29%0A%20%20params%20%3D%20parsed_request%5B'params'%5D%0A%0A%20%20output%20%3D%20case%20%28method%20%3D%20parsed_request%5B'method'%5D%29%0A%20%20when%20TextDocumentHoverMethod.method_name%0A%20%20%20%20TextDocumentHoverMethod.run%28params%29%0A%20%20else%0A%20%20%20%20raise%20%22Unknown%20method%3A%20%23%7Bmethod%7D%22%0A%20%20end%0A%0A%20%20if%20output%0A%20%20%20%20output.serialize%0A%20%20else%0A%20%20%20%20raise%20%22Error%20when%20running%20method%22%0A%20%20end%0Aend">→ View full example on sorbet.run</a></p>
+<p>The snippet above is heavily abbreviated to demonstrate some new concepts
+(<code>type_template</code> and <code>fixed</code>). The full example on sorbet.run contains many more
+details, and it’s strongly recommended reading.</p>
+<p>There are a couple interesting things happening in the example above:</p>
+<ul>
+<li><p>We have a generic interface <code>AbstractRPCMethod</code> which says that it’s generic
+in <code>RPCInput</code> and <code>RPCOutput</code>. It then mentions these types in the abstract
+<code>run</code> method. The example uses <code>type_member</code> to declare these generic types.</p></li>
+<li><p>The interface is implemented by a class that uses <code>extend</code> to implement the
+interface using the singleton class of <code>TextDocumentHoverMethod</code>. As we know
+from <a href="/docs/abstract">Abstract Classes and Interfaces</a>, that means
+<code>TextDocumentHoverMethod</code> must implement <code>def self.run</code>, <em>not</em> <code>def run</code>.</p>
+<p>In the same way, the <code>type_member</code> variables declared by the parent must be
+redeclared by the implementing class, where they then become <code>type_template</code>.
+Recall from the <a href="#type_member--type_template"><code>type_member</code> &amp; <code>type_template</code></a>
+section that the scope of a <code>type_template</code> is all singleton class methods on
+the given class.</p></li>
+<li><p>In the implementation, <code>TextDocumentHoverMethod</code> chooses to provided a
+<a href="#bounds-on-type-member-s-and-type-template-s-fixed-upper-lower"><code>fixed</code> annotation</a>
+on the <code>type_template</code> definitions. This effectively says that
+<code>TextDocumentHoverMethod</code> <strong>always</strong> conforms to the type
+<code>AbstractRPCMethod[TextDocumentPositionParams, HoverResponse]</code>. We’ll discuss
+<code>fixed</code> further below.</p>
+<p>Then when implementing the <code>def self.run</code> method, it can assume that
+<code>RPCInput</code> is equivalent to <code>TextDocumentPositionParams</code>. This allows it to
+access <code>input.position</code> in the implementation, a method that only exists on
+<code>TextDocumentPositionParams</code> (but not necessarily on every input to an
+<code>AbstractRPCMethod</code>).</p></li>
+</ul>
+<p>Again, for more information, be sure to view <a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20---%20plain%20old%20data%20structures%20use%20for%20input%20and%20output%20types%20---%0Aclass%20Position%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Aline%2C%20Integer%0A%20%20const%20%3Acharacter%2C%20Integer%0Aend%0A%0Aclass%20TextDocumentPositionParams%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Atext_document%2C%20String%0A%20%20const%20%3Aposition%2C%20Position%0Aend%0A%0Aclass%20MarkupKind%20%3C%20T%3A%3AEnum%0A%20%20enums%20do%0A%20%20%20%20PlainText%20%3D%20new%28'plaintext'%29%0A%20%20%20%20Markdown%20%3D%20new%28'markdown'%29%0A%20%20end%0Aend%0A%0Aclass%20MarkupContent%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Akind%2C%20MarkupKind%0A%20%20const%20%3Avalue%2C%20String%0Aend%0A%0Aclass%20HoverResponse%20%3C%20T%3A%3AStruct%0A%20%20const%20%3Acontents%2C%20MarkupContent%0Aend%0A%23%20----------------------------------------------------------------%0A%0Amodule%20AbstractRPCMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%0A%20%20abstract!%0A%0A%20%20RPCInput%20%3D%20type_member%0A%20%20RPCOutput%20%3D%20type_member%0A%0A%20%20sig%20%7Babstract.returns%28String%29%7D%0A%20%20def%20method_name%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private%20def%20deserialize_impl%28raw_input%29%3B%20end%0A%0A%20%20sig%20%7Babstract.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private%20def%20run_impl%28input%29%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20params%28%0A%20%20%20%20%20%20raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.nilable%28RPCOutput%29%29%0A%20%20end%0A%20%20def%20run%28raw_input%29%0A%20%20%20%20input%20%3D%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20%23%20Could%20extend%20this%20example%20to%20use%20something%20richer%20for%20conveying%20an%20error%0A%20%20%20%20%23%20%28currently%20just%20returns%20nil%29%0A%20%20%20%20return%20unless%20input%0A%20%20%20%20run_impl%28input%29%0A%20%20end%0Aend%0A%0Aclass%20TextDocumentHoverMethod%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20extend%20AbstractRPCMethod%0A%20%20final!%0A%0A%20%20RPCInput%20%3D%20type_template%20%7B%7Bfixed%3A%20TextDocumentPositionParams%7D%7D%0A%20%20RPCOutput%20%3D%20type_template%20%7B%7Bfixed%3A%20HoverResponse%7D%7D%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.returns%28String%29%7D%0A%20%20def%20self.method_name%3B%20'textDocument%2Fhover'%3B%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28raw_input%3A%20T%3A%3AHash%5BT.untyped%2C%20T.untyped%5D%29.returns%28T.nilable%28RPCInput%29%29%7D%0A%20%20private_class_method%20def%20self.deserialize_impl%28raw_input%29%0A%20%20%20%20begin%0A%20%20%20%20%20%20TextDocumentPositionParams.from_hash%28raw_input%29%0A%20%20%20%20rescue%20TypeError%0A%20%20%20%20%20%20nil%0A%20%20%20%20end%0A%20%20end%0A%0A%20%20sig%28%3Afinal%29%20%7Boverride.params%28input%3A%20RPCInput%29.returns%28T.nilable%28RPCOutput%29%29%7D%0A%20%20private_class_method%20def%20self.run_impl%28input%29%0A%20%20%20%20puts%20%22Computing%20hover%20request%20at%20%23%7Binput.position%7D%22%0A%20%20%20%20raise%20%22TODO%22%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28raw_request%3A%20String%29.returns%28String%29%7D%0Adef%20handle_rpc_request%28raw_request%29%0A%20%20parsed_request%20%3D%20JSON.parse%28raw_request%29%0A%20%20params%20%3D%20parsed_request%5B'params'%5D%0A%0A%20%20output%20%3D%20case%20%28method%20%3D%20parsed_request%5B'method'%5D%29%0A%20%20when%20TextDocumentHoverMethod.method_name%0A%20%20%20%20TextDocumentHoverMethod.run%28params%29%0A%20%20else%0A%20%20%20%20raise%20%22Unknown%20method%3A%20%23%7Bmethod%7D%22%0A%20%20end%0A%0A%20%20if%20output%0A%20%20%20%20output.serialize%0A%20%20else%0A%20%20%20%20raise%20%22Error%20when%20running%20method%22%0A%20%20end%0Aend">the full
+example</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="bounds-on-type_members-and-type_templates-fixed-upper-lower"></a><a href="#bounds-on-type_members-and-type_templates-fixed-upper-lower" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Bounds on <code>type_member</code>'s and <code>type_template</code>'s (<code>fixed</code>, <code>upper</code>, <code>lower</code>)</h2>
+<p>The <code>fixed</code> annotation in the <a href="#type_templates-and-bounds">example above</a> places
+<strong>bounds</strong> on a <code>type_template</code>. There are three annotations for providing
+bounds to a <code>type_member</code> or <code>type_template</code>:</p>
+<ul>
+<li><p><code>upper</code>: Places an upper bound on types that can be applied to a given type
+member. Only that are subtypes of that upper bound are valid.</p></li>
+<li><p><code>lower</code>: The opposite—places a lower bound, thus requiring only supertypes of
+that bound.</p></li>
+<li><p><code>fixed</code>: Syntactic sugar for specifying both <code>lower</code> and <code>upper</code> at the same
+time. Effectively requires that an equivalent type be applied to the type
+member. Sorbet then uses this fact to never require that an explicit type
+argument be provided to the class.</p></li>
+</ul>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NumericBox</span></span>
+  extend T::Generic
+  Elem = type_member {{<span class="hljs-symbol">upper:</span> Numeric}}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IntBox</span> &lt; NumericBox</span>
+  Elem = type_member {{<span class="hljs-symbol">fixed:</span> Integer}}
+<span class="hljs-keyword">end</span>
+
+NumericBox[Integer].new <span class="hljs-comment"># OK, Integer &lt;: Numeric</span>
+NumericBox[String].new
+<span class="hljs-comment">#          ^^^^^^ error: `String` is not a subtype of upper bound of `Elem`</span>
+
+IntBox.new
+<span class="hljs-comment"># ^ Does not need to be invoked like `IntBox[Integer]` because Sorbet can</span>
+<span class="hljs-comment">#   trivially infer the type argument</span>
+</code></pre>
+<p>Placing the bound on the type member makes it an error to ever instantiate a
+class with that member outside the given bound.</p>
+<h2><a class="anchor" aria-hidden="true" id="generic-methods"></a><a href="#generic-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Generic methods</h2>
+<p>Methods can also be made generic in Sorbet:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+extend T::Sig
+
+sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(
+      <span class="hljs-symbol">blk:</span> T.proc.returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+    )
+    .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">with_timer</span><span class="hljs-params">(&amp;blk)</span></span>
+  start = Time.now
+  res = <span class="hljs-keyword">yield</span>
+  duration = Time.now - start
+  puts <span class="hljs-string">"Running block took <span class="hljs-subst">#{duration.round(<span class="hljs-number">1</span>)}</span>s"</span>
+  res
+<span class="hljs-keyword">end</span>
+
+res = with_timer <span class="hljs-keyword">do</span>
+  sleep <span class="hljs-number">2</span>
+  puts <span class="hljs-string">'hello, world!'</span>
+  <span class="hljs-number">123</span>
+<span class="hljs-keyword">end</span>
+T.reveal_type(res) <span class="hljs-comment"># `Integer`</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20blk%3A%20T.proc.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20with_timer%28%26blk%29%0A%20%20start%20%3D%20Time.now%0A%20%20res%20%3D%20yield%0A%20%20duration%20%3D%20Time.now%20-%20start%0A%20%20puts%20%22Running%20block%20took%20%23%7Bduration.round%281%29%7Ds%22%0A%20%20res%0Aend%0A%0Ares%20%3D%20with_timer%20do%0A%20%20sleep%202%0A%20%20puts%20'hello%2C%20world!'%0A%20%20123%0Aend%0AT.reveal_type%28res%29">→ View on sorbet.run</a></p>
+<p>The <code>type_parameters</code> method at the top-level of the <code>sig</code> block introduces
+generic type variables that can be referenced elsewhere in the signature using
+<code>T.type_parameter</code>. Names are specified as Ruby <code>Symbol</code> literals. Multiple
+symbol literals can be given to <code>type_parameters</code>, like this:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:K</span>, <span class="hljs-symbol">:V</span>)
+    .params(<span class="hljs-symbol">hash:</span> T::Hash[T.type_parameter(<span class="hljs-symbol">:K</span>), T.type_parameter(<span class="hljs-symbol">:V</span>)])
+    .returns([T::Array[T.type_parameter(<span class="hljs-symbol">:K</span>)], T::Array[T.type_parameter(<span class="hljs-symbol">:V</span>)]])
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">keys_and_values</span><span class="hljs-params">(hash)</span></span>
+  [hash.keys, hash.values]
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AK%2C%20%3AV%29%0A%20%20%20%20.params%28hash%3A%20T%3A%3AHash%5BT.type_parameter%28%3AK%29%2C%20T.type_parameter%28%3AV%29%5D%29%0A%20%20%20%20.returns%28%5BT%3A%3AArray%5BT.type_parameter%28%3AK%29%5D%2C%20T%3A%3AArray%5BT.type_parameter%28%3AV%29%5D%5D%29%0Aend%0Adef%20keys_and_values%28hash%29%0A%20%20%5Bhash.keys%2C%20hash.values%5D%0Aend">→ View on sorbet.run</a></p>
+<p>Note Sorbet does not support return type deduction. This means that doing
+something like this won’t work:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_something</span></span>
+  <span class="hljs-literal">nil</span>
+<span class="hljs-keyword">end</span>
+
+x = returns_something
+puts(x) <span class="hljs-comment"># error: This code is unreachable</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20returns_something%0A%20%20nil%0Aend%0A%0Ax%20%3D%20returns_something%0Aputs%28x%29%20%23%20error%3A%20This%20code%20is%20unreachable">→ View on sorbet.run</a></p>
+<p>In the above example, the <code>puts(x)</code> is listed as “unreachable” for a somewhat
+confusing reason:</p>
+<ul>
+<li>Sorbet sees that the <code>T.type_parameter(:U)</code> in the <code>returns</code> annotation is not
+constrained by of the arguments. It could therefore be anything.</li>
+<li>The only type that is a subtype of any type in Sorbet is
+<a href="/docs/noreturn"><code>T.noreturn</code></a>. The only way to introduce a value of this type is
+to raise an exception.</li>
+<li>Therefore, Sorbet infers that the only valid way to implement
+<code>returns_something</code> is by raising, which would imply that the <code>puts(x)</code> code
+is never reached.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="placing-bounds-on-generic-methods"></a><a href="#placing-bounds-on-generic-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Placing bounds on generic methods</h3>
+<p>Sorbet does not have a way to place a bound on a generic method, but it’s
+usually possible to approximate it with
+<a href="/docs/intersection-types">intersection types (<code>T.all</code>)</a>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
+  extend T::Sig
+  sig {returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-number">0</span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(<span class="hljs-symbol">x:</span> T.type_parameter(<span class="hljs-symbol">:U</span>))
+    .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bad_example</span><span class="hljs-params">(x)</span></span>
+  x.foo <span class="hljs-comment"># error!</span>
+<span class="hljs-keyword">end</span>
+
+sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(<span class="hljs-symbol">x:</span> T.all(T.type_parameter(<span class="hljs-symbol">:U</span>), A))
+    .returns(T.type_parameter(<span class="hljs-symbol">:U</span>))
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
+  x.foo
+  <span class="hljs-keyword">if</span> x.foo.even? <span class="hljs-comment"># calls to `.foo` and `.even?` are OK</span>
+    <span class="hljs-keyword">return</span> x <span class="hljs-comment"># this return is OK</span>
+  <span class="hljs-keyword">else</span>
+    <span class="hljs-keyword">return</span> A.new <span class="hljs-comment"># this return is not OK</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20foo%3B%200%3B%20end%0Aend%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28x%3A%20T.type_parameter%28%3AU%29%29%0A%20%20%20%20.void%0Aend%0Adef%20bad_example%28x%29%0A%20%20x.foo%0Aend%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28x%3A%20T.all%28T.type_parameter%28%3AU%29%2C%20A%29%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20example%28x%29%0A%20%20x.foo%0A%20%20if%20x.foo.even%3F%0A%20%20%20%20return%20x%0A%20%20else%0A%20%20%20%20return%20A.new%0A%20%20end%0Aend">→ View on sorbet.run</a></p>
+<p>There are a couple of things worth pointing out here:</p>
+<ul>
+<li><p>The <code>bad_example</code> method attempts to call <code>x.foo</code> but fails with an error. The
+error mentions that there is a call to method <code>foo</code> on an unconstrained
+generic type parameter. <code>T.type_parameter(:U)</code> alone means &quot;for all types&quot;,
+but not all types have a <code>foo</code> method.</p></li>
+<li><p>In the <code>example</code> method, the method’s signature changes to ascribe the type
+<code>T.all(T.type_parameter(:U), A)</code> to <code>x</code>. This in essence allows Sorbet to
+assume that there is an upper bound of <code>A</code> on the type of
+<code>T.type_parameter(:U)</code>.</p></li>
+<li><p>In the method body, the <code>T.all</code> is sufficient to allow the call to
+<code>x.foo.even?</code> to type check (and to have the type of <code>T::Boolean</code> statically).</p></li>
+<li><p>The first <code>return</code> in the method works without error: <code>x</code> has type
+<code>T.all(T.type_parameter(:U), A)</code> which is a subtype of <code>T.type_parameter(:U)</code>,
+so the <code>return x</code> type checks.</p></li>
+<li><p>The second return in the method fails to type check: <code>A.new</code> has type <code>A</code> but
+it does not have type <code>T.type_parameter(:U)</code>. This is <strong>not</strong> a bug. To see
+why, consider how Sorbet will typecheck a call site to <code>example</code>:</p></li>
+</ul>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildA</span> &lt; A;</span> <span class="hljs-keyword">end</span>
+child = example(ChildA.new)
+T.reveal_type(child) <span class="hljs-comment"># =&gt; `ChildA`</span>
+</code></pre>
+<p>In the snippet above, Sorbet knows that the method returns
+<code>T.type_parameter(:U)</code>, which is the same as whatever the type of <code>x</code> is, which
+in this case is <code>ChildA</code>.</p>
+<p>If Sorbet had allowed <code>return A.new</code> in the method body above, there would have
+been a contradiction: Sorbet would have claimed that <code>child</code> had type <code>ChildA</code>,
+but in fact it would have had type <code>A</code>, which is not a subtype of <code>ChildA</code>.</p>
+<p><strong>tl;dr</strong>: The only valid way to return something of type <code>T.type_parameter(:U)</code>
+is to return one of the method’s arguments (or some piece of an argument), not
+by inventing an entirely new value.</p>
+<h3><a class="anchor" aria-hidden="true" id="shortcomings-of-generic-methods"></a><a href="#shortcomings-of-generic-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Shortcomings of generic methods</h3>
+<p>The <a href="#implementation-status">implementation status</a> disclaimer at the top of
+this doc mentioned that generics are quite buggy. Generic methods are one of the
+biggest areas where people run into bugs and/or missing features.</p>
+<p>Most commonly, when there is something wrong with Sorbet’s support for generic
+methods, the error message mentions something about <code>&lt;top&gt;</code>. Here is an example:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:U</span>)
+    .params(
+      <span class="hljs-symbol">xs:</span> T::Array[T.type_parameter(<span class="hljs-symbol">:U</span>)],
+      <span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">arg0:</span> T.type_parameter(<span class="hljs-symbol">:U</span>)).void
+    )
+    .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">yield_each_item</span><span class="hljs-params">(xs, &amp;blk)</span></span>
+  xs.each <span class="hljs-keyword">do</span> <span class="hljs-params">|x|</span>
+    <span class="hljs-keyword">yield</span> x
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+yield_each_item([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]) <span class="hljs-keyword">do</span> <span class="hljs-params">|item|</span>
+  T.reveal_type(item)
+  item.even?
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20xs%3A%20T%3A%3AArray%5BT.type_parameter%28%3AU%29%5D%2C%0A%20%20%20%20%20%20blk%3A%20T.proc.params%28arg0%3A%20T.type_parameter%28%3AU%29%29.void%0A%20%20%20%20%29%0A%20%20%20%20.void%0Aend%0Adef%20yield_each_item%28xs%2C%20%26blk%29%0A%20%20xs.each%20do%20%7Cx%7C%0A%20%20%20%20yield%20x%0A%20%20end%0Aend%0A%0Ayield_each_item%28%5B1%2C%202%2C%203%5D%29%20do%20%7Citem%7C%0A%20%20T.reveal_type%28item%29%0A%20%20item.even%3F%0Aend">→ View on sorbet.run</a></p>
+<p>In this example, the output as of the time of writing looks like this:</p>
+<pre><code class="hljs">editor.rb:<span class="hljs-number">19</span>: Revealed type: `&lt;top&gt;` https:<span class="hljs-comment">//srb.help/7014</span>
+    <span class="hljs-number">19</span> |  T.reveal_type(item)
+          ^^^^^^^^^^^^^^^^^^^
+  Got &lt;top&gt; originating <span class="hljs-keyword">from</span>:
+    editor.rb:<span class="hljs-number">18</span>:
+    <span class="hljs-number">18</span> |yield_each_item([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]) <span class="hljs-keyword">do</span> |item|
+                                       ^^^^
+
+editor.rb:<span class="hljs-number">20</span>: Method `even?` does <span class="hljs-keyword">not</span> exist on `&lt;top&gt;` https:<span class="hljs-comment">//srb.help/7003</span>
+    <span class="hljs-number">20</span> |  item.even?
+               ^^^^^
+  Got `&lt;top&gt;` originating <span class="hljs-keyword">from</span>:
+    editor.rb:<span class="hljs-number">18</span>:
+    <span class="hljs-number">18</span> |yield_each_item([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]) <span class="hljs-keyword">do</span> |item|
+                                       ^^^^
+Errors: <span class="hljs-number">2</span>
+</code></pre>
+<p>Whenever you see <code>&lt;top&gt;</code> in an error message, one of two things is happening:</p>
+<ul>
+<li><p>There is a valid error, because the method’s input type was not properly
+constrained. Double check the previous section on
+<a href="#placing-bounds-on-generic-methods">placing bounds on generic methods</a>.</p></li>
+<li><p>There is a bug or missing feature in Sorbet. Double check the list of issues
+in Sorbet’s support for generics:</p>
+<p><a href="https://github.com/sorbet/sorbet/issues?q=is%3Aopen+is%3Aissue+milestone%3AGenerics">→ Issues with generics in Sorbet</a></p>
+<p>If nothing in the list looks relevant to the particular behavior at hand,
+please report a new issue. Note that we have limited resources, and may not be
+able to prioritize fixing such issues.</p></li>
+</ul>
+<p>When encountering an error like this, there are a couple of choices:</p>
+<ul>
+<li><p>Continue using generics, but use <code>T.unsafe</code> to silence the errors.</p>
+<p>Note that this can be <strong>quite</strong> burdensome: new programmers programming
+against the given API will be confused as to whether errors are their fault or
+Sorbet’s.</p></li>
+<li><p>Refactor the API to use <code>T.untyped</code>. This has the benefit of having Sorbet
+stay out of people’s way, letting them write the code they’d like to be able
+to write. It obviously comes at the cost of Sorbet not being able to provide
+strong guarantees about correctness.</p></li>
+<li><p>Find another way to type the API, potentially avoiding generics entirely. This
+might entail restructuring an API in a different way, using some sort of code
+generation, or something that merely doesn’t trip the given bug. If you’re
+stuck, ask for help.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/shapes"><span class="arrow-prev">← </span><span>Shapes</span></a><a class="docs-next button" href="/docs/requires-ancestor"><span>Requiring Ancestors</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#implementation-status">Implementation status</a></li><li><a href="#basic-syntax">Basic syntax</a></li><li><a href="#generics-and-runtime-checks">Generics and runtime checks</a></li><li><a href="#type_member--type_template"><code>type_member</code> &amp; <code>type_template</code></a></li><li><a href="#in-out-and-variance"><code>:in</code>, <code>:out</code>, and variance</a><ul class="toc-headings"><li><a href="#invariance">Invariance</a></li><li><a href="#covariance-out">Covariance (<code>:out</code>)</a></li><li><a href="#contravariance-in">Contravariance (<code>:in</code>)</a></li><li><a href="#input-and-output-positions">Input and output positions</a></li><li><a href="#why-does-tracking-variance-matter">Why does tracking variance matter?</a></li></ul></li><li><a href="#a-type_template-example">A <code>type_template</code> example</a></li><li><a href="#bounds-on-type_members-and-type_templates-fixed-upper-lower">Bounds on <code>type_member</code>'s and <code>type_template</code>'s (<code>fixed</code>, <code>upper</code>, <code>lower</code>)</a></li><li><a href="#generic-methods">Generic methods</a><ul class="toc-headings"><li><a href="#placing-bounds-on-generic-methods">Placing bounds on generic methods</a></li><li><a href="#shortcomings-of-generic-methods">Shortcomings of generic methods</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
