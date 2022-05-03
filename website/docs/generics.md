@@ -886,7 +886,7 @@ end
 
 [→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AK%2C%20%3AV%29%0A%20%20%20%20.params%28hash%3A%20T%3A%3AHash%5BT.type_parameter%28%3AK%29%2C%20T.type_parameter%28%3AV%29%5D%29%0A%20%20%20%20.returns%28%5BT%3A%3AArray%5BT.type_parameter%28%3AK%29%5D%2C%20T%3A%3AArray%5BT.type_parameter%28%3AV%29%5D%5D%29%0Aend%0Adef%20keys_and_values%28hash%29%0A%20%20%5Bhash.keys%2C%20hash.values%5D%0Aend)
 
-Note Sorbet does not support return type polymorphism. This means that doing
+Note Sorbet does not support return type deduction. This means that doing
 something like this won't work:
 
 ```ruby
@@ -915,12 +915,6 @@ confusing reason:
 - Therefore, Sorbet infers that the only valid way to implement
   `returns_something` is by raising, which would imply that the `puts(x)` code
   is never reached.
-
-Sorbet cannot have return type polymorphism, because languages that implement
-return type polymorphism take advantage of a compilation step to decide how to
-call the method. Sorbet does not have the luxury (nor the burden) of compiling a
-program before it can be run by the Ruby VM, so information present in the type
-system cannot inform how the method is dispatched at runtime.
 
 ### Placing bounds on generic methods
 
