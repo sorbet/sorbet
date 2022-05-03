@@ -12,8 +12,6 @@ Generics are the most poorly supported feature within Sorbet, by far. Their
 implementation has many known, complicated-to-fix bugs which substantially limit
 their utility.
 
-It is hard to overstate how buggy Sorbet's support for generics is.
-
 We track known bugs in Sorbet's support for generics in the [Generics milestone]
 on Sorbet's issue tracker. Feel free to peruse the existing bugs, as well as
 report new bugs.
@@ -24,9 +22,9 @@ abstractions in Sorbet exceedingly brittle.
 It is imperative to thoroughly test abstractions making use of Sorbet generics.
 
 The tests you'll need to write look substantially different from other Ruby
-tests you may be accustomed to writing, because they will have to live **at the
-type level** (statics), not at the expression level (runtime). These tests
-should account for two main failure modes:
+tests you may be accustomed to writing, because the tests need to deal with what
+code should or should not typecheck, rather that code that should or should not
+run correctly. These tests
 
 - Many things that shouldn't type check **do type check anyways**.
 
@@ -102,12 +100,9 @@ T.reveal_type(int_box) # `Box[Integer]`
 T.reveal_type(int_box.val) # `Integer`
 
 int_box.val += 1
-
-string_box = int_box.map {|val| val.to_s}
-T.reveal_type(string_box) # `Box[String]`
 ```
 
-[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%20%23%20Provides%20%60type_member%60%20helper%0A%0A%20%20Elem%20%3D%20type_member%20%23%20Makes%20the%20%60Box%60%20class%20generic%0A%0A%20%20%23%20References%20the%20class-level%20generic%20%60Elem%60%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28val%3A%29%3B%20%40val%20%3D%20val%3B%20end%0A%20%20sig%20%7Breturns%28Elem%29%7D%0A%20%20def%20val%3B%20%40val%3B%20end%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20val%3D%28val%29%3B%20%40val%20%3D%20val%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28val%3A%200%29%0AT.reveal_type%28int_box%29%20%23%20%60Box%5BInteger%5D%60%0A%0AT.reveal_type%28int_box.val%29%20%23%20%60Integer%60%0A%0Aint_box.val%20%2B%3D%201%0A%0Astring_box%20%3D%20int_box.map%20%7B%7Cval%7C%20val.to_s%7D%0AT.reveal_type%28string_box%29%20%23%20%60Box%5BString%5D%60)
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%20%23%20Provides%20%60type_member%60%20helper%0A%0A%20%20Elem%20%3D%20type_member%20%23%20Makes%20the%20%60Box%60%20class%20generic%0A%0A%20%20%23%20References%20the%20class-level%20generic%20%60Elem%60%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28val%3A%29%3B%20%40val%20%3D%20val%3B%20end%0A%20%20sig%20%7Breturns%28Elem%29%7D%0A%20%20def%20val%3B%20%40val%3B%20end%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20val%3D%28val%29%3B%20%40val%20%3D%20val%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28val%3A%200%29%0AT.reveal_type%28int_box%29%20%23%20%60Box%5BInteger%5D%60%0A%0AT.reveal_type%28int_box.val%29%20%23%20%60Integer%60%0A%0Aint_box.val%20%2B%3D%201)
 
 ```ruby
 # typed: true
@@ -348,6 +343,8 @@ singleton classes are classes, even singleton classes of modules).
 Here's an example of a module that has a covariant type member:
 
 ```ruby
+extend T::Sig
+
 # covariant `Box` interface
 module IBox
   extend T::Generic
@@ -357,7 +354,7 @@ end
 
 sig {params(int_box: IBox[Integer]).void}
 def example(int_box)
-  T.let(int_ibox, IBox[Numeric]) # OK
+  T.let(int_box, IBox[Numeric]) # OK
 end
 ```
 
@@ -413,7 +410,7 @@ end
 [→ View on sorbet.run][covariant-ibox]
 
 Note how in the above example, `Box` includes `IBox`, meaning that `Box` is a
-child of `IBox`. Children of a generic classes or modules must always redeclare
+child of `IBox`. Children of generic classes or modules must always redeclare
 any type members declared by the parent, in the same order. The child must
 either copy the parent's specified variance or redeclare it as invariant. When
 the child is a `class` (not a `module`), redeclaring it as invariant is the
@@ -435,7 +432,7 @@ is not unique to Sorbet—all type systems that have both subtyping relationship
 and generics must grapple with variance, contravariance included, so there is a
 lot written about it elsewhere online. It maybe even be helpful to read about
 contravariance in a language you already have extensive familiarity with, as
-many of the concepts with transfer to Sorbet.
+many of the concepts will transfer to Sorbet.
 
 The way to understand contravariance is by understanding which function types
 are subtypes of other function types. For example:
@@ -560,7 +557,7 @@ are **input** positions.
 
 An obvious output position is a method signature's `returns` annotation, but
 there are more than just that. As an intuition, all positions in a signature
-where the value is produced by some computation in the method's body are out
+where the value is produced by some computation in the method's body are output
 positions. This includes values yielded to lambda functions and block arguments.
 
 ```ruby
@@ -889,7 +886,7 @@ end
 
 [→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AK%2C%20%3AV%29%0A%20%20%20%20.params%28hash%3A%20T%3A%3AHash%5BT.type_parameter%28%3AK%29%2C%20T.type_parameter%28%3AV%29%5D%29%0A%20%20%20%20.returns%28%5BT%3A%3AArray%5BT.type_parameter%28%3AK%29%5D%2C%20T%3A%3AArray%5BT.type_parameter%28%3AV%29%5D%5D%29%0Aend%0Adef%20keys_and_values%28hash%29%0A%20%20%5Bhash.keys%2C%20hash.values%5D%0Aend)
 
-Note Sorbet does not support return type inference. This means that doing
+Note Sorbet does not support return type polymorphism. This means that doing
 something like this won't work:
 
 ```ruby
@@ -919,9 +916,9 @@ confusing reason:
   `returns_something` is by raising, which would imply that the `puts(x)` code
   is never reached.
 
-Sorbet cannot have return type inference, because languages that implement
-return type inference take advantage of a compilation step to decide how to call
-the method. Sorbet does not have the luxury (nor the burden) of compiling a
+Sorbet cannot have return type polymorphism, because languages that implement
+return type polymorphism take advantage of a compilation step to decide how to
+call the method. Sorbet does not have the luxury (nor the burden) of compiling a
 program before it can be run by the Ruby VM, so information present in the type
 system cannot inform how the method is dispatched at runtime.
 
