@@ -1289,7 +1289,7 @@ public:
         if (checkAmbiguousDefinition(ctx)) {
             const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
             if (ambigDef.exists()) {
-                if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
+                if (auto e = ctx.beginError(original.declLoc, core::errors::Resolver::AmbiguousDefinitionError)) {
                     e.setHeader("Class definition is ambiguous");
                     e.addErrorLine(ambigDef.loc(ctx), "Alternate definition {} here",
                                    ambigDef.showFullNameWithoutPackagePrefix(ctx));
