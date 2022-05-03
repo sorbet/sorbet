@@ -3631,7 +3631,7 @@ Or if it's imperative to continue using `is_a?`, change the type to
 ## 7039
 
 For more information, see how to place
-[bounds on type members](generics.md#bounds-on-type-members-fixed-upper-lower).
+[bounds on type members](generics.md#bounds-on-type-member-s-and-type-template-s-fixed-upper-lower).
 
 Consider this example:
 

@@ -117,6 +117,23 @@ foo(untyped_str_array)
 (Also note that unlike other languages that implement generics via type erasure,
 Sorbet does not insert runtime casts that preserve type safety at runtime.)
 
+Another consequence of having erased generics is that things like this will not
+work:
+
+```ruby
+sig {params(xs: T.any(T::Array[Integer], T::Array[String])).void}
+def example(xs)
+  if xs.is_a?(T::Array[Integer]) # error!
+    # ...
+  elsif xs.is_a?(T::Array[String]) # error!
+    # ...
+  end
+end
+```
+
+Sorbet will attempt to detect cases where it looks like this is happening and
+report a static error, but it cannot do so in all cases.
+
 > **Note**: Sorbet used to take these type arguments into account during runtime
 > type-checking, but this turned out to be a common and difficult-to-debug
 > source of performance problems, frequently turning a fast, constant-time

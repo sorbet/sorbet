@@ -114,10 +114,13 @@ T.reveal_type(string_box) # `Box[String]`
 extend T::Sig
 
 sig do
+  # `extend T::Generic` is not required just to use `type_parameters`
   type_parameters(:U)
     .params(
+      # The block can return anything
       blk: T.proc.returns(T.type_parameter(:U))
     )
+    # The method returns whatever the block returns
     .returns(T.type_parameter(:U))
 end
 def with_timer(&blk)
@@ -131,8 +134,10 @@ end
 res = with_timer do
   sleep 2
   puts 'hello, world!'
+  # Block returns an Integer
   123
 end
+# ... therefore the method returns an Integer
 T.reveal_type(res) # `Integer`
 ```
 
@@ -176,6 +181,34 @@ foo(untyped_box)
 #   ^^^^^^^^^^^ no static error, AND no runtime error!
 ```
 
+Another consequence of having erased generics is that things like this will not
+work:
+
+```ruby
+if box.is_a?(Box[Integer]) # error!
+  # do something when `box` contains an Integer
+elsif box.is_a?(Box[String]) # error!
+  # do something when `box` contains a String
+end
+```
+
+Sorbet will attempt to detect cases where it looks like this is happening and
+report a static error, but it cannot do so in all cases.
+
+The workaround is to check only the class type of the generic class, and check
+any element type before it's used:
+
+```ruby
+if box.is_a?(Box)
+  val = box.val
+  if val.is_a?(Integer)
+    # ...
+  elsif val.is_a?(String)
+    # ...
+  end
+end
+```
+
 ## `type_member` & `type_template`
 
 The `type_member` and `type_template` annotations declare class-level generic
@@ -199,10 +232,6 @@ Type variables, like normal Ruby variables, have a scope:
   are usually used as a way for an abstract parent class to require a concrete
   child class to pick a specific type that all instances agree on.
 
-> These docs frequently use "type member" (two words, no code formatting) to
-> refer to either a type member declared via `type_member` or `type_template`
-> when the question of which class owns the type variable is irrelevant.
-
 One way to think about it is that `type_template` is merely a shorter name for
 something which could have also been named `singleton_class_type_member`. In
 Sorbet's implementation, `type_member` and `type_template` are treated almost
@@ -214,20 +243,20 @@ variable from an instance method. For a workaround, see the docs for error code
 
 ## `:in`, `:out`, and variance
 
-Understanding variance is important for understanding how class-level generics
-(type members) behave. Variance is a type system concept that controls how
+Understanding variance is important for understanding how `type_member`'s and
+`type_template`'s behave. Variance is a type system concept that controls how
 generics interact with subtyping. Specifically, [from Wikipedia][variance]:
 
 _"Variance refers to how subtyping between more complex types relates to
 subtyping between their components."_
 
-Variance is a property of each type member (not the generic class itself,
-because generic classes may have more than one type member). There are three
-kinds of variance relationships:
+Variance is a property of each `type_member` and `type_template` (not the
+generic class itself, because generic classes may have more than one such type
+variable). There are three kinds of variance relationships:
 
-- **invariant** (subtyping relationships are ignored for this type member)
-- **covariant** (subtyping order is preserved for this type member)
-- **contravariant** (subtyping order is reversed for this type member)
+- **invariant** (subtyping relationships are ignored for this type variable)
+- **covariant** (subtyping order is preserved for this type variable)
+- **contravariant** (subtyping order is reversed for this type variable)
 
 Here is the syntax Sorbet uses for these concepts:
 
@@ -260,7 +289,8 @@ motivates why type systems (Sorbet included) place such emphasis on variance.
 (_For convenience throughout these docs, we use the annotation `<:` to claim
 that one type is a subtype of another type._)
 
-By default, type members are invariant. Here is an example of what that means:
+By default, `type_member`'s and `type_template`'s are invariant. Here is an
+example of what that means:
 
 ```ruby
 class Box
@@ -286,31 +316,36 @@ Since `Elem` is invariant (has no explicit variance annotation), Sorbet reports
 an error on the `T.let` attempting to widen the type of `int_box` to
 `Box[Numeric]`. Two objects of a given generic class with an invariant type
 member (`Box` in this example) are only subtypes if the types bound to their
-invariant type members are **equivalent**.
+invariant `type_member`'s are **equivalent**.
 
-Invariant type members, unlike covariant and contravariant type members, maybe
-be used in **both** input and output positions within method signatures. This
-nuance is explained in more detail in the next sections about covariant and
-contravariant type members.
+Invariant `type_member`'s and `type_template`'s, unlike covariant and
+contravariant ones, may be used in **both** input and output positions within
+method signatures. This nuance is explained in more detail in the next sections
+about covariance and contravariance.
 
-> **Note**: all type members in a Ruby `class` must be invariant. Only type
-> members in a Ruby `module` are allowed to be covariant or contravariant. See
-> the docs for error code [5016](error-reference.md#5016) for more information.
+> **Note**: all `type_member`'s and `type_template`'s in a Ruby `class` must be
+> invariant. Only `type_member`'s in a Ruby `module` are allowed to be covariant
+> or contravariant. See the docs for error code [5016](error-reference.md#5016)
+> for more information.
 
 ### Covariance (`:out`)
 
-Covariant type members preserve the subtyping relationship. Specifically, if the
-type `Child` is a subtype of the type `Parent`, then the type `M[Child]` is a
-subtype of the type `M[Parent]` if the type member of `M` is covariant. In
+Covariant type variables preserve the subtyping relationship. Specifically, if
+the type `Child` is a subtype of the type `Parent`, then the type `M[Child]` is
+a subtype of the type `M[Parent]` if the type member of `M` is covariant. In
 symbols:
 
 ```
 Child <: Parent  ==>  M[Child] <: M[Parent]
 ```
 
-Note that only a Ruby `module` (not a `class`) may have a covariant type member.
-(See the docs for error code [5016](error-reference.md#5016) for more
-information.) Here's an example of a module that has a covariant type member:
+Note that only a Ruby `module` (not a `class`) may have a covariant
+`type_member`. (See the docs for error code [5016](error-reference.md#5016) for
+more information.) Note that since `type_template` creates a type variable
+scoped to a singleton class, `type_template` can never be covariant (because all
+singleton classes are classes, even singleton classes of modules).
+
+Here's an example of a module that has a covariant type member:
 
 ```ruby
 # covariant `Box` interface
@@ -749,8 +784,8 @@ There are a couple interesting things happening in the example above:
   the given class.
 
 - In the implementation, `TextDocumentHoverMethod` chooses to provided a
-  [`fixed` annotation](#bounds-on-type-members-fixed-upper-lower) on the
-  `type_template` definitions. This effectively says that
+  [`fixed` annotation](#bounds-on-type-member-s-and-type-template-s-fixed-upper-lower)
+  on the `type_template` definitions. This effectively says that
   `TextDocumentHoverMethod` **always** conforms to the type
   `AbstractRPCMethod[TextDocumentPositionParams, HoverResponse]`. We'll discuss
   `fixed` further below.
@@ -764,11 +799,11 @@ There are a couple interesting things happening in the example above:
 Again, for more information, be sure to view [the full
 example][abstract_rpc_method].
 
-## Bounds on type members (`fixed`, `upper`, `lower`)
+## Bounds on `type_member`'s and `type_template`'s (`fixed`, `upper`, `lower`)
 
 The `fixed` annotation in the [example above](#type_templates-and-bounds) places
-**bounds** on type members (specifically, `type_template`'s in the above
-example). There are three annotations for providing bounds to a type member:
+**bounds** on a `type_template`. There are three annotations for providing
+bounds to a `type_member` or `type_template`:
 
 - `upper`: Places an upper bound on types that can be applied to a given type
   member. Only that are subtypes of that upper bound are valid.
