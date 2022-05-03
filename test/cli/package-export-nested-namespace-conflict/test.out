@@ -1,7 +1,0 @@
-parent/__package.rb:4: Conflicting import sources for `Parent::Child` https://srb.help/3714
-     4 |  import Parent::Child
-                 ^^^^^^^^^^^^^
-    parent/__package.rb:6: Conflict from
-     6 |  export_for_test Parent
-                          ^^^^^^
-Errors: 1

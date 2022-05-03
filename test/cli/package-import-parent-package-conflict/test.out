@@ -1,4 +1,0 @@
-parent/child/__package.rb:4: Package Parent::Child cannot import Parent. The latter exports the constant Parent, which is a prefix of the importing package https://srb.help/3714
-     4 |  import Parent
-                 ^^^^^^
-Errors: 1
