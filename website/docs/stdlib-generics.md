@@ -182,10 +182,15 @@ Sorbet on large, existing codebases.
 
 ## What's next?
 
-- [TODO](#TODO)
+- [Class Types](class-types.md)
 
-  TODO
+  Every Ruby class and module doubles as a type in Sorbet. Class types supersede
+  the notion some other languages have of "primitive" types. For example,
+  `"abc"` is an instance of the `String` class, and so `"abc"` has type
+  `String`.
 
-- [TODO](#TODO)
+- [Generic Classes and Methods](generics.md)
 
-  TODO
+  Types do not have to belong in the Ruby standard library to be declared as
+  generic types. Read more about how to define custom generic classes and
+  methods.

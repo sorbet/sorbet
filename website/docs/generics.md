@@ -1,6 +1,6 @@
 ---
 id: generics
-title: Generic Methods and Classes
+title: Generic Classes and Methods
 sidebar_label: Generics
 ---
 
