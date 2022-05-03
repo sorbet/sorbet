@@ -878,6 +878,8 @@ class Main
 end
 ```
 
+For more information, see the docs for [Generics](generics.md).
+
 ## 4012
 
 A `class` was redefined as a `module` or _vice versa_ in two separate locations.
@@ -1241,11 +1243,10 @@ Given code like this:
 # typed: true
 class Parent
   extend T::Generic
-  Foo = type_member
+  X = type_member
 end
 
 class Child < Parent
-  extend T::Generic
 end
 ```
 
@@ -1255,16 +1256,39 @@ We need to change our code to redeclare the type member in the child class too:
 # typed: true
 class Parent
   extend T::Generic
-  Foo = type_member
+  X = type_member
 end
 
 class Child < Parent
-  extend T::Generic
-  Foo = type_member
+  X = type_member
 end
 ```
 
 The same thing holds for type templates.
+
+Note that when the ancestor is a `module` that has added to a child class using
+`extend`, the child class will need to use `type_template` to redeclare the
+module's type members
+
+```ruby
+# typed: true
+module IFoo
+  extend T::Generic
+  X = type_member
+end
+
+class A
+  extend T::Generic
+  extend IFoo
+  X = type_template
+end
+```
+
+The intuition here is similar to how using `extend` on an interface requires
+implementing its abstract methods as singleton class methods (`def self.foo`)
+instead of instance methods (`def foo`).
+
+For more information, see the docs for [Generics](generics.md).
 
 ## 5015
 
@@ -1917,8 +1941,8 @@ certain Sorbet usage patterns from introducing load-time cyclic references.
 
 ## 5044
 
-As background reading, you may first want to read more about variance—see the
-docs for error code [5015](#5015) and [5016](#5016).
+As background reading, you may first want to read more about
+[variance](generics.md#in-out-and-variance).
 
 When a type member is declared normally, without any variance annotation, it is
 invariant. It can then appear either in the `params` list or the `returns` of a
@@ -1942,59 +1966,9 @@ In this example, even though `Integer` is a subtype of `T.any(Integer, String)`,
 `Elem` has not been declared as `:out` nor `:in`, and is thus **invariant**.
 
 To allow code like this, we can declare `Elem` using `:out`, but this comes at
-the restriction of only being able to use `Elem` in **out positions**. An out
-position is named as such because it's the position of a method's output, like a
-method signature's `returns`, though there are other out positions as well. As
-an intuition, all positions in a signature where the value is produced by a
-method are out positions. This includes values yielded to lambda functions and
-block arguments.
-
-```ruby
-# ...
-
-  Elem = type_member(:out)
-
-  sig {abstract.returns(Elem)}
-  #                     ^^^^ out position
-  def value; end
-
-  sig do
-    type_parameters(:U)
-      .params(
-        blk: T.proc.params(val: Elem).returns(T.type_parameter(:U))
-      )
-      .returns(T.type_parameter(:U))
-  end
-  def with_value(&blk)
-    yield value
-  end
-
-# ...
-```
-
-[→ View full example on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0Amodule%20IImmutableBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20abstract!%0A%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0A%0A%20%20sig%20%7Babstract.returns%28Elem%29%7D%0A%20%20def%20value%3B%20end%0A%0A%20%20sig%20do%0A%20%20%20%20type_parameters%28%3AU%29%0A%20%20%20%20%20%20.params%28%0A%20%20%20%20%20%20%20%20blk%3A%20T.proc.params%28val%3A%20Elem%29.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%20%20%29%0A%20%20%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0A%20%20end%0A%20%20def%20with_value%28%26blk%29%0A%20%20%20%20yield%20value%0A%20%20end%0Aend%0A%0Aclass%20IBox%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20IImmutableBox%0A%0A%20%20Elem%20%3D%20type_member%0A%0A%20%20sig%20%7Bparams%28value%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28value%29%0A%20%20%20%20%40value%20%3D%20value%0A%20%20end%0A%0A%20%20sig%20%7Boverride.returns%28Elem%29%7D%0A%20%20def%20value%3B%20%40value%3B%20end%0Aend%0A%0Asig%20%7Bparams%28immutable_box%3A%20IImmutableBox%5BInteger%5D%29.void%7D%0Adef%20example%28immutable_box%29%0A%20%20x%20%3D%20immutable_box.value%0A%20%20T.reveal_type%28x%29%0A%0A%20%20immutable_box.with_value%20do%20%7Celem%7C%0A%20%20%20%20T.reveal_type%28elem%29%0A%20%20end%0Aend)
-
-The intuition for **in positions** is flipped: they're all positions that would
-correspond to an input to the function, instead of all things that the function
-produces. This includes the direct arguments of the method, as well as the
-return values of any lambda functions or blocks passed into the method.
-
-If it helps, some type system actually formalize the type of a function as a
-generic something like this:
-
-```ruby
-module Fn
-  extend T::Sig
-  extend T::Generic
-  interface!
-
-  Input = type_member(:in)
-  Output = type_member(:out)
-
-  sig {abstract.params(input: Input).returns(Oputput)}
-  def call(input); end
-end
-```
+the restriction of only being able to use `Elem` in **out positions**. See
+[Input and output positions](generics.md#input-and-output-positions) for more
+information.
 
 Recall that only modules (not classes) may have covariant and contravariant type
 members—classes are limited to only invariant type members. For more, see the
@@ -2467,6 +2441,85 @@ Since the definition of the lambda `f` is typechecked entirely before the call
 to `example` is typechecked, no `.bind` annotation on any of `example`'s
 positional or keyword arguments would actually affect how the lambda is
 typechecked.
+
+## 5072
+
+See [`type_member` & `type_template`](generics.md#type_member--type_template) in
+the generics docs for more.
+
+A `type_member` is limited in scope to only appear in instance methods of the
+given class. A `type_template` is limited in scope to only appear in singleton
+class methods of the given class. For example:
+
+```ruby
+class Box
+  extend T::Sig
+  extend T::Generic
+
+  Elem = type_member
+
+  sig {returns(Elem)} # error
+  def self.example
+    # ...
+  end
+end
+```
+
+This example doesn't make sense because `Elem` in this case is the element type
+of our generic `Box` type. For example, instances of `Box[Integer]` and
+`Box[String]` hold `Integer`'s and `String`'s respectively. Meanwhile, a call to
+the method `Box.example` wouldn't have a meaning, because there is no instance
+of `Box` in this call to `Box.example` whose element type should be used.
+
+Sometimes this error comes up when attempting to do something like this:
+
+```ruby
+class AbstractSerializable
+  extend T::Sig
+  extend T::Generic
+  abstract!
+  SerializeType = type_template
+
+  sig {abstract.returns(SerializeType)} # error
+  def serialize; end
+  sig do
+    abstract
+      .params(raw_input: SerializeType)
+      .returns(T.attached_class)
+  end
+  def self.deserialize(raw_input); end
+end
+
+class MyClass < AbstractSerializable
+  SerializeType = type_template {{fixed: String}}
+
+  # ... implement abstract methods ...
+end
+```
+
+In this case, the idea is that some subclasses may want to serialize to a
+`String`, some may want to serialize to an `Integer`, some may want to serialize
+to a `Symbol`, etc. and the child class should get to specify that, by using
+`fixed` on the `type_template`.
+
+Even in these cases, Sorbet does not let the `type_template` be referenced from
+an instance method. The solution is to instead specify both `type_member` and a
+`type_template`, and have the child class fix both of them:
+
+```ruby
+class AbstractSerializable
+  # ...
+  SerializeTypeMember = type_member
+  SerializeTypeTemplate = type_template
+  # ...
+end
+
+class MyClass < AbstractSerializable
+  SerializeTypeMember = type_member {{fixed: String}}
+  SerializeTypeTemplate = type_template {{fixed: String}}
+  # ...
+end
+```
 
 ## 6001
 
@@ -3458,6 +3511,9 @@ throughout the body of the `if` statement.
 
 ## 7038
 
+For more information, see the docs on
+[generic methods](generics.md#generic-methods).
+
 Consider this example:
 
 ```ruby
@@ -3527,7 +3583,8 @@ Or if it's imperative to continue using `is_a?`, change the type to
 
 ## 7039
 
-<!-- TODO(jez) Link to generic docs once written -->
+For more information, see how to place
+[bounds on type members](generics.md#bounds-on-type-member-s-and-type-template-s-fixed-upper-lower).
 
 Consider this example:
 
