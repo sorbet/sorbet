@@ -5,4 +5,7 @@ main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` i
     main_lib/__package.rb:7: Replace with `import Project::TestOnly`
      7 |  test_import Project::TestOnly
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test_only/__package.rb:5: Defined here
+     5 |class Project::TestOnly < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

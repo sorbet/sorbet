@@ -5,6 +5,9 @@ foo_class.rb:7: No import provides `Foo::Bar::OtherPackage::OtherClass` https://
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
+    other/__package.rb:3: Defined here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 foo_class.rb:8: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
      8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
@@ -13,6 +16,9 @@ foo_class.rb:8: No import provides `Foo::Bar::OtherPackage::OtherClass` https://
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
+    other/__package.rb:3: Defined here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 foo_class.rb:14: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
     14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
@@ -21,6 +27,9 @@ foo_class.rb:14: No import provides `Foo::Bar::OtherPackage::OtherClass` https:/
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
+    other/__package.rb:3: Defined here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 foo.test.rb:4: No import provides `Test::Foo::Bar::OtherPackage::TestUtil` https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
@@ -29,4 +38,7 @@ foo.test.rb:4: No import provides `Test::Foo::Bar::OtherPackage::TestUtil` https
     __package.rb:6: Insert `test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
+    other/__package.rb:3: Defined here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 4
