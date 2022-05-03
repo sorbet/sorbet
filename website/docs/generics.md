@@ -23,7 +23,7 @@ It is imperative to thoroughly test abstractions making use of Sorbet generics.
 
 The tests you'll need to write look substantially different from other Ruby
 tests you may be accustomed to writing, because the tests need to deal with what
-code should or should not typecheck, rather that code that should or should not
+code should or should not typecheck, rather than code that should or should not
 run correctly. These tests
 
 - Many things that shouldn't type check **do type check anyways**.
