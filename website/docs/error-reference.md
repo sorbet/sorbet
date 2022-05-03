@@ -1877,55 +1877,8 @@ each overload has a descriptive name.
 
 ## 5041
 
-Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
-
-```ruby
-class S < T::Struct
-  prop :foo, Integer
-end
-
-class Bad < S; end # error
-```
-
-This limitation exists because, in order to generate a static type for
-`initialize` for a struct, we need to know all of the `prop`s that are declared
-on this struct. By disallowing inheritance of structs, we can know that all of
-the props declared on this struct were syntactically present in the class body.
-
-One common situation where inheritance may be desired is when a parent struct
-declares some common props, and children structs declare their own props.
-
-```ruby
-class Parent < T::Struct
-  prop :foo, Integer
-end
-
-class ChildOne < Parent # error
-  prop :bar, String
-end
-
-class ChildTwo < Parent # error
-  prop :quz, Symbol
-end
-```
-
-We can restructure the code to use composition instead of inheritance.
-
-```ruby
-class Common < T::Struct
-  prop :foo, Integer
-end
-
-class ChildOne < T::Struct
-  prop :common, Common
-  prop :bar, String
-end
-
-class ChildTwo < T::Struct
-  prop :common, Common
-  prop :quz, Symbol
-end
-```
+See [T::Struct: Structs and inheritance](tstruct.md#structs-and-inheritance) for
+more information.
 
 ## 5042
 

@@ -69,11 +69,28 @@ my_struct.serialize # => { "foo": 4, "quz": 0.5 }
 
 Note that `bar` is skipped because it is `nil`.
 
-## Inheriting from Derived of T::Struct
+## Structs and inheritance
 
-Trying to create a subclass of a subclass of T::Struct will result in an a 
-[5041](https://sorbet.org/docs/error-reference#5041) error. So code like this
-will create an error:
+Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
+
+```ruby
+class S < T::Struct
+  prop :foo, Integer
+end
+
+class Bad < S; end # error
+```
+
+Sorbet imposes this limitation somewhat artificially, for performance. Sorbet
+generates a signature for the `initialize` method of a `T::Struct` subclass. In
+order to do so, it needs to know all `prop`'s defined on the class. For
+performance in large codebases, Sorbet requires that it is possible to know
+which methods are defined on a class purely based on syntax—Sorbet does not
+allow discovering the existence of methods based on things like what a class's
+superclass is, or what methods are defined on the superclass.
+
+One common situation where inheritance may be desired is when a parent struct
+declares some common props, and children structs declare their own props.
 
 ```ruby
 class Parent < T::Struct
@@ -81,15 +98,16 @@ class Parent < T::Struct
 end
 
 class ChildOne < Parent # error
-  prop :bar, Integer
+  prop :bar, String
 end
 
 class ChildTwo < Parent # error
-  prop :baz, Integer
+  prop :quz, Symbol
 end
 ```
 
-If this structure is required, then using composition is one viable solution:
+We can restructure the code to use composition instead of inheritance.
+
 ```ruby
 class Common < T::Struct
   prop :foo, Integer
@@ -97,11 +115,20 @@ end
 
 class ChildOne < T::Struct
   prop :common, Common
-  prop :bar, Integer
+  prop :bar, String
 end
 
 class ChildTwo < T::Struct
   prop :common, Common
-  prop :quz, Integer
+  prop :quz, Symbol
 end
 ```
+
+If it is imperative that inheritance must be used (not composition, either):
+
+- Avoid using `T::Struct`, and instead define a normal class, with things like
+  `attr_reader` and an explicit `initialize` method.
+
+- Change the superclass from `T::Struct` to `T::InexactStruct`. Sorbet will no
+  longer check the types of any arguments passed to the `initialize` method on
+  the subclass. This should only be used as a last resort.
