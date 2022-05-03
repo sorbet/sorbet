@@ -76,7 +76,7 @@ them][issues]. See the list of known bugs here:
 
 ## Basic syntax
 
-The basic syntax for generics in Sorbet looks like this:
+The basic syntax for class generics in Sorbet looks like this:
 
 ```ruby
 # typed: strict
@@ -94,24 +94,6 @@ class Box
   def val; @val; end
   sig {params(val: Elem).returns(Elem)}
   def val=(val); @val = val; end
-
-  # Declares a generic method using `type_parameters`
-  sig do
-    type_parameters(:U)
-      .params(
-        # References the method-level type parameter `:U`
-        blk: T.proc.params(val: Elem).returns(T.type_parameter(:U))
-      )
-      .returns(Box[T.type_parameter(:U)])
-  end
-  def map(&blk)
-    # This is for example purposes only.
-    # You likely want to `include Enumerable` and implement
-    # the abstract `each` method, getting methods like `map`
-    # and others for free.
-    new_val = yield val
-    res = Box.new(val: new_val)
-  end
 end
 
 int_box = Box[Integer].new(val: 0)
@@ -125,7 +107,36 @@ string_box = int_box.map {|val| val.to_s}
 T.reveal_type(string_box) # `Box[String]`
 ```
 
-[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%20%23%20Provides%20%60type_member%60%20helper%0A%0A%20%20Elem%20%3D%20type_member%20%23%20Makes%20%60Box%60%20class%20generic%0A%0A%20%20%23%20References%20the%20class-level%20generic%20%60Elem%60%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28val%3A%29%3B%20%40val%20%3D%20val%3B%20end%0A%20%20sig%20%7Breturns%28Elem%29%7D%0A%20%20def%20val%3B%20%40val%3B%20end%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20val%3D%28val%29%3B%20%40val%20%3D%20val%3B%20end%0A%0A%20%20%23%20Declares%20a%20generic%20method%20using%20%60type_parameters%60%0A%20%20sig%20do%0A%20%20%20%20type_parameters%28%3AU%29%0A%20%20%20%20%20%20.params%28%0A%20%20%20%20%20%20%20%20%23%20References%20the%20method-level%20type%20parameter%20%60%3AU%60%0A%20%20%20%20%20%20%20%20blk%3A%20T.proc.params%28val%3A%20Elem%29.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%20%20%29%0A%20%20%20%20%20%20.returns%28Box%5BT.type_parameter%28%3AU%29%5D%29%0A%20%20end%0A%20%20def%20map%28%26blk%29%0A%20%20%20%20%23%20This%20is%20for%20example%20purposes%20only.%0A%20%20%20%20%23%20You%20likely%20want%20to%20%60include%20Enumerable%60%20and%20implement%0A%20%20%20%20%23%20the%20abstract%20%60each%60%20method%2C%20getting%20methods%20like%20%60map%60%0A%20%20%20%20%23%20and%20others%20for%20free.%20%20%20%20%0A%20%20%20%20new_val%20%3D%20yield%20val%0A%20%20%20%20res%20%3D%20Box.new%28val%3A%20new_val%29%0A%20%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28val%3A%200%29%0AT.reveal_type%28int_box%29%20%23%20%60Box%5BInteger%5D%60%0A%0AT.reveal_type%28int_box.val%29%20%23%20%60Integer%60%0A%0Aint_box.val%20%2B%3D%201%0A%0Astring_box%20%3D%20int_box.map%20%7B%7Cval%7C%20val.to_s%7D%0AT.reveal_type%28string_box%29%20%23%20%60Box%5BString%5D%60)
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%20%23%20Provides%20%60type_member%60%20helper%0A%0A%20%20Elem%20%3D%20type_member%20%23%20Makes%20the%20%60Box%60%20class%20generic%0A%0A%20%20%23%20References%20the%20class-level%20generic%20%60Elem%60%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28val%3A%29%3B%20%40val%20%3D%20val%3B%20end%0A%20%20sig%20%7Breturns%28Elem%29%7D%0A%20%20def%20val%3B%20%40val%3B%20end%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20val%3D%28val%29%3B%20%40val%20%3D%20val%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28val%3A%200%29%0AT.reveal_type%28int_box%29%20%23%20%60Box%5BInteger%5D%60%0A%0AT.reveal_type%28int_box.val%29%20%23%20%60Integer%60%0A%0Aint_box.val%20%2B%3D%201%0A%0Astring_box%20%3D%20int_box.map%20%7B%7Cval%7C%20val.to_s%7D%0AT.reveal_type%28string_box%29%20%23%20%60Box%5BString%5D%60)
+
+```ruby
+# typed: true
+extend T::Sig
+
+sig do
+  type_parameters(:U)
+    .params(
+      blk: T.proc.returns(T.type_parameter(:U))
+    )
+    .returns(T.type_parameter(:U))
+end
+def with_timer(&blk)
+  start = Time.now
+  res = yield
+  duration = Time.now - start
+  puts "Running block took #{duration.round(1)}s"
+  res
+end
+
+res = with_timer do
+  sleep 2
+  puts 'hello, world!'
+  123
+end
+T.reveal_type(res) # `Integer`
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20do%0A%20%20type_parameters%28%3AU%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20blk%3A%20T.proc.returns%28T.type_parameter%28%3AU%29%29%0A%20%20%20%20%29%0A%20%20%20%20.returns%28T.type_parameter%28%3AU%29%29%0Aend%0Adef%20with_timer%28%26blk%29%0A%20%20start%20%3D%20Time.now%0A%20%20res%20%3D%20yield%0A%20%20duration%20%3D%20Time.now%20-%20start%0A%20%20puts%20%22Running%20block%20took%20%23%7Bduration.round%281%29%7Ds%22%0A%20%20res%0Aend%0A%0Ares%20%3D%20with_timer%20do%0A%20%20sleep%202%0A%20%20puts%20'hello%2C%20world!'%0A%20%20123%0Aend%0AT.reveal_type%28res%29)
 
 ## Generics and runtime checks
 
