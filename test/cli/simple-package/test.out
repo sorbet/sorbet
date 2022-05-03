@@ -16,4 +16,7 @@ foo/foo.rb:14: Package `Project::Bar` does not export `Project::Bar::UnexportedC
     bar/__package.rb:9: Insert `export Project::Bar::UnexportedClass`
      9 |  export Project::Bar::BarMethods
                                          ^
+    bar/bar.rb:14: Defined here
+    14 |  class UnexportedClass; end
+          ^^^^^^^^^^^^^^^^^^^^^
 Errors: 2

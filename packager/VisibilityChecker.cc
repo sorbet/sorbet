@@ -326,6 +326,7 @@ public:
                 if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
+                e.addErrorLine(pkg.declLoc(), "Defined here");
             }
 
             return tree;
@@ -337,6 +338,7 @@ public:
                 if (auto exp = this->package.addImport(ctx, pkg, false)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
+                e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
 
@@ -355,6 +357,7 @@ public:
                 if (auto exp = pkg.addExport(ctx, lit.symbol, false)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
+                e.addErrorLine(lit.symbol.loc(ctx), "Defined here");
             }
         }
 
