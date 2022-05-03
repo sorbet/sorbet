@@ -113,7 +113,59 @@ common, this conversion has been built in (it still must be explicitly called):<
 <pre><code class="hljs css language-ruby">my_struct.serialize <span class="hljs-comment"># =&gt; { "foo": 4, "quz": 0.5 }</span>
 </code></pre>
 <p>Note that <code>bar</code> is skipped because it is <code>nil</code>.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/exhaustiveness"><span class="arrow-prev">← </span><span>Exhaustiveness (T.absurd)</span></a><a class="docs-next button" href="/docs/tenum"><span>T::Enum</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-a-new-struct-class">Creating a new struct class</a></li><li><a href="#creating-and-using-an-instance-of-a-struct">Creating and using an instance of a struct</a></li><li><a href="#converting-structs-to-other-types">Converting structs to other types</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<h2><a class="anchor" aria-hidden="true" id="structs-and-inheritance"></a><a href="#structs-and-inheritance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structs and inheritance</h2>
+<p>Sorbet does not allow inheriting from a class which inherits from <code>T::Struct</code>.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">S</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bad</span> &lt; S;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+</code></pre>
+<p>Sorbet imposes this limitation somewhat artificially, for performance. Sorbet
+generates a signature for the <code>initialize</code> method of a <code>T::Struct</code> subclass. In
+order to do so, it needs to know all <code>prop</code>'s defined on the class. For
+performance in large codebases, Sorbet requires that it is possible to know
+which methods are defined on a class purely based on syntax—Sorbet does not
+allow discovering the existence of methods based on things like what a class’s
+superclass is, or what methods are defined on the superclass.</p>
+<p>One common situation where inheritance may be desired is when a parent struct
+declares some common props, and children structs declare their own props.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildOne</span> &lt; Parent <span class="hljs-comment"># error</span></span>
+  prop <span class="hljs-symbol">:bar</span>, String
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildTwo</span> &lt; Parent <span class="hljs-comment"># error</span></span>
+  prop <span class="hljs-symbol">:quz</span>, Symbol
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>We can restructure the code to use composition instead of inheritance.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Common</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildOne</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:common</span>, Common
+  prop <span class="hljs-symbol">:bar</span>, String
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildTwo</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:common</span>, Common
+  prop <span class="hljs-symbol">:quz</span>, Symbol
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>If it is imperative that inheritance must be used (not composition, either):</p>
+<ul>
+<li><p>Avoid using <code>T::Struct</code>, and instead define a normal class, with things like
+<code>attr_reader</code> and an explicit <code>initialize</code> method.</p></li>
+<li><p>Change the superclass from <code>T::Struct</code> to <code>T::InexactStruct</code>. Sorbet will no
+longer check the types of any arguments passed to the <code>initialize</code> method on
+the subclass. This should only be used as a last resort.</p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/exhaustiveness"><span class="arrow-prev">← </span><span>Exhaustiveness (T.absurd)</span></a><a class="docs-next button" href="/docs/tenum"><span>T::Enum</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-a-new-struct-class">Creating a new struct class</a></li><li><a href="#creating-and-using-an-instance-of-a-struct">Creating and using an instance of a struct</a></li><li><a href="#converting-structs-to-other-types">Converting structs to other types</a></li><li><a href="#structs-and-inheritance">Structs and inheritance</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
