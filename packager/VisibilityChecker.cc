@@ -337,7 +337,8 @@ public:
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
         if (otherFile.data(ctx).isPackagedTest() && !this->insideTestFile) {
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used test-only constant `{}` in non-test file", lit.symbol.show(ctx));
+                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
+                            lit.symbol.show(ctx));
             }
         }
 

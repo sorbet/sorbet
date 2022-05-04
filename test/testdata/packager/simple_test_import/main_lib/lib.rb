@@ -9,9 +9,9 @@ class Project::MainLib::Lib
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file
 
   Test::Project::Util::UtilHelper
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used test-only constant `Test::Project::Util::UtilHelper` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::UtilHelper` is defined in a test namespace
 
   Test::Project::Util::Unexported
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Project::Util` does not export `Test::Project::Util::Unexported`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used test-only constant `Test::Project::Util::Unexported` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` is defined in a test namespace
 end

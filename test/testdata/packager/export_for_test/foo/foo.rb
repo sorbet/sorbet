@@ -18,12 +18,12 @@ module Opus::Foo
   # via import Opus::Foo::Bar
   Opus::Foo::Bar::BarClass
   Test::Opus::Foo::Bar::BarClassTest
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used test-only constant `Test::Opus::Foo::Bar::BarClassTest` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Foo::Bar::BarClassTest` is defined in a test namespace
 
   # via import Opus::Util
   Opus::Util::UtilClass
   Test::Opus::Util::TestUtil
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used test-only constant `Test::Opus::Util::TestUtil` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Util::TestUtil` is defined in a test namespace
 
   Opus::Util::Nesting::Public.public_method
 
@@ -36,7 +36,7 @@ module Opus::Foo
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Opus::TestImported::TIClass` in non-test file
   Test::Opus::TestImported::TITestClass
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Opus::TestImported::TITestClass` in non-test file
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used test-only constant `Test::Opus::TestImported::TITestClass` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported::TITestClass` is defined in a test namespace
 
 
   # via export_for_test Opus::Foo::Private::ImplDetail
