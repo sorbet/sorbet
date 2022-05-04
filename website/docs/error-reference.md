@@ -733,17 +733,6 @@ cases, a common solution is to factor the shared functionality to a new package,
 and import that new package wherever it's needed. In some situations, there may
 be simpler ways to restructure the code that don't involve making a new package.
 
-## 3719
-
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
-
-Files that are marked `# packaged: false` must only define and reference
-completely unpackaged code. For example, `# packaged: false` files can be used
-to monkeypatch classes defined by the standard library. However, these monkey
-patches cannot mention packaged code. To monkeypatch something in the standard
-library and also mention a packaged definition do X.
-
 ## 3720
 
 > This error is specific to Stripe's custom `--stripe-packages` definition. If

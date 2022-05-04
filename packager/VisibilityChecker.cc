@@ -8,6 +8,8 @@
 #include "core/errors/resolver.h"
 #include <iterator>
 
+using namespace std::literals::string_view_literals;
+
 namespace sorbet::packager {
 
 namespace {
@@ -52,26 +54,27 @@ class PropagateVisibility final {
 
     // Lookup the package name on the given root symbol, and mark the final symbol as exported.
     void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        // Explicitly mark the symbol outside of the special package namespace as exported by this package, to allow
-        // other packages to refer to this namespace. Ultimately it would be great to not have this, but it helps with a
-        // migration to the visibility checker from the previous packages implementation.
+        // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
+        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visibile to packages that have imported
+        // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
+        // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
+        // names being exported by default.
         for (auto name : this->package.fullName()) {
             auto next = sym.data(gs)->findMember(gs, name);
             if (!next.exists() || !next.isClassOrModule()) {
                 sym = core::Symbols::noClassOrModule();
-                break;
+                return;
             }
 
             sym = next.asClassOrModuleRef();
         }
 
-        if (sym.exists()) {
-            sym.data(gs)->flags.isExported = true;
-        }
+        sym.data(gs)->flags.isExported = true;
     }
 
-    // Mark both the package and its test namespace as exported. This will terminate the recursive exporting in
-    // `exportParentNamespace`, as it stops when it hits either the root or an exported symbol.
+    // Mark both `::A::B` and `::Test::A::B` as exported (given package `A::B`).
+    // This will terminate the recursive exporting in `exportParentNamespace`, as it stops when it
+    // hits either the root or an exported symbol.
     void exportPackageRoots(core::GlobalState &gs) {
         this->exportRoot(gs, core::Symbols::root());
 
@@ -145,10 +148,18 @@ class PropagateVisibility final {
         }
     }
 
-    void checkExportPackage(core::MutableContext &ctx, core::LocOffsets loc, core::NameRef litPackage) {
-        if (litPackage != this->package.mangledName() && !this->package.importsPackage(litPackage)) {
+    // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
+    // This currently checks for two cases:
+    //
+    // 1. The current package is the same as the package passed in, which means we're exporting a symbol we own
+    // 2. The current package imports the package, which is for allowing re-exports of public symbols from other
+    //    packages.
+    void checkExportPackage(core::MutableContext &ctx, core::LocOffsets loc, core::SymbolRef sym) {
+        auto symPackage = ctx.state.packageDB().getPackageNameForFile(sym.loc(ctx).file());
+        if (symPackage != this->package.mangledName() && !this->package.importsPackage(symPackage)) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
-                e.setHeader("Exporting a symbol that isn't owned by this package");
+                e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
+                e.addErrorLine(sym.loc(ctx), "Defined here");
             }
         }
     }
@@ -177,28 +188,56 @@ public:
             return tree;
         }
 
-        auto &db = ctx.state.packageDB();
         if (lit->symbol.isClassOrModule()) {
             auto sym = lit->symbol.asClassOrModuleRef();
-            checkExportPackage(ctx, send.loc, db.getPackageNameForFile(sym.data(ctx)->loc().file()));
+            checkExportPackage(ctx, send.loc, lit->symbol);
             recursiveExportSymbol(ctx, true, sym);
 
+            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
+            // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
         } else if (lit->symbol.isFieldOrStaticField()) {
             auto sym = lit->symbol.asFieldRef();
-            checkExportPackage(ctx, send.loc, db.getPackageNameForFile(sym.data(ctx)->loc().file()));
+            checkExportPackage(ctx, send.loc, lit->symbol);
             sym.data(ctx)->flags.isExported = true;
 
             // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
-            // TODO: can we get away with only marking the owner as exported, and not everything up to the package?
             exportParentNamespace(ctx, sym.data(ctx)->owner);
 
             if (sym.data(ctx)->flags.isStaticFieldTypeAlias) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::ExportingTypeAlias)) {
                     e.setHeader("Exporting a type alias is not allowed in package specifications");
                     e.addErrorLine(sym.data(ctx)->loc(), "Originally defined here");
+                    e.addErrorNote(
+                        "You can put the type alias into a module and export the module to work around this error");
                 }
+            }
+        } else {
+            std::string_view kind = ""sv;
+            switch (lit->symbol.kind()) {
+                case core::SymbolRef::Kind::ClassOrModule:
+                case core::SymbolRef::Kind::FieldOrStaticField:
+                    ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
+                    break;
+
+                case core::SymbolRef::Kind::Method:
+                    kind = "type argument"sv;
+                    break;
+
+                case core::SymbolRef::Kind::TypeArgument:
+                    kind = "type argument"sv;
+                    break;
+
+                case core::SymbolRef::Kind::TypeMember:
+                    kind = "type member"sv;
+                    break;
+            }
+
+            if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+                e.setHeader("Only classes, modules, or constants may be exported");
+                e.addErrorLine(lit->symbol.loc(ctx), "Defined here");
+                e.addErrorNote("`{}` is a `{}`", lit->symbol.show(ctx), kind);
             }
         }
 
@@ -228,9 +267,7 @@ public:
         }
 
         const auto &package = gs.packageDB().getPackageInfo(pkgName);
-        if (!package.exists()) {
-            return f;
-        }
+        ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
         PropagateVisibility pass{package};
 
@@ -269,6 +306,7 @@ public:
 
     ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
         this->ignoreConstant = send.fun == core::Names::keepForIde();
         return tree;
     }
@@ -305,14 +343,6 @@ public:
         // no need to check visibility for these cases
         auto otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
-            return tree;
-        }
-
-        // Did we resolve a packaged symbol in unpackaged code?
-        if (!this->package.exists()) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::PackagedSymbolInUnpackagedContext)) {
-                e.setHeader("Packaged constant `{}` used in an unpackaged context", lit.symbol.show(ctx));
-            }
             return tree;
         }
 
@@ -488,7 +518,7 @@ public:
         this->imports.clear();
     }
 
-    static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
+    static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "packager.import_checker");
         auto resultq = std::make_shared<BlockingBoundedQueue<ast::ParsedFile>>(files.size());
@@ -531,8 +561,6 @@ public:
 };
 
 } // namespace
-
-// TODO: validate package imports and give errors for packages that don't exist
 
 std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
                                                     std::vector<ast::ParsedFile> files) {
