@@ -407,7 +407,7 @@ public:
 
     static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
-        Timer timeit(gs.tracer(), "packager.visibility_check");
+        Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto resultq = std::make_shared<BlockingBoundedQueue<ast::ParsedFile>>(files.size());
         auto fileq = std::make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
 
@@ -531,7 +531,7 @@ public:
 
     static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
-        Timer timeit(gs.tracer(), "packager.import_checker");
+        Timer timeit(gs.tracer(), "visibility_checker.check_imports");
         auto resultq = std::make_shared<BlockingBoundedQueue<ast::ParsedFile>>(files.size());
         auto fileq = std::make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
 
@@ -575,8 +575,10 @@ public:
 
 std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
                                                     std::vector<ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "visibility_checker.run");
+
     {
-        Timer timeit(gs.tracer(), "packager.propagate_visibility");
+        Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
         for (auto &f : files) {
             f = PropagateVisibility::run(gs, std::move(f));
         }
@@ -591,6 +593,7 @@ std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, Worke
 
 std::vector<ast::ParsedFile> VisibilityChecker::runIncremental(const core::GlobalState &gs, WorkerPool &workers,
                                                                std::vector<ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "visibility_checker.runIncremental");
     return VisibilityCheckerPass::run(gs, workers, std::move(files));
 }
 
