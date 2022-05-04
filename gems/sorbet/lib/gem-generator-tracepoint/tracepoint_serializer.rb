@@ -195,14 +195,20 @@ module Sorbet::Private
           when :key
             "#{name}: nil"
           when :rest
-            "*#{name}"
+            case name
+            when :* then "*"
+            else "*#{name}"
+            end
           when :keyrest
             case name
             when :** then "**"
             else "**#{name}"
             end
           when :block
-            "&#{name}"
+            case name
+            when :& then "&"
+            else "&#{name}"
+            end
           else
             raise "Unknown parameter type: #{type}"
           end
