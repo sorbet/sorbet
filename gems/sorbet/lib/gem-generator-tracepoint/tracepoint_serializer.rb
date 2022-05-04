@@ -197,7 +197,10 @@ module Sorbet::Private
           when :rest
             "*#{name}"
           when :keyrest
-            "**#{name}"
+            case name
+            when :** then "**"
+            else "**#{name}"
+            end
           when :block
             "&#{name}"
           else
