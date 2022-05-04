@@ -251,6 +251,7 @@ public:
             return tree;
         }
 
+        ENFORCE(original.symbol != core::Symbols::todo());
         setPackageLocs(ctx, original.name.loc(), original.symbol);
 
         return tree;
