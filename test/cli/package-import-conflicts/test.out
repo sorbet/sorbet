@@ -1,6 +1,9 @@
-a/__package.rb:4: Exporting a symbol that isn't owned by this package https://srb.help/3721
+a/__package.rb:4: Cannot export `A::B` because it is owned by another package https://srb.help/3721
      4 |  export A::B
           ^^^^^^^^^^^
+    ab/ab.rb:3: Defined here
+     3 |module A::B
+        ^^^^^^^^^^^
 
 ab/ab.rb:3: `A::B` was previously defined as a `class` https://srb.help/4012
      3 |module A::B

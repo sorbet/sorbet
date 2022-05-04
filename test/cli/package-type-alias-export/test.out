@@ -4,4 +4,6 @@ __package.rb:5: Exporting a type alias is not allowed in package specifications 
     a.rb:6: Originally defined here
      6 |  A = T.type_alias {String}
           ^
+  Note:
+    You can put the type alias into a module and export the module to work around this error
 Errors: 1
