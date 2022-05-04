@@ -52,7 +52,6 @@ public:
         SignatureHelp = 7,
         DocumentHighlight = 9,
         DocumentFormat = 10,
-        MoveMethod = 11,
     };
 
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
