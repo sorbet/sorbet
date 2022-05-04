@@ -341,8 +341,10 @@ public:
             }
         }
 
+        auto &db = ctx.state.packageDB();
+
         // no need to check visibility for these cases
-        auto otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
+        auto otherPackage = db.getPackageNameForFile(otherFile);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return tree;
         }
@@ -358,6 +360,10 @@ public:
                     e.addAutocorrect(std::move(exp.value()));
                 }
                 e.addErrorLine(pkg.declLoc(), "Defined here");
+
+                if (!db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
             }
 
             return tree;
@@ -389,6 +395,10 @@ public:
                     e.addAutocorrect(std::move(exp.value()));
                 }
                 e.addErrorLine(lit.symbol.loc(ctx), "Defined here");
+
+                if (!db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
             }
         }
 
