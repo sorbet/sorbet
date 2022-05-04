@@ -31,9 +31,21 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerInterface &
         // Only support go-to-definition on constants and fields in untyped files.
         if (auto c = resp->isConstant()) {
             auto sym = c->symbol;
+            vector<pair<core::Loc, unique_ptr<Location>>> locMapping;
             for (auto loc : sym.locs(gs)) {
-                addLocIfExists(gs, locations, loc);
+                locMapping.emplace_back(loc, config.loc2Location(gs, loc));
             }
+            // Move all non-existent Locations to the front of the vector.
+            auto validLocations = absl::c_partition(locMapping, [](const auto &p) { return p.second == nullptr; });
+            // If we have multiple locations, eliminate "definitions" in RBI files
+            // for classes and modules, since the one(s) in Ruby files are more
+            // likely to be what the user is looking for.
+            if (sym.isClassOrModule() && std::distance(validLocations, locMapping.end()) > 1) {
+                validLocations = std::partition(validLocations, locMapping.end(),
+                                                [&gs](const auto &p) { return p.first.file().data(gs).isRBI(); });
+            }
+            std::transform(validLocations, locMapping.end(), std::back_inserter(locations),
+                           [](auto &p) { return std::move(p.second); });
         } else if (resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
             const auto &retType = resp->getTypeAndOrigins();
             for (auto &originLoc : retType.origins) {
