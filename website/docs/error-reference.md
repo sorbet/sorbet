@@ -21,10 +21,6 @@ sidebar_label: Error Reference
 
 </div>
 
-> **Note**: This list is not exhaustive! Some errors are very context dependent
-> and other error codes are not common enough to know how to generally suggest
-> help. Contributions to this list are welcome!
-
 This is one of three docs aimed at helping answer common questions about Sorbet:
 
 1.  [Troubleshooting](troubleshooting.md)
