@@ -533,8 +533,8 @@ type `T.untyped` (along with all other values).
 
 ## 3702
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Package definitions must be formatted like this:
 
@@ -549,8 +549,8 @@ explicitly declares that this class definition is a package spec.
 
 ## 3703
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Each package must have only one definition. A package definition is the place
 where there is a line like `class Opus::Foo < PackageSpec` in a `__package.rb`
@@ -558,8 +558,8 @@ file.
 
 ## 3704
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Sorbet found an `import` in a `__package.rb` file, but the imported constant did
 not exist.
@@ -570,8 +570,8 @@ not exist.
 
 ## 3706
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 All `import` and `export` lines in a `__package.rb` file must have constant
 literals as their argument. Doing arbitrary computation of imports and exports
@@ -582,23 +582,23 @@ imports.
 
 ## 3707
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 `__package.rb` files must declare exactly one package.
 
 ## 3709
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 A package cannot import itself. Double check which files and/or packages you
 intended to modify, as you've likely made a typo.
 
 ## 3710
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary
 Ruby code. The fact that they use Ruby syntax is a convenience so that:
@@ -612,8 +612,8 @@ which means most forms of Ruby expressions are not allowed in these files.
 
 ## 3711
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Package files must be `# typed: strict`. If you are in the process of migrating
 a codebase to use the packager mode and want to sometimes ignore a
@@ -622,8 +622,8 @@ will ignore all files whose name matches `__package.rb` exactly, in any folder.
 
 ## 3712
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Package names must not contain underscores. Internally, the packager assumes it
 can use the underscore character to join components of a package name together.
@@ -634,8 +634,8 @@ or `Opus::Foo::Bar`.
 
 ## 3713
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 All code inside a package must live within the namespace declared by it's
 enclosing `__package.rb` file. Note that since packages are allowed to nest
@@ -647,8 +647,8 @@ If you're seeing this error and surprised, double check which folders have
 
 ## 3714
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 This error arises when it's unclear which import actually provides a constant,
 which in turn usually happens with nested packages: given a constant `A::B::C`
@@ -670,8 +670,8 @@ another less ambiguous package.
 
 ## 3715
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 The `export_for_test` directive is used to say, "Make this constant from the
 non-test namespace available in the test namespace for the same package." That
@@ -687,8 +687,8 @@ deleted.
 
 ## 3716
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 This error means that you're exporting a constant redundantly. In Stripe
 Packages mode, exporting a constant `A::B` will export anything accessible
@@ -700,8 +700,8 @@ To fix this error, simply remove the more specific export.
 
 ## 3717
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Referencing a constant defined in another package that has not been explicitly
 exported by that package is not allowed.
@@ -714,8 +714,8 @@ that the constant has not been exported.
 
 ## 3718
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 To reference constants defined in other packages, the package must first be
 imported into the current package.
@@ -731,8 +731,8 @@ be simpler ways to restructure the code that don't involve making a new package.
 
 ## 3720
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 The `--stripe-packages` mode draws a distinction between test and non-test code.
 For a package called `A::B`
@@ -753,8 +753,8 @@ For a package called `A::B`
 
 ## 3721
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 A package may only export a constant defined within itself.
 
@@ -781,8 +781,8 @@ end
 
 ## 3722
 
-> This error is specific to Stripe's custom `--stripe-packages` definition. If
-> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Sorbet's package mode does not currently exporting type aliases. The workaround
 is to declare the type alias inside a module, and export the containing module
