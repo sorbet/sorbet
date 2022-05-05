@@ -1,7 +1,7 @@
-test/cli/ambiguous-definitions/foo.rb:5: Definition of `::Opus::Foo` here is ambiguous https://srb.help/5068
+test/cli/ambiguous-definitions/foo.rb:5: Definition of `Opus::Foo::Foo::Bar` here is ambiguous https://srb.help/5068
      5 |    module Foo::Bar # ambiguous
             ^^^^^^^^^^^^^^^
-    test/cli/ambiguous-definitions/foo.rb:4: Alternate definition `::Opus::Foo` here
+    test/cli/ambiguous-definitions/foo.rb:4: Alternate definition here
      4 |  module Foo
           ^^^^^^^^^^
 Errors: 1
