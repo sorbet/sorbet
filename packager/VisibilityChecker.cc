@@ -215,15 +215,6 @@ public:
             // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.data(ctx)->owner);
-
-            if (sym.data(ctx)->flags.isStaticFieldTypeAlias) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::ExportingTypeAlias)) {
-                    e.setHeader("Exporting a type alias is not allowed in package specifications");
-                    e.addErrorLine(sym.data(ctx)->loc(), "Originally defined here");
-                    e.addErrorNote(
-                        "You can put the type alias into a module and export the module to work around this error");
-                }
-            }
         } else {
             std::string_view kind = ""sv;
             switch (lit->symbol.kind()) {

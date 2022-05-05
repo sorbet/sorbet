@@ -849,14 +849,7 @@ private:
 
         if (rhsSym.isTypeAlias(ctx)) {
             if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
-                if (ctx.file.data(ctx).isPackage()) {
-                    // In --stripe-packages mode, this error surfaces when type aliases
-                    // are exported by a package. TODO (aadi-stripe, 12/30/2021) update docs for
-                    // error 5034 as part of any larger --stripe-packages documentation effort.
-                    e.setHeader("Exporting a type alias is not allowed in package specifications");
-                } else {
-                    e.setHeader("Reassigning a type alias is not allowed");
-                }
+                e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
                 auto rhsLoc = ctx.locAt(it.rhs->loc);
                 if (rhsLoc.exists()) {
