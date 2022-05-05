@@ -92,12 +92,6 @@ public:
     static std::vector<ast::ParsedFile> runIncrementalBestEffort(const core::GlobalState &gs,
                                                                  std::vector<ast::ParsedFile> files);
 
-    // The structures created for `__package.rb` files from their imports are large and deep. This causes
-    // performance problems with typechecking. Use to remove these modules while retaining the PackageSpec
-    // class itself during typecheck.
-    static ast::ParsedFile removePackageModules(core::Context ctx, ast::ParsedFile pf,
-                                                bool intentionallyLeakASTs = false);
-
     static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 
     // For each file, set its package name.
