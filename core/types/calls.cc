@@ -3057,17 +3057,6 @@ public:
 
 namespace {
 
-optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) {
-    auto fnd = absl::c_find_if(
-        shape.keys, [&argLit](auto &elemLit) { return argLit.equals(cast_type_nonnull<LiteralType>(elemLit)); });
-
-    if (fnd == shape.keys.end()) {
-        return nullopt;
-    } else {
-        return std::distance(shape.keys.begin(), fnd);
-    }
-}
-
 optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
     if (!isa_type<ClassType>(expectedType)) {
         return nullopt;
@@ -3130,7 +3119,7 @@ public:
         }
 
         auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
-        if (auto idx = indexForKey(shape, argLit)) {
+        if (auto idx = shape.indexForKey(argLit)) {
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
