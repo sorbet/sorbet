@@ -1294,9 +1294,9 @@ public:
                     e.setHeader("Definition of `{}` is ambiguous", name);
                     auto klassOwner = klass.data(ctx)->owner;
                     auto option1 = fmt::format("{}::{}", klassOwner.show(ctx), name);
-                    e.addErrorLine(klassOwner.data(ctx)->loc(), "Could mean `{}` using this definition", option1);
+                    e.addErrorLine(klassOwner.data(ctx)->loc(), "Could mean `{}` if nested under here", option1);
                     auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
-                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` using this definition", option2);
+                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
                 }
             }
         }
