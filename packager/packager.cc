@@ -1145,11 +1145,6 @@ struct PackageInfoFinder {
         return tree;
     }
 
-    // Bar::Baz => <PackageRegistry>::Foo_Package_Private::Bar::Baz
-    ast::ExpressionPtr prependInternalPackageName(const core::GlobalState &gs, ast::ExpressionPtr scope) {
-        return prependPackageScope(gs, move(scope), this->info->privateMangledName);
-    }
-
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
     void finalize(ContextType ctx) {
         if (info == nullptr) {
