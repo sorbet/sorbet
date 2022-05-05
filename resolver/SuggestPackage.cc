@@ -319,36 +319,6 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         return true;
     }
 
-    if (ast::isa_tree<ast::ConstantLit>(unresolved.scope)) {
-        auto missingExports = pkgCtx.currentPkg.findMissingExports(
-            ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol, unresolved.cnst);
-        if (missingExports.size() > 3) {
-            missingExports.resize(3);
-        }
-        if (!missingExports.empty()) {
-            for (auto match : missingExports) {
-                pkgCtx.addMissingExportSuggestions(e, match);
-            }
-
-            if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
-                if (missingExports.size() == 1) {
-                    // if we have a single unambiguous export
-                    // suggestion, then we can use that information to
-                    // make the error message reference the exact
-                    // package we believe the constant came from
-                    auto missingExport = missingExports.front();
-                    auto pkgName = ctx.state.packageDB().getPackageInfo(missingExport.srcPkg).show(ctx);
-                    e.setHeader("Package `{}` does not export `{}`", pkgName, *fullConstant);
-                } else {
-                    // otherwise we should be explicit that it's
-                    // probably an export problem but be a bit cagey
-                    // about WHAT export problem it is
-                    e.setHeader("`{}` is not a public constant", *fullConstant);
-                }
-            }
-            return true;
-        }
-    }
     return false;
 }
 } // namespace sorbet::resolver

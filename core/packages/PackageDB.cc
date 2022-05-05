@@ -48,11 +48,6 @@ public:
         return nullopt;
     }
 
-    vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope, core::NameRef name) const {
-        notImplemented();
-        return {};
-    }
-
     std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef name,
                                                          bool isPrivateTestExport) const {
         return {};
