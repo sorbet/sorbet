@@ -7044,6 +7044,81 @@ class Gem::Security::DIGEST_ALGORITHM < OpenSSL::Digest
   def self.hexdigest(data); end
 end
 
+class Gem::Security::Policy
+  include Gem::UserInteraction
+
+  # Create a new Gem::Security::Policy object with the given mode and options.
+  def initialize(name, policy = {}, opt = {}); end
+
+  # Ensures that `signer` is valid for `time` and was signed by the `issuer`.
+  def check_cert(signer, issuer, time); end
+
+  # Verifies each certificate in `chain` has signed the following certificate
+  # and is valid for the given `time`.
+  def check_chain(chain, time); end
+
+  # Verifies that `data` matches the `signature` created by `public_key` and the
+  # `digest` algorithm.
+  def check_data(public_key, digest, signature, data); end
+
+  # Ensures the public key of `key` matches the public key in `signer`.
+  def check_key(signer, key); end
+
+  # Ensures the root certificate in `chain` is self-signed and valid for `time`.
+  def check_root(chain, time); end
+
+  # Ensures the root of `chain` has a trusted certificate in `trust_dir` and the
+  # digests of the two certificates match according to `digester`.
+  def check_trust(chain, digester, trust_dir); end
+
+  def inspect; end
+
+  # Returns the value of attribute name.
+  def name; end
+
+  # Returns the value of attribute only_signed.
+  def only_signed; end
+
+  def only_signed=(value); end
+
+  # Returns the value of attribute only_trusted.
+  def only_trusted; end
+
+  def only_trusted=(value); end
+
+  # Extracts the email or subject from `certificate`.
+  def subject(certificate); end
+
+  # For `full_name`, verifies the certificate `chain` is valid, the `digests`
+  # match the signatures `signatures` created by the signer depending on the
+  # `policy` settings.
+  def verify(chain, key = nil, digests = {}, signatures = {}, full_name = '(unknown)'); end
+
+  # Returns the value of attribute verify_chain.
+  def verify_chain; end
+
+  def verify_chain=(value); end
+
+  # Returns the value of attribute verify_data.
+  def verify_data; end
+
+  def verify_data=(value); end
+
+  # Returns the value of attribute verify_root.
+  def verify_root; end
+
+  def verify_root=(value); end
+
+  # Extracts the certificate chain from the `spec` and calls #verify to ensure
+  # the signatures and certificate chain is valid according to the policy.
+  def verify_signatures(spec, digests, signatures); end
+
+  # Returns the value of attribute verify_signer.
+  def verify_signer; end
+
+  def verify_signer=(value); end
+end
+
 class Gem::Security::Signer
   DEFAULT_OPTIONS = ::T.let(nil, ::T.untyped)
 end
