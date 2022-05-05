@@ -1,5 +1,6 @@
 #ifndef SORBET_COMMON_FILEOPS_HPP
 #define SORBET_COMMON_FILEOPS_HPP
+#include "absl/types/span.h"
 #include "common/common.h"
 #include <string>
 #include <string_view>
@@ -62,7 +63,8 @@ public:
      * - 0 if timeout occurs.
      * - <0 if an error or EOF occurs.
      */
-    static int readFd(int fd, std::vector<char> &output, int timeoutMs = 100);
+    static int readFd(int fd, absl::Span<char> output, int timeoutMs = 100);
+
     /**
      * Attempts to read data up to a newline (\n) from the given file descriptor.
      * Timeout is specified in milliseconds.

@@ -142,7 +142,7 @@ string_view sorbet::FileOps::getExtension(string_view path) {
     return path.substr(found + 1);
 }
 
-int sorbet::FileOps::readFd(int fd, std::vector<char> &output, int timeoutMs) {
+int sorbet::FileOps::readFd(int fd, absl::Span<char> output, int timeoutMs) {
     // Prepare to use select()
     fd_set set;
     FD_ZERO(&set);
@@ -179,7 +179,8 @@ sorbet::FileOps::ReadLineOutput sorbet::FileOps::readLineFromFd(int fd, string &
     }
 
     constexpr int BUFF_SIZE = 1024 * 8;
-    vector<char> buf(BUFF_SIZE);
+    char chars[BUFF_SIZE];
+    absl::Span<char> buf(chars);
 
     int result = FileOps::readFd(fd, buf, timeoutMs);
     if (result == 0) {

@@ -44,7 +44,7 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
         // Need to read more.
         int moreNeeded = length - buffer.length();
         vector<char> buf(moreNeeded);
-        int result = FileOps::readFd(inputFd, buf);
+        int result = FileOps::readFd(inputFd, absl::MakeSpan(buf));
         if (result > 0) {
             buffer.append(buf.begin(), buf.begin() + result);
         }
