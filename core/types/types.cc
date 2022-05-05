@@ -421,6 +421,28 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return Types::hashOfUntyped();
 }
 
+std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
+    if (isa_type<LiteralType>(t)) {
+        const auto &lit = cast_type_nonnull<LiteralType>(t);
+        return indexForKey(lit);
+    }
+    return std::nullopt;
+}
+
+std::optional<size_t> ShapeType::indexForKey(const LiteralType &lit) const {
+    auto fnd = absl::c_find_if(this->keys, [&lit](const auto &candidate) -> bool {
+        if (!isa_type<LiteralType>(candidate)) {
+            return false;
+        }
+        const auto &candlit = cast_type_nonnull<LiteralType>(candidate);
+        return candlit.equals(lit);
+    });
+    if (fnd == this->keys.end()) {
+        return std::nullopt;
+    }
+    return std::distance(this->keys.begin(), fnd);
+}
+
 TypePtr TupleType::underlying(const GlobalState &gs) const {
     if (this->elems.empty()) {
         return Types::arrayOfUntyped();

@@ -387,20 +387,15 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             bool differ2 = false;
                             for (auto &el2 : h2->keys) {
                                 ++i;
-                                auto el2l = cast_type_nonnull<LiteralType>(el2);
-                                auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
-                                    auto el1l = cast_type_nonnull<LiteralType>(candidate);
-                                    return el1l.equals(el2l); // from lambda
-                                });
-                                if (fnd != h1.keys.end()) {
-                                    auto &inserted = valueLubs.emplace_back(
-                                        lub(gs, h1.values[fnd - h1.keys.begin()], h2->values[i]));
-                                    differ1 = differ1 || inserted != h1.values[fnd - h1.keys.begin()];
-                                    differ2 = differ2 || inserted != h2->values[i];
-                                } else {
+                                auto optind = h1.indexForKey(el2);
+                                if (!optind.has_value()) {
                                     result = Types::hashOfUntyped();
                                     return;
                                 }
+                                auto &inserted =
+                                    valueLubs.emplace_back(lub(gs, h1.values[optind.value()], h2->values[i]));
+                                differ1 = differ1 || inserted != h1.values[optind.value()];
+                                differ2 = differ2 || inserted != h2->values[i];
                             }
                             if (!differ1) {
                                 result = t1;
@@ -739,26 +734,21 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         bool canReuseT2 = true;
                         for (auto &el2 : h2.keys) {
                             ++i;
-                            auto el2l = cast_type_nonnull<LiteralType>(el2);
-                            auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
-                                auto el1l = cast_type_nonnull<LiteralType>(candidate);
-                                return el1l.equals(el2l); // from lambda
-                            });
-                            if (fnd != h1.keys.end()) {
-                                auto left = h1.values[fnd - h1.keys.begin()];
-                                auto right = h2.values[i];
-                                auto glbe = glb(gs, left, right);
-                                if (glbe.isBottom()) {
-                                    result = Types::bottom();
-                                    return;
-                                }
-                                canReuseT1 &= glbe == left;
-                                canReuseT2 &= glbe == right;
-                                valueLubs.emplace_back(glbe);
-                            } else {
+                            auto optind = h1.indexForKey(el2);
+                            if (!optind.has_value()) {
                                 result = Types::bottom();
                                 return;
                             }
+                            auto &left = h1.values[optind.value()];
+                            auto &right = h2.values[i];
+                            auto glbe = glb(gs, left, right);
+                            if (glbe.isBottom()) {
+                                result = Types::bottom();
+                                return;
+                            }
+                            canReuseT1 &= glbe == left;
+                            canReuseT2 &= glbe == right;
+                            valueLubs.emplace_back(glbe);
                         }
                         if (canReuseT1) {
                             result = t1;
@@ -1225,15 +1215,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     int i = -1;
                     for (auto &el2 : h2->keys) {
                         ++i;
-                        auto el2l = cast_type_nonnull<LiteralType>(el2);
-                        auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
-                            auto el1l = cast_type_nonnull<LiteralType>(candidate);
-                            return el1l.equals(el2l); // from lambda
-                        });
-                        result = fnd != h1.keys.end() &&
-                                 Types::isSubTypeUnderConstraint(gs, constr, h1.values[fnd - h1.keys.begin()],
-                                                                 h2->values[i], mode);
-                        if (!result) {
+                        auto optind = h1.indexForKey(el2);
+                        if (!optind.has_value()) {
+                            result = false;
+                            return;
+                        }
+                        if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()], h2->values[i],
+                                                             mode)) {
+                            result = false;
                             return;
                         }
                     }
