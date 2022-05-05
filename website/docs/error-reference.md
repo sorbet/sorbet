@@ -698,6 +698,113 @@ you'll get this error—the latter export is redundant, as it's implied by expor
 
 To fix this error, simply remove the more specific export.
 
+## 3717
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Referencing a constant defined in another package that has not been explicitly
+exported by that package is not allowed.
+
+To fix this error, either change the upstream package to start exporting the
+constant, or change the code in the current package to depend on only public
+exports of the upstream package. When changing an upstream package to expose
+things that were not previously exposed, double check whether it's intentional
+that the constant has not been exported.
+
+## 3718
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+To reference constants defined in other packages, the package must first be
+imported into the current package.
+
+Fix the error by explicitly `import`'ing the upstream package into the
+`__package.rb` file for the package where this error was reported.
+
+Note that sometimes it is not possible to import another package because doing
+so would make the dependency graph of packages have a dependency cycle. In these
+cases, a common solution is to factor the shared functionality to a new package,
+and import that new package wherever it's needed. In some situations, there may
+be simpler ways to restructure the code that don't involve making a new package.
+
+## 3720
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The `--stripe-packages` mode draws a distinction between test and non-test code.
+For a package called `A::B`
+
+- Some of the constants defined outside of `A::B` but imported into `A::B` are
+  **test-only** imports (created by writing `test_import` instead of `import` in
+  a `__package.rb` file).
+
+  To fix this error, if the change is desired, replace `test_import` with
+  `import` for the constant.
+
+- Some of the constants defined within `A::B` live in the test namespace of
+  `Test::A::B`, meaning that those constants can only be referenced inside
+  `T::A::B`, not inside the non-test `A::B` namespace.
+
+  To fix this error, avoid referencing test code from a non-test namespace. This
+  means refactoring where code lives within `A::B` to satisfy the above rule.
+
+## 3721
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A package may only export a constant defined within itself.
+
+To re-export a constant defined by another package, make a constant alias to the
+other constant, and export that:
+
+```ruby
+class A::B
+  SomeOtherConstant = A::X::SomeOtherConstant
+end
+
+# -- a/b/__package.rb --
+
+class A::B < PackageSpec
+  import A::X
+
+  # BAD
+  export A::X::SomeOtherConstant
+
+  # CORRECT
+  export A::B::SomeOtherConstant
+end
+```
+
+## 3722
+
+> This error is specific to Stripe's custom `--stripe-packages` definition. If
+> you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Sorbet's package mode does not currently exporting type aliases. The workaround
+is to declare the type alias inside a module, and export the containing module
+instead:
+
+```ruby
+class A::B
+  BadTypeAlias = T.type_alias {T.any(Integer, String)}
+end
+
+class A::B::Types
+  GoodTypeAlias = T.type_alias {T.any(Integer, String)}
+end
+
+class A::B < PackageSpec
+  export A::B::BadTypeAlias # error
+
+  export A::B::Types # OK
+  # ^ allows referencing `A::B::Types::GoodTypeAlias` in downstream packages
+end
+```
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in

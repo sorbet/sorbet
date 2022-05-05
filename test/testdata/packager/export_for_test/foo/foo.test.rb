@@ -13,7 +13,6 @@ class Test::Opus::Foo::FooTest
 
   # util/__package.rb exposed via export_for_test, cannot access from here:
   Opus::Util::Nesting.nesting_method
-  #                   ^^^^^^^^^^^^^^ error: Method `nesting_method` does not exist on `T.class_of(Opus::Util::Nesting)`
 
   # via test_import Opus::TestImported
   Opus::TestImported::TIClass
@@ -27,7 +26,6 @@ class Test::Opus::Foo::FooTest
   # via export_for_test Opus::Foo::Private::ImplDetail
   Opus::Foo::Private::ImplDetail.stub_stuff!
 
-  # Not exported at all from Foo
+  # Visible, as the test package is able to see all of the package it's testing
   Opus::Foo::FooUnexported
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `FooUnexported`
 end

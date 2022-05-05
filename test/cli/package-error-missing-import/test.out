@@ -1,6 +1,6 @@
-foo_class.rb:7: No import provides `Foo::Bar` https://srb.help/5002
+foo_class.rb:7: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
@@ -11,9 +11,9 @@ foo_class.rb:7: No import provides `Foo::Bar` https://srb.help/5002
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:8: No import provides `Bar` https://srb.help/5002
+foo_class.rb:8: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
      8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
-              ^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
@@ -24,9 +24,9 @@ foo_class.rb:8: No import provides `Bar` https://srb.help/5002
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:14: No import provides `Foo::Bar` https://srb.help/5002
+foo_class.rb:14: No import provides `Foo::Bar::OtherPackage::OtherClass` https://srb.help/3718
     14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
-          ^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
@@ -37,9 +37,9 @@ foo_class.rb:14: No import provides `Foo::Bar` https://srb.help/5002
   Note:
     Try running generate-packages.sh
 
-foo.test.rb:4: No import provides `Test::Foo::Bar` https://srb.help/5002
+foo.test.rb:4: No import provides `Test::Foo::Bar::OtherPackage::TestUtil` https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!

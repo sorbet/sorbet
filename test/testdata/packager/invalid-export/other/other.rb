@@ -7,10 +7,10 @@ class Other::OtherClass
   #                ^^^^^^^ error: Method `helloXX` does not exist on `T.class_of(Foo::Bar::Exists)`
 
 
-  # Note this is a weird quirk that in this package `NotDefined` exists as a stub. This is safe
-  # because an error exists for this in the `__package.rb` file itself.
   Foo::Bar::NotDefined
+# ^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `NotDefined`
   Foo::Bar::NotDefined.xxx
+# ^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `NotDefined`
   Foo::Bar::NotDefined::Deeper
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Deeper`
+# ^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `NotDefined`
 end

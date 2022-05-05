@@ -3,15 +3,4 @@ parent/b.rb:4: Class or method definition must match enclosing package namespace
                  ^^^^^
   Note:
     Constant `Parent::Child` should either be defined in directory `./parent/` to match its package, or re-namespaced to be within `Parent`
-
-parent/b.rb:4: Redefining constant `Parent::Child` https://srb.help/4012
-     4 |  module Child
-     5 |    class B; end
-     6 |  end
-    parent/__package.rb: Previous definition
-
-parent/b.rb:5: Can't nest `B` under `Parent::Child` because `Parent::Child` is not a class or module https://srb.help/4015
-     5 |    class B; end
-                  ^
-    parent/__package.rb: `Parent::Child` defined here
-Errors: 3
+Errors: 1

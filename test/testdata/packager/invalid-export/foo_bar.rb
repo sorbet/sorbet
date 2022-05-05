@@ -7,4 +7,10 @@ module Foo::Bar
     sig {void}
     def self.hello; end
   end
+
+  class HasTypeMember
+    extend T::Generic
+
+    TypeMember = type_member
+  end
 end

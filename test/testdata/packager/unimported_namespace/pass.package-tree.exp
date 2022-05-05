@@ -1,50 +1,20 @@
 # -- test/testdata/packager/unimported_namespace/aaa/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C AAA><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1>::<C AAA>::<C AClass>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    <emptyTree>::<C AAA_Package_Private$1>::<C AAA>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1>::<C AAA>::<C AClass>
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C AAA_Package$1>::<C AAA>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1>::<C AAA>::<C AClass>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <self>.export(::<root>::<C AAA>::<C AClass>)
   end
 end
 # -- test/testdata/packager/unimported_namespace/aaa/a_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C AAA_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C AAA>::<C AClass><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>::<C BBB>
+  class <emptyTree>::<C AAA>::<C AClass><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C BBB>
 
-      <emptyTree>::<C C>
-    end
+    <emptyTree>::<C C>
   end
 end
 # -- test/testdata/packager/unimported_namespace/bbb/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C BBB><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C AAA>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    <emptyTree>::<C BBB_Package_Private$1>::<C AAA> = <emptyTree>::<C <PackageRegistry>>::<C AAA_Package$1>::<C AAA>
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    <emptyTree>::<C BBB_Package_Private$1>::<C AAA> = <emptyTree>::<C <PackageRegistry>>::<C AAA_Package$1>::<C AAA>
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
   end
 end

@@ -2,6 +2,7 @@
 #define SORBET_REWRITER_PACKAGE_H
 #include "ast/ast.h"
 #include "core/packages/PackageInfo.h"
+#include "packager/VisibilityChecker.h"
 
 namespace sorbet {
 class WorkerPool;

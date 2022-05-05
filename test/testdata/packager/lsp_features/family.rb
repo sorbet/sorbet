@@ -2,7 +2,7 @@
 # typed: true
 
 module Simpsons
-  #    ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "Simpsons"
+  #    ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "(nothing)"
   #    ^        show-symbol: Simpsons
   class Family
       # ^^^^^^ def: family
@@ -16,10 +16,12 @@ module Simpsons
           #     ^^^^^^^^^^^ usage: catchphrase
           #     ^^^^^^^^^^^ hover: String
           #     ^           show-symbol: Bart::CatchPhrase
+        # ^^^^ usage: bartmod
       end
 
       sig {returns(Bart::Character)}
       #                  ^^^^^^^^^ usage: character
+      #            ^^^^ usage: bartmod
       def son
           Bart::Character.new
           #     ^^^^^^^^^ usage: character
@@ -27,12 +29,17 @@ module Simpsons
           #     ^         show-symbol: Bart::Character
           #     ^^^^^^^^^ hover: Character class description
           #               ^^^ hover: Description of Character initialize
+        # ^^^^ usage: bartmod
           Bart::C # error: Unable to resolve constant `C`
           #      ^ completion: CatchPhrase, Character
+        # ^^^^ usage: bartmod
       end
   end
 
-  Test::Krabappel::Popquiz # error: Unable to resolve constant `Test`
+  Test::Krabappel::Popquiz
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Krabappel::Popquiz` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` is defined in a test namespace
+  #                ^^^^^^^ usage: popquiz
 
   class Private
     #   ^^^^^^^ def: s-private

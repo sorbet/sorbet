@@ -3,7 +3,7 @@
 
 module Bart
   #    ^^^^ def: bartmod
-  #    ^^^^ symbol-search: "Bart", name = "Bart", container = "Bart"
+  #    ^^^^ symbol-search: "Bart", name = "Bart", container = "(nothing)"
       CatchPhrase = "Don't have a cow, man."
   #   ^^^^^^^^^^^ def: catchphrase
   #   ^^^^^^^^^^^ symbol-search: "Catchphrase", name = "Bart::CatchPhrase", container = "Bart"

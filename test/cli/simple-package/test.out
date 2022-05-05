@@ -5,9 +5,11 @@ foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     foo/foo.rb:13: Replace with `Project::Bar::BarClass`
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
-    bar/__package.rb: `Project::Bar::BarClass` defined here
+    bar/bar.rb:6: `Project::Bar::BarClass` defined here
+     6 |  class BarClass
+          ^^^^^^^^^^^^^^
 
-foo/foo.rb:14: Package `Project::Bar` does not export `Project::Bar::UnexportedClass` https://srb.help/5002
+foo/foo.rb:14: Package `Project::Bar` does not export `Project::Bar::UnexportedClass` https://srb.help/3717
     14 |    Project::Bar::UnexportedClass
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect

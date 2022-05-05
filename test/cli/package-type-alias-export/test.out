@@ -1,10 +1,9 @@
-__package.rb: Exporting a type alias is not allowed in package specifications https://srb.help/5034
+__package.rb:5: Exporting a type alias is not allowed in package specifications https://srb.help/3722
+     5 |  export MyPackage::A
+          ^^^^^^^^^^^^^^^^^^^
     a.rb:6: Originally defined here
      6 |  A = T.type_alias {String}
           ^
-
-__package.rb: Exporting a type alias is not allowed in package specifications https://srb.help/5034
-    a.rb:6: Originally defined here
-     6 |  A = T.type_alias {String}
-          ^
-Errors: 2
+  Note:
+    You can put the type alias into a module and export the module to work around this error
+Errors: 1
