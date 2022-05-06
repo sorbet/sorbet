@@ -94,12 +94,6 @@ public:
                         return;
                     }
 
-                    nodes = Minitest::run(ctx, isClass, &send);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = move(nodes);
-                        return;
-                    }
-
                     nodes = DSLBuilder::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
