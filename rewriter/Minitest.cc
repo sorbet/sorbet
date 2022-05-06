@@ -330,7 +330,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         //
         // We only check for this when we're recursing into describe blocks, because
         // that's usually where the problems come up.
-        if (level == RunSingleLevel::Interior && send->fun == core::Names::each() && send->numNonBlockArgs() == 0 && !block->args.empty()) {
+        if (level == RunSingleLevel::Interior && send->fun == core::Names::each() && send->numNonBlockArgs() == 0 &&
+            !block->args.empty()) {
             auto &blockBody = block->body;
             ast::Send *blockSend = nullptr;
             if (auto *seq = ast::cast_tree<ast::InsSeq>(blockBody)) {
@@ -349,10 +350,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 // Drop the block body so the user doesn't get mysterious errors about
                 // certain functions not existing on our synthesized classes for
                 // describe blocks.
-                return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numNonBlockArgs(),
-                                     ast::MK::SendArgs(ast::MK::Block(block->loc, ast::MK::EmptyTree(),
-                                                                      std::move(block->args))),
-                                     send->flags);
+                return ast::MK::Send(
+                    send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numNonBlockArgs(),
+                    ast::MK::SendArgs(ast::MK::Block(block->loc, ast::MK::EmptyTree(), std::move(block->args))),
+                    send->flags);
             }
         }
         return nullptr;
