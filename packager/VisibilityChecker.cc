@@ -486,13 +486,7 @@ public:
         }
 
         if (lit->symbol == core::Symbols::StubModule()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Packager::PackageNotFound)) {
-                auto source = ctx.locAt(lit->loc).source(ctx);
-                ENFORCE(source.has_value());
-
-                e.setHeader("Cannot find package `{}`", *source);
-            }
-
+            // An error was already reported in resolver when the StubModule was created.
             return tree;
         }
 
