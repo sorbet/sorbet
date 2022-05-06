@@ -136,42 +136,40 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
         }
     }
 
-    if (config.opts.lspMoveMethodEnabled) {
-        auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
-                                           LSPMethod::TextDocumentCodeAction, false);
+    auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
+                                       LSPMethod::TextDocumentCodeAction, false);
 
-        // Generate "Move method" code actions only for class method definitions
-        if (queryResult.error == nullptr) {
-            for (auto &resp : queryResult.responses) {
-                if (auto def = resp->isMethodDef()) {
-                    if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs) || isOperator(def->name.show(gs))) {
-                        continue;
-                    }
-                    auto action = make_unique<CodeAction>("Move method to a new module");
-                    action->kind = CodeActionKind::RefactorExtract;
-
-                    bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
-                                            config.getClientConfig().clientCodeActionDataSupport;
-                    auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
-                    auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
-                    auto arg = make_unique<TextDocumentPositionParams>(
-                        make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
-                    auto args = vector<unique_ptr<TextDocumentPositionParams>>();
-                    args.emplace_back(move(arg));
-
-                    renameCommand->arguments = move(args);
-                    action->command = move(renameCommand);
-                    if (canResolveLazily) {
-                        action->data = move(params);
-                    } else {
-                        auto workspaceEdit = make_unique<WorkspaceEdit>();
-                        auto edits = getMoveMethodEdits(config, gs, *def, typechecker);
-                        workspaceEdit->documentChanges = move(edits);
-                        action->edit = move(workspaceEdit);
-                    }
-
-                    result.emplace_back(move(action));
+    // Generate "Move method" code actions only for class method definitions
+    if (queryResult.error == nullptr) {
+        for (auto &resp : queryResult.responses) {
+            if (auto def = resp->isMethodDef()) {
+                if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs) || isOperator(def->name.show(gs))) {
+                    continue;
                 }
+                auto action = make_unique<CodeAction>("Move method to a new module");
+                action->kind = CodeActionKind::RefactorExtract;
+
+                bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
+                                        config.getClientConfig().clientCodeActionDataSupport;
+                auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
+                auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
+                auto arg = make_unique<TextDocumentPositionParams>(
+                    make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
+                auto args = vector<unique_ptr<TextDocumentPositionParams>>();
+                args.emplace_back(move(arg));
+
+                renameCommand->arguments = move(args);
+                action->command = move(renameCommand);
+                if (canResolveLazily) {
+                    action->data = move(params);
+                } else {
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    auto edits = getMoveMethodEdits(config, gs, *def, typechecker);
+                    workspaceEdit->documentChanges = move(edits);
+                    action->edit = move(workspaceEdit);
+                }
+
+                result.emplace_back(move(action));
             }
         }
     }
