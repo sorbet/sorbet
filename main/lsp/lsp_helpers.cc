@@ -12,7 +12,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
-    if (!sym.exists() || sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
+    if (!sym.exists() || sym == core::Symbols::root()) {
         return true;
     }
     if (!sym.owner(gs).exists()) {

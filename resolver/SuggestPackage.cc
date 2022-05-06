@@ -205,13 +205,12 @@ private:
         // scope (or root scope if that didn't exist)
         auto matches = searchScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
         {
-            // remove anything that's not a package. Since we're
-            // searching from the root, that means we'll be finding
-            // the things which inherit from `PackageSpec`
-            // (i.e. something like `::MyPackage`, and not
-            // `::<PackageRegistry>::MyPackage`), and we can retain
-            // _only_ those constants which inherit from `PackageSpec`
-            // and throw out other suggestions
+            // remove anything that's not a package. Since we're searching from
+            // the root, that means we'll be finding the things which inherit
+            // from `PackageSpec` (i.e. something like
+            // `::<PackageSpecRegistry>::MyPackage`, and not `::MyPackage`), and
+            // we can retain _only_ those constants which inherit from
+            // `PackageSpec` and throw out other suggestions
             auto it = remove_if(matches.begin(), matches.end(), [&](auto &m) -> bool {
                 if (m.symbol.isClassOrModule()) {
                     return m.symbol.asClassOrModuleRef().data(ctx)->superClass() != core::Symbols::PackageSpec();

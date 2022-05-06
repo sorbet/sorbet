@@ -10,23 +10,12 @@ using namespace std;
 namespace sorbet::autogen {
 
 QualifiedName QualifiedName::fromFullName(vector<core::NameRef> &&name) {
-    if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
-        return {move(name), nullopt};
-    }
-    auto pkgName = std::optional<core::NameRef>{name[1]};
-    name.erase(name.begin(), name.begin() + 2);
-    return {move(name), pkgName};
+    return QualifiedName{move(name)};
 }
 
 string QualifiedName::show(const core::GlobalState &gs) const {
-    if (auto pkg = package) {
-        return fmt::format(
-            "<package {}>::{}", pkg->show(gs),
-            fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.shortName(gs); }));
-    } else {
-        return fmt::format(
-            "::{}", fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.shortName(gs); }));
-    }
+    return fmt::format(
+        "::{}", fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.shortName(gs); }));
 }
 
 string QualifiedName::join(const core::GlobalState &gs, string_view sep) const {
@@ -68,8 +57,7 @@ QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, Definit
     auto &ref = def.defining_ref.data(*this);
     auto nameParts = showFullName(gs, ref.scope);
     nameParts.insert(nameParts.end(), ref.name.nameParts.begin(), ref.name.nameParts.end());
-    auto package = ref.resolved.package;
-    return {nameParts, package};
+    return QualifiedName{nameParts};
 }
 
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
@@ -117,9 +105,6 @@ string ParsedFile::toString(const core::GlobalState &gs, int version) const {
 
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
-            if (ref.name.package) {
-                fmt::format_to(std::back_inserter(out), " defining_pkg=[{}]\n", nameToString(*ref.name.package));
-            }
             fmt::format_to(std::back_inserter(out), " defining_ref=[{}]\n",
                            fmt::map_join(ref.name.nameParts, " ", nameToString));
         }

@@ -390,23 +390,7 @@ std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState 
         withoutOwnerStr = name.show(gs);
     };
 
-    // This is a little bit gross.  Symbol performs this sort of logic itself, but
-    // the above calls are done inside NameRef, which doesn't have the necessary
-    // symbol ownership information to do this sort of munging.  So we have to
-    // duplicate the Symbol logic here.
-    if (sym.owner(gs) != core::Symbols::PackageRegistry() || !name.isPackagerName(gs)) {
-        return withoutOwnerStr;
-    }
-
-    if (name.isPackagerPrivateName(gs)) {
-        // Remove _Package_Private before de-munging
-        return absl::StrReplaceAll(
-            withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_PRIVATE_SUFFIX.size()), {{"_", "::"}});
-    }
-
-    // Remove _Package before de-munging
-    return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_SUFFIX.size()),
-                               {{"_", "::"}});
+    return withoutOwnerStr;
 }
 
 bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
@@ -416,12 +400,6 @@ bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::Symbol
 
     // These are the obvious cases.
     if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        return true;
-    }
-
-    // --stripe-packages interposes its own set of symbols at the toplevel.
-    // Absent any runtime support, we need to consider these as rootish.
-    if (sym == core::Symbols::PackageRegistry() || sym.name(gs).isPackagerName(gs)) {
         return true;
     }
 
