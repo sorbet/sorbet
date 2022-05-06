@@ -539,10 +539,6 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE(method == Symbols::SorbetPrivateStaticSingleton_sig());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
-    ENFORCE(klass == Symbols::PackageRegistry());
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageTests());
-    ENFORCE(klass == Symbols::PackageTests());
     klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
     ENFORCE(klass == Symbols::PackageSpecRegistry());
 
