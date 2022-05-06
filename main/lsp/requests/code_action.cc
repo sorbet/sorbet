@@ -137,7 +137,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
     }
 
     auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
-            LSPMethod::TextDocumentCodeAction, false);
+                                       LSPMethod::TextDocumentCodeAction, false);
 
     // Generate "Move method" code actions only for class method definitions
     if (queryResult.error == nullptr) {
@@ -150,11 +150,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
                 action->kind = CodeActionKind::RefactorExtract;
 
                 bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
-                    config.getClientConfig().clientCodeActionDataSupport;
+                                        config.getClientConfig().clientCodeActionDataSupport;
                 auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
                 auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
                 auto arg = make_unique<TextDocumentPositionParams>(
-                        make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
+                    make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
                 auto args = vector<unique_ptr<TextDocumentPositionParams>>();
                 args.emplace_back(move(arg));
 

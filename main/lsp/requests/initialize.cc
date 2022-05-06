@@ -35,7 +35,8 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerInterface &
     serverCap->sorbetShowSymbolProvider = true;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
-    codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet, CodeActionKind::RefactorExtract};
+    codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet,
+                                           CodeActionKind::RefactorExtract};
     serverCap->codeActionProvider = move(codeActionProvider);
 
     if (opts.lspSignatureHelpEnabled) {
