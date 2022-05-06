@@ -6,7 +6,7 @@ class AAA::AClass
 # ^^^ error: No import provides `BBB`
 
   CCC
-# ^^^ error: Unable to resolve constant `CCC`
+# ^^^ error: No import provides `CCC`
 
   C
 # ^ error: Unable to resolve constant `C`
