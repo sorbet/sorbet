@@ -25,7 +25,7 @@ message Name {
          OPUS_ENUM = 11;
          DEFAULT_ARG = 12;
          PACKAGER = 13;
-         PACKAGER_PRIVATE = 14;
+         // PACKAGER_PRIVATE = 14;
     };
 
     Kind kind = 1;

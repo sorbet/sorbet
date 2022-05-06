@@ -60,9 +60,6 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::Packager:
                     protoName.set_unique(com::stripe::rubytyper::Name::PACKAGER);
                     break;
-                case UniqueNameKind::PackagerPrivate:
-                    protoName.set_unique(com::stripe::rubytyper::Name::PACKAGER_PRIVATE);
-                    break;
             }
             break;
         case NameKind::CONSTANT:

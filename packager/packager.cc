@@ -207,13 +207,6 @@ public:
     vector<std::string> packagePathPrefixes;
     PackageName name;
 
-    // Private namespace of the package. We do not put this in the PackageName struct above because the former
-    // is used to not only hold package name information in PackageInfoImpl, but also created for every imported
-    // package during import enumeration. In that context, the private name is unnecessary and would
-    // take up an extra reference, which would contribute O(packages * imports) in space. Putting
-    // it here ensures only O(packages) space complexity.
-    core::NameRef privateMangledName;
-
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
     // loc for the package definition. Single line (just the class def). Used for error messages.
@@ -1079,36 +1072,6 @@ struct PackageInfoFinder {
             }
 
             info->name = move(packageName.value());
-
-            // Append _Private at the end of the mangled package name to get the name of its private namespace.
-            auto mangledWithPrivate = absl::StrCat(info->name.mangledName.show(ctx.state), "_Private");
-            if constexpr (isMutableContext) {
-                auto utf8PrivateName = ctx.state.enterNameUTF8(mangledWithPrivate);
-                auto packagerPrivateName =
-                    ctx.state.freshNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
-                info->privateMangledName = ctx.state.enterNameConstant(packagerPrivateName);
-            } else {
-                auto utf8PrivateName = ctx.state.lookupNameUTF8(mangledWithPrivate);
-                if (!utf8PrivateName.exists()) {
-                    dropRhs(classDef);
-                    return tree;
-                }
-
-                auto packagerPrivateName =
-                    ctx.state.lookupNameUnique(core::UniqueNameKind::PackagerPrivate, utf8PrivateName, 1);
-                if (!packagerPrivateName.exists()) {
-                    dropRhs(classDef);
-                    return tree;
-                }
-
-                auto constantPrivateName = ctx.state.lookupNameConstant(packagerPrivateName);
-                if (!constantPrivateName.exists()) {
-                    dropRhs(classDef);
-                    return tree;
-                }
-                info->privateMangledName = constantPrivateName;
-            }
-
             info->loc = ctx.locAt(classDef.loc);
             info->declLoc_ = ctx.locAt(classDef.declLoc);
 
@@ -1133,7 +1096,7 @@ struct PackageInfoFinder {
         }
 
         if constexpr (!isMutableContext) {
-            if (info != nullptr && !(info->name.mangledName.exists() && info->privateMangledName.exists())) {
+            if (info != nullptr && !info->name.mangledName.exists()) {
                 // On preTransformClassDef we were unable to populate the mangled name.
                 // As a best effort in immutable packager mode, just imagine that the file did not
                 // define a package.

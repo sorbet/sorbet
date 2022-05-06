@@ -67,7 +67,6 @@ struct NameRefDebugCheck {
 };
 
 constexpr std::string_view PACKAGE_SUFFIX = "_Package";
-constexpr std::string_view PACKAGE_PRIVATE_SUFFIX = "_Package_Private";
 
 class NameRef final : private DebugOnlyCheck<NameRefDebugCheck> {
 private:
@@ -178,8 +177,6 @@ public:
 
     NameRef prepend(GlobalState &gs, std::string_view s) const;
 
-    NameRef lookupMangledPrivatePackageName(const GlobalState &gs) const;
-
     bool isClassName(const GlobalState &gs) const;
 
     // Convenience method, because enums need to be special cased in more places than other kinds of
@@ -190,7 +187,6 @@ public:
     // Convenience method to avoid forgeting to unwrap the first layer (NameKind::CONSTANT)
     // before checking for UniqueNameKind::Packager.
     bool isPackagerName(const GlobalState &gs) const;
-    bool isPackagerPrivateName(const GlobalState &gs) const;
 
     bool isValidConstantName(const GlobalState &gs) const;
 
