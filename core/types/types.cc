@@ -326,16 +326,20 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
 } // namespace
 
 LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
-    categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype.integer");
 }
 
 LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKind::Float) {
-    categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype.double");
 }
 
 LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
     : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
-    categoryCounterInc("types.allocated", "literaltype");
+    if (klass == Symbols::String()) {
+        categoryCounterInc("types.allocated", "literaltype.string");
+    } else {
+        categoryCounterInc("types.allocated", "literaltype.symbol");
+    }
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
