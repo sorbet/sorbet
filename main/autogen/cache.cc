@@ -21,10 +21,13 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
     // change (since at that point we're vanishingly unlikely to
     // benefit from caching anyway)
     if (changedFiles.size() > MAX_SKIP_AMOUNT) {
+        gs.tracer().info("Rerunning autogen: found `{}` changed files, more than the threshold of `{}`",
+                         changedFiles.size(), MAX_SKIP_AMOUNT);
         return false;
     }
 
     if (!FileOps::exists(cachePath)) {
+        gs.tracer().info("Rerunning autogen: unable to find constant cache at `{}`", cachePath);
         return false;
     }
 
@@ -34,12 +37,14 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
 
     for (auto &file : changedFiles) {
         if (cache.constantHashMap().count(file) == 0) {
+            gs.tracer().info("Rerunning autogen: could not find `{}` in constant cache", file);
             return false;
         }
         if (!FileOps::exists(file)) {
             // this is... confusing, since the runner promised the
             // file existed and apparently it doesn't now, I guess it
             // means we should redo autogen to be safe
+            gs.tracer().info("Rerunning autogen: file `{}` does not exist on disk", file);
             return false;
         }
         core::FileRef ref;
@@ -58,6 +63,7 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
         ast::ParsedFile pf{std::move(ast), ref};
 
         if (autogen::constantHashTree(gs, std::move(pf)).constantHash != cache.constantHashMap().at(file)) {
+            gs.tracer().info("Rerunning autogen: constant hash for file `{}` does not match stored hash", file);
             return false;
         }
     }
