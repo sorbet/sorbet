@@ -531,6 +531,12 @@ generated setter method will then be given an invalid name ending with `==`.
 `T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
 type `T.untyped` (along with all other values).
 
+## 3513
+
+Type-checking table-driven tests written with `each` is quite complicated in
+the general case.  Sorbet therefore requires table-driven tests to be written
+using `test_each`
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are

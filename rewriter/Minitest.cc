@@ -318,6 +318,31 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     auto *block = send->block();
 
     if (!send->recv.isSelfReference()) {
+        // It's pretty common for people new (or old!) to Sorbet to use `each` in tests
+        // and be extremely puzzled that Sorbet produces errors about their tests,
+        // especially because the test works at runtime.  Try to detect when people are
+        // using `each` and hint that they should be doing something else.
+        if (send->fun == core::Names::each() && send->numNonBlockArgs() == 0 && !block->args.empty()) {
+            auto &blockBody = block->body;
+            ast::Send *blockSend = nullptr;
+            if (auto *seq = ast::cast_tree<ast::InsSeq>(blockBody)) {
+                blockSend = ast::cast_tree<ast::Send>(seq->expr);
+            } else {
+                blockSend = ast::cast_tree<ast::Send>(blockBody);
+            }
+            if (blockSend != nullptr && blockSend->fun == core::Names::it()) {
+                ENFORCE(!send->argsLoc().exists());
+                auto sendLoc = send->recv.loc().join(send->funLoc);
+                if (auto e = ctx.beginError(sendLoc, core::errors::Rewriter::UseTestEachNotEach)) {
+                    e.setHeader("`{}` cannot be used to write table-driven tests with Sorbet", "each");
+                    e.replaceWith("Use `test_each`", ctx.locAt(sendLoc), "test_each({})", send->recv.toString(ctx));
+                }
+                // TODO(froydnj): given that we have identified a case where someone
+                // should have used test_each, should we turn this into a test_each
+                // so we don't get further errors downstream?  Or should we return
+                // a send with the block body deleted for similar reasons?
+            }
+        }
         return nullptr;
     }
 
