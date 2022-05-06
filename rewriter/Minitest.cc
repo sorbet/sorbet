@@ -327,6 +327,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // and be extremely puzzled that Sorbet produces errors about their tests,
         // especially because the test works at runtime.  Try to detect when people are
         // using `each` and hint that they should be doing something else.
+        //
+        // We only check for this when we're recursing into describe blocks, because
+        // that's usually where the problems come up.
         if (level == RunSingleLevel::Interior && send->fun == core::Names::each() && send->numNonBlockArgs() == 0 && !block->args.empty()) {
             auto &blockBody = block->body;
             ast::Send *blockSend = nullptr;
