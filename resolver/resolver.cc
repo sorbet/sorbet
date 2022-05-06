@@ -1267,9 +1267,13 @@ public:
             const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
             if (ambigDef.exists()) {
                 if (auto e = ctx.beginError(original.declLoc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    e.setHeader("Class definition is ambiguous");
-                    e.addErrorLine(ambigDef.loc(ctx), "Alternate definition {} here",
-                                   ambigDef.showFullNameWithoutPackagePrefix(ctx));
+                    auto name = klass.data(ctx)->name.show(ctx);
+                    e.setHeader("Definition of `{}` is ambiguous", name);
+                    auto klassOwner = klass.data(ctx)->owner;
+                    auto option1 = fmt::format("{}::{}", klassOwner.show(ctx), name);
+                    e.addErrorLine(klassOwner.data(ctx)->loc(), "Could mean `{}` if nested under here", option1);
+                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
+                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
                 }
             }
         }

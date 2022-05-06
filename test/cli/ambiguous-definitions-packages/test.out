@@ -1,21 +1,30 @@
-bar/b.rb:7: Class definition is ambiguous https://srb.help/5068
+bar/b.rb:7: Definition of `C` is ambiguous https://srb.help/5068
      7 |    module Foo::C; end # ambiguous, despite not importing the foo package
             ^^^^^^^^^^^^^
-    foo/a.rb:4: Alternate definition Opus::Foo here
+    bar/b.rb:7: Could mean `Opus::Bar::Foo::C` if nested under here
+     7 |    module Foo::C; end # ambiguous, despite not importing the foo package
+                   ^^^
+    foo/a.rb:4: Or could mean `Opus::Foo::C` if nested under here
      4 |  module Foo
           ^^^^^^^^^^
 
-foo/a.rb:5: Class definition is ambiguous https://srb.help/5068
+foo/a.rb:5: Definition of `D` is ambiguous https://srb.help/5068
      5 |    module Foo::D # ambiguous
             ^^^^^^^^^^^^^
-    foo/a.rb:4: Alternate definition Opus::Foo here
+    foo/a.rb:5: Could mean `Opus::Foo::Foo::D` if nested under here
+     5 |    module Foo::D # ambiguous
+                   ^^^
+    foo/a.rb:4: Or could mean `Opus::Foo::D` if nested under here
      4 |  module Foo
           ^^^^^^^^^^
 
-foo/a.rb:8: Class definition is ambiguous https://srb.help/5068
+foo/a.rb:8: Definition of `C` is ambiguous https://srb.help/5068
      8 |    module Bar::C # ambiguous
             ^^^^^^^^^^^^^
-    bar/b.rb:4: Alternate definition Opus::Bar here
+    foo/a.rb:8: Could mean `Opus::Foo::Bar::C` if nested under here
+     8 |    module Bar::C # ambiguous
+                   ^^^
+    bar/b.rb:4: Or could mean `Opus::Bar::C` if nested under here
      4 |  module Bar
           ^^^^^^^^^^
 Errors: 3

@@ -1010,20 +1010,6 @@ string SymbolRef::showFullName(const GlobalState &gs) const {
     }
 }
 
-string SymbolRef::showFullNameWithoutPackagePrefix(const GlobalState &gs) const {
-    vector<std::string> parts;
-    auto curSym = *this;
-    while (curSym.exists() && curSym.owner(gs) != core::Symbols::PackageRegistry() &&
-           curSym.owner(gs) != core::Symbols::PackageTests() &&
-           curSym.owner(gs) != core::Symbols::PackageSpecRegistry() && curSym != core::Symbols::root()) {
-        parts.emplace_back(curSym.name(gs).show(gs));
-        curSym = curSym.owner(gs);
-    }
-
-    reverse(parts.begin(), parts.end());
-    return absl::StrJoin(parts, "::");
-}
-
 string ClassOrModuleRef::showFullName(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
     return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
