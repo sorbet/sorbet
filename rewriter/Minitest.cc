@@ -345,15 +345,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 if (auto e = ctx.beginError(sendLoc, core::errors::Rewriter::UseTestEachNotEach)) {
                     e.setHeader("`{}` cannot be used to write table-driven tests with Sorbet", "each");
                     e.replaceWith("Use `test_each`", ctx.locAt(sendLoc), "test_each({})", send->recv.toString(ctx));
+
+                    ENFORCE(send->numNonBlockArgs() == 0);
+                    // Drop the block body so the user doesn't get mysterious errors about
+                    // certain functions not existing on our synthesized classes for
+                    // describe blocks.
+                    return ast::MK::Send(
+                        send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numNonBlockArgs(),
+                        ast::MK::SendArgs(ast::MK::Block(block->loc, ast::MK::EmptyTree(), std::move(block->args))),
+                        send->flags);
                 }
-                ENFORCE(send->numNonBlockArgs() == 0);
-                // Drop the block body so the user doesn't get mysterious errors about
-                // certain functions not existing on our synthesized classes for
-                // describe blocks.
-                return ast::MK::Send(
-                    send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numNonBlockArgs(),
-                    ast::MK::SendArgs(ast::MK::Block(block->loc, ast::MK::EmptyTree(), std::move(block->args))),
-                    send->flags);
             }
         }
         return nullptr;
