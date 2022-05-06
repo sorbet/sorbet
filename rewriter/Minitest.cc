@@ -115,6 +115,11 @@ ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
 }
 } // namespace
 
+enum class RunSingleLevel {
+    Toplevel,
+    Interior,
+};
+
 ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body);
 
 ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body) {
@@ -310,7 +315,7 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
     return body;
 }
 
-ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send) {
+ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, RunSingleLevel level) {
     if (!send->hasBlock()) {
         return nullptr;
     }
@@ -322,7 +327,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // and be extremely puzzled that Sorbet produces errors about their tests,
         // especially because the test works at runtime.  Try to detect when people are
         // using `each` and hint that they should be doing something else.
-        if (send->fun == core::Names::each() && send->numNonBlockArgs() == 0 && !block->args.empty()) {
+        if (level == RunSingleLevel::Interior && send->fun == core::Names::each() && send->numNonBlockArgs() == 0 && !block->args.empty()) {
             auto &blockBody = block->body;
             ast::Send *blockSend = nullptr;
             if (auto *seq = ast::cast_tree<ast::InsSeq>(blockBody)) {
@@ -416,7 +421,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
-        auto change = runSingle(ctx, isClass, bodySend);
+        auto change = runSingle(ctx, isClass, bodySend, RunSingleLevel::Interior);
         if (change) {
             return change;
         }
@@ -430,7 +435,7 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         return stats;
     }
 
-    auto exp = runSingle(ctx, isClass, send);
+    auto exp = runSingle(ctx, isClass, send, RunSingleLevel::Toplevel);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }
