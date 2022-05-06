@@ -31,7 +31,6 @@ string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef 
         owner == core::Symbols::PackageSpecRegistry()) {
         return name.show(gs);
     }
-    ENFORCE(owner != core::Symbols::PackageRegistry());
     ENFORCE(owner != core::Symbols::PackageSpecRegistry());
     return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
@@ -399,24 +398,6 @@ string ClassOrModuleRef::show(const GlobalState &gs, ShowOptions options) const 
     // Make sure that we get nice error messages for things involving the proc sig builders.
     if (sym->name == core::Names::Constants::DeclBuilderForProcs()) {
         return "T.proc";
-    }
-
-    if (sym->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        if (sym->name.isPackagerName(gs)) {
-            auto nameStr = sym->name.shortName(gs);
-            if (sym->name.isPackagerPrivateName(gs)) {
-                // Foo_Bar_Package_Private => Foo::Bar
-                // Remove _Package_Private before de-munging
-                return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - core::PACKAGE_PRIVATE_SUFFIX.size()),
-                                           {{"_", "::"}});
-            } else {
-                // Foo_Bar_Package => Foo::Bar
-                // Remove _Package before de-munging
-                return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - core::PACKAGE_SUFFIX.size()),
-                                           {{"_", "::"}});
-            }
-        }
     }
 
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
@@ -2405,12 +2386,10 @@ void ClassOrModule::addLoc(const core::GlobalState &gs, core::Loc loc) {
         return;
     }
 
-    // We shouldn't add locs for <root> or <PackageRegistry>, otherwise it'll end up with a massive loc list (O(number
+    // We shouldn't add locs for <root>, otherwise it'll end up with a massive loc list (O(number
     // of files)). Those locs aren't useful, either.
     ENFORCE(ref(gs) != Symbols::root());
-    ENFORCE(ref(gs) != Symbols::PackageRegistry());
-    // We allow one loc (during class creation) for packages under package registry.
-    ENFORCE(locs_.empty() || owner != Symbols::PackageRegistry());
+    ENFORCE(ref(gs) != Symbols::PackageSpecRegistry());
 
     addLocInternal(gs, loc, this->loc(), locs_);
 }
