@@ -11,5 +11,6 @@ All constant hashes unchanged; exiting
 
 Running autogen with constant-related changes: should re-run
 Checking 1 changed files
+Rerunning autogen: constant hash for file `example.rb` does not match stored hash
 Autogen still needs rerunning
 No errors! Great job.
