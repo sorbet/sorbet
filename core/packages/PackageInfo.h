@@ -61,8 +61,6 @@ public:
 
     // Utilities:
 
-    static bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef klass);
-
     static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
 };
 

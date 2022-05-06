@@ -119,13 +119,8 @@ public:
     }
 
     bool tryPackageSpecCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
-        if (isUnresolvedExport(unresolved)) {
-            tryUnresolvedExportCorrections(e, unresolved);
-            return true;
-        } else {
-            tryUnresolvedImportCorrections(e, unresolved);
-            return true;
-        }
+        tryUnresolvedImportCorrections(e, unresolved);
+        return true;
     }
 
 private:
@@ -160,35 +155,6 @@ private:
 
     bool canImport(const core::packages::PackageInfo &other) const {
         return currentPkg.mangledName() != other.mangledName(); // Don't import yourself
-    }
-
-    bool isUnresolvedExport(ast::UnresolvedConstantLit &unresolved) {
-        if (ast::isa_tree<ast::EmptyTree>(unresolved.scope)) {
-            return false;
-        }
-        // Look for the prefix added by the packager to exports. (Imports are left as-is.)
-        return core::packages::PackageInfo::isPackageModule(
-            ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef());
-    }
-
-    void tryUnresolvedExportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
-        auto scope = ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef();
-        auto matches = scope.data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
-        {
-            // Remove results defined outside of this package:
-            auto it = remove_if(matches.begin(), matches.end(),
-                                [&](auto &m) -> bool { return !currentPkg.ownsSymbol(ctx, m.symbol); });
-            matches.erase(it, matches.end());
-            if (matches.size() > 4) {
-                matches.resize(4);
-            }
-        }
-        if (!matches.empty()) {
-            addReplacementSuggestions(e, unresolved, matches);
-        } else {
-            e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));
-        }
-        maybeAddErrorHint(e);
     }
 
     void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
