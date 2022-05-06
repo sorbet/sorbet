@@ -342,10 +342,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                     e.setHeader("`{}` cannot be used to write table-driven tests with Sorbet", "each");
                     e.replaceWith("Use `test_each`", ctx.locAt(sendLoc), "test_each({})", send->recv.toString(ctx));
                 }
-                // TODO(froydnj): given that we have identified a case where someone
-                // should have used test_each, should we turn this into a test_each
-                // so we don't get further errors downstream?  Or should we return
-                // a send with the block body deleted for similar reasons?
+                ENFORCE(send->numNonBlockArgs() == 0);
+                // Drop the block body so the user doesn't get mysterious errors about
+                // certain functions not existing on our synthesized classes for
+                // describe blocks.
+                return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numNonBlockArgs(),
+                                     ast::MK::SendArgs(ast::MK::Block(block->loc, ast::MK::EmptyTree(),
+                                                                      std::move(block->args))),
+                                     send->flags);
             }
         }
         return nullptr;
