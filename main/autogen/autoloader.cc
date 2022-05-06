@@ -354,7 +354,6 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
         auto &child = node->children[part];
         if (!child) {
             child = make_unique<DefTree>();
-            child->qname.package = ndef.qname.package;
             child->qname.nameParts = node->qname.nameParts;
             child->qname.nameParts.emplace_back(part);
         }

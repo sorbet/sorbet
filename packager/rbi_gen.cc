@@ -535,7 +535,7 @@ private:
     }
 
     bool isInTestPackage(core::SymbolRef sym) {
-        if (sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
+        if (sym == core::Symbols::root()) {
             return false;
         }
         if (sym == pkgNamespace) {
@@ -554,7 +554,7 @@ private:
 
     bool isInPackage(core::SymbolRef original) {
         for (auto sym = original; sym.exists(); sym = sym.owner(gs)) {
-            if (sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
+            if (sym == core::Symbols::root()) {
                 // Symbol isn't part of a package. Check if it was defined in an RBI.
                 auto locs = original.locs(gs);
                 for (auto loc : locs) {

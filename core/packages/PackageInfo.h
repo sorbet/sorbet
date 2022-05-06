@@ -56,13 +56,10 @@ public:
         core::SymbolRef symbol;
         core::NameRef srcPkg;
     };
-    virtual std::vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope,
-                                                               core::NameRef name) const = 0;
+
     virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
 
     // Utilities:
-
-    static bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef klass);
 
     static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
 };

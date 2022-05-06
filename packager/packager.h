@@ -29,47 +29,12 @@ namespace sorbet::packager {
  *
  * to:
  *
- *   module <PackageRegistry>::Project_Foo_Package
- *     module Project::Bar
- *       # Import methods exported on Bar
- *       extend <PackageRegistry>::Bar_Package::<PackageMethods>
- *       # Import each class exported by Bar
- *       SomeClassInBar = <PackageRegistry>::Bar_Package::SomeClassInBar
- *       SomeOtherClassInBar = <PackageRegistry>::Bar_Package::SomeOtherClassInBar
- *     end
- *     module <PackageMethods>
- *       include <PackageRegistry>::Project_Foo_Package::FooClassWithMethods
- *     end
+ *   class <PackgeRegistry>::Project::Foo < PackageSpec
+ *    import <PackgeRegistry>::Project::Bar
+ *
+ *    export Package::Baz
+ *    export_methods Package::FooClassWithMethods
  *   end
- *
- *   class Project::Foo < PackageSpec
- *    import Project::Bar
- *
- *    export <PackageRegistry>::Project_Foo_Package::Baz
- *    export_methods <PackageRegistry>::Project_Foo_Package::FooClassWithMethods
- *   end
- *
- * It also rewrites files in the package, like `foo/baz.rb`, from:
- *
- * class SomeOtherClassInTheFile
- *   ...
- * end
- *
- * class Baz
- *   ...
- * end
- *
- * to:
- *
- * module <PackageRegistry>::Project_Foo_Package
- *   class SomeOtherClassInTheFile
- *     ...
- *   end
- *
- *   class Baz
- *     ...
- *   end
- * end
  *
  * Note that packages cannot have `_` in their names, so the above name mangling is 1:1.
  *
@@ -91,12 +56,6 @@ public:
     // mutation is simply dropped.
     static std::vector<ast::ParsedFile> runIncrementalBestEffort(const core::GlobalState &gs,
                                                                  std::vector<ast::ParsedFile> files);
-
-    // The structures created for `__package.rb` files from their imports are large and deep. This causes
-    // performance problems with typechecking. Use to remove these modules while retaining the PackageSpec
-    // class itself during typecheck.
-    static ast::ParsedFile removePackageModules(core::Context ctx, ast::ParsedFile pf,
-                                                bool intentionallyLeakASTs = false);
 
     static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 

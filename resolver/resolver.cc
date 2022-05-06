@@ -689,7 +689,7 @@ private:
         // If a package exports a name that does not exist only one error should appear at the
         // export site. Ignore resolution failures in the aliases/modules created by packaging to
         // avoid this resulting in duplicate errors.
-        if (!constantNameMissing && !alreadyReported && !isPackagerMaterializedConstantRef(ctx, job)) {
+        if (!constantNameMissing && !alreadyReported) {
             if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
 
@@ -716,22 +716,6 @@ private:
                 }
             }
         }
-    }
-
-    // Is this constant materialized by the packager. This specifically excludes the PackageSpec
-    // class body itself.
-    static bool isPackagerMaterializedConstantRef(core::Context ctx, const ResolutionItem &job) {
-        if (!ctx.file.data(ctx).isPackage()) {
-            return false;
-        }
-        auto nesting = job.scope;
-        while (nesting != nullptr) {
-            if (nesting->scope == core::Symbols::PackageRegistry() || nesting->scope == core::Symbols::PackageTests()) {
-                return true;
-            }
-            nesting = nesting->parent;
-        }
-        return false;
     }
 
     static bool resolveJob(core::Context ctx, ResolutionItem &job) {
@@ -1310,23 +1294,8 @@ public:
             return false;
         }
 
-        // If current definition is owned by package registry/test, this means it is a package-mangled module.
-        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
-        if (curOwner == core::Symbols::PackageTests() || curOwner == core::Symbols::PackageRegistry()) {
-            return false;
-        }
-
-        // If current parent is owned by package registry/test, this means we are at package-top-level (and we skip).
-        // If we didn't skip here, we'd end up checking symbols like "Test", "Opus", etc.
-        //
-        // We have a small set of these leading package namespace symbols at Stripe, and we don't expect these to run
-        // into ambiguous definition issues. Skipping checking these saves on significant overhead.
-        const core::SymbolRef curParentOwner = nesting_->parent->scope.owner(ctx);
-        if (curParentOwner == core::Symbols::PackageTests() || curParentOwner == core::Symbols::PackageRegistry()) {
-            return false;
-        }
-
         // Can't be ambiguous if current definition is single-part, don't check in this case.
+        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
         if (curOwner == nesting_->parent->scope) {
             return false;
         }

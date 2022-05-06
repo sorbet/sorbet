@@ -119,13 +119,8 @@ public:
     }
 
     bool tryPackageSpecCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
-        if (isUnresolvedExport(unresolved)) {
-            tryUnresolvedExportCorrections(e, unresolved);
-            return true;
-        } else {
-            tryUnresolvedImportCorrections(e, unresolved);
-            return true;
-        }
+        tryUnresolvedImportCorrections(e, unresolved);
+        return true;
     }
 
 private:
@@ -162,35 +157,6 @@ private:
         return currentPkg.mangledName() != other.mangledName(); // Don't import yourself
     }
 
-    bool isUnresolvedExport(ast::UnresolvedConstantLit &unresolved) {
-        if (ast::isa_tree<ast::EmptyTree>(unresolved.scope)) {
-            return false;
-        }
-        // Look for the prefix added by the packager to exports. (Imports are left as-is.)
-        return core::packages::PackageInfo::isPackageModule(
-            ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef());
-    }
-
-    void tryUnresolvedExportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
-        auto scope = ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol.asClassOrModuleRef();
-        auto matches = scope.data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
-        {
-            // Remove results defined outside of this package:
-            auto it = remove_if(matches.begin(), matches.end(),
-                                [&](auto &m) -> bool { return !currentPkg.ownsSymbol(ctx, m.symbol); });
-            matches.erase(it, matches.end());
-            if (matches.size() > 4) {
-                matches.resize(4);
-            }
-        }
-        if (!matches.empty()) {
-            addReplacementSuggestions(e, unresolved, matches);
-        } else {
-            e.addErrorNote("To be exported it must be defined in package `{}`", formatPackageName(currentPkg));
-        }
-        maybeAddErrorHint(e);
-    }
-
     void tryUnresolvedImportCorrections(core::ErrorBuilder &e, ast::UnresolvedConstantLit &unresolved) {
         auto &scope = unresolved.scope;
         // by default, we'll try to search for a matching package in the root scope
@@ -205,13 +171,12 @@ private:
         // scope (or root scope if that didn't exist)
         auto matches = searchScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, unresolved.cnst);
         {
-            // remove anything that's not a package. Since we're
-            // searching from the root, that means we'll be finding
-            // the things which inherit from `PackageSpec`
-            // (i.e. something like `::MyPackage`, and not
-            // `::<PackageRegistry>::MyPackage`), and we can retain
-            // _only_ those constants which inherit from `PackageSpec`
-            // and throw out other suggestions
+            // remove anything that's not a package. Since we're searching from
+            // the root, that means we'll be finding the things which inherit
+            // from `PackageSpec` (i.e. something like
+            // `::<PackageSpecRegistry>::MyPackage`, and not `::MyPackage`), and
+            // we can retain _only_ those constants which inherit from
+            // `PackageSpec` and throw out other suggestions
             auto it = remove_if(matches.begin(), matches.end(), [&](auto &m) -> bool {
                 if (m.symbol.isClassOrModule()) {
                     return m.symbol.asClassOrModuleRef().data(ctx)->superClass() != core::Symbols::PackageSpec();
@@ -319,36 +284,6 @@ bool SuggestPackage::tryPackageCorrections(core::Context ctx, core::ErrorBuilder
         return true;
     }
 
-    if (ast::isa_tree<ast::ConstantLit>(unresolved.scope)) {
-        auto missingExports = pkgCtx.currentPkg.findMissingExports(
-            ctx, ast::cast_tree_nonnull<ast::ConstantLit>(unresolved.scope).symbol, unresolved.cnst);
-        if (missingExports.size() > 3) {
-            missingExports.resize(3);
-        }
-        if (!missingExports.empty()) {
-            for (auto match : missingExports) {
-                pkgCtx.addMissingExportSuggestions(e, match);
-            }
-
-            if (auto fullConstant = ctx.locAt(unresolved.loc).source(ctx)) {
-                if (missingExports.size() == 1) {
-                    // if we have a single unambiguous export
-                    // suggestion, then we can use that information to
-                    // make the error message reference the exact
-                    // package we believe the constant came from
-                    auto missingExport = missingExports.front();
-                    auto pkgName = ctx.state.packageDB().getPackageInfo(missingExport.srcPkg).show(ctx);
-                    e.setHeader("Package `{}` does not export `{}`", pkgName, *fullConstant);
-                } else {
-                    // otherwise we should be explicit that it's
-                    // probably an export problem but be a bit cagey
-                    // about WHAT export problem it is
-                    e.setHeader("`{}` is not a public constant", *fullConstant);
-                }
-            }
-            return true;
-        }
-    }
     return false;
 }
 } // namespace sorbet::resolver

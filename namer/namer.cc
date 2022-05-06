@@ -1195,10 +1195,9 @@ class SymbolDefiner {
             symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
-        // Don't add locs for <root> or <PackageRegistry>; 1) they aren't useful and 2) they'll end up with O(files in
+        // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in
         // project) locs!
-        if (symbol != core::Symbols::root() && symbol != core::Symbols::PackageRegistry() &&
-            symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
+        if (symbol != core::Symbols::root()) {
             symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
@@ -1682,10 +1681,7 @@ public:
             auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
                 classBehaviorLocs[klass.symbol] = ctx.locAt(klass.declLoc);
-            } else if (prevLoc->second.file() != ctx.file &&
-                       // Ignore packages, which have 'behavior defined in multiple files'.
-                       klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry() &&
-                       klass.symbol.data(ctx)->owner != core::Symbols::PackageTests()) {
+            } else if (prevLoc->second.file() != ctx.file) {
                 if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
