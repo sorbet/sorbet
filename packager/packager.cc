@@ -571,7 +571,7 @@ public:
         return res;
     }
 
-    core::NameRef packageForNamespace(core::Context ctx) const {
+    core::NameRef packageForNamespace() const {
         if (curPkg.empty()) {
             return core::NameRef::noName();
         }
@@ -780,7 +780,7 @@ public:
         if (lhs != nullptr && rootConsts == 0) {
             pushConstantLit(ctx, lhs);
 
-            if (rootConsts == 0 && namespaces.packageForNamespace(ctx) != pkg.mangledName()) {
+            if (rootConsts == 0 && namespaces.packageForNamespace() != pkg.mangledName()) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
@@ -840,7 +840,7 @@ public:
             return;
         }
         auto &pkgName = requiredNamespace(ctx);
-        if (namespaces.packageForNamespace(ctx) != pkg.mangledName()) {
+        if (namespaces.packageForNamespace() != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
@@ -918,7 +918,7 @@ private:
 
         e.addErrorLine(pkg.declLoc(), "Enclosing package declared here");
 
-        auto reqMangledName = namespaces.packageForNamespace(ctx);
+        auto reqMangledName = namespaces.packageForNamespace();
         if (reqMangledName.exists()) {
             auto &reqPkg = ctx.state.packageDB().getPackageInfo(reqMangledName);
             auto givenNamespace = absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(ctx));
