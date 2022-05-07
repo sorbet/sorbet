@@ -21,10 +21,10 @@ namespace sorbet::compiler {
 CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *module,
                              llvm::DIBuilder *debug, llvm::DICompileUnit *compileUnit, core::FileRef file,
                              llvm::BasicBlock *allocRubyIdsEntry, llvm::BasicBlock *globalConstructorsEntry,
-                             StringTable &stringTable, IDTable &idTable)
+                             StringTable &stringTable, IDTable &idTable, RubyStringTable &rubyStringTable)
     : gs(gs), lctx(lctx), module(module), allocRubyIdsEntry(allocRubyIdsEntry),
       globalConstructorsEntry(globalConstructorsEntry), debug(debug), compileUnit(compileUnit),
-      functionEntryInitializers(nullptr), file(file), stringTable(stringTable), idTable(idTable) {}
+      functionEntryInitializers(nullptr), file(file), stringTable(stringTable), idTable(idTable), rubyStringTable(rubyStringTable) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
