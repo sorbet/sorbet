@@ -561,6 +561,20 @@ MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef nam
     return Symbols::noMethod();
 }
 
+// Documented in SymbolRef.h
+bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
+    auto sym = *this;
+    while (sym.exists() && sym != core::Symbols::root()) {
+        if (sym == core::Symbols::PackageSpecRegistry()) {
+            return true;
+        }
+
+        sym = sym.data(gs)->owner;
+    }
+
+    return false;
+}
+
 namespace {
 MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrModuleRef owner, NameRef name,
                                                int maxDepth) {
@@ -730,9 +744,12 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
         best.distance = 1 + (currentName.size() / 2);
     }
 
+    bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+
     // Find the closest by following outer scopes
     {
         ClassOrModuleRef base = ref(gs);
+
         do {
             // follow outer scopes
 
@@ -761,6 +778,13 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                 for (auto member : scope.data(gs)->members()) {
                     if (member.first.kind() == NameKind::CONSTANT &&
                         member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
+                        if (onlySuggestPackageSpecs) {
+                            if (!member.second.isClassOrModule() ||
+                                !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                                continue;
+                            }
+                        }
+
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
@@ -810,6 +834,13 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         member.second.asClassOrModuleRef().data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
+                    if (onlySuggestPackageSpecs) {
+                        if (!member.second.isClassOrModule() ||
+                            !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                            continue;
+                        }
+                    }
+
                     auto thisDistance = Levenstein::distance(
                         currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {

@@ -5,22 +5,22 @@ example/__package.rb:5: Unable to resolve constant `NonexistentPackage` https://
 example/__package.rb:7: Unable to resolve constant `SUggestThis` https://srb.help/5002
      7 |  import DoNot::SUggestThis
                  ^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `Suggestion`? Use `-a` to autocorrect
     example/__package.rb:7: Replace with `Suggestion`
      7 |  import DoNot::SUggestThis
                  ^^^^^^^^^^^^^^^^^^
-    suggestion/__package.rb:3: Did you mean: `Suggestion`?
+    suggestion/__package.rb:3: `Suggestion` defined here
      3 |class Suggestion < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 example/__package.rb:9: Unable to resolve constant `SUggestion` https://srb.help/5002
      9 |  import SUggestion
                  ^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `Suggestion`? Use `-a` to autocorrect
     example/__package.rb:9: Replace with `Suggestion`
      9 |  import SUggestion
                  ^^^^^^^^^^
-    suggestion/__package.rb:3: Did you mean: `Suggestion`?
+    suggestion/__package.rb:3: `Suggestion` defined here
      3 |class Suggestion < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

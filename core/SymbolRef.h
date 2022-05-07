@@ -159,6 +159,11 @@ public:
         return show(gs, {});
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
+
+    // Given a symbol like <PackageSpecRegistry>::Project::Foo, returns true.
+    // Given any other symbol, returns false.
+    // Also returns false if called on core::Symbols::noClassOrModule().
+    bool isPackageSpecSymbol(const GlobalState &gs) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
