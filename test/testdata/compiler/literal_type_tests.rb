@@ -39,7 +39,8 @@ end
 # INITIAL{LITERAL}: }
 
 # INITIAL-LABEL: define internal i64 @"func_Object#14literal_string"
-# INITIAL: [[STRING:%[_a-zA-Z]+]] = load i64, i64* @rubyStrFrozen_matching{{.*}}
+# INITIAL: [[STRING_TMP:%[_a-zA-Z0-9]+]] = load i64*, i64** @addr_rubystr_matching{{.*}}
+# INITIAL-NEXT: [[STRING:%[_a-zA-Z]+]] = load i64, i64* [[STRING_TMP]]{{.*}}
 # INITIAL-NEXT: [[COND:%[0-9]+]] = call i1 @sorbet_i_isa_String(i64 [[STRING]]{{.*}}
 # INITIAL-NEXT: call void @llvm.assume(i1 [[COND]]){{.*}}
 # INITIAL-NEXT: br i1 true, label %"fastSymCallIntrinsic_String_===", label %"alternativeCallIntrinsic_String_==="{{.*}}
