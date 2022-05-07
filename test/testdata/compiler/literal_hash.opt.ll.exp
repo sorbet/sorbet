@@ -81,17 +81,8 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @.str.9 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @.str.10 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @"stackFramePrecomputed_func_<root>.17<static-init>$153" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
-@"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
-@"rubyStrFrozen_test/testdata/compiler/literal_hash.rb" = internal unnamed_addr global i64 0, align 8
 @iseqEncodedArray = internal global [15 x i64] zeroinitializer
 @fileLineNumberInfo = internal global %struct.SorbetLineNumberInfo zeroinitializer
-@rubyStrFrozen_foo = internal unnamed_addr global i64 0, align 8
-@rubyStrFrozen_bar = internal unnamed_addr global i64 0, align 8
-@rubyStrFrozen_baz = internal unnamed_addr global i64 0, align 8
-@rubyStrFrozen_quux = internal unnamed_addr global i64 0, align 8
-@rubyStrFrozen_wat = internal unnamed_addr global i64 0, align 8
-@rubyStrFrozen_how = internal unnamed_addr global i64 0, align 8
-@rubyStrFrozen_unknown = internal unnamed_addr global i64 0, align 8
 @ruby_hashLiteral1 = internal unnamed_addr global i64 0, align 8
 @ruby_hashLiteral2 = internal unnamed_addr global i64 0, align 8
 @ruby_hashLiteral3 = internal unnamed_addr global i64 0, align 8
@@ -103,6 +94,8 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @sorbet_moduleStringTable = internal unnamed_addr constant [140 x i8] c"<top (required)>\00test/testdata/compiler/literal_hash.rb\00foo\00bar\00baz\00quux\00wat\00how\00unknown\00do\00magic\00one\00two\00true\00false\00nil\00symbol\00puts\00master\00", align 1
 @sorbet_moduleIDTable = internal unnamed_addr global [4 x i64] zeroinitializer, align 8
 @sorbet_moduleIDDescriptors = internal unnamed_addr constant [4 x %struct.rb_code_position_struct] [%struct.rb_code_position_struct { i32 0, i32 16 }, %struct.rb_code_position_struct { i32 89, i32 2 }, %struct.rb_code_position_struct { i32 121, i32 6 }, %struct.rb_code_position_struct { i32 128, i32 4 }], align 8
+@sorbet_moduleRubyStringTable = internal unnamed_addr global [16 x i64] zeroinitializer, align 8
+@sorbet_moduleRubyStringDescriptors = internal unnamed_addr constant [16 x %struct.rb_code_position_struct] [%struct.rb_code_position_struct { i32 0, i32 16 }, %struct.rb_code_position_struct { i32 17, i32 38 }, %struct.rb_code_position_struct { i32 56, i32 3 }, %struct.rb_code_position_struct { i32 60, i32 3 }, %struct.rb_code_position_struct { i32 64, i32 3 }, %struct.rb_code_position_struct { i32 68, i32 4 }, %struct.rb_code_position_struct { i32 73, i32 3 }, %struct.rb_code_position_struct { i32 77, i32 3 }, %struct.rb_code_position_struct { i32 81, i32 7 }, %struct.rb_code_position_struct { i32 92, i32 5 }, %struct.rb_code_position_struct { i32 98, i32 3 }, %struct.rb_code_position_struct { i32 102, i32 3 }, %struct.rb_code_position_struct { i32 106, i32 4 }, %struct.rb_code_position_struct { i32 111, i32 5 }, %struct.rb_code_position_struct { i32 117, i32 3 }, %struct.rb_code_position_struct { i32 121, i32 6 }], align 8
 
 ; Function Attrs: nounwind readnone willreturn
 declare i64 @rb_id2sym(i64) local_unnamed_addr #0
@@ -125,13 +118,11 @@ declare i64 @sorbet_globalConstDupHash(i64) local_unnamed_addr #1
 
 declare void @sorbet_vm_intern_ids(i64*, %struct.rb_code_position_struct*, i32, i8*) local_unnamed_addr #1
 
-declare i64 @sorbet_vm_fstring_new(i8*, i64) local_unnamed_addr #1
+declare void @sorbet_vm_init_string_table(i64*, %struct.rb_code_position_struct*, i32, i8*) local_unnamed_addr #1
 
 declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #1
 
 declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #1
-
-declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #1
 
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #2
@@ -158,209 +149,174 @@ entry:
   %locals.i.i = alloca i64, i32 0, align 8
   %realpath = tail call i64 @sorbet_readRealpath()
   tail call void @sorbet_vm_intern_ids(i64* noundef getelementptr inbounds ([4 x i64], [4 x i64]* @sorbet_moduleIDTable, i32 0, i32 0), %struct.rb_code_position_struct* noundef getelementptr inbounds ([4 x %struct.rb_code_position_struct], [4 x %struct.rb_code_position_struct]* @sorbet_moduleIDDescriptors, i32 0, i32 0), i32 noundef 4, i8* noundef getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i32 0, i32 0))
-  %0 = tail call i64 @sorbet_vm_fstring_new(i8* noundef getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 0), i64 noundef 16) #7
-  tail call void @rb_gc_register_mark_object(i64 %0) #7
-  store i64 %0, i64* @"rubyStrFrozen_<top (required)>", align 8
-  %1 = tail call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 17), i64 noundef 38) #7
-  tail call void @rb_gc_register_mark_object(i64 %1) #7
-  store i64 %1, i64* @"rubyStrFrozen_test/testdata/compiler/literal_hash.rb", align 8
+  tail call void @sorbet_vm_init_string_table(i64* noundef getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i32 0, i32 0), %struct.rb_code_position_struct* noundef getelementptr inbounds ([16 x %struct.rb_code_position_struct], [16 x %struct.rb_code_position_struct]* @sorbet_moduleRubyStringDescriptors, i32 0, i32 0), i32 noundef 16, i8* noundef getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i32 0, i32 0))
   tail call void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i32 0, i32 0), i32 noundef 15)
   %"rubyId_<top (required)>.i.i" = load i64, i64* getelementptr inbounds ([4 x i64], [4 x i64]* @sorbet_moduleIDTable, i64 0, i64 0), align 8, !invariant.load !5
-  %"rubyStr_<top (required)>.i.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
-  %"rubyStr_test/testdata/compiler/literal_hash.rb.i.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/literal_hash.rb", align 8
-  %2 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/literal_hash.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 0, i32 noundef 6, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i.i, i32 noundef 0, i32 noundef 15)
-  store %struct.rb_iseq_struct* %2, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.17<static-init>$153", align 8
-  %3 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 56), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %3) #7
-  store i64 %3, i64* @rubyStrFrozen_foo, align 8
-  %4 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 60), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %4) #7
-  store i64 %4, i64* @rubyStrFrozen_bar, align 8
-  %5 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 64), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %5) #7
-  store i64 %5, i64* @rubyStrFrozen_baz, align 8
-  %6 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 68), i64 noundef 4) #7
-  call void @rb_gc_register_mark_object(i64 %6) #7
-  store i64 %6, i64* @rubyStrFrozen_quux, align 8
-  %7 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 73), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %7) #7
-  store i64 %7, i64* @rubyStrFrozen_wat, align 8
-  %8 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 77), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %8) #7
-  store i64 %8, i64* @rubyStrFrozen_how, align 8
-  %9 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 81), i64 noundef 7) #7
-  call void @rb_gc_register_mark_object(i64 %9) #7
-  store i64 %9, i64* @rubyStrFrozen_unknown, align 8
-  %10 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 92), i64 noundef 5) #7
-  call void @rb_gc_register_mark_object(i64 %10) #7
-  %11 = bitcast [14 x i64]* %argArray.i.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 112, i8* nonnull %11)
-  %rubyStr_foo.i.i = load i64, i64* @rubyStrFrozen_foo, align 8
+  %"rubyStr_<top (required)>.i.i" = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 0), align 8, !invariant.load !5
+  %"rubyStr_test/testdata/compiler/literal_hash.rb.i.i" = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 1), align 8, !invariant.load !5
+  %0 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/literal_hash.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 0, i32 noundef 6, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i.i, i32 noundef 0, i32 noundef 15)
+  store %struct.rb_iseq_struct* %0, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.17<static-init>$153", align 8
+  %1 = bitcast [14 x i64]* %argArray.i.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 112, i8* nonnull %1)
+  %rubyStr_foo.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 2), align 8, !invariant.load !5
   %hashArgs0Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 0
   store i64 %rubyStr_foo.i.i, i64* %hashArgs0Addr.i.i, align 8
   %hashArgs1Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 1
   store i64 3, i64* %hashArgs1Addr.i.i, align 8
-  %rubyStr_bar.i.i = load i64, i64* @rubyStrFrozen_bar, align 8
+  %rubyStr_bar.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 3), align 8, !invariant.load !5
   %hashArgs2Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 2
   store i64 %rubyStr_bar.i.i, i64* %hashArgs2Addr.i.i, align 8
   %hashArgs3Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 3
   store i64 2, i64* %hashArgs3Addr.i.i, align 8
-  %rubyStr_baz.i.i = load i64, i64* @rubyStrFrozen_baz, align 8
+  %rubyStr_baz.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 4), align 8, !invariant.load !5
   %hashArgs4Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 4
   store i64 %rubyStr_baz.i.i, i64* %hashArgs4Addr.i.i, align 8
   %hashArgs5Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 5
   store i64 20, i64* %hashArgs5Addr.i.i, align 8
-  %rubyStr_quux.i.i = load i64, i64* @rubyStrFrozen_quux, align 8
+  %rubyStr_quux.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 5), align 8, !invariant.load !5
   %hashArgs6Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 6
   store i64 %rubyStr_quux.i.i, i64* %hashArgs6Addr.i.i, align 8
   %hashArgs7Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 7
   store i64 0, i64* %hashArgs7Addr.i.i, align 8
-  %rubyStr_wat.i.i = load i64, i64* @rubyStrFrozen_wat, align 8
+  %rubyStr_wat.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 6), align 8, !invariant.load !5
   %hashArgs8Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 8
   store i64 %rubyStr_wat.i.i, i64* %hashArgs8Addr.i.i, align 8
   %hashArgs9Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 9
   store i64 8, i64* %hashArgs9Addr.i.i, align 8
-  %rubyStr_how.i.i = load i64, i64* @rubyStrFrozen_how, align 8
   %hashArgs10Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 10
-  store i64 %rubyStr_how.i.i, i64* %hashArgs10Addr.i.i, align 8
-  %rubyStr_unknown.i.i = load i64, i64* @rubyStrFrozen_unknown, align 8
-  %hashArgs11Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 11
-  store i64 %rubyStr_unknown.i.i, i64* %hashArgs11Addr.i.i, align 8
+  %2 = load <2 x i64>, <2 x i64>* bitcast (i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 7) to <2 x i64>*), align 8, !invariant.load !5
+  %3 = bitcast i64* %hashArgs10Addr.i.i to <2 x i64>*
+  store <2 x i64> %2, <2 x i64>* %3, align 8
   %rubyId_do.i.i = load i64, i64* getelementptr inbounds ([4 x i64], [4 x i64]* @sorbet_moduleIDTable, i64 0, i64 1), align 8, !invariant.load !5
-  %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_do.i.i) #8
+  %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_do.i.i) #7
   %hashArgs12Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 12
   store i64 %rawSym.i.i, i64* %hashArgs12Addr.i.i, align 8
+  %rubyStr_magic.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 9), align 8, !invariant.load !5
   %hashArgs13Addr.i.i = getelementptr [14 x i64], [14 x i64]* %argArray.i.i, i64 0, i64 13
-  store i64 %10, i64* %hashArgs13Addr.i.i, align 8
-  %12 = call i64 @rb_hash_new_with_size(i64 noundef 7) #7
-  call void @rb_hash_bulk_insert(i64 noundef 14, i64* noundef nonnull %hashArgs0Addr.i.i, i64 %12) #7
-  %13 = call i64 @sorbet_globalConstRegister(i64 %12) #7
-  store i64 %13, i64* @ruby_hashLiteral1, align 8
-  call void @llvm.lifetime.end.p0i8(i64 112, i8* nonnull %11)
-  %14 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 98), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %14) #7
-  %15 = bitcast [2 x i64]* %argArray.i1.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %15)
+  store i64 %rubyStr_magic.i.i, i64* %hashArgs13Addr.i.i, align 8
+  %4 = call i64 @rb_hash_new_with_size(i64 noundef 7) #8
+  call void @rb_hash_bulk_insert(i64 noundef 14, i64* noundef nonnull %hashArgs0Addr.i.i, i64 %4) #8
+  %5 = call i64 @sorbet_globalConstRegister(i64 %4) #8
+  store i64 %5, i64* @ruby_hashLiteral1, align 8
+  call void @llvm.lifetime.end.p0i8(i64 112, i8* nonnull %1)
+  %6 = bitcast [2 x i64]* %argArray.i1.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6)
   %hashArgs0Addr.i2.i = getelementptr [2 x i64], [2 x i64]* %argArray.i1.i, i64 0, i64 0
   store i64 3, i64* %hashArgs0Addr.i2.i, align 8
+  %rubyStr_one.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 10), align 8, !invariant.load !5
   %hashArgs1Addr.i3.i = getelementptr [2 x i64], [2 x i64]* %argArray.i1.i, i64 0, i64 1
-  store i64 %14, i64* %hashArgs1Addr.i3.i, align 8
-  %16 = call i64 @rb_hash_new_with_size(i64 noundef 1) #7
-  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %16) #7
-  %17 = call i64 @sorbet_globalConstRegister(i64 %16) #7
-  store i64 %17, i64* @ruby_hashLiteral2, align 8
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15)
-  %18 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 102), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %18) #7
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %15)
+  store i64 %rubyStr_one.i.i, i64* %hashArgs1Addr.i3.i, align 8
+  %7 = call i64 @rb_hash_new_with_size(i64 noundef 1) #8
+  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %7) #8
+  %8 = call i64 @sorbet_globalConstRegister(i64 %7) #8
+  store i64 %8, i64* @ruby_hashLiteral2, align 8
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6)
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6)
   store i64 2, i64* %hashArgs0Addr.i2.i, align 8
-  store i64 %18, i64* %hashArgs1Addr.i3.i, align 8
-  %19 = call i64 @rb_hash_new_with_size(i64 noundef 1) #7
-  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %19) #7
-  %20 = call i64 @sorbet_globalConstRegister(i64 %19) #7
-  store i64 %20, i64* @ruby_hashLiteral3, align 8
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15)
-  %21 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 106), i64 noundef 4) #7
-  call void @rb_gc_register_mark_object(i64 %21) #7
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %15)
+  %rubyStr_two.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 11), align 8, !invariant.load !5
+  store i64 %rubyStr_two.i.i, i64* %hashArgs1Addr.i3.i, align 8
+  %9 = call i64 @rb_hash_new_with_size(i64 noundef 1) #8
+  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %9) #8
+  %10 = call i64 @sorbet_globalConstRegister(i64 %9) #8
+  store i64 %10, i64* @ruby_hashLiteral3, align 8
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6)
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6)
   store i64 20, i64* %hashArgs0Addr.i2.i, align 8
-  store i64 %21, i64* %hashArgs1Addr.i3.i, align 8
-  %22 = call i64 @rb_hash_new_with_size(i64 noundef 1) #7
-  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %22) #7
-  %23 = call i64 @sorbet_globalConstRegister(i64 %22) #7
-  store i64 %23, i64* @ruby_hashLiteral4, align 8
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15)
-  %24 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 111), i64 noundef 5) #7
-  call void @rb_gc_register_mark_object(i64 %24) #7
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %15)
+  %rubyStr_true.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 12), align 8, !invariant.load !5
+  store i64 %rubyStr_true.i.i, i64* %hashArgs1Addr.i3.i, align 8
+  %11 = call i64 @rb_hash_new_with_size(i64 noundef 1) #8
+  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %11) #8
+  %12 = call i64 @sorbet_globalConstRegister(i64 %11) #8
+  store i64 %12, i64* @ruby_hashLiteral4, align 8
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6)
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6)
   store i64 0, i64* %hashArgs0Addr.i2.i, align 8
-  store i64 %24, i64* %hashArgs1Addr.i3.i, align 8
-  %25 = call i64 @rb_hash_new_with_size(i64 noundef 1) #7
-  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %25) #7
-  %26 = call i64 @sorbet_globalConstRegister(i64 %25) #7
-  store i64 %26, i64* @ruby_hashLiteral5, align 8
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15)
-  %27 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 117), i64 noundef 3) #7
-  call void @rb_gc_register_mark_object(i64 %27) #7
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %15)
+  %rubyStr_false.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 13), align 8, !invariant.load !5
+  store i64 %rubyStr_false.i.i, i64* %hashArgs1Addr.i3.i, align 8
+  %13 = call i64 @rb_hash_new_with_size(i64 noundef 1) #8
+  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %13) #8
+  %14 = call i64 @sorbet_globalConstRegister(i64 %13) #8
+  store i64 %14, i64* @ruby_hashLiteral5, align 8
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6)
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6)
   store i64 8, i64* %hashArgs0Addr.i2.i, align 8
-  store i64 %27, i64* %hashArgs1Addr.i3.i, align 8
-  %28 = call i64 @rb_hash_new_with_size(i64 noundef 1) #7
-  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %28) #7
-  %29 = call i64 @sorbet_globalConstRegister(i64 %28) #7
-  store i64 %29, i64* @ruby_hashLiteral6, align 8
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15)
-  %30 = call i64 @sorbet_vm_fstring_new(i8* getelementptr inbounds ([140 x i8], [140 x i8]* @sorbet_moduleStringTable, i64 0, i64 121), i64 noundef 6) #7
-  call void @rb_gc_register_mark_object(i64 %30) #7
-  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %15)
+  %rubyStr_nil.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 14), align 8, !invariant.load !5
+  store i64 %rubyStr_nil.i.i, i64* %hashArgs1Addr.i3.i, align 8
+  %15 = call i64 @rb_hash_new_with_size(i64 noundef 1) #8
+  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %15) #8
+  %16 = call i64 @sorbet_globalConstRegister(i64 %15) #8
+  store i64 %16, i64* @ruby_hashLiteral6, align 8
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6)
+  call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %6)
   %rubyId_symbol.i.i = load i64, i64* getelementptr inbounds ([4 x i64], [4 x i64]* @sorbet_moduleIDTable, i64 0, i64 2), align 8, !invariant.load !5
-  %rawSym.i17.i = call i64 @rb_id2sym(i64 %rubyId_symbol.i.i) #8
+  %rawSym.i17.i = call i64 @rb_id2sym(i64 %rubyId_symbol.i.i) #7
   store i64 %rawSym.i17.i, i64* %hashArgs0Addr.i2.i, align 8
-  store i64 %30, i64* %hashArgs1Addr.i3.i, align 8
-  %31 = call i64 @rb_hash_new_with_size(i64 noundef 1) #7
-  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %31) #7
-  %32 = call i64 @sorbet_globalConstRegister(i64 %31) #7
-  store i64 %32, i64* @ruby_hashLiteral7, align 8
-  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %15)
+  %rubyStr_symbol.i.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 15), align 8, !invariant.load !5
+  store i64 %rubyStr_symbol.i.i, i64* %hashArgs1Addr.i3.i, align 8
+  %17 = call i64 @rb_hash_new_with_size(i64 noundef 1) #8
+  call void @rb_hash_bulk_insert(i64 noundef 2, i64* noundef nonnull %hashArgs0Addr.i2.i, i64 %17) #8
+  %18 = call i64 @sorbet_globalConstRegister(i64 %17) #8
+  store i64 %18, i64* @ruby_hashLiteral7, align 8
+  call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %6)
   %rubyId_puts.i = load i64, i64* getelementptr inbounds ([4 x i64], [4 x i64]* @sorbet_moduleIDTable, i64 0, i64 3), align 8, !dbg !10, !invariant.load !5
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts.i, i32 noundef 20, i32 noundef 7, i32 noundef 0, i64* noundef null), !dbg !10
-  %33 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !15
-  %34 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %33, i64 0, i32 18
-  %35 = load i64, i64* %34, align 8, !tbaa !17
-  %36 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
-  %37 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %36, i64 0, i32 2
-  %38 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %37, align 8, !tbaa !27
+  %19 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !15
+  %20 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %19, i64 0, i32 18
+  %21 = load i64, i64* %20, align 8, !tbaa !17
+  %22 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
+  %23 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %22, i64 0, i32 2
+  %24 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %23, align 8, !tbaa !27
   %stackFrame.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.17<static-init>$153", align 8
-  %39 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %38, i64 0, i32 2
-  store %struct.rb_iseq_struct* %stackFrame.i, %struct.rb_iseq_struct** %39, align 8, !tbaa !30
-  %40 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %38, i64 0, i32 4
-  %41 = load i64*, i64** %40, align 8, !tbaa !32
-  %42 = load i64, i64* %41, align 8, !tbaa !6
-  %43 = and i64 %42, -33
-  store i64 %43, i64* %41, align 8, !tbaa !6
-  call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %36, %struct.rb_control_frame_struct* %38, %struct.rb_iseq_struct* %stackFrame.i) #7
-  %44 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %38, i64 0, i32 0
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %44, align 8, !dbg !33, !tbaa !15
+  %25 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %24, i64 0, i32 2
+  store %struct.rb_iseq_struct* %stackFrame.i, %struct.rb_iseq_struct** %25, align 8, !tbaa !30
+  %26 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %24, i64 0, i32 4
+  %27 = load i64*, i64** %26, align 8, !tbaa !32
+  %28 = load i64, i64* %27, align 8, !tbaa !6
+  %29 = and i64 %28, -33
+  store i64 %29, i64* %27, align 8, !tbaa !6
+  call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %22, %struct.rb_control_frame_struct* %24, %struct.rb_iseq_struct* %stackFrame.i) #8
+  %30 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %24, i64 0, i32 0
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %30, align 8, !dbg !33, !tbaa !15
   %hashLiteral.i = load i64, i64* @ruby_hashLiteral1, align 8, !dbg !34
-  %duplicatedHash.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral.i) #7, !dbg !34
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %44, align 8, !dbg !34, !tbaa !15
+  %duplicatedHash.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral.i) #8, !dbg !34
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %30, align 8, !dbg !34, !tbaa !15
   %hashLiteral80.i = load i64, i64* @ruby_hashLiteral2, align 8, !dbg !35
-  %duplicatedHash81.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral80.i) #7, !dbg !35
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %44, align 8, !dbg !35, !tbaa !15
+  %duplicatedHash81.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral80.i) #8, !dbg !35
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %30, align 8, !dbg !35, !tbaa !15
   %hashLiteral87.i = load i64, i64* @ruby_hashLiteral3, align 8, !dbg !36
-  %duplicatedHash88.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral87.i) #7, !dbg !36
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 10), i64** %44, align 8, !dbg !36, !tbaa !15
+  %duplicatedHash88.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral87.i) #8, !dbg !36
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 10), i64** %30, align 8, !dbg !36, !tbaa !15
   %hashLiteral94.i = load i64, i64* @ruby_hashLiteral4, align 8, !dbg !37
-  %duplicatedHash95.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral94.i) #7, !dbg !37
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 11), i64** %44, align 8, !dbg !37, !tbaa !15
+  %duplicatedHash95.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral94.i) #8, !dbg !37
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 11), i64** %30, align 8, !dbg !37, !tbaa !15
   %hashLiteral101.i = load i64, i64* @ruby_hashLiteral5, align 8, !dbg !38
-  %duplicatedHash102.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral101.i) #7, !dbg !38
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %44, align 8, !dbg !38, !tbaa !15
+  %duplicatedHash102.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral101.i) #8, !dbg !38
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %30, align 8, !dbg !38, !tbaa !15
   %hashLiteral108.i = load i64, i64* @ruby_hashLiteral6, align 8, !dbg !39
-  %duplicatedHash109.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral108.i) #7, !dbg !39
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %44, align 8, !dbg !39, !tbaa !15
+  %duplicatedHash109.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral108.i) #8, !dbg !39
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %30, align 8, !dbg !39, !tbaa !15
   %hashLiteral115.i = load i64, i64* @ruby_hashLiteral7, align 8, !dbg !40
-  %duplicatedHash116.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral115.i) #7, !dbg !40
-  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %44, align 8, !dbg !40, !tbaa !15
-  %45 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %38, i64 0, i32 1, !dbg !10
-  %46 = load i64*, i64** %45, align 8, !dbg !10
-  store i64 %35, i64* %46, align 8, !dbg !10, !tbaa !6
-  %47 = getelementptr inbounds i64, i64* %46, i64 1, !dbg !10
-  store i64 %duplicatedHash.i, i64* %47, align 8, !dbg !10, !tbaa !6
-  %48 = getelementptr inbounds i64, i64* %47, i64 1, !dbg !10
-  store i64 %duplicatedHash81.i, i64* %48, align 8, !dbg !10, !tbaa !6
-  %49 = getelementptr inbounds i64, i64* %48, i64 1, !dbg !10
-  store i64 %duplicatedHash88.i, i64* %49, align 8, !dbg !10, !tbaa !6
-  %50 = getelementptr inbounds i64, i64* %49, i64 1, !dbg !10
-  store i64 %duplicatedHash95.i, i64* %50, align 8, !dbg !10, !tbaa !6
-  %51 = getelementptr inbounds i64, i64* %50, i64 1, !dbg !10
-  store i64 %duplicatedHash102.i, i64* %51, align 8, !dbg !10, !tbaa !6
-  %52 = getelementptr inbounds i64, i64* %51, i64 1, !dbg !10
-  store i64 %duplicatedHash109.i, i64* %52, align 8, !dbg !10, !tbaa !6
-  %53 = getelementptr inbounds i64, i64* %52, i64 1, !dbg !10
-  store i64 %duplicatedHash116.i, i64* %53, align 8, !dbg !10, !tbaa !6
-  %54 = getelementptr inbounds i64, i64* %53, i64 1, !dbg !10
-  store i64* %54, i64** %45, align 8, !dbg !10
+  %duplicatedHash116.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral115.i) #8, !dbg !40
+  store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %30, align 8, !dbg !40, !tbaa !15
+  %31 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %24, i64 0, i32 1, !dbg !10
+  %32 = load i64*, i64** %31, align 8, !dbg !10
+  store i64 %21, i64* %32, align 8, !dbg !10, !tbaa !6
+  %33 = getelementptr inbounds i64, i64* %32, i64 1, !dbg !10
+  store i64 %duplicatedHash.i, i64* %33, align 8, !dbg !10, !tbaa !6
+  %34 = getelementptr inbounds i64, i64* %33, i64 1, !dbg !10
+  store i64 %duplicatedHash81.i, i64* %34, align 8, !dbg !10, !tbaa !6
+  %35 = getelementptr inbounds i64, i64* %34, i64 1, !dbg !10
+  store i64 %duplicatedHash88.i, i64* %35, align 8, !dbg !10, !tbaa !6
+  %36 = getelementptr inbounds i64, i64* %35, i64 1, !dbg !10
+  store i64 %duplicatedHash95.i, i64* %36, align 8, !dbg !10, !tbaa !6
+  %37 = getelementptr inbounds i64, i64* %36, i64 1, !dbg !10
+  store i64 %duplicatedHash102.i, i64* %37, align 8, !dbg !10, !tbaa !6
+  %38 = getelementptr inbounds i64, i64* %37, i64 1, !dbg !10
+  store i64 %duplicatedHash109.i, i64* %38, align 8, !dbg !10, !tbaa !6
+  %39 = getelementptr inbounds i64, i64* %38, i64 1, !dbg !10
+  store i64 %duplicatedHash116.i, i64* %39, align 8, !dbg !10, !tbaa !6
+  %40 = getelementptr inbounds i64, i64* %39, i64 1, !dbg !10
+  store i64* %40, i64** %31, align 8, !dbg !10
   %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !10
   ret void
 }
@@ -378,8 +334,8 @@ attributes #3 = { nounwind ssp uwtable "disable-tail-calls"="false" "frame-point
 attributes #4 = { sspreq }
 attributes #5 = { argmemonly nofree nosync nounwind willreturn }
 attributes #6 = { noreturn nounwind }
-attributes #7 = { nounwind }
-attributes #8 = { nounwind willreturn }
+attributes #7 = { nounwind willreturn }
+attributes #8 = { nounwind }
 
 !llvm.module.flags = !{!0, !1, !2}
 !llvm.dbg.cu = !{!3}

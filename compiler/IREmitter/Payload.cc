@@ -123,41 +123,12 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
                                   {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))},
                                   "rawRubyStr");
     }
-    // this is a frozen string. We'll allocate it at load time and share it.
-    string rawName = "rubyStrFrozen_" + string(str);
-    auto tp = llvm::Type::getInt64Ty(cs);
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-
-    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
-        llvm::IRBuilder<> globalInitBuilder(cs);
-        auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
-        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
-        // create constructor
-        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
-        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *cs.module);
-
-        auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
-        globalInitBuilder.SetInsertPoint(bb);
-        auto rawCString = Payload::toCString(cs, str, globalInitBuilder);
-        auto rawStr =
-            globalInitBuilder.CreateCall(cs.getFunction("sorbet_cPtrToRubyStringFrozen"),
-                                         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
-        globalInitBuilder.CreateStore(rawStr, ret);
-        globalInitBuilder.CreateRetVoid();
-        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
-        globalInitBuilder.CreateCall(constr, {});
-
-        return ret;
-    }));
-
-    auto name = llvm::StringRef(str.data(), str.length());
-    auto global = builder.CreateLoad(globalDeclaration, {"rubyStr_", name});
-
-    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
-    return global;
+    auto *loadAddr = builder.CreateLoad(cs.rubyStringTableRef(str));
+    auto *MD = llvm::MDNode::get(cs, llvm::None);
+    loadAddr->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    auto *load = builder.CreateLoad(loadAddr, {"rubyStr_", str});
+    load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    return load;
 }
 
 llvm::Value *Payload::testIsUndef(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
