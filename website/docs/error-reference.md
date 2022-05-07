@@ -533,9 +533,9 @@ type `T.untyped` (along with all other values).
 
 ## 3513
 
-Type-checking table-driven tests written with `each` is quite complicated in
-the general case.  Sorbet therefore requires table-driven tests to be written
-using `test_each`
+Type-checking table-driven tests written with `each` is quite complicated in the
+general case. Sorbet therefore requires table-driven tests to be written using
+`test_each`
 
 ## 3702
 
