@@ -57,7 +57,7 @@ nested/nested.test.rb:9: Tests in the `Root::Nested` package must define tests i
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Root::NOT_IN_MODULE`
+    __package.rb:3: Must belong to this package, given constant name `Test::Root::NOT_IN_MODULE`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 

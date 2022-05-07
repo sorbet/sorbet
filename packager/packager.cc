@@ -543,7 +543,7 @@ class PackageNamespaces final {
     vector<Bound> bounds;
     vector<core::NameRef> nameParts;
     vector<pair<core::NameRef, uint16_t>> curPkg;
-    bool foundTestNS = false;
+    core::NameRef foundTestNS = core::NameRef::noName();
 
     static constexpr uint16_t SKIP_BOUND_VAL = 0;
 
@@ -558,8 +558,17 @@ public:
         return nameParts.size();
     }
 
-    const vector<core::NameRef> &currentConstantName() const {
-        return nameParts;
+    const vector<core::NameRef> currentConstantName() const {
+        if (!foundTestNS.exists()) {
+            return nameParts;
+        }
+
+        auto res = vector<core::NameRef>{};
+        res.emplace_back(foundTestNS);
+        for (const auto nm : nameParts) {
+            res.emplace_back(nm);
+        }
+        return res;
     }
 
     core::NameRef packageForNamespace(core::Context ctx) const {
@@ -586,9 +595,9 @@ public:
         }
         bool boundsEmpty = bounds.empty();
 
-        if (isTestFile && boundsEmpty && !foundTestNS) {
+        if (isTestFile && boundsEmpty && !foundTestNS.exists()) {
             if (isPrimaryTestNamespace(name)) {
-                foundTestNS = true;
+                foundTestNS = name;
                 return;
             } else if (!isTestNamespace(ctx, name)) {
                 // Inside a test file, but not inside a test namespace. Set bounds such that
@@ -641,9 +650,9 @@ public:
             }
         }
 
-        if (isTestFile && bounds.size() == 0 && foundTestNS) {
+        if (isTestFile && bounds.size() == 0 && foundTestNS.exists()) {
             ENFORCE(nameParts.empty());
-            foundTestNS = false;
+            foundTestNS = core::NameRef::noName();
             return;
         }
 
@@ -674,7 +683,7 @@ public:
         ENFORCE(begin == 0);
         ENFORCE(end = packages.size());
         ENFORCE(curPkg.empty());
-        ENFORCE(!foundTestNS);
+        ENFORCE(!foundTestNS.exists());
         ENFORCE(skips == 0);
     }
 };
