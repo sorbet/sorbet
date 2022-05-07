@@ -352,36 +352,6 @@ public:
             return tree;
         }
 
-        auto importType = this->package.importsPackage(otherPackage);
-        if (!importType.has_value()) {
-            // We failed to import the package that defines the symbol
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("No import provides `{}`", lit.symbol.show(ctx));
-                bool isTestImport = otherFile.data(ctx).isPackagedTest();
-                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                e.addErrorLine(pkg.declLoc(), "Defined here");
-
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
-            }
-
-            return tree;
-        } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
-            // We used a symbol from a `test_import` in a non-test context
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                e.addErrorLine(pkg.declLoc(), "Defined here");
-            }
-        }
-
         bool isExported = false;
         if (lit.symbol.isClassOrModule()) {
             isExported = lit.symbol.asClassOrModuleRef().data(ctx)->flags.isExported;
@@ -393,15 +363,44 @@ public:
         if (!isExported) {
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("Package `{}` does not export `{}`", pkg.show(ctx), lit.symbol.show(ctx));
+                e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
+                e.addErrorLine(lit.symbol.loc(ctx), "Defined here");
                 if (auto exp = pkg.addExport(ctx, lit.symbol)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
-                e.addErrorLine(lit.symbol.loc(ctx), "Defined here");
+                if (!db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
+            }
+
+            return tree;
+        }
+
+        auto importType = this->package.importsPackage(otherPackage);
+        if (!importType.has_value()) {
+            // We failed to import the package that defines the symbol
+            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
+                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
+                bool isTestImport = otherFile.data(ctx).isPackagedTest();
+                e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
+                    e.addAutocorrect(std::move(exp.value()));
+                }
 
                 if (!db.errorHint().empty()) {
                     e.addErrorNote("{}", db.errorHint());
                 }
+            }
+        } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
+            // We used a symbol from a `test_import` in a non-test context
+            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
+                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
+                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                if (auto exp = this->package.addImport(ctx, pkg, false)) {
+                    e.addAutocorrect(std::move(exp.value()));
+                }
+                e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
 
