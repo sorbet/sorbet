@@ -207,14 +207,6 @@ bool NameRef::isTEnumName(const GlobalState &gs) const {
     return original.kind() == NameKind::UNIQUE && original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::TEnum;
 }
 
-bool NameRef::isPackagerName(const GlobalState &gs) const {
-    if (kind() != NameKind::CONSTANT) {
-        return false;
-    }
-    auto original = dataCnst(gs)->original;
-    return original.kind() == NameKind::UNIQUE && original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::Packager;
-}
-
 bool NameRef::isValidConstantName(const GlobalState &gs) const {
     switch (kind()) {
         case NameKind::UTF8:

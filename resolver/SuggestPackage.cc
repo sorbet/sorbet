@@ -22,7 +22,7 @@ public:
 // Add all name parts for a symbol to a vector, exclude internal names used by packager.
 void symbol2NameParts(core::Context ctx, core::SymbolRef symbol, vector<core::NameRef> &out) {
     ENFORCE(out.empty());
-    while (symbol.exists() && symbol != core::Symbols::root() && !symbol.name(ctx).isPackagerName(ctx)) {
+    while (symbol.exists() && symbol != core::Symbols::root()) {
         out.emplace_back(symbol.name(ctx));
         symbol = symbol.owner(ctx);
     }

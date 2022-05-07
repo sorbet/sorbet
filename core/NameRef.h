@@ -184,10 +184,6 @@ public:
     // before checking for UniqueNameKind::TEnum.
     bool isTEnumName(const GlobalState &gs) const;
 
-    // Convenience method to avoid forgeting to unwrap the first layer (NameKind::CONSTANT)
-    // before checking for UniqueNameKind::Packager.
-    bool isPackagerName(const GlobalState &gs) const;
-
     bool isValidConstantName(const GlobalState &gs) const;
 
     std::string_view shortName(const GlobalState &gs) const;
