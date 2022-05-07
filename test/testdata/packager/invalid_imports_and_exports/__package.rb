@@ -13,7 +13,7 @@ class A < PackageSpec
        # ^^^^^^ error: Argument to `import` must be a constant
        # ^^^^^^ error: Expected `T.class_of(PackageSpec)`
        #       ^ error: Not enough arguments
-  import REFERENCE # error: Cannot find package `REFERENCE`
+  import REFERENCE
        # ^^^^^^^^^ error: Unable to resolve constant `REFERENCE`
   # Despite the above, this import should work.
   import B

@@ -27,11 +27,9 @@ constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
-    if (!owner.exists() || owner == Symbols::root() || owner.name(gs).isPackagerName(gs) ||
-        owner == core::Symbols::PackageSpecRegistry()) {
+    if (!owner.exists() || owner == Symbols::root() || owner == core::Symbols::PackageSpecRegistry()) {
         return name.show(gs);
     }
-    ENFORCE(owner != core::Symbols::PackageSpecRegistry());
     return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
 } // namespace
@@ -563,6 +561,20 @@ MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef nam
     return Symbols::noMethod();
 }
 
+// Documented in SymbolRef.h
+bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
+    auto sym = *this;
+    while (sym.exists() && sym != core::Symbols::root()) {
+        if (sym == core::Symbols::PackageSpecRegistry()) {
+            return true;
+        }
+
+        sym = sym.data(gs)->owner;
+    }
+
+    return false;
+}
+
 namespace {
 MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrModuleRef owner, NameRef name,
                                                int maxDepth) {
@@ -732,9 +744,12 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
         best.distance = 1 + (currentName.size() / 2);
     }
 
+    bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+
     // Find the closest by following outer scopes
     {
         ClassOrModuleRef base = ref(gs);
+
         do {
             // follow outer scopes
 
@@ -763,6 +778,13 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                 for (auto member : scope.data(gs)->members()) {
                     if (member.first.kind() == NameKind::CONSTANT &&
                         member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
+                        if (onlySuggestPackageSpecs) {
+                            if (!member.second.isClassOrModule() ||
+                                !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                                continue;
+                            }
+                        }
+
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
@@ -807,32 +829,29 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
             yetToGoDeeper.pop_back();
             for (auto member : thisIter.data(gs)->members()) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
-                    (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 || member.first.isPackagerName(gs))) {
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
                     if (member.second.isClassOrModule() &&
                         member.second.asClassOrModuleRef().data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
-                    // A static-field inside a package file is an alias created by that packager.
-                    // Ignore these so that the search finds only actual definitions.
-                    if (member.second.isFieldOrStaticField() && member.second.loc(gs).file().exists() &&
-                        member.second.loc(gs).file().data(gs).isPackage()) {
-                        continue;
-                    }
-                    // Mangled packager names are not matched, but we do descend into them to search
-                    // deeper.
-                    if (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
-                        auto thisDistance = Levenstein::distance(
-                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        if (thisDistance <= globalBestDistance) {
-                            if (thisDistance < globalBestDistance) {
-                                globalBest.clear();
-                            }
-                            globalBestDistance = thisDistance;
-                            best.distance = thisDistance;
-                            best.symbol = member.second;
-                            best.name = member.first;
-                            globalBest.emplace_back(best);
+                    if (onlySuggestPackageSpecs) {
+                        if (!member.second.isClassOrModule() ||
+                            !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                            continue;
                         }
+                    }
+
+                    auto thisDistance = Levenstein::distance(
+                        currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
+                    if (thisDistance <= globalBestDistance) {
+                        if (thisDistance < globalBestDistance) {
+                            globalBest.clear();
+                        }
+                        globalBestDistance = thisDistance;
+                        best.distance = thisDistance;
+                        best.symbol = member.second;
+                        best.name = member.first;
+                        globalBest.emplace_back(best);
                     }
                     if (member.second.isClassOrModule()) {
                         yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());

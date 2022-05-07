@@ -10,7 +10,6 @@
 #include "core/core.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
-#include "resolver/SuggestPackage.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
@@ -696,11 +695,6 @@ private:
                 auto suggestScope = job.out->resolutionScopes->front();
                 if (suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() && suggestScope.isClassOrModule()) {
                     suggestionCount++;
-                    bool madePackageSuggestions =
-                        SuggestPackage::tryPackageCorrections(ctx, e, *job.out->resolutionScopes, original);
-                    if (madePackageSuggestions) {
-                        return;
-                    }
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
                     if (suggested.size() > 3) {
@@ -2540,17 +2534,6 @@ class ResolveTypeMembersAndFieldsWalk {
                         return;
                     }
                     continue;
-                } else {
-                    auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-                    auto packageName = package.asName(ctx);
-                    auto mangledName = packageName.lookupMangledPrivatePackageName(ctx.state);
-                    // if the mangled name doesn't exist, then this means probably there's no package named this
-                    if (!mangledName.exists()) {
-                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        }
-                        return;
-                    }
                 }
             }
 
