@@ -103,6 +103,24 @@ llvm::Value *CompilerState::idTableRef(std::string_view str) {
     return global;
 }
 
+llvm::Value *CompilerState::rubyStringTableRef(std::string_view str) {
+    auto it = this->rubyStringTable.map.find(str);
+
+    if (it != this->rubyStringTable.map.end()) {
+        return it->second.addrVar;
+    }
+
+    auto entry = this->insertIntoStringTable(str);
+    auto offset = static_cast<uint32_t>(this->rubyStringTable.map.size());
+    auto globalName = fmt::format("addr_rubystr_{}", str);
+    auto *type = llvm::Type::getInt64PtrTy(this->lctx);
+    auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
+    auto strSize = static_cast<uint32_t>(str.size());
+    this->rubyStringTable.map[str] = RubyStringTable::RubyStringTableEntry{offset, entry.offset, strSize, global};
+
+    return global;
+}
+
 void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module) {
     vector<pair<string_view, StringTable::StringTableEntry>> tableElements;
     tableElements.reserve(this->map.size());
