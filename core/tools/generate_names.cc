@@ -433,7 +433,6 @@ NameDef names[] = {
     {"import"},
     {"test_import"},
     {"export_", "export"},
-    {"export_for_test"},
     {"restrict_to_service"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},

@@ -105,20 +105,6 @@ enum class ImportType {
     Friend,
 };
 
-// There are 4 kinds of virtual modules inserted into the AST.
-// Private: suffixed with _Package_Private, it maps external imports of a package into its namespace.
-// PrivateTest: suffixed with _Package_Private, it maps external imports, exports and self-test exports of a package
-// into its
-//   test namespace.
-// Public: suffixed with _Package, it maps exports of a package into its publicly available namespace (this
-//   is used by other packages when they import this package).
-// PublicTest: suffixed with _Package, it maps exports of a package that are in the "Test::" namespace into its
-//   publicly available test namespace (this is used by other packages when they import this package).
-//
-// A package cannot access an external package's _Package_Private module, but a package's private module can access
-// an external package's public interface (which is the public _Package module).
-enum class ModuleType { Private, PrivateTest, Public, PublicTest };
-
 struct Import {
     PackageName name;
     ImportType type;
@@ -126,25 +112,18 @@ struct Import {
     Import(PackageName &&name, ImportType type) : name(std::move(name)), type(type) {}
 };
 
-enum class ExportType {
-    Public = 0,
-    PrivateTest = 1,
-};
-
 struct Export {
     FullyQualifiedName fqn;
-    ExportType type;
 
-    Export(FullyQualifiedName &&fqn, ExportType type) : fqn(move(fqn)), type(type) {}
+    explicit Export(FullyQualifiedName &&fqn) : fqn(move(fqn)) {}
 
     const vector<core::NameRef> &parts() const {
         return fqn.parts;
     }
 
     static bool lexCmp(const Export &a, const Export &b) {
-        // Lex sort by name. If they're equal ensure the `export` (type == Public) is less than
-        // `export_for_test` (type == PrivateTest)
-        return core::packages::PackageInfo::lexCmp(a.parts(), b.parts()) || (a.type < b.type && a.parts() == b.parts());
+        // Lex sort by name.
+        return core::packages::PackageInfo::lexCmp(a.parts(), b.parts());
     }
 };
 
@@ -295,8 +274,8 @@ public:
         return {suggestion};
     }
 
-    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef newExport,
-                                                    bool isPrivateTestExport) const {
+    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                    const core::SymbolRef newExport) const {
         auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
         if (!exports_.empty()) {
@@ -325,9 +304,8 @@ public:
         // now find the appropriate place for it, specifically by
         // finding the import that directly preceeds it, if any
         auto strName = newExport.show(gs);
-        core::AutocorrectSuggestion suggestion(
-            fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
-            {{insertionLoc, fmt::format("\n  {} {}", isPrivateTestExport ? "export_for_test" : "export", strName)}});
+        core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
+                                               {{insertionLoc, fmt::format("\n  export {}", strName)}});
         return {suggestion};
     }
 
@@ -342,18 +320,7 @@ public:
     vector<vector<core::NameRef>> exports() const {
         vector<vector<core::NameRef>> rv;
         for (auto &e : exports_) {
-            if (e.type == ExportType::Public) {
-                rv.emplace_back(e.fqn.parts);
-            }
-        }
-        return rv;
-    }
-    vector<vector<core::NameRef>> testExports() const {
-        vector<vector<core::NameRef>> rv;
-        for (auto &e : exports_) {
-            if (e.type == ExportType::PrivateTest) {
-                rv.emplace_back(e.fqn.parts);
-            }
+            rv.emplace_back(e.fqn.parts);
         }
         return rv;
     }
@@ -990,26 +957,9 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                exported.emplace_back(getFullyQualifiedName(ctx, target), ExportType::Public);
+                exported.emplace_back(getFullyQualifiedName(ctx, target));
                 auto &arg = send.getPosArg(0);
                 arg = prependRoot(std::move(arg));
-            }
-        }
-        if (send.fun == core::Names::export_for_test() && send.numPosArgs() == 1) {
-            // null indicates an invalid export.
-            if (auto target = verifyConstant(ctx, core::Names::export_for_test(), send.getPosArg(0))) {
-                auto fqn = getFullyQualifiedName(ctx, target);
-                ENFORCE(fqn.parts.size() > 0);
-                if (isTestNamespace(ctx.state, fqn.parts[0])) {
-                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidExportForTest)) {
-                        e.setHeader("Packages may not {} names in the `{}::` namespace", send.fun.toString(ctx),
-                                    fqn.parts[0].show(ctx));
-                    }
-                } else {
-                    exported.emplace_back(move(fqn), ExportType::PrivateTest);
-                    auto &arg = send.getPosArg(0);
-                    arg = prependRoot(std::move(arg));
-                }
             }
         }
 
@@ -1133,10 +1083,6 @@ struct PackageInfoFinder {
             LexNext upperBound(it->parts());
             auto longer = it + 1;
             for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (allowedExportPrefix(ctx, *it, *longer)) {
-                    continue;
-                }
-
                 if (auto e = ctx.beginError(longer->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                     if (it->parts() == longer->parts()) {
                         e.setHeader("Duplicate export of `{}`",
@@ -1165,20 +1111,11 @@ struct PackageInfoFinder {
         std::swap(exported, info->exports_);
     }
 
-    bool allowedExportPrefix(ContextType ctx, const Export &shorter, const Export &longer) {
-        // Permits:
-        //   export Foo::Bar::Baz
-        //   export_for_test Foo::Bar
-        return shorter.type == ExportType::PrivateTest && longer.type == ExportType::Public &&
-               shorter.fqn.loc.file() == longer.fqn.loc.file() && ctx.file == shorter.fqn.loc.file();
-    }
-
     bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
             case core::Names::test_import().rawId():
             case core::Names::export_().rawId():
-            case core::Names::export_for_test().rawId():
             case core::Names::restrict_to_service().rawId():
                 return true;
             default:

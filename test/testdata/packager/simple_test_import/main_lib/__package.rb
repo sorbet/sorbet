@@ -7,4 +7,6 @@ class Project::MainLib < PackageSpec
   test_import Project::TestOnly
 
   export_for_test Project::MainLib::Lib
+# ^^^^^^^^^^^^^^^ error: Method `export_for_test` does not exist
+  #               ^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
 end

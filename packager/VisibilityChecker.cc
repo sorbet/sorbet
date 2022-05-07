@@ -394,7 +394,7 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("Package `{}` does not export `{}`", pkg.show(ctx), lit.symbol.show(ctx));
-                if (auto exp = pkg.addExport(ctx, lit.symbol, false)) {
+                if (auto exp = pkg.addExport(ctx, lit.symbol)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
                 e.addErrorLine(lit.symbol.loc(ctx), "Defined here");

@@ -21,6 +21,8 @@ class Simpsons < PackageSpec
     #                ^      show-symbol: Simpsons::Family
 
     export_for_test Simpsons::Private
+  # ^^^^^^^^^^^^^^^ error: Method `export_for_test` does not exist
+    #               ^^^^^^^^^^^^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
     #                         ^^^^^^^ usage: s-private
     #                         ^       show-symbol: Simpsons::Private
 end
