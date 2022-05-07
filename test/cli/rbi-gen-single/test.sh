@@ -12,6 +12,7 @@ trap "rm -rf $rbis" EXIT
 echo "-- sanity-checking package with --stripe-packages"
 "$sorbet" --silence-dev-message \
   --stripe-packages \
+  --max-threads=0 \
   --dump-package-info="$rbis/package-info.json" \
   --extra-package-files-directory-prefix="${test_path}/other/" \
   "$test_path" 2>&1 || true
