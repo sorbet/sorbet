@@ -8,4 +8,12 @@ main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` i
     test_only/__package.rb:5: Defined here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
+
+main_lib/__package.rb:8: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
+     8 |  export_for_test Project::MainLib::Lib
+                          ^^^^^^^^^^^^^^^^^^^^^
+
+main_lib/__package.rb:8: Method `export_for_test` does not exist on `T.class_of(Project::MainLib)` https://srb.help/7003
+     8 |  export_for_test Project::MainLib::Lib
+          ^^^^^^^^^^^^^^^
+Errors: 3

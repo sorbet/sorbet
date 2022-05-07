@@ -26,7 +26,6 @@ public:
     virtual const std::vector<core::NameRef> &fullName() const = 0;
     virtual const std::vector<std::string> &pathPrefixes() const = 0;
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
-    virtual std::vector<std::vector<core::NameRef>> testExports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
@@ -40,8 +39,8 @@ public:
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  bool isTestImport) const = 0;
-    virtual std::optional<core::AutocorrectSuggestion>
-    addExport(const core::GlobalState &gs, const core::SymbolRef name, bool isPrivateTestExport) const = 0;
+    virtual std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                                 const core::SymbolRef name) const = 0;
 
     bool operator==(const PackageInfo &rhs) const;
 

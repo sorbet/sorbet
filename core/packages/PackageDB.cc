@@ -48,8 +48,8 @@ public:
         return nullopt;
     }
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef name,
-                                                         bool isPrivateTestExport) const {
+    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                         const core::SymbolRef name) const {
         return {};
     }
 
@@ -59,9 +59,6 @@ public:
     }
 
     std::vector<std::vector<core::NameRef>> exports() const {
-        return vector<vector<core::NameRef>>();
-    }
-    std::vector<std::vector<core::NameRef>> testExports() const {
         return vector<vector<core::NameRef>>();
     }
     std::vector<std::vector<core::NameRef>> imports() const {

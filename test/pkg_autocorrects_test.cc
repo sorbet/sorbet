@@ -242,30 +242,7 @@ TEST_CASE("Simple add export") {
 
     auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
-    auto addExport = package.addExport(gs, test.getConstantRef(gs, {"Opus", "MyPackage", "NewExport"}), false);
-    ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = addExport->applySingleEditForTesting(pkg_source);
-    CHECK_EQ(expected, replaced);
-}
-
-TEST_CASE("Simple add export_for_test") {
-    core::GlobalState gs(errorQueue);
-    gs.initEmpty();
-
-    string pkg_source = "class Opus::MyPackage < PackageSpec\n"
-                        "  export Opus::MyPackage::This\n"
-                        "end\n";
-
-    string expected = "class Opus::MyPackage < PackageSpec\n"
-                      "  export Opus::MyPackage::This\n"
-                      "  export_for_test Opus::MyPackage::NewExport\n"
-                      "end\n";
-
-    auto test = TestPackageFile::create(gs, "my_package/__package.rb", pkg_source);
-
-    auto &package = test.targetPackage(gs);
-    ENFORCE(package.exists());
-    auto addExport = package.addExport(gs, test.getConstantRef(gs, {"Opus", "MyPackage", "NewExport"}), true);
+    auto addExport = package.addExport(gs, test.getConstantRef(gs, {"Opus", "MyPackage", "NewExport"}));
     ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
     auto replaced = addExport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);

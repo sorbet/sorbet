@@ -1,1 +1,8 @@
-No errors! Great job.
+parent/__package.rb:6: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
+     6 |  export_for_test Parent
+                          ^^^^^^
+
+parent/__package.rb:6: Method `export_for_test` does not exist on `T.class_of(Parent)` https://srb.help/7003
+     6 |  export_for_test Parent
+          ^^^^^^^^^^^^^^^
+Errors: 2

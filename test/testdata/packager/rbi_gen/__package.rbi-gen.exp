@@ -290,11 +290,3 @@ end
 class Test::RBIGen::MyTest
 end
 
-# test/testdata/packager/rbi_gen/RBIGen_Package.test.private.package.rbi
-# typed: true
-
-class RBIGen::Sealed::TestChild < RBIGen::Sealed::Parent
-end
-class RBIGen::Private::PrivateClassForTests
-end
-

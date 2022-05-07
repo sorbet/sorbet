@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(::<root>::<C Opus>::<C Foo>::<C FooClass>)
 
-    <self>.export_for_test(::<root>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>)
+    <self>.export_for_test(<emptyTree>::<C Opus>::<C Foo>::<C Private>::<C ImplDetail>)
 
     <self>.export_for_test(<emptyTree>::<C Test>::<C Opus>::<C Foo>::<C FooTest>)
   end
@@ -143,7 +143,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(::<root>::<C Opus>::<C Util>::<C Nesting>::<C Public>)
 
-    <self>.export_for_test(::<root>::<C Opus>::<C Util>::<C Nesting>)
+    <self>.export_for_test(<emptyTree>::<C Opus>::<C Util>::<C Nesting>)
   end
 end
 # -- test/testdata/packager/export_for_test/util/util.rb --

@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.test_import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C TestOnly>)
 
-    <self>.export_for_test(::<root>::<C Project>::<C MainLib>::<C Lib>)
+    <self>.export_for_test(<emptyTree>::<C Project>::<C MainLib>::<C Lib>)
   end
 end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.rb --
