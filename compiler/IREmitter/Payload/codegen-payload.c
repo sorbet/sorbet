@@ -858,13 +858,6 @@ VALUE sorbet_cPtrToRubyString(const char *ptr, long length) {
 }
 
 SORBET_INLINE
-VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) {
-    VALUE ret = sorbet_vm_fstring_new(ptr, length);
-    rb_gc_register_mark_object(ret);
-    return ret;
-}
-
-SORBET_INLINE
 VALUE sorbet_cPtrToRubyRegexpFrozen(const char *ptr, long length, int options) {
     VALUE ret = rb_reg_new(ptr, length, options);
     rb_gc_register_mark_object(ret);
