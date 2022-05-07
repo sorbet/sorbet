@@ -42,6 +42,23 @@ struct IDTable {
     void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder);
 };
 
+struct RubyStringTable {
+    struct RubyStringTableEntry {
+        uint32_t offset;
+        uint32_t stringTableOffset = 0;
+        uint32_t stringLength = 0;
+        llvm::GlobalVariable *addrVar = nullptr;
+    };
+
+    UnorderedMap<std::string, RubyStringTableEntry> map;
+
+    void clear() {
+        this->map.clear();
+    }
+
+    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder);
+};
+
 // Like GlobalState, but for the Sorbet Compiler.
 class CompilerState {
 public:
