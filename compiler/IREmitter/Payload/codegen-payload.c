@@ -168,14 +168,21 @@ SORBET_ALIVE(void, sorbet_vm_define_method,
 SORBET_ALIVE(void, sorbet_vm_define_prop_getter,
              (VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq));
 
-// The layout of this struct is known to the compiler.
+// The layout of these structs is known to the compiler.
 struct IDDescriptor {
+    unsigned int offset;
+    unsigned int length;
+};
+
+struct RubyStringDescriptor {
     unsigned int offset;
     unsigned int length;
 };
 
 SORBET_ALIVE(void, sorbet_vm_intern_ids,
              (ID * idTable, struct IDDescriptor *idDescriptors, unsigned int numIDs, const char *stringTable));
+SORBET_ALIVE(void, sorbet_vm_init_string_table,
+             (VALUE * rubyStringTable, struct RubyStringDescriptor *descriptors, unsigned int numRubyStrings, const char *stringTable));
 
 SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
 SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_get,
