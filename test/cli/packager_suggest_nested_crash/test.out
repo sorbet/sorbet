@@ -1,44 +1,19 @@
-Exception::raise(): core/Symbols.cc:247 enforced condition this->exists() has failed: (no message provided)
-
-Backtrace:
-  #3 0xb17042 
-  #4 0x19841e2 sorbet::core::ClassOrModuleRef::data()
-  #5 0x1988d16 sorbet::core::SymbolRef::dealias()
-  #6 0x1398ab4 sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::constantResolutionFailed<>()
-  #7 0x138c9b9 sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::resolveConstants<>()
-  #8 0x1392815 sorbet::resolver::Resolver::run()
-  #9 0xee8c7b sorbet::realmain::pipeline::resolve()
-  #10 0xb09214 sorbet::realmain::realmain()
-  #11 0xb03ee2 main
-  #12 0x7fe755e670b3 __libc_start_main
-  #13 0xb03dee _start
-
-test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:4: `Project::ConsumerAuth::Data` was previously defined as a `module` https://srb.help/4012
-     4 |class Project::ConsumerAuth::Data
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/packager_suggest_nested_crash/consumer_auth/data/__package.rb:4: Previous definition
-     4 |class Project::ConsumerAuth::Data < PackageSpec
-     5 |  export Project::ConsumerAuth::Data::IdentifierStruct
-     6 |end
-
-test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:5: Redefining constant `Project::ConsumerAuth::Data::IdentifierStruct` https://srb.help/4012
-     5 |  class IdentifierStruct
-     6 |    puts(Project::ConsumerAuth::IdentifierType)
-     7 |  end
-    test/cli/packager_suggest_nested_crash/consumer_auth/data/__package.rb: Previous definition
-
 test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:4: Class or method definition must match enclosing package namespace `Test::Project::ConsumerAuth::Data` https://srb.help/3713
      4 |class Project::ConsumerAuth::Data
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/packager_suggest_nested_crash/consumer_auth/identity_type.rb:4: `Project::ConsumerAuth` was previously defined as a `module` https://srb.help/4012
-     4 |class Project::ConsumerAuth
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/packager_suggest_nested_crash/consumer_auth/__package.rb: Previous definition
+test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:6: No import provides `Project::ConsumerAuth::IdentifierType` https://srb.help/3718
+     6 |    puts(Project::ConsumerAuth::IdentifierType)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/packager_suggest_nested_crash/consumer_auth/data/__package.rb:4: Insert `test_import Project::ConsumerAuth`
+     4 |class Project::ConsumerAuth::Data < PackageSpec
+                                                       ^
+    test/cli/packager_suggest_nested_crash/consumer_auth/__package.rb:5: Defined here
+     5 |class Project::ConsumerAuth < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/packager_suggest_nested_crash/consumer_auth/identity_type.rb:4: Class or method definition must match enclosing package namespace `Test::Project::ConsumerAuth` https://srb.help/3713
      4 |class Project::ConsumerAuth
               ^^^^^^^^^^^^^^^^^^^^^
-
-???: Exception resolving (backtrace is above) https://srb.help/1001
-Errors: 6
+Errors: 3

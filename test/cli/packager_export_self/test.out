@@ -1,17 +1,19 @@
-Exception::raise(): core/Symbols.cc:247 enforced condition this->exists() has failed: (no message provided)
+test/cli/packager_export_self/__package.rb:3: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
+     3 |  export_for_test Opus::Deploy
+                          ^^^^^^^^^^^^
 
-Backtrace:
-  #3 0xb17042 
-  #4 0x19841e2 sorbet::core::ClassOrModuleRef::data()
-  #5 0x1988d16 sorbet::core::SymbolRef::dealias()
-  #6 0x1398ab4 sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::constantResolutionFailed<>()
-  #7 0x138c9b9 sorbet::resolver::(anonymous namespace)::ResolveConstantsWalk::resolveConstants<>()
-  #8 0x1392815 sorbet::resolver::Resolver::run()
-  #9 0xee8c7b sorbet::realmain::pipeline::resolve()
-  #10 0xb09214 sorbet::realmain::realmain()
-  #11 0xb03ee2 main
-  #12 0x7f6744ae10b3 __libc_start_main
-  #13 0xb03dee _start
+test/cli/packager_export_self/__package.rb:3: Unable to resolve constant `Opus` https://srb.help/5002
+     3 |  export_for_test Opus::Deploy
+                          ^^^^
+  Did you mean `Opus`? Use `-a` to autocorrect
+    test/cli/packager_export_self/__package.rb:3: Replace with `Opus`
+     3 |  export_for_test Opus::Deploy
+                          ^^^^
+    test/cli/packager_export_self/__package.rb:2: `Opus` defined here
+     2 |class Opus::Deploy < PackageSpec
+              ^^^^
 
-???: Exception resolving (backtrace is above) https://srb.help/1001
-Errors: 1
+test/cli/packager_export_self/__package.rb:3: Method `export_for_test` does not exist on `T.class_of(Opus::Deploy)` https://srb.help/7003
+     3 |  export_for_test Opus::Deploy
+          ^^^^^^^^^^^^^^^
+Errors: 3
