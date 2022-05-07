@@ -24,7 +24,8 @@ CompilerState::CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lct
                              StringTable &stringTable, IDTable &idTable, RubyStringTable &rubyStringTable)
     : gs(gs), lctx(lctx), module(module), allocRubyIdsEntry(allocRubyIdsEntry),
       globalConstructorsEntry(globalConstructorsEntry), debug(debug), compileUnit(compileUnit),
-      functionEntryInitializers(nullptr), file(file), stringTable(stringTable), idTable(idTable), rubyStringTable(rubyStringTable) {}
+      functionEntryInitializers(nullptr), file(file), stringTable(stringTable), idTable(idTable),
+      rubyStringTable(rubyStringTable) {}
 
 llvm::StructType *CompilerState::getValueType() {
     auto intType = llvm::Type::getInt64Ty(lctx);
@@ -220,7 +221,8 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
                               builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
 }
 
-void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder) {
+void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module,
+                                            llvm::IRBuilderBase &builder) {
     vector<pair<string_view, RubyStringTable::RubyStringTableEntry>> tableElements;
     tableElements.reserve(this->map.size());
     absl::c_copy(this->map, std::back_inserter(tableElements));

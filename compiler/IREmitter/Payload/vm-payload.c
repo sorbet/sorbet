@@ -557,7 +557,8 @@ void sorbet_vm_intern_ids(ID *idTable, struct IDDescriptor *idDescriptors, size_
 extern VALUE sorbet_vm_fstring_new(const char *ptr, long len);
 extern void rb_gc_register_address(VALUE *addr);
 
-void sorbet_vm_init_string_table(VALUE *rubyStringTable, struct RubyStringDescriptor *descriptors, size_t numRubyStrings, const char *stringTable) {
+void sorbet_vm_init_string_table(VALUE *rubyStringTable, struct RubyStringDescriptor *descriptors,
+                                 size_t numRubyStrings, const char *stringTable) {
     for (size_t i = 0; i < numRubyStrings; ++i) {
         const struct RubyStringDescriptor *desc = &descriptors[i];
         rubyStringTable[i] = sorbet_vm_fstring_new(&stringTable[desc->offset], desc->length);

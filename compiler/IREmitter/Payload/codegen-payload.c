@@ -182,7 +182,8 @@ struct RubyStringDescriptor {
 SORBET_ALIVE(void, sorbet_vm_intern_ids,
              (ID * idTable, struct IDDescriptor *idDescriptors, unsigned int numIDs, const char *stringTable));
 SORBET_ALIVE(void, sorbet_vm_init_string_table,
-             (VALUE * rubyStringTable, struct RubyStringDescriptor *descriptors, unsigned int numRubyStrings, const char *stringTable));
+             (VALUE * rubyStringTable, struct RubyStringDescriptor *descriptors, unsigned int numRubyStrings,
+              const char *stringTable));
 
 SORBET_ALIVE(VALUE, sorbet_maybeAllocateObjectFastPath, (VALUE recv, struct FunctionInlineCache *newCache));
 SORBET_ALIVE(VALUE, sorbet_vm_instance_variable_get,
