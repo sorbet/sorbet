@@ -220,6 +220,72 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
                               builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
 }
 
+void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder) {
+    vector<pair<string_view, RubyStringTable::RubyStringTableEntry>> tableElements;
+    tableElements.reserve(this->map.size());
+    absl::c_copy(this->map, std::back_inserter(tableElements));
+    fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
+
+    llvm::GlobalVariable *table;
+
+    {
+        auto *arrayType = llvm::ArrayType::get(llvm::Type::getInt64Ty(lctx), this->map.size());
+        const auto isConstant = false;
+        auto *initializer = llvm::ConstantAggregateZero::get(arrayType);
+        table = new llvm::GlobalVariable(module, arrayType, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                         initializer, "sorbet_moduleRubyStringTable");
+        table->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+        table->setAlignment(llvm::MaybeAlign(8));
+    }
+
+    // Fill in all the addr vars that we indirected through.
+    for (auto &elem : tableElements) {
+        auto *var = elem.second.addrVar;
+        auto *zero = llvm::ConstantInt::get(lctx, llvm::APInt(64, 0));
+        auto *index = llvm::ConstantInt::get(lctx, llvm::APInt(64, elem.second.offset));
+        llvm::Constant *indices[] = {zero, index};
+        auto *initializer = llvm::ConstantExpr::getInBoundsGetElementPtr(table->getValueType(), table, indices);
+        var->setInitializer(initializer);
+        var->setConstant(true);
+    }
+
+    // Descriptors for the runtime initialization of members of the above.
+    // These types are known to the runtime.
+    auto *func = module.getFunction("sorbet_vm_init_string_table");
+    ENFORCE(func != nullptr);
+    auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
+    auto *descLengthTy = descOffsetTy;
+    auto *structType = llvm::dyn_cast<llvm::StructType>(
+        func->getType()->getElementType()->getFunctionParamType(1)->getPointerElementType());
+    ENFORCE(structType != nullptr);
+    auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
+    const auto isConstant = true;
+    std::vector<llvm::Constant *> descsConstants;
+    descsConstants.reserve(this->map.size());
+
+    for (auto &elem : tableElements) {
+        auto *offset = llvm::ConstantInt::get(descOffsetTy, elem.second.stringTableOffset);
+        auto *length = llvm::ConstantInt::get(descLengthTy, elem.second.stringLength);
+        auto *desc = llvm::ConstantStruct::get(structType, offset, length);
+        descsConstants.push_back(desc);
+    }
+
+    auto *initializer = llvm::ConstantArray::get(arrayType, descsConstants);
+    auto *descTable = new llvm::GlobalVariable(module, arrayType, isConstant, llvm::GlobalVariable::InternalLinkage,
+                                               initializer, "sorbet_moduleRubyStringDescriptors");
+    descTable->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+    descTable->setAlignment(llvm::MaybeAlign(8));
+
+    // Call into the runtime to initialize everything.
+    const auto allowInternal = true;
+    auto *stringTable = module.getGlobalVariable("sorbet_moduleStringTable", allowInternal);
+    ENFORCE(stringTable != nullptr);
+    builder.CreateCall(func, {builder.CreateConstGEP2_32(nullptr, table, 0, 0),
+                              builder.CreateConstGEP2_32(nullptr, descTable, 0, 0),
+                              llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), this->map.size()),
+                              builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
+}
+
 llvm::FunctionType *CompilerState::getRubyFFIType() {
     llvm::Type *args[] = {
         llvm::Type::getInt32Ty(lctx),    // arg count
