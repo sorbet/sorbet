@@ -12,9 +12,13 @@ ab/ab.rb:3: `A::B` was previously defined as a `class` https://srb.help/4012
      4 |  class B; end
           ^^^^^^^
 
-a/a.rb:4: Class or method definition must match enclosing package namespace `A` https://srb.help/3713
+a/a.rb:4: File belongs to package `A` but defines a constant that does not match this namespace https://srb.help/3713
      4 |  class B; end
                 ^
-  Note:
-    Constant `A::B` should either be defined in directory `./a/` to match its package, or re-namespaced to be within `A`
+    a/__package.rb:3: Enclosing package declared here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+    ab/__package.rb:3: Must belong to this package, given constant name `A::B`
+     3 |class A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 3

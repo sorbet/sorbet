@@ -717,7 +717,6 @@ public:
         }
 
         pushConstantLit(ctx, constantLit);
-        auto &pkgName = requiredNamespace(ctx);
 
         if (rootConsts == 0) {
             if (hasParentClass(classDef)) {
@@ -728,9 +727,7 @@ public:
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(constantLit->loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                    e.setHeader("Class or method definition must match enclosing package namespace `{}`",
-                                fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    addPackageSuggestion(ctx, e);
+                    definitionPackageMismatch(ctx, e);
                 }
             }
         }
@@ -773,15 +770,12 @@ public:
 
         if (lhs != nullptr && rootConsts == 0) {
             pushConstantLit(ctx, lhs);
-            auto &pkgName = requiredNamespace(ctx);
 
             if (rootConsts == 0 && namespaces.packageForNamespace(ctx) != pkg.mangledName()) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                    e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
-                                fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    addPackageSuggestion(ctx, e);
+                    definitionPackageMismatch(ctx, e);
                 }
             }
 
@@ -844,7 +838,6 @@ public:
                 e.setHeader(
                     "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
                     fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
-                addPackageSuggestion(ctx, e);
             }
         }
     }
@@ -901,13 +894,26 @@ private:
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
     }
 
-    void addPackageSuggestion(core::Context ctx, core::ErrorBuilder &e) const {
-        auto cnstPkg = namespaces.packageForNamespace(ctx);
-        if (cnstPkg.exists()) {
-            e.addErrorNote("Constant `{}` should either be defined in directory `{}` to match its package, or "
-                           "re-namespaced to be within `{}`",
-                           absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(ctx)),
-                           pkg.pathPrefixes().front(), absl::StrJoin(requiredNamespace(ctx), "::", NameFormatter(ctx)));
+    void definitionPackageMismatch(core::Context ctx, core::ErrorBuilder &e) const {
+        auto requiredName = fmt::map_join(requiredNamespace(ctx), "::", [&](const auto &nr) { return nr.show(ctx); });
+
+        if (useTestNamespace) {
+            e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(ctx),
+                        requiredName);
+            // TODO: If the only thing missing is a `Test::` prefix (e.g., if this were not a test
+            // file there would not have been an error), then we could suggest an autocorrect.
+        } else {
+            e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
+                        requiredName);
+        }
+
+        e.addErrorLine(pkg.declLoc(), "Enclosing package declared here");
+
+        auto reqMangledName = namespaces.packageForNamespace(ctx);
+        if (reqMangledName.exists()) {
+            auto &reqPkg = ctx.state.packageDB().getPackageInfo(reqMangledName);
+            auto givenNamespace = absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(ctx));
+            e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`", givenNamespace);
         }
     }
 };
@@ -1214,11 +1220,9 @@ struct PackageInfoFinder {
     }
 };
 
-// Sanity checks package files, mutates arguments to export / export_methods to point to item in namespace,
-// builds up the expression injected into packages that import the package, and codegens the <PackagedMethods>  module.
 template <typename ContextType>
-unique_ptr<PackageInfoImpl> getPackageInfo(ContextType ctx, ast::ParsedFile &package,
-                                           const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
+unique_ptr<PackageInfoImpl> runPackageInfoFinder(ContextType ctx, ast::ParsedFile &package,
+                                                 const vector<std::string> &extraPackageFilesDirectoryPrefixes) {
     static_assert(is_same_v<ContextType, core::Context> || is_same_v<ContextType, core::MutableContext>);
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).isPackage());
@@ -1304,7 +1308,7 @@ template <typename StateType> vector<ast::ParsedFile> rewriteFilesFast(StateType
             {
                 if constexpr (isMutableStateType) {
                     core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                    getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+                    runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
                 } else {
                     if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
                         // When we're running with an immutable GlobalState, we can't setIsPackage(false)
@@ -1312,7 +1316,7 @@ template <typename StateType> vector<ast::ParsedFile> rewriteFilesFast(StateType
                         continue;
                     }
                     core::Context ctx(gs, core::Symbols::root(), file.file);
-                    getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+                    runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
                 }
             }
             // Re-write imports and exports:
@@ -1355,7 +1359,7 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
             }
 
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = getPackageInfo(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
+            auto pkg = runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryPrefixes());
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
