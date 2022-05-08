@@ -9,12 +9,12 @@
 namespace sorbet::compiler {
 
 struct StringTable {
-    struct StringTableEntry {
+    struct Entry {
         uint32_t offset = 0;
         llvm::GlobalVariable *addrVar = nullptr;
     };
 
-    UnorderedMap<std::string, StringTableEntry> map;
+    UnorderedMap<std::string, Entry> map;
     uint32_t size = 0;
 
     void clear() {
@@ -26,14 +26,14 @@ struct StringTable {
 };
 
 struct IDTable {
-    struct IDTableEntry {
+    struct Entry {
         uint32_t offset;
         uint32_t stringTableOffset = 0;
         uint32_t stringLength = 0;
         llvm::GlobalVariable *addrVar = nullptr;
     };
 
-    UnorderedMap<std::string, IDTableEntry> map;
+    UnorderedMap<std::string, Entry> map;
 
     void clear() {
         this->map.clear();
@@ -43,14 +43,14 @@ struct IDTable {
 };
 
 struct RubyStringTable {
-    struct RubyStringTableEntry {
+    struct Entry {
         uint32_t offset;
         uint32_t stringTableOffset = 0;
         uint32_t stringLength = 0;
         llvm::GlobalVariable *addrVar = nullptr;
     };
 
-    UnorderedMap<std::string, RubyStringTableEntry> map;
+    UnorderedMap<std::string, Entry> map;
 
     void clear() {
         this->map.clear();
@@ -90,7 +90,7 @@ public:
     RubyStringTable &rubyStringTable;
 
 private:
-    StringTable::StringTableEntry insertIntoStringTable(std::string_view str);
+    StringTable::Entry insertIntoStringTable(std::string_view str);
 
 public:
     llvm::Value *stringTableRef(std::string_view str);
