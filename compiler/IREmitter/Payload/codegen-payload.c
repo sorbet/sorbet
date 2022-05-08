@@ -46,8 +46,7 @@ struct SorbetLineNumberInfo {
 // thinking that they will be used outside of this compilation unit (and serves as a
 // market of "constants we want to be available for the compiler to use").  Then
 // post-processing fixes them up to be as if they were originally declared `static`.
-#define SORBET_CONSTANT(type, name, value) \
-    const type __attribute__((visibility("hidden"))) name = value;
+#define SORBET_CONSTANT(type, name, value) const type __attribute__((visibility("hidden"))) name = value;
 
 // Define a function that uses a name, keeping it in scope. The payload post-processing step will detect these functions
 // and keep them as externally visible, which will allow functions used with this macro to avoid being garbage collected

@@ -87,7 +87,8 @@ void markRubyConstants(Module &module) {
         }
 
         // See the definition of `SORBET_CONSTANT` in the codegen payload.
-        if (name.startswith("sorbet_") && cnst.getVisibility() == llvm::GlobalValue::VisibilityTypes::HiddenVisibility) {
+        if (name.startswith("sorbet_") &&
+            cnst.getVisibility() == llvm::GlobalValue::VisibilityTypes::HiddenVisibility) {
             cnst.setVisibility(llvm::GlobalValue::VisibilityTypes::DefaultVisibility);
             cnst.setLinkage(llvm::GlobalVariable::LinkageTypes::InternalLinkage);
         }
