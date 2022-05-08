@@ -2774,35 +2774,12 @@ VALUE sorbet_callIntrinsicInlineBlock_noBreak(VALUE (*body)(VALUE), VALUE recv, 
     return body((VALUE)&env);
 }
 
-SORBET_INLINE
-unsigned int sorbet_vmCallKwarg() {
-    return VM_CALL_KWARG;
-}
-
-SORBET_INLINE
-unsigned int sorbet_vmCallArgsSimple() {
-    return VM_CALL_ARGS_SIMPLE;
-}
-
-SORBET_INLINE
-unsigned int sorbet_vmCallArgsSplat() {
-    return VM_CALL_ARGS_SPLAT;
-}
-
-SORBET_INLINE
-unsigned int sorbet_vmCallKwSplat() {
-    return VM_CALL_KW_SPLAT;
-}
-
-SORBET_INLINE
-unsigned int sorbet_vmCallFCall() {
-    return VM_CALL_FCALL;
-}
-
-SORBET_INLINE
-unsigned int sorbet_vmCallArgsBlockarg() {
-    return VM_CALL_ARGS_BLOCKARG;
-}
+SORBET_CONSTANT(unsigned int, sorbet_vmCallKwarg, VM_CALL_KWARG);
+SORBET_CONSTANT(unsigned int, sorbet_vmCallArgsSimple, VM_CALL_ARGS_SIMPLE);
+SORBET_CONSTANT(unsigned int, sorbet_vmCallArgsSplat, VM_CALL_ARGS_SPLAT);
+SORBET_CONSTANT(unsigned int, sorbet_vmCallKwSplat, VM_CALL_KW_SPLAT);
+SORBET_CONSTANT(unsigned int, sorbet_vmCallFCall, VM_CALL_FCALL);
+SORBET_CONSTANT(unsigned int, sorbet_vmCallArgsBlockarg, VM_CALL_ARGS_BLOCKARG);
 
 // static struct rb_kwarg_call_data test_cd = {0};
 

@@ -495,7 +495,7 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
 llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &builder) {
     static struct {
         bool CallCacheFlags::*field;
-        string_view functionName;
+        string_view variableName;
         llvm::StringRef flagName;
     } flags[] = {
         {&CallCacheFlags::args_simple, "sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"},
@@ -509,7 +509,11 @@ llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build
     llvm::Value *acc = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
     for (auto &flag : flags) {
         if (this->*flag.field) {
-            auto *flagVal = builder.CreateCall(cs.getFunction(flag.functionName), {}, flag.flagName);
+            const bool allowInternal = true;
+            auto *global = cs.module->getGlobalVariable(flag.variableName, allowInternal);
+            ENFORCE(global != nullptr);
+            ENFORCE(global->hasInitializer());
+            auto *flagVal = global->getInitializer();
             acc = builder.CreateBinOp(llvm::Instruction::Or, acc, flagVal);
         }
     }
