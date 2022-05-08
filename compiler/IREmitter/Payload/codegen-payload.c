@@ -44,7 +44,7 @@ struct SorbetLineNumberInfo {
 // can't declare them `static` in this file because LLVM will see that they are unused
 // and delete them.  So we declare them hidden, via this macro, which tricks LLVM into
 // thinking that they will be used outside of this compilation unit (and serves as a
-// market of "constants we want to be available for the compiler to use").  Then
+// marker of "constants we want to be available for the compiler to use").  Then
 // post-processing fixes them up to be as if they were originally declared `static`.
 #define SORBET_CONSTANT(type, name, value) const type __attribute__((visibility("hidden"))) name = value;
 
