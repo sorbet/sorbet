@@ -394,71 +394,71 @@ define void @Init_all_arguments() local_unnamed_addr #8 {
 entry:
   %positional_table.i = alloca i64, i32 4, align 8, !dbg !37
   %keyword_table.i = alloca i64, i32 3, align 8, !dbg !37
-  %locals.i164.i = alloca i64, i32 0, align 8
+  %locals.i122.i = alloca i64, i32 0, align 8
   %locals.i.i = alloca i64, align 8
   %keywords.i = alloca i64, align 8, !dbg !39
-  %keywords4.i = alloca i64, align 8, !dbg !40
-  %keywords10.i = alloca i64, align 8, !dbg !41
-  %keywords16.i = alloca i64, align 8, !dbg !42
-  %keywords22.i = alloca i64, align 8, !dbg !43
-  %keywords28.i = alloca i64, align 8, !dbg !44
-  %keywords34.i = alloca i64, align 8, !dbg !45
-  %keywords40.i = alloca i64, i32 2, align 8, !dbg !46
-  %keywords47.i = alloca i64, i32 2, align 8, !dbg !47
-  %keywords55.i = alloca i64, i32 2, align 8, !dbg !48
-  %keywords63.i = alloca i64, i32 2, align 8, !dbg !49
-  %keywords71.i = alloca i64, i32 2, align 8, !dbg !50
-  %keywords79.i = alloca i64, i32 2, align 8, !dbg !51
-  %keywords87.i = alloca i64, i32 2, align 8, !dbg !52
-  %keywords95.i = alloca i64, i32 3, align 8, !dbg !53
-  %keywords104.i = alloca i64, i32 3, align 8, !dbg !54
-  %keywords114.i = alloca i64, i32 3, align 8, !dbg !55
-  %keywords124.i = alloca i64, i32 3, align 8, !dbg !56
-  %keywords134.i = alloca i64, i32 3, align 8, !dbg !57
-  %keywords144.i = alloca i64, i32 3, align 8, !dbg !58
-  %keywords154.i = alloca i64, i32 3, align 8, !dbg !59
+  %keywords2.i = alloca i64, align 8, !dbg !40
+  %keywords6.i = alloca i64, align 8, !dbg !41
+  %keywords10.i = alloca i64, align 8, !dbg !42
+  %keywords14.i = alloca i64, align 8, !dbg !43
+  %keywords18.i = alloca i64, align 8, !dbg !44
+  %keywords22.i = alloca i64, align 8, !dbg !45
+  %keywords26.i = alloca i64, i32 2, align 8, !dbg !46
+  %keywords31.i = alloca i64, i32 2, align 8, !dbg !47
+  %keywords37.i = alloca i64, i32 2, align 8, !dbg !48
+  %keywords43.i = alloca i64, i32 2, align 8, !dbg !49
+  %keywords49.i = alloca i64, i32 2, align 8, !dbg !50
+  %keywords55.i = alloca i64, i32 2, align 8, !dbg !51
+  %keywords61.i = alloca i64, i32 2, align 8, !dbg !52
+  %keywords67.i = alloca i64, i32 3, align 8, !dbg !53
+  %keywords74.i = alloca i64, i32 3, align 8, !dbg !54
+  %keywords82.i = alloca i64, i32 3, align 8, !dbg !55
+  %keywords90.i = alloca i64, i32 3, align 8, !dbg !56
+  %keywords98.i = alloca i64, i32 3, align 8, !dbg !57
+  %keywords106.i = alloca i64, i32 3, align 8, !dbg !58
+  %keywords114.i = alloca i64, i32 3, align 8, !dbg !59
   %realpath = tail call i64 @sorbet_readRealpath()
   %0 = bitcast i64* %keywords.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %0)
-  %1 = bitcast i64* %keywords4.i to i8*
+  %1 = bitcast i64* %keywords2.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %1)
-  %2 = bitcast i64* %keywords10.i to i8*
+  %2 = bitcast i64* %keywords6.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %2)
-  %3 = bitcast i64* %keywords16.i to i8*
+  %3 = bitcast i64* %keywords10.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %3)
-  %4 = bitcast i64* %keywords22.i to i8*
+  %4 = bitcast i64* %keywords14.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %4)
-  %5 = bitcast i64* %keywords28.i to i8*
+  %5 = bitcast i64* %keywords18.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %5)
-  %6 = bitcast i64* %keywords34.i to i8*
+  %6 = bitcast i64* %keywords22.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %6)
-  %7 = bitcast i64* %keywords40.i to i8*
+  %7 = bitcast i64* %keywords26.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %7)
-  %8 = bitcast i64* %keywords47.i to i8*
+  %8 = bitcast i64* %keywords31.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %8)
-  %9 = bitcast i64* %keywords55.i to i8*
+  %9 = bitcast i64* %keywords37.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %9)
-  %10 = bitcast i64* %keywords63.i to i8*
+  %10 = bitcast i64* %keywords43.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %10)
-  %11 = bitcast i64* %keywords71.i to i8*
+  %11 = bitcast i64* %keywords49.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %11)
-  %12 = bitcast i64* %keywords79.i to i8*
+  %12 = bitcast i64* %keywords55.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %12)
-  %13 = bitcast i64* %keywords87.i to i8*
+  %13 = bitcast i64* %keywords61.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 16, i8* nonnull %13)
-  %14 = bitcast i64* %keywords95.i to i8*
+  %14 = bitcast i64* %keywords67.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %14)
-  %15 = bitcast i64* %keywords104.i to i8*
+  %15 = bitcast i64* %keywords74.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %15)
-  %16 = bitcast i64* %keywords114.i to i8*
+  %16 = bitcast i64* %keywords82.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %16)
-  %17 = bitcast i64* %keywords124.i to i8*
+  %17 = bitcast i64* %keywords90.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %17)
-  %18 = bitcast i64* %keywords134.i to i8*
+  %18 = bitcast i64* %keywords98.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %18)
-  %19 = bitcast i64* %keywords144.i to i8*
+  %19 = bitcast i64* %keywords106.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %19)
-  %20 = bitcast i64* %keywords154.i to i8*
+  %20 = bitcast i64* %keywords114.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 24, i8* nonnull %20)
   tail call void @sorbet_vm_intern_ids(i64* noundef getelementptr inbounds ([14 x i64], [14 x i64]* @sorbet_moduleIDTable, i32 0, i32 0), %struct.rb_code_position_struct* noundef getelementptr inbounds ([14 x %struct.rb_code_position_struct], [14 x %struct.rb_code_position_struct]* @sorbet_moduleIDDescriptors, i32 0, i32 0), i32 noundef 14, i8* noundef getelementptr inbounds ([138 x i8], [138 x i8]* @sorbet_moduleStringTable, i32 0, i32 0))
   tail call void @sorbet_vm_init_string_table(i64* noundef getelementptr inbounds ([3 x i64], [3 x i64]* @sorbet_moduleRubyStringTable, i32 0, i32 0), %struct.rb_code_position_struct* noundef getelementptr inbounds ([3 x %struct.rb_code_position_struct], [3 x %struct.rb_code_position_struct]* @sorbet_moduleRubyStringDescriptors, i32 0, i32 0), i32 noundef 3, i8* noundef getelementptr inbounds ([138 x i8], [138 x i8]* @sorbet_moduleStringTable, i32 0, i32 0))
@@ -479,98 +479,98 @@ entry:
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts.i, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !36
   %"rubyId_<top (required)>.i.i" = load i64, i64* getelementptr inbounds ([14 x i64], [14 x i64]* @sorbet_moduleIDTable, i64 0, i64 7), align 8, !invariant.load !5
   %"rubyStr_<top (required)>.i.i" = load i64, i64* getelementptr inbounds ([3 x i64], [3 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 2), align 8, !invariant.load !5
-  %23 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/all_arguments.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 0, i32 noundef 4, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i164.i, i32 noundef 0, i32 noundef 11)
+  %23 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/all_arguments.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 0, i32 noundef 4, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i122.i, i32 noundef 0, i32 noundef 11)
   store %struct.rb_iseq_struct* %23, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.17<static-init>$153", align 8
   %rubyId_d.i = load i64, i64* getelementptr inbounds ([14 x i64], [14 x i64]* @sorbet_moduleIDTable, i64 0, i64 2), align 8, !dbg !39, !invariant.load !5
   %24 = call i64 @rb_id2sym(i64 %rubyId_d.i) #13, !dbg !39
   store i64 %24, i64* %keywords.i, align 8, !dbg !39
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 8, i32 noundef 1, i64* noundef nonnull align 8 %keywords.i), !dbg !39
-  store i64 %24, i64* %keywords4.i, align 8, !dbg !40
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.1, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 7, i32 noundef 1, i64* noundef nonnull align 8 %keywords4.i), !dbg !40
-  store i64 %24, i64* %keywords10.i, align 8, !dbg !41
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.2, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 6, i32 noundef 1, i64* noundef nonnull align 8 %keywords10.i), !dbg !41
-  store i64 %24, i64* %keywords16.i, align 8, !dbg !42
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.3, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 5, i32 noundef 1, i64* noundef nonnull align 8 %keywords16.i), !dbg !42
-  store i64 %24, i64* %keywords22.i, align 8, !dbg !43
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.4, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 4, i32 noundef 1, i64* noundef nonnull align 8 %keywords22.i), !dbg !43
-  store i64 %24, i64* %keywords28.i, align 8, !dbg !44
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.5, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 3, i32 noundef 1, i64* noundef nonnull align 8 %keywords28.i), !dbg !44
-  store i64 %24, i64* %keywords34.i, align 8, !dbg !45
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.6, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 2, i32 noundef 1, i64* noundef nonnull align 8 %keywords34.i), !dbg !45
-  store i64 %24, i64* %keywords40.i, align 8, !dbg !46
+  store i64 %24, i64* %keywords2.i, align 8, !dbg !40
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.1, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 7, i32 noundef 1, i64* noundef nonnull align 8 %keywords2.i), !dbg !40
+  store i64 %24, i64* %keywords6.i, align 8, !dbg !41
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.2, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 6, i32 noundef 1, i64* noundef nonnull align 8 %keywords6.i), !dbg !41
+  store i64 %24, i64* %keywords10.i, align 8, !dbg !42
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.3, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 5, i32 noundef 1, i64* noundef nonnull align 8 %keywords10.i), !dbg !42
+  store i64 %24, i64* %keywords14.i, align 8, !dbg !43
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.4, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 4, i32 noundef 1, i64* noundef nonnull align 8 %keywords14.i), !dbg !43
+  store i64 %24, i64* %keywords18.i, align 8, !dbg !44
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.5, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 3, i32 noundef 1, i64* noundef nonnull align 8 %keywords18.i), !dbg !44
+  store i64 %24, i64* %keywords22.i, align 8, !dbg !45
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.6, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 2, i32 noundef 1, i64* noundef nonnull align 8 %keywords22.i), !dbg !45
+  store i64 %24, i64* %keywords26.i, align 8, !dbg !46
   %rubyId_e.i = load i64, i64* getelementptr inbounds ([14 x i64], [14 x i64]* @sorbet_moduleIDTable, i64 0, i64 3), align 8, !dbg !46, !invariant.load !5
   %25 = call i64 @rb_id2sym(i64 %rubyId_e.i) #13, !dbg !46
-  %26 = getelementptr i64, i64* %keywords40.i, i32 1, !dbg !46
+  %26 = getelementptr i64, i64* %keywords26.i, i32 1, !dbg !46
   store i64 %25, i64* %26, align 8, !dbg !46
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.7, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 9, i32 noundef 2, i64* noundef nonnull align 8 %keywords40.i), !dbg !46
-  store i64 %24, i64* %keywords47.i, align 8, !dbg !47
-  %27 = getelementptr i64, i64* %keywords47.i, i32 1, !dbg !47
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.7, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 9, i32 noundef 2, i64* noundef nonnull align 8 %keywords26.i), !dbg !46
+  store i64 %24, i64* %keywords31.i, align 8, !dbg !47
+  %27 = getelementptr i64, i64* %keywords31.i, i32 1, !dbg !47
   store i64 %25, i64* %27, align 8, !dbg !47
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.8, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 8, i32 noundef 2, i64* noundef nonnull align 8 %keywords47.i), !dbg !47
-  store i64 %24, i64* %keywords55.i, align 8, !dbg !48
-  %28 = getelementptr i64, i64* %keywords55.i, i32 1, !dbg !48
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.8, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 8, i32 noundef 2, i64* noundef nonnull align 8 %keywords31.i), !dbg !47
+  store i64 %24, i64* %keywords37.i, align 8, !dbg !48
+  %28 = getelementptr i64, i64* %keywords37.i, i32 1, !dbg !48
   store i64 %25, i64* %28, align 8, !dbg !48
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.9, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 7, i32 noundef 2, i64* noundef nonnull align 8 %keywords55.i), !dbg !48
-  store i64 %24, i64* %keywords63.i, align 8, !dbg !49
-  %29 = getelementptr i64, i64* %keywords63.i, i32 1, !dbg !49
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.9, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 7, i32 noundef 2, i64* noundef nonnull align 8 %keywords37.i), !dbg !48
+  store i64 %24, i64* %keywords43.i, align 8, !dbg !49
+  %29 = getelementptr i64, i64* %keywords43.i, i32 1, !dbg !49
   store i64 %25, i64* %29, align 8, !dbg !49
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.10, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 6, i32 noundef 2, i64* noundef nonnull align 8 %keywords63.i), !dbg !49
-  store i64 %24, i64* %keywords71.i, align 8, !dbg !50
-  %30 = getelementptr i64, i64* %keywords71.i, i32 1, !dbg !50
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.10, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 6, i32 noundef 2, i64* noundef nonnull align 8 %keywords43.i), !dbg !49
+  store i64 %24, i64* %keywords49.i, align 8, !dbg !50
+  %30 = getelementptr i64, i64* %keywords49.i, i32 1, !dbg !50
   store i64 %25, i64* %30, align 8, !dbg !50
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.11, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 5, i32 noundef 2, i64* noundef nonnull align 8 %keywords71.i), !dbg !50
-  store i64 %24, i64* %keywords79.i, align 8, !dbg !51
-  %31 = getelementptr i64, i64* %keywords79.i, i32 1, !dbg !51
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.11, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 5, i32 noundef 2, i64* noundef nonnull align 8 %keywords49.i), !dbg !50
+  store i64 %24, i64* %keywords55.i, align 8, !dbg !51
+  %31 = getelementptr i64, i64* %keywords55.i, i32 1, !dbg !51
   store i64 %25, i64* %31, align 8, !dbg !51
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.12, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 4, i32 noundef 2, i64* noundef nonnull align 8 %keywords79.i), !dbg !51
-  store i64 %24, i64* %keywords87.i, align 8, !dbg !52
-  %32 = getelementptr i64, i64* %keywords87.i, i32 1, !dbg !52
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.12, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 4, i32 noundef 2, i64* noundef nonnull align 8 %keywords55.i), !dbg !51
+  store i64 %24, i64* %keywords61.i, align 8, !dbg !52
+  %32 = getelementptr i64, i64* %keywords61.i, i32 1, !dbg !52
   store i64 %25, i64* %32, align 8, !dbg !52
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.13, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 3, i32 noundef 2, i64* noundef nonnull align 8 %keywords87.i), !dbg !52
-  store i64 %24, i64* %keywords95.i, align 8, !dbg !53
-  %33 = getelementptr i64, i64* %keywords95.i, i32 1, !dbg !53
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.13, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 3, i32 noundef 2, i64* noundef nonnull align 8 %keywords61.i), !dbg !52
+  store i64 %24, i64* %keywords67.i, align 8, !dbg !53
+  %33 = getelementptr i64, i64* %keywords67.i, i32 1, !dbg !53
   store i64 %25, i64* %33, align 8, !dbg !53
   %rubyId_baz.i = load i64, i64* getelementptr inbounds ([14 x i64], [14 x i64]* @sorbet_moduleIDTable, i64 0, i64 13), align 8, !dbg !53, !invariant.load !5
   %34 = call i64 @rb_id2sym(i64 %rubyId_baz.i) #13, !dbg !53
-  %35 = getelementptr i64, i64* %keywords95.i, i32 2, !dbg !53
+  %35 = getelementptr i64, i64* %keywords67.i, i32 2, !dbg !53
   store i64 %34, i64* %35, align 8, !dbg !53
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.14, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 10, i32 noundef 3, i64* noundef nonnull align 8 %keywords95.i), !dbg !53
-  store i64 %24, i64* %keywords104.i, align 8, !dbg !54
-  %36 = getelementptr i64, i64* %keywords104.i, i32 1, !dbg !54
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.14, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 10, i32 noundef 3, i64* noundef nonnull align 8 %keywords67.i), !dbg !53
+  store i64 %24, i64* %keywords74.i, align 8, !dbg !54
+  %36 = getelementptr i64, i64* %keywords74.i, i32 1, !dbg !54
   store i64 %25, i64* %36, align 8, !dbg !54
-  %37 = getelementptr i64, i64* %keywords104.i, i32 2, !dbg !54
+  %37 = getelementptr i64, i64* %keywords74.i, i32 2, !dbg !54
   store i64 %34, i64* %37, align 8, !dbg !54
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.15, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 9, i32 noundef 3, i64* noundef nonnull align 8 %keywords104.i), !dbg !54
-  store i64 %24, i64* %keywords114.i, align 8, !dbg !55
-  %38 = getelementptr i64, i64* %keywords114.i, i32 1, !dbg !55
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.15, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 9, i32 noundef 3, i64* noundef nonnull align 8 %keywords74.i), !dbg !54
+  store i64 %24, i64* %keywords82.i, align 8, !dbg !55
+  %38 = getelementptr i64, i64* %keywords82.i, i32 1, !dbg !55
   store i64 %25, i64* %38, align 8, !dbg !55
-  %39 = getelementptr i64, i64* %keywords114.i, i32 2, !dbg !55
+  %39 = getelementptr i64, i64* %keywords82.i, i32 2, !dbg !55
   store i64 %34, i64* %39, align 8, !dbg !55
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.16, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 8, i32 noundef 3, i64* noundef nonnull align 8 %keywords114.i), !dbg !55
-  store i64 %24, i64* %keywords124.i, align 8, !dbg !56
-  %40 = getelementptr i64, i64* %keywords124.i, i32 1, !dbg !56
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.16, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 8, i32 noundef 3, i64* noundef nonnull align 8 %keywords82.i), !dbg !55
+  store i64 %24, i64* %keywords90.i, align 8, !dbg !56
+  %40 = getelementptr i64, i64* %keywords90.i, i32 1, !dbg !56
   store i64 %25, i64* %40, align 8, !dbg !56
-  %41 = getelementptr i64, i64* %keywords124.i, i32 2, !dbg !56
+  %41 = getelementptr i64, i64* %keywords90.i, i32 2, !dbg !56
   store i64 %34, i64* %41, align 8, !dbg !56
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.17, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 7, i32 noundef 3, i64* noundef nonnull align 8 %keywords124.i), !dbg !56
-  store i64 %24, i64* %keywords134.i, align 8, !dbg !57
-  %42 = getelementptr i64, i64* %keywords134.i, i32 1, !dbg !57
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.17, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 7, i32 noundef 3, i64* noundef nonnull align 8 %keywords90.i), !dbg !56
+  store i64 %24, i64* %keywords98.i, align 8, !dbg !57
+  %42 = getelementptr i64, i64* %keywords98.i, i32 1, !dbg !57
   store i64 %25, i64* %42, align 8, !dbg !57
-  %43 = getelementptr i64, i64* %keywords134.i, i32 2, !dbg !57
+  %43 = getelementptr i64, i64* %keywords98.i, i32 2, !dbg !57
   store i64 %34, i64* %43, align 8, !dbg !57
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.18, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 6, i32 noundef 3, i64* noundef nonnull align 8 %keywords134.i), !dbg !57
-  store i64 %24, i64* %keywords144.i, align 8, !dbg !58
-  %44 = getelementptr i64, i64* %keywords144.i, i32 1, !dbg !58
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.18, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 6, i32 noundef 3, i64* noundef nonnull align 8 %keywords98.i), !dbg !57
+  store i64 %24, i64* %keywords106.i, align 8, !dbg !58
+  %44 = getelementptr i64, i64* %keywords106.i, i32 1, !dbg !58
   store i64 %25, i64* %44, align 8, !dbg !58
-  %45 = getelementptr i64, i64* %keywords144.i, i32 2, !dbg !58
+  %45 = getelementptr i64, i64* %keywords106.i, i32 2, !dbg !58
   store i64 %34, i64* %45, align 8, !dbg !58
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.19, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 5, i32 noundef 3, i64* noundef nonnull align 8 %keywords144.i), !dbg !58
-  store i64 %24, i64* %keywords154.i, align 8, !dbg !59
-  %46 = getelementptr i64, i64* %keywords154.i, i32 1, !dbg !59
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.19, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 5, i32 noundef 3, i64* noundef nonnull align 8 %keywords106.i), !dbg !58
+  store i64 %24, i64* %keywords114.i, align 8, !dbg !59
+  %46 = getelementptr i64, i64* %keywords114.i, i32 1, !dbg !59
   store i64 %25, i64* %46, align 8, !dbg !59
-  %47 = getelementptr i64, i64* %keywords154.i, i32 2, !dbg !59
+  %47 = getelementptr i64, i64* %keywords114.i, i32 2, !dbg !59
   store i64 %34, i64* %47, align 8, !dbg !59
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.20, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 4, i32 noundef 3, i64* noundef nonnull align 8 %keywords154.i), !dbg !59
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_take_arguments.20, i64 %rubyId_take_arguments.i.i, i32 noundef 68, i32 noundef 4, i32 noundef 3, i64* noundef nonnull align 8 %keywords114.i), !dbg !59
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %0)
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %1)
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %2)

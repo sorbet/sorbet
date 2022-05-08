@@ -230,8 +230,8 @@ functionEntryInitializers:
 define void @Init_block_type_checking() local_unnamed_addr #10 {
 entry:
   %positional_table.i.i = alloca i64, i32 2, align 8, !dbg !26
-  %locals.i18.i = alloca i64, i32 0, align 8
-  %locals.i16.i = alloca i64, i32 0, align 8
+  %locals.i7.i = alloca i64, i32 0, align 8
+  %locals.i5.i = alloca i64, i32 0, align 8
   %locals.i.i = alloca i64, i32 0, align 8
   %keywords.i = alloca i64, i32 2, align 8, !dbg !29
   %realpath = tail call i64 @sorbet_readRealpath()
@@ -262,11 +262,11 @@ entry:
   %rubyId_p.i = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleIDTable, i64 0, i64 5), align 8, !dbg !32, !invariant.load !5
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_p, i64 %rubyId_p.i, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !32
   %rubyStr_bar.i.i = load i64, i64* getelementptr inbounds ([6 x i64], [6 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 3), align 8, !invariant.load !5
-  %6 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %rubyStr_bar.i.i, i64 %rubyId_bar.i, i64 %"rubyStr_test/testdata/compiler/block_type_checking.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 1, i32 noundef 9, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i16.i, i32 noundef 0, i32 noundef 2)
+  %6 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %rubyStr_bar.i.i, i64 %rubyId_bar.i, i64 %"rubyStr_test/testdata/compiler/block_type_checking.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 1, i32 noundef 9, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i5.i, i32 noundef 0, i32 noundef 2)
   store %struct.rb_iseq_struct* %6, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo#3bar", align 8
   %"rubyId_<class:Foo>.i.i" = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleIDTable, i64 0, i64 7), align 8, !invariant.load !5
   %"rubyStr_<class:Foo>.i.i" = load i64, i64* getelementptr inbounds ([6 x i64], [6 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 4), align 8, !invariant.load !5
-  %7 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<class:Foo>.i.i", i64 %"rubyId_<class:Foo>.i.i", i64 %"rubyStr_test/testdata/compiler/block_type_checking.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i18.i, i32 noundef 0, i32 noundef 4)
+  %7 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<class:Foo>.i.i", i64 %"rubyId_<class:Foo>.i.i", i64 %"rubyStr_test/testdata/compiler/block_type_checking.rb.i.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 3, i32 noundef 5, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i7.i, i32 noundef 0, i32 noundef 4)
   store %struct.rb_iseq_struct* %7, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo.13<static-init>", align 8
   %"rubyId_block in <class:Foo>.i.i" = load i64, i64* getelementptr inbounds ([16 x i64], [16 x i64]* @sorbet_moduleIDTable, i64 0, i64 8), align 8, !invariant.load !5
   %"rubyStr_block in <class:Foo>.i.i" = load i64, i64* getelementptr inbounds ([6 x i64], [6 x i64]* @sorbet_moduleRubyStringTable, i64 0, i64 5), align 8, !invariant.load !5
