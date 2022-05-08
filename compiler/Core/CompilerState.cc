@@ -52,7 +52,7 @@ llvm::GlobalVariable *declareNullptrPlaceholder(llvm::Module &module, llvm::Type
 }
 } // namespace
 
-StringTable::StringTableEntry CompilerState::insertIntoStringTable(std::string_view str) {
+StringTable::Entry CompilerState::insertIntoStringTable(std::string_view str) {
     auto it = this->stringTable.map.find(str);
 
     // We would like to return &sorbet_moduleStringTable[offset], but that would
@@ -73,7 +73,7 @@ StringTable::StringTableEntry CompilerState::insertIntoStringTable(std::string_v
     auto *type = llvm::Type::getInt8PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     auto &entry = this->stringTable.map[str];
-    entry = StringTable::StringTableEntry{offset, global};
+    entry = StringTable::Entry{offset, global};
     // +1 for the null terminator.
     this->stringTable.size += str.size() + 1;
 
@@ -99,7 +99,7 @@ llvm::Value *CompilerState::idTableRef(std::string_view str) {
     auto *type = llvm::Type::getInt64PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     auto strSize = static_cast<uint32_t>(str.size());
-    this->idTable.map[str] = IDTable::IDTableEntry{offset, entry.offset, strSize, global};
+    this->idTable.map[str] = IDTable::Entry{offset, entry.offset, strSize, global};
 
     return global;
 }
@@ -117,13 +117,13 @@ llvm::Value *CompilerState::rubyStringTableRef(std::string_view str) {
     auto *type = llvm::Type::getInt64PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     auto strSize = static_cast<uint32_t>(str.size());
-    this->rubyStringTable.map[str] = RubyStringTable::RubyStringTableEntry{offset, entry.offset, strSize, global};
+    this->rubyStringTable.map[str] = RubyStringTable::Entry{offset, entry.offset, strSize, global};
 
     return global;
 }
 
 void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module) {
-    vector<pair<string_view, StringTable::StringTableEntry>> tableElements;
+    vector<pair<string_view, StringTable::Entry>> tableElements;
     tableElements.reserve(this->map.size());
     absl::c_copy(this->map, std::back_inserter(tableElements));
     fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
@@ -156,7 +156,7 @@ void StringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &m
 }
 
 void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder) {
-    vector<pair<string_view, IDTable::IDTableEntry>> tableElements;
+    vector<pair<string_view, IDTable::Entry>> tableElements;
     tableElements.reserve(this->map.size());
     absl::c_copy(this->map, std::back_inserter(tableElements));
     fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
@@ -223,7 +223,7 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
 
 void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module,
                                             llvm::IRBuilderBase &builder) {
-    vector<pair<string_view, RubyStringTable::RubyStringTableEntry>> tableElements;
+    vector<pair<string_view, RubyStringTable::Entry>> tableElements;
     tableElements.reserve(this->map.size());
     absl::c_copy(this->map, std::back_inserter(tableElements));
     fast_sort(tableElements, [](const auto &l, const auto &r) -> bool { return l.second.offset < r.second.offset; });
