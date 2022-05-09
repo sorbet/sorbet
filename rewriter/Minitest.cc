@@ -348,6 +348,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
         if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::BadTestEach)) {
             e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
+            if (send->numPosArgs() == 0 && errLoc.exists()) {
+                auto replaceLoc = ctx.locAt(errLoc);
+                e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}", replaceLoc.source(ctx).value());
+            }
         }
     }
 
