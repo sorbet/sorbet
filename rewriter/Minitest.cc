@@ -344,6 +344,17 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             send->flags);
     }
 
+    if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
+        auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
+        if (auto e = ctx.beginError(errLoc, core::errors::Rewriter::BadTestEach)) {
+            e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
+            if (send->numPosArgs() == 0 && errLoc.exists()) {
+                auto replaceLoc = ctx.locAt(errLoc);
+                e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}", replaceLoc.source(ctx).value());
+            }
+        }
+    }
+
     if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
