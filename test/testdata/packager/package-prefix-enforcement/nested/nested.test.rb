@@ -2,7 +2,7 @@
 
 module Test::Root
   BAD = 1
-# ^^^ error: Constants may not be defined outside of the enclosing package namespace `Test::Root::Nested`
+# ^^^ error: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace
   #
   module Nested
     class Ok; end
@@ -12,5 +12,5 @@ module Test::Root
 end
 
 module Root::Nested::Foo
-#      ^^^^^^^^^^^^^^^^^ error: Class or method definition must match enclosing package namespace `Test::Root::Nested`
+#      ^^^^^^^^^^^^^^^^^ error: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace
 end

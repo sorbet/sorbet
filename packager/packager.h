@@ -24,16 +24,14 @@ namespace sorbet::packager {
  *   class Project::Bar < PackageSpec
  *     export SomeClassInBar
  *     export Inner::SomeOtherClassInBar
- *     export_methods SomeClassWithMethods, SomeOtherClassWithMethods
  *   end
  *
  * to:
  *
- *   class <PackgeRegistry>::Project::Foo < PackageSpec
- *    import <PackgeRegistry>::Project::Bar
+ *   class <PackgeSpecRegistry>::Project::Foo < PackageSpec
+ *    import <PackgeSpecRegistry>::Project::Bar
  *
  *    export Package::Baz
- *    export_methods Package::FooClassWithMethods
  *   end
  *
  * Note that packages cannot have `_` in their names, so the above name mangling is 1:1.

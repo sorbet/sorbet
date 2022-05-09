@@ -1,6 +1,10 @@
-parent/b.rb:4: Class or method definition must match enclosing package namespace `Parent` https://srb.help/3713
+parent/b.rb:4: File belongs to package `Parent` but defines a constant that does not match this namespace https://srb.help/3713
      4 |  module Child
                  ^^^^^
-  Note:
-    Constant `Parent::Child` should either be defined in directory `./parent/` to match its package, or re-namespaced to be within `Parent`
+    parent/__package.rb:3: Enclosing package declared here
+     3 |class Parent < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    parent/child/__package.rb:3: Must belong to this package, given constant name `Parent::Child`
+     3 |class Parent::Child < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
