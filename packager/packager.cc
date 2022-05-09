@@ -903,11 +903,12 @@ private:
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
     }
 
-    void definitionPackageMismatch(core::Context ctx, core::ErrorBuilder &e) const {
-        auto requiredName = fmt::map_join(requiredNamespace(ctx), "::", [&](const auto &nr) { return nr.show(ctx); });
+    void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e) const {
+        auto requiredName =
+            fmt::format("{}", fmt::map_join(requiredNamespace(gs), "::", [&](const auto nr) { return nr.show(gs); }));
 
         if (useTestNamespace) {
-            e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(ctx),
+            e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(gs),
                         requiredName);
             // TODO: If the only thing missing is a `Test::` prefix (e.g., if this were not a test
             // file there would not have been an error), then we could suggest an autocorrect.
@@ -920,8 +921,8 @@ private:
 
         auto reqMangledName = namespaces.packageForNamespace();
         if (reqMangledName.exists()) {
-            auto &reqPkg = ctx.state.packageDB().getPackageInfo(reqMangledName);
-            auto givenNamespace = absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(ctx));
+            auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
+            auto givenNamespace = absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(gs));
             e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`", givenNamespace);
         }
     }
