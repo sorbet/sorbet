@@ -37,6 +37,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(Cast)
         SANITY_CHECK(Hash)
         SANITY_CHECK(Array)
+        SANITY_CHECK(NonEmptyArray)
         SANITY_CHECK(Literal)
         SANITY_CHECK(UnresolvedConstantLit)
         SANITY_CHECK(ConstantLit)

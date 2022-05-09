@@ -1179,6 +1179,16 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             break;
         }
 
+        case ast::Tag::NonEmptyArray: {
+            auto &a = ast::cast_tree_nonnull<ast::NonEmptyArray>(what);
+            pickle(p, a.loc);
+            p.putU4(a.elems.size());
+            for (auto &e : a.elems) {
+                pickle(p, e);
+            }
+            break;
+        }
+
         case ast::Tag::Cast: {
             auto &c = ast::cast_tree_nonnull<ast::Cast>(what);
             pickle(p, c.loc);
@@ -1443,6 +1453,15 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
                 elem = unpickleExpr(p, gs);
             }
             return ast::MK::Array(loc, std::move(elems));
+        }
+        case ast::Tag::NonEmptyArray: {
+            auto loc = unpickleLocOffsets(p);
+            auto sz = p.getU4();
+            ast::NonEmptyArray::ENTRY_store elems(sz);
+            for (auto &elem : elems) {
+                elem = unpickleExpr(p, gs);
+            }
+            return ast::MK::NonEmptyArray(loc, std::move(elems));
         }
         case ast::Tag::Cast: {
             auto loc = unpickleLocOffsets(p);

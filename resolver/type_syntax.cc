@@ -873,6 +873,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                                         klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
                                         klass == core::Symbols::T_Enumerable() ||
                                         klass == core::Symbols::T_Enumerator() ||
+                                        klass == core::Symbols::T_NonEmptyArray() ||
                                         klass == core::Symbols::T_Enumerator_Lazy();
 
                 if (isBuiltinGeneric || klass.data(ctx)->typeArity(ctx) > 0) {

@@ -110,6 +110,9 @@ end
 module T::Array
   def self.[](type); end
 end
+module T::NonEmptyArray
+  def self.[](type); end
+end
 module T::Hash
   def self.[](keys, values); end
 end

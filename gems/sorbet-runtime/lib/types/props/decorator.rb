@@ -253,7 +253,7 @@ class T::Props::Decorator
   sig {params(type: T::Types::Base).returns(Module)}
   private def convert_type_to_class(type)
     case type
-    when T::Types::TypedArray, T::Types::FixedArray
+    when T::Types::TypedArray, T::Types::FixedArray, T::Types::TypedNonEmptyArray
       Array
     when T::Types::TypedHash, T::Types::FixedHash
       Hash

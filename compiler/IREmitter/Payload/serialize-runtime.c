@@ -14,6 +14,7 @@ extern VALUE rb_cT_Types_Enum;
 extern VALUE rb_cT_Types_Intersection;
 extern VALUE rb_cT_Types_Simple;
 extern VALUE rb_cT_Types_TypedArray;
+extern VALUE rb_cT_Types_TypedNonEmptyArray;
 extern VALUE rb_cT_Types_TypedHash;
 extern VALUE rb_cT_Types_TypedSet;
 extern VALUE rb_cT_Types_Union;

@@ -1923,6 +1923,8 @@ public:
 
         if (attachedClass == Symbols::T_Array()) {
             attachedClass = Symbols::Array();
+        } else if (attachedClass == Symbols::T_NonEmptyArray()) {
+            attachedClass = Symbols::NonEmptyArray();
         } else if (attachedClass == Symbols::T_Hash()) {
             attachedClass = Symbols::Hash();
         } else if (attachedClass == Symbols::T_Enumerable()) {
@@ -3827,6 +3829,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Generic(), Intrinsic::Kind::Instance, Names::squareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::T_Array(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_NonEmptyArray(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerable(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},

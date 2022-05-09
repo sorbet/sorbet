@@ -16,6 +16,7 @@ VALUE rb_cT_Types_Enum;
 VALUE rb_cT_Types_Intersection;
 VALUE rb_cT_Types_Simple;
 VALUE rb_cT_Types_TypedArray;
+VALUE rb_cT_Types_TypedNonEmptyArray;
 VALUE rb_cT_Types_TypedEnumerable;
 VALUE rb_cT_Types_TypedHash;
 VALUE rb_cT_Types_TypedSet;

@@ -43,6 +43,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, Cast)                  \
         CASE_STATEMENT(CASE_BODY, Hash)                  \
         CASE_STATEMENT(CASE_BODY, Array)                 \
+        CASE_STATEMENT(CASE_BODY, NonEmptyArray)         \
         CASE_STATEMENT(CASE_BODY, Literal)               \
         CASE_STATEMENT(CASE_BODY, UnresolvedConstantLit) \
         CASE_STATEMENT(CASE_BODY, ConstantLit)           \

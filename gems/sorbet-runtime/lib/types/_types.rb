@@ -258,6 +258,16 @@ module T
     end
   end
 
+  module NonEmptyArray
+    def self.[](type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedNonEmptyArray::Untyped.new
+      else
+        T::Types::TypedNonEmptyArray.new(type)
+      end
+    end
+  end
+
   module Hash
     def self.[](keys, values)
       if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)

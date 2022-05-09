@@ -1008,6 +1008,14 @@ public:
         return ClassOrModuleRef::fromRaw(91);
     }
 
+    static ClassOrModuleRef T_NonEmptyArray() {
+        return ClassOrModuleRef::fromRaw(92);
+    }
+
+    static ClassOrModuleRef NonEmptyArray() {
+        return ClassOrModuleRef::fromRaw(93);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

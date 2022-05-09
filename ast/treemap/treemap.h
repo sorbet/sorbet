@@ -59,6 +59,9 @@ public:
     ExpressionPtr preTransformArray(core::MutableContext ctx, ExpressionPtr original);
     ExpressionPtr postransformArray(core::MutableContext ctx, ExpressionPtr original);
 
+    ExpressionPtr preTransformNonEmptyArray(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postransformNonEmptyArray(core::MutableContext ctx, ExpressionPtr original);
+
     ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ExpressionPtr original);
 
     ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr original);
@@ -105,6 +108,7 @@ GENERATE_POSTPONE_PRECLASS(Assign);
 GENERATE_POSTPONE_PRECLASS(Send);
 GENERATE_POSTPONE_PRECLASS(Hash);
 GENERATE_POSTPONE_PRECLASS(Array);
+GENERATE_POSTPONE_PRECLASS(NonEmptyArray);
 GENERATE_POSTPONE_PRECLASS(Block);
 GENERATE_POSTPONE_PRECLASS(InsSeq);
 GENERATE_POSTPONE_PRECLASS(Cast);
@@ -124,6 +128,7 @@ GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
+GENERATE_POSTPONE_POSTCLASS(NonEmptyArray);
 GENERATE_POSTPONE_POSTCLASS(Local);
 GENERATE_POSTPONE_POSTCLASS(Literal);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit);
@@ -400,6 +405,20 @@ private:
         return v;
     }
 
+    ExpressionPtr mapNonEmptyArray(ExpressionPtr v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformNonEmptyArray<FUNC>()) {
+            v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
+        }
+        for (auto &elem : cast_tree_nonnull<NonEmptyArray>(v).elems) {
+            elem = mapIt(std::move(elem), ctx);
+        }
+
+        if constexpr (HAS_MEMBER_postTransformNonEmptyArray<FUNC>()) {
+            return CALL_MEMBER_postTransformNonEmptyArray<FUNC>::call(func, ctx, std::move(v));
+        }
+        return v;
+    }
+
     ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
             return CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, std::move(v));
@@ -565,6 +584,9 @@ private:
 
                 case Tag::Array:
                     return mapArray(std::move(what), ctx);
+
+                case Tag::NonEmptyArray:
+                    return mapNonEmptyArray(std::move(what), ctx);
 
                 case Tag::Literal:
                     return mapLiteral(std::move(what), ctx);
@@ -868,6 +890,20 @@ private:
         return v;
     }
 
+    ExpressionPtr mapNonEmptyArray(ExpressionPtr v, CTX ctx) {
+        if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
+            v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
+        }
+        for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
+            elem = mapIt(std::move(elem), ctx);
+        }
+
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
+            return CALL_MEMBER_postTransformArray<FUNC>::call(func, ctx, std::move(v));
+        }
+        return v;
+    }
+
     ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
             return CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, std::move(v));
@@ -1033,6 +1069,9 @@ private:
 
                 case Tag::Array:
                     return mapArray(std::move(what), ctx);
+
+                case Tag::NonEmptyArray:
+                    return mapNonEmptyArray(std::move(what), ctx);
 
                 case Tag::Literal:
                     return mapLiteral(std::move(what), ctx);

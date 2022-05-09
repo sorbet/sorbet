@@ -62,6 +62,7 @@ enum class Tag {
     ZSuperArgs,
     Block,
     InsSeq,
+    NonEmptyArray,
 };
 
 // A mapping from tree type to its corresponding tag.
@@ -996,6 +997,27 @@ public:
     void _sanityCheck();
 };
 CheckSize(Array, 48, 8);
+
+EXPRESSION(NonEmptyArray) {
+public:
+    const core::LocOffsets loc;
+
+    static constexpr int EXPECTED_ENTRY_COUNT = 4;
+    using ENTRY_store = InlinedVector<ExpressionPtr, EXPECTED_ENTRY_COUNT>;
+
+    ENTRY_store elems;
+
+    NonEmptyArray(core::LocOffsets loc, ENTRY_store elems);
+
+    ExpressionPtr deepCopy() const;
+
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
+
+    void _sanityCheck();
+};
+CheckSize(NonEmptyArray, 48, 8);
 
 EXPRESSION(Literal) {
 public:

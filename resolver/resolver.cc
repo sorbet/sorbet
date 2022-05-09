@@ -2672,6 +2672,8 @@ public:
                 // after that their bounds will have been fully resolved.
                 if (klass == core::Symbols::T_Array()) {
                     klass = core::Symbols::Array();
+                } else if (klass == core::Symbols::T_NonEmptyArray()) {
+                    klass = core::Symbols::NonEmptyArray();
                 } else if (klass == core::Symbols::T_Hash()) {
                     klass = core::Symbols::Hash();
                 } else if (klass == core::Symbols::T_Enumerable()) {

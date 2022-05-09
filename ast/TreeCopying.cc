@@ -147,6 +147,11 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             return make_expression<Array>(exp->loc, deepCopyVec(avoid, exp->elems));
         }
 
+        case Tag::NonEmptyArray: {
+            auto *exp = reinterpret_cast<const NonEmptyArray *>(tree);
+            return make_expression<NonEmptyArray>(exp->loc, deepCopyVec(avoid, exp->elems));
+        }
+
         case Tag::Literal: {
             auto *exp = reinterpret_cast<const Literal *>(tree);
             return make_expression<Literal>(exp->loc, exp->value);

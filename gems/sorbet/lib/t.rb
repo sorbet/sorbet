@@ -40,6 +40,10 @@ module T
     def self.[](type); end
   end
 
+  module NonEmptyArray
+    def self.[](type); end
+  end
+
   module Hash
     def self.[](keys, values); end
   end

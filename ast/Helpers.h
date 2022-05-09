@@ -287,6 +287,10 @@ public:
         return make_expression<ast::Array>(loc, std::move(entries));
     }
 
+    static ExpressionPtr NonEmptyArray(core::LocOffsets loc, NonEmptyArray::ENTRY_store entries) {
+        return make_expression<ast::NonEmptyArray>(loc, std::move(entries));
+    }
+
     static ExpressionPtr Hash(core::LocOffsets loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
         return make_expression<ast::Hash>(loc, std::move(keys), std::move(values));
     }
