@@ -1,0 +1,19 @@
+test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:4: Class or method definition must match enclosing package namespace `Test::Project::ConsumerAuth::Data` https://srb.help/3713
+     4 |class Project::ConsumerAuth::Data
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:6: No import provides `Project::ConsumerAuth::IdentifierType` https://srb.help/3718
+     6 |    puts(Project::ConsumerAuth::IdentifierType)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/packager_suggest_nested_crash/consumer_auth/data/__package.rb:4: Insert `test_import Project::ConsumerAuth`
+     4 |class Project::ConsumerAuth::Data < PackageSpec
+                                                       ^
+    test/cli/packager_suggest_nested_crash/consumer_auth/__package.rb:5: Defined here
+     5 |class Project::ConsumerAuth < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/packager_suggest_nested_crash/consumer_auth/identity_type.rb:4: Class or method definition must match enclosing package namespace `Test::Project::ConsumerAuth` https://srb.help/3713
+     4 |class Project::ConsumerAuth
+              ^^^^^^^^^^^^^^^^^^^^^
+Errors: 3
