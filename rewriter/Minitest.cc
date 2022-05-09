@@ -344,7 +344,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 auto sendLoc = send->recv.loc().join(send->funLoc);
                 if (auto e = ctx.beginError(sendLoc, core::errors::Rewriter::UseTestEachNotEach)) {
                     e.setHeader("`{}` cannot be used to write table-driven tests with Sorbet", "each");
-                    e.replaceWith("Use `test_each`", ctx.locAt(sendLoc), "test_each({})", send->recv.toString(ctx));
+                    e.replaceWith("Use `test_each`", ctx.locAt(sendLoc), "test_each({})", *ctx.locAt(send->recv.loc()).source(ctx));
 
                     ENFORCE(send->numNonBlockArgs() == 0);
                     // Drop the block body so the user doesn't get mysterious errors about
