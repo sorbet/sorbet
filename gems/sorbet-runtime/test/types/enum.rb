@@ -189,6 +189,12 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'as_json' do
+    it 'has a string JSON representation' do
+      assert_equal("club", CardSuit::CLUB.as_json)
+    end
+  end
+
   describe 'T::Props::CustomType integration' do
     it 'supports instance? checks on the Enum class' do
       assert_equal(true, CardSuit.instance?(CardSuit::SPADE))
