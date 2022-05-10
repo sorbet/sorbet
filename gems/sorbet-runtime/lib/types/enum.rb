@@ -160,7 +160,7 @@ class T::Enum
 
   sig {params(args: T.untyped).returns(T.untyped)}
   def as_json(*args)
-    serialize
+    serialize.as_json(*args)
   end
 
   sig {returns(String)}
