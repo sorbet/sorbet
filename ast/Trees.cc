@@ -154,6 +154,7 @@ ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOr
     categoryCounterInc("trees", "classdef");
     histogramInc("trees.classdef.kind", (int)kind);
     histogramInc("trees.classdef.ancestors", this->ancestors.size());
+    histogramInc("trees.classdef.rhs", this->rhs.size());
     _sanityCheck();
 }
 
@@ -328,6 +329,7 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
 Block::Block(core::LocOffsets loc, MethodDef::ARGS_store args, ExpressionPtr body)
     : loc(loc), args(std::move(args)), body(std::move(body)) {
     categoryCounterInc("trees", "block");
+    histogramInc("trees.block.args", this->args.size());
     _sanityCheck();
 };
 
