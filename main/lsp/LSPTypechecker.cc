@@ -325,7 +325,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, /*presorted*/ true);
+    const auto presorted = true;
+    const auto cancelable = false;
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
 
     return subset;
@@ -504,7 +506,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         }
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
+        const auto presorted = true;
+        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -621,7 +624,8 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
-    pipeline::typecheck(*gs, move(resolved), config->opts, workers, /*presorted*/ true);
+    const auto cancelable = true;
+    pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
@@ -794,7 +798,8 @@ LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
-    pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, /*presorted*/ true);
+    const auto cancelable = true;
+    pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, cancelable);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
