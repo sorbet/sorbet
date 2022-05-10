@@ -130,6 +130,13 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "opentelemetry",
+        urls = _github_public_urls("open-telemetry/opentelemetry-cpp/archive/f462034737cc8b8950bbc204cd44d3c348d607aa.zip"),
+        sha256 = "7dfcd3e2ab995ae52129a73d45e4d8bc42df222c8728eeb3fdb83cd9403b7ec8",
+        strip_prefix = "opentelemetry-cpp-f462034737cc8b8950bbc204cd44d3c348d607aa",
+    )
+
+    http_archive(
         name = "cxxopts",
         urls = _github_public_urls("jarro2783/cxxopts/archive/b0f67a06de3446aa97a4943ad0ad6086460b2b61.zip"),
         sha256 = "8635d7305e6623e7f4c635dae901891eb1151cee3106445d124c696361bb70fc",
