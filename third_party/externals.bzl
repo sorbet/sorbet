@@ -131,9 +131,11 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "opentelemetry",
-        urls = _github_public_urls("open-telemetry/opentelemetry-cpp/archive/f462034737cc8b8950bbc204cd44d3c348d607aa.zip"),
-        sha256 = "7dfcd3e2ab995ae52129a73d45e4d8bc42df222c8728eeb3fdb83cd9403b7ec8",
-        strip_prefix = "opentelemetry-cpp-f462034737cc8b8950bbc204cd44d3c348d607aa",
+        # From a fork, technically:
+        # https://github.com/open-telemetry/opentelemetry-cpp/compare/jez:jez-platforms
+        urls = _github_public_urls("open-telemetry/opentelemetry-cpp/archive/bb9e5fecf6d1de51e88297d6570fe9af35396872.zip"),
+        sha256 = "d47db5fffbdaf6f544b11d414c1994091f8d5ed2367f290c6791b5c6bf439fc2",
+        strip_prefix = "opentelemetry-cpp-bb9e5fecf6d1de51e88297d6570fe9af35396872",
     )
 
     http_archive(
