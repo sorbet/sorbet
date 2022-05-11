@@ -5,4 +5,5 @@
 
 class MyPackage < PackageSpec
   # No imports or exports.
+  import OtherPackageImported
 end
