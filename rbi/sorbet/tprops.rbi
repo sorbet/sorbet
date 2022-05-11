@@ -178,13 +178,16 @@ module T::Props::PrettyPrintable::DecoratorMethods
   extend T::Sig
 end
 
-module T::Props::SerializableImpl
-  def deserialize(hash, strict = nil); end
+module T::Props::With
   def recursive_stringify_keys(obj); end
-  def serialize(strict = nil); end
   sig {params(changed_props: T.untyped).returns(T.self_type)}
   def with(changed_props); end
   def with_existing_hash(changed_props, existing_hash:); end
+end
+
+module T::Props::SerializableImpl
+  def deserialize(hash, strict = nil); end
+  def serialize(strict = nil); end
   include T::Props::Optional
   include T::Props::Plugin
   include T::Props::PrettyPrintable
@@ -193,6 +196,7 @@ end
 
 module T::Props::Serializable
   include T::Props
+  include T::Props::With
   include T::Props::SerializableImpl
 end
 

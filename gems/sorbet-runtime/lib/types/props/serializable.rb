@@ -1,6 +1,44 @@
 # frozen_string_literal: true
 # typed: false
 
+module T::Props::With
+  # with() will clone the old object to the new object and merge the specified props to the new object.
+  def with(changed_props)
+    with_existing_hash(changed_props, existing_hash: self.serialize)
+  end
+
+  private def recursive_stringify_keys(obj)
+    if obj.is_a?(Hash)
+      new_obj = obj.class.new
+      obj.each do |k, v|
+        new_obj[k.to_s] = recursive_stringify_keys(v)
+      end
+    elsif obj.is_a?(Array)
+      new_obj = obj.map {|v| recursive_stringify_keys(v)}
+    else
+      new_obj = obj
+    end
+    new_obj
+  end
+
+  private def with_existing_hash(changed_props, existing_hash:)
+    serialized = existing_hash
+    new_val = self.class.from_hash(serialized.merge(recursive_stringify_keys(changed_props)))
+    old_extra = self.instance_variable_get(:@_extra_props) if self.instance_variable_defined?(:@_extra_props)
+    new_extra = new_val.instance_variable_get(:@_extra_props) if new_val.instance_variable_defined?(:@_extra_props)
+    if old_extra != new_extra
+      difference =
+        if old_extra
+          new_extra.reject {|k, v| old_extra[k] == v}
+        else
+          new_extra
+        end
+      raise ArgumentError.new("Unexpected arguments: input(#{changed_props}), unexpected(#{difference})")
+    end
+    new_val
+  end
+end
+
 module T::Props::SerializableImpl
   include T::Props::Plugin
   # Required because we have special handling for `optional: false`
@@ -97,42 +135,6 @@ module T::Props::SerializableImpl
     #
     # To see the definition for class `Foo`, run `Foo.decorator.send(:generate_deserialize_source)`
     0
-  end
-
-  # with() will clone the old object to the new object and merge the specified props to the new object.
-  def with(changed_props)
-    with_existing_hash(changed_props, existing_hash: self.serialize)
-  end
-
-  private def recursive_stringify_keys(obj)
-    if obj.is_a?(Hash)
-      new_obj = obj.class.new
-      obj.each do |k, v|
-        new_obj[k.to_s] = recursive_stringify_keys(v)
-      end
-    elsif obj.is_a?(Array)
-      new_obj = obj.map {|v| recursive_stringify_keys(v)}
-    else
-      new_obj = obj
-    end
-    new_obj
-  end
-
-  private def with_existing_hash(changed_props, existing_hash:)
-    serialized = existing_hash
-    new_val = self.class.from_hash(serialized.merge(recursive_stringify_keys(changed_props)))
-    old_extra = self.instance_variable_get(:@_extra_props) if self.instance_variable_defined?(:@_extra_props)
-    new_extra = new_val.instance_variable_get(:@_extra_props) if new_val.instance_variable_defined?(:@_extra_props)
-    if old_extra != new_extra
-      difference =
-        if old_extra
-          new_extra.reject {|k, v| old_extra[k] == v}
-        else
-          new_extra
-        end
-      raise ArgumentError.new("Unexpected arguments: input(#{changed_props}), unexpected(#{difference})")
-    end
-    new_val
   end
 
   # Asserts if this property is missing during strict serialize
@@ -367,5 +369,6 @@ end
 
 module T::Props::Serializable
   include T::Props
+  include T::Props::With
   include T::Props::SerializableImpl
 end

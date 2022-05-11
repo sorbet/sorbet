@@ -136,3 +136,6 @@ class ImmutableTest
   obj.b = "bar"
     # ^^^ error: Method `b=` does not exist on `Immutable`
 end
+
+Immutable.new(b: "foo").with(b: "bar")
+                      # ^^^^ error: Method `with` does not exist on `Immutable`

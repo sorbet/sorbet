@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=138:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=140:39}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U AccidentallyStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=37:25}
     class <C <U AccidentallyStruct>>::<C <U A>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
