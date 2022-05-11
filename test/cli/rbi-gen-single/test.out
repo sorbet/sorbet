@@ -1,4 +1,28 @@
 -- sanity-checking package with --stripe-packages
+family/family.rb:21: `WhoKnows` resolves but is not exported from `External` https://srb.help/3717
+    21 |    sig {returns(::WhoKnows)}
+                         ^^^^^^^^^^
+  Consider marking this RBI file `# packaged: false` if it is meant to declare unpackaged constants
+    external/who_knows.rbi:3:
+     3 |class ::WhoKnows; end
+        ^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    external/__package.rb:3: Insert `export WhoKnows`
+     3 |class External < PackageSpec
+                                    ^
+
+family/family.rb:23: `WhoKnows` resolves but is not exported from `External` https://srb.help/3717
+    23 |      WhoKnows.new
+              ^^^^^^^^
+  Consider marking this RBI file `# packaged: false` if it is meant to declare unpackaged constants
+    external/who_knows.rbi:3:
+     3 |class ::WhoKnows; end
+        ^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    external/__package.rb:3: Insert `export WhoKnows`
+     3 |class External < PackageSpec
+                                    ^
+
 family/__package.rb:13: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
     13 |  export_for_test Family::Flanders
                           ^^^^^^^^^^^^^^^^
@@ -14,7 +38,7 @@ family/__package.rb:13: Method `export_for_test` does not exist on `T.class_of(F
 family/__package.rb:15: Method `export_for_test` does not exist on `T.class_of(Family)` https://srb.help/7003
     15 |  export_for_test Family::Krabappel
           ^^^^^^^^^^^^^^^
-Errors: 4
+Errors: 6
 -- ./test/cli/rbi-gen-single/external/__package.rb (External)
 family/__package.rb:13: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
     13 |  export_for_test Family::Flanders

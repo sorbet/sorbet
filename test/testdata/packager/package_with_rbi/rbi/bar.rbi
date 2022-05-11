@@ -1,16 +1,16 @@
 # typed: strict
-# packaged: false
+# packaged: true
 
-class RBI::Foo
+class RBI::Bar
   extend T::Sig
 
   sig {returns(::Integer)}
   def self.one(); end
 end
 
-class ::GlobalFoo
+class ::GlobalBar
   extend T::Sig
 
-  sig {returns(RBI::Foo)}
+  sig {returns(RBI::Bar)}
   def self.foo(); end
 end

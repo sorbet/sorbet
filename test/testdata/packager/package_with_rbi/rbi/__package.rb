@@ -3,4 +3,5 @@
 
 class RBI < PackageSpec
   export RBI::Foo
+  export RBI::Bar
 end
