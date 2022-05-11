@@ -379,6 +379,7 @@ TypePtr LiteralType::underlying(const GlobalState &gs) const {
 
 TupleType::TupleType(vector<TypePtr> elements) : elems(move(elements)) {
     categoryCounterInc("types.allocated", "tupletype");
+    histogramInc("tupletype.elems", this->elems.size());
 }
 
 AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
@@ -419,6 +420,7 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
     DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k)); };);
     categoryCounterInc("types.allocated", "shapetype");
+    histogramInc("shapetype.keys", this->keys.size());
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
@@ -726,6 +728,7 @@ SelfType::SelfType() {
 };
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
+    histogramInc("appliedtype.targs", this->targs.size());
 }
 
 bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
