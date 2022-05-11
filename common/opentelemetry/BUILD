@@ -14,10 +14,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common",
+        "//sorbet_version",
     ] + select({
         "//tools/config:webasm": [],
         "//conditions:default": [
             "@opentelemetry//api",
+            "@opentelemetry//exporters/ostream:ostream_span_exporter",
             "@opentelemetry//sdk/src/trace",
         ],
     }),

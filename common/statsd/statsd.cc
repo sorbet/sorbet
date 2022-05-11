@@ -53,6 +53,7 @@ class StatsdClientWrapper {
             tags.emplace_back(key.c_str(), value.c_str());
         }
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
+        // TODO(jez) I thought we were stripping the tags, why does it look like we're sending them here?
         auto newLine = fmt::format("{}{}:{}|{}{}{}", link->ns ? link->ns : "", cleanMetricName(name), value, type,
                                    tags.empty() ? "" : "|#", fmt::map_join(tags, ",", [&](const auto &tag) -> string {
                                        return fmt::format("{}:{}", cleanTagNameOrValue(tag.first),

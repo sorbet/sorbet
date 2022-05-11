@@ -35,6 +35,7 @@ struct CounterImpl;
 // forward declarations for classes that need private access to the counter
 // implementation
 class StatsD;
+class OpenTelemetry;
 namespace core {
 class Proto;
 }
@@ -69,6 +70,7 @@ private:
     friend void counterConsume(CounterState cs);
     friend class core::Proto;
     friend class StatsD;
+    friend class OpenTelemetry;
     friend class sorbet::web_tracer_framework::Tracing;
     friend class sorbet::test::lsp::CounterStateDatabase;
 
