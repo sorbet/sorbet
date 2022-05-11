@@ -7,6 +7,8 @@ class Root::A
   sig {void}
   def main
     RBI::Foo.one
-    GlobalBar.foo
+    GlobalFoo.foo
+    RBI::Bar.one
+    GlobalBar.foo # error: `GlobalBar` resolves but is not exported from `RBI`
   end
 end

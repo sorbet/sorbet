@@ -364,7 +364,16 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
-                e.addErrorLine(lit.symbol.loc(ctx), "Defined here");
+                auto definedHereLoc = lit.symbol.loc(ctx);
+                if (definedHereLoc.file().data(ctx).isRBI()) {
+                    e.addErrorSection(core::ErrorSection(
+                        core::ErrorColors::format(
+                            "Consider marking this RBI file `{}` if it is meant to declare unpackaged constants",
+                            "# packaged: false"),
+                        {core::ErrorLine(definedHereLoc, "")}));
+                } else {
+                    e.addErrorLine(definedHereLoc, "Defined here");
+                }
                 if (auto exp = pkg.addExport(ctx, lit.symbol)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
