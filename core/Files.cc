@@ -418,10 +418,8 @@ bool File::isPackaged() const {
             return false;
 
         case PackagedLevel::True:
-            return true;
-
         case PackagedLevel::None:
-            return !this->isRBI();
+            return true;
     }
 }
 
