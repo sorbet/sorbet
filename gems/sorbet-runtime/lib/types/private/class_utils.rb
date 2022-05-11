@@ -69,6 +69,27 @@ module T::Private::ClassUtils
     end
   end
 
+  def self.def_with_visibility(mod, name, visibility, method=nil, &block)
+    mod.module_exec do
+      # Start a visibility (public/protected/private) region, so that
+      # all of the method redefinitions happen with the right visibility
+      # from the beginning. This ensures that any other code that is
+      # triggered by `method_added`, sees the redefined method with the
+      # right visibility.
+      send(visibility)
+
+      if method
+        define_method(name, method)
+      else
+        define_method(name, &block)
+      end
+
+      if block && block.arity < 0 && respond_to?(:ruby2_keywords, true)
+        ruby2_keywords(name)
+      end
+    end
+  end
+
   # Replaces a method, either by overwriting it (if it is defined directly on `mod`) or by
   # overriding it (if it is defined by one of mod's ancestors). Returns a ReplacedMethod instance
   # on which you can call `bind(...).call(...)` to call the original method, or `restore` to
@@ -96,13 +117,9 @@ module T::Private::ClassUtils
     overwritten = original_owner == mod
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
-        mod.send(:define_method, name, &blk)
-        if blk.arity < 0 && mod.respond_to?(:ruby2_keywords, true)
-          mod.send(:ruby2_keywords, name)
-        end
+        def_with_visibility(mod, name, original_visibility, &blk)
       end
     end
-    mod.send(original_visibility, name)
     new_method = mod.instance_method(name)
 
     ReplacedMethod.new(mod, original_method, new_method, overwritten, original_visibility)

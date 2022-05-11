@@ -70,7 +70,8 @@ variant<Options, int> parseArgs(int argc, char **argv) {
 void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
     auto kindString = validatorKindToString(kind);
     auto typeString = typeKindToString(type);
-    fmt::print("  def self.create_validator_{}_{}(mod, original_method, method_sig)\n", kindString, typeString);
+    fmt::print("  def self.create_validator_{}_{}(mod, original_method, method_sig, original_visibility)\n", kindString,
+               typeString);
     switch (kind) {
         case ValidatorKind::Method:
             fmt::print("    if method_sig.return_type.is_a?(T::Private::Types::Void)\n"
@@ -100,7 +101,8 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
             fmt::print("    elsif method_sig.arg_types.length == {}\n", arity);
         }
 
-        fmt::print("      create_validator_{}_{}{}(mod, original_method, method_sig", kindString, typeString, arity);
+        fmt::print("      create_validator_{}_{}{}(mod, original_method, method_sig, original_visibility", kindString,
+                   typeString, arity);
 
         if (kind == ValidatorKind::Method) {
             fmt::print(", method_sig.return_type{}", rawTypeMethodCall);
@@ -129,14 +131,14 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
             returnTypeArg = "";
             break;
     }
-    fmt::print("  def self.create_validator_{}_{}{}(mod, original_method, method_sig{}", validatorKindToString(kind),
-               typeKindToString(type), arity, returnTypeArg);
+    fmt::print("  def self.create_validator_{}_{}{}(mod, original_method, method_sig, original_visibility{}",
+               validatorKindToString(kind), typeKindToString(type), arity, returnTypeArg);
     for (size_t i = 0; i < arity; i++) {
         fmt::print(", arg{}_type", i);
     }
     fmt::print(")\n");
 
-    fmt::print("    mod.send(:define_method, method_sig.method_name) do |");
+    fmt::print("    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |");
     for (size_t i = 0; i < arity; i++) {
         fmt::print("arg{}, ", i);
     }

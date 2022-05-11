@@ -40,9 +40,8 @@ module T::Private::Methods::CallValidation
       T::Configuration.without_ruby_warnings do
         # get all the shims out of the way and put back the original method
         T::Private::DeclState.current.without_on_method_added do
-          mod.send(:define_method, method_sig.method_name, original_method)
+          T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility, original_method)
         end
-        mod.send(original_visibility, method_sig.method_name)
       end
     end
     # Return the newly created method (or the original one if we didn't replace it)
@@ -70,27 +69,24 @@ module T::Private::Methods::CallValidation
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
         if simple_method
-          create_validator_method_fast(mod, original_method, method_sig)
+          create_validator_method_fast(mod, original_method, method_sig, original_visibility)
         elsif simple_procedure
-          create_validator_procedure_fast(mod, original_method, method_sig)
+          create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path && method_sig.return_type.is_a?(T::Private::Types::Void)
-          create_validator_procedure_medium(mod, original_method, method_sig)
+          create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
-          create_validator_method_medium(mod, original_method, method_sig)
+          create_validator_method_medium(mod, original_method, method_sig, original_visibility)
         else
-          create_validator_slow(mod, original_method, method_sig)
+          create_validator_slow(mod, original_method, method_sig, original_visibility)
         end
       end
+      mod.send(original_visibility, method_sig.method_name)
     end
-    mod.send(original_visibility, method_sig.method_name)
   end
 
-  def self.create_validator_slow(mod, original_method, method_sig)
-    mod.send(:define_method, method_sig.method_name) do |*args, &blk|
+  def self.create_validator_slow(mod, original_method, method_sig, original_visibility)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       CallValidation.validate_call(self, original_method, method_sig, args, blk)
-    end
-    if mod.respond_to?(:ruby2_keywords, true)
-      mod.send(:ruby2_keywords, method_sig.method_name)
     end
   end
 
