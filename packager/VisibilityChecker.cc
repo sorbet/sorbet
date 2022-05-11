@@ -421,7 +421,7 @@ public:
         workers.multiplexJob("VisibilityChecker", [&gs, fileq, resultq]() {
             ast::ParsedFile f;
             for (auto result = fileq->try_pop(f); !result.done(); result = fileq->try_pop(f)) {
-                if (!f.file.data(gs).isPackage() && f.file.data(gs).isPackaged()) {
+                if (!f.file.data(gs).isPackage()) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
