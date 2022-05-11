@@ -2,6 +2,7 @@
 #include "common/Timer.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "common/opentelemetry/opentelemetry.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/errors/internal.h"
@@ -49,6 +50,10 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     } else {
         timeit.setTag("webtracefile", "false");
     }
+
+    // TODO(jez) Gate this on command line flag
+    // TODO(jez) Maybe do this instead of --statsd-host?
+    OpenTelemetry::submitTimers(counters);
 }
 
 namespace {

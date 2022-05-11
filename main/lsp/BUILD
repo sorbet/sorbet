@@ -64,6 +64,7 @@ cc_library(
         "//ast",
         "//common/kvstore",
         "//common/statsd",
+        "//common/opentelemetry",
         "//common/web_tracer_framework:tracing",
         "//core",
         "//core/proto",

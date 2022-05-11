@@ -4,6 +4,7 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
+#include "common/opentelemetry/opentelemetry.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -919,6 +920,10 @@ int realmain(int argc, char *argv[]) {
     if (!opts.webTraceFile.empty()) {
         web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
     }
+
+    // TODO(jez) Gate this on command line flag
+    // TODO(jez) Maybe do this instead of --statsd-host?
+    OpenTelemetry::submitTimers(counters);
 
     if (!opts.metricsFile.empty()) {
         auto metrics = core::Proto::toProto(counters, opts.metricsPrefix);

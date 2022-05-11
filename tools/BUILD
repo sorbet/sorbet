@@ -30,6 +30,7 @@ compilation_database(
         "//common/json2msgpack:json2msgpack",
         "//common/kvstore:kvstore",
         "//common/kvstore:kvstore_test",
+        "//common/opentelemetry:opentelemetry",
         "//common/statsd:statsd",
         "//common/web_tracer_framework:tracing",
         "//compiler:sorbet",

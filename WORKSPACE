@@ -51,6 +51,10 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
+load("@opentelemetry//bazel:repository.bzl", "opentelemetry_cpp_deps")
+
+opentelemetry_cpp_deps()
+
 load("//third_party/gems:rules.bzl", "gemfile_lock_deps")
 
 gemfile_lock_deps(
