@@ -456,4 +456,41 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Bar>.new().a()
   end
+
+  class <emptyTree>::<C Immutable><<C <todo sym>>> < (<emptyTree>::<C T>::<C ImmutableStruct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:b, <emptyTree>::<C String>).void()
+    end
+
+    def initialize<<todo method>>(b:, &<blk>)
+      begin
+        @b = ::T.let(b, <emptyTree>::<C String>)
+        nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def b<<todo method>>(&<blk>)
+      @b
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.prop(:a, <emptyTree>::<C Integer>)
+
+    <self>.const(:b, <emptyTree>::<C String>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :b, :attr_reader)
+  end
+
+  class <emptyTree>::<C ImmutableTest><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C Immutable>.new(:a, 1, :b, "foo")
+
+    obj = <emptyTree>::<C Immutable>.new(:b, "foo")
+
+    obj.b=("bar")
+  end
 end

@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=122:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=138:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U AccidentallyStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=37:25}
     class <C <U AccidentallyStruct>>::<C <U A>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
@@ -85,6 +85,22 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U FullyQualifiedStructUsages>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=115:7 end=115:33}
     type-member(+) <S <C <U FullyQualifiedStructUsages>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U FullyQualifiedStructUsages>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=FullyQualifiedStructUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=115:7 end=115:33}
     method <S <C <U FullyQualifiedStructUsages>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=115:1 end=122:4}
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
+  class <C <U Immutable>> < <C <U T>>::<C <U ImmutableStruct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=124:37}
+    field <C <U Immutable>>#<U @b> -> String @ Loc {file=test/testdata/rewriter/struct.rb start=128:10 end=128:11}
+    method <C <U Immutable>>#<U b> (<blk>) -> String @ Loc {file=test/testdata/rewriter/struct.rb start=128:3 end=128:19}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
+    method <C <U Immutable>>#<U initialize> (b, <blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=124:37}
+      argument b<keyword> -> String @ Loc {file=test/testdata/rewriter/struct.rb start=128:3 end=128:19}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
+  class <S <C <U Immutable>> $1>[<C <U <AttachedClass>>>] < <C <U T>>::<S <C <U ImmutableStruct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=124:7 end=124:16}
+    type-member(+) <S <C <U Immutable>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Immutable>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Immutable) @ Loc {file=test/testdata/rewriter/struct.rb start=124:7 end=124:16}
+    method <S <C <U Immutable>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=129:4}
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
+  class <C <U ImmutableTest>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=131:1 end=131:20}
+  class <S <C <U ImmutableTest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=131:7 end=131:20}
+    type-member(+) <S <C <U ImmutableTest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U ImmutableTest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ImmutableTest) @ Loc {file=test/testdata/rewriter/struct.rb start=131:7 end=131:20}
+    method <S <C <U ImmutableTest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=131:1 end=138:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U InvalidMember>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=45:1 end=45:20}
     class <C <U InvalidMember>>::<C <U A>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=46:3 end=46:24}
