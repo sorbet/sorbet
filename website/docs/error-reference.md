@@ -1824,7 +1824,7 @@ our definitions as RBI under `sorbet/rbi/shims/foo.rbi`:
 # sorbet/rbi/shims/foo.rbi
 # typed: true
 
-module Foo
+class Foo
   def foo; end
 end
 ```
