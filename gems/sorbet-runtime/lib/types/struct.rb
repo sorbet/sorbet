@@ -19,8 +19,8 @@ end
 
 class T::ImmutableStruct
   include T::Props::Const
-  include T::Props::Serializable
-  include T::Props::Constructor
+  include T::Props::SerializableImpl
+  include T::Props::ConstructorImpl
 
   def self.inherited(subclass)
     super(subclass)

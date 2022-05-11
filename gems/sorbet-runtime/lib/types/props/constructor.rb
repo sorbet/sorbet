@@ -1,11 +1,16 @@
 # frozen_string_literal: true
 # typed: false
 
+module T::Props::ConstructorImpl
+  include T::Props::WeakConstructorImpl
+end
+
 module T::Props::Constructor
+  include T::Props::ConstructorImpl
   include T::Props::WeakConstructor
 end
 
-module T::Props::Constructor::DecoratorMethods
+module T::Props::ConstructorImpl::DecoratorMethods
   extend T::Sig
 
   # Set values for all props that have no defaults. Override what `WeakConstructor`

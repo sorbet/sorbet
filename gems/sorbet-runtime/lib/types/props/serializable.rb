@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: false
 
-module T::Props::Serializable
+module T::Props::SerializableImpl
   include T::Props::Plugin
   # Required because we have special handling for `optional: false`
   include T::Props::Optional
@@ -176,7 +176,7 @@ end
 
 # NB: This must stay in the same file where T::Props::Serializable is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
-module T::Props::Serializable::DecoratorMethods
+module T::Props::SerializableImpl::DecoratorMethods
   include T::Props::HasLazilySpecializedMethods::DecoratorMethods
 
   VALID_RULE_KEYS = {dont_store: true, name: true, raise_on_nil_write: true}.freeze
@@ -346,7 +346,7 @@ end
 
 # NB: This must stay in the same file where T::Props::Serializable is defined due to
 # T::Props::Decorator#apply_plugin; see https://git.corp.stripe.com/stripe-internal/pay-server/blob/fc7f15593b49875f2d0499ffecfd19798bac05b3/chalk/odm/lib/chalk-odm/document_decorator.rb#L716-L717
-module T::Props::Serializable::ClassMethods
+module T::Props::SerializableImpl::ClassMethods
   def prop_by_serialized_forms
     @prop_by_serialized_forms ||= {}
   end
@@ -363,4 +363,9 @@ module T::Props::Serializable::ClassMethods
   def from_hash!(hash)
     self.decorator.from_hash(hash, true)
   end
+end
+
+module T::Props::Serializable
+  include T::Props
+  include T::Props::SerializableImpl
 end

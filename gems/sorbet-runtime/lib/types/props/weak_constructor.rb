@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: false
 
-module T::Props::WeakConstructor
+module T::Props::WeakConstructorImpl
   include T::Props::Optional
   extend T::Sig
 
@@ -19,7 +19,7 @@ module T::Props::WeakConstructor
   end
 end
 
-module T::Props::WeakConstructor::DecoratorMethods
+module T::Props::WeakConstructorImpl::DecoratorMethods
   extend T::Sig
 
   # Set values for all props that have no defaults. Ignore any not present.
@@ -64,4 +64,9 @@ module T::Props::WeakConstructor::DecoratorMethods
     end
     result
   end
+end
+
+module T::Props::WeakConstructor
+  include T::Props
+  include T::Props::WeakConstructorImpl
 end

@@ -14,8 +14,8 @@ end
 
 class T::ImmutableStruct
   include T::Props::Const
-  include T::Props::Serializable
-  include T::Props::Constructor
+  include T::Props::SerializableImpl
+  include T::Props::ConstructorImpl
 end
 
 module T::Props
@@ -141,13 +141,23 @@ module T::Props::Optional::DecoratorMethods
   def valid_rule_key?(key); end
 end
 
-module T::Props::WeakConstructor
+module T::Props::WeakConstructorImpl
   def initialize(hash = nil); end
   include T::Props::Optional
 end
 
+module T::Props::WeakConstructor
+  include T::Props
+  include T::Props::WeakConstructorImpl
+end
+
+module T::Props::ConstructorImpl
+  include T::Props::WeakConstructorImpl
+end
+
 module T::Props::Constructor
   def initialize(hash = nil); end
+  include T::Props::ConstructorImpl
   include T::Props::WeakConstructor
 end
 
@@ -168,7 +178,7 @@ module T::Props::PrettyPrintable::DecoratorMethods
   extend T::Sig
 end
 
-module T::Props::Serializable
+module T::Props::SerializableImpl
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
   def serialize(strict = nil); end
@@ -178,10 +188,15 @@ module T::Props::Serializable
   include T::Props::Optional
   include T::Props::Plugin
   include T::Props::PrettyPrintable
-  mixes_in_class_methods(T::Props::Serializable::ClassMethods)
+  mixes_in_class_methods(T::Props::SerializableImpl::ClassMethods)
 end
 
-module T::Props::Serializable::DecoratorMethods
+module T::Props::Serializable
+  include T::Props
+  include T::Props::SerializableImpl
+end
+
+module T::Props::SerializableImpl::DecoratorMethods
   def add_prop_definition(prop, rules); end
   def extra_props(instance); end
   def from_hash(hash, strict = nil); end
@@ -196,7 +211,7 @@ module T::Props::Serializable::DecoratorMethods
   def valid_rule_key?(key); end
 end
 
-module T::Props::Serializable::ClassMethods
+module T::Props::SerializableImpl::ClassMethods
   def from_hash!(hash); end
   def from_hash(hash, strict = nil); end
   def prop_by_serialized_forms; end
