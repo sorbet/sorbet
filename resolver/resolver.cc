@@ -2069,7 +2069,7 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static core::TypePtr resolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
-        auto data = job.sym.data(ctx);
+        //auto data = job.sym.data(ctx);
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
         auto resultType = resolveConstantType(ctx, asgn->rhs);
