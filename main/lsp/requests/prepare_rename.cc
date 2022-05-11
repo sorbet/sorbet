@@ -125,6 +125,8 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
         response->result = getPrepareRenameResultForSend(gs, sendResp);
     } else if (auto identResp = resp->isIdent()) {
         response->result = getPrepareRenameResultForIdent(gs, identResp);
+    } else if (auto fieldResp = resp->isField()) {
+        response->result = getPrepareRenameResult(gs, fieldResp->symbol);
     }
 
     return response;
