@@ -352,6 +352,13 @@ public:
             return tree;
         }
 
+        if (!this->package.exists()) {
+            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::PackagedSymbolInUnpackagedContext)) {
+                e.setHeader("Packaged constant `{}` used in an unpackaged context", lit.symbol.show(ctx));
+            }
+            return tree;
+        }
+
         bool isExported = false;
         if (lit.symbol.isClassOrModule()) {
             isExported = lit.symbol.asClassOrModuleRef().data(ctx)->flags.isExported;

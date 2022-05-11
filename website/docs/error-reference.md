@@ -805,6 +805,10 @@ class A::B < PackageSpec
 end
 ```
 
+## 3723
+
+TODO(jez)
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
