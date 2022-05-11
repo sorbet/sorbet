@@ -6,7 +6,8 @@
 class ::UnpackagedTheSequel
   def test
 
-    # This reference should be an error.
     puts MyPackage::MyClass.new
+    puts OtherPackageImported::ExportedClass.new
+    puts OtherPackageNotImported::ExportedClass.new
   end
 end
