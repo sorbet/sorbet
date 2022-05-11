@@ -388,6 +388,13 @@ public:
                     e.addAutocorrect(std::move(exp.value()));
                 }
 
+                if (!ctx.file.data(ctx).isPackaged()) {
+                    e.addErrorNote(
+                        "A `{}` file is allowed to define constants outside of the package's namespace,\n    "
+                        "but must still respect its enclosing package's imports.",
+                        "# packaged: false");
+                }
+
                 if (!db.errorHint().empty()) {
                     e.addErrorNote("{}", db.errorHint());
                 }
