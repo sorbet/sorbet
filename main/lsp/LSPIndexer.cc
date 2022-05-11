@@ -116,8 +116,8 @@ bool LSPIndexer::canTakeFastPathInternal(
         }
         ENFORCE(oldFile.getFileHash() != nullptr);
         ENFORCE(f->getFileHash() != nullptr);
-        auto oldHash = *oldFile.getFileHash();
-        auto newHash = *f->getFileHash();
+        const auto &oldHash = *oldFile.getFileHash();
+        const auto &newHash = *f->getFileHash();
         ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
         if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
             logger.debug("Taking slow path because {} has a syntax error", f->path());
