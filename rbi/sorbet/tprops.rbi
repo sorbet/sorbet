@@ -20,12 +20,19 @@ end
 
 module T::Props
   extend T::Helpers
+  include T::Props::Common
   mixes_in_class_methods(T::Props::ClassMethods)
 end
 
 module T::Props::Prop::ClassMethods
+  include T::Props::Common::ClassMethods
   sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
   def prop(name, cls, rules = nil); end
+end
+
+module T::Props::Prop
+  extend T::Helpers
+  mixes_in_class_methods(T::Props::Prop::ClassMethods)
 end
 
 module T::Props::Const
@@ -34,6 +41,7 @@ module T::Props::Const
 end
 
 module T::Props::Const::ClassMethods
+  include T::Props::Common::ClassMethods
   sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
   def const(name, cls_or_args, args={}, &blk); end
 end

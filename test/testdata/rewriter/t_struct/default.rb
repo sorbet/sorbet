@@ -12,6 +12,6 @@ Default.new(foo: "no")
 T.reveal_type(Default.new(foo: 3).foo) # error: Revealed type: `Integer`
 
 class Bad < T::Struct
-  prop :no_type_on_prop  # error: Not enough arguments provided for method `T::Props::ClassMethods#prop`
-  const :no_type_on_const  # error: Not enough arguments provided for method `T::Props::ClassMethods#const`
+  prop :no_type_on_prop  # error: Not enough arguments provided for method `T::Props::Prop::ClassMethods#prop`
+  const :no_type_on_const  # error: Not enough arguments provided for method `T::Props::Const::ClassMethods#const`
 end

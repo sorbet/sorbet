@@ -639,13 +639,13 @@ class T::Props::Decorator
     end
   end
 
-  sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
+  sig {params(child: T.all(Module, T::Props::Common::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
   private def clobber_getter?(child, prop)
     !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
        child.instance_method(prop).source_location&.first == __FILE__)
   end
 
-  sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
+  sig {params(child: T.all(Module, T::Props::Common::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
   private def clobber_setter?(child, prop)
     !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
        child.instance_method("#{prop}=").source_location&.first == __FILE__)

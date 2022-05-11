@@ -84,8 +84,11 @@ module T::Props
   end
 
   module Prop
+    extend T::Helpers
+
     module ClassMethods
       extend T::Sig
+      include T::Props::Common::ClassMethods
 
       # Define a new property. See {file:README.md} for some concrete
       #  examples.
@@ -167,6 +170,7 @@ module T::Props
         decorator.prop_defined(name, cls, rules)
       end
     end
+    mixes_in_class_methods(ClassMethods)
   end
 
   module Const

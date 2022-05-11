@@ -224,11 +224,15 @@ module RBIGen::Public::DefDelegator
 end
 class RBIGen::Public::CustomStruct
   include T::Props
+  include T::Props::Common
   const :bar, T.nilable(String)
   prop :foo, Integer
   sig {void}
   def my_method; end
   extend T::Props::ClassMethods
+  extend T::Props::Const::ClassMethods
+  extend T::Props::Prop::ClassMethods
+  extend T::Props::Common::ClassMethods
   extend T::Sig
 end
 class RBIGen::Public::ClassWithTypeParams
