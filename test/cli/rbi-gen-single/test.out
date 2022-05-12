@@ -126,8 +126,15 @@ Errors: 2
 
 class Util::GenericMessage
   Elem = type_member()
+  sig {params(x: Elem).void}
+  def initialize(x)
+    @x = T.let(T.unsafe(nil), Elem)
+  end
+  sig {returns(Elem)}
+  def x; end
   extend T::Generic
   extend T::Helpers
+  extend T::Sig
 end
 class Util::Messages
   extend T::Sig
