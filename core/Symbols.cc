@@ -433,15 +433,10 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
     }
-    auto owner = sym->owner;
-    if (options.showForRBI && sym->owner.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
-        // Don't show T.class_of(Foo)::Field; show Foo::Field when printing an RBI
-        owner = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
-    }
     if (options.showForRBI) {
         return sym->name.show(gs);
     }
-    return showInternal(gs, owner, sym->name, COLON_SEPARATOR);
+    return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
