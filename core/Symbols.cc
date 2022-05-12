@@ -438,7 +438,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         // Don't show T.class_of(Foo)::Field; show Foo::Field when printing an RBI
         owner = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
     }
-    if (options.showForSigSuggestion) {
+    if (options.showForRBI) {
         return sym->name.show(gs);
     }
     return showInternal(gs, owner, sym->name, COLON_SEPARATOR);

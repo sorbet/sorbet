@@ -469,7 +469,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            auto options = core::ShowOptions().withShowForSigSuggestion();
+            auto options = core::ShowOptions().withShowForRBI();
             fmt::format_to(std::back_inserter(ss), "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx, options));
         }
         fmt::format_to(std::back_inserter(ss), ").");
