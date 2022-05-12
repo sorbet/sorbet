@@ -121,7 +121,6 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
         statsd.gauge(e.first, e.second);
     }
 
-    UnorderedMap<int, CounterImpl::Timing> flowStarts;
     for (const auto &e : counters.counters->timings) {
         statsd.timing(e);
     }
