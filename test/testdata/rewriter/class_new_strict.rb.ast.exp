@@ -1,0 +1,42 @@
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        ::<Magic>.<define-top-class-or-module>(::A)
+        ::Sorbet::Private::Static.keep_for_ide(::A)
+        <emptyTree>
+      end
+    end
+  end
+  class ::A<<C A>> < (::<todo sym>)
+    def self.make(<blk>)
+      cls = ::Class.new(::A) do ||
+        begin
+          begin
+            ::Sorbet::Private::Static.keep_for_typechecking(::T.class_of(::A))
+            T.<synthetic bind>(<self>, AppliedType {
+              klass = <S <C <U A>> $1>
+              targs = [
+                <C <U <AttachedClass>>> = A
+              ]
+            })
+          end
+          <emptyTree>
+        end
+      end
+    end
+
+    def self.<static-init>(<blk>)
+      begin
+        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, true, :make) do ||
+          <self>.void()
+        end
+        <self>.extend(::T::Sig)
+        ::Sorbet::Private::Static.keep_self_def(<self>, :make, :normal)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

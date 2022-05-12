@@ -1,0 +1,20 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def self.make<<todo method>>(&<blk>)
+      cls = <emptyTree>::<C Class>.new(<emptyTree>::<C A>) do ||
+        begin
+          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C A>))
+          <emptyTree>
+        end
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :make, :normal)
+  end
+end

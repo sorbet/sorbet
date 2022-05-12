@@ -783,10 +783,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 current = walk(cctx.withTarget(tmp), c.arg, current);
                 if (c.cast == core::Names::uncheckedLet()) {
                     current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(tmp));
-                } else if (c.cast == core::Names::bind()) {
+                } else if (c.cast == core::Names::bind() || c.cast == core::Names::syntheticBind()) {
+                    auto isSynthetic = c.cast == core::Names::syntheticBind();
                     if (c.arg.isSelfReference()) {
                         auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
-                        current->exprs.emplace_back(self, c.loc, make_insn<Cast>(tmp, c.type, core::Names::cast()));
+                        auto &inserted =
+                            current->exprs.emplace_back(self, c.loc, make_insn<Cast>(tmp, c.type, core::Names::cast()));
+                        if (isSynthetic) {
+                            inserted.value.setSynthetic();
+                        }
                         current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
 
                         if (cctx.rescueScope) {

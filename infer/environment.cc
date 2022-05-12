@@ -1439,7 +1439,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
 
                 const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c.value);
-                ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind());
+                ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind() &&
+                        c.cast != core::Names::syntheticBind());
 
                 if (c.cast != core::Names::cast()) {
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
