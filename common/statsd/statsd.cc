@@ -59,7 +59,7 @@ class StatsdClientWrapper {
                                                           cleanTagNameOrValue(tag.second));
                                    }));
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
-            packet = packet + '\n' + newLine;
+            packet = absl::StrCat(packet, "\n", newLine);
         } else {
             if (!packet.empty()) {
                 statsd_send(link, packet.c_str());
