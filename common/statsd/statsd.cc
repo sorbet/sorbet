@@ -59,7 +59,7 @@ class StatsdClientWrapper {
                                                           cleanTagNameOrValue(tag.second));
                                    }));
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
-            packet = packet + '\n' + newLine;
+            packet = absl::StrCat(packet, "\n", newLine);
         } else {
             if (!packet.empty()) {
                 statsd_send(link, packet.c_str());
@@ -121,7 +121,6 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
         statsd.gauge(e.first, e.second);
     }
 
-    UnorderedMap<int, CounterImpl::Timing> flowStarts;
     for (const auto &e : counters.counters->timings) {
         statsd.timing(e);
     }
