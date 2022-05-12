@@ -2126,6 +2126,7 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     uint32_t fieldHash = 0;
     uint32_t methodHash = 0;
     UnorderedMap<NameHash, uint32_t> methodHashes;
+    UnorderedMap<NameHash, uint32_t> staticFieldHashes;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2168,12 +2169,13 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     for (const auto &field : this->fields) {
         counter++;
         // No fields are ignored in hashing.
-        // TODO(jez) We're abusing methodHashes--after this change, the name is no longer accurate.
-        auto &target = methodHashes[NameHash(*this, field.name)];
         uint32_t symhash = field.hash(*this);
+        if (field.flags.isStaticField) {
+            auto &target = staticFieldHashes[NameHash(*this, field.name)];
+            target = mix(target, symhash);
+        }
         hierarchyHash = mix(hierarchyHash, field.fieldShapeHash(*this));
         fieldHash = mix(fieldHash, symhash);
-        target = mix(target, symhash);
 
         if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));
@@ -2197,11 +2199,16 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
 
     unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
     result->methodHashes.reserve(methodHashes.size());
+    result->staticFieldHashes.reserve(staticFieldHashes.size());
     for (const auto &e : methodHashes) {
         result->methodHashes.emplace_back(e.first, patchHash(e.second));
     }
+    for (const auto &e : staticFieldHashes) {
+        result->staticFieldHashes.emplace_back(e.first, patchHash(e.second));
+    }
     // Sort the hashes. Semantically important for quickly diffing hashes.
     fast_sort(result->methodHashes);
+    fast_sort(result->staticFieldHashes);
 
     result->hierarchyHash = patchHash(hierarchyHash);
     result->classModuleHash = patchHash(classModuleHash);
