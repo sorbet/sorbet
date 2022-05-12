@@ -338,6 +338,7 @@ NameDef names[] = {
     {"kwargs", "<kwargs>"},
     {"blkArg", "<blk>"},
     {"blockGiven_p", "block_given?"},
+    {"anonymousBlock", "<anonymous-block>"},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end
@@ -433,11 +434,9 @@ NameDef names[] = {
     {"import"},
     {"test_import"},
     {"export_", "export"},
-    {"export_for_test"},
     {"restrict_to_service"},
     {"PackageSpec", "PackageSpec", true},
-    {"PackageRegistry", "<PackageRegistry>", true},
-    {"PackageTests", "<PackageTests>", true},
+    {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 
     // Compiler
     {"runningCompiled_p", "running_compiled?"},

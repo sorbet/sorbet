@@ -5,7 +5,8 @@
       "adopting",
       "metrics",
       "quickref",
-      "vscode"
+      "vscode",
+      "from-typescript"
     ],
     "Static & Runtime": [
       "gradual",
@@ -17,6 +18,7 @@
     ],
     "Troubleshooting": [
       "troubleshooting",
+      "why-type-annotations",
       "faq",
       "error-reference"
     ],
@@ -25,6 +27,7 @@
       "type-annotations",
       "type-assertions",
       "class-types",
+      "stdlib-generics",
       "nilable-types",
       "union-types",
       "flow-sensitive",
@@ -39,7 +42,6 @@
       "override-checking",
       "sealed",
       "class-of",
-      "stdlib-generics",
       "self-type",
       "noreturn",
       "attached-class",
@@ -49,6 +51,7 @@
     "Experimental Features": [
       "tuples",
       "shapes",
+      "generics",
       "requires-ancestor"
     ]
   },
@@ -59,7 +62,8 @@
       "talks/ruby-kaigi-2019",
       "talks/curry-on-2019",
       "talks/jvm-ls-2019",
-      "talks/ruby-conf-2019"
+      "talks/ruby-conf-2019",
+      "talks/ruby-conf-2021"
     ]
   },
   "legal": {

@@ -325,23 +325,24 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, /*presorted*/ true);
+    const auto presorted = true;
+    const auto cancelable = false;
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
 
     return subset;
 }
 
 namespace {
-pair<unique_ptr<core::GlobalState>, ast::ParsedFile>
-updateFile(unique_ptr<core::GlobalState> gs, const shared_ptr<core::File> &file, const options::Options &opts) {
-    core::FileRef fref = gs->findFileByPath(file->path());
+ast::ParsedFile updateFile(core::GlobalState &gs, const shared_ptr<core::File> &file, const options::Options &opts) {
+    core::FileRef fref = gs.findFileByPath(file->path());
     if (fref.exists()) {
-        gs->replaceFile(fref, file);
+        gs.replaceFile(fref, file);
     } else {
-        fref = gs->enterFile(file);
+        fref = gs.enterFile(file);
     }
-    fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, opts);
-    return make_pair(move(gs), pipeline::indexOne(opts, *gs, fref));
+    fref.data(gs).strictLevel = pipeline::decideStrictLevel(gs, fref, opts);
+    return pipeline::indexOne(opts, gs, fref);
 }
 } // namespace
 
@@ -425,16 +426,15 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
         // Index the updated files using finalGS.
         {
-            core::UnfreezeFileTable fileTableAccess(*finalGS);
+            auto &gs = *finalGS;
+            core::UnfreezeFileTable fileTableAccess(gs);
             for (auto &file : updates.updatedFiles) {
-                auto pair = updateFile(move(finalGS), file, config->opts);
-                finalGS = move(pair.first);
-                auto &ast = pair.second;
-                if (ast.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
-                    updatedFiles.insert(ast.file.id());
+                auto parsedFile = updateFile(gs, file, config->opts);
+                if (parsedFile.tree) {
+                    indexedCopies.emplace_back(ast::ParsedFile{parsedFile.tree.deepCopy(), parsedFile.file});
+                    updatedFiles.insert(parsedFile.file.id());
                 }
-                updates.updatedFinalGSFileIndexes.push_back(move(ast));
+                updates.updatedFinalGSFileIndexes.push_back(move(parsedFile));
             }
         }
 
@@ -504,7 +504,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         }
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, /*presorted*/ true);
+        const auto presorted = true;
+        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -621,7 +622,8 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
-    pipeline::typecheck(*gs, move(resolved), config->opts, workers, /*presorted*/ true);
+    const auto cancelable = true;
+    pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
@@ -794,7 +796,8 @@ LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
-    pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, /*presorted*/ true);
+    const auto cancelable = true;
+    pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, cancelable);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};

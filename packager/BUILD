@@ -9,6 +9,7 @@ cc_library(
         exclude = ["flycheck_*"],
     ),
     hdrs = [
+        "VisibilityChecker.h",
         "packager.h",
         "rbi_gen.h",
     ],

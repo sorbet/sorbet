@@ -1274,7 +1274,7 @@ end
 class Psych::Nodes::Alias < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def alias?(); end
 
@@ -1301,7 +1301,7 @@ end
 class Psych::Nodes::Document < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def document?(); end
 
@@ -1355,7 +1355,7 @@ end
 class Psych::Nodes::Mapping < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Any Map Style
   ANY = ::T.unsafe(nil)
@@ -1400,7 +1400,7 @@ end
 class Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   def alias?(); end
 
@@ -1483,7 +1483,7 @@ end
 class Psych::Nodes::Scalar < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Any style scalar, the emitter chooses
   ANY = ::T.unsafe(nil)
@@ -1588,7 +1588,7 @@ end
 class Psych::Nodes::Sequence < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Any Styles, emitter chooses
   ANY = ::T.unsafe(nil)
@@ -1636,7 +1636,7 @@ end
 class Psych::Nodes::Stream < Psych::Nodes::Node
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Any encoding
   ANY = ::T.unsafe(nil)
@@ -1663,7 +1663,7 @@ class Psych::Omap < Hash
   extend T::Generic
   K = type_member(:out)
   V = type_member(:out)
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 end
 
 # [`YAML`](https://docs.ruby-lang.org/en/2.7.0/YAML.html) event parser class.
@@ -1793,7 +1793,7 @@ class Psych::Set < Hash
   extend T::Generic
   K = type_member(:out)
   V = type_member(:out)
-  Elem = type_member(:out, fixed: T.untyped)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 end
 
 # [`Psych::Stream`](https://docs.ruby-lang.org/en/2.7.0/Psych/Stream.html) is a

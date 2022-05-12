@@ -9,12 +9,6 @@ class Simpsons::Family
   extend T::Sig
 end
 
-# test/testdata/packager/lsp_features/Simpsons_Package.test.private.package.rbi
-# typed: true
-
-class Simpsons::Private
-end
-
 # test/testdata/packager/lsp_features/Bart_Package.rbi
 # typed: true
 

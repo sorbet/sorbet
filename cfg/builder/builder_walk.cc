@@ -44,6 +44,12 @@ void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat
 namespace {
 
 LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
+    if (what == core::Symbols::StubModule()) {
+        // We don't need all stub module assignments to alias to the same temporary.
+        // (The fact that there's a StubModule at all means an error was already reported elsewhere)
+        return cctx.newTemporary(what.name(cctx.ctx));
+    }
+
     // Note: this will add an empty local to aliases if 'what' is not there
     LocalRef &alias = cctx.aliases[what];
     if (!alias.exists()) {
@@ -170,7 +176,8 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 
     if (argInfo.type != nullptr) {
         auto tmp = cctx.newTemporary(core::Names::castTemp());
-        synthesizeExpr(defaultNext, tmp, defLoc, make_insn<Cast>(result, argInfo.type, core::Names::let()));
+        synthesizeExpr(defaultNext, tmp, defLoc,
+                       make_insn<Cast>(result, core::LocOffsets::none(), argInfo.type, core::Names::let()));
         cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
     }
 
@@ -780,6 +787,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
             [&](ast::Cast &c) {
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
+                core::LocOffsets argLoc = c.arg.loc();
                 current = walk(cctx.withTarget(tmp), c.arg, current);
                 if (c.cast == core::Names::uncheckedLet()) {
                     current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(tmp));
@@ -787,16 +795,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto isSynthetic = c.cast == core::Names::syntheticBind();
                     if (c.arg.isSelfReference()) {
                         auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
-                        auto &inserted =
-                            current->exprs.emplace_back(self, c.loc, make_insn<Cast>(tmp, c.type, core::Names::cast()));
+                        auto &inserted = current->exprs.emplace_back(
+                            self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
                         if (isSynthetic) {
                             inserted.value.setSynthetic();
                         }
                         current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
 
                         if (cctx.rescueScope) {
-                            cctx.rescueScope->exprs.emplace_back(self, c.loc,
-                                                                 make_insn<Cast>(tmp, c.type, core::Names::cast()));
+                            cctx.rescueScope->exprs.emplace_back(
+                                self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
                             cctx.rescueScope->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
                         }
                     } else {
@@ -805,7 +813,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         }
                     }
                 } else {
-                    current->exprs.emplace_back(cctx.target, c.loc, make_insn<Cast>(tmp, c.type, c.cast));
+                    current->exprs.emplace_back(cctx.target, c.loc, make_insn<Cast>(tmp, argLoc, c.type, c.cast));
                 }
                 if (c.cast == core::Names::let()) {
                     cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;

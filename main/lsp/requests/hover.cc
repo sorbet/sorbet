@@ -52,14 +52,24 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
     }
 
     auto &queryResponses = result.responses;
+    auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
     if (queryResponses.empty()) {
-        // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
-        response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
+        auto fref = config.uri2FileRef(gs, params->textDocument->uri);
+        ENFORCE(fref.exists());
+        auto level = fref.data(gs).strictLevel;
+        if (level < core::StrictLevel::True) {
+            auto text = fmt::format("This file is `# typed: {}`.\n"
+                                    "Hover, Go To Definition, and other features are disabled in this file.",
+                                    level == core::StrictLevel::Ignore ? "ignore" : "false");
+            response->result = make_unique<Hover>(make_unique<MarkupContent>(clientHoverMarkupKind, text));
+        } else {
+            // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.
+            response->result = variant<JSONNullObject, unique_ptr<Hover>>(JSONNullObject());
+        }
         return response;
     }
 
     auto resp = move(queryResponses[0]);
-    auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
     vector<core::Loc> documentationLocations;
     string typeString;
 

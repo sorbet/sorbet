@@ -11,11 +11,11 @@ constexpr ErrorClass MethodArgumentCountMismatch{7004, StrictLevel::True};
 constexpr ErrorClass ReturnTypeMismatch{7005, StrictLevel::True};
 constexpr ErrorClass DeadBranchInferencer{7006, StrictLevel::True};
 constexpr ErrorClass CastTypeMismatch{7007, StrictLevel::True};
-constexpr ErrorClass OverloadedArgumentCountMismatch{7008, StrictLevel::True};
+// constexpr ErrorClass OverloadedArgumentCountMismatch{7008, StrictLevel::True};
 constexpr ErrorClass BareTypeUsage{7009, StrictLevel::True};
 constexpr ErrorClass GenericArgumentCountMismatch{7010, StrictLevel::True};
 constexpr ErrorClass IncompleteType{7011, StrictLevel::True};
-constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::True};
+// constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, StrictLevel::True};
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, StrictLevel::True};
 // constexpr ErrorClass GenericMethodConstraintUnsolved{7013, StrictLevel::True};
 constexpr ErrorClass RevealType{7014, StrictLevel::True};
@@ -29,7 +29,7 @@ constexpr ErrorClass BlockNotPassed{7021, StrictLevel::True};
 constexpr ErrorClass SuggestTyped{7022, StrictLevel::True};
 constexpr ErrorClass ProcArityUnknown{7023, StrictLevel::Strict};
 constexpr ErrorClass GenericPassedAsBlock{7024, StrictLevel::True};
-constexpr ErrorClass AbstractClassInstantiated{7025, StrictLevel::True};
+// constexpr ErrorClass AbstractClassInstantiated{7025, StrictLevel::True};
 constexpr ErrorClass NotExhaustive{7026, StrictLevel::True};
 constexpr ErrorClass UntypedConstantSuggestion{7027, StrictLevel::Strict};
 // constexpr ErrorClass GenericTypeParamBoundMismatch{7028, StrictLevel::False};
@@ -43,6 +43,7 @@ constexpr ErrorClass TakesNoBlock{7035, StrictLevel::True};
 constexpr ErrorClass PackagePrivateMethod{7036, StrictLevel::True};
 constexpr ErrorClass CallAfterAndAnd{7037, StrictLevel::True};
 constexpr ErrorClass CallOnTypeArgument{7038, StrictLevel::True};
+constexpr ErrorClass CallOnUnboundedTypeMember{7039, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif

@@ -3,11 +3,11 @@
 class A
   class <<self
     extend T::Generic
-    X = type_member(:out, upper: String)
+    X = type_member(:out) {{upper: String}}
 
     class <<self
       extend T::Generic
-      X = type_member(:out, upper: Integer)
+      X = type_member(:out) {{upper: Integer}}
     end
   end
 end

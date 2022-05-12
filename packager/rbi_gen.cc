@@ -271,7 +271,7 @@ private:
         if (sym->flags.isOverride) {
             flags.emplace_back("override");
         }
-        for (auto ta : method.data(gs)->typeArguments) {
+        for (auto ta : method.data(gs)->typeArguments()) {
             typeArguments.emplace_back(absl::StrCat(":", ta.data(gs)->name.show(gs)));
         }
         for (auto &argSym : method.data(gs)->arguments) {
@@ -535,7 +535,7 @@ private:
     }
 
     bool isInTestPackage(core::SymbolRef sym) {
-        if (sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
+        if (sym == core::Symbols::root()) {
             return false;
         }
         if (sym == pkgNamespace) {
@@ -554,7 +554,7 @@ private:
 
     bool isInPackage(core::SymbolRef original) {
         for (auto sym = original; sym.exists(); sym = sym.owner(gs)) {
-            if (sym == core::Symbols::root() || sym == core::Symbols::PackageRegistry()) {
+            if (sym == core::Symbols::root()) {
                 // Symbol isn't part of a package. Check if it was defined in an RBI.
                 auto locs = original.locs(gs);
                 for (auto loc : locs) {
@@ -1210,7 +1210,6 @@ public:
 
         vector<core::SymbolRef> exports;
         vector<core::SymbolRef> testExports;
-        vector<core::SymbolRef> testPrivateExports;
 
         auto rawExports = pkg.exports();
         for (auto &e : rawExports) {
@@ -1222,15 +1221,6 @@ public:
                 } else {
                     exports.emplace_back(exportSymbol);
                 }
-            }
-        }
-
-        // These are `export_for_test` exports, which should only be visible to the test package.
-        auto rawTestExports = pkg.testExports();
-        for (auto &e : rawTestExports) {
-            auto exportSymbol = lookupFQN(gs, e);
-            if (exportSymbol.exists()) {
-                testPrivateExports.emplace_back(exportSymbol);
             }
         }
 
@@ -1258,20 +1248,6 @@ public:
             if (!rbiText.empty()) {
                 output.testRBI = "# typed: true\n\n" + rbiText;
                 output.testRBIPackageDependencies = buildPackageDependenciesString(gs);
-            }
-        }
-
-        if (!testPrivateExports.empty()) {
-            for (auto &exportSymbol : testPrivateExports) {
-                maybeEmit(exportSymbol);
-            }
-
-            emitLoop();
-
-            auto rbiText = out.toString();
-            if (!rbiText.empty()) {
-                output.testPrivateRBI = "# typed: true\n\n" + rbiText;
-                output.testPrivateRBIPackageDependencies = buildPackageDependenciesString(gs);
             }
         }
 
@@ -1348,13 +1324,6 @@ void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrMo
                         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
                                        output.testRBIPackageDependencies);
                     }
-
-                    if (!output.testPrivateRBI.empty()) {
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.private.package.rbi"),
-                                       output.testPrivateRBI);
-                        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.private.deps.json"),
-                                       output.testPrivateRBIPackageDependencies);
-                    }
                 }
             }
             threadBarrier.DecrementCount();
@@ -1375,13 +1344,6 @@ void RBIGenerator::runSinglePackage(core::GlobalState &gs,
         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.package.rbi"), output.testRBI);
         FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.deps.json"),
                        output.testRBIPackageDependencies);
-    }
-
-    if (!output.testPrivateRBI.empty()) {
-        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.private.package.rbi"),
-                       output.testPrivateRBI);
-        FileOps::write(absl::StrCat(outputDir, "/", output.baseFilePath, ".test.private.deps.json"),
-                       output.testPrivateRBIPackageDependencies);
     }
 }
 

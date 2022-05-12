@@ -459,7 +459,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
                 auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
                 tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
-                tree = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(tree)));
+                tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
 
                 if (tree.file.data(*rbiGenGs).isPackage()) {
                     packageTrees.emplace_back(move(tree));
@@ -467,6 +467,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     trees.emplace_back(move(tree));
                 }
             }
+
+            // Initialize the package DB
+            packageTrees = packager::Packager::findPackages(*rbiGenGs, *workers, move(packageTrees));
+
+            packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
+            packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
 
             // Namer
             {
@@ -481,10 +487,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters stubs
                 trees = move(resolver::Resolver::run(*rbiGenGs, move(trees), *workers).result());
             }
-
             // RBI generation
             {
-                packageTrees = packager::Packager::findPackages(*rbiGenGs, *workers, move(packageTrees));
                 auto packageNamespaces = packager::RBIGenerator::buildPackageNamespace(*rbiGenGs, *workers);
                 for (auto &package : rbiGenGs->packageDB().packages()) {
                     auto output = packager::RBIGenerator::runOnce(*rbiGenGs, package, packageNamespaces);
@@ -496,12 +500,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     if (!output.testRBI.empty()) {
                         handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
                             return absl::StrCat("# ", test.folder, output.baseFilePath, ".test.rbi\n", output.testRBI);
-                        });
-                    }
-                    if (!output.testPrivateRBI.empty()) {
-                        handler.addObserved(*rbiGenGs, "rbi-gen", [&]() {
-                            return absl::StrCat("# ", test.folder, output.baseFilePath, ".test.private.package.rbi\n",
-                                                output.testPrivateRBI);
                         });
                     }
                 }
@@ -558,6 +556,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
+
+        if (enablePackager) {
+            trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
+        }
+
         handler.drainErrors(*gs);
     }
 
@@ -845,6 +848,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // resolver
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees)).result());
+
+    if (enablePackager) {
+        trees = packager::VisibilityChecker::runIncremental(*gs, *workers, move(trees));
+    }
 
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });

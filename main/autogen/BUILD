@@ -3,6 +3,7 @@ cc_library(
     srcs = [
         "autogen.cc",
         "autoloader.cc",
+        "cache.cc",
         "constant_hash.cc",
         "crc_builder.cc",
         "packages.cc",
@@ -11,6 +12,7 @@ cc_library(
     hdrs = [
         "autogen.h",
         "autoloader.h",
+        "cache.h",
         "constant_hash.h",
         "crc_builder.h",
         "packages.h",
@@ -23,11 +25,11 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//ast/desugar",
         "//ast/treemap",
         "//core",
         "//main/autogen/data",
         "//main/options",
-        "//parser",
         "@com_github_d_bahr_crcpp",
     ],
 )
@@ -43,6 +45,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":autogen",
+        "//ast/desugar",
         "//core",
         "//parser",
         "@doctest",

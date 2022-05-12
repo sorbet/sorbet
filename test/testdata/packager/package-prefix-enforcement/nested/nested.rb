@@ -3,7 +3,7 @@
 extend T::Sig
 
 module Wrong
-     # ^^^^^ error: Class or method definition must match enclosing package namespace `Root::Nested`
+     # ^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
   class Inside; end
 end
 
@@ -11,7 +11,7 @@ Root::Nested::Foo::Bar = nil
 ::Allowed::TopLevel = nil
 
   NotAllowed::Foo::Bar = nil
-# ^^^^^^^^^^^^^^^^^^^^ error: Constants may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
 module Root::Nested
 
@@ -51,7 +51,7 @@ module Root
   extend T::Sig
 # ^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
   NOT_IN_PACKAGE = T.let(1, Integer)
-# ^^^^^^^^^^^^^^ error: Constants may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
   sig {returns(NilClass)}
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
@@ -70,11 +70,11 @@ def top_level_method
 end
 
 module Root::ModNotInPackage
-     # ^^^^^^^^^^^^^^^^^^^^^ error: Class or method definition must match enclosing package namespace `Root::Nested`
+     # ^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
 class Root::ClassNotInPackage
-    # ^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method definition must match enclosing package namespace `Root::Nested`
+    # ^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
 module ::TopLevel

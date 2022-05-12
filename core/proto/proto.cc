@@ -60,9 +60,6 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::Packager:
                     protoName.set_unique(com::stripe::rubytyper::Name::PACKAGER);
                     break;
-                case UniqueNameKind::PackagerPrivate:
-                    protoName.set_unique(com::stripe::rubytyper::Name::PACKAGER_PRIVATE);
-                    break;
             }
             break;
         case NameKind::CONSTANT:
@@ -147,7 +144,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             *symbolProto.add_children() = toProto(gs, pair.second, showFull);
         }
     } else if (sym.isMethod()) {
-        for (auto typeArg : sym.asMethodRef().data(gs)->typeArguments) {
+        for (auto typeArg : sym.asMethodRef().data(gs)->typeArguments()) {
             if (!typeArg.exists()) {
                 continue;
             }

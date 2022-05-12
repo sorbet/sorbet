@@ -3027,6 +3027,21 @@ token_t lexer::advance() {
   return tok;
 }
 
+void lexer::unadvance(token_t token) {
+  token_queue.push_front(token);
+}
+
+void lexer::rewind_and_reset_to_expr_beg(size_t newPos) {
+  assert(newPos <= source_buffer.size());
+
+  // rewind
+  this->_p = this->source_buffer.data() + newPos;
+
+  // reset
+  set_state_expr_beg();
+  this->in_kwarg = false;
+}
+
 void lexer::rewind_and_reset_to_expr_end(size_t newPos) {
   assert(newPos <= source_buffer.size());
 
@@ -3071,6 +3086,14 @@ void lexer::declare_forward_args() {
 
 bool lexer::is_declared_forward_args() {
   return is_declared(FORWARD_ARGS);
+}
+
+void lexer::declare_anonymous_args() {
+  declare(ANONYMOUS_BLOCKARG);
+}
+
+bool lexer::is_declared_anonymous_args() {
+  return is_declared(ANONYMOUS_BLOCKARG);
 }
 
 optional_size lexer::dedentLevel() {

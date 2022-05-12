@@ -539,10 +539,8 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE(method == Symbols::SorbetPrivateStaticSingleton_sig());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
-    ENFORCE(klass == Symbols::PackageRegistry());
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageTests());
-    ENFORCE(klass == Symbols::PackageTests());
+    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
+    ENFORCE(klass == Symbols::PackageSpecRegistry());
 
     // PackageSpec is a class that can be subclassed.
     klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpec());
@@ -564,8 +562,6 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_for_test()).arg(Names::arg0()).build();
-    ENFORCE(method == Symbols::PackageSpec_export_for_test());
     method =
         enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrict_to_service()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
@@ -861,7 +857,9 @@ void GlobalState::initEmpty() {
 }
 
 void GlobalState::installIntrinsics() {
-    for (auto &entry : intrinsicMethods) {
+    int offset = -1;
+    for (auto &entry : intrinsicMethods()) {
+        ++offset;
         ClassOrModuleRef symbol;
         switch (entry.singleton) {
             case Intrinsic::Kind::Instance:
@@ -873,7 +871,7 @@ void GlobalState::installIntrinsics() {
         }
         auto countBefore = methodsUsed();
         auto method = enterMethodSymbol(Loc::none(), symbol, entry.method);
-        method.data(*this)->intrinsic = entry.impl;
+        method.data(*this)->intrinsicOffset = offset + Method::FIRST_VALID_INTRINSIC_OFFSET;
         if (countBefore != methodsUsed()) {
             auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
             blkArg.flags.isBlock = true;
@@ -942,7 +940,7 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
         if (resSym.isMethod()) {
             auto resMethod = resSym.asMethodRef().data(*this);
             if (resMethod->methodArgumentHash(*this) == methodHash ||
-                (resMethod->intrinsic != nullptr && !resMethod->hasSig())) {
+                (resMethod->hasIntrinsic() && !resMethod->hasSig())) {
                 return resSym.asMethodRef();
             }
         }
@@ -1092,7 +1090,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
     wasModified_ = true;
 
-    auto &members = owner.dataAllowingNone(*this)->typeMembers();
+    auto &members = owner.dataAllowingNone(*this)->getOrCreateTypeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
@@ -1116,9 +1114,9 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     flags.isTypeArgument = true;
 
     auto ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->typeArguments.size());
+    histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
 
-    for (auto typeArg : ownerScope->typeArguments) {
+    for (auto typeArg : ownerScope->typeArguments()) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             counterInc("symbols.hit");
@@ -1127,8 +1125,8 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     }
 
     ENFORCE(!symbolTableFrozen);
-    auto result = TypeArgumentRef(*this, typeArguments.size());
-    typeArguments.emplace_back();
+    auto result = TypeArgumentRef(*this, this->typeArguments.size());
+    this->typeArguments.emplace_back();
 
     TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1138,7 +1136,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    owner.dataAllowingNone(*this)->typeArguments.emplace_back(result);
+    owner.dataAllowingNone(*this)->getOrCreateTypeArguments().emplace_back(result);
     return result;
 }
 

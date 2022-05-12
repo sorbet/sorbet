@@ -26,21 +26,21 @@ public:
     virtual const std::vector<core::NameRef> &fullName() const = 0;
     virtual const std::vector<std::string> &pathPrefixes() const = 0;
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
-    virtual std::vector<std::vector<core::NameRef>> testExports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
+    std::string show(const core::GlobalState &gs) const;
 
-    virtual std::optional<ImportType> importsPackage(const PackageInfo &other) const = 0;
+    virtual std::optional<ImportType> importsPackage(core::NameRef mangledName) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
                                                                  bool isTestImport) const = 0;
-    virtual std::optional<core::AutocorrectSuggestion>
-    addExport(const core::GlobalState &gs, const core::SymbolRef name, bool isPrivateTestExport) const = 0;
+    virtual std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
+                                                                 const core::SymbolRef name) const = 0;
 
     bool operator==(const PackageInfo &rhs) const;
 
@@ -55,13 +55,10 @@ public:
         core::SymbolRef symbol;
         core::NameRef srcPkg;
     };
-    virtual std::vector<MissingExportMatch> findMissingExports(core::Context ctx, core::SymbolRef scope,
-                                                               core::NameRef name) const = 0;
+
     virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
 
     // Utilities:
-
-    static bool isPackageModule(const core::GlobalState &gs, core::ClassOrModuleRef klass);
 
     static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
 };

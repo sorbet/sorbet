@@ -39,13 +39,13 @@ ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, cons
     return result;
 }
 
-core::TypePtr TypeSyntax::getResultType(core::Context ctx, ast::ExpressionPtr &expr, const ParsedSig &sigBeingParsed,
-                                        TypeSyntaxArgs args) {
+core::TypePtr TypeSyntax::getResultType(core::Context ctx, const ast::ExpressionPtr &expr,
+                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     return core::Types::unwrapSelfTypeParam(
         ctx, getResultTypeWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()));
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, ast::ExpressionPtr &expr,
+TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, const ast::ExpressionPtr &expr,
                                                         const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
     result.type = core::Types::unwrapSelfTypeParam(ctx, result.type);
@@ -956,7 +956,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
+                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
                             string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 
@@ -1068,8 +1068,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
 
             if (recvi->symbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
-                // TODO(pay-server) remove this block
-                if (auto e = ctx.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
+                if (auto e = ctx.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();

@@ -193,7 +193,7 @@ struct Intrinsic {
     const NameRef method;
     const IntrinsicMethod *impl;
 };
-extern const std::vector<Intrinsic> intrinsicMethods;
+absl::Span<const Intrinsic> intrinsicMethods();
 
 template <class To> bool isa_type(const TypePtr &what) {
     return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
@@ -715,6 +715,9 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
+
+    std::optional<size_t> indexForKey(const TypePtr &t) const;
+    std::optional<size_t> indexForKey(const LiteralType &lit) const;
 };
 CheckSize(ShapeType, 48, 8);
 

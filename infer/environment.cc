@@ -1459,21 +1459,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (castType.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
-
-                            // TODO(jez) Add location to cfg::Cast instruction
-                            auto prefix = "T.cast(";
-                            auto suffix = ", T.untyped)";
-                            uint32_t beginPos = bind.loc.beginPos() + char_traits<char>::length(prefix);
-                            uint32_t endPos = bind.loc.endPos() - char_traits<char>::length(suffix);
-                            // Naive attempt at detecting when this heuristic will have failed.
-                            if ((beginPos <= endPos) &&
-                                (core::Loc{ctx.file, bind.loc.beginPos(), beginPos}.source(ctx) == prefix) &&
-                                (core::Loc{ctx.file, endPos, bind.loc.endPos()}.source(ctx) == suffix)) {
-                                const auto locWithoutTCast = core::Loc{ctx.file, beginPos, endPos};
-                                if (locWithoutTCast.exists()) {
-                                    e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc), "T.unsafe({})",
-                                                  locWithoutTCast.source(ctx).value());
-                                }
+                            auto argLoc = core::Loc{ctx.file, c.valueLoc};
+                            if (argLoc.exists()) {
+                                e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc), "T.unsafe({})",
+                                              argLoc.source(ctx).value());
                             }
                         }
                     } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
@@ -1481,6 +1470,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                         ty.type.show(ctx), castType.show(ctx));
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                            auto argLoc = ctx.locAt(c.valueLoc);
+                            if (argLoc.exists()) {
+                                e.replaceWith("Delete `T.cast`", ctx.locAt(bind.loc), "{}", argLoc.source(ctx).value());
+                            }
                         }
                     }
                 }
@@ -1496,6 +1489,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
                 e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
                             "members?)");
+                e.addErrorNote(
+                    "Historically, users seeing this error has represented finding a bug in Sorbet\n"
+                    "    (or at least finding a test case for which there could be a better error message).\n"
+                    "    Consider searching for similar bugs at https://github.com/sorbet/sorbet/issues\n"
+                    "    or reporting a new one.");
             }
             tp.type = core::Types::untypedUntracked();
         }
@@ -1527,17 +1525,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
                                 core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, cur.type,
                                                                              tp.type);
-                            }
-                            tp = cur;
-                        }
-                        break;
-                    case cfg::CFG::MIN_LOOP_GLOBAL:
-                        if (!asGoodAs) {
-                            if (auto e =
-                                    ctx.beginError(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch)) {
-                                e.setHeader(
-                                    "Reassigning global with a value of wrong type: `{}` is not a subtype of `{}`",
-                                    tp.type.show(ctx), cur.type.show(ctx));
                             }
                             tp = cur;
                         }

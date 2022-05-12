@@ -1,4 +1,5 @@
 # typed: strict
+# packaged: false
 
 class RBI::Foo
   extend T::Sig
@@ -7,7 +8,7 @@ class RBI::Foo
   def self.one(); end
 end
 
-class ::GlobalBar
+class ::GlobalFoo
   extend T::Sig
 
   sig {returns(RBI::Foo)}

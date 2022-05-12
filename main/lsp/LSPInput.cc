@@ -44,7 +44,7 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
         // Need to read more.
         int moreNeeded = length - buffer.length();
         vector<char> buf(moreNeeded);
-        int result = FileOps::readFd(inputFd, buf);
+        int result = FileOps::readFd(inputFd, absl::MakeSpan(buf));
         if (result > 0) {
             buffer.append(buf.begin(), buf.begin() + result);
         }
@@ -60,10 +60,11 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
 
     ENFORCE(buffer.length() >= length);
 
-    string json = buffer.substr(0, length);
-    buffer.erase(0, length);
+    string_view json{buffer.data(), static_cast<size_t>(length)};
     logger->debug("Read: {}\n", json);
-    return ReadOutput{FileOps::ReadResult::Success, LSPMessage::fromClient(json)};
+    auto msg = LSPMessage::fromClient(json);
+    buffer.erase(0, length);
+    return ReadOutput{FileOps::ReadResult::Success, move(msg)};
 }
 
 LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {

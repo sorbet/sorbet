@@ -5,8 +5,11 @@
     -e:1:
      1 |1.to_
         ^
-  Autocorrect: Use `-a` to autocorrect
+  Did you mean `to_c`? Use `-a` to autocorrect
     -e:1: Replace with `to_c`
      1 |1.to_
           ^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L1116: Defined here
+    1116 |  def to_c(); end
+            ^^^^^^^^^^
 Errors: 1

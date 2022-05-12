@@ -1,0 +1,44 @@
+# -- test/testdata/namer/type_member_autocorrect_multiline.rb --
+# typed: false
+extend T::Sig
+
+module Example
+  extend T::Sig
+  extend T::Generic
+
+  # Also need to delete the double space in other changes: `type_member  {{...}}`
+
+  A1 = type_member do
+    {fixed: Integer}
+  end
+  A2 = type_member do
+    {
+      lower: Integer, # error: syntax for bounds has changed
+      upper: T.any(Integer, String),
+    }
+  end
+
+  B1 = type_member(
+    :out,
+    # error: syntax for bounds has changed
+  ) {{fixed: Integer}}
+  B2 = type_member(
+    :out,
+   
+  ) {{lower: Integer, # error: syntax for bounds has changed
+    upper: T.any(Integer, String)}}
+
+  C1 = type_member do
+    {
+      fixed: T.any( # error: syntax for bounds has changed
+        Integer,
+        String
+      ),
+    }
+  end
+  C2 = type_member(:out) {{fixed: T.any( # error: syntax for bounds has changed
+    Integer,
+    String
+  )}}
+end
+# ------------------------------

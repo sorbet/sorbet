@@ -1,148 +1,80 @@
 # -- test/testdata/packager/extra_package_paths/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C Project>::<C Foo>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo>)
 
-    <self>.import(<emptyTree>::<C Project>::<C Baz>::<C Package>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
-    end
-
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
-    end
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project>::<C Baz><<C <todo sym>>> < ()
-      <emptyTree>::<C Package> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package>
-    end
-
-    module <emptyTree>::<C Project_Bar_Package_Private$1>::<C Project><<C <todo sym>>> < ()
-      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>
-    end
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Baz>::<C Package>)
   end
 end
 # -- test/testdata/packager/extra_package_paths/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Bar>::<C Bar><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.void()
-      end
-
-      def bar1<<todo method>>(&<blk>)
-        <emptyTree>::<C Project>::<C Foo>::<C B>.b()
-      end
-
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.void()
-      end
-
-      def bar2<<todo method>>(&<blk>)
-        <emptyTree>::<C Project>::<C Baz>::<C Package>::<C C>.c()
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      ::Sorbet::Private::Static.keep_def(<self>, :bar1, :normal)
-
-      ::Sorbet::Private::Static.keep_def(<self>, :bar2, :normal)
+  class <emptyTree>::<C Project>::<C Bar>::<C Bar><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
     end
+
+    def bar1<<todo method>>(&<blk>)
+      <emptyTree>::<C Project>::<C Foo>::<C B>.b()
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def bar2<<todo method>>(&<blk>)
+      <emptyTree>::<C Project>::<C Baz>::<C Package>::<C C>.c()
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar1, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar2, :normal)
   end
 end
 # -- test/testdata/packager/extra_package_paths/baz/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
-    end
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Baz_Package_Package$1>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C C> = <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1>::<C Project>::<C Baz>::<C Package>::<C C>
-    end
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C Baz>::<C Package>::<C C>)
   end
 end
 # -- test/testdata/packager/extra_package_paths/extra/Project_Baz_Package/c.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Baz_Package_Package_Private$1><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
-      class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.void()
-        end
-
-        def self.c<<todo method>>(&<blk>)
-          <emptyTree>
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
-      end
-    end
-  end
-end
-# -- test/testdata/packager/extra_package_paths/extra/Project_Foo/b.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1><<C <todo sym>>> < ()
-    class <emptyTree>::<C Project>::<C Foo>::<C B><<C <todo sym>>> < (::<todo sym>)
+  module <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
       end
 
-      def self.b<<todo method>>(&<blk>)
+      def self.c<<todo method>>(&<blk>)
         <emptyTree>
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
     end
+  end
+end
+# -- test/testdata/packager/extra_package_paths/extra/Project_Foo/b.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C Foo>::<C B><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def self.b<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
   end
 end
 # -- test/testdata/packager/extra_package_paths/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>
-    end
-  end
-
-  module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
-      <emptyTree>::<C B> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package_Private$1>::<C Project>::<C Foo>::<C B>
-    end
-  end
-
-  module <emptyTree>::<C <PackageTests>><<C <todo sym>>> < ()
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C Foo>::<C B>)
   end
 end

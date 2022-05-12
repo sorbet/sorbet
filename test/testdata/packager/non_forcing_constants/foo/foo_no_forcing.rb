@@ -51,7 +51,7 @@ module Project::Foo::FooNonForcing
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
   def self.bad_non_existent_package(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Quux") # error: Unable to find package: `Project::Quux`
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Quux") # error: Unable to resolve constant `::Project::Quux`
       true
     else
       false

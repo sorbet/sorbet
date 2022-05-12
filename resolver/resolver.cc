@@ -10,7 +10,6 @@
 #include "core/core.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
-#include "resolver/SuggestPackage.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
@@ -689,18 +688,13 @@ private:
         // If a package exports a name that does not exist only one error should appear at the
         // export site. Ignore resolution failures in the aliases/modules created by packaging to
         // avoid this resulting in duplicate errors.
-        if (!constantNameMissing && !alreadyReported && !isPackagerMaterializedConstantRef(ctx, job)) {
+        if (!constantNameMissing && !alreadyReported) {
             if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
 
                 auto suggestScope = job.out->resolutionScopes->front();
                 if (suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() && suggestScope.isClassOrModule()) {
                     suggestionCount++;
-                    bool madePackageSuggestions =
-                        SuggestPackage::tryPackageCorrections(ctx, e, *job.out->resolutionScopes, original);
-                    if (madePackageSuggestions) {
-                        return;
-                    }
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
                     if (suggested.size() > 3) {
@@ -716,22 +710,6 @@ private:
                 }
             }
         }
-    }
-
-    // Is this constant materialized by the packager. This specifically excludes the PackageSpec
-    // class body itself.
-    static bool isPackagerMaterializedConstantRef(core::Context ctx, const ResolutionItem &job) {
-        if (!ctx.file.data(ctx).isPackage()) {
-            return false;
-        }
-        auto nesting = job.scope;
-        while (nesting != nullptr) {
-            if (nesting->scope == core::Symbols::PackageRegistry() || nesting->scope == core::Symbols::PackageTests()) {
-                return true;
-            }
-            nesting = nesting->parent;
-        }
-        return false;
     }
 
     static bool resolveJob(core::Context ctx, ResolutionItem &job) {
@@ -849,14 +827,7 @@ private:
 
         if (rhsSym.isTypeAlias(ctx)) {
             if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
-                if (ctx.file.data(ctx).isPackage()) {
-                    // In --stripe-packages mode, this error surfaces when type aliases
-                    // are exported by a package. TODO (aadi-stripe, 12/30/2021) update docs for
-                    // error 5034 as part of any larger --stripe-packages documentation effort.
-                    e.setHeader("Exporting a type alias is not allowed in package specifications");
-                } else {
-                    e.setHeader("Reassigning a type alias is not allowed");
-                }
+                e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
                 auto rhsLoc = ctx.locAt(it.rhs->loc);
                 if (rhsLoc.exists()) {
@@ -1289,10 +1260,14 @@ public:
         if (checkAmbiguousDefinition(ctx)) {
             const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
             if (ambigDef.exists()) {
-                if (auto e = ctx.beginError(original.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    e.setHeader("Class definition is ambiguous");
-                    e.addErrorLine(ambigDef.loc(ctx), "Alternate definition {} here",
-                                   ambigDef.showFullNameWithoutPackagePrefix(ctx));
+                if (auto e = ctx.beginError(original.declLoc, core::errors::Resolver::AmbiguousDefinitionError)) {
+                    auto name = klass.data(ctx)->name.show(ctx);
+                    e.setHeader("Definition of `{}` is ambiguous", name);
+                    auto klassOwner = klass.data(ctx)->owner;
+                    auto option1 = fmt::format("{}::{}", klassOwner.show(ctx), name);
+                    e.addErrorLine(klassOwner.data(ctx)->loc(), "Could mean `{}` if nested under here", option1);
+                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
+                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
                 }
             }
         }
@@ -1317,23 +1292,8 @@ public:
             return false;
         }
 
-        // If current definition is owned by package registry/test, this means it is a package-mangled module.
-        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
-        if (curOwner == core::Symbols::PackageTests() || curOwner == core::Symbols::PackageRegistry()) {
-            return false;
-        }
-
-        // If current parent is owned by package registry/test, this means we are at package-top-level (and we skip).
-        // If we didn't skip here, we'd end up checking symbols like "Test", "Opus", etc.
-        //
-        // We have a small set of these leading package namespace symbols at Stripe, and we don't expect these to run
-        // into ambiguous definition issues. Skipping checking these saves on significant overhead.
-        const core::SymbolRef curParentOwner = nesting_->parent->scope.owner(ctx);
-        if (curParentOwner == core::Symbols::PackageTests() || curParentOwner == core::Symbols::PackageRegistry()) {
-            return false;
-        }
-
         // Can't be ambiguous if current definition is single-part, don't check in this case.
+        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
         if (curOwner == nesting_->parent->scope) {
             return false;
         }
@@ -2105,8 +2065,10 @@ class ResolveTypeMembersAndFieldsWalk {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
+        // Hoisted out here to report an error from within resolveConstantType when using
+        // `T.assert_type!` even on the fast path
+        auto resultType = resolveConstantType(ctx, asgn->rhs);
         if (data->resultType == nullptr) {
-            auto resultType = resolveConstantType(ctx, asgn->rhs);
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
@@ -2123,21 +2085,6 @@ class ResolveTypeMembersAndFieldsWalk {
             return resultType;
         }
 
-        if (!core::isa_type<core::AliasType>(data->resultType)) {
-            // If we've already resolved a temporary constant, we still want to run resolveConstantType to
-            // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
-            // typechecking runs) but we only want to run this on constants that are value-level and not class
-            // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
-            // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
-            //
-            // NOTE that this error is meaningless in package files, and hence suppressed there.
-            if (resolveConstantType(ctx, asgn->rhs) == nullptr && !ctx.file.data(ctx).isPackage()) {
-                if (auto e = ctx.beginError(asgn->rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
-                                "# typed: strict");
-                }
-            }
-        }
         return data->resultType;
     }
 
@@ -2147,27 +2094,29 @@ class ResolveTypeMembersAndFieldsWalk {
         auto owner = data->owner.asClassOrModuleRef();
 
         const core::LambdaParam *parentType = nullptr;
-        core::SymbolRef parentMember = core::Symbols::noSymbol();
-        parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+        core::SymbolRef parentMemberSymbol = core::Symbols::noSymbol();
+        parentMemberSymbol = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
 
         // check mixins if the type member doesn't exist in the parent
-        if (!parentMember.exists()) {
+        if (!parentMemberSymbol.exists()) {
             for (auto mixin : owner.data(ctx)->mixins()) {
-                parentMember = mixin.data(ctx)->findMember(ctx, data->name);
-                if (parentMember.exists()) {
+                parentMemberSymbol = mixin.data(ctx)->findMember(ctx, data->name);
+                if (parentMemberSymbol.exists()) {
                     break;
                 }
             }
         }
 
-        if (parentMember.exists()) {
-            if (parentMember.isTypeMember()) {
-                parentType = core::cast_type<core::LambdaParam>(parentMember.resultType(ctx));
+        core::TypeMemberRef parentMember = core::Symbols::noTypeMember();
+        if (parentMemberSymbol.exists()) {
+            if (parentMemberSymbol.isTypeMember()) {
+                parentType = core::cast_type<core::LambdaParam>(parentMemberSymbol.resultType(ctx));
+                parentMember = parentMemberSymbol.asTypeMemberRef();
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                const auto parentShow = parentMember.show(ctx);
+                const auto parentShow = parentMemberSymbol.show(ctx);
                 e.setHeader("`{}` is a type member but `{}` is not a type member", lhs.show(ctx), parentShow);
-                e.addErrorLine(parentMember.loc(ctx), "`{}` definition", parentShow);
+                e.addErrorLine(parentMemberSymbol.loc(ctx), "`{}` definition", parentShow);
             }
         }
 
@@ -2176,16 +2125,20 @@ class ResolveTypeMembersAndFieldsWalk {
         data->resultType = lambdaParam;
         auto *memberType = core::cast_type<core::LambdaParam>(lambdaParam);
 
-        // When no args are supplied, this implies that the upper and lower
-        // bounds of the type parameter are top and bottom.
-        const auto numKwArgs = rhs->numKwArgs();
-        if (numKwArgs > 0) {
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto &keyExpr = rhs->getKwKey(i);
+        core::Loc lowerBoundTypeLoc;
+        core::Loc upperBoundTypeLoc;
+        if (rhs->block() != nullptr) {
+            if (const auto *hash = ast::cast_tree<ast::Hash>(rhs->block()->body)) {
+                int i = -1;
+                for (const auto &keyExpr : hash->keys) {
+                    i++;
+                    const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                    if (key == nullptr || !key->isSymbol(ctx)) {
+                        // Namer reported an error already
+                        continue;
+                    }
 
-                auto lit = ast::cast_tree<ast::Literal>(keyExpr);
-                if (lit && lit->isSymbol(ctx)) {
-                    auto &value = rhs->getKwValue(i);
+                    const auto &value = hash->values[i];
 
                     ParsedSig emptySig;
                     auto allowSelfType = true;
@@ -2194,50 +2147,75 @@ class ResolveTypeMembersAndFieldsWalk {
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
-                    switch (lit->asSymbol(ctx).rawId()) {
+                    switch (key->asSymbol(ctx).rawId()) {
                         case core::Names::fixed().rawId():
                             memberType->lowerBound = resTy;
                             memberType->upperBound = resTy;
+                            lowerBoundTypeLoc = ctx.locAt(value.loc());
+                            upperBoundTypeLoc = ctx.locAt(value.loc());
                             break;
 
                         case core::Names::lower().rawId():
                             memberType->lowerBound = resTy;
+                            lowerBoundTypeLoc = ctx.locAt(value.loc());
                             break;
 
                         case core::Names::upper().rawId():
                             memberType->upperBound = resTy;
+                            upperBoundTypeLoc = ctx.locAt(value.loc());
                             break;
                     }
                 }
             }
         }
 
-        // If the parent bounds existis, validate the new bounds against
-        // those of the parent.
-        // NOTE: these errors could be better for cases involving
-        // `fixed`.
+        // If the parent bounds exists, validate the new bounds against those of the parent.
         if (parentType != nullptr) {
+            auto parentData = parentMember.data(ctx);
             if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
-                if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                    e.setHeader("parent lower bound `{}` is not a subtype of lower bound `{}`",
-                                parentType->lowerBound.show(ctx), memberType->lowerBound.show(ctx));
+                auto errLoc = lowerBoundTypeLoc.exists() ? lowerBoundTypeLoc : ctx.locAt(rhs->loc);
+                if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                    e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
+                                "for {} `{}`",
+                                data->flags.isFixed ? "fixed" : "lower", memberType->lowerBound.show(ctx),
+                                parentData->flags.isFixed ? "equivalent to" : "a supertype of",
+                                parentData->flags.isFixed ? "fixed" : "lower", parentType->lowerBound.show(ctx),
+                                rhs->fun.show(ctx), data->name.show(ctx));
+                    e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
+                                   parentMember.show(ctx));
+                    if (lowerBoundTypeLoc.exists()) {
+                        auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
+                                                                                   : parentType->lowerBound;
+                        e.replaceWith("Replace with `T.untyped`", lowerBoundTypeLoc, "{}", replacementType.show(ctx));
+                    }
                 }
             }
             if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
-                if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                    e.setHeader("upper bound `{}` is not a subtype of parent upper bound `{}`",
-                                memberType->upperBound.show(ctx), parentType->upperBound.show(ctx));
+                auto errLoc = upperBoundTypeLoc.exists() ? upperBoundTypeLoc : ctx.locAt(rhs->loc);
+                if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
+                    e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
+                                "for {} `{}`",
+                                data->flags.isFixed ? "fixed" : "upper", memberType->upperBound.show(ctx),
+                                parentData->flags.isFixed ? "equivalent to" : "a subtype of",
+                                parentData->flags.isFixed ? "fixed" : "upper", parentType->upperBound.show(ctx),
+                                rhs->fun.show(ctx), data->name.show(ctx));
+                    e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
+                                   parentMember.show(ctx));
+                    if (upperBoundTypeLoc.exists()) {
+                        auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
+                                                                                   : parentType->upperBound;
+                        e.replaceWith("Replace with `T.untyped`", upperBoundTypeLoc, "{}", replacementType.show(ctx));
+                    }
                 }
             }
         }
 
-        // Ensure that the new lower bound is a subtype of the upper
-        // bound. This will be a no-op in the case that the type member
-        // is fixed.
+        // Ensure that the new lower bound is a subtype of the upper bound.
+        // This will be a no-op in the case that the type member is fixed.
         if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
             if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
-                e.setHeader("`{}` is not a subtype of `{}`", memberType->lowerBound.show(ctx),
-                            memberType->upperBound.show(ctx));
+                e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`", "lower",
+                            memberType->lowerBound.show(ctx), "upper", memberType->upperBound.show(ctx), lhs.show(ctx));
             }
         }
 
@@ -2310,10 +2288,6 @@ class ResolveTypeMembersAndFieldsWalk {
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
         ENFORCE(job.lhs.isTypeAlias(ctx) || job.lhs.isTypeMember());
 
-        if (isLHSResolved(ctx, job.lhs)) {
-            return true;
-        }
-
         auto it = std::remove_if(job.dependencies.begin(), job.dependencies.end(), [&](core::SymbolRef dep) {
             if (isGenericResolved(ctx, dep)) {
                 if (dep.isClassOrModule()) {
@@ -2331,7 +2305,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
         if (job.lhs.isTypeMember()) {
             resolveTypeMember(ctx.withOwner(job.owner), job.lhs.asTypeMemberRef(), job.rhs, resolvedAttachedClasses);
-        } else {
+        } else if (!isLHSResolved(ctx, job.lhs)) {
             resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
         }
 
@@ -2547,6 +2521,8 @@ class ResolveTypeMembersAndFieldsWalk {
         core::SymbolRef current;
         for (auto part : parts) {
             if (!current.exists()) {
+                current = core::Symbols::root();
+
                 // First iteration
                 if (!packageType) {
                     if (part != "") {
@@ -2557,26 +2533,7 @@ class ResolveTypeMembersAndFieldsWalk {
                         }
                         return;
                     }
-                    current = core::Symbols::root();
                     continue;
-                } else {
-                    auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-                    auto packageName = package.asName(ctx);
-                    auto mangledName = packageName.lookupMangledPrivatePackageName(ctx.state);
-                    // if the mangled name doesn't exist, then this means probably there's no package named this
-                    if (!mangledName.exists()) {
-                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        }
-                        return;
-                    }
-                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
-                    if (!current.exists()) {
-                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
-                        }
-                        return;
-                    }
                 }
             }
 

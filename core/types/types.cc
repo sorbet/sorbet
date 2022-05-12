@@ -326,16 +326,20 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
 } // namespace
 
 LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
-    categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype.integer");
 }
 
 LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKind::Float) {
-    categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype.double");
 }
 
 LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
     : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
-    categoryCounterInc("types.allocated", "literaltype");
+    if (klass == Symbols::String()) {
+        categoryCounterInc("types.allocated", "literaltype.string");
+    } else {
+        categoryCounterInc("types.allocated", "literaltype.symbol");
+    }
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
@@ -375,6 +379,7 @@ TypePtr LiteralType::underlying(const GlobalState &gs) const {
 
 TupleType::TupleType(vector<TypePtr> elements) : elems(move(elements)) {
     categoryCounterInc("types.allocated", "tupletype");
+    histogramInc("tupletype.elems", this->elems.size());
 }
 
 AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
@@ -415,10 +420,33 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
     DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k)); };);
     categoryCounterInc("types.allocated", "shapetype");
+    histogramInc("shapetype.keys", this->keys.size());
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return Types::hashOfUntyped();
+}
+
+std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
+    if (isa_type<LiteralType>(t)) {
+        const auto &lit = cast_type_nonnull<LiteralType>(t);
+        return indexForKey(lit);
+    }
+    return std::nullopt;
+}
+
+std::optional<size_t> ShapeType::indexForKey(const LiteralType &lit) const {
+    auto fnd = absl::c_find_if(this->keys, [&lit](const auto &candidate) -> bool {
+        if (!isa_type<LiteralType>(candidate)) {
+            return false;
+        }
+        const auto &candlit = cast_type_nonnull<LiteralType>(candidate);
+        return candlit.equals(lit);
+    });
+    if (fnd == this->keys.end()) {
+        return std::nullopt;
+    }
+    return std::distance(this->keys.begin(), fnd);
 }
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
@@ -509,7 +537,8 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
 
     if (what == asIf || (asIf.data(gs)->isClass() && what.data(gs)->isClass() &&
                          asIf.data(gs)->typeMembers().size() == what.data(gs)->typeMembers().size())) {
-        currentAlignment = what.data(gs)->typeMembers();
+        auto members = what.data(gs)->typeMembers();
+        currentAlignment.assign(members.begin(), members.end());
     } else {
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
         for (auto originalTp : asIf.data(gs)->typeMembers()) {
@@ -699,6 +728,7 @@ SelfType::SelfType() {
 };
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
+    histogramInc("appliedtype.targs", this->targs.size());
 }
 
 bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {

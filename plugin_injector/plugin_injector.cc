@@ -82,6 +82,10 @@ public:
 
     compiler::StringTable stringTable;
 
+    compiler::IDTable idTable;
+
+    compiler::RubyStringTable rubyStringTable;
+
     // The function that holds calls to global constructors
     //
     // This works as a replacement to llvm.global_ctors so that we can delay initialization until after
@@ -242,6 +246,8 @@ public:
 
             threadState->file = cfg.file;
             threadState->stringTable.clear();
+            threadState->idTable.clear();
+            threadState->rubyStringTable.clear();
 
             {
                 auto linkageType = llvm::Function::InternalLinkage;
@@ -261,7 +267,7 @@ public:
         ENFORCE(threadState->file.exists());
         compiler::CompilerState state(gs, lctx, module.get(), debug.get(), compUnit, threadState->file,
                                       threadState->allocRubyIdsEntry, threadState->globalConstructorsEntry,
-                                      threadState->stringTable);
+                                      threadState->stringTable, threadState->idTable, threadState->rubyStringTable);
         absl::Cleanup dropInternalState = [&] {
             threadState->aborted = true;
             module = nullptr;
@@ -322,13 +328,15 @@ public:
         {
             llvm::IRBuilder<> builder(lctx);
 
+            threadState->stringTable.defineGlobalVariables(lctx, *module);
+
             builder.SetInsertPoint(threadState->allocRubyIdsEntry);
+            threadState->idTable.defineGlobalVariables(lctx, *module, builder);
+            threadState->rubyStringTable.defineGlobalVariables(lctx, *module, builder);
             builder.CreateBr(threadState->globalConstructorsEntry);
 
             builder.SetInsertPoint(threadState->globalConstructorsEntry);
             builder.CreateRetVoid();
-
-            threadState->stringTable.defineGlobalVariables(lctx, *module);
         }
 
         threadState->globalConstructorsEntry = nullptr;

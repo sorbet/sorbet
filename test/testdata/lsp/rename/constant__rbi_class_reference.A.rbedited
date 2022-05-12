@@ -7,6 +7,6 @@ sig { params(foo: Bar::Foo).returns(Bar::Foo) }
 def foo(foo); end
 
 class Baz
-#     ^ apply-rename: [D] newName: Bar invalid: true expectedErrorMessage: Renaming constants defined in .rbi files is not supported; symbol Baz is defined at test/testdata/lsp/rename/constant__rbi_class_reference.rbi
+#     ^ apply-rename: [D] newName: Bar placeholderText: Baz invalid: true expectedErrorMessage: Renaming constants defined in .rbi files is not supported; symbol Baz is defined at test/testdata/lsp/rename/constant__rbi_class_reference.rbi
 
 end

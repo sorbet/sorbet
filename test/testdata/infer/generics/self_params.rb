@@ -48,7 +48,7 @@ class Foo
 end
 
 class FooChild < Foo # error: must be re-declared
-  Self_Type_Member = type_template(fixed: String)
+  Self_Type_Member = type_template {{fixed: String}}
 
   sig {params(x: Foo::Self_Type_Member).void} # error: `type_template` type `T.class_of(Foo)::Self_Type_Member` used outside of the class definition
   def not_self_method(x)

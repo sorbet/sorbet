@@ -8,11 +8,7 @@ suggest-type-alias.rb:4: Reassigning a type alias is not allowed https://srb.hel
     suggest-type-alias.rb:4: Replaced with `T.type_alias {A}`
      4 |B = A
             ^
-
-suggest-type-alias.rb:4: Constants must have type annotations with `T.let` when specifying `# typed: strict` https://srb.help/5028
-     4 |B = A
-            ^
-Errors: 2
+Errors: 1
 
 --------------------------------------------------------------------------
 

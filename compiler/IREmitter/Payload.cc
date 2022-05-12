@@ -123,41 +123,12 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
                                   {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))},
                                   "rawRubyStr");
     }
-    // this is a frozen string. We'll allocate it at load time and share it.
-    string rawName = "rubyStrFrozen_" + string(str);
-    auto tp = llvm::Type::getInt64Ty(cs);
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-
-    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
-        llvm::IRBuilder<> globalInitBuilder(cs);
-        auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
-        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
-        // create constructor
-        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
-        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *cs.module);
-
-        auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
-        globalInitBuilder.SetInsertPoint(bb);
-        auto rawCString = Payload::toCString(cs, str, globalInitBuilder);
-        auto rawStr =
-            globalInitBuilder.CreateCall(cs.getFunction("sorbet_cPtrToRubyStringFrozen"),
-                                         {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length()))});
-        globalInitBuilder.CreateStore(rawStr, ret);
-        globalInitBuilder.CreateRetVoid();
-        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
-        globalInitBuilder.CreateCall(constr, {});
-
-        return ret;
-    }));
-
-    auto name = llvm::StringRef(str.data(), str.length());
-    auto global = builder.CreateLoad(globalDeclaration, {"rubyStr_", name});
-
-    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
-    return global;
+    auto *loadAddr = builder.CreateLoad(cs.rubyStringTableRef(str));
+    auto *MD = llvm::MDNode::get(cs, llvm::None);
+    loadAddr->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    auto *load = builder.CreateLoad(loadAddr, {"rubyStr_", str});
+    load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    return load;
 }
 
 llvm::Value *Payload::testIsUndef(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val) {
@@ -169,39 +140,17 @@ llvm::Value *Payload::testIsTruthy(CompilerState &cs, llvm::IRBuilderBase &build
 }
 
 llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, std::string_view idName) {
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    auto name = llvm::StringRef(idName.data(), idName.length());
-    string rawName = "rubyIdPrecomputed_" + string(idName);
-    auto tp = llvm::Type::getInt64Ty(cs);
-    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
-        llvm::IRBuilder<> globalInitBuilder(cs);
-        auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
-        ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(llvm::MaybeAlign(8));
-        // create constructor
-        std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
-        auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
-        auto constr = llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *cs.module);
-
-        auto bb = llvm::BasicBlock::Create(cs, "constr", constr);
-        globalInitBuilder.SetInsertPoint(bb);
-        auto rawCString = Payload::toCString(cs, idName, globalInitBuilder);
-        auto rawID = globalInitBuilder.CreateCall(
-            cs.getFunction("sorbet_idIntern"),
-            {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, idName.length()))}, "rawId");
-        globalInitBuilder.CreateStore(rawID, ret);
-        globalInitBuilder.CreateRetVoid();
-        globalInitBuilder.SetInsertPoint(cs.allocRubyIdsEntry);
-        globalInitBuilder.CreateCall(constr, {});
-
-        return ret;
-    }));
-
-    auto global = builder.CreateLoad(globalDeclaration, {"rubyId_", name});
-
-    // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
-    return global;
+    // We know that this load will always return the same reference at runtime, but
+    // the actual contents of the id table reference won't be filled in until
+    // later (see the code in CompilerState for why).  But we want LLVM to know
+    // that the load always returns the same thing.  So mark the load as
+    //`!invariant.load`.
+    auto *loadAddr = builder.CreateLoad(cs.idTableRef(idName));
+    auto *MD = llvm::MDNode::get(cs, llvm::None);
+    loadAddr->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    auto *load = builder.CreateLoad(loadAddr, {"rubyId_", idName});
+    load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
+    return load;
 }
 
 namespace {

@@ -128,15 +128,15 @@ public:
 };
 } // namespace
 
-ExpressionPtr Substitute::run(core::MutableContext ctx, const core::NameSubstitution &subst, ExpressionPtr what) {
+ParsedFile Substitute::run(core::MutableContext ctx, const core::NameSubstitution &subst, ParsedFile what) {
     SubstWalk walk(subst);
-    what = TreeMap::apply(ctx, walk, std::move(what));
+    what.tree = TreeMap::apply(ctx, walk, std::move(what.tree));
     return what;
 }
 
-ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ExpressionPtr what) {
+ParsedFile Substitute::run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ParsedFile what) {
     SubstWalk walk(subst);
-    what = TreeMap::apply(ctx, walk, std::move(what));
+    what.tree = TreeMap::apply(ctx, walk, std::move(what.tree));
     return what;
 }
 

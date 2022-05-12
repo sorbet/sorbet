@@ -159,6 +159,11 @@ public:
         return show(gs, {});
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
+
+    // Given a symbol like <PackageSpecRegistry>::Project::Foo, returns true.
+    // Given any other symbol, returns false.
+    // Also returns false if called on core::Symbols::noClassOrModule().
+    bool isPackageSpecSymbol(const GlobalState &gs) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
@@ -516,7 +521,6 @@ public:
     // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
     // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;
-    std::string showFullNameWithoutPackagePrefix(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const {
@@ -924,20 +928,16 @@ public:
         return MethodRef::fromRaw(5);
     }
 
-    static ClassOrModuleRef PackageRegistry() {
+    static ClassOrModuleRef PackageSpecRegistry() {
         return ClassOrModuleRef::fromRaw(79);
     }
 
-    static ClassOrModuleRef PackageTests() {
+    static ClassOrModuleRef PackageSpec() {
         return ClassOrModuleRef::fromRaw(80);
     }
 
-    static ClassOrModuleRef PackageSpec() {
-        return ClassOrModuleRef::fromRaw(81);
-    }
-
     static ClassOrModuleRef PackageSpecSingleton() {
-        return ClassOrModuleRef::fromRaw(82);
+        return ClassOrModuleRef::fromRaw(81);
     }
 
     static MethodRef PackageSpec_import() {
@@ -952,64 +952,60 @@ public:
         return MethodRef::fromRaw(8);
     }
 
-    static MethodRef PackageSpec_export_for_test() {
+    static MethodRef PackageSpec_restrict_to_service() {
         return MethodRef::fromRaw(9);
     }
 
-    static MethodRef PackageSpec_restrict_to_service() {
-        return MethodRef::fromRaw(10);
-    }
-
     static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(83);
+        return ClassOrModuleRef::fromRaw(82);
     }
 
     static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(84);
+        return ClassOrModuleRef::fromRaw(83);
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(11);
+        return MethodRef::fromRaw(10);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(12);
+        return MethodRef::fromRaw(11);
     }
 
     static MethodRef rootStaticInit() {
-        return MethodRef::fromRaw(13);
+        return MethodRef::fromRaw(12);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
-        return ClassOrModuleRef::fromRaw(85);
+        return ClassOrModuleRef::fromRaw(84);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
-        return ClassOrModuleRef::fromRaw(86);
+        return ClassOrModuleRef::fromRaw(85);
     }
 
     static ClassOrModuleRef T_Private_Compiler() {
-        return ClassOrModuleRef::fromRaw(87);
+        return ClassOrModuleRef::fromRaw(86);
     }
 
     static ClassOrModuleRef T_Private_CompilerSingleton() {
-        return ClassOrModuleRef::fromRaw(88);
+        return ClassOrModuleRef::fromRaw(87);
     }
 
     static ClassOrModuleRef MagicBindToAttachedClass() {
-        return ClassOrModuleRef::fromRaw(89);
+        return ClassOrModuleRef::fromRaw(88);
     }
 
     static ClassOrModuleRef MagicBindToSelfType() {
-        return ClassOrModuleRef::fromRaw(90);
+        return ClassOrModuleRef::fromRaw(89);
     }
 
     static ClassOrModuleRef T_Types() {
-        return ClassOrModuleRef::fromRaw(91);
+        return ClassOrModuleRef::fromRaw(90);
     }
 
     static ClassOrModuleRef T_Types_Base() {
-        return ClassOrModuleRef::fromRaw(92);
+        return ClassOrModuleRef::fromRaw(91);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -1034,11 +1030,11 @@ public:
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 207;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 46;
+    static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 205;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 45;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 104;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 103;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

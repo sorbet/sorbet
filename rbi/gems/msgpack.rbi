@@ -146,7 +146,7 @@ end
 
 class MessagePack::ExtensionValue < Struct
   include ::MessagePack::CoreExt
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member {{fixed: T.untyped}}
 
   sig {returns(::T.untyped)}
   def payload(); end

@@ -79,8 +79,13 @@ do
             if [ "$IS_REGENERATING_REC_FILE" != true ]; then
                 if [[ "$payload" != "$expected_payload" ]];
                 then
-                    diff -u  <(echo "$expected_payload" | python -m json.tool)\
-                         <(echo "$payload" | python -m json.tool)
+                    if command -v python3 &> /dev/null; then
+                      python="python3"
+                    else
+                      python="python"
+                    fi
+                    diff -u  <(echo "$expected_payload" | "$python" -m json.tool)\
+                         <(echo "$payload" | "$python" -m json.tool)
                     exit 1
                 fi
             else

@@ -29,10 +29,6 @@ autocorrect-helpers.rb:16: Method `sealed!` does not exist on `T.class_of(S4)` h
     autocorrect-helpers.rb:16: Inserted `extend T::Helpers`
     16 |  sealed!
         ^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2213: `Kernel#select`
-    2213 |  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-helpers.rb:20: Method `interface!` does not exist on `T.class_of(S5)` https://srb.help/7003
     20 |  interface!
@@ -65,10 +61,6 @@ autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` h
     autocorrect-helpers.rb:25: Inserted `extend T::Helpers`
     25 |  abstract!
         ^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2213: `Kernel#select`
-    2213 |  def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.class_of(S7)` https://srb.help/7003
     30 |  mixes_in_class_methods(S1)
@@ -77,10 +69,6 @@ autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.
     autocorrect-helpers.rb:30: Inserted `extend T::Helpers`
     30 |  mixes_in_class_methods(S1)
         ^
-  Did you mean:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1490: `Module#public_class_method`
-    1490 |  def public_class_method(*arg0); end
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 9
 
 --------------------------------------------------------------------------

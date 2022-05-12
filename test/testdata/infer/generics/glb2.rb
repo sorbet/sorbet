@@ -12,7 +12,7 @@ class TestSubtyping
 
   class DifferentArityChild < Parent
       TParent = type_member
-      TChild = type_member(fixed: String)
+      TChild = type_member {{fixed: String}}
   end
 
   class TestGLB

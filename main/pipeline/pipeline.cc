@@ -5,6 +5,8 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
+#include "main/autogen/cache.h"
+#include "main/autogen/constant_hash.h"
 #include "packager/packager.h"
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
@@ -266,6 +268,14 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
                 return what;
             }
         }
+
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+            what = packager::VisibilityChecker::runIncremental(gs, *emptyWorkers, std::move(what));
+        }
+#endif
+
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
@@ -314,6 +324,13 @@ vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs
                 return what;
             }
         }
+
+#ifndef SORBET_REALMAIN_MIN
+        if (opts.stripePackages) {
+            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
+            what = packager::VisibilityChecker::runIncremental(gs, *emptyWorkers, move(what));
+        }
+#endif
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
@@ -539,7 +556,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                             auto file = tree.file;
                             if (!file.data(cgs).cached()) {
                                 core::MutableContext ctx(cgs, core::Symbols::root(), file);
-                                tree.tree = ast::Substitute::run(ctx, *job.subst, move(tree.tree));
+                                tree = ast::Substitute::run(ctx, *job.subst, move(tree));
                             }
                         }
                     }
@@ -646,12 +663,6 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         return;
     }
-
-#ifndef SORBET_REALMAIN_MIN
-    if (f.data(ctx).isPackage()) {
-        resolved = packager::Packager::removePackageModules(ctx, move(resolved), intentionallyLeakASTs);
-    }
-#endif
 
     resolved = definition_validator::runOne(ctx, std::move(resolved));
 
@@ -867,6 +878,14 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 }
                 what = move(maybeResult.result());
             }
+
+#ifndef SORBET_REALMAIN_MIN
+            if (opts.stripePackages) {
+                Timer timeit(gs->tracer(), "visibility_checker");
+                what = packager::VisibilityChecker::run(*gs, workers, std::move(what));
+            }
+#endif
+
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {
@@ -1255,6 +1274,47 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
         }
     }
     return written;
+}
+
+vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, string_view cachePath,
+                                              vector<ast::ParsedFile> what, WorkerPool &workers) {
+#ifndef SORBET_REALMAIN_MIN
+    Timer timeit(gs.tracer(), "autogenWriteCacheFile");
+
+    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
+    auto resultq = make_shared<BlockingBoundedQueue<autogen::HashedParsedFile>>(what.size());
+    for (auto &pf : what) {
+        fileq->push(move(pf), 1);
+    }
+
+    workers.multiplexJob("computeConstantCache", [&]() {
+        ast::ParsedFile job;
+        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            resultq->push(autogen::constantHashTree(gs, move(job)), 1);
+        }
+    });
+
+    autogen::AutogenCache cache;
+    vector<ast::ParsedFile> results;
+
+    {
+        autogen::HashedParsedFile output;
+        for (auto result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !result.done();
+             result = resultq->wait_pop_timed(output, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            cache.add(string(output.pf.file.data(gs).path()), output.constantHash);
+            results.emplace_back(move(output.pf));
+        }
+    }
+
+    FileOps::write(cachePath, cache.pack());
+
+    return results;
+#else
+    return what;
+#endif
 }
 
 } // namespace sorbet::realmain::pipeline

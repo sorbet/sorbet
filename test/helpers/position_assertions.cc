@@ -60,7 +60,7 @@ const UnorderedMap<
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
 const UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization", "commented-out-error",
-                                                     "Note",  "See"};
+                                                     "Note",  "See",  "packaged"};
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
 constexpr string_view NULL_LABEL = "null"sv;
@@ -505,7 +505,25 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
     auto responses = getLSPResponsesFor(lspWrapper, makeDefinitionRequest(id, queryLoc.uri, line, character));
     {
         INFO("Unexpected number of responses to a `textDocument/definition` request.");
-        REQUIRE_EQ(1, responses.size());
+        const auto numResponses = absl::c_count_if(responses, [](const auto &m) { return m->isResponse(); });
+        REQUIRE_EQ(1, numResponses);
+        const auto numRequests = absl::c_count_if(responses, [](const auto &m) { return m->isRequest(); });
+        REQUIRE_EQ(0, numRequests);
+        // Ensure the lone response is at the front.
+        absl::c_partition(responses, [](const auto &m) { return m->isResponse(); });
+        // We would like to verify the number of notifications here, but the number
+        // of notifications depends on the typed-ness of the file as well as the
+        // particular kind of query we're running, and we don't have access to the
+        // latter here.  We can definitely assert that typed files have no notifications,
+        // though.
+        auto foundFile = sourceFileContents.find(locFilename);
+        REQUIRE_NE(sourceFileContents.end(), foundFile);
+        auto &file = foundFile->second;
+        if (file->strictLevel >= core::StrictLevel::True) {
+            const auto numNotifications =
+                absl::c_count_if(responses, [](const auto &m) { return m->isNotification(); });
+            REQUIRE_EQ(0, numNotifications);
+        }
     }
     assertResponseMessage(id, *responses.at(0));
 
@@ -580,10 +598,27 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     auto responses =
         getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(make_unique<RequestMessage>(
                                            "2.0", id, LSPMethod::TextDocumentReferences, move(referenceParams))));
-    if (responses.size() != 1) {
+    {
         INFO("Unexpected number of responses to a `textDocument/references` request.");
-        CHECK_EQ(1, responses.size());
-        return;
+        const auto numResponses = absl::c_count_if(responses, [](const auto &m) { return m->isResponse(); });
+        REQUIRE_EQ(1, numResponses);
+        const auto numRequests = absl::c_count_if(responses, [](const auto &m) { return m->isRequest(); });
+        REQUIRE_EQ(0, numRequests);
+        // Ensure the lone response is at the front.
+        absl::c_partition(responses, [](const auto &m) { return m->isResponse(); });
+        // We would like to verify the number of notifications here, but the number
+        // of notifications depends on the typed-ness of the file as well as the
+        // particular kind of query we're running, and we don't have access to the
+        // latter here.  We can definitely assert that typed files have no notifications,
+        // though.
+        auto foundFile = sourceFileContents.find(locFilename);
+        REQUIRE_NE(sourceFileContents.end(), foundFile);
+        auto &file = foundFile->second;
+        if (file->strictLevel >= core::StrictLevel::True) {
+            const auto numNotifications =
+                absl::c_count_if(responses, [](const auto &m) { return m->isNotification(); });
+            REQUIRE_EQ(0, numNotifications);
+        }
     }
 
     assertResponseMessage(id, *responses.at(0));
@@ -1277,23 +1312,31 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
                                                             int assertionLine, string_view assertionContents,
                                                             string_view assertionType) {
     static const regex newNameRegex(
-        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:invalid:\s+(true))??\s?(?:expectedErrorMessage:\s+(.+))?)$)");
+        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:placeholderText:\s+([^ ]+))?\s?(?:invalid:\s+(true))?\s?(?:expectedErrorMessage:\s+(.+))?)$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
     if (regex_search(assertionContentsString, matches, newNameRegex)) {
         auto version = matches[1].str();
         auto newName = matches[2].str();
-        auto invalid = !matches[3].str().empty();
-        auto expectedErrorMessage = matches[4].str();
-        if (!newName.empty() || invalid) {
-            return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName, invalid,
-                                                     expectedErrorMessage);
+        auto placeholderText = matches[3].str();
+        if (!newName.empty() && placeholderText.empty()) {
+            ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                              "placeholderText must be provided if newName is provided");
+            return nullptr;
+        }
+
+        auto invalid = !matches[4].str().empty();
+        auto expectedErrorMessage = matches[5].str();
+        if ((!newName.empty() && !placeholderText.empty()) || invalid) {
+            return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName, placeholderText,
+                                                     invalid, expectedErrorMessage);
         }
     }
 
     ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
                       fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> "
+                                  "placeholderText: <name> "
                                   "(invalid: true) (expectedErrorMessage: <message>)'. Found '{}' in file {}",
                                   assertionContents, filename));
 
@@ -1301,10 +1344,10 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
 }
 
 ApplyRenameAssertion::ApplyRenameAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                           string_view version, string newName, bool invalid,
+                                           string_view version, string newName, string placeholderText, bool invalid,
                                            string expectedErrorMessage)
-    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName), invalid(invalid),
-      expectedErrorMessage(expectedErrorMessage) {}
+    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName),
+      placeholderText(placeholderText), invalid(invalid), expectedErrorMessage(expectedErrorMessage) {}
 
 void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
@@ -1319,13 +1362,16 @@ void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &as
 void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                  LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
     auto prepareRenameResponse = doTextDocumentPrepareRename(wrapper, *this->range, nextId, this->filename);
-    // TODO: test placeholder in prepareRenameResponse
 
     // A rename at an invalid position
     if (newName.empty() && invalid) {
         REQUIRE_EQ(prepareRenameResponse, nullptr);
     } else {
         REQUIRE_NE(prepareRenameResponse, nullptr);
+        auto &optPlaceholder = prepareRenameResponse->placeholder;
+        REQUIRE(optPlaceholder.has_value());
+        auto &placeholder = *optPlaceholder;
+        REQUIRE_EQ(this->placeholderText, placeholder);
     }
 
     auto workspaceEdits =

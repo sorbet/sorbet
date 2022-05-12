@@ -12,7 +12,7 @@ constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::True};
 // constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
 constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::True};
 // constexpr ErrorClass InvalidAttr{5009, StrictLevel::True};
-constexpr ErrorClass InvalidCast{5010, StrictLevel::False};
+// constexpr ErrorClass InvalidCast{5010, StrictLevel::False};
 constexpr ErrorClass CircularDependency{5011, StrictLevel::False};
 constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::False};
 constexpr ErrorClass ConstantAssertType{5013, StrictLevel::False};
@@ -30,9 +30,8 @@ constexpr ErrorClass RecursiveTypeAlias{5024, StrictLevel::False};
 constexpr ErrorClass TypeAliasInGenericClass{5025, StrictLevel::False};
 constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::False};
 
-// This is for type signatures that we permit at False but ban in True code
-constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::True};
-constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
+// constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::True};
+// constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
 constexpr ErrorClass RecursiveClassAlias{5030, StrictLevel::False};
 constexpr ErrorClass ConstantInTypeAlias{5031, StrictLevel::False};
 constexpr ErrorClass IncludesNonModule{5032, StrictLevel::False};
@@ -71,12 +70,13 @@ constexpr ErrorClass InvalidRequiredAncestor{5062, StrictLevel::True};
 constexpr ErrorClass UselessRequiredAncestor{5063, StrictLevel::True};
 constexpr ErrorClass UnsatisfiedRequiredAncestor{5064, StrictLevel::True};
 constexpr ErrorClass UnsatisfiableRequiredAncestor{5065, StrictLevel::True};
-constexpr ErrorClass ExperimentalRequiredAncestor{5066, StrictLevel::False};
+// constexpr ErrorClass ExperimentalRequiredAncestor{5066, StrictLevel::False};
 constexpr ErrorClass NonClassSuperclass{5067, StrictLevel::False};
 constexpr ErrorClass AmbiguousDefinitionError{5068, StrictLevel::False};
 constexpr ErrorClass MultipleStatementsInSig{5069, StrictLevel::False};
 constexpr ErrorClass NilableUntyped{5070, StrictLevel::False};
 constexpr ErrorClass BindNonBlockParameter{5071, StrictLevel::False};
+constexpr ErrorClass TypeMemberScopeMismatch{5072, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

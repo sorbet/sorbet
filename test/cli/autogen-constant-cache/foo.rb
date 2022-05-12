@@ -1,0 +1,2 @@
+class ExampleClass
+end

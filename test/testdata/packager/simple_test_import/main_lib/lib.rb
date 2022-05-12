@@ -6,11 +6,12 @@ class Project::MainLib::Lib
 
   # Normal code is not allowed to access names from `test_import`
   Project::TestOnly::SomeHelper.new
-# ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestOnly`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file
 
   Test::Project::Util::UtilHelper
-# ^^^^ error: Unable to resolve constant `Test`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::UtilHelper` is defined in a test namespace
 
   Test::Project::Util::Unexported
-# ^^^^ error: Unable to resolve constant `Test`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` resolves but is not exported from `Project::Util`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` is defined in a test namespace
 end

@@ -6,13 +6,13 @@
 module BadLower
   extend T::Generic
 
-  A = type_member(lower: String)
+  A = type_member {{lower: String}}
 end
 
 module BadUpper
   extend T::Generic
 
-  A = type_member(upper: Integer)
+  A = type_member {{upper: Integer}}
 end
 
 extend T::Sig

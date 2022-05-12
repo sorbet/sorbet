@@ -390,23 +390,7 @@ std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState 
         withoutOwnerStr = name.show(gs);
     };
 
-    // This is a little bit gross.  Symbol performs this sort of logic itself, but
-    // the above calls are done inside NameRef, which doesn't have the necessary
-    // symbol ownership information to do this sort of munging.  So we have to
-    // duplicate the Symbol logic here.
-    if (sym.owner(gs) != core::Symbols::PackageRegistry() || !name.isPackagerName(gs)) {
-        return withoutOwnerStr;
-    }
-
-    if (name.isPackagerPrivateName(gs)) {
-        // Remove _Package_Private before de-munging
-        return absl::StrReplaceAll(
-            withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_PRIVATE_SUFFIX.size()), {{"_", "::"}});
-    }
-
-    // Remove _Package before de-munging
-    return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - core::PACKAGE_SUFFIX.size()),
-                               {{"_", "::"}});
+    return withoutOwnerStr;
 }
 
 bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
@@ -416,12 +400,6 @@ bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::Symbol
 
     // These are the obvious cases.
     if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        return true;
-    }
-
-    // --stripe-packages interposes its own set of symbols at the toplevel.
-    // Absent any runtime support, we need to consider these as rootish.
-    if (sym == core::Symbols::PackageRegistry() || sym.name(gs).isPackagerName(gs)) {
         return true;
     }
 
@@ -517,7 +495,7 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
 llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &builder) {
     static struct {
         bool CallCacheFlags::*field;
-        string_view functionName;
+        string_view variableName;
         llvm::StringRef flagName;
     } flags[] = {
         {&CallCacheFlags::args_simple, "sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"},
@@ -531,7 +509,11 @@ llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build
     llvm::Value *acc = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
     for (auto &flag : flags) {
         if (this->*flag.field) {
-            auto *flagVal = builder.CreateCall(cs.getFunction(flag.functionName), {}, flag.flagName);
+            const bool allowInternal = true;
+            auto *global = cs.module->getGlobalVariable(flag.variableName, allowInternal);
+            ENFORCE(global != nullptr);
+            ENFORCE(global->hasInitializer());
+            auto *flagVal = global->getInitializer();
             acc = builder.CreateBinOp(llvm::Instruction::Or, acc, flagVal);
         }
     }

@@ -50,7 +50,7 @@ ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
 }
 
 vector<ast::ExpressionPtr> badConst(core::MutableContext ctx, core::LocOffsets headerLoc, core::LocOffsets line1Loc) {
-    if (auto e = ctx.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
+    if (auto e = ctx.beginError(headerLoc, core::errors::Rewriter::BadTEnumSyntax)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
         e.addErrorLine(ctx.locAt(line1Loc), "Enclosing definition here");
     }
@@ -109,7 +109,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     // So we're good to process this thing as a new T::Enum value.
 
     if (fromWhere != FromWhere::Inside) {
-        if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::TEnumOutsideEnumsDo)) {
+        if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "T::Enum");
             e.addErrorLine(ctx.locAt(klass->declLoc), "Enclosing definition here");

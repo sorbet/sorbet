@@ -4,8 +4,8 @@
 class Package::A
   extend T::Sig
 
-  sig {returns(Dep::ExportedItem)} # error: Unable to resolve constant `ExportedItem`
+  sig {returns(Dep::ExportedItem)} # error: `Dep::ExportedItem` resolves but its package is not imported
   def self.get_exported_item
-    Dep::ExportedItem.new # error: Unable to resolve constant `ExportedItem`
+    Dep::ExportedItem.new # error: `Dep::ExportedItem` resolves but its package is not imported
   end
 end

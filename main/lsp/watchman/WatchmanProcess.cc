@@ -62,21 +62,31 @@ void WatchmanProcess::start() {
         string buffer;
 
         while (!isStopped()) {
+            errno = 0;
             auto maybeLine = FileOps::readLineFromFd(fd, buffer);
             if (maybeLine.result == FileOps::ReadResult::Timeout) {
                 // Timeout occurred. See if we should abort before reading further.
                 continue;
-            } else if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+            }
+
+            if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+                if (errno == EINTR) {
+                    continue;
+                }
+
                 // Exit loop; unable to read from Watchman process.
+                exitWithCode(1, "Unknown error while reading from Watchman process");
                 break;
             }
+
+            ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
 
             const string &line = *maybeLine.output;
             // Line found!
             rapidjson::MemoryPoolAllocator<> alloc;
             rapidjson::Document d(&alloc);
             logger->debug(line);
-            if (d.Parse(line.c_str()).HasParseError()) {
+            if (d.Parse(line.c_str(), line.size()).HasParseError()) {
                 logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
             } else if (d.HasMember("is_fresh_instance")) {
                 try {
@@ -106,6 +116,8 @@ void WatchmanProcess::start() {
             exit(1);
         }
     }
+
+    ENFORCE(isStopped());
 }
 
 bool WatchmanProcess::isStopped() {

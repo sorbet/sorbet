@@ -94,7 +94,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
     assertDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
     auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
     INFO("Expected a single response to a definition request to an untyped document.");
-    REQUIRE_EQ(defResponses.size(), 1);
+    const auto numResponses = absl::c_count_if(defResponses, [](const auto &m) { return m->isResponse(); });
+    REQUIRE_EQ(1, numResponses);
+    const auto numRequests = absl::c_count_if(defResponses, [](const auto &m) { return m->isRequest(); });
+    REQUIRE_EQ(0, numRequests);
+    const auto numNotifications = absl::c_count_if(defResponses, [](const auto &m) { return m->isNotification(); });
+    REQUIRE_EQ(0, numNotifications);
+    // Ensure the lone response is at the front.
+    absl::c_partition(defResponses, [](const auto &m) { return m->isResponse(); });
     assertResponseMessage(nextId - 1, *defResponses.at(0));
 
     auto &respMsg = defResponses.at(0)->asResponse();

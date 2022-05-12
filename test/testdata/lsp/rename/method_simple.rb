@@ -4,7 +4,7 @@
 module M
   class Foo
     def bar(a=1)
-#     ^ apply-rename: [A] newName: bazz
+#     ^ apply-rename: [A] newName: bazz placeholderText: bar
     end
 
     def caller

@@ -1811,6 +1811,14 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.build.blockPass(self, $1, $2);
                     }
+                | tAMPER
+                    {
+                      if (!driver.lex.is_declared_anonymous_args()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousBlockArg, $1);
+                      }
+
+                      $$ = driver.build.blockPass(self, $1, nullptr);
+                    }
 
    opt_block_arg: tCOMMA block_arg
                     {
@@ -4116,6 +4124,14 @@ f_opt_paren_args: f_paren_args
 
                       $$ = driver.alloc.node_list(blockarg);
                     }
+                | blkarg_mark
+                    {
+                      driver.lex.declare_anonymous_args();
+
+                      auto blockarg = driver.build.blockarg(self, $1, nullptr);
+
+                      $$ = driver.alloc.node_list(blockarg);
+                    }
 
  opt_f_block_arg: tCOMMA f_block_arg
                     {
@@ -4174,6 +4190,8 @@ f_opt_paren_args: f_paren_args
                       list->emplace_back(driver.build.pair_keyword(self, $3, err));
                       $$ = list;
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3.beginPos(), @3.endPos()), $3->asString());
+                      driver.rewind_and_reset_to_beg(@3.endPos());
+                      driver.lex.unadvance($2);
                     }
                 // There's quite a bit going on in these next two. What we'd really like is to do something like
                 //     assoc error assoc

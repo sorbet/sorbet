@@ -155,11 +155,9 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
             }
         }
         // Add link to error documentation.
-        relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
-            make_unique<Location>(absl::StrCat(config->opts.errorUrlBase, error->what.code),
-                                  make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(0, 0))),
-            "Click for more information on this error."));
         diagnostic->relatedInformation = move(relatedInformation);
+        diagnostic->codeDescription =
+            make_unique<CodeDescription>(absl::StrCat(config->opts.errorUrlBase, error->what.code));
         diagnostics.push_back(move(diagnostic));
     }
 

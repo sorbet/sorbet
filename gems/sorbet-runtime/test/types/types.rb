@@ -1439,6 +1439,15 @@ module Opus::Types::Test
       end
     end
 
+    class TestGeneric3
+      extend T::Sig
+      extend T::Generic
+
+      Elem = type_member {{fixed: Integer}}
+      sig {params(x: Elem).void}
+      def foo(x); end
+    end
+
     class GenericSingleton
       extend T::Sig
       extend T::Generic
@@ -1451,7 +1460,7 @@ module Opus::Types::Test
     end
 
     class GenericSingletonChild < GenericSingleton
-      SingletonTP = type_template(fixed: String)
+      SingletonTP = type_template {{fixed: String}}
     end
 
     describe "generics" do

@@ -112,12 +112,15 @@ TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
 DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMethod(gs, args.name);
-    if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
-        DispatchResult res{nullptr, std::move(comp)};
-        method.data(gs)->intrinsic->apply(gs, args, res);
-        if (res.returnType != nullptr) {
-            return res;
+    if (method.exists()) {
+        auto *intrinsic = method.data(gs)->getIntrinsic();
+        if (intrinsic != nullptr) {
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchResult res{nullptr, std::move(comp)};
+            intrinsic->apply(gs, args, res);
+            if (res.returnType != nullptr) {
+                return res;
+            }
         }
     }
     return dispatchCallProxyType(gs, underlying(gs), args);
@@ -126,23 +129,68 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
 DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMethod(gs, args.name);
-    if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
-        DispatchResult res{nullptr, std::move(comp)};
-        method.data(gs)->intrinsic->apply(gs, args, res);
-        if (res.returnType != nullptr) {
-            return res;
+    if (method.exists()) {
+        auto *intrinsic = method.data(gs)->getIntrinsic();
+        if (intrinsic != nullptr) {
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchResult res{nullptr, std::move(comp)};
+            intrinsic->apply(gs, args, res);
+            if (res.returnType != nullptr) {
+                return res;
+            }
         }
     }
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
+namespace {
+void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc receiverLoc,
+                         core::NameRef methodName) {
+    if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
+        auto wrapInFn = gs.suggestUnsafe.value();
+        if (receiverLoc.empty()) {
+            auto shortName = methodName.shortName(gs);
+            auto beginAdjust = -2;                     // (&
+            auto endAdjust = 1 + shortName.size() + 1; // :foo)
+            auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+            if (blockPassLoc.exists()) {
+                auto blockPassSource = blockPassLoc.source(gs).value();
+                if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                    e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc, " {{|x| {}(x).{}}}",
+                                  wrapInFn, shortName);
+                }
+            }
+        } else {
+            e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
+                          receiverLoc.source(gs).value());
+        }
+    }
+}
+
+void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, SymbolRef definition, NameRef methodName,
+                                    string_view genericKind) {
+    if (methodName == Names::isA_p()) {
+        e.addErrorNote("Use `{}` instead of `{}` to check the type of an unconstrained generic type {}", "case",
+                       methodName.show(gs), genericKind);
+    } else if (definition.isTypeMember()) {
+        e.addErrorSection(ErrorSection(
+            ErrorColors::format("Consider adding an `{}` bound to `{}` here", "upper", definition.show(gs)),
+            {{definition.loc(gs), ""}}));
+
+    } else {
+        auto showOptions = ShowOptions().withShowForRBI();
+        auto wrapped = fmt::format("T.all({}, Constraint)", definition.show(gs, showOptions));
+        e.addErrorNote("Consider using `{}` to place a constraint on this type", wrapped);
+    }
+}
+} // namespace
+
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    auto emptyResult = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     if (this->definition.isTypeArgument()) {
-        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
-            return result;
+            return emptyResult;
         }
         auto funLoc = args.funLoc();
         auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
@@ -156,34 +204,44 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-
-            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
-            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
-                auto wrapInFn = gs.suggestUnsafe.value();
-                if (receiverLoc.empty()) {
-                    auto shortName = args.name.shortName(gs);
-                    auto beginAdjust = -2;                     // (&
-                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
-                    if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs).value();
-                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
-                        }
-                    }
-                } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
-                                  receiverLoc.source(gs).value());
-                }
-            }
+            autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+            addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
         }
-        result.main.errors.emplace_back(e.build());
-        return result;
+        emptyResult.main.errors.emplace_back(e.build());
+        return emptyResult;
     } else {
-        // TODO: https://github.com/sorbet/sorbet/issues/1731
-        auto untypedUntracked = Types::untypedUntracked();
-        return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
+        ENFORCE(this->definition.isTypeMember());
+        auto typeMember = this->definition.asTypeMemberRef();
+        auto lambdaParam = cast_type_nonnull<LambdaParam>(typeMember.data(gs)->resultType);
+        auto upperBound = lambdaParam.upperBound;
+        if (upperBound.isTop()) {
+            if (args.suppressErrors) {
+                return emptyResult;
+            }
+
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+            auto e = gs.beginError(errLoc, errors::Infer::CallOnUnboundedTypeMember);
+            if (e) {
+                auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
+                                  ? "template"
+                                  : "member";
+                auto thisStr = args.thisType.show(gs);
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Call to method `{}` on unbounded type {} `{}` component of `{}`", args.name.show(gs),
+                                member, thisStr, args.fullType.type.show(gs));
+                } else {
+                    e.setHeader("Call to method `{}` on unbounded type {} `{}`", args.name.show(gs), member, thisStr);
+                }
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+                addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
+            }
+            emptyResult.main.errors.emplace_back(e.build());
+            return emptyResult;
+        }
+
+        return upperBound.dispatchCall(gs, args.withThisRef(upperBound));
     }
 }
 
@@ -685,36 +743,35 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             args.fullType.type.show(gs));
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
-
-                // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
-                // suggest adding `extend T::Helpers`.
-                if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
-                    args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
-                    args.name == core::Names::mixesInClassMethods() ||
-                    (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
-                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                    if (auto suggestion =
-                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Helpers())) {
-                        e.addAutocorrect(std::move(*suggestion));
-                    }
-                } else if (args.name == core::Names::sig()) {
-                    auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                    if (auto suggestion =
-                            maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Sig())) {
-                        e.addAutocorrect(std::move(*suggestion));
-                    }
-                }
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
-            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
-                                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+
+            // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
+            // suggest adding `extend T::Helpers`.
+            if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
+                args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
+                args.name == core::Names::mixesInClassMethods() ||
+                (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
+                auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                if (auto suggestion =
+                        maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Helpers())) {
+                    e.addAutocorrect(std::move(*suggestion));
+                }
+            } else if (args.name == core::Names::sig()) {
+                auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                if (auto suggestion =
+                        maybeSuggestExtendModule(gs, attachedClass, args.callLoc(), core::Symbols::T_Sig())) {
+                    e.addAutocorrect(std::move(*suggestion));
+                }
+            } else if (args.receiverLoc().exists() &&
+                       (gs.suggestUnsafe.has_value() ||
+                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                if (receiverLoc.empty()) {
+                if (args.receiverLoc().empty()) {
                     auto shortName = args.name.shortName(gs);
                     auto beginAdjust = -2;                     // (&
                     auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+                    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
                     if (blockPassLoc.exists()) {
                         auto blockPassSource = blockPassLoc.source(gs).value();
                         if (blockPassSource == fmt::format("(&:{})", shortName)) {
@@ -725,10 +782,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 } else if (errLoc == args.funLoc() &&
                            args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
                     e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
-                                  receiverLoc.source(gs).value(), args.name.shortName(gs));
+                                  args.receiverLoc().source(gs).value(), args.name.shortName(gs));
                 } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
-                                  receiverLoc.source(gs).value());
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
+                                  args.receiverLoc().source(gs).value());
                 }
             } else {
                 if (symbol.data(gs)->isModule()) {
@@ -739,61 +796,57 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
-                if (!alternatives.empty()) {
-                    vector<ErrorLine> lines;
-                    lines.reserve(alternatives.size());
-                    for (auto alternative : alternatives) {
-                        auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() &&
-                            (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
-                            continue;
-                        }
-
-                        auto suggestedName = possibleSymbol.isClassOrModule() ? alternative.symbol.show(gs) + ".new"
-                                                                              : alternative.symbol.show(gs);
-
-                        bool addedAutocorrect = false;
-                        if (possibleSymbol.isClassOrModule()) {
-                            // TODO(jez) Use Loc::adjust here?
-                            const auto replacement = possibleSymbol.name(gs).show(gs);
-                            const auto loc = args.callLoc();
-                            const auto toReplace = args.name.toString(gs);
-                            // This is a bit hacky but the loc corresponding to the send isn't available here and until
-                            // it is, this verifies that the methodLoc below exists.
-                            if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
-                                const auto methodLoc =
-                                    Loc{loc.file(), loc.beginPos(), (uint32_t)(loc.beginPos() + toReplace.length())};
-                                e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
-                                              replacement);
-                                addedAutocorrect = true;
-                            }
-                        } else {
-                            const auto replacement = possibleSymbol.name(gs).toString(gs);
-                            const auto toReplace = args.name.toString(gs);
-                            if (replacement != toReplace) {
-                                const auto recvLoc = args.receiverLoc();
-                                const auto callLoc = args.callLoc();
-                                // See comment above.
-                                // TODO(jez) Use adjust loc here?
-                                if (recvLoc.exists() && callLoc.exists() &&
-                                    absl::StartsWith(callLoc.source(gs).value(),
-                                                     fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
-                                    const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
-                                                               (uint32_t)(recvLoc.endPos() + 1 + toReplace.length())};
-                                    e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
-                                                  replacement);
-                                    addedAutocorrect = true;
-                                }
-                            }
-                        }
-
-                        if (!addedAutocorrect) {
-                            lines.emplace_back(ErrorLine::from(alternative.symbol.loc(gs), "`{}`", suggestedName));
-                        }
+                for (auto alternative : alternatives) {
+                    auto possibleSymbol = alternative.symbol;
+                    if (!possibleSymbol.isClassOrModule() &&
+                        (!possibleSymbol.isMethod() ||
+                         (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                        continue;
                     }
-                    if (!lines.empty()) {
-                        e.addErrorSection(ErrorSection("Did you mean:", lines));
+
+                    const auto toReplace = args.name.toString(gs);
+                    if (args.funLoc().source(gs) != toReplace) {
+                        auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
+                                                                              : possibleSymbol.show(gs);
+                        e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                        continue;
+                    }
+
+                    if (possibleSymbol.isClassOrModule()) {
+                        e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                        e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                        continue;
+                    }
+
+                    const auto replacement = possibleSymbol.name(gs).toString(gs);
+                    if (replacement != toReplace) {
+                        e.didYouMean(replacement, args.funLoc());
+                        e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
+                        continue;
+                    }
+
+                    auto possibleSymbolOwner = possibleSymbol.asMethodRef().data(gs)->owner;
+                    if (possibleSymbolOwner.data(gs)->lookupSingletonClass(gs) == symbol) {
+                        auto defKeyword = "def ";
+                        auto defKeywordLen = char_traits<char>::length(defKeyword);
+                        auto prefixLen = defKeywordLen + toReplace.size();
+                        auto declLocPrefix = possibleSymbol.loc(gs).adjustLen(gs, 0, prefixLen);
+                        e.addErrorNote("Did you mean to define `{}` as a singleton class method?", toReplace);
+                        if (declLocPrefix.source(gs) == fmt::format("{}{}", defKeyword, toReplace)) {
+                            e.replaceWith("Define method with `self.`",
+                                          possibleSymbol.loc(gs).adjustLen(gs, defKeywordLen, 0), "self.");
+                        } else {
+                            e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
+                        }
+                    } else if (symbol.data(gs)->lookupSingletonClass(gs) == possibleSymbolOwner) {
+                        e.addErrorNote("Did you mean to call `{}` which is a singleton class method?",
+                                       possibleSymbol.show(gs));
+                        if (args.receiverLoc().empty()) {
+                            e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
+                        } else {
+                            e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
+                        }
+                        e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
                     }
                 }
             }
@@ -823,7 +876,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (data->flags.isGenericMethod) {
-        constr->defineDomain(gs, data->typeArguments);
+        constr->defineDomain(gs, data->typeArguments());
     }
     auto posArgs = args.numPosArgs;
     bool hasKwargs = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
@@ -1381,8 +1434,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     TypePtr &resultType = result.returnType;
 
-    if (method.data(gs)->intrinsic != nullptr) {
-        method.data(gs)->intrinsic->apply(gs, args, result);
+    auto *intrinsic = method.data(gs)->getIntrinsic();
+    if (intrinsic != nullptr) {
+        intrinsic->apply(gs, args, result);
         // the call could have overriden constraint
         if (result.main.constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
             constr = result.main.constr.get();
@@ -3003,17 +3057,6 @@ public:
 
 namespace {
 
-optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) {
-    auto fnd = absl::c_find_if(
-        shape.keys, [&argLit](auto &elemLit) { return argLit.equals(cast_type_nonnull<LiteralType>(elemLit)); });
-
-    if (fnd == shape.keys.end()) {
-        return nullopt;
-    } else {
-        return std::distance(shape.keys.begin(), fnd);
-    }
-}
-
 optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
     if (!isa_type<ClassType>(expectedType)) {
         return nullopt;
@@ -3076,7 +3119,7 @@ public:
         }
 
         auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
-        if (auto idx = indexForKey(shape, argLit)) {
+        if (auto idx = shape.indexForKey(argLit)) {
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
@@ -3767,9 +3810,7 @@ public:
     }
 } T_Enum_tripleEq;
 
-} // namespace
-
-const vector<Intrinsic> intrinsicMethods{
+const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::must(), &T_must},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::all(), &T_all},
@@ -3852,5 +3893,11 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
     {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
 };
+
+} // namespace
+
+absl::Span<const Intrinsic> intrinsicMethods() {
+    return absl::MakeSpan(intrinsics);
+}
 
 } // namespace sorbet::core

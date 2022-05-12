@@ -1,8 +1,10 @@
 #ifndef SORBET_CORE_STRICT_LEVEL_H
 #define SORBET_CORE_STRICT_LEVEL_H
 
+#include <stdint.h>
+
 namespace sorbet::core {
-enum class StrictLevel {
+enum class StrictLevel : uint8_t {
     // Internal Sorbet errors. There is no syntax to make those errors ignored.
     // This error should _always_ be lower than any other level so that there's no way to silence internal errors.
     Internal = 0,

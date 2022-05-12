@@ -1,7 +1,4 @@
 # typed: false
-#
-# The type_member errors don't get re-raised in the fast-path
-# disable-fast-path: true
 
 
 Bad = T.type_alias {T.nilable(T.untyped)}
@@ -19,8 +16,8 @@ class A
   extend T::Sig
   extend T::Generic
 
-  X = type_member(upper: T.nilable(T.untyped))
-  #                      ^^^^^^^^^^^^^^^^^^^^ error: `T.nilable(T.untyped)` is the same as `T.untyped`
+  X = type_member {{upper: T.nilable(T.untyped)}}
+  #                        ^^^^^^^^^^^^^^^^^^^^ error: `T.nilable(T.untyped)` is the same as `T.untyped`
 
   sig {params(x: T.nilable(T.untyped)).void}
   #              ^^^^^^^^^^^^^^^^^^^^ error: `T.nilable(T.untyped)` is the same as `T.untyped`

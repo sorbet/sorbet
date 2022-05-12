@@ -65,11 +65,6 @@ public:
         }
         scopeTypes.emplace_back(ScopeType::Class);
 
-        if (original.symbol.data(ctx)->owner == core::Symbols::PackageRegistry()) {
-            // this is a package, so do not enter a definition for it
-            return tree;
-        }
-
         // create a new `Definition`
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;

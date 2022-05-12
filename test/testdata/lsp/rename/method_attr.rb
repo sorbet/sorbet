@@ -12,4 +12,4 @@ end
 
 f = Foo.new
 f.foo
-#  ^ apply-rename: [B] newName: bar invalid: true expectedErrorMessage: Sorbet does not support renaming `attr_reader`s
+#  ^ apply-rename: [B] newName: bar placeholderText: foo invalid: true expectedErrorMessage: Sorbet does not support renaming `attr_reader`s

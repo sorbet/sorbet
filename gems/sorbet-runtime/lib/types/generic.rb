@@ -12,11 +12,11 @@ module T::Generic
     self
   end
 
-  def type_member(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject)
+  def type_member(variance=:invariant, &blk)
     T::Types::TypeMember.new(variance)
   end
 
-  def type_template(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject)
+  def type_template(variance=:invariant, &blk)
     T::Types::TypeTemplate.new(variance)
   end
 end

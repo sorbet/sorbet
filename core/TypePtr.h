@@ -277,6 +277,8 @@ public:
 
     bool isBottom() const;
 
+    bool isTop() const;
+
     // Used in subtyping.cc to order types.
     int kind() const;
 

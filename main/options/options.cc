@@ -330,8 +330,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                                                            "typechecker state");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
-    options.add_options("advanced")("enable-experimental-lsp-move-method",
-                                    "Enable experimental LSP feature: Move Method");
 
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
@@ -398,6 +396,15 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("autogen-autoloader-strip-prefix",
                                     "Prefixes to strip from file output paths. "
                                     "If path does not start with prefix, nothing is stripped",
+                                    cxxopts::value<vector<string>>());
+    options.add_options("advanced")("autogen-constant-cache-file",
+                                    "Location of the cache file used to determine if it's safe to skip autogen. If "
+                                    "this is not provided, autogen will always run.",
+                                    cxxopts::value<string>()->default_value(""));
+    options.add_options("advanced")("autogen-changed-files",
+                                    "List of files which have changed since the last autogen run. If a cache file is "
+                                    "also provided, autogen may exit early if it determines that these files could "
+                                    "not have affected the output of autogen.",
                                     cxxopts::value<vector<string>>());
 
     options.add_options("advanced")("error-url-base",
@@ -731,7 +738,6 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
-        opts.lspMoveMethodEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-move-method"].as<bool>();
 
         // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
         // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers
@@ -801,6 +807,11 @@ void readOptions(Options &opts,
                     opts.autogenSubclassesRelativeIgnorePatterns.emplace_back(fmt::format("/{}", pNormalized));
                 }
             }
+        }
+
+        opts.autogenConstantCacheFile = raw["autogen-constant-cache-file"].as<string>();
+        if (raw.count("autogen-changed-files") > 0) {
+            opts.autogenChangedFiles = raw["autogen-changed-files"].as<vector<string>>();
         }
 
         opts.noErrorCount = raw["no-error-count"].as<bool>();

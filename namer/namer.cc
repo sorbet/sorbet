@@ -1,4 +1,6 @@
 #include "namer/namer.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
@@ -651,7 +653,7 @@ public:
             return foundDefs->addStaticField(move(staticField));
         }
 
-        if (send->hasPosArgs() || send->hasKwArgs()) {
+        if (send->hasPosArgs() || send->block() != nullptr) {
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
@@ -661,15 +663,17 @@ public:
                 }
             }
 
-            const auto numKwArgs = send->numKwArgs();
-            // Walk over the keyword args to find bounds annotations
-            for (auto i = 0; i < numKwArgs; ++i) {
-                auto *key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
-                if (key != nullptr && key->isSymbol(ctx)) {
-                    switch (key->asSymbol(ctx).rawId()) {
-                        case core::Names::fixed().rawId():
-                            found.isFixed = true;
-                            break;
+            if (send->block() != nullptr) {
+                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                    for (const auto &keyExpr : hash->keys) {
+                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        if (key != nullptr && key->isSymbol(ctx)) {
+                            switch (key->asSymbol(ctx).rawId()) {
+                                case core::Names::fixed().rawId():
+                                    found.isFixed = true;
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -720,7 +724,7 @@ public:
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
-    unique_ptr<const FoundDefinitions> foundDefs;
+    const FoundDefinitions foundDefs;
     vector<core::ClassOrModuleRef> definedClasses;
     vector<core::MethodRef> definedMethods;
 
@@ -734,7 +738,7 @@ class SymbolDefiner {
                 return ref.symbol();
             }
             case DefinitionKind::ClassRef: {
-                auto &klassRef = ref.klassRef(*foundDefs);
+                auto &klassRef = ref.klassRef(foundDefs);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
                 return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
@@ -762,7 +766,7 @@ class SymbolDefiner {
     // Allow stub symbols created to hold intrinsics to be filled in
     // with real types from code
     bool isIntrinsic(const core::MethodData &data) {
-        return data->intrinsic != nullptr && !data->hasSig();
+        return data->hasIntrinsic() && !data->hasSig();
     }
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::Loc errorLoc, std::string constantName,
@@ -1191,10 +1195,9 @@ class SymbolDefiner {
             symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
-        // Don't add locs for <root> or <PackageRegistry>; 1) they aren't useful and 2) they'll end up with O(files in
+        // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in
         // project) locs!
-        if (symbol != core::Symbols::root() && symbol != core::Symbols::PackageRegistry() &&
-            symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
+        if (symbol != core::Symbols::root()) {
             symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
@@ -1249,13 +1252,7 @@ class SymbolDefiner {
     }
 
     core::FieldRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
-        // forbid dynamic constant definition
-        if (!ctx.owner.isClassOrModule()) {
-            if (auto e = ctx.state.beginError(core::Loc(ctx.file, staticField.asgnLoc),
-                                              core::errors::Namer::DynamicConstantAssignment)) {
-                e.setHeader("Dynamic constant assignment");
-            }
-        }
+        ENFORCE(ctx.owner.isClassOrModule());
 
         auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
                                    staticField.name, staticField.asgnLoc);
@@ -1342,9 +1339,12 @@ class SymbolDefiner {
                 emitRedefinedConstantError(ctx, ctx.locAt(typeMember.nameLoc), oldSym, existingTypeMember);
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
-            ENFORCE(absl::c_find_if(onSymbol.data(ctx)->typeMembers(), [&](auto mem) {
-                        return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
-                    }) != onSymbol.data(ctx)->typeMembers().end());
+            if (::sorbet::debug_mode) {
+                auto members = onSymbol.data(ctx)->typeMembers();
+                ENFORCE(absl::c_find_if(members, [&](auto mem) {
+                            return mem.data(ctx)->name == existingTypeMember.data(ctx)->name;
+                        }) != members.end());
+            }
             sym = existingTypeMember;
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
@@ -1380,33 +1380,33 @@ class SymbolDefiner {
     }
 
 public:
-    SymbolDefiner(unique_ptr<const FoundDefinitions> foundDefs) : foundDefs(move(foundDefs)) {}
+    SymbolDefiner(unique_ptr<FoundDefinitions> foundDefs) : foundDefs(move(*foundDefs)) {}
 
     void run(core::MutableContext ctx) {
-        definedClasses.reserve(foundDefs->klasses().size());
-        definedMethods.reserve(foundDefs->methods().size());
+        definedClasses.reserve(foundDefs.klasses().size());
+        definedMethods.reserve(foundDefs.methods().size());
 
-        for (auto &ref : foundDefs->definitions()) {
+        for (auto &ref : foundDefs.definitions()) {
             switch (ref.kind()) {
                 case DefinitionKind::Class: {
-                    const auto &klass = ref.klass(*foundDefs);
+                    const auto &klass = ref.klass(foundDefs);
                     ENFORCE(definedClasses.size() == ref.idx());
                     definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
                     break;
                 }
                 case DefinitionKind::Method: {
-                    const auto &method = ref.method(*foundDefs);
+                    const auto &method = ref.method(foundDefs);
                     ENFORCE(definedMethods.size() == ref.idx());
                     definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
                     break;
                 }
                 case DefinitionKind::StaticField: {
-                    const auto &staticField = ref.staticField(*foundDefs);
+                    const auto &staticField = ref.staticField(foundDefs);
                     insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
                     break;
                 }
                 case DefinitionKind::TypeMember: {
-                    const auto &typeMember = ref.typeMember(*foundDefs);
+                    const auto &typeMember = ref.typeMember(foundDefs);
                     insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
                     break;
                 }
@@ -1417,7 +1417,7 @@ public:
         }
 
         // TODO: Split up?
-        for (const auto &modifier : foundDefs->modifiers()) {
+        for (const auto &modifier : foundDefs.modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
                 case Modifier::Kind::Method:
@@ -1681,10 +1681,7 @@ public:
             auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
                 classBehaviorLocs[klass.symbol] = ctx.locAt(klass.declLoc);
-            } else if (prevLoc->second.file() != ctx.file &&
-                       // Ignore packages, which have 'behavior defined in multiple files'.
-                       klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry() &&
-                       klass.symbol.data(ctx)->owner != core::Symbols::PackageTests()) {
+            } else if (prevLoc->second.file() != ctx.file) {
                 if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
@@ -1782,6 +1779,63 @@ public:
         return tree;
     }
 
+    void lazyTypeMemberAutocorrect(core::Context ctx, core::ErrorBuilder &e, const ast::Send *send,
+                                   core::Loc kwArgsLoc) {
+        auto deleteLoc = kwArgsLoc;
+        auto prefix = deleteLoc.adjustLen(ctx, -2, 2);
+        if (prefix.source(ctx) == ", ") {
+            deleteLoc = prefix.join(deleteLoc);
+        }
+        prefix = deleteLoc.adjustLen(ctx, -1, 1);
+        if (prefix.source(ctx) == " ") {
+            deleteLoc = prefix.join(deleteLoc);
+        }
+
+        auto surroundingLoc = deleteLoc.adjust(ctx, -1, 1);
+        auto surroundingSrc = surroundingLoc.source(ctx);
+        if (surroundingSrc.has_value() && absl::StartsWith(surroundingSrc.value(), "(") &&
+            absl::EndsWith(surroundingSrc.value(), ")")) {
+            deleteLoc = surroundingLoc;
+        }
+
+        auto multiline = false;
+        auto indent = ""s;
+        auto sendLoc = ctx.locAt(send->loc);
+        auto [beginDetail, endDetail] = sendLoc.position(ctx);
+        if (endDetail.line > beginDetail.line && send->funLoc.exists() && !send->funLoc.empty() &&
+            send->numPosArgs() == 0) {
+            deleteLoc = core::Loc(ctx.file, send->funLoc.endPos(), send->loc.endPos());
+            multiline = true;
+            auto [_, indentLen] = sendLoc.copyEndWithZeroLength().findStartOfLine(ctx);
+            indent = string(indentLen, ' ');
+        }
+
+        auto edits = vector<core::AutocorrectSuggestion::Edit>{};
+        edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
+        auto insertLoc = ctx.locAt(send->loc).copyEndWithZeroLength();
+        auto kwArgsSource = kwArgsLoc.source(ctx).value();
+        if (multiline) {
+            auto [kwBeginDetail, kwEndDetail] = kwArgsLoc.position(ctx);
+            if (kwEndDetail.line > kwBeginDetail.line) {
+                auto reindentedSource = absl::StrReplaceAll(kwArgsSource, {{"\n", "\n  "}});
+                if (kwBeginDetail.line == beginDetail.line) {
+                    reindentedSource = absl::StrReplaceAll(reindentedSource, {{"\n", "\n  "}});
+                }
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertLoc, fmt::format(" do\n{0}  {{\n{0}    {1},\n{0}  }}\n{0}end", indent, reindentedSource)});
+            } else {
+                edits.emplace_back(core::AutocorrectSuggestion::Edit{
+                    insertLoc, fmt::format(" do\n{0}  {{{1}}}\n{0}end", indent, kwArgsSource)});
+            }
+        } else {
+            edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, fmt::format(" {{{{{}}}}}", kwArgsSource)});
+        }
+        e.addAutocorrect(core::AutocorrectSuggestion{
+            fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
+            move(edits),
+        });
+    }
+
     ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
                                                   const ast::UnresolvedConstantLit *typeName) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
@@ -1806,7 +1860,7 @@ public:
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
-        if (send->hasPosArgs() || send->hasKwArgs()) {
+        if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             if (send->numPosArgs() > 1) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
@@ -1831,13 +1885,35 @@ public:
             }
 
             if (send->hasKwArgs()) {
+                const auto numKwArgs = send->numKwArgs();
+                auto kwArgsLoc = ctx.locAt(send->getKwKey(0).loc().join(send->getKwValue(numKwArgs - 1).loc()));
+                if (auto e = ctx.state.beginError(kwArgsLoc, core::errors::Namer::OldTypeMemberSyntax)) {
+                    e.setHeader("The `{}` syntax for bounds has changed to use a block instead of keyword args",
+                                send->fun.show(ctx));
+
+                    if (kwArgsLoc.exists() && send->block() == nullptr) {
+                        lazyTypeMemberAutocorrect(ctx, e, send, kwArgsLoc);
+                    } else {
+                        e.addErrorNote("Provide these keyword args in a block that returns a `{}` literal", "Hash");
+                    }
+                }
+            }
+
+            if (send->block() != nullptr) {
                 bool fixed = false;
                 bool bounded = false;
 
-                const auto numKwArgs = send->numKwArgs();
-                for (auto i = 0; i < numKwArgs; ++i) {
-                    auto key = ast::cast_tree<ast::Literal>(send->getKwKey(i));
-                    if (key != nullptr && key->isSymbol(ctx)) {
+                if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
+                    for (const auto &keyExpr : hash->keys) {
+                        const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
+                        if (key == nullptr || !key->isSymbol(ctx)) {
+                            if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                                e.setHeader("Hash provided in block to `{}` must have symbol keys",
+                                            send->fun.show(ctx));
+                            }
+                            return tree;
+                        }
+
                         switch (key->asSymbol(ctx).rawId()) {
                             case core::Names::fixed().rawId():
                                 fixed = true;
@@ -1847,7 +1923,22 @@ public:
                             case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
+
+                            default:
+                                if (auto e =
+                                        ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                                    e.setHeader("Unknown key `{}` provided in block to `{}`",
+                                                key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
+                                }
+                                return tree;
                         }
+                    }
+                } else {
+                    if (auto e =
+                            ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx),
+                                    "Hash");
+                        return tree;
                     }
                 }
 
@@ -1901,7 +1992,6 @@ public:
 
         switch (send->fun.rawId()) {
             case core::Names::typeTemplate().rawId():
-                return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             case core::Names::typeMember().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             default:

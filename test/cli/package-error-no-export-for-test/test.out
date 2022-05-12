@@ -1,22 +1,11 @@
-foo_bar/thing.test.rb:5: Unable to resolve constant `Thing` https://srb.help/5002
-     5 |    f = Foo::Bar::Thing.new
-                ^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    foo_bar/__package.rb:4: Insert `export_for_test Foo::Bar`
-     4 |  export Foo::Bar::Exported
-                                   ^
-    foo_bar/exported.rb:3: Defined here
-     3 |class Foo::Bar::Exported
-              ^^^^^^^^
-
-other/other.test.rb:5: Unable to resolve constant `Thing` https://srb.help/5002
+other/other.test.rb:5: `Foo::Bar::Thing` resolves but is not exported from `Foo::Bar` https://srb.help/3717
      5 |    Foo::Bar::Thing
             ^^^^^^^^^^^^^^^
+    foo_bar/thing.rb:3: Defined here
+     3 |class Foo::Bar::Thing
+        ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     foo_bar/__package.rb:4: Insert `export Foo::Bar::Thing`
      4 |  export Foo::Bar::Exported
                                    ^
-    foo_bar/thing.rb:3: Defined here
-     3 |class Foo::Bar::Thing
-        ^^^^^^^^^^^^^^^^^^^^^
-Errors: 2
+Errors: 1

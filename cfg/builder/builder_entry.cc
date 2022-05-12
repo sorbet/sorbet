@@ -31,9 +31,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         if (!selfClaz.exists()) {
             selfClaz = md.symbol.enclosingClass(ctx);
         }
-        synthesizeExpr(
-            entry, LocalRef::selfVariable(), core::LocOffsets::none(),
-            make_insn<Cast>(LocalRef::selfVariable(), selfClaz.data(ctx)->selfType(ctx), core::Names::cast()));
+        synthesizeExpr(entry, LocalRef::selfVariable(), core::LocOffsets::none(),
+                       make_insn<Cast>(LocalRef::selfVariable(), core::LocOffsets::none(),
+                                       selfClaz.data(ctx)->selfType(ctx), core::Names::cast()));
 
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
@@ -112,7 +112,12 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         if (global.isFieldOrStaticField()) {
             res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
         } else {
-            res->minLoops[local.id()] = CFG::MIN_LOOP_GLOBAL;
+            // We used to have special handling here for "MIN_LOOP_GLOBAL" but it was meaningless,
+            // because it only happened for type members, and we already prohibit re-assigning type
+            // members (in namer). If this ENFORCE fails, we might have to resurrect the old logic
+            // we had for handling MIN_LOOP_GLOBAL (or at least, add some tests that would trigger
+            // pinning errors).
+            ENFORCE(global.isTypeMember());
         }
     }
     for (auto kv : discoveredUndeclaredFields) {

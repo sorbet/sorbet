@@ -71,11 +71,8 @@ end
 module T::Generic
   include T::Helpers
 
-  sig {params(params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
-  def type_parameters(*params); end
-
-  def type_member(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject); end
-  def type_template(variance=:invariant, fixed: nil, lower: T.untyped, upper: BasicObject); end
+  def type_member(variance=:invariant, &blk); end
+  def type_template(variance=:invariant, &blk); end
   def [](*types); end
 end
 

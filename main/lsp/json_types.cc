@@ -107,19 +107,16 @@ unique_ptr<Range> Range::fromLoc(const core::GlobalState &gs, core::Loc loc) {
                               make_unique<Position>(pair.second.line - 1, pair.second.column - 1));
 }
 
-core::Loc Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
+std::optional<core::Loc> Range::toLoc(const core::GlobalState &gs, core::FileRef file) const {
     ENFORCE(start->line >= 0);
     ENFORCE(start->character >= 0);
     ENFORCE(end->line >= 0);
     ENFORCE(end->character >= 0);
 
-    auto sPos = core::Loc::pos2Offset(file.data(gs),
-                                      core::Loc::Detail{(uint32_t)start->line + 1, (uint32_t)start->character + 1});
-    auto ePos =
-        core::Loc::pos2Offset(file.data(gs), core::Loc::Detail{(uint32_t)end->line + 1, (uint32_t)end->character + 1});
+    core::Loc::Detail sDetail{(uint32_t)start->line + 1, (uint32_t)start->character + 1};
+    core::Loc::Detail eDetail{(uint32_t)end->line + 1, (uint32_t)end->character + 1};
 
-    // These offsets are non-nullopt assuming the input Range is valid
-    return core::Loc(file, sPos.value(), ePos.value());
+    return core::Loc::fromDetails(gs, file, sDetail, eDetail);
 }
 
 int Range::cmp(const Range &b) const {
@@ -160,6 +157,24 @@ unique_ptr<Position> Position::copy() const {
 
 string Position::showRaw() const {
     return fmt::format("Position{{.line={}, .character={}}}", this->line, this->character);
+}
+
+// LSP Spec: line / col in Position are 0-based
+// Sorbet:   line / col in core::Loc are 1-based (like most editors)
+// LSP Spec: distinguishes Position (zero-width) and Range (start & end)
+// Sorbet:   zero-width core::Loc is a Position
+//
+// https://microsoft.github.io/language-server-protocol/specification#text-documents
+//
+// Returns nullopt if the position does not represent a valid location.
+optional<core::Loc> Position::toLoc(const core::GlobalState &gs, const core::FileRef fref) const {
+    core::Loc::Detail reqPos{static_cast<uint32_t>(this->line + 1), static_cast<uint32_t>(this->character + 1)};
+    if (auto maybeOffset = core::Loc::pos2Offset(fref.data(gs), reqPos)) {
+        auto offset = maybeOffset.value();
+        return core::Loc{fref, offset, offset};
+    } else {
+        return nullopt;
+    }
 }
 
 unique_ptr<DiagnosticRelatedInformation> DiagnosticRelatedInformation::copy() const {

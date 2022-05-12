@@ -8,6 +8,12 @@ sig do
 end
 def example1(x)
   x.foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
+
+  if x.is_a?(Integer)
+    T.reveal_type(x)
+  else
+    T.reveal_type(x)
+  end
 end
 
 module M

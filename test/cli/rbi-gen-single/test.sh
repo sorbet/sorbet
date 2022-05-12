@@ -12,9 +12,10 @@ trap "rm -rf $rbis" EXIT
 echo "-- sanity-checking package with --stripe-packages"
 "$sorbet" --silence-dev-message \
   --stripe-packages \
+  --max-threads=0 \
   --dump-package-info="$rbis/package-info.json" \
   --extra-package-files-directory-prefix="${test_path}/other/" \
-  "$test_path"
+  "$test_path" 2>&1 || true
 
 show_output() {
   local name=$1
@@ -38,12 +39,10 @@ find . -name __package.rb | sort | while read -r package; do
     --package-rbi-generation \
     --package-rbi-dir="$rbis" \
     --extra-package-files-directory-prefix="${test_path}/other/" \
-    --single-package="$name" "$test_path"
+    --single-package="$name" "$test_path" 2>&1 || true
 
   show_output "$name" "RBI"                   "package.rbi"
   show_output "$name" "RBI Deps"              "deps.json"
-  show_output "$name" "Test Private RBI"      "test.private.package.rbi"
-  show_output "$name" "Test Private RBI Deps" "test.private.deps.json"
   show_output "$name" "Test RBI"              "test.package.rbi"
   show_output "$name" "Test RBI Deps"         "test.deps.json"
 done

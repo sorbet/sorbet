@@ -1,52 +1,52 @@
-foo_class.rb:10: Unable to resolve constant `NotExported` https://srb.help/5002
+foo_class.rb:10: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     10 |      Foo::Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:7: Defined here
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::NotExported`
      4 |  export Foo::Bar::OtherPackage::OtherClass
                                                    ^
-    other/other_class.rb:7: Defined here
-     7 |  class NotExported
-          ^^^^^^^^^^^^^^^^^
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:11: Unable to resolve constant `NotExported` https://srb.help/5002
+foo_class.rb:11: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     11 |      Bar::OtherPackage::NotExported
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:7: Defined here
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::NotExported`
      4 |  export Foo::Bar::OtherPackage::OtherClass
                                                    ^
-    other/other_class.rb:7: Defined here
-     7 |  class NotExported
-          ^^^^^^^^^^^^^^^^^
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:12: Unable to resolve constant `Inner` https://srb.help/5002
+foo_class.rb:12: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::Inner`
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-                                                   ^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/other_class.rb:10: Defined here
     10 |  class Inner::AlsoNotExported
-                ^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::Inner::AlsoNotExported`
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+                                                   ^
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:13: Unable to resolve constant `Inner` https://srb.help/5002
+foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
     13 |      Bar::OtherPackage::Inner::AlsoNotExported
-              ^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::Inner`
-     4 |  export Foo::Bar::OtherPackage::OtherClass
-                                                   ^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/other_class.rb:10: Defined here
     10 |  class Inner::AlsoNotExported
-                ^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `export Foo::Bar::OtherPackage::Inner::AlsoNotExported`
+     4 |  export Foo::Bar::OtherPackage::OtherClass
+                                                   ^
   Note:
     Try running generate-packages.sh
 Errors: 4

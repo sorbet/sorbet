@@ -1,0 +1,16 @@
+Running autogen
+No errors! Great job.
+
+Running autogen with no changes: should exit early
+Checking 1 changed files
+All constant hashes unchanged; exiting
+
+Running autogen with non-constant-related changes: should exit early
+Checking 1 changed files
+All constant hashes unchanged; exiting
+
+Running autogen with constant-related changes: should re-run
+Checking 1 changed files
+Rerunning autogen: constant hash for file `example.rb` does not match stored hash
+Autogen still needs rerunning
+No errors! Great job.

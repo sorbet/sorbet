@@ -1,6 +1,6 @@
-main_lib/lib.rb:8: Unable to resolve constant `TestOnly` https://srb.help/5002
+main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file https://srb.help/3720
      8 |  Project::TestOnly::SomeHelper.new
-          ^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     main_lib/__package.rb:7: Replace with `import Project::TestOnly`
      7 |  test_import Project::TestOnly
@@ -8,6 +8,12 @@ main_lib/lib.rb:8: Unable to resolve constant `TestOnly` https://srb.help/5002
     test_only/__package.rb:5: Defined here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    RUN SCRIPT HINT
-Errors: 1
+
+main_lib/__package.rb:8: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
+     8 |  export_for_test Project::MainLib::Lib
+                          ^^^^^^^^^^^^^^^^^^^^^
+
+main_lib/__package.rb:8: Method `export_for_test` does not exist on `T.class_of(Project::MainLib)` https://srb.help/7003
+     8 |  export_for_test Project::MainLib::Lib
+          ^^^^^^^^^^^^^^^
+Errors: 3

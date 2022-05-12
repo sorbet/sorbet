@@ -724,11 +724,18 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // tuple type and call into the normal call merchanism.
                     unique_ptr<parser::Node> block;
                     auto argnodes = std::move(send->args);
+                    bool anonymousBlockPass = false;
+                    core::LocOffsets bpLoc;
                     auto it = absl::c_find_if(argnodes,
                                               [](auto &arg) { return parser::isa_node<parser::BlockPass>(arg.get()); });
                     if (it != argnodes.end()) {
                         auto *bp = parser::cast_node<parser::BlockPass>(it->get());
-                        block = std::move(bp->block);
+                        if (bp->block == nullptr) {
+                            anonymousBlockPass = true;
+                            bpLoc = bp->loc;
+                        } else {
+                            block = std::move(bp->block);
+                        }
                         argnodes.erase(it);
                     }
 
@@ -778,11 +785,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     sendargs.emplace_back(std::move(args));
                     sendargs.emplace_back(std::move(kwargs));
                     ExpressionPtr res;
-                    if (block == nullptr) {
+                    if (block == nullptr && !anonymousBlockPass) {
                         res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
                                        locZeroLen, 4, std::move(sendargs), flags);
                     } else {
-                        auto convertedBlock = node2TreeImpl(dctx, std::move(block));
+                        ExpressionPtr convertedBlock;
+                        if (anonymousBlockPass) {
+                            ENFORCE(block == nullptr, "encountered a block while processing an anonymous block pass");
+                            convertedBlock = MK::Local(bpLoc, core::Names::ampersand());
+                        } else {
+                            convertedBlock = node2TreeImpl(dctx, std::move(block));
+                        }
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
@@ -835,10 +848,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     Send::ARGS_store args;
                     unique_ptr<parser::Node> block;
                     args.reserve(send->args.size());
+                    bool anonymousBlockPass = false;
+                    core::LocOffsets bpLoc;
                     for (auto &stat : send->args) {
                         if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
                             ENFORCE(block == nullptr, "passing a block where there is no block");
-                            block = std::move(bp->block);
+                            if (bp->block == nullptr) {
+                                anonymousBlockPass = true;
+                                bpLoc = bp->loc;
+                            } else {
+                                block = std::move(bp->block);
+                            }
 
                             // we don't count the block arg as part of the positional arguments anymore.
                             numPosArgs = max(0, numPosArgs - 1);
@@ -850,13 +870,19 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
 
                     ExpressionPtr res;
-                    if (block == nullptr) {
+                    if (block == nullptr && !anonymousBlockPass) {
                         res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs, std::move(args),
                                        flags);
                     } else {
                         auto method =
                             MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
-                        auto convertedBlock = node2TreeImpl(dctx, std::move(block));
+                        ExpressionPtr convertedBlock;
+                        if (anonymousBlockPass) {
+                            ENFORCE(block == nullptr, "encountered a block while processing an anonymous block pass");
+                            convertedBlock = MK::Local(bpLoc, core::Names::ampersand());
+                        } else {
+                            convertedBlock = node2TreeImpl(dctx, std::move(block));
+                        }
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
                             res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs,
@@ -1645,6 +1671,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     val = numeric_limits<double>::quiet_NaN();
                     if (auto e = dctx.ctx.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
                         e.setHeader("Unsupported float literal: `{}`", floatNode->val);
+                        e.addErrorNote("This likely represents a bug in Sorbet. Please report an issue:\n"
+                                       "    https://github.com/sorbet/sorbet/issues");
                     }
                 }
 

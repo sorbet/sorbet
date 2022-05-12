@@ -78,6 +78,9 @@ bool TypePtr::isNilClass() const {
 bool TypePtr::isBottom() const {
     return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::bottom();
 }
+bool TypePtr::isTop() const {
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::top();
+}
 
 int TypePtr::kind() const {
     switch (tag()) {

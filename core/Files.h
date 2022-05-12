@@ -2,68 +2,25 @@
 #define SORBET_AST_FILES_H
 
 #include "core/CompiledLevel.h"
+#include "core/FileRef.h"
+#include "core/LocOffsets.h"
 #include "core/Names.h"
+#include "core/PackagedLevel.h"
 #include "core/StrictLevel.h"
 #include <string>
 #include <string_view>
 
 namespace sorbet::core {
 class GlobalState;
-class File;
 struct GlobalStateHash;
 struct FileHash;
 namespace serialize {
 class SerializerImpl;
 }
 
-class FileRef final {
-public:
-    FileRef() : _id(0){};
-    FileRef(unsigned int id);
-
-    FileRef(FileRef &f) = default;
-    FileRef(const FileRef &f) = default;
-    FileRef(FileRef &&f) = default;
-    FileRef &operator=(const FileRef &f) = default;
-    FileRef &operator=(FileRef &&f) = default;
-
-    bool operator==(const FileRef &rhs) const {
-        return _id == rhs._id;
-    }
-
-    bool operator!=(const FileRef &rhs) const {
-        return !(rhs == *this);
-    }
-
-    bool operator<(const FileRef &rhs) const {
-        return _id < rhs._id;
-    }
-
-    bool operator>(const FileRef &rhs) const {
-        return _id > rhs._id;
-    }
-
-    inline unsigned int id() const {
-        return _id;
-    }
-
-    inline bool exists() const {
-        return _id > 0;
-    }
-
-    const File &data(const GlobalState &gs) const;
-    File &data(GlobalState &gs) const;
-    const File &dataAllowingUnsafe(const GlobalState &gs) const;
-    File &dataAllowingUnsafe(GlobalState &gs) const;
-
-private:
-    uint32_t _id;
-};
-CheckSize(FileRef, 4, 4);
-
 class File final {
 public:
-    enum class Type {
+    enum class Type : uint8_t {
         NotYetRead,
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
@@ -79,7 +36,9 @@ public:
     friend class ::sorbet::core::serialize::SerializerImpl;
 
     static StrictLevel fileStrictSigil(std::string_view source);
+    static LocOffsets locStrictSigil(std::string_view source);
     static CompiledLevel fileCompiledSigil(std::string_view source);
+    static PackagedLevel filePackagedSigil(std::string_view source);
 
     std::string_view path() const;
     std::string_view source() const;
@@ -107,6 +66,9 @@ public:
 
     bool cached() const;
     void setCached(bool value);
+
+    // Returns whether or not this file is considered to be packaged.
+    bool isPackaged() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
@@ -147,18 +109,27 @@ private:
 
     Flags flags;
 
+private:
+    const PackagedLevel packagedLevel;
+
+public:
     const std::string path_;
     const std::string source_;
     mutable std::shared_ptr<std::vector<int>> lineBreaks_;
+
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
-    std::shared_ptr<const FileHash> hash_;
 
 public:
     const StrictLevel originalSigil;
     StrictLevel strictLevel;
 
     const CompiledLevel compiledLevel;
+
+private:
+    std::shared_ptr<const FileHash> hash_;
 };
+
+CheckSize(File, 96, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());

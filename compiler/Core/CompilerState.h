@@ -9,12 +9,12 @@
 namespace sorbet::compiler {
 
 struct StringTable {
-    struct StringTableEntry {
+    struct Entry {
         uint32_t offset = 0;
         llvm::GlobalVariable *addrVar = nullptr;
     };
 
-    UnorderedMap<std::string, StringTableEntry> map;
+    UnorderedMap<std::string, Entry> map;
     uint32_t size = 0;
 
     void clear() {
@@ -25,13 +25,48 @@ struct StringTable {
     void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module);
 };
 
+struct IDTable {
+    struct Entry {
+        uint32_t offset;
+        uint32_t stringTableOffset = 0;
+        uint32_t stringLength = 0;
+        llvm::GlobalVariable *addrVar = nullptr;
+    };
+
+    UnorderedMap<std::string, Entry> map;
+
+    void clear() {
+        this->map.clear();
+    }
+
+    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder);
+};
+
+struct RubyStringTable {
+    struct Entry {
+        uint32_t offset;
+        uint32_t stringTableOffset = 0;
+        uint32_t stringLength = 0;
+        llvm::GlobalVariable *addrVar = nullptr;
+    };
+
+    UnorderedMap<std::string, Entry> map;
+
+    void clear() {
+        this->map.clear();
+    }
+
+    void defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module, llvm::IRBuilderBase &builder);
+};
+
 // Like GlobalState, but for the Sorbet Compiler.
 class CompilerState {
 public:
     // Things created and managed ouside of us (by either Sorbet or plugin_injector)
     CompilerState(const core::GlobalState &gs, llvm::LLVMContext &lctx, llvm::Module *, llvm::DIBuilder *,
                   llvm::DICompileUnit *, core::FileRef, llvm::BasicBlock *allocRubyIdsEntry,
-                  llvm::BasicBlock *globalConstructorsEntry, StringTable &stringTable);
+                  llvm::BasicBlock *globalConstructorsEntry, StringTable &stringTable, IDTable &idTable,
+                  RubyStringTable &rubyStringTable);
 
     const core::GlobalState &gs;
     llvm::LLVMContext &lctx;
@@ -51,8 +86,16 @@ public:
 
     core::FileRef file;
     StringTable &stringTable;
+    IDTable &idTable;
+    RubyStringTable &rubyStringTable;
 
+private:
+    StringTable::Entry insertIntoStringTable(std::string_view str);
+
+public:
     llvm::Value *stringTableRef(std::string_view str);
+    llvm::Value *idTableRef(std::string_view str);
+    llvm::Value *rubyStringTableRef(std::string_view str);
 
     // useful apis for getting common types
 

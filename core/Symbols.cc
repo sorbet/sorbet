@@ -27,10 +27,9 @@ constexpr string_view COLON_SEPARATOR = "::"sv;
 constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
-    if (!owner.exists() || owner == Symbols::root() || owner.name(gs).isPackagerName(gs)) {
+    if (!owner.exists() || owner == Symbols::root() || owner == core::Symbols::PackageSpecRegistry()) {
         return name.show(gs);
     }
-    ENFORCE(owner != core::Symbols::PackageRegistry());
     return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
 } // namespace
@@ -399,24 +398,6 @@ string ClassOrModuleRef::show(const GlobalState &gs, ShowOptions options) const 
         return "T.proc";
     }
 
-    if (sym->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        if (sym->name.isPackagerName(gs)) {
-            auto nameStr = sym->name.shortName(gs);
-            if (sym->name.isPackagerPrivateName(gs)) {
-                // Foo_Bar_Package_Private => Foo::Bar
-                // Remove _Package_Private before de-munging
-                return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - core::PACKAGE_PRIVATE_SUFFIX.size()),
-                                           {{"_", "::"}});
-            } else {
-                // Foo_Bar_Package => Foo::Bar
-                // Remove _Package before de-munging
-                return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - core::PACKAGE_SUFFIX.size()),
-                                           {{"_", "::"}});
-            }
-        }
-    }
-
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
@@ -452,12 +433,10 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
     }
-    auto owner = sym->owner;
-    if (options.showForRBI && sym->owner.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
-        // Don't show T.class_of(Foo)::Field; show Foo::Field when printing an RBI
-        owner = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
+    if (options.showForRBI) {
+        return sym->name.show(gs);
     }
-    return showInternal(gs, owner, sym->name, COLON_SEPARATOR);
+    return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
@@ -578,6 +557,20 @@ MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef nam
         return sym.asMethodRef();
     }
     return Symbols::noMethod();
+}
+
+// Documented in SymbolRef.h
+bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
+    auto sym = *this;
+    while (sym.exists() && sym != core::Symbols::root()) {
+        if (sym == core::Symbols::PackageSpecRegistry()) {
+            return true;
+        }
+
+        sym = sym.data(gs)->owner;
+    }
+
+    return false;
 }
 
 namespace {
@@ -749,9 +742,12 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
         best.distance = 1 + (currentName.size() / 2);
     }
 
+    bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+
     // Find the closest by following outer scopes
     {
         ClassOrModuleRef base = ref(gs);
+
         do {
             // follow outer scopes
 
@@ -780,6 +776,13 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                 for (auto member : scope.data(gs)->members()) {
                     if (member.first.kind() == NameKind::CONSTANT &&
                         member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
+                        if (onlySuggestPackageSpecs) {
+                            if (!member.second.isClassOrModule() ||
+                                !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                                continue;
+                            }
+                        }
+
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
@@ -824,32 +827,29 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
             yetToGoDeeper.pop_back();
             for (auto member : thisIter.data(gs)->members()) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
-                    (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 || member.first.isPackagerName(gs))) {
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
                     if (member.second.isClassOrModule() &&
                         member.second.asClassOrModuleRef().data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
-                    // A static-field inside a package file is an alias created by that packager.
-                    // Ignore these so that the search finds only actual definitions.
-                    if (member.second.isFieldOrStaticField() && member.second.loc(gs).file().exists() &&
-                        member.second.loc(gs).file().data(gs).isPackage()) {
-                        continue;
-                    }
-                    // Mangled packager names are not matched, but we do descend into them to search
-                    // deeper.
-                    if (member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
-                        auto thisDistance = Levenstein::distance(
-                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        if (thisDistance <= globalBestDistance) {
-                            if (thisDistance < globalBestDistance) {
-                                globalBest.clear();
-                            }
-                            globalBestDistance = thisDistance;
-                            best.distance = thisDistance;
-                            best.symbol = member.second;
-                            best.name = member.first;
-                            globalBest.emplace_back(best);
+                    if (onlySuggestPackageSpecs) {
+                        if (!member.second.isClassOrModule() ||
+                            !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                            continue;
                         }
+                    }
+
+                    auto thisDistance = Levenstein::distance(
+                        currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
+                    if (thisDistance <= globalBestDistance) {
+                        if (thisDistance < globalBestDistance) {
+                            globalBest.clear();
+                        }
+                        globalBestDistance = thisDistance;
+                        best.distance = thisDistance;
+                        best.symbol = member.second;
+                        best.name = member.first;
+                        globalBest.emplace_back(best);
                     }
                     if (member.second.isClassOrModule()) {
                         yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
@@ -1008,19 +1008,6 @@ string SymbolRef::showFullName(const GlobalState &gs) const {
     }
 }
 
-string SymbolRef::showFullNameWithoutPackagePrefix(const GlobalState &gs) const {
-    vector<std::string> parts;
-    auto curSym = *this;
-    while (curSym.exists() && curSym.owner(gs) != core::Symbols::PackageRegistry() &&
-           curSym.owner(gs) != core::Symbols::PackageTests() && curSym != core::Symbols::root()) {
-        parts.emplace_back(curSym.name(gs).show(gs));
-        curSym = curSym.owner(gs);
-    }
-
-    reverse(parts.begin(), parts.end());
-    return absl::StrJoin(parts, "::");
-}
-
 string ClassOrModuleRef::showFullName(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
     return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
@@ -1112,7 +1099,7 @@ bool Method::isPrintable(const GlobalState &gs) const {
         return true;
     }
 
-    for (auto typeParam : this->typeArguments) {
+    for (auto typeParam : this->typeArguments()) {
         if (typeParam.data(gs)->isPrintable(gs)) {
             return true;
         }
@@ -1188,7 +1175,9 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     fmt::format_to(std::back_inserter(buf), "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
 
-    auto typeMembers = sym->typeMembers();
+    auto membersSpan = sym->typeMembers();
+    InlinedVector<TypeMemberRef, 4> typeMembers;
+    typeMembers.assign(membersSpan.begin(), membersSpan.end());
     auto it = remove_if(typeMembers.begin(), typeMembers.end(),
                         [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
     typeMembers.erase(it, typeMembers.end());
@@ -1284,7 +1273,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
                        fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
     }
 
-    auto typeMembers = sym->typeArguments;
+    InlinedVector<TypeArgumentRef, 4> typeMembers;
+    typeMembers.assign(sym->typeArguments().begin(), sym->typeArguments().end());
     auto it = remove_if(typeMembers.begin(), typeMembers.end(),
                         [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
     typeMembers.erase(it, typeMembers.end());
@@ -1307,7 +1297,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
     fmt::format_to(std::back_inserter(buf), "\n");
-    for (auto ta : sym->typeArguments) {
+    for (auto ta : sym->typeArguments()) {
         ENFORCE_NO_TIMER(ta.exists());
 
         if (!showFull && !ta.data(gs)->isPrintable(gs)) {
@@ -2002,7 +1992,9 @@ ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) cons
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
-    result.typeParams = this->typeParams;
+    if (this->typeParams) {
+        result.typeParams = std::make_unique<InlinedVector<TypeMemberRef, 4>>(*this->typeParams);
+    }
     if (keepGsId) {
         result.members_ = this->members_;
     } else {
@@ -2023,14 +2015,16 @@ Method Method::deepCopy(const GlobalState &to) const {
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
-    result.typeArguments = this->typeArguments;
+    if (this->typeArgs) {
+        result.typeArgs = std::make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
+    }
     result.arguments.reserve(this->arguments.size());
     for (auto &mem : this->arguments) {
         auto &store = result.arguments.emplace_back(mem.deepCopy());
         store.name = NameRef(to, mem.name);
     }
     result.rebind = this->rebind;
-    result.intrinsic = this->intrinsic;
+    result.intrinsicOffset = this->intrinsicOffset;
     return result;
 }
 
@@ -2089,7 +2083,7 @@ void Method::sanityCheck(const GlobalState &gs) const {
     MethodRef current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
 
     ENFORCE_NO_TIMER(current == current2);
-    for (auto &tp : typeArguments) {
+    for (auto &tp : typeArguments()) {
         ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), name.toString(gs) + " has a member symbol without a name");
         ENFORCE_NO_TIMER(tp.exists(), name.toString(gs) + "." + tp.data(gs)->name.toString(gs) +
                                           " corresponds to a core::Symbols::noTypeArgument()");
@@ -2220,7 +2214,7 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
-    for (const auto &e : typeParams) {
+    for (const auto &e : typeMembers()) {
         if (e.exists()) {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
@@ -2244,7 +2238,7 @@ uint32_t Method::hash(const GlobalState &gs) const {
         result = mix(result, type.hash(gs));
         result = mix(result, _hash(arg.name.shortName(gs)));
     }
-    for (const auto &e : typeArguments) {
+    for (const auto &e : typeArguments()) {
         if (e.exists()) {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
@@ -2409,12 +2403,10 @@ void ClassOrModule::addLoc(const core::GlobalState &gs, core::Loc loc) {
         return;
     }
 
-    // We shouldn't add locs for <root> or <PackageRegistry>, otherwise it'll end up with a massive loc list (O(number
+    // We shouldn't add locs for <root>, otherwise it'll end up with a massive loc list (O(number
     // of files)). Those locs aren't useful, either.
     ENFORCE(ref(gs) != Symbols::root());
-    ENFORCE(ref(gs) != Symbols::PackageRegistry());
-    // We allow one loc (during class creation) for packages under package registry.
-    ENFORCE(locs_.empty() || owner != Symbols::PackageRegistry());
+    ENFORCE(ref(gs) != Symbols::PackageSpecRegistry());
 
     addLocInternal(gs, loc, this->loc(), locs_);
 }
@@ -2546,5 +2538,17 @@ const TypeParameter *ConstTypeParameterData::operator->() const {
     runDebugOnlyCheck();
     return &typeParam;
 };
+
+bool Method::hasIntrinsic() const {
+    return this->intrinsicOffset != INVALID_INTRINSIC_OFFSET;
+}
+
+const IntrinsicMethod *Method::getIntrinsic() const {
+    if (this->intrinsicOffset == INVALID_INTRINSIC_OFFSET) {
+        return nullptr;
+    }
+
+    return intrinsicMethods()[this->intrinsicOffset - FIRST_VALID_INTRINSIC_OFFSET].impl;
+}
 
 } // namespace sorbet::core

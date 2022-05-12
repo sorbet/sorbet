@@ -128,7 +128,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                     }
                     ENFORCE(foundIdx < sym.data(gs)->typeMembers().size());
                     // quadratic
-                    swap(sym.data(gs)->typeMembers()[foundIdx], sym.data(gs)->typeMembers()[i]);
+                    swap(sym.data(gs)->existingTypeMembers()[foundIdx], sym.data(gs)->existingTypeMembers()[i]);
                 }
                 i++;
             }

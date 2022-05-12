@@ -1,52 +1,52 @@
-foo_class.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:8: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
      8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
-              ^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:14: Unable to resolve constant `Bar` https://srb.help/5002
+foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
     14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
-          ^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Try running generate-packages.sh
 
-foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Exported from package here
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     __package.rb:6: Insert `test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
-    other/__package.rb:3: Defined here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Try running generate-packages.sh
 Errors: 4

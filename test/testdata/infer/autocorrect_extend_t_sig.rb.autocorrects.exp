@@ -5,7 +5,7 @@ class DoesntHaveSig
   extend T::Sig
   sig do
 # ^^^ error: Method `sig` does not exist
-    void
+    load
   # ^^^^ error: Method `void` does not exist
   end
   def foo; end
@@ -22,7 +22,7 @@ end
 
   sig do
 # ^^^ error: Method `sig` does not exist
-    void
+    load
   # ^^^^ error: Method `void` does not exist
   end
   def foo; end

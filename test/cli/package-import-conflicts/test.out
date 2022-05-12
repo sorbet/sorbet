@@ -1,20 +1,24 @@
-imports_both_reversed/__package.rb:5: Conflicting import sources for `A::B` https://srb.help/3714
-     5 |  import A
-                 ^
-    imports_both_reversed/__package.rb:4: Conflict from
-     4 |  import A::B
-                 ^^^^
+a/__package.rb:4: Cannot export `A::B` because it is owned by another package https://srb.help/3721
+     4 |  export A::B
+          ^^^^^^^^^^^
+    ab/ab.rb:3: Defined here
+     3 |module A::B
+        ^^^^^^^^^^^
 
-imports_both/__package.rb:5: Conflicting import sources for `A::B` https://srb.help/3714
-     5 |  import A::B
-                 ^^^^
-    imports_both/__package.rb:4: Conflict from
-     4 |  import A
-                 ^
+ab/ab.rb:3: `A::B` was previously defined as a `class` https://srb.help/4012
+     3 |module A::B
+        ^^^^^^^^^^^
+    a/a.rb:4: Previous definition
+     4 |  class B; end
+          ^^^^^^^
 
-a/a.rb:4: Class or method definition must match enclosing package namespace `A` https://srb.help/3713
+a/a.rb:4: File belongs to package `A` but defines a constant that does not match this namespace https://srb.help/3713
      4 |  class B; end
                 ^
-  Note:
-    Constant `A::B` should either be defined in directory `./a/` to match its package, or re-namespaced to be within `A`
+    a/__package.rb:3: Enclosing package declared here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+    ab/__package.rb:3: Must belong to this package, given constant name `A::B`
+     3 |class A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 3

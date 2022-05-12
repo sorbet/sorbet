@@ -85,6 +85,13 @@ void markRubyConstants(Module &module) {
         if (name.startswith("rb_c") && cnst.getUnnamedAddr() == llvm::GlobalValue::UnnamedAddr::Local) {
             cnst.setConstant(true);
         }
+
+        // See the definition of `SORBET_CONSTANT` in the codegen payload.
+        if (name.startswith("sorbet_") &&
+            cnst.getVisibility() == llvm::GlobalValue::VisibilityTypes::HiddenVisibility) {
+            cnst.setVisibility(llvm::GlobalValue::VisibilityTypes::DefaultVisibility);
+            cnst.setLinkage(llvm::GlobalVariable::LinkageTypes::InternalLinkage);
+        }
     }
 }
 
