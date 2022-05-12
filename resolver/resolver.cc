@@ -2050,47 +2050,58 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
-        if (job.sym.show(ctx) == "A::X") {
-            stopInDebugger();
+        if (data->resultType == nullptr) {
+            if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
+                return resultType;
+            }
         }
-        // auto data = job.sym.data(ctx);
-        // if (data->resultType == nullptr) {
-        // TODO(jez) This is bad, this just implements something like last one wins. Is that ok? How
-        // does it work for methods, because they do something similar right?
-        if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
-            return resultType;
-        }
-        // }
-        // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
-        // `resolveStaticField`, which may produce an error message.
         return core::Types::todo();
     }
 
     [[nodiscard]] static core::TypePtr resolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
         auto &asgn = job.asgn;
-        //auto data = job.sym.data(ctx);
+        auto data = job.sym.data(ctx);
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
         auto resultType = resolveConstantType(ctx, asgn->rhs);
-        // TODO(jez) This is bad, this just implements something like last one wins. Is that ok? How
-        // does it work for methods, because they do something similar right?
-        // if (data->resultType == nullptr) {
-        // Do not attempt to suggest types for aliases that fail to resolve in package files.
-        if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
-            // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
-            auto rhs = move(job.asgn->rhs);
-            auto loc = rhs.loc();
-            if (!loc.exists()) {
-                // If the rhs happens to be an EmptyTree (e.g., `begin; end`) there will be no loc.
-                // In that case, use the assign's loc instead.
-                loc = job.asgn->loc;
+        if (data->resultType == nullptr) {
+            // Do not attempt to suggest types for aliases that fail to resolve in package files.
+            if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
+                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
+                auto rhs = move(job.asgn->rhs);
+                auto loc = rhs.loc();
+                if (!loc.exists()) {
+                    // If the rhs happens to be an EmptyTree (e.g., `begin; end`) there will be no loc.
+                    // In that case, use the assign's loc instead.
+                    loc = job.asgn->loc;
+                }
+                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                               core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
             }
-            job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                           core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
-        }
 
-        return resultType;
+            return resultType;
+        }
+        // If we already have a type, that would normally be the end of things.
+        // But we might be running incrementally and need to check for errors, in
+        // which case the already-existing type is actually incorrect.
+        //
+        // This is not really correct in general, since this code is assuming that
+        // the "error" is the top-level of the rhs, and not something buried inside
+        // the rhs.
+        auto *tree = &asgn->rhs;
+        if (auto *seq = ast::cast_tree<ast::InsSeq>(*tree)) {
+            tree = &seq->expr;
+        }
+        if (auto *cast = ast::cast_tree<ast::Cast>(*tree)) {
+            if (auto *cnst = ast::cast_tree<ast::ConstantLit>(cast->arg)) {
+                // FIXME(froydnj): give this a name in `core::Symbols::`
+                if (cnst->symbol.name(ctx) == core::Names::Constants::ErrorNode()) {
+                    return resultType;
+                }
+            }
+        }
+        return data->resultType;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::TypeMemberRef lhs, ast::Send *rhs,
