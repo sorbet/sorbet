@@ -72,3 +72,17 @@ Class.new(Foo) do
   T.reveal_type(self) # error: Revealed type: `T.class_of(Foo)`
   foo
 end
+
+class Bar
+  def bar
+    Class.new(Foo) do
+      T.reveal_type(self) # error: Revealed type: `T.class_of(Foo)`
+    end
+  end
+
+  def self.bar
+    Class.new(Foo) do
+      T.reveal_type(self) # error: Revealed type: `T.class_of(Foo)`
+    end
+  end
+end

@@ -2751,8 +2751,13 @@ public:
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.getPosArg(1)));
                     auto expr = std::move(send.getPosArg(0));
-                    auto cast =
-                        ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
+                    // We only do this for `bind` because `bind` doesn't participate in the same
+                    // sort of pinning decisions that the other casts do. Hiding pinning errors from
+                    // arbitrary synthetic lets and casts would push confusing behavior downstream.
+                    auto fun = (send.fun == core::Names::bind() && send.flags.isRewriterSynthesized)
+                                   ? core::Names::syntheticBind()
+                                   : send.fun;
+                    auto cast = ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), fun);
                     item.cast = ast::cast_tree<ast::Cast>(cast);
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).getPosArg(0);
 

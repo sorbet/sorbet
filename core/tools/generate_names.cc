@@ -145,6 +145,7 @@ NameDef names[] = {
     {"cast"},
     {"let"},
     {"uncheckedLet", "<unchecked_let>"},
+    {"syntheticBind", "<synthetic bind>"},
     {"unsafe"},
     {"must"},
     {"declareInterface", "interface!"},
