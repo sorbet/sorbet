@@ -13,6 +13,19 @@ xs[:foo] = 1
 xs[:bar] = 1 # error: Expected `NilClass` but found `Integer(1)` for key `Symbol(:bar)`
 xs[:qux]
 
+ys = {
+  5.0 => T.let(nil, T.nilable(Integer)),
+  "string" => T.let(true, T::Boolean),
+  1 => :value,
+}
+
+ys[5.0] = 5
+ys[5.0] = 6.0 # error: Expected `T.nilable(Integer)` but found `Float(6.000000)` for key `Float(5.000000)`
+ys["string"] = false
+ys["string"] = 6 # error: Expected `T::Boolean` but found `Integer(6)` for key `String("string")`
+ys[1]
+ys[1] = :other
+
 options = {
   enable_foo: T.let(false, T::Boolean),
   enable_bar: T.let(false, T::Boolean),
@@ -60,6 +73,17 @@ three_five = {
   five: '5',
 }
 T.reveal_type(one_three.merge(three_five)) # error: Revealed type: `{one: Integer(1), three: String("3"), five: String("5")} (shape of T::Hash[T.untyped, T.untyped])`
+
+float_one_three = {
+  1.0 => :one,
+  3.0 => :three,
+}
+
+float_five_three = {
+  5.0 => :five,
+  3.0 => :three,
+}
+T.reveal_type(float_one_three.merge(float_five_three)) # error: Revealed type: `{Float(1.000000) => Symbol(:one), Float(3.000000) => Symbol(:three), Float(5.000000) => Symbol(:five)} (shape of T::Hash[T.untyped, T.untyped])`
 
 # Fixes https://github.com/sorbet/sorbet/issues/3751
 sig {params(xs: T::Array[Integer]).void}
