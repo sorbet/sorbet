@@ -50,12 +50,6 @@ public:
             error = "The new name must not be empty.";
             return;
         }
-
-        if (oldName == newName) {
-            invalid = true;
-            error = "The new name cannot be the same as the oldname.";
-            return;
-        }
     }
 
     ~LocalRenamer() {}
@@ -64,8 +58,11 @@ public:
             return;
         }
 
+        string source;
+
         for (auto &localUsage : localUsages) {
-            edits[localUsage] = newName;
+            source = localUsage.source(gs).value();
+            edits[localUsage] = source[source.length() - 1] == ':' ? newName + ":" : newName;
         }
     }
 

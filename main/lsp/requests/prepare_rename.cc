@@ -36,7 +36,10 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
 
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
 getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::IdentResponse *identResp) {
-    ENFORCE(identResp->termLoc.exists());
+    if (!identResp->termLoc.exists()) {
+        ENFORCE(false);
+        return JSONNullObject();
+    }
 
     // The loc for the instance variable local in `attr_reader :foo`
     // corresponds to `foo`, but we don't want to permit renames on such
