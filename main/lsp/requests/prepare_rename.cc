@@ -11,6 +11,18 @@ namespace sorbet::realmain::lsp {
 namespace {
 variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(const core::GlobalState &gs,
                                                                                 core::SymbolRef symbol) {
+    if (symbol.isMethod()) {
+        auto def = symbol.loc(gs).source(gs);
+        if (def.has_value()) {
+            const vector<string> unsupportedDefPrefixes{"attr_reader", "attr_accessor", "attr_writer"};
+            for (auto u : unsupportedDefPrefixes) {
+                if (absl::StartsWith(*def, u)) {
+                    return JSONNullObject();
+                }
+            }
+        }
+    }
+
     auto range = Range::fromLoc(gs, symbol.loc(gs));
     if (range == nullptr) {
         return JSONNullObject();
@@ -19,6 +31,35 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
     auto result = make_unique<PrepareRenameResult>(move(range));
     auto name = symbol.name(gs).show(gs);
     result->placeholder = name;
+    return result;
+}
+
+variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
+getPrepareRenameResultForIdent(const core::GlobalState &gs, const core::lsp::IdentResponse *identResp) {
+    if (!identResp->termLoc.exists()) {
+        ENFORCE(false);
+        return JSONNullObject();
+    }
+
+    // The loc for the instance variable local in `attr_reader :foo`
+    // corresponds to `foo`, but we don't want to permit renames on such
+    // things.  This is a heuristic to rule out such cases.
+    auto adjusted = identResp->termLoc.adjust(gs, -1, 0);
+    if (adjusted.exists()) {
+        auto source = adjusted.source(gs);
+        // Check for symbols and strings.
+        if (source.has_value() && (source.value()[0] == ':' || source.value()[0] == '"' || source.value()[0] == '\'')) {
+            return JSONNullObject();
+        }
+    }
+
+    auto range = Range::fromLoc(gs, identResp->termLoc);
+    if (range == nullptr) {
+        return JSONNullObject();
+    }
+
+    auto result = make_unique<PrepareRenameResult>(move(range));
+    result->placeholder = identResp->variable._name.show(gs);
     return result;
 }
 
@@ -39,7 +80,12 @@ getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::Send
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    result->placeholder = methodNameLoc->source(gs);
+    // TODO(froydnj): this returns `FUNC=` for setters from `attr_accessor`.  we
+    // will disallow renaming such things in renaming proper, but it's not clear
+    // what to do about setters that don't result from `attr_{writer,accessor}`.
+    // Regardless, using the method name seems better than showing `FUNC =`,
+    // which is what we would get from `methodNameLoc.source(gs)`.
+    result->placeholder = sendResp->callerSideName.show(gs);
     return result;
 }
 
@@ -71,13 +117,14 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
         return response;
     }
     auto resp = move(queryResponses[0]);
-    // We support rename requests from constants, class definitions, and methods.
     if (auto constResp = resp->isConstant()) {
         response->result = getPrepareRenameResult(gs, constResp->symbol);
     } else if (auto defResp = resp->isMethodDef()) {
         response->result = getPrepareRenameResult(gs, defResp->symbol);
     } else if (auto sendResp = resp->isSend()) {
         response->result = getPrepareRenameResultForSend(gs, sendResp);
+    } else if (auto identResp = resp->isIdent()) {
+        response->result = getPrepareRenameResultForIdent(gs, identResp);
     }
 
     return response;

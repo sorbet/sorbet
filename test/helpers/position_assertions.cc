@@ -1365,6 +1365,10 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 
     // A rename at an invalid position
     if (newName.empty() && invalid) {
+        if (prepareRenameResponse != nullptr) {
+            ADD_FAIL_CHECK_AT(this->filename.c_str(), this->assertionLine + 1,
+                              "Received a prepareRenameResponse for an invalid rename position");
+        }
         REQUIRE_EQ(prepareRenameResponse, nullptr);
     } else {
         REQUIRE_NE(prepareRenameResponse, nullptr);
@@ -1378,6 +1382,10 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName, expectedErrorMessage);
     // A rename at a valid position but with an invalid new name
     if (invalid) {
+        if (workspaceEdits != nullptr) {
+            ADD_FAIL_CHECK_AT(this->filename.c_str(), this->assertionLine + 1,
+                              "Received workspaceEdits for an invalid rename position");
+        }
         REQUIRE_EQ(workspaceEdits, nullptr);
         return;
     }

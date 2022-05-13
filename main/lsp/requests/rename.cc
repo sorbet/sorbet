@@ -38,6 +38,40 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
     return true;
 }
 
+class LocalRenamer : public AbstractRenamer {
+public:
+    LocalRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
+                 const string newName, std::vector<core::Loc> localUsages)
+        : AbstractRenamer(gs, config, oldName, newName), localUsages(localUsages) {
+        // If the name is the same as before or empty, return an error. VS Code already prevents this on its own, but
+        // other IDEs might not
+        if (newName.empty()) {
+            invalid = true;
+            error = "The new name must not be empty.";
+            return;
+        }
+    }
+
+    ~LocalRenamer() {}
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+        if (invalid) {
+            return;
+        }
+
+        string source;
+
+        for (auto &localUsage : localUsages) {
+            source = localUsage.source(gs).value();
+            edits[localUsage] = source[source.length() - 1] == ':' ? newName + ":" : newName;
+        }
+    }
+
+    void addSymbol(const core::SymbolRef symbol) override {}
+
+private:
+    std::vector<core::Loc> localUsages;
+};
+
 class MethodRenamer : public AbstractRenamer {
 public:
     MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
@@ -261,6 +295,23 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
         renamer = makeRenamer(gs, config, method, params->newName);
         renamer->getRenameEdits(typechecker, method, params->newName);
         enrichResponse(response, renamer);
+    } else if (auto identResp = resp->isIdent()) {
+        if (identResp->enclosingMethod.exists()) {
+            core::NameRef localName = identResp->variable._name;
+            auto references =
+                typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
+                                  {identResp->termLoc.file()});
+            std::vector<core::Loc> locations;
+
+            for (auto &reference : references.responses) {
+                locations.emplace_back(reference->getLoc());
+            }
+
+            shared_ptr<AbstractRenamer> renamer =
+                make_shared<LocalRenamer>(gs, config, localName.show(gs), params->newName, locations);
+            renamer->rename(resp, core::SymbolRef{});
+            enrichResponse(response, renamer);
+        }
     }
 
     return response;
