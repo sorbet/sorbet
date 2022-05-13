@@ -19,13 +19,6 @@ class Foo
   end
 end
 
-class Bar
-  def foo
-    a = "hello"
-#   ^ apply-rename: [E] newName: a placeholderText: a invalid: true expectedErrorMessage: The new name cannot be the same as the oldname.
-  end
-end
-
 class DifferentScopeLevels
   def foo
     variable = "123"
@@ -45,9 +38,9 @@ class DifferentScopeLevels
       local * 5
     end
 
-    new_local = "something different"
-  # ^ apply-rename: [G] newName: new_local placeholderText: local
-    new_local
+    local = "something different"
+  # ^ apply-rename: [F] newName: new_local placeholderText: local
+    local
   end
 
   def cond
@@ -61,7 +54,7 @@ class DifferentScopeLevels
 
   def higher_level
     higher = 123
-  # ^ apply-rename: [F] newName: new_higher placeholderText: higher
+  # ^ apply-rename: [E] newName: new_higher placeholderText: higher
 
     5.times do
       higher = 321
@@ -72,9 +65,9 @@ class DifferentScopeLevels
 end
 
 class MethodParameter
-  def add(a, b)
-        # ^ apply-rename: [H] newName: c placeholderText: a
-    a + b
+  def add(c, b)
+        # ^ apply-rename: [G] newName: c placeholderText: a
+    c + b
   end
 end
 
@@ -83,7 +76,7 @@ class BlockParameter
     variable = 1
 
     [1, 2, 3].map do |variable|
-                    # ^ apply-rename: [I] newName: new_variable placeholderText: variable
+                    # ^ apply-rename: [H] newName: new_variable placeholderText: variable
       variable.to_s
     end
 
@@ -95,7 +88,7 @@ class BlockParameter
 
     [1, 2, 3].map do |variable|
       variable.to_s
-    # ^ apply-rename: [J] newName: new_variable placeholderText: variable
+    # ^ apply-rename: [I] newName: new_variable placeholderText: variable
     end
 
     variable
