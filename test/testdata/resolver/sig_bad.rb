@@ -20,6 +20,15 @@ class A
       c: T.enum(1),
       #  ^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
       #    ^^^^    error: Method `enum` does not exist on `T.class_of(T)`
+      c1: T.enum(1.0),
+      #   ^^^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
+      #     ^^^^    error: Method `enum` does not exist on `T.class_of(T)`
+      c2: T.enum("T"),
+      #   ^^^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
+      #     ^^^^    error: Method `enum` does not exist on `T.class_of(T)`
+      c3: T.enum(:T),
+      #   ^^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
+      #     ^^^^    error: Method `enum` does not exist on `T.class_of(T)`
       d: T.enum([]),
       #  ^^^^^^^^^^ error: `T.enum` has been renamed to `T.deprecated_enum`
       #  ^^^^^^^^^^ error: enum([]) is invalid
@@ -29,7 +38,10 @@ class A
       #          ^^^^^^^^^^^   error: Unsupported type literal
       #    ^^^^                error: Method `enum` does not exist on `T.class_of(T)`
       b1: T.deprecated_enum, # error: Not enough arguments provided for method `T.deprecated_enum`. Expected: `1`, got: `0`
-      c1: T.deprecated_enum(1),
+      c11: T.deprecated_enum(1),
+      c12: T.deprecated_enum(1.0),
+      c13: T.deprecated_enum("d"),
+      c14: T.deprecated_enum(:e),
       d1: T.deprecated_enum([]), # error: enum([]) is invalid
       e1: T.deprecated_enum([unsupported]), # error: Unsupported type literal
       f: 0, # error: Unsupported literal in type syntax
@@ -43,6 +55,18 @@ class A
       #  ^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
       #             ^  error: Unsupported literal in type syntax
       #             ^  error: Unexpected bare `Integer(1)` value found in type position
+      k1: T.class_of(1.0),
+      #   ^^^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
+      #              ^^^  error: Unsupported literal in type syntax
+      #              ^^^  error: Unexpected bare `Float(1.000000)` value found in type position
+      k2: T.class_of("a"),
+      #   ^^^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
+      #              ^^^  error: Unsupported literal in type syntax
+      #              ^^^  error: Unexpected bare `String("a")` value found in type position
+      k3: T.class_of(:b),
+      #   ^^^^^^^^^^^^^^ error: `T.class_of` needs a class or module as its argument
+      #              ^^  error: Unsupported literal in type syntax
+      #              ^^  error: Unexpected bare `Symbol(:b)` value found in type position
       l: {[] => String}, # error: Shape keys must be literals
       m: {foo: 0}, # error: Unsupported literal in type syntax
       n: T.all, # error: Not enough arguments provided for method
@@ -50,7 +74,7 @@ class A
     )
     .returns(T2)
   end
-  def bad(a, b, c, d, e, b1, c1, d1, e1, f, g, h, i, j, k, l, m, n, o)
+  def bad(a, b, c, c1, c2, c3, d, e, b1, c11, c12, c13, c14, d1, e1, f, g, h, i, j, k, k1, k2, k3, l, m, n, o)
     T2.new
   end
 end
