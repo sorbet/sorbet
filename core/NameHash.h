@@ -43,6 +43,12 @@ struct GlobalStateHash {
     static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
     std::vector<std::pair<NameHash, uint32_t>> methodHashes;
+
+    static GlobalStateHash invalid() {
+        GlobalStateHash ret;
+        ret.hierarchyHash = HASH_STATE_INVALID;
+        return ret;
+    }
 };
 
 struct UsageHash {
