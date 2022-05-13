@@ -13,19 +13,19 @@ public:
     inline bool isDefined() const {
         return _hashValue != 0;
     }
-    NameHash(const NameHash &nm) = default;
-    NameHash() : _hashValue(0){};
-    inline bool operator==(const NameHash &rhs) const {
+    NameHash(const NameHash &nm) noexcept = default;
+    NameHash() noexcept : _hashValue(0){};
+    inline bool operator==(const NameHash &rhs) const noexcept {
         ENFORCE(isDefined());
         ENFORCE(rhs.isDefined());
         return _hashValue == rhs._hashValue;
     }
 
-    inline bool operator!=(const NameHash &rhs) const {
+    inline bool operator!=(const NameHash &rhs) const noexcept {
         return !(rhs == *this);
     }
 
-    inline bool operator<(const NameHash &rhs) const {
+    inline bool operator<(const NameHash &rhs) const noexcept {
         return this->_hashValue < rhs._hashValue;
     }
 
