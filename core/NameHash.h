@@ -50,8 +50,8 @@ struct DefinitionFingerprint {
         : nameHash(nameHash), definitionHash(definitionHash) {}
 
     inline bool operator<(const DefinitionFingerprint &h) const noexcept {
-        return this->nameHash < h.nameHash
-            || (!(h.nameHash < this->nameHash) && this->definitionHash < h.definitionHash);
+        return this->nameHash < h.nameHash ||
+               (!(h.nameHash < this->nameHash) && this->definitionHash < h.definitionHash);
     }
 };
 
