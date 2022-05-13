@@ -133,11 +133,11 @@ bool LSPIndexer::canTakeFastPathInternal(
         if (newHash.definitions.hierarchyHash != core::DefinitionHash::HASH_STATE_INVALID &&
             newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
             logger.debug("Taking slow path because {} has changed definitions", f->path());
-            ENFORCE(newHash.definitions.classModuleHash != core::GlobalStateHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.typeArgumentHash != core::GlobalStateHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.typeMemberHash != core::GlobalStateHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.fieldHash != core::GlobalStateHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.methodHash != core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.classModuleHash != core::DefinitionHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.typeArgumentHash != core::DefinitionHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.typeMemberHash != core::DefinitionHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.fieldHash != core::DefinitionHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.methodHash != core::DefinitionHash::HASH_STATE_INVALID);
             prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
             // Also record some information about what might have changed.
             if (newHash.definitions.classModuleHash != oldHash.definitions.classModuleHash) {
