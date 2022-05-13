@@ -51,6 +51,18 @@ begin
         end
         s.+("hi")
         s.+(3)
+        f = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(7.000000)
+          T.cast(6.000000, Float)
+        end
+        str = begin
+          ::Sorbet::Private::Static.keep_for_typechecking("y")
+          T.cast("x", String)
+        end
+        sym = begin
+          ::Sorbet::Private::Static.keep_for_typechecking(:y)
+          T.cast(:x, Symbol)
+        end
       end
     end
 

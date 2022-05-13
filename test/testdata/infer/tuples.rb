@@ -1,15 +1,16 @@
 # typed: true
-x = [0, "hi", :what]
+x = [0, "hi", :what, 3.1415926]
 
 T.assert_type!(x[0], Integer)
 T.assert_type!(x[1], String)
 T.assert_type!(x[2], Symbol)
-T.assert_type!(x[3], NilClass)
+T.assert_type!(x[3], Float)
+T.assert_type!(x[4], NilClass)
 
 i = "4".to_i # make sure ruby-typer doesn't see a Literal
 x[i]
 
-T.assert_type!(x[i], T.any(NilClass, Integer, String, Symbol))
+T.assert_type!(x[i], T.any(NilClass, Integer, String, Symbol, Float))
 
 T.assert_type!([1, 2].min, Integer)
 T.assert_type!([1, 2].max, Integer)
@@ -34,6 +35,8 @@ T.let(T.unsafe(nil), [T::Array[Integer], 0]) # error: Unsupported literal in typ
 
 T.assert_type!([1].concat([:foo]), [Integer, Symbol])
 T.assert_type!([1].concat([:foo]).concat([3, 4]), [Integer, Symbol, Integer, Integer])
+T.assert_type!([1].concat([9.0]), [Integer, Float])
+T.assert_type!([8.0].concat(["x"]), [Float, String])
 T.assert_type!([1].
                  concat(T::Array[Integer].new).
                  concat(T::Array[String].new),

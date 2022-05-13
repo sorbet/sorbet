@@ -34,7 +34,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 method ::TestCasts#test_casts {
 
-bb0[rubyRegionId=0, firstDead=52]():
+bb0[rubyRegionId=0, firstDead=68]():
     <self>: TestCasts = cast(<self>: NilClass, TestCasts);
     <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$8: T.class_of(Integer) = alias <C Integer>
@@ -84,9 +84,25 @@ bb0[rubyRegionId=0, firstDead=52]():
     s: Integer = cast(<castTemp>$68: Integer(6), Integer);
     <statTemp>$71: String("hi") = "hi"
     <statTemp>$69: Integer = s: Integer.+(<statTemp>$71: String("hi"))
-    <statTemp>$73: Integer(3) = 3
-    <returnMethodTemp>$2: Integer = s: Integer.+(<statTemp>$73: Integer(3))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+    <statTemp>$74: Integer(3) = 3
+    <statTemp>$72: Integer = s: Integer.+(<statTemp>$74: Integer(3))
+    <cfgAlias>$78: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$79: Float(7.000000) = 7.000000
+    <statTemp>$76: Sorbet::Private::Static::Void = <cfgAlias>$78: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$79: Float(7.000000))
+    <castTemp>$80: Float(6.000000) = 6.000000
+    f: Float = cast(<castTemp>$80: Float(6.000000), Float);
+    <cfgAlias>$84: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$85: String("y") = "y"
+    <statTemp>$82: Sorbet::Private::Static::Void = <cfgAlias>$84: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$85: String("y"))
+    <castTemp>$86: String("x") = "x"
+    str: String = cast(<castTemp>$86: String("x"), String);
+    <cfgAlias>$89: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <statTemp>$90: Symbol(:y) = :y
+    <statTemp>$87: Sorbet::Private::Static::Void = <cfgAlias>$89: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$90: Symbol(:y))
+    <castTemp>$91: Symbol(:x) = :x
+    sym: Symbol = cast(<castTemp>$91: Symbol(:x), Symbol);
+    <returnMethodTemp>$2: Symbol = sym
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
     <unconditional> -> bb1
 
 # backedges
