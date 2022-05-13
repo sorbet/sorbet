@@ -43,17 +43,17 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 
 // In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
 // methods in a file.
-bool validateMethodHashesHaveSameMethods(const std::vector<std::pair<core::NameHash, uint32_t>> &a,
-                                         const std::vector<std::pair<core::NameHash, uint32_t>> &b) {
+bool validateMethodHashesHaveSameMethods(const std::vector<core::DefinitionFingerprint> &a,
+                                         const std::vector<core::DefinitionFingerprint> &b) {
     if (a.size() != b.size()) {
         return false;
     }
 
-    pair<core::NameHash, uint32_t> previousHash; // Initializes to <0, 0>.
+    core::DefinitionFingerprint previousHash;
     auto bIt = b.begin();
     for (const auto &methodA : a) {
         const auto &methodB = *bIt;
-        if (methodA.first != methodB.first) {
+        if (methodA.nameHash != methodB.nameHash) {
             return false;
         }
 
@@ -241,7 +241,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        vector<pair<core::NameHash, uint32_t>> changedMethodHashes;
+        vector<core::DefinitionFingerprint> changedMethodHashes;
         for (auto &f : updates.updatedFiles) {
             auto fref = gs->findFileByPath(f->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -279,7 +279,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
         changedHashes.reserve(changedMethodHashes.size());
         for (auto &changedMethodHash : changedMethodHashes) {
-            changedHashes.push_back(changedMethodHash.first);
+            changedHashes.push_back(changedMethodHash.nameHash);
         }
         core::NameHash::sortAndDedupe(changedHashes);
     }

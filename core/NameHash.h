@@ -36,20 +36,48 @@ template <typename H> H AbslHashValue(H h, const NameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
+// A per-symbol kind fingerprint, currently only used for methods.
+struct DefinitionFingerprint {
+    // The hash of the definition's name (e.g. the method name).  Note that
+    // multiple names may map to this same hash, but we expect this to be rare.
+    core::NameHash nameHash;
+    // The combined hash of all symbols (e.g. core::Method) that mapped to this
+    // structure's `nameHash`.
+    uint32_t definitionHash = 0;
+
+    DefinitionFingerprint() noexcept = default;
+    DefinitionFingerprint(core::NameHash nameHash, uint32_t definitionHash) noexcept
+        : nameHash(nameHash), definitionHash(definitionHash) {}
+
+    inline bool operator<(const DefinitionFingerprint &h) const noexcept {
+        return this->nameHash < h.nameHash
+            || (!(h.nameHash < this->nameHash) && this->definitionHash < h.definitionHash);
+    }
+};
+
+// This structure represents the state of definitions found in a single file.
 struct DefinitionHash {
     static constexpr int HASH_STATE_NOT_COMPUTED = 0;
     static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
     static constexpr int HASH_STATE_INVALID = 2;
     static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
+    // A fingerprint for all the symbols contained in the file.
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the classes and modules contained in the file.
     uint32_t classModuleHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the type argument symbols contained in the file.
     uint32_t typeArgumentHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the type member symbols contained in the file.
     uint32_t typeMemberHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the fields contained in the file.
     // TODO(froydnj) would maybe be interesting to split this out into separate
     // field/static field hashes, or even finer subdivisions on static fields.
     uint32_t fieldHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
-    std::vector<std::pair<NameHash, uint32_t>> methodHashes;
+
+    // This vector is maintained in sorted order for linear-time diffing.
+    std::vector<DefinitionFingerprint> methodHashes;
 
     static DefinitionHash invalid() {
         DefinitionHash ret;
