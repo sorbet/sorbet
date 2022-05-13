@@ -36,7 +36,6 @@ message Type {
             string string = 101;
             string symbol = 102;
             bool bool = 103;
-            float float = 104;
         }
     }
 
@@ -46,6 +45,10 @@ message Type {
 
     message LiteralInteger {
         int64 integer = 1;
+    }
+
+    message LiteralFloat {
+        float float = 1;
     }
 
     enum Kind {
@@ -63,6 +66,7 @@ message Type {
         AND = 11;
         // skip some more
         LITERALINTEGER = 13;
+        LITERALFLOAT = 14;
     }
 
     Kind kind = 1;
@@ -76,5 +80,6 @@ message Type {
         Literal literal = 105;
         Tuple tuple = 106;
         LiteralInteger literalinteger= 107;
+        LiteralFloat literalfloat = 108;
     }
 }

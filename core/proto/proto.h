@@ -24,6 +24,7 @@ public:
 
     static com::stripe::rubytyper::Type::Literal toProto(const GlobalState &gs, const LiteralType &lit);
     static com::stripe::rubytyper::Type::LiteralInteger toProto(const GlobalState &gs, const LiteralIntegerType &lit);
+    static com::stripe::rubytyper::Type::LiteralFloat toProto(const GlobalState &gs, const FloatLiteralType &lit);
     static com::stripe::rubytyper::Type toProto(const GlobalState &gs, const TypePtr &typ);
 
     static com::stripe::rubytyper::Loc toProto(const GlobalState &gs, Loc loc);

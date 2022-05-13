@@ -21,6 +21,7 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, SelfType)              \
         CASE_STATEMENT(CASE_BODY, LiteralType)           \
         CASE_STATEMENT(CASE_BODY, LiteralIntegerType)    \
+        CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
         CASE_STATEMENT(CASE_BODY, TypeVar)               \
         CASE_STATEMENT(CASE_BODY, OrType)                \
         CASE_STATEMENT(CASE_BODY, AndType)               \
@@ -115,6 +116,8 @@ int TypePtr::kind() const {
             return 12;
         case Tag::LiteralIntegerType:
             return 13;
+        case Tag::FloatLiteralType:
+            return 14;
     }
 }
 
@@ -137,6 +140,7 @@ bool TypePtr::isFullyDefined() const {
         case Tag::ClassType:
         case Tag::LiteralType:
         case Tag::LiteralIntegerType:
+        case Tag::FloatLiteralType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
         case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
@@ -177,6 +181,7 @@ bool TypePtr::hasUntyped() const {
         case Tag::TypeVar:
         case Tag::LiteralType:
         case Tag::LiteralIntegerType:
+        case Tag::FloatLiteralType:
         case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
@@ -234,7 +239,8 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::TupleType:
         case Tag::ShapeType:
         case Tag::LiteralType:
-        case Tag::LiteralIntegerType: {
+        case Tag::LiteralIntegerType:
+        case Tag::FloatLiteralType: {
             return this->underlying(gs).getCallArguments(gs, name);
         }
         case Tag::OrType: {
@@ -298,6 +304,7 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
         case Tag::TypeVar:
         case Tag::LiteralType:
         case Tag::LiteralIntegerType:
+        case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:
             return nullptr;

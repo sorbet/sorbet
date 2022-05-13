@@ -323,14 +323,15 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
         Payload::assumeType(cs, builder, value, core::Symbols::Integer());
         return value;
     }
+    if (core::isa_type<core::FloatLiteralType>(lit)) {
+        const auto &litFloat = core::cast_type_nonnull<core::FloatLiteralType>(lit);
+        auto *value = Payload::doubleToRubyValue(cs, builder, litFloat.value);
+        Payload::assumeType(cs, builder, value, core::Symbols::Float());
+        return value;
+    }
 
     auto litType = core::cast_type_nonnull<core::LiteralType>(lit);
     switch (litType.literalKind) {
-        case core::LiteralType::LiteralTypeKind::Float: {
-            auto *value = Payload::doubleToRubyValue(cs, builder, litType.asFloat());
-            Payload::assumeType(cs, builder, value, core::Symbols::Float());
-            return value;
-        }
         case core::LiteralType::LiteralTypeKind::Symbol: {
             auto str = litType.asName().shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);

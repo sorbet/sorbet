@@ -360,9 +360,6 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             auto c = cast_type_nonnull<LiteralType>(what);
             p.putU1((uint8_t)c.literalKind);
             switch (c.literalKind) {
-                case LiteralType::LiteralTypeKind::Float:
-                    p.putS8(absl::bit_cast<int64_t>(c.asFloat()));
-                    break;
                 case LiteralType::LiteralTypeKind::Symbol:
                 case LiteralType::LiteralTypeKind::String:
                     p.putS8(c.unsafeAsName().rawId());
@@ -373,6 +370,11 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::LiteralIntegerType: {
             auto &i = cast_type_nonnull<LiteralIntegerType>(what);
             p.putS8(i.value);
+            break;
+        }
+        case TypePtr::Tag::FloatLiteralType: {
+            auto &f = cast_type_nonnull<FloatLiteralType>(what);
+            p.putS8(absl::bit_cast<int64_t>(f.value));
             break;
         }
         case TypePtr::Tag::AndType: {
@@ -456,8 +458,6 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             auto kind = (core::LiteralType::LiteralTypeKind)p.getU1();
             auto value = p.getS8();
             switch (kind) {
-                case LiteralType::LiteralTypeKind::Float:
-                    return make_type<LiteralType>(absl::bit_cast<double>(value));
                 case LiteralType::LiteralTypeKind::String:
                     return make_type<LiteralType>(Symbols::String(), NameRef::fromRawUnchecked(value));
                 case LiteralType::LiteralTypeKind::Symbol:
@@ -467,6 +467,8 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         }
         case TypePtr::Tag::LiteralIntegerType:
             return make_type<LiteralIntegerType>(p.getS8());
+        case TypePtr::Tag::FloatLiteralType:
+            return make_type<FloatLiteralType>(absl::bit_cast<double>(p.getS8()));
         case TypePtr::Tag::AndType:
             return AndType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case TypePtr::Tag::TupleType: {

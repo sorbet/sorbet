@@ -43,12 +43,12 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (!arg) {
         return;
     }
-    auto value = core::cast_type_nonnull<core::LiteralType>(arg->value);
-    if (value.literalKind != core::LiteralType::LiteralTypeKind::Float) {
+    if (!core::isa_type<core::FloatLiteralType>(arg->value)) {
         return;
     }
+    auto f = core::cast_type_nonnull<core::FloatLiteralType>(arg->value);
     char version[5];
-    snprintf(version, sizeof(version), "V%.1f", value.asFloat());
+    snprintf(version, sizeof(version), "V%.1f", f.value);
     absl::c_replace(version, '.', '_');
 
     cdef->ancestors.emplace_back(ast::MK::UnresolvedConstant(

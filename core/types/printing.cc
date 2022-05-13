@@ -97,8 +97,6 @@ string LiteralType::showValue(const GlobalState &gs) const {
                 return fmt::format(":{}", shown);
             }
         }
-        case LiteralType::LiteralTypeKind::Float:
-            return to_string(asFloat());
     }
 }
 
@@ -116,6 +114,23 @@ string LiteralIntegerType::show(const GlobalState &gs, ShowOptions options) cons
 }
 
 string LiteralIntegerType::showValue(const GlobalState &gs) const {
+    return to_string(this->value);
+}
+
+string FloatLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return fmt::format("{}({})", this->underlying(gs).toStringWithTabs(gs, tabs), showValue(gs));
+}
+
+string FloatLiteralType::show(const GlobalState &gs, ShowOptions options) const {
+    if (options.showForRBI) {
+        // RBI generator: Users type the class name, not `String("value")`.
+        return fmt::format("{}", this->underlying(gs).show(gs, options));
+    }
+
+    return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
+}
+
+string FloatLiteralType::showValue(const GlobalState &gs) const {
     return to_string(this->value);
 }
 
@@ -184,9 +199,12 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
             } else {
                 keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
             }
-        } else {
-            ENFORCE(isa_type<LiteralIntegerType>(key));
+        } else if (isa_type<LiteralIntegerType>(key)) {
             const auto &keyLiteral = cast_type_nonnull<LiteralIntegerType>(key);
+            keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
+        } else {
+            ENFORCE(isa_type<FloatLiteralType>(key));
+            const auto &keyLiteral = cast_type_nonnull<FloatLiteralType>(key);
             keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
         }
 

@@ -171,10 +171,6 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
             proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
             proto.set_symbol(lit.asName().show(gs));
             break;
-        case LiteralType::LiteralTypeKind::Float:
-            proto.set_kind(com::stripe::rubytyper::Type::Literal::FLOAT);
-            proto.set_float_(lit.asFloat());
-            break;
     }
     return proto;
 }
@@ -182,6 +178,12 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
 com::stripe::rubytyper::Type::LiteralInteger Proto::toProto(const GlobalState &gs, const LiteralIntegerType &lit) {
     com::stripe::rubytyper::Type::LiteralInteger proto;
     proto.set_integer(lit.value);
+    return proto;
+}
+
+com::stripe::rubytyper::Type::LiteralFloat Proto::toProto(const GlobalState &gs, const FloatLiteralType &lit) {
+    com::stripe::rubytyper::Type::LiteralFloat proto;
+    proto.set_float_(lit.value);
     return proto;
 }
 
@@ -226,6 +228,10 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         [&](const LiteralIntegerType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::LITERALINTEGER);
             *proto.mutable_literalinteger() = toProto(gs, t);
+        },
+        [&](const FloatLiteralType &t) {
+            proto.set_kind(com::stripe::rubytyper::Type::LITERALINTEGER);
+            *proto.mutable_literalfloat() = toProto(gs, t);
         },
         [&](const TupleType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::TUPLE);

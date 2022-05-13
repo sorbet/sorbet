@@ -56,7 +56,7 @@ TEST_CASE("Infer") {
     SUBCASE("LiteralsSubtyping") {
         auto intLit = core::make_type<core::LiteralIntegerType>(int64_t(1));
         auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
-        auto floatLit = core::make_type<core::LiteralType>(1.0f);
+        auto floatLit = core::make_type<core::FloatLiteralType>(1.0f);
         auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
         auto trueLit = core::Types::trueClass();
         auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());

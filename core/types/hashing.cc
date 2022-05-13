@@ -33,16 +33,20 @@ uint32_t LiteralType::hash(const GlobalState &gs) const {
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());
 
-    uint64_t rawValue;
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::String:
         case LiteralType::LiteralTypeKind::Symbol:
             return mix(result, _hash(asName().shortName(gs)));
-        case LiteralType::LiteralTypeKind::Float:
-            rawValue = absl::bit_cast<uint64_t>(asFloat());
-            break;
     }
+}
 
+uint32_t FloatLiteralType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::FloatLiteralType);
+    auto underlying = this->underlying(gs);
+    ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
+    result = mix(result, undSymbol.id());
+
+    uint64_t rawValue = absl::bit_cast<uint64_t>(this->value);
     uint32_t topBits = static_cast<uint32_t>(rawValue >> 32);
     uint32_t bottomBits = static_cast<uint32_t>(rawValue & 0xFFFFFFFF);
     result = mix(result, topBits);

@@ -163,6 +163,7 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
     typecase(
         this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
         [&](const core::LiteralIntegerType &i) { res = i.showValue(gs); },
+        [&](const core::FloatLiteralType &i) { res = i.showValue(gs); },
         [&](const core::ClassType &l) {
             if (l.symbol == core::Symbols::NilClass()) {
                 res = "nil";

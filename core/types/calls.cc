@@ -45,6 +45,10 @@ bool LiteralIntegerType::derivesFrom(const GlobalState &gs, core::ClassOrModuleR
     return underlying(gs).derivesFrom(gs, klass);
 }
 
+bool FloatLiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
+    return underlying(gs).derivesFrom(gs, klass);
+}
+
 bool ShapeType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying(gs).derivesFrom(gs, klass);
 }
@@ -58,6 +62,10 @@ DispatchResult LiteralType::dispatchCall(const GlobalState &gs, const DispatchAr
 }
 
 DispatchResult LiteralIntegerType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return dispatchCallProxyType(gs, underlying(gs), args);
+}
+
+DispatchResult FloatLiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
@@ -506,7 +514,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<LiteralType>(tp) || isa_type<LiteralIntegerType>(tp)) {
+    } else if (isa_type<LiteralType>(tp) || isa_type<LiteralIntegerType>(tp) || isa_type<FloatLiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
         }
@@ -2102,7 +2110,8 @@ public:
 
         for (int i = 0; i < args.args.size(); i += 2) {
             if (!isa_type<LiteralType>(args.args[i]->type) &&
-                !isa_type<LiteralIntegerType>(args.args[i]->type)) {
+                !isa_type<LiteralIntegerType>(args.args[i]->type) &&
+                !isa_type<FloatLiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -3124,12 +3133,14 @@ public:
             return;
         }
 
-        if (!isa_type<LiteralType>(args.args.front()->type)) {
+        auto &arg = args.args.front()->type;
+        if (!isa_type<LiteralType>(arg) &&
+            !isa_type<LiteralIntegerType>(arg) &&
+            !isa_type<FloatLiteralType>(arg)) {
             return;
         }
 
-        auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
-        if (auto idx = shape.indexForKey(argLit)) {
+        if (auto idx = shape.indexForKey(arg)) {
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
@@ -3146,13 +3157,16 @@ public:
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
 
                     if (args.fullType.origins.size() == 1 &&
-                        argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
-                        auto key = argLit.asName();
-                        auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
+                        isa_type<LiteralType>(arg)) {
+                        auto argLit = cast_type_nonnull<LiteralType>(arg);
+                        if (argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
+                            auto key = argLit.asName();
+                            auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
 
-                        if (loc.has_value() && loc->exists()) {
-                            e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs).value(),
-                                          Types::any(gs, expectedType, actualType.type).show(gs));
+                            if (loc.has_value() && loc->exists()) {
+                                e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs).value(),
+                                              Types::any(gs, expectedType, actualType.type).show(gs));
+                            }
                         }
                     }
                 }
@@ -3197,21 +3211,16 @@ public:
             }
         }
 
-        auto keys = shape->keys;
-        auto values = shape->values;
-        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
-            auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) {
-                        if (!isa_type<LiteralType>(lit)) {
-                            return false;
-                        }
-                        return key.equals(cast_type_nonnull<LiteralType>(lit));
-                    });
-            if (fnd == keys.end()) {
-                keys.emplace_back(keyType);
-                values.emplace_back(value);
+        // Deliberately copy the keys and values, since we may be adding entries.
+        auto copyTypePtr = make_type<ShapeType>(shape->keys, shape->values);
+        auto *copy = cast_type<ShapeType>(copyTypePtr);
+        ENFORCE(copy != nullptr);
+        auto addShapeEntry = [&copy](const TypePtr &keyType, const TypePtr &value) {
+            if (auto optind = copy->indexForKey(keyType)) {
+                copy->values[*optind] = value;
             } else {
-                values[fnd - keys.begin()] = value;
+                copy->keys.emplace_back(keyType);
+                copy->values.emplace_back(value);
             }
         };
 
@@ -3227,21 +3236,22 @@ public:
                 return;
             }
 
-            addShapeEntry(keyType, key, args.args[i + 1]->type);
+            addShapeEntry(keyType, args.args[i + 1]->type);
         }
 
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                if (!isa_type<LiteralType>(keyType)) {
+                if (!isa_type<LiteralType>(keyType) &&
+                    !isa_type<LiteralIntegerType>(keyType) &&
+                    !isa_type<FloatLiteralType>(keyType)) {
                     return;
                 }
-                auto key = cast_type_nonnull<LiteralType>(keyType);
-                addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
+                addShapeEntry(keyType, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
         }
 
-        res.returnType = make_type<ShapeType>(std::move(keys), std::move(values));
+        res.returnType = std::move(copyTypePtr);
     }
 } Shape_merge;
 

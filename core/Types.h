@@ -215,6 +215,7 @@ inline bool is_ground_type(const TypePtr &what) {
             return true;
         case TypePtr::Tag::LiteralType:
         case TypePtr::Tag::LiteralIntegerType:
+        case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
@@ -235,6 +236,7 @@ inline bool is_proxy_type(const TypePtr &what) {
     switch (what.tag()) {
         case TypePtr::Tag::LiteralType:
         case TypePtr::Tag::LiteralIntegerType:
+        case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
@@ -477,12 +479,11 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 
 TYPE_INLINED(LiteralType) final {
     union {
-        const double floatval;
         const NameRef name;
     };
 
 public:
-    enum class LiteralTypeKind : uint8_t { String, Symbol, Float };
+    enum class LiteralTypeKind : uint8_t { String, Symbol };
     const LiteralTypeKind literalKind;
     LiteralType(double val);
     LiteralType(ClassOrModuleRef klass, NameRef val);
@@ -490,7 +491,6 @@ public:
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     int64_t asInteger() const;
-    double asFloat() const;
     core::NameRef asName() const;
     core::NameRef unsafeAsName() const;
 
@@ -505,21 +505,7 @@ public:
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(LiteralType, 16, 8);
-
-template <> inline TypePtr make_type<LiteralType, double &>(double &val) {
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(LiteralType::LiteralTypeKind::Float),
-                   absl::bit_cast<uint64_t>(val));
-}
-
-template <> inline TypePtr make_type<LiteralType, double>(double &&val) {
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(LiteralType::LiteralTypeKind::Float),
-                   absl::bit_cast<uint64_t>(val));
-}
-
-template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
-    return make_type<LiteralType>(static_cast<double>(val));
-}
+CheckSize(LiteralType, 8, 8);
 
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
@@ -535,8 +521,6 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
     ENFORCE_NO_TIMER(isa_type<LiteralType>(what));
     auto literalKind = static_cast<LiteralType::LiteralTypeKind>(what.inlinedValue());
     switch (literalKind) {
-        case LiteralType::LiteralTypeKind::Float:
-            return LiteralType(absl::bit_cast<double>(what.value));
         case LiteralType::LiteralTypeKind::String:
             return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
         case LiteralType::LiteralTypeKind::Symbol:
@@ -576,6 +560,36 @@ template <> inline TypePtr make_type<LiteralIntegerType, long &>(long &val) {
 
 template <> inline TypePtr make_type<LiteralIntegerType, long long &>(long long &val) {
     return make_type<LiteralIntegerType>(static_cast<int64_t>(val));
+}
+
+TYPE(FloatLiteralType) final {
+public:
+    const double value;
+
+    FloatLiteralType(double val);
+    TypePtr underlying(const GlobalState &gs) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
+
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
+    std::string showValue(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs) const;
+
+    bool equals(const FloatLiteralType &rhs) const;
+    void _sanityCheck(const GlobalState &gs) const;
+};
+CheckSize(FloatLiteralType, 8, 8);
+
+template <> inline TypePtr make_type<FloatLiteralType, double &&>(double &&val) {
+    return make_type<FloatLiteralType>(val);
+}
+
+template <> inline TypePtr make_type<FloatLiteralType, float &&>(float &&val) {
+    return make_type<FloatLiteralType>(static_cast<double>(val));
 }
 
 /*
@@ -733,6 +747,7 @@ public:
     std::optional<size_t> indexForKey(const TypePtr &t) const;
     std::optional<size_t> indexForKey(const LiteralType &lit) const;
     std::optional<size_t> indexForKey(const LiteralIntegerType &lit) const;
+    std::optional<size_t> indexForKey(const FloatLiteralType &lit) const;
 };
 CheckSize(ShapeType, 48, 8);
 
