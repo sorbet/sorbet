@@ -63,8 +63,16 @@ struct DefinitionHash {
     }
 };
 
+// This structure represents all the uses of various constructs contained in a single file.
 struct UsageHash {
+    // A sorted, deduplicated list of the hashes of all the method names called
+    // by this file.
     std::vector<core::NameHash> sends;
+    // A sorted, deduplicated list of the hashes of all the names referenced in this
+    // file that will wind up referencing `core::Symbol` structures.  This includes
+    // the obvious constant names (`T::Hash` counts as two constant names), but also
+    // the names of the classes/methods defined in the file as well as any
+    // @instance/@@class variables.
     std::vector<core::NameHash> symbols;
 };
 
