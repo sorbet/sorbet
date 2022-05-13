@@ -1,0 +1,19 @@
+# typed: true
+
+extend T::Sig
+
+sig { params(arg0: T.untyped, arg1: T.untyped, arg2: T.untyped, arg3: T.untyped).returns(T::Array[T.untyped]) }
+def example1(arg0, arg1 = nil, arg2:, arg3: nil)
+#            ^ apply-rename: [A] newName: target placeholderText: arg0
+#                  ^ apply-rename: [B] newName: target placeholderText: arg1
+#                              ^ apply-rename: [C] newName: target placeholderText: arg2
+#                                     ^ apply-rename: [D] newName: target placeholderText: arg3
+  [arg0, arg1, arg2, arg3]
+end
+
+sig { params(args: T.untyped, kwargs: T.untyped).returns(T::Array[T.untyped]) }
+def example2(*target, **kwargs)
+#             ^ apply-rename: [E] newName: target placeholderText: args
+#                     ^ apply-rename: [F] newName: target placeholderText: kwargs
+  [target, kwargs]
+end
