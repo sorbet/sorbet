@@ -120,6 +120,11 @@ bool LSPIndexer::canTakeFastPathInternal(
         const auto &newHash = *f->getFileHash();
         ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
         if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
+            ENFORCE(newHash.definitions.classModuleHash == core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.typeArgumentHash == core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.typeMemberHash == core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.fieldHash == core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.methodHash == core::GlobalStateHash::HASH_STATE_INVALID);
             logger.debug("Taking slow path because {} has a syntax error", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
             return false;
@@ -128,7 +133,28 @@ bool LSPIndexer::canTakeFastPathInternal(
         if (newHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
             newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
             logger.debug("Taking slow path because {} has changed definitions", f->path());
+            ENFORCE(newHash.definitions.classModuleHash != core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.typeArgumentHash != core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.typeMemberHash != core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.fieldHash != core::GlobalStateHash::HASH_STATE_INVALID);
+            ENFORCE(newHash.definitions.methodHash != core::GlobalStateHash::HASH_STATE_INVALID);
             prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
+            // Also record some information about what might have changed.
+            if (newHash.definitions.classModuleHash != oldHash.definitions.classModuleHash) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "classmodule");
+            }
+            if (newHash.definitions.typeArgumentHash != oldHash.definitions.typeArgumentHash) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "typeargument");
+            }
+            if (newHash.definitions.typeMemberHash != oldHash.definitions.typeMemberHash) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "typemember");
+            }
+            if (newHash.definitions.fieldHash != oldHash.definitions.fieldHash) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "field");
+            }
+            if (newHash.definitions.methodHash != oldHash.definitions.methodHash) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "method");
+            }
             return false;
         }
     }
