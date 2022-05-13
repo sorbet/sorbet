@@ -42,7 +42,25 @@ struct GlobalStateHash {
     static constexpr int HASH_STATE_INVALID = 2;
     static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
+    uint32_t classModuleHash = HASH_STATE_NOT_COMPUTED;
+    uint32_t typeArgumentHash = HASH_STATE_NOT_COMPUTED;
+    uint32_t typeMemberHash = HASH_STATE_NOT_COMPUTED;
+    // TODO(froydnj) would maybe be interesting to split this out into separate
+    // field/static field hashes, or even finer subdivisions on static fields.
+    uint32_t fieldHash = HASH_STATE_NOT_COMPUTED;
+    uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
     std::vector<std::pair<NameHash, uint32_t>> methodHashes;
+
+    static GlobalStateHash invalid() {
+        GlobalStateHash ret;
+        ret.hierarchyHash = HASH_STATE_INVALID;
+        ret.classModuleHash = HASH_STATE_INVALID;
+        ret.typeArgumentHash = HASH_STATE_INVALID;
+        ret.typeMemberHash = HASH_STATE_INVALID;
+        ret.fieldHash = HASH_STATE_INVALID;
+        ret.methodHash = HASH_STATE_INVALID;
+        return ret;
+    }
 };
 
 struct UsageHash {

@@ -2120,12 +2120,19 @@ uint32_t patchHash(uint32_t hash) {
 unique_ptr<GlobalStateHash> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
+    uint32_t classModuleHash = 0;
+    uint32_t typeArgumentHash = 0;
+    uint32_t typeMemberHash = 0;
+    uint32_t fieldHash = 0;
+    uint32_t methodHash = 0;
     UnorderedMap<NameHash, uint32_t> methodHashes;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
         if (!sym.ignoreInHashing(*this)) {
-            hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+            uint32_t symhash = sym.hash(*this);
+            hierarchyHash = mix(hierarchyHash, symhash);
+            classModuleHash = mix(classModuleHash, symhash);
             counter++;
             if (DEBUG_HASHING_TAIL && counter > this->classAndModules.size() - 15) {
                 errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
@@ -2137,7 +2144,9 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     for (const auto &typeArg : this->typeArguments) {
         counter++;
         // No type arguments are ignored in hashing.
-        hierarchyHash = mix(hierarchyHash, typeArg.hash(*this));
+        uint32_t symhash = typeArg.hash(*this);
+        hierarchyHash = mix(hierarchyHash, symhash);
+        typeArgumentHash = mix(typeArgumentHash, symhash);
         if (DEBUG_HASHING_TAIL && counter > this->typeArguments.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeArg.name.show(*this));
         }
@@ -2147,7 +2156,9 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     for (const auto &typeMember : this->typeMembers) {
         counter++;
         // No type members are ignored in hashing.
-        hierarchyHash = mix(hierarchyHash, typeMember.hash(*this));
+        uint32_t symhash = typeMember.hash(*this);
+        hierarchyHash = mix(hierarchyHash, symhash);
+        typeMemberHash = mix(typeMemberHash, symhash);
         if (DEBUG_HASHING_TAIL && counter > this->typeMembers.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeMember.name.show(*this));
         }
@@ -2157,7 +2168,9 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     for (const auto &field : this->fields) {
         counter++;
         // No fields are ignored in hashing.
-        hierarchyHash = mix(hierarchyHash, field.hash(*this));
+        uint32_t symhash = field.hash(*this);
+        hierarchyHash = mix(hierarchyHash, symhash);
+        fieldHash = mix(fieldHash, symhash);
 
         if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));
@@ -2169,7 +2182,9 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = methodHashes[NameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
-            hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
+            uint32_t symhash = sym.methodShapeHash(*this);
+            hierarchyHash = mix(hierarchyHash, symhash);
+            methodHash = mix(methodHash, symhash);
             counter++;
             if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
                 errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));
@@ -2186,6 +2201,11 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     fast_sort(result->methodHashes);
 
     result->hierarchyHash = patchHash(hierarchyHash);
+    result->classModuleHash = patchHash(classModuleHash);
+    result->typeArgumentHash = patchHash(typeArgumentHash);
+    result->typeMemberHash = patchHash(typeMemberHash);
+    result->fieldHash = patchHash(fieldHash);
+    result->methodHash = patchHash(methodHash);
     return result;
 }
 
