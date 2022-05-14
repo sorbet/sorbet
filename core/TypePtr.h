@@ -306,7 +306,7 @@ public:
     friend typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what);
     friend class TypePtrTestHelper;
 };
-CheckSize(TypePtr, 16, 8);
+CheckSize(TypePtr, 8, 8);
 } // namespace sorbet::core
 
 #endif

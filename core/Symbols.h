@@ -183,7 +183,7 @@ private:
     InlinedVector<Loc, 2> locs_;
     std::unique_ptr<InlinedVector<TypeArgumentRef, 4>> typeArgs;
 };
-CheckSize(Method, 160, 8);
+CheckSize(Method, 136, 8);
 
 // Contains a field or a static field
 class Field final {
@@ -249,7 +249,7 @@ private:
 public:
     Flags flags;
 };
-CheckSize(Field, 64, 8);
+CheckSize(Field, 56, 8);
 
 class TypeParameter final {
     friend class serialize::SerializerImpl;
@@ -329,7 +329,7 @@ public:
 private:
     InlinedVector<Loc, 2> locs_;
 };
-CheckSize(TypeParameter, 64, 8);
+CheckSize(TypeParameter, 56, 8);
 
 class ClassOrModule final {
 public:
@@ -609,7 +609,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 136, 8);
+CheckSize(ClassOrModule, 128, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H

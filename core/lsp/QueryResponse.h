@@ -39,7 +39,7 @@ public:
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
-CheckSize(IdentResponse, 64, 8);
+CheckSize(IdentResponse, 56, 8);
 
 class LiteralResponse final {
 public:
@@ -47,7 +47,7 @@ public:
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
-CheckSize(LiteralResponse, 56, 8);
+CheckSize(LiteralResponse, 48, 8);
 
 class ConstantResponse final {
 public:
@@ -71,7 +71,7 @@ public:
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
-CheckSize(ConstantResponse, 96, 8);
+CheckSize(ConstantResponse, 88, 8);
 
 class FieldResponse final {
 public:
@@ -82,7 +82,7 @@ public:
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
-CheckSize(FieldResponse, 64, 8);
+CheckSize(FieldResponse, 56, 8);
 
 class MethodDefResponse final {
 public:
@@ -93,7 +93,7 @@ public:
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };
-CheckSize(MethodDefResponse, 64, 8);
+CheckSize(MethodDefResponse, 56, 8);
 
 class EditResponse final {
 public:

@@ -54,7 +54,7 @@ public:
     ArgInfo &operator=(ArgInfo &&) noexcept = default;
     ArgInfo deepCopy() const;
 };
-CheckSize(ArgInfo, 40, 8);
+CheckSize(ArgInfo, 32, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&...args) {
     static_assert(!TypePtr::TypeToIsInlined<T>::value, "Inlined types must specialize `make_type` for each combination "
@@ -386,7 +386,7 @@ public:
     TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
 };
-CheckSize(LambdaParam, 40, 8);
+CheckSize(LambdaParam, 24, 8);
 
 TYPE_INLINED(SelfTypeParam) final {
 public:
@@ -552,7 +552,7 @@ public:
     bool equals(const LiteralIntegerType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(LiteralIntegerType, 8, 8);
+CheckSize(LiteralIntegerType, 16, 8);
 
 template <> inline TypePtr make_type<LiteralIntegerType, int64_t>(int64_t &&val) {
     return make_type<LiteralIntegerType>(absl::bit_cast<uint64_t>(val));
@@ -586,7 +586,7 @@ public:
     bool equals(const FloatLiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(FloatLiteralType, 8, 8);
+CheckSize(FloatLiteralType, 16, 8);
 
 template <> inline TypePtr make_type<FloatLiteralType, double &&>(double &&val) {
     return make_type<FloatLiteralType>(val);
@@ -675,7 +675,7 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(OrType, 32, 8);
+CheckSize(OrType, 24, 8);
 
 TYPE(AndType) final : public Refcounted{
 public:
@@ -722,7 +722,7 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(AndType, 32, 8);
+CheckSize(AndType, 24, 8);
 
 TYPE(ShapeType) final : public Refcounted {
 public:
@@ -753,7 +753,7 @@ public:
     std::optional<size_t> indexForKey(const LiteralIntegerType &lit) const;
     std::optional<size_t> indexForKey(const FloatLiteralType &lit) const;
 };
-CheckSize(ShapeType, 48, 8);
+CheckSize(ShapeType, 56, 8);
 
 TYPE(TupleType) final : public Refcounted {
 private:
@@ -785,7 +785,7 @@ public:
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
-CheckSize(TupleType, 24, 8);
+CheckSize(TupleType, 32, 8);
 
 TYPE(AppliedType) final : public Refcounted {
 public:
@@ -881,7 +881,7 @@ public:
     TypeAndOrigins &operator=(const TypeAndOrigins &) = default;
     TypeAndOrigins &operator=(TypeAndOrigins &&) = default;
 };
-CheckSize(TypeAndOrigins, 40, 8);
+CheckSize(TypeAndOrigins, 32, 8);
 
 struct CallLocs final {
     FileRef file;
