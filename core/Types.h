@@ -339,11 +339,11 @@ public:
 CheckSize(ClassType, 8, 8);
 
 template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef>(core::ClassOrModuleRef &&ref) {
-    return TypePtr(TypePtr::Tag::ClassType, ref.id(), 0);
+    return TypePtr(TypePtr::Tag::ClassType, ref.id());
 }
 
 template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef &>(core::ClassOrModuleRef &ref) {
-    return TypePtr(TypePtr::Tag::ClassType, ref.id(), 0);
+    return TypePtr(TypePtr::Tag::ClassType, ref.id());
 }
 
 template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
@@ -408,7 +408,7 @@ public:
 CheckSize(SelfTypeParam, 8, 8);
 
 template <> inline TypePtr make_type<SelfTypeParam, core::SymbolRef &>(core::SymbolRef &definition) {
-    return TypePtr(TypePtr::Tag::SelfTypeParam, definition.rawId(), 0);
+    return TypePtr(TypePtr::Tag::SelfTypeParam, definition.rawId());
 }
 
 template <> inline SelfTypeParam cast_type_nonnull<SelfTypeParam>(const TypePtr &what) {
@@ -433,11 +433,11 @@ public:
 CheckSize(AliasType, 8, 8);
 
 template <> inline TypePtr make_type<AliasType, core::SymbolRef &>(core::SymbolRef &other) {
-    return TypePtr(TypePtr::Tag::AliasType, other.rawId(), 0);
+    return TypePtr(TypePtr::Tag::AliasType, other.rawId());
 }
 
 template <> inline TypePtr make_type<AliasType, core::SymbolRef>(core::SymbolRef &&other) {
-    return TypePtr(TypePtr::Tag::AliasType, other.rawId(), 0);
+    return TypePtr(TypePtr::Tag::AliasType, other.rawId());
 }
 
 template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
@@ -469,7 +469,7 @@ CheckSize(SelfType, 8, 8);
 
 template <> inline TypePtr make_type<SelfType>() {
     // static_cast required to disambiguate TypePtr constructor.
-    return TypePtr(TypePtr::Tag::SelfType, static_cast<uint32_t>(0), 0);
+    return TypePtr(TypePtr::Tag::SelfType, uint64_t(0));
 }
 
 template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
@@ -507,24 +507,28 @@ public:
 };
 CheckSize(LiteralType, 8, 8);
 
+// TODO(froydnj) it would be more work, but maybe it would be cleaner to split this
+// type into distinct types, rather than doing this manual tagging.
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(type.literalKind), val.rawId());
+    return TypePtr(TypePtr::Tag::LiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
 }
 
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<uint32_t>(type.literalKind), val.rawId());
+    return TypePtr(TypePtr::Tag::LiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<LiteralType>(what));
-    auto literalKind = static_cast<LiteralType::LiteralTypeKind>(what.inlinedValue());
+    uint64_t tagged = what.inlinedValue();
+    uint32_t id = static_cast<uint32_t>(tagged >> 8);
+    auto literalKind = static_cast<LiteralType::LiteralTypeKind>(tagged & 0xff);
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::String:
-            return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
+            return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(id));
         case LiteralType::LiteralTypeKind::Symbol:
-            return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(static_cast<uint32_t>(what.value)));
+            return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(id));
     }
 }
 
@@ -1003,7 +1007,7 @@ public:
 };
 
 template <> inline TypePtr make_type<BlamedUntyped, core::SymbolRef &>(core::SymbolRef &whoToBlame) {
-    return TypePtr(TypePtr::Tag::BlamedUntyped, whoToBlame.rawId(), 0);
+    return TypePtr(TypePtr::Tag::BlamedUntyped, whoToBlame.rawId());
 }
 
 template <> inline BlamedUntyped cast_type_nonnull<BlamedUntyped>(const TypePtr &what) {

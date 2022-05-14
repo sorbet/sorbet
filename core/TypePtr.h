@@ -140,7 +140,7 @@ private:
     }
 
     // Inlined TypePtr constructor
-    TypePtr(Tag tag, uint32_t value1, uint64_t value2) : value(value2), store(tagValue(tag, value1)) {}
+    TypePtr(Tag tag, uint64_t inlinedValue) : value(0), store(tagValue(tag, inlinedValue)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
