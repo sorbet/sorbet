@@ -677,7 +677,7 @@ private:
 };
 CheckSize(OrType, 24, 8);
 
-TYPE(AndType) final : public Refcounted{
+TYPE(AndType) final : public Refcounted {
 public:
     TypePtr left;
     TypePtr right;

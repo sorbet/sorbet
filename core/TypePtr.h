@@ -20,12 +20,12 @@ class Refcounted {
 
 public:
     void addref() {
-	this->counter.fetch_add(1);
+        this->counter.fetch_add(1);
     }
 
     uint32_t release() {
-	// fetch_sub returns value prior to subtract
-	return this->counter.fetch_sub(1) - 1;
+        // fetch_sub returns value prior to subtract
+        return this->counter.fetch_sub(1) - 1;
     }
 };
 

@@ -1253,9 +1253,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                        if (!isa_type<LiteralType>(litType)) {
-                            return false;
-                        }
+                    if (!isa_type<LiteralType>(litType)) {
+                        return false;
+                    }
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
@@ -2109,8 +2109,7 @@ public:
         ENFORCE(args.args.size() % 2 == 0);
 
         for (int i = 0; i < args.args.size(); i += 2) {
-            if (!isa_type<LiteralType>(args.args[i]->type) &&
-                !isa_type<LiteralIntegerType>(args.args[i]->type) &&
+            if (!isa_type<LiteralType>(args.args[i]->type) && !isa_type<LiteralIntegerType>(args.args[i]->type) &&
                 !isa_type<FloatLiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
@@ -2200,8 +2199,7 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        if (!(isa_type<LiteralIntegerType>(args.args[1]->type) &&
-              isa_type<LiteralIntegerType>(args.args[2]->type))) {
+        if (!(isa_type<LiteralIntegerType>(args.args[1]->type) && isa_type<LiteralIntegerType>(args.args[2]->type))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
@@ -3134,9 +3132,7 @@ public:
         }
 
         auto &arg = args.args.front()->type;
-        if (!isa_type<LiteralType>(arg) &&
-            !isa_type<LiteralIntegerType>(arg) &&
-            !isa_type<FloatLiteralType>(arg)) {
+        if (!isa_type<LiteralType>(arg) && !isa_type<LiteralIntegerType>(arg) && !isa_type<FloatLiteralType>(arg)) {
             return;
         }
 
@@ -3156,8 +3152,7 @@ public:
                                      args.fullType.origins2Explanations(gs, args.originForUninitialized)));
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
 
-                    if (args.fullType.origins.size() == 1 &&
-                        isa_type<LiteralType>(arg)) {
+                    if (args.fullType.origins.size() == 1 && isa_type<LiteralType>(arg)) {
                         auto argLit = cast_type_nonnull<LiteralType>(arg);
                         if (argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
                             auto key = argLit.asName();
@@ -3242,8 +3237,7 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                if (!isa_type<LiteralType>(keyType) &&
-                    !isa_type<LiteralIntegerType>(keyType) &&
+                if (!isa_type<LiteralType>(keyType) && !isa_type<LiteralIntegerType>(keyType) &&
                     !isa_type<FloatLiteralType>(keyType)) {
                     return;
                 }

@@ -416,7 +416,10 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 }
 
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
-    DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k) || isa_type<LiteralIntegerType>(k) || isa_type<FloatLiteralType>(k)); };);
+    DEBUG_ONLY(for (auto &k
+                    : this->keys) {
+        ENFORCE(isa_type<LiteralType>(k) || isa_type<LiteralIntegerType>(k) || isa_type<FloatLiteralType>(k));
+    };);
     categoryCounterInc("types.allocated", "shapetype");
     histogramInc("shapetype.keys", this->keys.size());
 }
@@ -457,12 +460,12 @@ std::optional<size_t> ShapeType::indexForKey(const LiteralType &lit) const {
 
 std::optional<size_t> ShapeType::indexForKey(const LiteralIntegerType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
-            if (!isa_type<LiteralIntegerType>(candidate)) {
-                return false;
-            }
-            const auto &candlit = cast_type_nonnull<LiteralIntegerType>(candidate);
-            return candlit.equals(lit);
-        });
+        if (!isa_type<LiteralIntegerType>(candidate)) {
+            return false;
+        }
+        const auto &candlit = cast_type_nonnull<LiteralIntegerType>(candidate);
+        return candlit.equals(lit);
+    });
     if (fnd == this->keys.end()) {
         return std::nullopt;
     }
@@ -471,12 +474,12 @@ std::optional<size_t> ShapeType::indexForKey(const LiteralIntegerType &lit) cons
 
 std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const {
     auto fnd = absl::c_find_if(keys, [&](auto &candidate) -> bool {
-            if (!isa_type<FloatLiteralType>(candidate)) {
-                return false;
-            }
-            const auto &candlit = cast_type_nonnull<FloatLiteralType>(candidate);
-            return candlit.equals(lit);
-        });
+        if (!isa_type<FloatLiteralType>(candidate)) {
+            return false;
+        }
+        const auto &candlit = cast_type_nonnull<FloatLiteralType>(candidate);
+        return candlit.equals(lit);
+    });
     if (fnd == this->keys.end()) {
         return std::nullopt;
     }
@@ -814,8 +817,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
         [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
-        [&](const LiteralType &lit) { ret = type; },
-        [&](const LiteralIntegerType &i) { ret = type; },
+        [&](const LiteralType &lit) { ret = type; }, [&](const LiteralIntegerType &i) { ret = type; },
         [&](const FloatLiteralType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
