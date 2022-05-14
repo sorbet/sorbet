@@ -90,12 +90,6 @@ public:
     static std::string tagToString(Tag tag);
 
 private:
-    union {
-        // If containsPtr()
-        std::atomic<uint32_t> *counter;
-        // If !containsPtr()
-        uint64_t value;
-    };
     tagged_storage store;
 
     // We use a 0 to indicate not inlined so that nullptr (which has counter value 0) is naturally viewed as
@@ -134,13 +128,8 @@ private:
         return maskedPtr | val | NOT_INLINED_MASK;
     }
 
-    TypePtr(Tag tag, std::atomic<uint32_t> *counter, Refcounted *expr) : counter(counter), store(tagPtr(tag, expr)) {
-        ENFORCE_NO_TIMER(counter == nullptr);
-        expr->addref();
-    }
-
     // Inlined TypePtr constructor
-    TypePtr(Tag tag, uint64_t inlinedValue) : value(0), store(tagValue(tag, inlinedValue)) {}
+    TypePtr(Tag tag, uint64_t inlinedValue) noexcept : store(tagValue(tag, inlinedValue)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -179,19 +168,15 @@ private:
     }
 
 public:
-    constexpr TypePtr() noexcept : value(0), store(0) {}
+    constexpr TypePtr() noexcept : store(0) {}
 
     TypePtr(std::nullptr_t) noexcept : TypePtr() {}
 
     TypePtr(TypePtr &&other) noexcept {
-        ENFORCE_NO_TIMER(other.value == 0);
-        value = 0;
         store = other.releaseTagged();
     }
 
     TypePtr(const TypePtr &other) noexcept : store(other.store) {
-        ENFORCE_NO_TIMER(other.value == 0);
-        value = 0;
         if (other.containsPtr()) {
             this->get()->addref();
         }
@@ -207,8 +192,6 @@ public:
         }
 
         handleDelete();
-        ENFORCE_NO_TIMER(other.value == 0);
-        value = 0;
         store = other.releaseTagged();
         return *this;
     };
@@ -218,17 +201,17 @@ public:
             return *this;
         }
 
-        ENFORCE_NO_TIMER(other.value == 0);
         handleDelete();
         if (other.containsPtr()) {
             other.get()->addref();
         }
-        value = 0;
         store = other.store;
         return *this;
     };
 
-    explicit TypePtr(Tag tag, Refcounted *expr) : TypePtr(tag, nullptr, expr) {}
+    explicit TypePtr(Tag tag, Refcounted *expr) noexcept : store(tagPtr(tag, expr)) {
+        expr->addref();
+    }
 
     operator bool() const {
         return (bool)store;
@@ -242,16 +225,10 @@ public:
     }
 
     bool operator!=(const TypePtr &other) const {
-        // There's a lot going on in this line.
-        // * If store == other.store, both `this` and `other` have the same value of `containsPtr()`.
-        // * If store == other.store and both contain a pointer, there's no need to compare `counter`; they point to the
-        // same Type object.
-        // * If store == other.store and both do not contain a pointer, then we need to compare the inlined values.
-        return store != other.store || (!containsPtr() && value != other.value);
+        return store != other.store;
     }
     bool operator==(const TypePtr &other) const {
-        // Inverse of !=
-        return store == other.store && (containsPtr() || value == other.value);
+        return store == other.store;
     }
     bool operator!=(std::nullptr_t n) const {
         return store != 0;
