@@ -360,7 +360,7 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
  * This is the type used to represent a use of a type_member or type_template in
  * a signature.
  */
-TYPE(LambdaParam) final {
+TYPE(LambdaParam) final : public Refcounted {
 public:
     TypeMemberRef definition;
 
@@ -528,7 +528,7 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
     }
 }
 
-TYPE(LiteralIntegerType) final {
+TYPE(LiteralIntegerType) final : public Refcounted {
 public:
     const int64_t value;
 
@@ -562,7 +562,7 @@ template <> inline TypePtr make_type<LiteralIntegerType, long long &>(long long 
     return make_type<LiteralIntegerType>(static_cast<int64_t>(val));
 }
 
-TYPE(FloatLiteralType) final {
+TYPE(FloatLiteralType) final : public Refcounted {
 public:
     const double value;
 
@@ -596,7 +596,7 @@ template <> inline TypePtr make_type<FloatLiteralType, float &&>(float &&val) {
  * TypeVars are the used for the type parameters of generic methods.
  * Note: These are mutated post-construction and cannot be inlined.
  */
-TYPE(TypeVar) final {
+TYPE(TypeVar) final : public Refcounted {
 public:
     TypeArgumentRef sym;
     TypeVar(TypeArgumentRef sym);
@@ -617,7 +617,7 @@ public:
 };
 CheckSize(TypeVar, 8, 8);
 
-TYPE(OrType) final {
+TYPE(OrType) final : public Refcounted {
 public:
     TypePtr left;
     TypePtr right;
@@ -673,7 +673,7 @@ private:
 };
 CheckSize(OrType, 32, 8);
 
-TYPE(AndType) final {
+TYPE(AndType) final : public Refcounted{
 public:
     TypePtr left;
     TypePtr right;
@@ -720,7 +720,7 @@ private:
 };
 CheckSize(AndType, 32, 8);
 
-TYPE(ShapeType) final {
+TYPE(ShapeType) final : public Refcounted {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
@@ -751,7 +751,7 @@ public:
 };
 CheckSize(ShapeType, 48, 8);
 
-TYPE(TupleType) final {
+TYPE(TupleType) final : public Refcounted {
 private:
     TupleType() = delete;
 
@@ -783,7 +783,7 @@ public:
 };
 CheckSize(TupleType, 24, 8);
 
-TYPE(AppliedType) final {
+TYPE(AppliedType) final : public Refcounted {
 public:
     ClassOrModuleRef klass;
     std::vector<TypePtr> targs;
@@ -818,7 +818,7 @@ CheckSize(AppliedType, 32, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-TYPE(MetaType) final {
+TYPE(MetaType) final : public Refcounted {
 public:
     TypePtr wrapped;
 
@@ -1011,7 +1011,7 @@ template <> inline BlamedUntyped cast_type_nonnull<BlamedUntyped>(const TypePtr 
     return BlamedUntyped(core::SymbolRef::fromRaw(what.inlinedValue()));
 }
 
-TYPE(UnresolvedClassType) final : public ClassType {
+TYPE(UnresolvedClassType) final : public Refcounted, public ClassType {
 public:
     const core::SymbolRef scope;
     const std::vector<core::NameRef> names;
@@ -1027,7 +1027,7 @@ public:
     uint32_t hash(const GlobalState &gs) const;
 };
 
-TYPE(UnresolvedAppliedType) final : public ClassType {
+TYPE(UnresolvedAppliedType) final : public Refcounted, public ClassType {
 public:
     const core::ClassOrModuleRef klass;
     const std::vector<TypePtr> targs;

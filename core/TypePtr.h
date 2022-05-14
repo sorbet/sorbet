@@ -13,6 +13,22 @@ class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
 
+class NonRefcounted {};
+
+class Refcounted {
+    std::atomic<uint32_t> counter{0};
+
+public:
+    void addref() {
+	this->counter.fetch_add(1);
+    }
+
+    uint32_t release() {
+	// fetch_sub returns value prior to subtract
+	return this->counter.fetch_sub(1) - 1;
+    }
+};
+
 class TypePtr final {
     template <class To> static To &const_cast_type(const To &what) {
         return const_cast<To &>(what);
@@ -118,7 +134,7 @@ private:
         return maskedPtr | val | NOT_INLINED_MASK;
     }
 
-    TypePtr(Tag tag, std::atomic<uint32_t> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
+    TypePtr(Tag tag, std::atomic<uint32_t> *counter, Refcounted *expr) : counter(counter), store(tagPtr(tag, expr)) {
         ENFORCE_NO_TIMER(counter != nullptr);
         counter->fetch_add(1);
     }
@@ -241,7 +257,7 @@ public:
         return *this;
     };
 
-    explicit TypePtr(Tag tag, void *expr) : TypePtr(tag, new std::atomic<uint32_t>(), expr) {}
+    explicit TypePtr(Tag tag, Refcounted *expr) : TypePtr(tag, new std::atomic<uint32_t>(), expr) {}
 
     operator bool() const {
         return (bool)store;
