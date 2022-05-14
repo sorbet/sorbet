@@ -135,8 +135,8 @@ private:
     }
 
     TypePtr(Tag tag, std::atomic<uint32_t> *counter, Refcounted *expr) : counter(counter), store(tagPtr(tag, expr)) {
-        ENFORCE_NO_TIMER(counter != nullptr);
-        counter->fetch_add(1);
+        ENFORCE_NO_TIMER(counter == nullptr);
+        expr->addref();
     }
 
     // Inlined TypePtr constructor
@@ -155,27 +155,12 @@ private:
         return saved;
     }
 
-    std::atomic<uint32_t> *releaseCounter() noexcept {
-        ENFORCE_NO_TIMER(containsPtr());
-        auto saved = counter;
-        counter = nullptr;
-        return saved;
-    }
-
-    uint64_t releaseValue() noexcept {
-        ENFORCE_NO_TIMER(!containsPtr());
-        auto saved = value;
-        value = 0;
-        return saved;
-    }
-
     void handleDelete() noexcept {
         if (containsPtr()) {
-            // fetch_sub returns value prior to subtract
-            const uint32_t counterVal = counter->fetch_sub(1) - 1;
+            auto *ptr = this->get();
+            const uint32_t counterVal = ptr->release();
             if (counterVal == 0) {
-                deleteTagged(tag(), get());
-                delete counter;
+                deleteTagged(tag(), ptr);
             }
         }
     }
@@ -188,9 +173,9 @@ private:
         return val;
     }
 
-    void *get() const {
+    Refcounted *get() const {
         auto val = store & PTR_MASK;
-        return reinterpret_cast<void *>(val >> 16);
+        return reinterpret_cast<Refcounted *>(val >> 16);
     }
 
 public:
@@ -199,23 +184,16 @@ public:
     TypePtr(std::nullptr_t) noexcept : TypePtr() {}
 
     TypePtr(TypePtr &&other) noexcept {
-        if (other.containsPtr()) {
-            counter = other.releaseCounter();
-            ENFORCE_NO_TIMER(counter != nullptr);
-        } else {
-            value = other.releaseValue();
-        }
-        // Has to happen last to avoid releaseCounter() triggering an ENFORCE.
+        ENFORCE_NO_TIMER(other.value == 0);
+        value = 0;
         store = other.releaseTagged();
     }
 
     TypePtr(const TypePtr &other) noexcept : store(other.store) {
+        ENFORCE_NO_TIMER(other.value == 0);
+        value = 0;
         if (other.containsPtr()) {
-            counter = other.counter;
-            ENFORCE_NO_TIMER(counter != nullptr);
-            counter->fetch_add(1);
-        } else {
-            value = other.value;
+            this->get()->addref();
         }
     };
 
@@ -229,11 +207,8 @@ public:
         }
 
         handleDelete();
-        if (other.containsPtr()) {
-            counter = other.releaseCounter();
-        } else {
-            value = other.releaseValue();
-        }
+        ENFORCE_NO_TIMER(other.value == 0);
+        value = 0;
         store = other.releaseTagged();
         return *this;
     };
@@ -243,21 +218,17 @@ public:
             return *this;
         }
 
+        ENFORCE_NO_TIMER(other.value == 0);
         handleDelete();
-
         if (other.containsPtr()) {
-            counter = other.counter;
-            if (counter != nullptr) {
-                counter->fetch_add(1);
-            }
-        } else {
-            value = other.value;
+            other.get()->addref();
         }
+        value = 0;
         store = other.store;
         return *this;
     };
 
-    explicit TypePtr(Tag tag, Refcounted *expr) : TypePtr(tag, new std::atomic<uint32_t>(), expr) {}
+    explicit TypePtr(Tag tag, Refcounted *expr) : TypePtr(tag, nullptr, expr) {}
 
     operator bool() const {
         return (bool)store;
