@@ -112,13 +112,13 @@ private:
         return static_cast<tagged_storage>(tag);
     }
 
-    static tagged_storage tagValue(Tag tag, uint32_t inlinedValue) {
+    static tagged_storage tagValue(Tag tag, uint64_t inlinedValue) {
+        // Ensure the upper bits aren't getting used for anything exciting.
+        ENFORCE_NO_TIMER((inlinedValue >> 48) == 0);
         auto val = tagToMask(tag);
 
-        // Store value into val.  It doesn't much matter where we put it in
-        // the upper 48 bits, but we put it in the uppermost 32 bits to
-        // ensure that retrieving it requires only a shift and no masking.
-        val |= static_cast<tagged_storage>(inlinedValue) << 32;
+        // Store value into val.  Put it in the same place as pointer values.
+        val |= static_cast<tagged_storage>(inlinedValue) << 16;
 
         // Asserts that tag isn't using the bit which we use to indicate that value is _not_ inlined.
         ENFORCE((val & NOT_INLINED_MASK) == 0);
@@ -182,10 +182,10 @@ private:
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    uint32_t inlinedValue() const {
+    uint64_t inlinedValue() const {
         ENFORCE_NO_TIMER(!containsPtr());
-        auto val = store >> 32;
-        return static_cast<uint32_t>(val);
+        auto val = store >> 16;
+        return val;
     }
 
     void *get() const {
