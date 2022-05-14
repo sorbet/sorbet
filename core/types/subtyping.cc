@@ -438,7 +438,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 },
                 [&](const LiteralIntegerType &l1) {
                     if (isa_type<LiteralIntegerType>(t2)) {
-                        auto l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                        auto &l2 = cast_type_nonnull<LiteralIntegerType>(t2);
                         if (l1.equals(l2)) {
                             result = t1;
                         } else {
@@ -450,7 +450,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 },
                 [&](const FloatLiteralType &l1) {
                     if (isa_type<FloatLiteralType>(t2)) {
-                        auto l2 = cast_type_nonnull<FloatLiteralType>(t2);
+                        auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                         if (l1.equals(l2)) {
                             result = t1;
                         } else {
@@ -803,7 +803,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     }
                 },
                 [&](const LiteralIntegerType &l1) {
-                    auto l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                    auto &l2 = cast_type_nonnull<LiteralIntegerType>(t2);
                     if (l1.equals(l2)) {
                         result = t1;
                     } else {
@@ -811,7 +811,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     }
                 },
                 [&](const FloatLiteralType &l1) {
-                    auto l2 = cast_type_nonnull<FloatLiteralType>(t2);
+                    auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                     if (l1.equals(l2)) {
                         result = t1;
                     } else {
@@ -1284,7 +1284,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         return;
                     }
 
-                    auto l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                    auto &l2 = cast_type_nonnull<LiteralIntegerType>(t2);
                     result = l1.equals(l2);
                 },
                 [&](const FloatLiteralType &l1) {
@@ -1294,7 +1294,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         return;
                     }
 
-                    auto l2 = cast_type_nonnull<FloatLiteralType>(t2);
+                    auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                     result = l1.equals(l2);
                 },
                 [&](const MetaType &m1) {

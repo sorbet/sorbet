@@ -46,7 +46,7 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (!core::isa_type<core::FloatLiteralType>(arg->value)) {
         return;
     }
-    auto f = core::cast_type_nonnull<core::FloatLiteralType>(arg->value);
+    auto &f = core::cast_type_nonnull<core::FloatLiteralType>(arg->value);
     char version[5];
     snprintf(version, sizeof(version), "V%.1f", f.value);
     absl::c_replace(version, '.', '_');
