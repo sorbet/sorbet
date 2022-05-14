@@ -212,7 +212,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
     } else {
         ENFORCE(this->definition.isTypeMember());
         auto typeMember = this->definition.asTypeMemberRef();
-        auto lambdaParam = cast_type_nonnull<LambdaParam>(typeMember.data(gs)->resultType);
+        auto &lambdaParam = cast_type_nonnull<LambdaParam>(typeMember.data(gs)->resultType);
         auto upperBound = lambdaParam.upperBound;
         if (upperBound.isTop()) {
             if (args.suppressErrors) {
@@ -1085,7 +1085,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             } else if (hasKwParam) {
                 auto hashType = isa_type<ShapeType>(kwSplatType) ? kwSplatType.underlying(gs) : kwSplatType;
-                auto appliedType = cast_type_nonnull<AppliedType>(hashType);
+                auto &appliedType = cast_type_nonnull<AppliedType>(hashType);
                 auto kwSplatKeyType = appliedType.targs[0];
                 auto kwSplatValueType = appliedType.targs[1];
 
@@ -1652,7 +1652,7 @@ ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type, bool m
     bool breakOut = false;
     while (!result.exists() && !breakOut) {
         typecase(
-            typePtr,
+		 (const TypePtr &)typePtr,
 
             [&](const ClassType &klass) { result = klass.symbol; },
 
