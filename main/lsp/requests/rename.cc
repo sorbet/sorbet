@@ -225,7 +225,7 @@ public:
     void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
-        if (!source.has_value()) {
+        if (!source.has_value() || source.value().empty()) {
             return;
         }
 

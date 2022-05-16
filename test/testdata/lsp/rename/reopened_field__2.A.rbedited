@@ -1,0 +1,7 @@
+# typed: true
+
+class Animal
+  def information
+    "Puppy is #{@years_of_age} years old."
+  end
+end

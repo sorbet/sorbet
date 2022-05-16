@@ -15,3 +15,10 @@ class Person
     "#{@name} is #{@age} years old."
   end
 end
+
+class Child < Person
+  def information
+    "Child #{@name} is #{@age} years old."
+#             ^ apply-rename: [C] newName: first_name placeholderText: @name
+  end
+end

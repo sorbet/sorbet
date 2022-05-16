@@ -1,0 +1,21 @@
+# typed: true
+
+class Config
+  @@name = T.let("Configs", String)
+#   ^ apply-rename: [B] newName: @@package placeholderText: @@name
+
+  def self.package_name
+    @@name
+  end
+
+  class << self
+    def initialize_version
+      @version = T.let("1.0", T.nilable(String))
+#      ^ apply-rename: [A] newName: @version_string placeholderText: @version
+    end
+
+    def version
+      @version
+    end
+  end
+end
