@@ -1,0 +1,24 @@
+# typed: true
+
+class Person
+  attr_reader :years_of_age
+  attr_reader :name
+
+  def initialize
+    @years_of_age = T.let(1, Integer)
+#    ^ apply-rename: [A] newName: @years_of_age placeholderText: @age
+    @name = T.let("John", String)
+#    ^ apply-rename: [B] newName: first_name placeholderText: @name
+  end
+
+  def information
+    "#{@name} is #{@years_of_age} years old."
+  end
+end
+
+class Child < Person
+  def information
+    "Child #{@name} is #{@years_of_age} years old."
+#             ^ apply-rename: [C] newName: first_name placeholderText: @name
+  end
+end

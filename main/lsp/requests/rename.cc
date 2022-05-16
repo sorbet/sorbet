@@ -215,6 +215,43 @@ public:
     }
 };
 
+class FieldRenamer : public AbstractRenamer {
+public:
+    FieldRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
+                 const string newName)
+        : AbstractRenamer(gs, config, oldName, newName) {}
+    ~FieldRenamer() {}
+
+    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+        auto loc = response->getLoc();
+        auto source = loc.source(gs);
+        if (!source.has_value() || source.value().empty()) {
+            return;
+        }
+
+        string newsrc;
+
+        // If the source includes `@` in the first character, then we're renaming the instance variable and need to make
+        // sure to include it. Otherwise, we're renaming an attr_reader/writer/accessor and need to make sure to not
+        // include it. This allows users to not care about whether they need to add the `@` themselves.
+        if (source.value()[0] == '@' && newName[0] != '@') {
+            newsrc = "@" + newName;
+        } else if (source.value()[0] != '@' && newName[0] == '@') {
+            newsrc = newName.substr(1, newName.length() - 1);
+        } else {
+            newsrc = newName;
+        }
+
+        edits[loc] = newsrc;
+    }
+
+    void addSymbol(const core::SymbolRef symbol) override {
+        if (symbol.isField(gs)) {
+            getQueue()->tryEnqueue(symbol);
+        }
+    }
+};
+
 void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<AbstractRenamer> renamer) {
     responseMsg->result = renamer->buildWorkspaceEdit();
     if (renamer->getInvalid()) {
@@ -228,6 +265,8 @@ shared_ptr<AbstractRenamer> makeRenamer(const core::GlobalState &gs,
     auto originalName = symbol.name(gs).show(gs);
     if (symbol.isMethod()) {
         return make_shared<MethodRenamer>(gs, config, originalName, newName);
+    } else if (symbol.isField(gs)) {
+        return make_shared<FieldRenamer>(gs, config, originalName, newName);
     } else {
         return make_shared<ConstRenamer>(gs, config, originalName, newName);
     }
@@ -312,6 +351,10 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &type
             renamer->rename(resp, core::SymbolRef{});
             enrichResponse(response, renamer);
         }
+    } else if (auto fieldResp = resp->isField()) {
+        renamer = makeRenamer(gs, config, fieldResp->symbol, params->newName);
+        renamer->getRenameEdits(typechecker, fieldResp->symbol, params->newName);
+        enrichResponse(response, renamer);
     }
 
     return response;
