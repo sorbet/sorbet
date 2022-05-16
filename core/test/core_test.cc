@@ -249,15 +249,10 @@ class TypePtrTestHelper {
 public:
     static std::atomic<uint32_t> *counter(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
-        return ptr.counter;
+        return &ptr.get()->counter;
     }
 
-    static uint64_t value(const TypePtr &ptr) {
-        CHECK(!ptr.containsPtr());
-        return ptr.value;
-    }
-
-    static uint32_t inlinedValue(const TypePtr &ptr) {
+    static uint64_t inlinedValue(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.inlinedValue();
     }
@@ -266,24 +261,24 @@ public:
         return ptr.store;
     }
 
-    static void *get(const TypePtr &ptr) {
+    static Refcounted *get(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
         return ptr.get();
     }
 
-    static TypePtr create(TypePtr::Tag tag, void *type) {
+    static TypePtr create(TypePtr::Tag tag, Refcounted *type) {
         return TypePtr(tag, type);
     }
 
-    static TypePtr createInlined(TypePtr::Tag tag, uint32_t inlinedValue, uint64_t value) {
-        return TypePtr(tag, inlinedValue, value);
+    static TypePtr createInlined(TypePtr::Tag tag, uint64_t inlinedValue) {
+        return TypePtr(tag, inlinedValue);
     }
 };
 
 TEST_SUITE("TypePtr") {
     TEST_CASE("Does not allocate a counter for null type") {
         TypePtr ptr;
-        CHECK_EQ(0, TypePtrTestHelper::value(ptr));
+        CHECK_EQ(0, TypePtrTestHelper::store(ptr));
     }
 
     TEST_CASE("Properly manages counter") {
