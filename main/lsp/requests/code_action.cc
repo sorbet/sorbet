@@ -1,4 +1,5 @@
 #include "main/lsp/requests/code_action.h"
+#include "absl/algorithm/container.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPQuery.h"
@@ -39,6 +40,35 @@ vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &co
             make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
     }
     return documentEdits;
+}
+
+const core::lsp::MethodDefResponse *
+hasLoneClassMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
+    // We want to return the singular `MethodDefResponse` for a singleton, non-operator method.
+    // We do not want to return the first such response, because there might be multiple
+    // methods "defined" at the same location (cf. the DSLBuilder rewriter).  And because the
+    // query we're examining was a location-based query, there might be several overlapping responses,
+    // and we only want to consider the method ones.
+    const core::lsp::MethodDefResponse *found = nullptr;
+
+    for (auto &resp : responses) {
+        if (auto *def = resp->isMethodDef()) {
+            if (found != nullptr) {
+                // Assume these two methods stem from some of rewriter pass.
+                return nullptr;
+            }
+
+            // If we find a method def we can't handle at this location, assume
+            // it also comes from sort of rewriter pass.
+            if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs) || isOperator(def->name.show(gs))) {
+                return nullptr;
+            }
+
+            found = def;
+        }
+    }
+
+    return found;
 }
 } // namespace
 
@@ -141,36 +171,31 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
 
     // Generate "Move method" code actions only for class method definitions
     if (queryResult.error == nullptr) {
-        for (auto &resp : queryResult.responses) {
-            if (auto def = resp->isMethodDef()) {
-                if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs) || isOperator(def->name.show(gs))) {
-                    continue;
-                }
-                auto action = make_unique<CodeAction>("Move method to a new module");
-                action->kind = CodeActionKind::RefactorExtract;
+        if (auto *def = hasLoneClassMethodResponse(gs, queryResult.responses)) {
+            auto action = make_unique<CodeAction>("Move method to a new module");
+            action->kind = CodeActionKind::RefactorExtract;
 
-                bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
-                                        config.getClientConfig().clientCodeActionDataSupport;
-                auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
-                auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
-                auto arg = make_unique<TextDocumentPositionParams>(
-                    make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
-                auto args = vector<unique_ptr<TextDocumentPositionParams>>();
-                args.emplace_back(move(arg));
+            bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
+                                    config.getClientConfig().clientCodeActionDataSupport;
+            auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
+            auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
+            auto arg = make_unique<TextDocumentPositionParams>(
+                make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
+            auto args = vector<unique_ptr<TextDocumentPositionParams>>();
+            args.emplace_back(move(arg));
 
-                renameCommand->arguments = move(args);
-                action->command = move(renameCommand);
-                if (canResolveLazily) {
-                    action->data = move(params);
-                } else {
-                    auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    auto edits = getMoveMethodEdits(config, gs, *def, typechecker);
-                    workspaceEdit->documentChanges = move(edits);
-                    action->edit = move(workspaceEdit);
-                }
-
-                result.emplace_back(move(action));
+            renameCommand->arguments = move(args);
+            action->command = move(renameCommand);
+            if (canResolveLazily) {
+                action->data = move(params);
+            } else {
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                auto edits = getMoveMethodEdits(config, gs, *def, typechecker);
+                workspaceEdit->documentChanges = move(edits);
+                action->edit = move(workspaceEdit);
             }
+
+            result.emplace_back(move(action));
         }
     }
 
