@@ -609,7 +609,7 @@ module Fn
   Input = type_member(:in)
   Output = type_member(:out)
 
-  sig {abstract.params(input: Input).returns(Oputput)}
+  sig {abstract.params(input: Input).returns(Output)}
   def call(input); end
 end
 
