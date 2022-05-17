@@ -315,6 +315,14 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
 }
 
 void TypePtr::_sanityCheck(const GlobalState &gs) const {
+    // Not really a dynamic check, but this is a convenient place to put this to
+    // ensure that all relevant types get checked.
+#define SANITY_CHECK(T)                                                                        \
+    static_assert(TypePtr::TypeToIsInlined<T>::value || !std::is_copy_constructible<T>::value, \
+                  "non-inline types must not be copy-constructible");                          \
+    break;
+    GENERATE_TAG_SWITCH(tag(), SANITY_CHECK)
+#undef SANITY_CHECK
 #define SANITY_CHECK(T) return cast_type_nonnull<T>(*this)._sanityCheck(gs);
     GENERATE_TAG_SWITCH(tag(), SANITY_CHECK)
 #undef SANITY_CHECK

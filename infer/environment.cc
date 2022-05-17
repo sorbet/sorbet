@@ -604,7 +604,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                 auto c = core::cast_type_nonnull<core::ClassType>(argType);
                 argSymbol = c.symbol;
             } else if (core::isa_type<core::AppliedType>(argType)) {
-                auto a = core::cast_type_nonnull<core::AppliedType>(argType);
+                auto &a = core::cast_type_nonnull<core::AppliedType>(argType);
                 argSymbol = a.klass;
             }
             if (argSymbol.exists() && isSingleton(ctx, argSymbol)) {
@@ -620,7 +620,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                 auto c = core::cast_type_nonnull<core::ClassType>(recvType);
                 recvSymbol = c.symbol;
             } else if (core::isa_type<core::AppliedType>(recvType)) {
-                auto a = core::cast_type_nonnull<core::AppliedType>(recvType);
+                auto &a = core::cast_type_nonnull<core::AppliedType>(recvType);
                 recvSymbol = a.klass;
             }
             if (recvSymbol.exists() && isSingleton(ctx, recvSymbol)) {
