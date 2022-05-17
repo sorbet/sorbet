@@ -65,9 +65,9 @@ public:
     template <class To>
     static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(TypePtr &&what) = delete;
 
-    template <class To> static auto cast(TypePtr &what) {
-        return const_cast_type<To>(cast<To>(static_cast<const TypePtr &>(what)));
-    }
+    // Disallowing this and requiring people to cast to `const TypePtr &` is simplier
+    // than creating a parallel `TypeToCastType` for non-const argument types.
+    template <class To> static auto cast(TypePtr &what) = delete;
 
     static std::string tagToString(Tag tag);
 
