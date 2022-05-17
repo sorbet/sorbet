@@ -158,6 +158,13 @@ class T::Enum
     serialize.to_json(*args)
   end
 
+  sig {params(args: T.untyped).returns(T.untyped)}
+  def as_json(*args)
+    serialized_val = serialize
+    return serialized_val unless serialized_val.respond_to?(:as_json)
+    serialized_val.as_json(*args)
+  end
+
   sig {returns(String)}
   def to_s
     inspect

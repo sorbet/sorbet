@@ -189,6 +189,28 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'as_json' do
+    class CustomSerializedValue
+      def as_json(*args)
+        1234
+      end
+    end
+
+    class CustomSerializationEnum < T::Enum
+      enums do
+        SPADE = new(CustomSerializedValue.new)
+      end
+    end
+
+    it 'has a JSON representation' do
+      assert_equal("club", CardSuit::CLUB.as_json)
+    end
+
+    it 'asks for the JSON representation of the serialized value' do
+      assert_equal(1234, CustomSerializationEnum::SPADE.as_json)
+    end
+  end
+
   describe 'T::Props::CustomType integration' do
     it 'supports instance? checks on the Enum class' do
       assert_equal(true, CardSuit.instance?(CardSuit::SPADE))
