@@ -381,6 +381,8 @@ public:
     TypePtr upperBound;
 
     LambdaParam(TypeMemberRef definition, TypePtr lower, TypePtr upper);
+    LambdaParam(const LambdaParam &) = delete;
+    LambdaParam &operator=(const LambdaParam &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});
@@ -580,6 +582,8 @@ TYPE(TypeVar) final {
 public:
     TypeArgumentRef sym;
     TypeVar(TypeArgumentRef sym);
+    TypeVar(const TypeVar &) = delete;
+    TypeVar &operator=(const TypeVar &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});
@@ -600,6 +604,8 @@ public:
     TypePtr left;
     TypePtr right;
 
+    OrType(const OrType &) = delete;
+    OrType &operator=(const OrType &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});
@@ -654,6 +660,8 @@ public:
     TypePtr left;
     TypePtr right;
 
+    AndType(const AndType &) = delete;
+    AndType &operator=(const AndType &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});
@@ -699,6 +707,8 @@ public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
     ShapeType(std::vector<TypePtr> keys, std::vector<TypePtr> values);
+    ShapeType(const ShapeType &) = delete;
+    ShapeType &operator=(const ShapeType &) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
@@ -729,6 +739,8 @@ public:
     std::vector<TypePtr> elems;
 
     TupleType(std::vector<TypePtr> elements);
+    TupleType(const TupleType &) = delete;
+    TupleType &operator=(const TupleType &) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
@@ -756,6 +768,8 @@ public:
     ClassOrModuleRef klass;
     std::vector<TypePtr> targs;
     AppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs);
+    AppliedType(const AppliedType &) = delete;
+    AppliedType &operator=(const AppliedType &) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
@@ -789,6 +803,8 @@ public:
     TypePtr wrapped;
 
     MetaType(const TypePtr &wrapped);
+    MetaType(const MetaType &) = delete;
+    MetaType &operator=(const MetaType &) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
@@ -981,6 +997,8 @@ public:
     const std::vector<core::NameRef> names;
     UnresolvedClassType(SymbolRef scope, std::vector<core::NameRef> names)
         : ClassType(core::Symbols::untyped()), scope(scope), names(std::move(names)){};
+    UnresolvedClassType(const UnresolvedClassType &) = delete;
+    UnresolvedClassType &operator=(const UnresolvedClassType &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});
@@ -995,6 +1013,8 @@ public:
     const std::vector<TypePtr> targs;
     UnresolvedAppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs)
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
+    UnresolvedAppliedType(const UnresolvedAppliedType &) = delete;
+    UnresolvedAppliedType &operator=(const UnresolvedAppliedType &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
         return show(gs, {});
