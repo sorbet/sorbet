@@ -140,20 +140,43 @@ bool LSPIndexer::canTakeFastPathInternal(
             ENFORCE(newHash.definitions.methodHash != core::DefinitionHash::HASH_STATE_INVALID);
             prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
             // Also record some information about what might have changed.
-            if (newHash.definitions.classModuleHash != oldHash.definitions.classModuleHash) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "classmodule");
-            }
-            if (newHash.definitions.typeArgumentHash != oldHash.definitions.typeArgumentHash) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "typeargument");
-            }
-            if (newHash.definitions.typeMemberHash != oldHash.definitions.typeMemberHash) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "typemember");
-            }
-            if (newHash.definitions.fieldHash != oldHash.definitions.fieldHash) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "field");
-            }
-            if (newHash.definitions.methodHash != oldHash.definitions.methodHash) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "method");
+            const bool classesDiffer = newHash.definitions.classModuleHash != oldHash.definitions.classModuleHash;
+            const bool typeArgumentsDiffer =
+                newHash.definitions.typeArgumentHash != oldHash.definitions.typeArgumentHash;
+            const bool typeMembersDiffer = newHash.definitions.typeMemberHash != oldHash.definitions.typeMemberHash;
+            const bool fieldsDiffer = newHash.definitions.fieldHash != oldHash.definitions.fieldHash;
+            const bool methodsDiffer = newHash.definitions.methodHash != oldHash.definitions.methodHash;
+            const uint32_t differCount = int(classesDiffer) + int(typeArgumentsDiffer) + int(typeMembersDiffer) +
+                                         int(fieldsDiffer) + int(methodsDiffer);
+            if (differCount == 1) {
+                if (classesDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlyclassmodule");
+                } else if (typeArgumentsDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlytypeargument");
+                } else if (typeMembersDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlytypemembers");
+                } else if (fieldsDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlyfields");
+                } else {
+                    ENFORCE(methodsDiffer);
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlymethods");
+                }
+            } else {
+                if (classesDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "classmodule");
+                }
+                if (typeArgumentsDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "typeargument");
+                }
+                if (typeMembersDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "typemember");
+                }
+                if (fieldsDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "field");
+                }
+                if (methodsDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "method");
+                }
             }
             return false;
         }
