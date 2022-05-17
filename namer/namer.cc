@@ -40,6 +40,7 @@ enum class DefinitionKind : uint8_t {
     TypeMember = 5,
     Symbol = 6,
 };
+CheckSize(DefinitionKind, 1, 1);
 
 class FoundDefinitionRef final {
     DefinitionKind _kind;
@@ -85,6 +86,7 @@ public:
 
     core::SymbolRef symbol() const;
 };
+CheckSize(FoundDefinitionRef, 8, 4);
 
 struct FoundClassRef final {
     core::NameRef name;
@@ -92,6 +94,7 @@ struct FoundClassRef final {
     // If !owner.exists(), owner is determined by reference site.
     FoundDefinitionRef owner;
 };
+CheckSize(FoundClassRef, 20, 4);
 
 struct FoundClass final {
     FoundDefinitionRef owner;
@@ -100,6 +103,7 @@ struct FoundClass final {
     core::LocOffsets declLoc;
     ast::ClassDef::Kind classKind;
 };
+CheckSize(FoundClass, 36, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
@@ -109,6 +113,7 @@ struct FoundStaticField final {
     core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
 };
+CheckSize(FoundStaticField, 40, 4);
 
 struct FoundTypeMember final {
     FoundDefinitionRef owner;
@@ -120,6 +125,7 @@ struct FoundTypeMember final {
     bool isFixed = false;
     bool isTypeTemplete = false;
 };
+CheckSize(FoundTypeMember, 44, 4);
 
 struct FoundMethod final {
     FoundDefinitionRef owner;
@@ -130,6 +136,7 @@ struct FoundMethod final {
     vector<ast::ParsedArg> parsedArgs;
     vector<uint32_t> argsHash;
 };
+CheckSize(FoundMethod, 80, 8);
 
 struct Modifier {
     enum class Kind : uint8_t {
@@ -150,6 +157,7 @@ struct Modifier {
         return Modifier{this->kind, this->owner, this->loc, this->name, target};
     }
 };
+CheckSize(Modifier, 28, 4);
 
 class FoundDefinitions final {
     // Contains references to items in _klasses, _methods, _staticFields, and _typeMembers.

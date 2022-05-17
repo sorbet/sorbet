@@ -2223,6 +2223,11 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
     return result;
 }
 
+// Tracks whether _anything_ changed about the method, but unlike the other things, this hash is not
+// used for the fast path decision. This is just used to figure out the names of the method symbols
+// that changed, so that _if_ we took the fast path (determined using methodShapeHash), we know
+// which methods might have been updated on the fast path, so we can then figure out which files to
+// type check after the fast path resolver finishes.
 uint32_t Method::hash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
