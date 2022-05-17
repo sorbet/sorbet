@@ -1,6 +1,0 @@
-# typed: true
-
-AA = 123
-#^ hover: NilClass
-puts AA
-#    ^ hover: NilClass
