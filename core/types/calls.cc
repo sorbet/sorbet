@@ -1653,7 +1653,7 @@ ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type, bool m
     while (!result.exists() && !breakOut) {
         const TypePtr &ptrForTypecase = typePtr;
         typecase(
-	    ptrForTypecase,
+            ptrForTypecase,
 
             [&](const ClassType &klass) { result = klass.symbol; },
 
