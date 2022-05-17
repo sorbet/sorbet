@@ -54,7 +54,7 @@ hasLoneClassMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<
     for (auto &resp : responses) {
         if (auto *def = resp->isMethodDef()) {
             if (found != nullptr) {
-                // Assume these two methods stem from some of rewriter pass.
+                // Assume these two methods stem from some sort of rewriter pass.
                 return nullptr;
             }
 
