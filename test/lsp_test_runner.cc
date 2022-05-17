@@ -255,7 +255,9 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
             INFO(fmt::format(
                 "Did not receive code action matching assertion `{}` for error or selected code action `{}`...",
                 codeActionAssertion->toString(), codeActionDescription));
-            CHECK_NE(it2, receivedCodeActionsByTitle.end());
+            INFO("(If this was the expected behavior, add `# assert-no-code-action: $CODE_ACTION_KIND` to your "
+                 "testcase)");
+            REQUIRE_NE(it2, receivedCodeActionsByTitle.end());
         }
 
         // Ensure that the received code action applies correctly.
@@ -353,7 +355,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                 validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId,
                                     selectedCodeActionKinds, ignoredCodeActionKinds, applyCodeActionAssertions,
                                     codeActionAssertion->toString(), true);
-                ENFORCE(applyCodeActionAssertions.size() < initialSize);
+                REQUIRE_LT(applyCodeActionAssertions.size(), initialSize);
             }
 
             // We've already removed any code action assertions that matches a received code action assertion.
