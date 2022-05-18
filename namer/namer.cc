@@ -1468,6 +1468,8 @@ class TreeSymbolizer {
 
     bool bestEffort;
 
+    core::ClassOrModuleRef commonPrefix;
+
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
@@ -1607,6 +1609,14 @@ class TreeSymbolizer {
 public:
     TreeSymbolizer(bool bestEffort) : bestEffort(bestEffort) {}
 
+    const core::ClassOrModuleRef getCommonPrefix() const {
+        return commonPrefix;
+    }
+
+    void clearCommonPrefix() {
+        commonPrefix = core::Symbols::noClassOrModule();
+    }
+
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -1713,6 +1723,50 @@ public:
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
             }
+
+            if (!commonPrefix.exists()) {
+                // Initialize common prefix to the current symbol
+                commonPrefix = klass.symbol;
+            } else if (commonPrefix != core::Symbols::root()) {
+                // Find common prefix.
+                // Say the current common prefix is Foo -> Bar -> Baz, and the current symbol is Foo -> Bar -> Bat
+                // We iterate backwards over both symbols to find the first prefix that matches
+                // in both symbols: this will be the new common prefix.
+
+                core::ClassOrModuleRef foundPrefix;
+
+                auto curSym = klass.symbol;
+                int curSymLen = symbolLength(ctx, curSym);
+
+                auto prefixSym = commonPrefix;
+                int prefixSymLen = symbolLength(ctx, prefixSym);
+
+                while (curSymLen != prefixSymLen) {
+                    if (curSymLen > prefixSymLen) {
+                        curSym = curSym.data(ctx)->owner;
+                        curSymLen--;
+                    } else {
+                        prefixSym = prefixSym.data(ctx)->owner;
+                        prefixSymLen--;
+                    }
+                }
+
+                while (!foundPrefix.exists() && curSym != core::Symbols::root()) {
+                    if (curSym == prefixSym) {
+                        foundPrefix = curSym;
+                    } else {
+                        curSym = curSym.data(ctx)->owner;
+                        prefixSym = prefixSym.data(ctx)->owner;
+                    }
+                }
+
+                if (foundPrefix.exists()) {
+                    commonPrefix = foundPrefix;
+                } else {
+                    // set to root symbol if common prefix is not found
+                    commonPrefix = core::Symbols::root();
+                }
+            }
         }
 
         ast::InsSeq::STATS_store retSeqs;
@@ -1721,6 +1775,16 @@ public:
             retSeqs.emplace_back(std::move(stat));
         }
         return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
+    }
+
+    int symbolLength(core::Context ctx, core::ClassOrModuleRef sym) {
+        int len = 0;
+        while (sym != core::Symbols::root()) {
+            len++;
+            sym = sym.data(ctx)->owner;
+        }
+
+        return len;
     }
 
     ast::MethodDef::ARGS_store fillInArgs(vector<ast::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
@@ -2110,7 +2174,13 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, bestEffort]() {
+    // Store a map of common prefix -> file where that prefix is seen.
+    UnorderedMap<core::ClassOrModuleRef, core::FileRef> commonPrefixes;
+
+    // Mutex for safe concurrent updates of map.
+    std::mutex prefixMutex;
+
+    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, bestEffort, &commonPrefixes, &prefixMutex]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter(bestEffort);
         vector<ast::ParsedFile> output;
@@ -2120,6 +2190,30 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
+
+                // Grab the common prefix that was found by the TreeSymbolizer walk
+                const auto commonPrefix = inserter.getCommonPrefix();
+
+                // Update the map
+                prefixMutex.lock();
+                if (commonPrefix.exists() && commonPrefix != core::Symbols::root()) {
+                    const auto &it = commonPrefixes.find(commonPrefix);
+                    if (it != commonPrefixes.end()) {
+                        // Report error if common prefix is already found in another file
+                        if (auto e = ctx.beginError(commonPrefix.data(gs)->loc().offsets(),
+                                                    core::errors::Namer::ConflictingCommonPrefix)) {
+                            e.setHeader("`{}` is a common prefix in multiple files", commonPrefix.show(ctx));
+                            e.addErrorNote("Additional file: `{}`", it->second.data(gs).path());
+                        }
+                    } else {
+                        commonPrefixes[commonPrefix] = job.file;
+                    }
+                }
+                prefixMutex.unlock();
+
+                // Reset the common prefix for the next walk
+                inserter.clearCommonPrefix();
+
                 output.emplace_back(move(job));
             }
         }
