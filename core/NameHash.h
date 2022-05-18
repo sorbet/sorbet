@@ -36,7 +36,7 @@ template <typename H> H AbslHashValue(H h, const NameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
-struct GlobalStateHash {
+struct LocalSymbolTableHashes {
     static constexpr int HASH_STATE_NOT_COMPUTED = 0;
     static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
     static constexpr int HASH_STATE_INVALID = 2;
@@ -57,8 +57,8 @@ struct GlobalStateHash {
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
     std::vector<std::pair<NameHash, uint32_t>> methodHashes;
 
-    static GlobalStateHash invalid() {
-        GlobalStateHash ret;
+    static LocalSymbolTableHashes invalid() {
+        LocalSymbolTableHashes ret;
         ret.hierarchyHash = HASH_STATE_INVALID;
         ret.classModuleHash = HASH_STATE_INVALID;
         ret.typeArgumentHash = HASH_STATE_INVALID;
@@ -83,11 +83,11 @@ struct UsageHash {
 };
 
 struct FileHash {
-    GlobalStateHash definitions;
+    LocalSymbolTableHashes definitions;
     UsageHash usages;
 
     FileHash() = default;
-    FileHash(GlobalStateHash &&definitions, UsageHash &&usages);
+    FileHash(LocalSymbolTableHashes &&definitions, UsageHash &&usages);
 };
 
 }; // namespace sorbet::core
