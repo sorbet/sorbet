@@ -213,7 +213,7 @@ to hold, but not statically checked.
 | `T.bind(self, Type)`         | **assumed** | checked |
 
 When an assertion is assumed to hold statically, Sorbet will only use it for the
-purpose of updating it's internal understanding of the types, and will never
+purpose of updating its internal understanding of the types, and will never
 attempt to alert the programmer that an assumption might not hold. In this
 sense, those assertions can be considered
 [Escape Hatches](troubleshooting.md#escape-hatches) for getting something to
