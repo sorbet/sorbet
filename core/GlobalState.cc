@@ -2116,7 +2116,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<NameHash, uint32_t> methodHashes;
+    UnorderedMap<NameHash, uint32_t> methodHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2171,7 +2171,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashes[NameHash(*this, sym.name)];
+            auto &target = methodHashesMap[NameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
             uint32_t symhash = sym.methodShapeHash(*this);
             hierarchyHash = mix(hierarchyHash, symhash);
@@ -2184,9 +2184,9 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     }
 
     unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
-    result->methodHashes.reserve(methodHashes.size());
-    for (const auto &e : methodHashes) {
-        result->methodHashes.emplace_back(e.first, LocalSymbolTableHashes::patchHash(e.second));
+    result->methodHashes.reserve(methodHashesMap.size());
+    for (const auto &[nameHash, symbolHash] : methodHashesMap) {
+        result->methodHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
     fast_sort(result->methodHashes);
