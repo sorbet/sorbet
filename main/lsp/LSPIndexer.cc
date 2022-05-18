@@ -119,27 +119,15 @@ bool LSPIndexer::canTakeFastPathInternal(
         const auto &oldHash = *oldFile.getFileHash();
         const auto &newHash = *f->getFileHash();
         ENFORCE(oldHash.localSymbolTableHashes.hierarchyHash != core::LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED);
-        if (newHash.localSymbolTableHashes.hierarchyHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID) {
-            ENFORCE(newHash.localSymbolTableHashes.classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.typeArgumentHash ==
-                    core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+        if (newHash.localSymbolTableHashes.isInvalid()) {
             logger.debug("Taking slow path because {} has a syntax error", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
             return false;
         }
 
-        if (newHash.localSymbolTableHashes.hierarchyHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID &&
+        if (!newHash.localSymbolTableHashes.isInvalid() &&
             newHash.localSymbolTableHashes.hierarchyHash != oldHash.localSymbolTableHashes.hierarchyHash) {
             logger.debug("Taking slow path because {} has changed localSymbolTableHashes", f->path());
-            ENFORCE(newHash.localSymbolTableHashes.classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.typeArgumentHash !=
-                    core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-            ENFORCE(newHash.localSymbolTableHashes.methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
             prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
             // Also record some information about what might have changed.
             const bool classesDiffer =

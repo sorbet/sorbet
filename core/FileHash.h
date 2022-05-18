@@ -76,6 +76,24 @@ struct LocalSymbolTableHashes {
         ret.methodHash = HASH_STATE_INVALID;
         return ret;
     }
+
+    bool isInvalid() const {
+        DEBUG_ONLY(
+            if (hierarchyHash == HASH_STATE_INVALID) {
+                ENFORCE(classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(typeArgumentHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+            } else {
+                ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(typeArgumentHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+            });
+        return hierarchyHash == HASH_STATE_INVALID;
+    }
 };
 
 // This structure represents all the uses of various constructs contained in a single file.
