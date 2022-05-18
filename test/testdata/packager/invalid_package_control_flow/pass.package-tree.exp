@@ -39,9 +39,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.some_method(1)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :package_method, :normal)
+    :package_method
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :static_method, :normal)
+    :static_method
 
     @hello = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
   end
@@ -59,9 +59,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :some_method, :normal)
+    :some_method
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :method_call_arg, :normal)
+    :method_call_arg
 
     <emptyTree>::<C ConstantArg> = 10
   end

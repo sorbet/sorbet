@@ -225,6 +225,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :test_instance_methods, :normal)
+    :test_instance_methods
   end
 end

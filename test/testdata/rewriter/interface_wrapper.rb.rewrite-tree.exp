@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :some_method, :normal)
+    :some_method
   end
 
   class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :other_method, :normal)
+    :other_method
   end
 
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
@@ -35,8 +35,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :wrap_instance, :normal)
+    :wrap_instance
   end
 
-  ::Sorbet::Private::Static.keep_def(<self>, :testit, :normal)
+  :testit
 end

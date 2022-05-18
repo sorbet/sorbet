@@ -98,28 +98,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
+    :a
 
-    ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
+    :a=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :b, :normal)
+    :b
 
-    ::Sorbet::Private::Static.keep_def(<self>, :c, :normal)
+    :c
 
-    ::Sorbet::Private::Static.keep_def(<self>, :b=, :normal)
+    :b=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :c=, :normal)
+    :c=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :d, :normal)
+    :d
 
-    ::Sorbet::Private::Static.keep_def(<self>, :e, :normal)
+    :e
 
-    ::Sorbet::Private::Static.keep_def(<self>, :f, :normal)
+    :f
 
-    ::Sorbet::Private::Static.keep_def(<self>, :g=, :normal)
+    :g=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :h=, :normal)
+    :h=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :i=, :normal)
+    :i=
   end
 end

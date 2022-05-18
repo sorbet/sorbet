@@ -174,41 +174,24 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-te
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=35](<block-pre-call-temp>$30: Sorbet::Private::Static::Void, <selfRestore>$31: T.class_of(<root>)):
+bb7[rubyRegionId=0, firstDead=18](<block-pre-call-temp>$30: Sorbet::Private::Static::Void, <selfRestore>$31: T.class_of(<root>)):
     <statTemp>$24: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$30, sig>
     <self>: T.class_of(<root>) = <selfRestore>$31
     <cfgAlias>$48: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$50: T.class_of(T) = alias <C T>
     <statTemp>$45: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$48: T.class_of(T::Sig))
-    <cfgAlias>$54: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$56: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$52: Sorbet::Private::Static::Void = <cfgAlias>$54: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$56: T.class_of(Base)[T.untyped])
-    <cfgAlias>$59: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$61: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$57: Sorbet::Private::Static::Void = <cfgAlias>$59: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$61: T.class_of(Base)[T.untyped])
-    <cfgAlias>$65: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$67: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$63: Sorbet::Private::Static::Void = <cfgAlias>$65: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$67: T.class_of(Concrete))
-    <cfgAlias>$70: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$72: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$68: Sorbet::Private::Static::Void = <cfgAlias>$70: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$72: T.class_of(Concrete))
-    <cfgAlias>$75: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$77: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$73: Sorbet::Private::Static::Void = <cfgAlias>$75: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$77: T.class_of(Base)[T.untyped])
-    <cfgAlias>$81: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$83: T.class_of(Other) = alias <C Other>
-    <statTemp>$79: Sorbet::Private::Static::Void = <cfgAlias>$81: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$83: T.class_of(Other))
-    <cfgAlias>$86: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$88: T.class_of(Other) = alias <C Other>
-    <statTemp>$84: Sorbet::Private::Static::Void = <cfgAlias>$86: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$88: T.class_of(Other))
-    <cfgAlias>$91: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$93: Symbol(:f) = :f
-    <statTemp>$94: Symbol(:normal) = :normal
-    <statTemp>$89: Symbol(:f) = <cfgAlias>$91: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$93: Symbol(:f), <statTemp>$94: Symbol(:normal))
-    <cfgAlias>$97: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$99: Symbol(:f2) = :f2
-    <statTemp>$100: Symbol(:normal) = :normal
-    <statTemp>$95: Symbol(:f2) = <cfgAlias>$97: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$99: Symbol(:f2), <statTemp>$100: Symbol(:normal))
+    <cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$57: T.class_of(Base)[T.untyped] = alias <C Base>
+    <statTemp>$53: Sorbet::Private::Static::Void = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$57: T.class_of(Base)[T.untyped])
+    <cfgAlias>$62: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$64: T.class_of(Concrete) = alias <C Concrete>
+    <statTemp>$60: Sorbet::Private::Static::Void = <cfgAlias>$62: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$64: T.class_of(Concrete))
+    <cfgAlias>$67: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$69: T.class_of(Base)[T.untyped] = alias <C Base>
+    <statTemp>$65: Sorbet::Private::Static::Void = <cfgAlias>$67: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$69: T.class_of(Base)[T.untyped])
+    <cfgAlias>$74: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$76: T.class_of(Other) = alias <C Other>
+    <statTemp>$72: Sorbet::Private::Static::Void = <cfgAlias>$74: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$76: T.class_of(Other))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

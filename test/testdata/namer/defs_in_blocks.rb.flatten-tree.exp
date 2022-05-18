@@ -7,7 +7,7 @@ begin
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       <self>.foobar() do ||
-        ::Sorbet::Private::Static.keep_def(<self>, :a_method, :normal)
+        :a_method
       end
     end
   end

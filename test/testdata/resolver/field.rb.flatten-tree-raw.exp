@@ -35,23 +35,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = Send{
-            flags = {}
-            recv = ConstantLit{
-              symbol = (module ::Sorbet::Private::Static)
-              orig = nullptr
-            }
-            fun = <U keep_def>
-            block = nullptr
-            pos_args = 3
-            args = [
-              Local{
-                localVariable = <U <self>>
-              }
-              Literal{ value = :foo }
-              Literal{ value = :normal }
-            ]
-          }
+          rhs = Literal{ value = :foo }
         }
       ]
     }

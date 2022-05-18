@@ -1,13 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$7: T.class_of(A) = alias <C A>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(A))
-    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$12: T.class_of(A) = alias <C A>
-    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(A))
+    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$8: T.class_of(A) = alias <C A>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(A))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -90,16 +87,12 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$9
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb3[rubyRegionId=0, firstDead=10](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(A)):
+bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(A)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$9, sig>
     <self>: T.class_of(A) = <selfRestore>$10
     <cfgAlias>$18: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$20: T.class_of(T) = alias <C T>
     <statTemp>$15: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$18: T.class_of(T::Sig))
-    <cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$25: Symbol(:make) = :make
-    <statTemp>$26: Symbol(:normal) = :normal
-    <statTemp>$21: Symbol(:make) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(A), <statTemp>$25: Symbol(:make), <statTemp>$26: Symbol(:normal))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

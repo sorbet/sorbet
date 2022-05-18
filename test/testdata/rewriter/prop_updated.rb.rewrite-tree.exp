@@ -48,13 +48,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :updated_prop, :normal)
+    :updated_prop
 
     <self>.updated_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :updated, :attr_reader)
+    :updated
 
-    ::Sorbet::Private::Static.keep_def(<self>, :updated=, :normal)
+    :updated=
   end
 
   updated_at = <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.new().updated())

@@ -30,9 +30,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit, :genericPropGetter)
+    :array_of_explicit
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit=, :normal)
+    :array_of_explicit=
 
     <self>.prop(:no_class_arg, :type, <emptyTree>::<C Array>, :immutable, true, :array, <emptyTree>::<C String>)
 

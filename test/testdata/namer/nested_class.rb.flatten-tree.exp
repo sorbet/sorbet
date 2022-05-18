@@ -4,12 +4,12 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::C)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::C)
           <emptyTree>
         end
@@ -20,7 +20,7 @@ begin
   module ::A<<C A>> < ()
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::A::B)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A::B)
         <emptyTree>
       end

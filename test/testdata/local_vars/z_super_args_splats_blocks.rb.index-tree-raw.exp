@@ -7407,724 +7407,84 @@ ClassDef{
       }
     }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_kw }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_kw }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_kw }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_kw }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_kw }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_kw }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_kw }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_kw }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_kw }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_kw }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_kw_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_kw_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_kw_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_kw_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_kw_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_kw_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_kw_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_kw_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_kw_kwsplat }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_kw_kwsplat }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_kw_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_kw_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_kw_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_kw_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_kw_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_kw_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_kw_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_kw_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_kw_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_kw_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_kw_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_kw_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_kw_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_kw_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :possplat_pos_kw_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :possplat_pos_kw_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_kw_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_kw_kwsplat_blk }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :pos_possplat_pos_kw_kwsplat_blk }
-        Literal{ value = :normal }
-      ]
-    }
+    Literal{ value = :pos_possplat_pos_kw_kwsplat_blk }
   ]
 }

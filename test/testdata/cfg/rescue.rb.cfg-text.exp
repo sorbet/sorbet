@@ -121,30 +121,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=24]():
+bb0[rubyRegionId=0, firstDead=4]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$7: Symbol(:main) = :main
-    <statTemp>$8: Symbol(:normal) = :normal
-    <statTemp>$3: Symbol(:main) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$7: Symbol(:main), <statTemp>$8: Symbol(:normal))
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$13: Symbol(:a) = :a
-    <statTemp>$14: Symbol(:normal) = :normal
-    <statTemp>$9: Symbol(:a) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$13: Symbol(:a), <statTemp>$14: Symbol(:normal))
-    <cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$19: Symbol(:b) = :b
-    <statTemp>$20: Symbol(:normal) = :normal
-    <statTemp>$15: Symbol(:b) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$19: Symbol(:b), <statTemp>$20: Symbol(:normal))
-    <cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$25: Symbol(:c) = :c
-    <statTemp>$26: Symbol(:normal) = :normal
-    <statTemp>$21: Symbol(:c) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$25: Symbol(:c), <statTemp>$26: Symbol(:normal))
-    <cfgAlias>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$31: Symbol(:d) = :d
-    <statTemp>$32: Symbol(:normal) = :normal
-    <statTemp>$27: Symbol(:d) = <cfgAlias>$29: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$31: Symbol(:d), <statTemp>$32: Symbol(:normal))
-    <statTemp>$35: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$33: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$35: T.untyped)
+    <statTemp>$10: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$8: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$10: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

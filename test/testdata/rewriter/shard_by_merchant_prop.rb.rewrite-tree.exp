@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :merchant_prop, :normal)
+    :merchant_prop
   end
 
   module <emptyTree>::<C ShardByMerchantBase><<C <todo sym>>> < ()
@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :merchant_token_prop, :normal)
+    :merchant_token_prop
   end
 
   class <emptyTree>::<C MerchantPropModel><<C <todo sym>>> < (::<todo sym>)
@@ -38,7 +38,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.merchant_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :genericPropGetter)
+    :merchant
   end
 
   class <emptyTree>::<C MerchantTokenPropModel><<C <todo sym>>> < (::<todo sym>)
@@ -59,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.merchant_token_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :genericPropGetter)
+    :merchant
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C MerchantPropModel>.new().merchant())

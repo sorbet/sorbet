@@ -3,7 +3,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::A)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A)
         <emptyTree>
       end
@@ -19,7 +19,7 @@ begin
     end
 
     def self.outer_static(<blk>)
-      <self>.private_class_method(::Sorbet::Private::Static.keep_self_def(<self>, :inner_static, :normal))
+      <self>.private_class_method(:inner_static)
     end
 
     def self.inner_static(<blk>)
@@ -27,7 +27,7 @@ begin
     end
 
     def outer_instance(<blk>)
-      <self>.class().private(::Sorbet::Private::Static.keep_def(<self>, :inner_instance, :normal))
+      <self>.class().private(:inner_instance)
     end
 
     def inner_instance(<blk>)
@@ -43,10 +43,10 @@ begin
           <self>.params(:arg0, ::Integer).void()
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :private, :normal)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :private_class_method, :normal)
-        <self>.private_class_method(::Sorbet::Private::Static.keep_self_def(<self>, :outer_static, :normal))
-        <self>.private(::Sorbet::Private::Static.keep_def(<self>, :outer_instance, :normal))
+        :private
+        :private_class_method
+        <self>.private_class_method(:outer_static)
+        <self>.private(:outer_instance)
         <emptyTree>
       end
     end

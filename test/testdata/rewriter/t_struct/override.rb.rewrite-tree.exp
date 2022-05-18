@@ -35,17 +35,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts("override")
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    :initialize
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    :foo=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    :initialize
   end
 
   <emptyTree>::<C Override>.new()

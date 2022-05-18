@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :instance, :normal)
+    :instance
 
     <self>.include(<emptyTree>::<C Singleton>)
   end
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :instance, :normal)
+    :instance
 
     <self>.include(<emptyTree>::<C Singleton>)
 

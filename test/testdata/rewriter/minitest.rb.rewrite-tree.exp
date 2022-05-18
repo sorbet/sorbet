@@ -93,18 +93,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :outside_method, :normal)
+    :outside_method
 
     begin
       "works outside"
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works outside\'>", :normal)
+      :"<it \'works outside\'>"
     end
 
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       begin
         "allows constants inside of IT"
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows constants inside of IT\'>", :normal)
+        :"<it \'allows constants inside of IT\'>"
       end
     end
 
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C2> = ::T.let(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <emptyTree>::<C Integer>)
       begin
         "allows let-ed constants inside of IT"
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows let-ed constants inside of IT\'>", :normal)
+        :"<it \'allows let-ed constants inside of IT\'>"
       end
     end
 
@@ -120,13 +120,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
       begin
         "allows path constants inside of IT"
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'allows path constants inside of IT\'>", :normal)
+        :"<it \'allows path constants inside of IT\'>"
       end
     end
 
     begin
       ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'::<Magic>.<string-interpolate>(\"finds errors in the test name: \", <self>.bad_variable())\'>", :normal)
+      :"<it \'::<Magic>.<string-interpolate>(\"finds errors in the test name: \", <self>.bad_variable())\'>"
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
@@ -146,26 +146,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :inside_method, :normal)
+        :inside_method
         begin
           "works inside"
-          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works inside\'>", :normal)
+          :"<it \'works inside\'>"
         end
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_helper, :normal)
+    :instance_helper
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    :initialize
 
-    ::Sorbet::Private::Static.keep_def(<self>, :<after>, :normal)
+    :<after>
 
     begin
       "can read foo"
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'can read foo\'>", :normal)
+      :"<it \'can read foo\'>"
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :random_method, :normal)
+    :random_method
 
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
@@ -191,16 +191,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         begin
           <emptyTree>::<C Object>
-          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'Object\'>", :normal)
+          :"<it \'Object\'>"
         end
         begin
           <emptyTree>::<C Object>
-          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'Object\'>", :normal)
+          :"<it \'Object\'>"
         end
       end
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :it, :normal)
+    :it
 
     <self>.it("ignores methods without a block")
 
@@ -222,13 +222,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
         begin
           "contains nested describes"
-          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'contains nested describes\'>", :normal)
+          :"<it \'contains nested describes\'>"
         end
       end
     end
   end
 
-  ::Sorbet::Private::Static.keep_def(<self>, :junk, :normal)
+  :junk
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)

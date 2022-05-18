@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Main)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Main)
           <emptyTree>
         end
@@ -58,11 +58,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :yielder, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :blockpass, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :mixed, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :blockyield, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+        :yielder
+        :blockpass
+        :mixed
+        :blockyield
+        :main
         <emptyTree>
       end
     end

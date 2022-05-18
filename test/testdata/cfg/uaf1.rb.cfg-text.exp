@@ -1,13 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$7: T.class_of(A) = alias <C A>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(A))
-    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$12: T.class_of(A) = alias <C A>
-    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(A))
+    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$8: T.class_of(A) = alias <C A>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(A))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -115,12 +112,9 @@ bb13[rubyRegionId=1, firstDead=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Pr
 
 method ::<Class:A>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$6: Symbol(:initialize) = :initialize
-    <statTemp>$7: Symbol(:normal) = :normal
-    <returnMethodTemp>$2: Symbol(:initialize) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:initialize), <statTemp>$7: Symbol(:normal))
+    <returnMethodTemp>$2: Symbol(:initialize) = :initialize
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:initialize)
     <unconditional> -> bb1
 

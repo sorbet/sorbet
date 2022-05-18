@@ -109,27 +109,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    :bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    :baz
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ball, :normal)
+    :ball
 
-    ::Sorbet::Private::Static.keep_def(<self>, :string_foo, :normal)
+    :string_foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :string_bar, :normal)
+    :string_bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :symbol_foo, :normal)
+    :symbol_foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :symbol_bar, :normal)
+    :symbol_bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :true_foo, :normal)
+    :true_foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :true_bar, :normal)
+    :true_bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :usages, :normal)
+    :usages
   end
 
   class <emptyTree>::<C WorksWithoutExtendingTSig><<C <todo sym>>> < (::<todo sym>)
@@ -149,9 +149,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    :bar
   end
 
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
@@ -195,6 +195,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Elem> = <self>.type_member()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :each, :normal)
+    :each
   end
 end

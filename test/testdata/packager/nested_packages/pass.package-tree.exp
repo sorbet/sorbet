@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :subpkg_class, :normal)
+    :subpkg_class
   end
 end
 # -- test/testdata/packager/nested_packages/subpackage/__package.rb --
@@ -43,6 +43,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :package_class, :normal)
+    :package_class
   end
 end

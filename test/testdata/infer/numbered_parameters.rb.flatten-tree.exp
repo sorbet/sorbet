@@ -11,7 +11,7 @@ begin
           <self>.params(:blk, ::T.proc().params(:a, ::Integer, :b, ::String).void()).void()
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        :foo
         <self>.foo() do |_1$2|
           ::T.reveal_type(_1$2)
         end

@@ -68,23 +68,16 @@ bb9[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: Integer(3)):
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=17]():
+bb0[rubyRegionId=0, firstDead=10]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$8: T.class_of(MyException) = alias <C MyException>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(MyException))
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
-    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(MyException))
-    <cfgAlias>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$18: T.class_of(Exception) = alias <C Exception>
-    <statTemp>$14: Sorbet::Private::Static::Void = <cfgAlias>$16: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$18: T.class_of(Exception))
-    <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$23: Symbol(:foo) = :foo
-    <statTemp>$24: Symbol(:normal) = :normal
-    <statTemp>$19: Symbol(:foo) = <cfgAlias>$21: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$23: Symbol(:foo), <statTemp>$24: Symbol(:normal))
-    <statTemp>$27: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$25: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$27: T.untyped)
+    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$9: T.class_of(MyException) = alias <C MyException>
+    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(MyException))
+    <cfgAlias>$12: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$14: T.class_of(Exception) = alias <C Exception>
+    <statTemp>$10: Sorbet::Private::Static::Void = <cfgAlias>$12: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$14: T.class_of(Exception))
+    <statTemp>$18: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$16: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

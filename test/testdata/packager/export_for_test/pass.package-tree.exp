@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :stub_stuff!, :normal)
+      :stub_stuff!
     end
 
     <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
@@ -163,7 +163,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :nesting_method, :normal)
+      :nesting_method
 
       class <emptyTree>::<C OnlyForSelf><<C <todo sym>>> < (::<todo sym>)
       end
@@ -179,7 +179,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        ::Sorbet::Private::Static.keep_self_def(<self>, :public_method, :normal)
+        :public_method
       end
     end
   end

@@ -17,9 +17,9 @@ class ::<root> < ::Object ()
     method ::Test#splat_call : private (args, <blk>) @ test/testdata/infer/private_methods.rb:15
       argument args<repeated> @ Loc {file=test/testdata/infer/private_methods.rb start=15:27 end=15:31}
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
-    method ::Test#subsequent_visibility : private (<blk>) @ test/testdata/infer/private_methods.rb:33
+    method ::Test#subsequent_visibility (<blk>) @ test/testdata/infer/private_methods.rb:33
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
-    method ::Test#subsequent_visibility_attr_reader : private (<blk>) @ test/testdata/infer/private_methods.rb:37
+    method ::Test#subsequent_visibility_attr_reader (<blk>) @ test/testdata/infer/private_methods.rb:37
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
     method ::Test#using_symbol : private (<blk>) @ test/testdata/infer/private_methods.rb:6
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}

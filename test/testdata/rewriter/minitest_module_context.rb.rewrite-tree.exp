@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         begin
           "adds a method"
-          ::Sorbet::Private::Static.keep_def(<self>, :"<it \'adds a method\'>", :normal)
+          :"<it \'adds a method\'>"
         end
         class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
           ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
           begin
             "inner test"
-            ::Sorbet::Private::Static.keep_def(<self>, :"<it \'inner test\'>", :normal)
+            :"<it \'inner test\'>"
           end
         end
       end
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :test_method, :normal)
+    :test_method
 
     class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (<self>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -50,7 +50,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       begin
         "adds a method"
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'adds a method\'>", :normal)
+        :"<it \'adds a method\'>"
       end
     end
   end

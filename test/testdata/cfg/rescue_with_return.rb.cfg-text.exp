@@ -57,12 +57,9 @@ bb9[rubyRegionId=0, firstDead=1]():
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$6: Symbol(:a) = :a
-    <statTemp>$7: Symbol(:normal) = :normal
-    <returnMethodTemp>$2: Symbol(:a) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$6: Symbol(:a), <statTemp>$7: Symbol(:normal))
+    <returnMethodTemp>$2: Symbol(:a) = :a
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:a)
     <unconditional> -> bb1
 

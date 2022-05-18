@@ -18,12 +18,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+      :a_class_method
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
+    :instance_method
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -58,14 +58,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+      :a_class_method
 
-      ::Sorbet::Private::Static.keep_def(<self>, :another_class_method, :normal)
+      :another_class_method
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
+    :instance_method
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -100,16 +100,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+      :a_class_method
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method_2, :normal)
+      :a_class_method_2
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
+    :instance_method
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -138,14 +138,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+      :a_class_method
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method_2, :normal)
+      :a_class_method_2
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
+    :instance_method
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -167,7 +167,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
+    :instance_method
   end
 
   class <emptyTree>::<C E><<C <todo sym>>> < (::<todo sym>)
@@ -186,10 +186,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.class_methods() do ||
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+      :a_class_method
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :instance_method, :normal)
+    :instance_method
   end
 
   class <emptyTree>::<C F><<C <todo sym>>> < (::<todo sym>)
@@ -210,9 +210,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+      :a_class_method
 
-      ::Sorbet::Private::Static.keep_def(<self>, :another_class_method, :normal)
+      :another_class_method
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)

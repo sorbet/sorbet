@@ -3,7 +3,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::OpEq)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::OpEq)
         <emptyTree>
       end
@@ -83,11 +83,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :b, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :b=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :y, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :z, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :example, :normal)
+        :b
+        :b=
+        :y
+        :z
+        :example
         <emptyTree>
       end
     end

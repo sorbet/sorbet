@@ -1,13 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$7: T.class_of(TestMetaType) = alias <C TestMetaType>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestMetaType))
-    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$12: T.class_of(TestMetaType) = alias <C TestMetaType>
-    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestMetaType))
+    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$8: T.class_of(TestMetaType) = alias <C TestMetaType>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(TestMetaType))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -102,16 +99,8 @@ bb7[rubyRegionId=0, firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
 
 method ::<Class:TestMetaType>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=10]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(TestMetaType) = cast(<self>: NilClass, T.class_of(TestMetaType));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$7: Symbol(:_) = :_
-    <statTemp>$8: Symbol(:normal) = :normal
-    <statTemp>$3: Symbol(:_) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestMetaType), <statTemp>$7: Symbol(:_), <statTemp>$8: Symbol(:normal))
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$13: Symbol(:testit) = :testit
-    <statTemp>$14: Symbol(:normal) = :normal
-    <statTemp>$9: Symbol(:testit) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestMetaType), <statTemp>$13: Symbol(:testit), <statTemp>$14: Symbol(:normal))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

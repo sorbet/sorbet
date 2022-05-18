@@ -34,15 +34,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    :foo=
 
     <self>.prop(:bar, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :attr_reader)
+    :bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+    :bar=
   end
 
   <emptyTree>::<C Inexact>.new()
@@ -76,8 +76,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux, :genericPropGetter)
+    :qux
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux=, :normal)
+    :qux=
   end
 end

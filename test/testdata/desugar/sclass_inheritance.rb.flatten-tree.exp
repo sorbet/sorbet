@@ -12,27 +12,27 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::MM)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::MM)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::B)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::C)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::C)
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+        :main
         <self>.main()
         <emptyTree>
       end
@@ -46,7 +46,7 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:A>)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::MM)
         <emptyTree>
       end
@@ -60,7 +60,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <self>.include(::MM)
-        ::Sorbet::Private::Static.keep_def(<self>, :newer, :normal)
+        :newer
         <emptyTree>
       end
     end
@@ -73,7 +73,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <self>.extend(::MM)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :newer, :normal)
+        :newer
         <emptyTree>
       end
     end
@@ -81,7 +81,7 @@ begin
   class ::C<<C C>> < (::A)
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:C>)
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -92,7 +92,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :newerer, :normal)
+      :newerer
     end
   end
   <emptyTree>

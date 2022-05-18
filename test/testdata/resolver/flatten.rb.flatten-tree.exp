@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
@@ -27,8 +27,8 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     def foo(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :food, :normal)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :foos, :normal)
+        :food
+        :foos
       end
     end
 
@@ -42,8 +42,8 @@ begin
 
     def self.sfoo(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :sfood, :normal)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :sfoos, :normal)
+        :sfood
+        :sfoos
       end
     end
 
@@ -57,8 +57,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :sfoo, :normal)
+        :foo
+        :sfoo
         <emptyTree>
       end
     end

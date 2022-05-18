@@ -16,13 +16,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :flatfile, :normal)
+    :flatfile
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :from, :normal)
+    :from
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :pattern, :normal)
+    :pattern
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :field, :normal)
+    :field
   end
 
   class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
@@ -82,17 +82,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    :foo=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    :bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+    :bar=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    :baz
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz=, :normal)
+    :baz=
   end
 
   t = <emptyTree>::<C Flatfile>.new()

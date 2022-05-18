@@ -1,19 +1,13 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=14]():
+bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$8: T.class_of(Funcs) = alias <C Funcs>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(Funcs))
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$13: T.class_of(Funcs) = alias <C Funcs>
-    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(Funcs))
-    <cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$19: T.class_of(C) = alias <C C>
-    <statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(C))
-    <cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$24: T.class_of(C) = alias <C C>
-    <statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(C))
+    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$9: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(Funcs))
+    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$16: T.class_of(C) = alias <C C>
+    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$16: T.class_of(C))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -271,40 +265,18 @@ bb18[rubyRegionId=5, firstDead=-1](<self>: T.class_of(Funcs), <block-pre-call-te
 
 # backedges
 # - bb18(rubyRegionId=5)
-bb19[rubyRegionId=0, firstDead=34](<block-pre-call-temp>$81: Sorbet::Private::Static::Void, <selfRestore>$82: T.class_of(Funcs)):
+bb19[rubyRegionId=0, firstDead=12](<block-pre-call-temp>$81: Sorbet::Private::Static::Void, <selfRestore>$82: T.class_of(Funcs)):
     <statTemp>$75: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$81, sig>
     <self>: T.class_of(Funcs) = <selfRestore>$82
     <cfgAlias>$96: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$98: T.class_of(T) = alias <C T>
     <statTemp>$93: T.class_of(Funcs) = <self>: T.class_of(Funcs).extend(<cfgAlias>$96: T.class_of(T::Sig))
-    <cfgAlias>$101: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$103: Symbol(:f) = :f
-    <statTemp>$104: Symbol(:normal) = :normal
-    <statTemp>$99: Symbol(:f) = <cfgAlias>$101: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$103: Symbol(:f), <statTemp>$104: Symbol(:normal))
-    <statTemp>$107: Symbol(:f) = :f
-    <statTemp>$105: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$107: Symbol(:f))
-    <cfgAlias>$110: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$112: Symbol(:f) = :f
-    <statTemp>$113: Symbol(:normal) = :normal
-    <statTemp>$108: Symbol(:f) = <cfgAlias>$110: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$112: Symbol(:f), <statTemp>$113: Symbol(:normal))
-    <cfgAlias>$118: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$120: Symbol(:g) = :g
-    <statTemp>$121: Symbol(:normal) = :normal
-    <statTemp>$116: Symbol(:g) = <cfgAlias>$118: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$120: Symbol(:g), <statTemp>$121: Symbol(:normal))
-    <statTemp>$114: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$116: Symbol(:g))
-    <cfgAlias>$124: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$126: Symbol(:g) = :g
-    <statTemp>$127: Symbol(:normal) = :normal
-    <statTemp>$122: Symbol(:g) = <cfgAlias>$124: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$126: Symbol(:g), <statTemp>$127: Symbol(:normal))
-    <cfgAlias>$132: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$134: Symbol(:h) = :h
-    <statTemp>$135: Symbol(:normal) = :normal
-    <statTemp>$130: Symbol(:h) = <cfgAlias>$132: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Funcs), <statTemp>$134: Symbol(:h), <statTemp>$135: Symbol(:normal))
-    <statTemp>$128: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$130: Symbol(:h))
-    <cfgAlias>$138: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$140: Symbol(:h) = :h
-    <statTemp>$141: Symbol(:normal) = :normal
-    <statTemp>$136: Symbol(:h) = <cfgAlias>$138: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(Funcs), <statTemp>$140: Symbol(:h), <statTemp>$141: Symbol(:normal))
+    <statTemp>$102: Symbol(:f) = :f
+    <statTemp>$100: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$102: Symbol(:f))
+    <statTemp>$106: Symbol(:g) = :g
+    <statTemp>$104: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$106: Symbol(:g))
+    <statTemp>$110: Symbol(:h) = :h
+    <statTemp>$108: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$110: Symbol(:h))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -356,14 +328,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 method ::<Class:C>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=4]():
     <self>: T.class_of(C) = cast(<self>: NilClass, T.class_of(C));
     <cfgAlias>$6: T.class_of(Funcs) = alias <C Funcs>
     <statTemp>$3: T.class_of(C) = <self>: T.class_of(C).include(<cfgAlias>$6: T.class_of(Funcs))
-    <cfgAlias>$9: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$11: Symbol(:test_calls) = :test_calls
-    <statTemp>$12: Symbol(:normal) = :normal
-    <statTemp>$7: Symbol(:test_calls) = <cfgAlias>$9: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(C), <statTemp>$11: Symbol(:test_calls), <statTemp>$12: Symbol(:normal))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

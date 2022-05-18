@@ -27,9 +27,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar1, :normal)
+    :bar1
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar2, :normal)
+    :bar2
   end
 end
 # -- test/testdata/packager/extra_package_paths/baz/__package.rb --
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :c, :normal)
+      :c
     end
   end
 end
@@ -69,7 +69,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :b, :normal)
+    :b
   end
 end
 # -- test/testdata/packager/extra_package_paths/foo/__package.rb --

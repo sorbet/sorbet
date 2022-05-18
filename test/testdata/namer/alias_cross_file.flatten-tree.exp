@@ -3,7 +3,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::TestSig)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::TestSig)
         <emptyTree>
       end
@@ -19,7 +19,7 @@ begin
         ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :test_resolve) do ||
           <self>.returns(::T2)
         end
-        ::Sorbet::Private::Static.keep_def(<self>, :test_resolve, :normal)
+        :test_resolve
         <emptyTree>
       end
     end
@@ -32,7 +32,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::T1)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::T1)
           <emptyTree>
         end

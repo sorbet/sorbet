@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :something_outside, :normal)
+    :something_outside
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)

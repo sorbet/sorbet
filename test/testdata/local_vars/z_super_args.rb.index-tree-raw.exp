@@ -225,131 +225,19 @@ ClassDef{
           }
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_positional }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_positional }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_keyword }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_keyword }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_two_keyword }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_two_keyword }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_positional_then_keyword }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_positional_then_keyword }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_rest }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_rest }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_keyword_rest }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_keyword_rest }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_block }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_block }
       ]
     }
 
@@ -635,131 +523,19 @@ ClassDef{
           }
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_positional }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_positional }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_keyword }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_keyword }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_two_keyword }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_two_keyword }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_positional_then_keyword }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_positional_then_keyword }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_rest }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_rest }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_keyword_rest }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_keyword_rest }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :takes_block }
-            Literal{ value = :normal }
-          ]
-        }
+        Literal{ value = :takes_block }
       ]
     }
   ]

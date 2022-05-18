@@ -27,13 +27,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo = arg0
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    :initialize
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    :foo=
   end
 
   <emptyTree>::<C Normal>.new()

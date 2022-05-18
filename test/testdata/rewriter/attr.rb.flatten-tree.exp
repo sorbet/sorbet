@@ -3,7 +3,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::TestAttr)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::TestAttr)
         <emptyTree>
       end
@@ -116,18 +116,18 @@ begin
           <self>.params(:strv9, ::Float).returns(::Float)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v1, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v1=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v2, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v2=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v3, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v4=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v5=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv7, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv8=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv9, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv9=, :normal)
+        :initialize
+        :v1
+        :v1=
+        :v2
+        :v2=
+        :v3
+        :v4=
+        :v5=
+        :strv7
+        :strv8=
+        :strv9
+        :strv9=
         <emptyTree>
       end
     end

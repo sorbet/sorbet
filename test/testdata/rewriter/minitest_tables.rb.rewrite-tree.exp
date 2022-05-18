@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    :foo
   end
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
@@ -412,34 +412,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :outside_method, :normal)
+    :outside_method
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :test_each, :normal)
+    :test_each
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :test_each_hash, :normal)
+    :test_each_hash
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :it, :normal)
+    :it
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |value|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works with instance methods\'>", :normal)
+      :"<it \'works with instance methods\'>"
     end
 
     <emptyTree>::<C CONST_LIST> = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
 
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a constant list\'>", :normal)
+      :"<it \'succeeds with a constant list\'>"
     end
 
     <emptyTree>::<C ANOTHER_CONST_LIST> = <emptyTree>::<C T>.let([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()], <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Parent>))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST>) do |value|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a typed constant list\'>", :normal)
+      :"<it \'succeeds with a typed constant list\'>"
     end
 
     local = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
 
     <self>.test_each(local) do |value|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeed with a local variable but cannot type it\'>", :normal)
+      :"<it \'succeed with a local variable but cannot type it\'>"
     end
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |x|
@@ -453,63 +453,63 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
       begin
         x = value.foo()
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails with non-it statements\'>", :normal)
+        :"<it \'fails with non-it statements\'>"
       end
     end
 
     <self>.test_each(["foo", 5, {:x => false}]) do |v|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles lists with several types\'>", :normal)
+      :"<it \'handles lists with several types\'>"
     end
 
     <self>.test_each([1, 2, 3]) do |k, v|
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'blocks get padded with NilClass arguments\'>", :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'multiple it blocks are ok with multiple arguments\'>", :normal)
+        :"<it \'blocks get padded with NilClass arguments\'>"
+        :"<it \'multiple it blocks are ok with multiple arguments\'>"
       end
     end
 
     <self>.test_each([1, 2, 3]) do |<destructure>$4|
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'destructured blocks get padded with NilClass arguments\'>", :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'multiple it blocks are ok with multiple destructured arguments\'>", :normal)
+        :"<it \'destructured blocks get padded with NilClass arguments\'>"
+        :"<it \'multiple it blocks are ok with multiple destructured arguments\'>"
       end
     end
 
     <self>.test_each([[1, ["hi", false]], [2, ["bye", true]]]) do |i, <destructure>$7, <destructure>$10|
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles mixed destructuring and positional arguments\'>", :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'multiple it blocks are ok with mixed argument styles\'>", :normal)
+        :"<it \'handles mixed destructuring and positional arguments\'>"
+        :"<it \'multiple it blocks are ok with mixed argument styles\'>"
       end
     end
 
     <emptyTree>::<C CONST_LIST_TUPLE> = [[1, "a"], [2, "b"]]
 
     <self>.test_each(<emptyTree>::<C CONST_LIST_TUPLE>) do |i, s|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a constant list of tuples\'>", :normal)
+      :"<it \'succeeds with a constant list of tuples\'>"
     end
 
     <self>.test_each(<emptyTree>::<C CONST_LIST_TUPLE>) do |<destructure>$13|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a constant list of tuples and destructuring\'>", :normal)
+      :"<it \'succeeds with a constant list of tuples and destructuring\'>"
     end
 
     <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE> = <emptyTree>::<C T>.let([[1, "a"], [2, "b"]], <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C Integer>, <emptyTree>::<C String>]))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>) do |i, s|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a typed constant tuple list\'>", :normal)
+      :"<it \'succeeds with a typed constant tuple list\'>"
     end
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>) do |<destructure>$16|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeeds with a typed constant tuple list with destructuring\'>", :normal)
+      :"<it \'succeeds with a typed constant tuple list with destructuring\'>"
     end
 
     local_tuple = [[1, "a"], [2, "b"]]
 
     <self>.test_each(local_tuple) do |i, s|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeed with local variables but cannot type them\'>", :normal)
+      :"<it \'succeed with local variables but cannot type them\'>"
     end
 
     <self>.test_each(local_tuple) do |<destructure>$19|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'succeed with destructured local variables but cannot type them\'>", :normal)
+      :"<it \'succeed with destructured local variables but cannot type them\'>"
     end
 
     <self>.test_each([1, 2, 3]) do ||
@@ -527,20 +527,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           s = <assignTemp>$23.[](1)
           <assignTemp>$22
         end
-        ::Sorbet::Private::Static.keep_def(<self>, :"<it \'rejects manual destructuring of the list argument\'>", :normal)
+        :"<it \'rejects manual destructuring of the list argument\'>"
       end
     end
 
     <self>.test_each([["red", <emptyTree>::<C NoShow>.new()], ["blue", <emptyTree>::<C NoShow>.new()]]) do |<destructure>$24|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'::<Magic>.<string-interpolate>(\"color \", color, \" which is not purple is not number 1 \", ns)\'>", :normal)
+      :"<it \'::<Magic>.<string-interpolate>(\"color \", color, \" which is not purple is not number 1 \", ns)\'>"
     end
 
     <self>.test_each_hash({:foo => 1, :bar => 2, :baz => 3}) do |k, v|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles lists with several types\'>", :normal)
+      :"<it \'handles lists with several types\'>"
     end
 
     <self>.test_each_hash([1, 2, 3]) do |k, v|
-      ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails to typecheck with non-hash arguments to `test_each-hash`\'>", :normal)
+      :"<it \'fails to typecheck with non-hash arguments to `test_each-hash`\'>"
     end
 
     <self>.test_each_hash({:foo => 1, :bar => 2}) do |x|

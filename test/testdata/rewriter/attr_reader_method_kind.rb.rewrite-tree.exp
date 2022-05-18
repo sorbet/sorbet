@@ -30,13 +30,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader, :attr_reader)
+    :using_attr_reader
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader_sig_checked, :normal)
+    :using_attr_reader_sig_checked
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader_sig_checked_tests, :normal)
+    :using_attr_reader_sig_checked_tests
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader_sig_checked_never, :attr_reader)
+    :using_attr_reader_sig_checked_never
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
@@ -76,17 +76,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_t_struct_const
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    :initialize
 
     <self>.prop(:using_t_struct_prop, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop, :attr_reader)
+    :using_t_struct_prop
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop=, :normal)
+    :using_t_struct_prop=
 
     <self>.const(:using_t_struct_const, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_const, :attr_reader)
+    :using_t_struct_const
   end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_bare_method
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_bare_method, :normal)
+    :using_bare_method
   end
 
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
@@ -102,6 +102,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_bare_self_method
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :using_bare_self_method, :normal)
+    :using_bare_self_method
   end
 end

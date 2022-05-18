@@ -17,42 +17,42 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::B)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
         $c = ::Object.new()
         begin
-          ::<Magic>.<define-top-class-or-module>(::D)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::D)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::E)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::E)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::F)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::F)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::G)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::G)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::H)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::H)
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+        :main
         <self>.main()
         <emptyTree>
       end
@@ -66,7 +66,7 @@ begin
   class ::B<<C B>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:B>)
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -77,13 +77,13 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :b, :normal)
+      :b
     end
   end
   class ::D<<C D>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:D>)
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -91,7 +91,7 @@ begin
   class <singleton class><<Class:D>> < ()
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:<Class:D>>)
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -102,14 +102,14 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :d, :normal)
+      :d
     end
   end
   class ::E<<C E>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::<Class:E>)
+          <emptyTree>
           <emptyTree>
         end
         <self>.wrapper()
@@ -119,7 +119,7 @@ begin
   end
   class <singleton class><<Class:E>> < ()
     def wrapper(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :e, :normal)
+      :e
     end
 
     def e(<blk>)
@@ -127,13 +127,13 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :wrapper, :normal)
+      :wrapper
     end
   end
   class ::F<<C F>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:F>)
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -155,9 +155,9 @@ begin
         ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :f=) do ||
           <self>.params(:f, ::Integer).returns(::Integer)
         end
-        ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+        :initialize
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :f=, :normal)
+        :f=
         <emptyTree>
       end
     end
@@ -174,11 +174,11 @@ begin
     def self.<static-init>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::<Class:G>)
+          <emptyTree>
           <emptyTree>
         end
-        ::Sorbet::Private::Static.keep_def(<self>, :wrapper, :normal)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :g, :normal)
+        :wrapper
+        :g
         <emptyTree>
       end
     end
@@ -189,13 +189,13 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :inner, :normal)
+      :inner
     end
   end
   class ::H<<C H>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:H>)
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -203,7 +203,7 @@ begin
   class <singleton class><<Class:H>> < ()
     def self.<static-init>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::<Class:H>::H2)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::<Class:H>::H2)
         <emptyTree>
       end
@@ -215,7 +215,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_self_def(<self>, :h, :normal)
+      :h
     end
   end
   <emptyTree>

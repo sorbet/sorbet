@@ -5,7 +5,7 @@ begin
       begin
         $a = 1
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
@@ -22,7 +22,7 @@ begin
       begin
         $b = 2
         $a
-        ::Sorbet::Private::Static.keep_def(<self>, :meth, :normal)
+        :meth
         <emptyTree>
       end
     end

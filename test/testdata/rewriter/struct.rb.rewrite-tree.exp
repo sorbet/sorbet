@@ -38,19 +38,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+      :bar
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+      :bar=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
 
     class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -78,19 +78,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+      :bar
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+      :bar=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
   end
 
@@ -122,15 +122,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+      :bar
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+      :bar=
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :new, :normal)
+      :new
     end
   end
 
@@ -152,15 +152,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
 
     class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -180,15 +180,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
   end
 
@@ -221,19 +221,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+      :bar
 
-      ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+      :bar=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
   end
 
@@ -255,15 +255,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+      :foo=
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo==, :normal)
+      :foo==
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
   end
 
@@ -273,7 +273,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
     end
 
     class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -293,15 +293,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :x, :normal)
+      :x
 
-      ::Sorbet::Private::Static.keep_def(<self>, :x=, :normal)
+      :x=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
@@ -327,15 +327,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :x, :normal)
+      :x
 
-      ::Sorbet::Private::Static.keep_def(<self>, :x=, :normal)
+      :x=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
@@ -388,7 +388,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+    :main
   end
 
   <self>.puts(<emptyTree>::<C Main>.new().main())
@@ -411,15 +411,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
+      :a
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
+      :a=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
 
     class <emptyTree>::<C Bar><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -439,15 +439,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
+      :a
 
-      ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
+      :a=
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+      :initialize
     end
 
     <emptyTree>::<C Baz> = ::<root>::<C Foo>::<C Struct>.new()

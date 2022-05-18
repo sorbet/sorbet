@@ -3,7 +3,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::Destructure)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::Destructure)
         <emptyTree>
       end
@@ -38,7 +38,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :f, :normal)
+      :f
     end
   end
   <emptyTree>

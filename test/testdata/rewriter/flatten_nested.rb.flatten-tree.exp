@@ -4,14 +4,14 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         ::A.new().outer_method()
         ::A.new().inner_method()
         begin
-          ::<Magic>.<define-top-class-or-module>(::B)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end
@@ -19,14 +19,14 @@ begin
         b.outer_method()
         b.inner_method()
         begin
-          ::<Magic>.<define-top-class-or-module>(::C)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::C)
           <emptyTree>
         end
         ::C.outer_method()
         ::C.new().inner_method()
         begin
-          ::<Magic>.<define-top-class-or-module>(::D)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::D)
           <emptyTree>
         end
@@ -38,7 +38,7 @@ begin
   end
   class ::A<<C A>> < (::<todo sym>)
     def outer_method(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :inner_method, :normal)
+      :inner_method
     end
 
     def inner_method(<blk>)
@@ -46,12 +46,12 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :outer_method, :normal)
+      :outer_method
     end
   end
   class ::B<<C B>> < (::<todo sym>)
     def outer_method(<blk>)
-      ::Sorbet::Private::Static.keep_self_def(<self>, :inner_method, :normal)
+      :inner_method
     end
 
     def inner_method(<blk>)
@@ -59,12 +59,12 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :outer_method, :normal)
+      :outer_method
     end
   end
   class ::C<<C C>> < (::<todo sym>)
     def self.outer_method(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :inner_method, :normal)
+      :inner_method
     end
 
     def inner_method(<blk>)
@@ -72,12 +72,12 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_self_def(<self>, :outer_method, :normal)
+      :outer_method
     end
   end
   class ::D<<C D>> < (::<todo sym>)
     def self.outer_method(<blk>)
-      ::Sorbet::Private::Static.keep_self_def(<self>, :inner_method, :normal)
+      :inner_method
     end
 
     def self.inner_method(<blk>)
@@ -85,7 +85,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_self_def(<self>, :outer_method, :normal)
+      :outer_method
     end
   end
   <emptyTree>

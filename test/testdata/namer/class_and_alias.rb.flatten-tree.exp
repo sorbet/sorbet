@@ -5,12 +5,12 @@ begin
       begin
         ::A = 91
         begin
-          ::<Magic>.<define-top-class-or-module>(::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::B)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::B)
           <emptyTree>
         end

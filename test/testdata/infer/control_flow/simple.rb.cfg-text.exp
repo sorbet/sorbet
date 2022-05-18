@@ -1,13 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$7: T.class_of(ControlFlow) = alias <C ControlFlow>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(ControlFlow))
-    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$12: T.class_of(ControlFlow) = alias <C ControlFlow>
-    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(ControlFlow))
+    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$8: T.class_of(ControlFlow) = alias <C ControlFlow>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(ControlFlow))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -651,48 +648,12 @@ bb34[rubyRegionId=9, firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-c
 
 # backedges
 # - bb34(rubyRegionId=9)
-bb35[rubyRegionId=0, firstDead=42](<block-pre-call-temp>$188: Sorbet::Private::Static::Void, <selfRestore>$189: T.class_of(ControlFlow)):
+bb35[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$188: Sorbet::Private::Static::Void, <selfRestore>$189: T.class_of(ControlFlow)):
     <statTemp>$182: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$188, sig>
     <self>: T.class_of(ControlFlow) = <selfRestore>$189
     <cfgAlias>$208: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$210: T.class_of(T) = alias <C T>
     <statTemp>$205: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<cfgAlias>$208: T.class_of(T::Sig))
-    <cfgAlias>$213: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$215: Symbol(:orZero0) = :orZero0
-    <statTemp>$216: Symbol(:normal) = :normal
-    <statTemp>$211: Symbol(:orZero0) = <cfgAlias>$213: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$215: Symbol(:orZero0), <statTemp>$216: Symbol(:normal))
-    <cfgAlias>$219: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$221: Symbol(:orZero0a) = :orZero0a
-    <statTemp>$222: Symbol(:normal) = :normal
-    <statTemp>$217: Symbol(:orZero0a) = <cfgAlias>$219: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$221: Symbol(:orZero0a), <statTemp>$222: Symbol(:normal))
-    <cfgAlias>$225: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$227: Symbol(:orZero0n) = :orZero0n
-    <statTemp>$228: Symbol(:normal) = :normal
-    <statTemp>$223: Symbol(:orZero0n) = <cfgAlias>$225: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$227: Symbol(:orZero0n), <statTemp>$228: Symbol(:normal))
-    <cfgAlias>$231: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$233: Symbol(:orZero1n) = :orZero1n
-    <statTemp>$234: Symbol(:normal) = :normal
-    <statTemp>$229: Symbol(:orZero1n) = <cfgAlias>$231: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$233: Symbol(:orZero1n), <statTemp>$234: Symbol(:normal))
-    <cfgAlias>$237: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$239: Symbol(:orZero2) = :orZero2
-    <statTemp>$240: Symbol(:normal) = :normal
-    <statTemp>$235: Symbol(:orZero2) = <cfgAlias>$237: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$239: Symbol(:orZero2), <statTemp>$240: Symbol(:normal))
-    <cfgAlias>$243: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$245: Symbol(:orZero3) = :orZero3
-    <statTemp>$246: Symbol(:normal) = :normal
-    <statTemp>$241: Symbol(:orZero3) = <cfgAlias>$243: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$245: Symbol(:orZero3), <statTemp>$246: Symbol(:normal))
-    <cfgAlias>$249: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$251: Symbol(:orZero3n) = :orZero3n
-    <statTemp>$252: Symbol(:normal) = :normal
-    <statTemp>$247: Symbol(:orZero3n) = <cfgAlias>$249: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$251: Symbol(:orZero3n), <statTemp>$252: Symbol(:normal))
-    <cfgAlias>$255: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$257: Symbol(:orZero4) = :orZero4
-    <statTemp>$258: Symbol(:normal) = :normal
-    <statTemp>$253: Symbol(:orZero4) = <cfgAlias>$255: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$257: Symbol(:orZero4), <statTemp>$258: Symbol(:normal))
-    <cfgAlias>$261: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$263: Symbol(:orZero5) = :orZero5
-    <statTemp>$264: Symbol(:normal) = :normal
-    <statTemp>$259: Symbol(:orZero5) = <cfgAlias>$261: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(ControlFlow), <statTemp>$263: Symbol(:orZero5), <statTemp>$264: Symbol(:normal))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

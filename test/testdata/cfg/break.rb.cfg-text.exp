@@ -98,18 +98,10 @@ bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$9: Sorbet::Private::Stat
     <cfgAlias>$32: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$34: T.class_of(T) = alias <C T>
     <statTemp>$29: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$32: T.class_of(T::Sig))
-    <cfgAlias>$37: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$39: Symbol(:foo) = :foo
-    <statTemp>$40: Symbol(:normal) = :normal
-    <statTemp>$35: Symbol(:foo) = <cfgAlias>$37: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$39: Symbol(:foo), <statTemp>$40: Symbol(:normal))
-    <statTemp>$43: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$41: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$43: T.untyped)
-    <cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$49: Symbol(:bar) = :bar
-    <statTemp>$50: Symbol(:normal) = :normal
-    <statTemp>$45: Symbol(:bar) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$49: Symbol(:bar), <statTemp>$50: Symbol(:normal))
-    <block-pre-call-temp>$53: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()
-    <selfRestore>$54: T.class_of(<root>) = <self>
+    <statTemp>$38: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$36: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$38: T.untyped)
+    <block-pre-call-temp>$43: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()
+    <selfRestore>$44: T.class_of(<root>) = <self>
     <unconditional> -> bb6
 
 # backedges
@@ -134,105 +126,105 @@ bb5[rubyRegionId=1, firstDead=13](<self>: T.class_of(<root>), <block-pre-call-te
 # backedges
 # - bb3(rubyRegionId=0)
 # - bb11(rubyRegionId=2)
-bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$53: Sorbet::Private::Static::Void, <selfRestore>$54: T.class_of(<root>)):
+bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$43: Sorbet::Private::Static::Void, <selfRestore>$44: T.class_of(<root>)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$53: Sorbet::Private::Static::Void, <selfRestore>$54: T.class_of(<root>)):
-    a: String = Solve<<block-pre-call-temp>$53, bar>
+bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$43: Sorbet::Private::Static::Void, <selfRestore>$44: T.class_of(<root>)):
+    a: String = Solve<<block-pre-call-temp>$43, bar>
     <unconditional> -> bb8
 
 # backedges
 # - bb7(rubyRegionId=0)
 # - bb10(rubyRegionId=2)
-bb8[rubyRegionId=0, firstDead=-1](a: T.any(String, Integer), <selfRestore>$54: T.class_of(<root>)):
-    <self>: T.class_of(<root>) = <selfRestore>$54
-    <cfgAlias>$68: T.class_of(T) = alias <C T>
-    <statTemp>$66: T.any(String, Integer) = <cfgAlias>$68: T.class_of(T).reveal_type(a: T.any(String, Integer))
-    <block-pre-call-temp>$72: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()
-    <selfRestore>$73: T.class_of(<root>) = <self>
+bb8[rubyRegionId=0, firstDead=-1](a: T.any(String, Integer), <selfRestore>$44: T.class_of(<root>)):
+    <self>: T.class_of(<root>) = <selfRestore>$44
+    <cfgAlias>$58: T.class_of(T) = alias <C T>
+    <statTemp>$56: T.any(String, Integer) = <cfgAlias>$58: T.class_of(T).reveal_type(a: T.any(String, Integer))
+    <block-pre-call-temp>$62: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()
+    <selfRestore>$63: T.class_of(<root>) = <self>
     <unconditional> -> bb12
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb9[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$53: Sorbet::Private::Static::Void, <selfRestore>$54: T.class_of(<root>)):
+bb9[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$43: Sorbet::Private::Static::Void, <selfRestore>$44: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(bar)
-    <blk>$55: [Integer] = load_yield_params(bar)
-    x$2: Integer = yield_load_arg(0, <blk>$55: [Integer])
-    <statTemp>$60: Integer(5) = 5
-    <ifTemp>$58: T::Boolean = x$2: Integer.>(<statTemp>$60: Integer(5))
-    <ifTemp>$58 -> (T::Boolean ? bb10 : bb11)
+    <blk>$45: [Integer] = load_yield_params(bar)
+    x$2: Integer = yield_load_arg(0, <blk>$45: [Integer])
+    <statTemp>$50: Integer(5) = 5
+    <ifTemp>$48: T::Boolean = x$2: Integer.>(<statTemp>$50: Integer(5))
+    <ifTemp>$48 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb9(rubyRegionId=2)
-bb10[rubyRegionId=2, firstDead=-1](<selfRestore>$54: T.class_of(<root>)):
+bb10[rubyRegionId=2, firstDead=-1](<selfRestore>$44: T.class_of(<root>)):
     # outerLoops: 1
-    <returnTemp>$61: Integer(10) = 10
-    <block-break-assign>$62: Integer(10) = <returnTemp>$61
-    <magic>$63: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$64: T.untyped = <magic>$63: T.class_of(<Magic>).<block-break>(<returnTemp>$61: Integer(10))
-    a: Integer(10) = <block-break-assign>$62
+    <returnTemp>$51: Integer(10) = 10
+    <block-break-assign>$52: Integer(10) = <returnTemp>$51
+    <magic>$53: T.class_of(<Magic>) = alias <C <Magic>>
+    <block-break>$54: T.untyped = <magic>$53: T.class_of(<Magic>).<block-break>(<returnTemp>$51: Integer(10))
+    a: Integer(10) = <block-break-assign>$52
     <unconditional> -> bb8
 
 # backedges
 # - bb9(rubyRegionId=2)
-bb11[rubyRegionId=2, firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$53: Sorbet::Private::Static::Void, <selfRestore>$54: T.class_of(<root>)):
+bb11[rubyRegionId=2, firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$43: Sorbet::Private::Static::Void, <selfRestore>$44: T.class_of(<root>)):
     # outerLoops: 1
-    <blockReturnTemp>$56: String("test") = "test"
-    <blockReturnTemp>$65: T.noreturn = blockreturn<bar> <blockReturnTemp>$56: String("test")
+    <blockReturnTemp>$46: String("test") = "test"
+    <blockReturnTemp>$55: T.noreturn = blockreturn<bar> <blockReturnTemp>$46: String("test")
     <unconditional> -> bb6
 
 # backedges
 # - bb8(rubyRegionId=0)
 # - bb17(rubyRegionId=3)
-bb12[rubyRegionId=3, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(<root>)):
+bb12[rubyRegionId=3, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(<root>)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb15 : bb13)
 
 # backedges
 # - bb12(rubyRegionId=3)
-bb13[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(<root>)):
-    b: String = Solve<<block-pre-call-temp>$72, bar>
+bb13[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(<root>)):
+    b: String = Solve<<block-pre-call-temp>$62, bar>
     <unconditional> -> bb14
 
 # backedges
 # - bb13(rubyRegionId=0)
 # - bb16(rubyRegionId=3)
-bb14[rubyRegionId=0, firstDead=-1](b: T.nilable(String), <selfRestore>$73: T.class_of(<root>)):
-    <cfgAlias>$87: T.class_of(T) = alias <C T>
-    <statTemp>$85: T.nilable(String) = <cfgAlias>$87: T.class_of(T).reveal_type(b: T.nilable(String))
+bb14[rubyRegionId=0, firstDead=-1](b: T.nilable(String), <selfRestore>$63: T.class_of(<root>)):
+    <cfgAlias>$77: T.class_of(T) = alias <C T>
+    <statTemp>$75: T.nilable(String) = <cfgAlias>$77: T.class_of(T).reveal_type(b: T.nilable(String))
     <unconditional> -> bb18
 
 # backedges
 # - bb12(rubyRegionId=3)
-bb15[rubyRegionId=3, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(<root>)):
+bb15[rubyRegionId=3, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(bar)
-    <blk>$74: [Integer] = load_yield_params(bar)
-    x$3: Integer = yield_load_arg(0, <blk>$74: [Integer])
-    <statTemp>$79: Integer(5) = 5
-    <ifTemp>$77: T::Boolean = x$3: Integer.>(<statTemp>$79: Integer(5))
-    <ifTemp>$77 -> (T::Boolean ? bb16 : bb17)
+    <blk>$64: [Integer] = load_yield_params(bar)
+    x$3: Integer = yield_load_arg(0, <blk>$64: [Integer])
+    <statTemp>$69: Integer(5) = 5
+    <ifTemp>$67: T::Boolean = x$3: Integer.>(<statTemp>$69: Integer(5))
+    <ifTemp>$67 -> (T::Boolean ? bb16 : bb17)
 
 # backedges
 # - bb15(rubyRegionId=3)
-bb16[rubyRegionId=3, firstDead=-1](<selfRestore>$73: T.class_of(<root>)):
+bb16[rubyRegionId=3, firstDead=-1](<selfRestore>$63: T.class_of(<root>)):
     # outerLoops: 1
-    <block-break-assign>$81: NilClass = <returnTemp>$80
-    <magic>$82: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$83: T.untyped = <magic>$82: T.class_of(<Magic>).<block-break>(<returnTemp>$80: NilClass)
-    b: NilClass = <block-break-assign>$81
+    <block-break-assign>$71: NilClass = <returnTemp>$70
+    <magic>$72: T.class_of(<Magic>) = alias <C <Magic>>
+    <block-break>$73: T.untyped = <magic>$72: T.class_of(<Magic>).<block-break>(<returnTemp>$70: NilClass)
+    b: NilClass = <block-break-assign>$71
     <unconditional> -> bb14
 
 # backedges
 # - bb15(rubyRegionId=3)
-bb17[rubyRegionId=3, firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(<root>)):
+bb17[rubyRegionId=3, firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(<root>)):
     # outerLoops: 1
-    <blockReturnTemp>$75: String("test") = "test"
-    <blockReturnTemp>$84: T.noreturn = blockreturn<bar> <blockReturnTemp>$75: String("test")
+    <blockReturnTemp>$65: String("test") = "test"
+    <blockReturnTemp>$74: T.noreturn = blockreturn<bar> <blockReturnTemp>$65: String("test")
     <unconditional> -> bb12
 
 # backedges
@@ -240,11 +232,11 @@ bb17[rubyRegionId=3, firstDead=2](<self>: T.class_of(<root>), <block-pre-call-te
 # - bb21(rubyRegionId=0)
 bb18[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
-    <statTemp>$92: Integer(1) = 1
-    <statTemp>$91: String = <statTemp>$92: Integer(1).to_s()
-    <statTemp>$93: String("") = ""
-    <whileTemp>$90: T::Boolean = <statTemp>$91: String.==(<statTemp>$93: String(""))
-    <whileTemp>$90 -> (T::Boolean ? bb21 : bb19)
+    <statTemp>$82: Integer(1) = 1
+    <statTemp>$81: String = <statTemp>$82: Integer(1).to_s()
+    <statTemp>$83: String("") = ""
+    <whileTemp>$80: T::Boolean = <statTemp>$81: String.==(<statTemp>$83: String(""))
+    <whileTemp>$80 -> (T::Boolean ? bb21 : bb19)
 
 # backedges
 # - bb18(rubyRegionId=0)
@@ -256,8 +248,8 @@ bb19[rubyRegionId=0, firstDead=-1]():
 # - bb19(rubyRegionId=0)
 # - bb22(rubyRegionId=0)
 bb20[rubyRegionId=0, firstDead=3](c: T.nilable(Symbol)):
-    <cfgAlias>$103: T.class_of(T) = alias <C T>
-    <statTemp>$101: T.nilable(Symbol) = <cfgAlias>$103: T.class_of(T).reveal_type(c: T.nilable(Symbol))
+    <cfgAlias>$93: T.class_of(T) = alias <C T>
+    <statTemp>$91: T.nilable(Symbol) = <cfgAlias>$93: T.class_of(T).reveal_type(c: T.nilable(Symbol))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -265,19 +257,19 @@ bb20[rubyRegionId=0, firstDead=3](c: T.nilable(Symbol)):
 # - bb18(rubyRegionId=0)
 bb21[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
-    <statTemp>$97: Integer(1) = 1
-    <statTemp>$96: String = <statTemp>$97: Integer(1).to_s()
-    <statTemp>$98: String("") = ""
-    <ifTemp>$95: T::Boolean = <statTemp>$96: String.==(<statTemp>$98: String(""))
-    <ifTemp>$95 -> (T::Boolean ? bb22 : bb18)
+    <statTemp>$87: Integer(1) = 1
+    <statTemp>$86: String = <statTemp>$87: Integer(1).to_s()
+    <statTemp>$88: String("") = ""
+    <ifTemp>$85: T::Boolean = <statTemp>$86: String.==(<statTemp>$88: String(""))
+    <ifTemp>$85 -> (T::Boolean ? bb22 : bb18)
 
 # backedges
 # - bb21(rubyRegionId=0)
 bb22[rubyRegionId=0, firstDead=-1]():
     # outerLoops: 1
-    <returnTemp>$99: Symbol(:abc) = :abc
-    <block-break-assign>$100: Symbol(:abc) = <returnTemp>$99
-    c: Symbol(:abc) = <block-break-assign>$100
+    <returnTemp>$89: Symbol(:abc) = :abc
+    <block-break-assign>$90: Symbol(:abc) = <returnTemp>$89
+    c: Symbol(:abc) = <block-break-assign>$90
     <unconditional> -> bb20
 
 }

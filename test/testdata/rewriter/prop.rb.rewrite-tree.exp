@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :prop, :normal)
+    :prop
 
     <self>.prop()
 
@@ -115,13 +115,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :genericPropGetter)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    :foo=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo2, :normal)
+    :foo2
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo2=, :normal)
+    :foo2=
   end
 
   class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
@@ -514,101 +514,101 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:default, <emptyTree>::<C String>, :default, "", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :default, :genericPropGetter)
+    :default
 
-    ::Sorbet::Private::Static.keep_def(<self>, :default=, :normal)
+    :default=
 
     <self>.prop(:t_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_nilable, :genericPropGetter)
+    :t_nilable
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_nilable=, :normal)
+    :t_nilable=
 
     <self>.prop(:array, <emptyTree>::<C Array>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array, :genericPropGetter)
+    :array
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array=, :normal)
+    :array=
 
     <self>.prop(:t_array, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_array, :genericPropGetter)
+    :t_array
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_array=, :normal)
+    :t_array=
 
     <self>.prop(:hash_of, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_of, :genericPropGetter)
+    :hash_of
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_of=, :normal)
+    :hash_of=
 
     <self>.prop(:const_explicit, <emptyTree>::<C String>, :immutable, true, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :const_explicit, :genericPropGetter)
+    :const_explicit
 
     <self>.const(:const, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :const, :genericPropGetter)
+    :const
 
     <self>.prop(:enum_prop, <emptyTree>::<C String>, :enum, ["hello", "goodbye"], :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :enum_prop, :genericPropGetter)
+    :enum_prop
 
-    ::Sorbet::Private::Static.keep_def(<self>, :enum_prop=, :normal)
+    :enum_prop=
 
     <self>.prop(:foreign, <emptyTree>::<C String>, :foreign, <emptyTree>::<C ForeignClass>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign, :genericPropGetter)
+    :foreign
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign=, :normal)
+    :foreign=
 
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :genericPropGetter)
+    :foreign_lazy
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
+    :foreign_lazy=
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :genericPropGetter)
+    :foreign_proc
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
+    :foreign_proc=
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :genericPropGetter)
+    :foreign_invalid
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
+    :foreign_invalid=
 
     <self>.prop(:ifunset, <emptyTree>::<C String>, :ifunset, "", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset, :normal)
+    :ifunset
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset=, :normal)
+    :ifunset=
 
     <self>.prop(:ifunset_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :ifunset, "", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset_nilable, :normal)
+    :ifunset_nilable
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset_nilable=, :normal)
+    :ifunset_nilable=
 
     <self>.prop(:empty_hash_rules, <emptyTree>::<C String>, {:without_accessors => true})
 
-    ::Sorbet::Private::Static.keep_def(<self>, :empty_hash_rules, :genericPropGetter)
+    :empty_hash_rules
 
-    ::Sorbet::Private::Static.keep_def(<self>, :empty_hash_rules=, :normal)
+    :empty_hash_rules=
 
     <self>.prop(:hash_rules, <emptyTree>::<C String>, {:enum => ["hello", "goodbye"], :without_accessors => true})
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_rules, :genericPropGetter)
+    :hash_rules
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_rules=, :normal)
+    :hash_rules=
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
@@ -666,21 +666,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :token_prop, :normal)
+    :token_prop
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :created_prop, :normal)
+    :created_prop
 
     <self>.token_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token, :genericPropGetter)
+    :token
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token=, :normal)
+    :token=
 
     <self>.created_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :created, :genericPropGetter)
+    :created
 
-    ::Sorbet::Private::Static.keep_def(<self>, :created=, :normal)
+    :created=
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
@@ -727,19 +727,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :timestamped_token_prop, :normal)
+    :timestamped_token_prop
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :created_prop, :normal)
+    :created_prop
 
     <self>.timestamped_token_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token, :genericPropGetter)
+    :token
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token=, :normal)
+    :token=
 
     <self>.created_prop(:immutable, true, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :created, :genericPropGetter)
+    :created
   end
 
   class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
@@ -803,20 +803,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :encrypted_prop, :normal)
+    :encrypted_prop
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    :foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_foo, :normal)
+    :encrypted_foo
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    :foo=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_foo=, :normal)
+    :encrypted_foo=
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    :bar
 
-    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_bar, :normal)
+    :encrypted_bar
   end
 
-  ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+  :main
 end

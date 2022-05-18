@@ -8,7 +8,7 @@ begin
     end
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+      :foo
     end
   end
   <emptyTree>
