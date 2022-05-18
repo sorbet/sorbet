@@ -356,6 +356,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
+    options.add_options("advanced")("stripe-mode-namespace-collision-check-experimental",
+                                    "Enable Stripe specific error enforcement for file-based namespace collisions",
+                                    cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                     cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages-hint-message",
@@ -903,6 +906,12 @@ void readOptions(Options &opts,
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
+        opts.stripeModeNamespaceCollisionCheck = raw["stripe-mode-namespace-collision-check-experimental"].as<bool>();
+        if (opts.stripeModeNamespaceCollisionCheck && !opts.stripeMode) {
+            logger->error("--stripe-mode-namespace-collision-check-experimental is only valid in --stripe-mode");
+            throw EarlyReturnWithCode(1);
+        }
+
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         if (raw.count("extra-package-files-directory-prefix")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix"].as<vector<string>>()) {

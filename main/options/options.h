@@ -157,6 +157,7 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool stripeMode = false;
+    bool stripeModeNamespaceCollisionCheck = false;
     bool stripePackages = false;
     std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryPrefixes;

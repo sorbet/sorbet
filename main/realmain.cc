@@ -526,7 +526,10 @@ int realmain(int argc, char *argv[]) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-            gs->suppressErrorClass(core::errors::Namer::ConflictingCommonPrefix.code);
+        }
+    } else {
+        if (opts.stripeModeNamespaceCollisionCheck) {
+            gs->checkNamespaceCollisions = true;
         }
     }
     if (opts.suggestTyped) {
@@ -534,7 +537,6 @@ int realmain(int argc, char *argv[]) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
         if (!opts.stripeMode) {
             gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
-            gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::ConflictingCommonPrefix.code);
         }
     }
     gs->suggestUnsafe = opts.suggestUnsafe;
