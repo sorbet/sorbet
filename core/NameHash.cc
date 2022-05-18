@@ -16,7 +16,7 @@ void NameHash::sortAndDedupe(std::vector<core::NameHash> &hashes) {
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
 
-FileHash::FileHash(DefinitionHash &&definitions, UsageHash &&usages)
+FileHash::FileHash(GlobalStateHash &&definitions, UsageHash &&usages)
     : definitions(move(definitions)), usages(move(usages)) {}
 
 } // namespace sorbet::core

@@ -2109,15 +2109,15 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
 }
 
 uint32_t patchHash(uint32_t hash) {
-    if (hash == DefinitionHash::HASH_STATE_NOT_COMPUTED) {
-        hash = DefinitionHash::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
-    } else if (hash == DefinitionHash::HASH_STATE_INVALID) {
-        hash = DefinitionHash::HASH_STATE_INVALID_COLLISION_AVOID;
+    if (hash == GlobalStateHash::HASH_STATE_NOT_COMPUTED) {
+        hash = GlobalStateHash::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
+    } else if (hash == GlobalStateHash::HASH_STATE_INVALID) {
+        hash = GlobalStateHash::HASH_STATE_INVALID_COLLISION_AVOID;
     }
     return hash;
 }
 
-unique_ptr<DefinitionHash> GlobalState::hash() const {
+unique_ptr<GlobalStateHash> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
     uint32_t classModuleHash = 0;
@@ -2192,7 +2192,7 @@ unique_ptr<DefinitionHash> GlobalState::hash() const {
         }
     }
 
-    unique_ptr<DefinitionHash> result = make_unique<DefinitionHash>();
+    unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
     result->methodHashes.reserve(methodHashes.size());
     for (const auto &e : methodHashes) {
         result->methodHashes.emplace_back(e.first, patchHash(e.second));

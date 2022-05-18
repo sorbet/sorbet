@@ -36,27 +36,7 @@ template <typename H> H AbslHashValue(H h, const NameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
-// A per-symbol kind fingerprint, currently only used for methods.
-struct DefinitionFingerprint {
-    // The hash of the definition's name (e.g. the method name).  Note that
-    // multiple names may map to this same hash, but we expect this to be rare.
-    core::NameHash nameHash;
-    // The combined hash of all symbols (e.g. core::Method) that mapped to this
-    // structure's `nameHash`.
-    uint32_t definitionHash = 0;
-
-    DefinitionFingerprint() noexcept = default;
-    DefinitionFingerprint(core::NameHash nameHash, uint32_t definitionHash) noexcept
-        : nameHash(nameHash), definitionHash(definitionHash) {}
-
-    inline bool operator<(const DefinitionFingerprint &h) const noexcept {
-        return this->nameHash < h.nameHash ||
-               (!(h.nameHash < this->nameHash) && this->definitionHash < h.definitionHash);
-    }
-};
-
-// This structure represents the state of definitions found in a single file.
-struct DefinitionHash {
+struct GlobalStateHash {
     static constexpr int HASH_STATE_NOT_COMPUTED = 0;
     static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
     static constexpr int HASH_STATE_INVALID = 2;
@@ -75,12 +55,10 @@ struct DefinitionHash {
     uint32_t fieldHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
+    std::vector<std::pair<NameHash, uint32_t>> methodHashes;
 
-    // This vector is maintained in sorted order for linear-time diffing.
-    std::vector<DefinitionFingerprint> methodHashes;
-
-    static DefinitionHash invalid() {
-        DefinitionHash ret;
+    static GlobalStateHash invalid() {
+        GlobalStateHash ret;
         ret.hierarchyHash = HASH_STATE_INVALID;
         ret.classModuleHash = HASH_STATE_INVALID;
         ret.typeArgumentHash = HASH_STATE_INVALID;
@@ -105,11 +83,11 @@ struct UsageHash {
 };
 
 struct FileHash {
-    DefinitionHash definitions;
+    GlobalStateHash definitions;
     UsageHash usages;
 
     FileHash() = default;
-    FileHash(DefinitionHash &&definitions, UsageHash &&usages);
+    FileHash(GlobalStateHash &&definitions, UsageHash &&usages);
 };
 
 }; // namespace sorbet::core
