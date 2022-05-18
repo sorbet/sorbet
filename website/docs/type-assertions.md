@@ -196,6 +196,40 @@ assertion result into a variable, and it can only be used on `self`.
 etc.), though it is most usually useful within blocks. See
 [Blocks, Procs, and Lambda Types](procs.md) for more real-world usage examples.
 
+## Static vs Runtime Checking
+
+At runtime, all of these assertions verify the `expr` they are passed matches
+the `Type` they are passed.
+
+Statically, e.g., when type checking with `srb tc`, some of them are **assumed**
+to hold, but not statically checked.
+
+| Assertion                    | Static      | Runtime |
+| ---------------------------- | ----------- | ------- |
+| `T.let(expr, Type)`          | checked     | checked |
+| `T.cast(expr, Type)`         | **assumed** | checked |
+| `T.must(expr)`               | **assumed** | checked |
+| `T.assert_type!(expr, Type)` | checked     | checked |
+| `T.bind(self, Type)`         | **assumed** | checked |
+
+When an assertion is assumed to hold statically, Sorbet will only use it for the
+purpose of updating it's internal understanding of the types, and will never
+attempt to alert the programmer that an assumption might not hold. In this
+sense, those assertions can be considered
+[Escape Hatches](troubleshooting.md#escape-hatches) for getting something to
+typecheck that might not otherwise.
+
+**Note** that even though all of these assertions are checked at runtime, some
+**individual types** might never be checked at runtime, regardless of the type
+assertion used. This includes the element types of generics (like the `Integer`
+in `T::Array[Integer]`), the argument and return types of
+[Proc Types](procs.md), [`T.self_type`](self-type.md),
+[`T.attached_class`](attached-class), and others.
+
+These assertions are also subject to the `T::Configuration` hooks that
+`sorbet-runtime` provides for controlling runtime type checking. See
+[Runtime Configuration](tconfiguration.md) for more.
+
 ## Comparison of type assertions
 
 Here are some other ways to think of the behavior of the individual type
