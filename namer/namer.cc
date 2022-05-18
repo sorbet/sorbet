@@ -115,12 +115,6 @@ struct FoundStaticField final {
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
-
-    // Return a debug string representation
-    string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
-        return fmt::format("FoundStaticField {{ id = {}, owner = {}, klass = {}, name = {} }}", id, owner.idx(),
-                           klass.idx(), name.toString(gs));
-    }
 };
 CheckSize(FoundStaticField, 32, 4);
 
@@ -133,11 +127,6 @@ struct FoundTypeMember final {
     core::NameRef varianceName;
     bool isFixed = false;
     bool isTypeTemplete = false;
-
-    // Return a debug string representation
-    string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
-        return fmt::format("FoundTypeMember {{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
-    }
 };
 CheckSize(FoundTypeMember, 40, 4);
 
