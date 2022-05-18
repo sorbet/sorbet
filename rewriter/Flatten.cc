@@ -41,6 +41,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 class FlattenWalk {
+    const bool compiledFile;
     enum class ScopeType { ClassScope, StaticMethodScope, InstanceMethodScope };
 
     struct ScopeInfo {
@@ -291,7 +292,7 @@ class FlattenWalk {
     }
 
 public:
-    FlattenWalk() {
+    FlattenWalk(core::Context ctx) : compiledFile(ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
         newMethodSet();
     }
     ~FlattenWalk() {
@@ -376,6 +377,11 @@ public:
 
         if (discardable) {
             return ast::MK::EmptyTree();
+        } else if (!this->compiledFile) {
+            // TODO(froydnj) We have to return something here so things like `module_function`
+            // work correctly, but it would be extremely nice if we didn't have to return anything
+            // here, because there's no point in the vast majority of cases.
+            return ast::MK::Symbol(loc.copyWithZeroLength(), name);
         } else {
             return ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
                                   loc.copyWithZeroLength(), ast::MK::Self(loc), ast::MK::Symbol(loc, name),
@@ -411,7 +417,7 @@ public:
 };
 
 ast::ExpressionPtr Flatten::run(core::Context ctx, ast::ExpressionPtr tree) {
-    FlattenWalk flatten;
+    FlattenWalk flatten(ctx);
     tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
     tree = flatten.addTopLevelMethods(ctx, std::move(tree));
 
