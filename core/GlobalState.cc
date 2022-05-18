@@ -2108,15 +2108,6 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
     return what;
 }
 
-uint32_t patchHash(uint32_t hash) {
-    if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {
-        hash = LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
-    } else if (hash == LocalSymbolTableHashes::HASH_STATE_INVALID) {
-        hash = LocalSymbolTableHashes::HASH_STATE_INVALID_COLLISION_AVOID;
-    }
-    return hash;
-}
-
 unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
@@ -2195,17 +2186,17 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
     result->methodHashes.reserve(methodHashes.size());
     for (const auto &e : methodHashes) {
-        result->methodHashes.emplace_back(e.first, patchHash(e.second));
+        result->methodHashes.emplace_back(e.first, LocalSymbolTableHashes::patchHash(e.second));
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
     fast_sort(result->methodHashes);
 
-    result->hierarchyHash = patchHash(hierarchyHash);
-    result->classModuleHash = patchHash(classModuleHash);
-    result->typeArgumentHash = patchHash(typeArgumentHash);
-    result->typeMemberHash = patchHash(typeMemberHash);
-    result->fieldHash = patchHash(fieldHash);
-    result->methodHash = patchHash(methodHash);
+    result->hierarchyHash = LocalSymbolTableHashes::patchHash(hierarchyHash);
+    result->classModuleHash = LocalSymbolTableHashes::patchHash(classModuleHash);
+    result->typeArgumentHash = LocalSymbolTableHashes::patchHash(typeArgumentHash);
+    result->typeMemberHash = LocalSymbolTableHashes::patchHash(typeMemberHash);
+    result->fieldHash = LocalSymbolTableHashes::patchHash(fieldHash);
+    result->methodHash = LocalSymbolTableHashes::patchHash(methodHash);
     return result;
 }
 

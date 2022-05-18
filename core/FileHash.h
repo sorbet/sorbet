@@ -57,6 +57,15 @@ struct LocalSymbolTableHashes {
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
     std::vector<std::pair<NameHash, uint32_t>> methodHashes;
 
+    static uint32_t patchHash(uint32_t hash) {
+        if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {
+            hash = LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
+        } else if (hash == LocalSymbolTableHashes::HASH_STATE_INVALID) {
+            hash = LocalSymbolTableHashes::HASH_STATE_INVALID_COLLISION_AVOID;
+        }
+        return hash;
+    }
+
     static LocalSymbolTableHashes invalid() {
         LocalSymbolTableHashes ret;
         ret.hierarchyHash = HASH_STATE_INVALID;
