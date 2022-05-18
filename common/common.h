@@ -102,7 +102,7 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
 #endif
 
 #define CheckSize(T, ExpSize, ExpAlign)                                              \
-    inline void _##T##is##ExpSize##_bytes_long_() {                                  \
+    [[maybe_unused]] inline void _##T##is##ExpSize##_bytes_long_() {                 \
         sorbet::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);       \
         sorbet::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned); \
     }
