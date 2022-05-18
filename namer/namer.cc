@@ -178,6 +178,17 @@ class FoundDefinitions final {
     vector<Modifier> _modifiers;
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
+        DEBUG_ONLY(switch (ref.kind()) {
+            case DefinitionKind::Class:
+            case DefinitionKind::Method:
+            case DefinitionKind::StaticField:
+            case DefinitionKind::TypeMember:
+                break;
+            case DefinitionKind::ClassRef:
+            case DefinitionKind::Empty:
+            case DefinitionKind::Symbol:
+                ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
+        });
         _definitions.emplace_back(ref);
         return ref;
     }
@@ -226,18 +237,22 @@ public:
         _modifiers.emplace_back(move(mod));
     }
 
+    // See documentation on _definitions
     const vector<FoundDefinitionRef> &definitions() const {
         return _definitions;
     }
 
+    // See documentation on _klasses
     const vector<FoundClass> &klasses() const {
         return _klasses;
     }
 
+    // See documentation on _methods
     const vector<FoundMethod> &methods() const {
         return _methods;
     }
 
+    // See documentation on _modifiers
     const vector<Modifier> &modifiers() const {
         return _modifiers;
     }
