@@ -22,6 +22,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced
         // in Stripe code.
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
+        gs.suppressErrorClass(sorbet::core::errors::Namer::ConflictingCommonPrefix.code);
     }
 
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
