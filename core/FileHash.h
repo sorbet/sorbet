@@ -37,9 +37,20 @@ template <typename H> H AbslHashValue(H h, const NameHash &m) {
 }
 
 struct LocalSymbolTableHashes {
+    // Default value of hierarchyHash (and other hashes) tracked by this class.
     static constexpr int HASH_STATE_NOT_COMPUTED = 0;
+    // Since something could naturally hash to `HASH_STATE_NOT_COMPUTED`, we force these hash
+    // results to collide with all things that hashed to `1`.
     static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
+    // Indicates that Sorbet completely failed to parse the file (there were parse errors and the
+    // parse result was completely empty), therefore the LocalSymbolTableHashes are meaningless.
+    //
+    // While this state is not strictly necessary, it is useful for tracking metrics (want to know
+    // how many times a user actually changed definitions vs how many times they changed because of
+    // a shortcoming in Sorbet's parser implementation.)
     static constexpr int HASH_STATE_INVALID_PARSE = 2;
+    // Since something could naturally hash to `HASH_STATE_INVALID_PARSE`, we force these hash
+    // results to collide with all things that hashed to `3`.
     static constexpr int HASH_STATE_INVALID_PARSE_COLLISION_AVOID = 3;
     // A fingerprint for all the symbols contained in the file.
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
