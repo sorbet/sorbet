@@ -83,11 +83,11 @@ struct UsageHash {
 };
 
 struct FileHash {
-    LocalSymbolTableHashes definitions;
+    LocalSymbolTableHashes localSymbolTableHashes;
     UsageHash usages;
 
     FileHash() = default;
-    FileHash(LocalSymbolTableHashes &&definitions, UsageHash &&usages);
+    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages);
 };
 
 }; // namespace sorbet::core

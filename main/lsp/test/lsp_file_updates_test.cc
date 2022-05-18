@@ -16,7 +16,7 @@ namespace {
 uint32_t nextHash = 0;
 unique_ptr<core::FileHash> getFileHash() {
     auto hash = make_unique<core::FileHash>();
-    hash->definitions.hierarchyHash = nextHash++;
+    hash->localSymbolTableHashes.hierarchyHash = nextHash++;
     return hash;
 }
 
@@ -121,8 +121,8 @@ TEST_CASE("MergeUpdatedFiles") {
         int i = fileIndexes["bar.rb"];
         CHECK_EQ("newcontents", newUpdates.updatedFiles[i]->source());
         CHECK_EQ(2, newUpdates.updatedFileIndexes[i].file.id());
-        CHECK_NE(oldUpdates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
-                 newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
+        CHECK_NE(oldUpdates.updatedFiles[1]->getFileHash()->localSymbolTableHashes.hierarchyHash,
+                 newUpdates.updatedFiles[i]->getFileHash()->localSymbolTableHashes.hierarchyHash);
     }
 
     {
@@ -130,8 +130,8 @@ TEST_CASE("MergeUpdatedFiles") {
         int i = fileIndexes["foo.rb"];
         CHECK_EQ("foo", newUpdates.updatedFiles[i]->source());
         CHECK_EQ(1, newUpdates.updatedFileIndexes[i].file.id());
-        CHECK_EQ(oldUpdates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
-                 newUpdates.updatedFiles[i]->getFileHash()->definitions.hierarchyHash);
+        CHECK_EQ(oldUpdates.updatedFiles[0]->getFileHash()->localSymbolTableHashes.hierarchyHash,
+                 newUpdates.updatedFiles[i]->getFileHash()->localSymbolTableHashes.hierarchyHash);
     }
 
     {
@@ -170,10 +170,10 @@ TEST_CASE("Copy") {
     CHECK_EQ(1, copy.updatedFileIndexes[0].file.id());
     CHECK_EQ(2, copy.updatedFileIndexes[1].file.id());
 
-    CHECK_EQ(updates.updatedFiles[0]->getFileHash()->definitions.hierarchyHash,
-             copy.updatedFiles[0]->getFileHash()->definitions.hierarchyHash);
-    CHECK_EQ(updates.updatedFiles[1]->getFileHash()->definitions.hierarchyHash,
-             copy.updatedFiles[1]->getFileHash()->definitions.hierarchyHash);
+    CHECK_EQ(updates.updatedFiles[0]->getFileHash()->localSymbolTableHashes.hierarchyHash,
+             copy.updatedFiles[0]->getFileHash()->localSymbolTableHashes.hierarchyHash);
+    CHECK_EQ(updates.updatedFiles[1]->getFileHash()->localSymbolTableHashes.hierarchyHash,
+             copy.updatedFiles[1]->getFileHash()->localSymbolTableHashes.hierarchyHash);
 }
 
 TEST_CASE("MergeOlderPreemptionExpected") {

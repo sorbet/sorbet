@@ -257,8 +257,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             if (fref.exists()) {
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
-                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->definitions.methodHashes;
-                const auto &newMethodHashes = f->getFileHash()->definitions.methodHashes;
+                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes.methodHashes;
+                const auto &newMethodHashes = f->getFileHash()->localSymbolTableHashes.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
                 ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),
