@@ -276,6 +276,9 @@ public:
     // The error code is appended to this string.
     std::string errorUrlBase;
 
+    // If 'true', check for common prefix namespace collisions (experimental)
+    bool checkNamespaceCollisions = false;
+
     // If 'true', print error sections
     bool includeErrorSections = true;
 

@@ -1724,48 +1724,8 @@ public:
                 }
             }
 
-            if (!commonPrefix.exists()) {
-                // Initialize common prefix to the current symbol
-                commonPrefix = klass.symbol;
-            } else if (commonPrefix != core::Symbols::root()) {
-                // Find common prefix.
-                // Say the current common prefix is Foo -> Bar -> Baz, and the current symbol is Foo -> Bar -> Bat
-                // We iterate backwards over both symbols to find the first prefix that matches
-                // in both symbols: this will be the new common prefix.
-
-                core::ClassOrModuleRef foundPrefix;
-
-                auto curSym = klass.symbol;
-                int curSymLen = symbolLength(ctx, curSym);
-
-                auto prefixSym = commonPrefix;
-                int prefixSymLen = symbolLength(ctx, prefixSym);
-
-                while (curSymLen != prefixSymLen) {
-                    if (curSymLen > prefixSymLen) {
-                        curSym = curSym.data(ctx)->owner;
-                        curSymLen--;
-                    } else {
-                        prefixSym = prefixSym.data(ctx)->owner;
-                        prefixSymLen--;
-                    }
-                }
-
-                while (!foundPrefix.exists() && curSym != core::Symbols::root()) {
-                    if (curSym == prefixSym) {
-                        foundPrefix = curSym;
-                    } else {
-                        curSym = curSym.data(ctx)->owner;
-                        prefixSym = prefixSym.data(ctx)->owner;
-                    }
-                }
-
-                if (foundPrefix.exists()) {
-                    commonPrefix = foundPrefix;
-                } else {
-                    // set to root symbol if common prefix is not found
-                    commonPrefix = core::Symbols::root();
-                }
+            if (ctx.state.checkNamespaceCollisions) {
+                updateCommonPrefix(ctx, klass.symbol);
             }
         }
 
@@ -1775,6 +1735,52 @@ public:
             retSeqs.emplace_back(std::move(stat));
         }
         return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
+    }
+
+    void updateCommonPrefix(core::Context ctx, core::ClassOrModuleRef klassSymbol) {
+        if (!commonPrefix.exists()) {
+            // Initialize common prefix to the current symbol
+            commonPrefix = klassSymbol;
+        } else if (commonPrefix != core::Symbols::root()) {
+            // Find common prefix.
+            // Say the current common prefix is Foo -> Bar -> Baz, and the current symbol is Foo -> Bar -> Bat
+            // We iterate backwards over both symbols to find the first prefix that matches
+            // in both symbols: this will be the new common prefix.
+
+            core::ClassOrModuleRef foundPrefix;
+
+            auto curSym = klassSymbol;
+            int curSymLen = symbolLength(ctx, curSym);
+
+            auto prefixSym = commonPrefix;
+            int prefixSymLen = symbolLength(ctx, prefixSym);
+
+            while (curSymLen != prefixSymLen) {
+                if (curSymLen > prefixSymLen) {
+                    curSym = curSym.data(ctx)->owner;
+                    curSymLen--;
+                } else {
+                    prefixSym = prefixSym.data(ctx)->owner;
+                    prefixSymLen--;
+                }
+            }
+
+            while (!foundPrefix.exists() && curSym != core::Symbols::root()) {
+                if (curSym == prefixSym) {
+                    foundPrefix = curSym;
+                } else {
+                    curSym = curSym.data(ctx)->owner;
+                    prefixSym = prefixSym.data(ctx)->owner;
+                }
+            }
+
+            if (foundPrefix.exists()) {
+                commonPrefix = foundPrefix;
+            } else {
+                // set to root symbol if common prefix is not found
+                commonPrefix = core::Symbols::root();
+            }
+        }
     }
 
     int symbolLength(core::Context ctx, core::ClassOrModuleRef sym) {
@@ -2191,28 +2197,30 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
 
-                // Grab the common prefix that was found by the TreeSymbolizer walk
-                const auto commonPrefix = inserter.getCommonPrefix();
+                if (gs.checkNamespaceCollisions) {
+                    // Grab the common prefix that was found by the TreeSymbolizer walk
+                    const auto commonPrefix = inserter.getCommonPrefix();
 
-                // Update the map
-                prefixMutex.lock();
-                if (commonPrefix.exists() && commonPrefix != core::Symbols::root()) {
-                    const auto &it = commonPrefixes.find(commonPrefix);
-                    if (it != commonPrefixes.end()) {
-                        // Report error if common prefix is already found in another file
-                        if (auto e = ctx.beginError(commonPrefix.data(gs)->loc().offsets(),
-                                                    core::errors::Namer::ConflictingCommonPrefix)) {
-                            e.setHeader("`{}` is a common prefix in multiple files", commonPrefix.show(ctx));
-                            e.addErrorNote("Additional file: `{}`", it->second.data(gs).path());
+                    // Update the map
+                    prefixMutex.lock();
+                    if (commonPrefix.exists() && commonPrefix != core::Symbols::root()) {
+                        const auto &it = commonPrefixes.find(commonPrefix);
+                        if (it != commonPrefixes.end()) {
+                            // Report error if common prefix is already found in another file
+                            if (auto e = ctx.beginError(commonPrefix.data(gs)->loc().offsets(),
+                                                        core::errors::Namer::ConflictingCommonPrefix)) {
+                                e.setHeader("`{}` is a common prefix in multiple files", commonPrefix.show(ctx));
+                                e.addErrorNote("Additional file: `{}`", it->second.data(gs).path());
+                            }
+                        } else {
+                            commonPrefixes[commonPrefix] = job.file;
                         }
-                    } else {
-                        commonPrefixes[commonPrefix] = job.file;
                     }
-                }
-                prefixMutex.unlock();
+                    prefixMutex.unlock();
 
-                // Reset the common prefix for the next walk
-                inserter.clearCommonPrefix();
+                    // Reset the common prefix for the next walk
+                    inserter.clearCommonPrefix();
+                }
 
                 output.emplace_back(move(job));
             }
