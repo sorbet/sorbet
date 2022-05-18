@@ -39,8 +39,8 @@ template <typename H> H AbslHashValue(H h, const NameHash &m) {
 struct LocalSymbolTableHashes {
     static constexpr int HASH_STATE_NOT_COMPUTED = 0;
     static constexpr int HASH_STATE_NOT_COMPUTED_COLLISION_AVOID = 1;
-    static constexpr int HASH_STATE_INVALID = 2;
-    static constexpr int HASH_STATE_INVALID_COLLISION_AVOID = 3;
+    static constexpr int HASH_STATE_INVALID_PARSE = 2;
+    static constexpr int HASH_STATE_INVALID_PARSE_COLLISION_AVOID = 3;
     // A fingerprint for all the symbols contained in the file.
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the classes and modules contained in the file.
@@ -60,39 +60,39 @@ struct LocalSymbolTableHashes {
     static uint32_t patchHash(uint32_t hash) {
         if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {
             hash = LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
-        } else if (hash == LocalSymbolTableHashes::HASH_STATE_INVALID) {
-            hash = LocalSymbolTableHashes::HASH_STATE_INVALID_COLLISION_AVOID;
+        } else if (hash == LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE) {
+            hash = LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE_COLLISION_AVOID;
         }
         return hash;
     }
 
-    static LocalSymbolTableHashes invalid() {
+    static LocalSymbolTableHashes invalidParse() {
         LocalSymbolTableHashes ret;
-        ret.hierarchyHash = HASH_STATE_INVALID;
-        ret.classModuleHash = HASH_STATE_INVALID;
-        ret.typeArgumentHash = HASH_STATE_INVALID;
-        ret.typeMemberHash = HASH_STATE_INVALID;
-        ret.fieldHash = HASH_STATE_INVALID;
-        ret.methodHash = HASH_STATE_INVALID;
+        ret.hierarchyHash = HASH_STATE_INVALID_PARSE;
+        ret.classModuleHash = HASH_STATE_INVALID_PARSE;
+        ret.typeArgumentHash = HASH_STATE_INVALID_PARSE;
+        ret.typeMemberHash = HASH_STATE_INVALID_PARSE;
+        ret.fieldHash = HASH_STATE_INVALID_PARSE;
+        ret.methodHash = HASH_STATE_INVALID_PARSE;
         return ret;
     }
 
-    bool isInvalid() const {
+    bool isInvalidParse() const {
         DEBUG_ONLY(
-            if (hierarchyHash == HASH_STATE_INVALID) {
-                ENFORCE(classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(typeArgumentHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+            if (hierarchyHash == HASH_STATE_INVALID_PARSE) {
+                ENFORCE(classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(typeArgumentHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             } else {
-                ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(typeArgumentHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
-                ENFORCE(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID);
+                ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(typeArgumentHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             });
-        return hierarchyHash == HASH_STATE_INVALID;
+        return hierarchyHash == HASH_STATE_INVALID_PARSE;
     }
 };
 

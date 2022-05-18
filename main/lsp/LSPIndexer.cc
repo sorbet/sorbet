@@ -119,13 +119,13 @@ bool LSPIndexer::canTakeFastPathInternal(
         const auto &oldHash = *oldFile.getFileHash();
         const auto &newHash = *f->getFileHash();
         ENFORCE(oldHash.localSymbolTableHashes.hierarchyHash != core::LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED);
-        if (newHash.localSymbolTableHashes.isInvalid()) {
+        if (newHash.localSymbolTableHashes.isInvalidParse()) {
             logger.debug("Taking slow path because {} has a syntax error", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
             return false;
         }
 
-        if (!newHash.localSymbolTableHashes.isInvalid() &&
+        if (!newHash.localSymbolTableHashes.isInvalidParse() &&
             newHash.localSymbolTableHashes.hierarchyHash != oldHash.localSymbolTableHashes.hierarchyHash) {
             logger.debug("Taking slow path because {} has changed localSymbolTableHashes", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");

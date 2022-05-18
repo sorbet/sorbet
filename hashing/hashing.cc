@@ -69,7 +69,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
             auto view = string_view{result.GetString(), result.GetLength()};
             logger.debug(view);
 
-            return make_unique<core::FileHash>(core::LocalSymbolTableHashes::invalid(), move(usageHash));
+            return make_unique<core::FileHash>(core::LocalSymbolTableHashes::invalidParse(), move(usageHash));
         }
     }
 
