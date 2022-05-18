@@ -31,36 +31,38 @@ struct FoundStaticField;
 struct FoundTypeMember;
 struct FoundMethod;
 
-enum class DefinitionKind : uint8_t {
-    Empty = 0,
-    Class = 1,
-    ClassRef = 2,
-    Method = 3,
-    StaticField = 4,
-    TypeMember = 5,
-    Symbol = 6,
-};
-CheckSize(DefinitionKind, 1, 1);
-
 class FoundDefinitionRef final {
+public:
+    enum class Kind : uint8_t {
+        Empty = 0,
+        Class = 1,
+        ClassRef = 2,
+        Method = 3,
+        StaticField = 4,
+        TypeMember = 5,
+        Symbol = 6,
+    };
+    CheckSize(Kind, 1, 1);
+
+private:
     struct Storage {
-        DefinitionKind kind;
+        Kind kind;
         uint32_t id : 24; // We only support 2^24 (≈ 16M) definitions of any kind in a single file.
     } _storage;
     CheckSize(Storage, 4, 4);
 
 public:
-    FoundDefinitionRef(DefinitionKind kind, uint32_t idx) : _storage({kind, idx}) {}
-    FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::Empty, 0) {}
+    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({kind, idx}) {}
+    FoundDefinitionRef() : FoundDefinitionRef(FoundDefinitionRef::Kind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
     }
 
-    DefinitionKind kind() const {
+    FoundDefinitionRef::Kind kind() const {
         return _storage.kind;
     }
 
@@ -182,14 +184,14 @@ class FoundDefinitions final {
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
-            case DefinitionKind::Class:
-            case DefinitionKind::Method:
-            case DefinitionKind::StaticField:
-            case DefinitionKind::TypeMember:
+            case FoundDefinitionRef::Kind::Class:
+            case FoundDefinitionRef::Kind::Method:
+            case FoundDefinitionRef::Kind::StaticField:
+            case FoundDefinitionRef::Kind::TypeMember:
                 break;
-            case DefinitionKind::ClassRef:
-            case DefinitionKind::Empty:
-            case DefinitionKind::Symbol:
+            case FoundDefinitionRef::Kind::ClassRef:
+            case FoundDefinitionRef::Kind::Empty:
+            case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
         });
         _definitions.emplace_back(ref);
@@ -205,35 +207,35 @@ public:
     FoundDefinitionRef addClass(FoundClass &&klass) {
         const uint32_t idx = _klasses.size();
         _klasses.emplace_back(move(klass));
-        return addDefinition(FoundDefinitionRef(DefinitionKind::Class, idx));
+        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx));
     }
 
     FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
         const uint32_t idx = _klassRefs.size();
         _klassRefs.emplace_back(move(klassRef));
-        return FoundDefinitionRef(DefinitionKind::ClassRef, idx);
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::ClassRef, idx);
     }
 
     FoundDefinitionRef addMethod(FoundMethod &&method) {
         const uint32_t idx = _methods.size();
         _methods.emplace_back(move(method));
-        return addDefinition(FoundDefinitionRef(DefinitionKind::Method, idx));
+        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Method, idx));
     }
 
     FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
         const uint32_t idx = _staticFields.size();
         _staticFields.emplace_back(move(staticField));
-        return addDefinition(FoundDefinitionRef(DefinitionKind::StaticField, idx));
+        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::StaticField, idx));
     }
 
     FoundDefinitionRef addTypeMember(FoundTypeMember &&typeMember) {
         const uint32_t idx = _typeMembers.size();
         _typeMembers.emplace_back(move(typeMember));
-        return addDefinition(FoundDefinitionRef(DefinitionKind::TypeMember, idx));
+        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::TypeMember, idx));
     }
 
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
-        return FoundDefinitionRef(DefinitionKind::Symbol, symbol.rawId());
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.rawId());
     }
 
     void addModifier(Modifier &&mod) {
@@ -264,62 +266,62 @@ public:
 };
 
 FoundClassRef &FoundDefinitionRef::klassRef(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == DefinitionKind::ClassRef);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::ClassRef);
     ENFORCE(foundDefs._klassRefs.size() > idx());
     return foundDefs._klassRefs[idx()];
 }
 const FoundClassRef &FoundDefinitionRef::klassRef(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == DefinitionKind::ClassRef);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::ClassRef);
     ENFORCE(foundDefs._klassRefs.size() > idx());
     return foundDefs._klassRefs[idx()];
 }
 
 FoundClass &FoundDefinitionRef::klass(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == DefinitionKind::Class);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Class);
     ENFORCE(foundDefs._klasses.size() > idx());
     return foundDefs._klasses[idx()];
 }
 const FoundClass &FoundDefinitionRef::klass(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == DefinitionKind::Class);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Class);
     ENFORCE(foundDefs._klasses.size() > idx());
     return foundDefs._klasses[idx()];
 }
 
 FoundMethod &FoundDefinitionRef::method(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == DefinitionKind::Method);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Method);
     ENFORCE(foundDefs._methods.size() > idx());
     return foundDefs._methods[idx()];
 }
 const FoundMethod &FoundDefinitionRef::method(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == DefinitionKind::Method);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Method);
     ENFORCE(foundDefs._methods.size() > idx());
     return foundDefs._methods[idx()];
 }
 
 FoundStaticField &FoundDefinitionRef::staticField(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == DefinitionKind::StaticField);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::StaticField);
     ENFORCE(foundDefs._staticFields.size() > idx());
     return foundDefs._staticFields[idx()];
 }
 const FoundStaticField &FoundDefinitionRef::staticField(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == DefinitionKind::StaticField);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::StaticField);
     ENFORCE(foundDefs._staticFields.size() > idx());
     return foundDefs._staticFields[idx()];
 }
 
 FoundTypeMember &FoundDefinitionRef::typeMember(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == DefinitionKind::TypeMember);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::TypeMember);
     ENFORCE(foundDefs._typeMembers.size() > idx());
     return foundDefs._typeMembers[idx()];
 }
 const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == DefinitionKind::TypeMember);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::TypeMember);
     ENFORCE(foundDefs._typeMembers.size() > idx());
     return foundDefs._typeMembers[idx()];
 }
 
 core::SymbolRef FoundDefinitionRef::symbol() const {
-    ENFORCE(kind() == DefinitionKind::Symbol);
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Symbol);
     return core::SymbolRef::fromRaw(_storage.id);
 }
 
@@ -710,7 +712,7 @@ public:
     FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
-        ENFORCE(foundRef.kind() == DefinitionKind::StaticField);
+        ENFORCE(foundRef.kind() == FoundDefinitionRef::Kind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
         staticField.isTypeAlias = send.fun == core::Names::typeAlias();
         return foundRef;
@@ -758,12 +760,12 @@ class SymbolDefiner {
     // Prerequisite: Owner is a class or module.
     core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::ClassOrModuleRef owner) {
         switch (ref.kind()) {
-            case DefinitionKind::Empty:
+            case FoundDefinitionRef::Kind::Empty:
                 return owner;
-            case DefinitionKind::Symbol: {
+            case FoundDefinitionRef::Kind::Symbol: {
                 return ref.symbol();
             }
-            case DefinitionKind::ClassRef: {
+            case FoundDefinitionRef::Kind::ClassRef: {
                 auto &klassRef = ref.klassRef(foundDefs);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
                 return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
@@ -776,12 +778,12 @@ class SymbolDefiner {
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::SymbolRef getOwnerSymbol(FoundDefinitionRef ref) {
         switch (ref.kind()) {
-            case DefinitionKind::Symbol:
+            case FoundDefinitionRef::Kind::Symbol:
                 return ref.symbol();
-            case DefinitionKind::Class:
+            case FoundDefinitionRef::Kind::Class:
                 ENFORCE(ref.idx() < definedClasses.size());
                 return definedClasses[ref.idx()];
-            case DefinitionKind::Method:
+            case FoundDefinitionRef::Kind::Method:
                 ENFORCE(ref.idx() < definedMethods.size());
                 return definedMethods[ref.idx()];
             default:
@@ -1414,24 +1416,24 @@ public:
 
         for (auto &ref : foundDefs.definitions()) {
             switch (ref.kind()) {
-                case DefinitionKind::Class: {
+                case FoundDefinitionRef::Kind::Class: {
                     const auto &klass = ref.klass(foundDefs);
                     ENFORCE(definedClasses.size() == ref.idx());
                     definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
                     break;
                 }
-                case DefinitionKind::Method: {
+                case FoundDefinitionRef::Kind::Method: {
                     const auto &method = ref.method(foundDefs);
                     ENFORCE(definedMethods.size() == ref.idx());
                     definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
                     break;
                 }
-                case DefinitionKind::StaticField: {
+                case FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);
                     insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
                     break;
                 }
-                case DefinitionKind::TypeMember: {
+                case FoundDefinitionRef::Kind::TypeMember: {
                     const auto &typeMember = ref.typeMember(foundDefs);
                     insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
                     break;
