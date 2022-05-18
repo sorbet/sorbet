@@ -2,7 +2,7 @@
 #define RUBY_TYPER_LSP_UNDOSTATE_H
 
 #include "ast/ast.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/core.h"
 
 namespace sorbet::realmain::lsp {

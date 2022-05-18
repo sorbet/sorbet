@@ -2,7 +2,7 @@
 // has to go first as it violates our requirements
 
 #include "ast/ast.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/core.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/json_types.h"

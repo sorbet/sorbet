@@ -1,4 +1,4 @@
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "common/sort.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"

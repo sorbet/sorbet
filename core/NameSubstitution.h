@@ -2,7 +2,7 @@
 #define SORBET_CORE_NAME_SUBSTITUTION_H
 
 #include "common/common.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
 #include <vector>

@@ -6,7 +6,7 @@
 #include "common/sort.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"
 #include "lib/lz4.h"

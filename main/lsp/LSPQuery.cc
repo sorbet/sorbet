@@ -1,6 +1,6 @@
 #include "main/lsp/LSPQuery.h"
 #include "common/sort.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;

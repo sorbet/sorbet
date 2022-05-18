@@ -1,7 +1,7 @@
 #include "main/lsp/LSPIndexer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"

@@ -3,7 +3,7 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/NullFlusher.h"

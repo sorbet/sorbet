@@ -2,7 +2,7 @@
 #include "absl/strings/match.h"
 #include "absl/synchronization/notification.h"
 #include "common/sort.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPQuery.h"

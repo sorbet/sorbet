@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_NAME_HASH_H
-#define RUBY_TYPER_NAME_HASH_H
+#ifndef RUBY_TYPER_FILE_HASH_H
+#define RUBY_TYPER_FILE_HASH_H
 #include "common/common.h"
 namespace sorbet::core {
 class NameRef;
@@ -92,4 +92,4 @@ struct FileHash {
 
 }; // namespace sorbet::core
 
-#endif // RUBY_TYPER_NAME_HASH_H
+#endif // RUBY_TYPER_FILE_HASH_H

@@ -1,7 +1,7 @@
 #include "core/Files.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include <vector>
 
 #include "absl/strings/match.h"
