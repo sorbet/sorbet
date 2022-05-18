@@ -213,6 +213,38 @@ assertion result into a variable, and it can only be used on <code>self</code>.<
 <p><code>T.bind</code> can be used anywhere <code>self</code> is used (i.e., methods, blocks, lambdas,
 etc.), though it is most usually useful within blocks. See
 <a href="/docs/procs">Blocks, Procs, and Lambda Types</a> for more real-world usage examples.</p>
+<h2><a class="anchor" aria-hidden="true" id="static-vs-runtime-checking"></a><a href="#static-vs-runtime-checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Static vs Runtime Checking</h2>
+<p>At runtime, all of these assertions verify the <code>expr</code> they are passed matches
+the <code>Type</code> they are passed.</p>
+<p>Statically, e.g., when type checking with <code>srb tc</code>, some of them are <strong>assumed</strong>
+to hold, but not statically checked.</p>
+<table>
+<thead>
+<tr><th>Assertion</th><th>Static</th><th>Runtime</th></tr>
+</thead>
+<tbody>
+<tr><td><code>T.let(expr, Type)</code></td><td>checked</td><td>checked</td></tr>
+<tr><td><code>T.cast(expr, Type)</code></td><td><strong>assumed</strong></td><td>checked</td></tr>
+<tr><td><code>T.must(expr)</code></td><td><strong>assumed</strong></td><td>checked</td></tr>
+<tr><td><code>T.assert_type!(expr, Type)</code></td><td>checked</td><td>checked</td></tr>
+<tr><td><code>T.bind(self, Type)</code></td><td><strong>assumed</strong></td><td>checked</td></tr>
+</tbody>
+</table>
+<p>When an assertion is assumed to hold statically, Sorbet will only use it for the
+purpose of updating its internal understanding of the types, and will never
+attempt to alert the programmer that an assumption might not hold. In this
+sense, those assertions can be considered
+<a href="/docs/troubleshooting#escape-hatches">Escape Hatches</a> for getting something to
+typecheck that might not otherwise.</p>
+<p><strong>Note</strong> that even though all of these assertions are checked at runtime, some
+<strong>individual types</strong> might never be checked at runtime, regardless of the type
+assertion used. This includes the element types of generics (like the <code>Integer</code>
+in <code>T::Array[Integer]</code>), the argument and return types of
+<a href="/docs/procs">Proc Types</a>, <a href="/docs/self-type"><code>T.self_type</code></a>,
+<a href="attached-class"><code>T.attached_class</code></a>, and others.</p>
+<p>These assertions are also subject to the <code>T::Configuration</code> hooks that
+<code>sorbet-runtime</code> provides for controlling runtime type checking. See
+<a href="/docs/tconfiguration">Runtime Configuration</a> for more.</p>
 <h2><a class="anchor" aria-hidden="true" id="comparison-of-type-assertions"></a><a href="#comparison-of-type-assertions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Comparison of type assertions</h2>
 <p>Here are some other ways to think of the behavior of the individual type
 assertions:</p>
@@ -243,7 +275,7 @@ assertions:</p>
 </code></pre>
 <p>if it were valid in Ruby to assign to <code>self</code>.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/type-annotations"><span class="arrow-prev">← </span><span>Type Annotations (non-sig)</span></a><a class="docs-next button" href="/docs/class-types"><span>Class Types (Integer, String)</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tlet"><code>T.let</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#tmust"><code>T.must</code></a></li><li><a href="#tassert_type"><code>T.assert_type!</code></a></li><li><a href="#tbind"><code>T.bind</code></a></li><li><a href="#comparison-of-type-assertions">Comparison of type assertions</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/type-annotations"><span class="arrow-prev">← </span><span>Type Annotations (non-sig)</span></a><a class="docs-next button" href="/docs/class-types"><span>Class Types (Integer, String)</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#tlet"><code>T.let</code></a></li><li><a href="#tcast"><code>T.cast</code></a></li><li><a href="#tmust"><code>T.must</code></a></li><li><a href="#tassert_type"><code>T.assert_type!</code></a></li><li><a href="#tbind"><code>T.bind</code></a></li><li><a href="#static-vs-runtime-checking">Static vs Runtime Checking</a></li><li><a href="#comparison-of-type-assertions">Comparison of type assertions</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
