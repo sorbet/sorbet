@@ -43,11 +43,14 @@ enum class DefinitionKind : uint8_t {
 CheckSize(DefinitionKind, 1, 1);
 
 class FoundDefinitionRef final {
-    DefinitionKind _kind;
-    uint32_t _id;
+    struct Storage {
+        DefinitionKind kind;
+        uint32_t id : 24; // We only support 2^24 (≈ 16M) definitions of any kind in a single file.
+    } _storage;
+    CheckSize(Storage, 4, 4);
 
 public:
-    FoundDefinitionRef(DefinitionKind kind, uint32_t idx) : _kind(kind), _id(idx) {}
+    FoundDefinitionRef(DefinitionKind kind, uint32_t idx) : _storage({kind, idx}) {}
     FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
@@ -58,15 +61,15 @@ public:
     }
 
     DefinitionKind kind() const {
-        return _kind;
+        return _storage.kind;
     }
 
     bool exists() const {
-        return _id > 0;
+        return _storage.id > 0;
     }
 
     uint32_t idx() const {
-        return _id;
+        return _storage.id;
     }
 
     FoundClassRef &klassRef(FoundDefinitions &foundDefs);
@@ -86,7 +89,7 @@ public:
 
     core::SymbolRef symbol() const;
 };
-CheckSize(FoundDefinitionRef, 8, 4);
+CheckSize(FoundDefinitionRef, 4, 4);
 
 struct FoundClassRef final {
     core::NameRef name;
@@ -94,7 +97,7 @@ struct FoundClassRef final {
     // If !owner.exists(), owner is determined by reference site.
     FoundDefinitionRef owner;
 };
-CheckSize(FoundClassRef, 20, 4);
+CheckSize(FoundClassRef, 16, 4);
 
 struct FoundClass final {
     FoundDefinitionRef owner;
@@ -103,7 +106,7 @@ struct FoundClass final {
     core::LocOffsets declLoc;
     ast::ClassDef::Kind classKind;
 };
-CheckSize(FoundClass, 36, 4);
+CheckSize(FoundClass, 28, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
@@ -112,8 +115,14 @@ struct FoundStaticField final {
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
+
+    // Return a debug string representation
+    string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
+        return fmt::format("FoundStaticField {{ id = {}, owner = {}, klass = {}, name = {} }}", id, owner.idx(),
+                           klass.idx(), name.toString(gs));
+    }
 };
-CheckSize(FoundStaticField, 40, 4);
+CheckSize(FoundStaticField, 32, 4);
 
 struct FoundTypeMember final {
     FoundDefinitionRef owner;
@@ -124,8 +133,13 @@ struct FoundTypeMember final {
     core::NameRef varianceName;
     bool isFixed = false;
     bool isTypeTemplete = false;
+
+    // Return a debug string representation
+    string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
+        return fmt::format("FoundTypeMember {{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
+    }
 };
-CheckSize(FoundTypeMember, 44, 4);
+CheckSize(FoundTypeMember, 40, 4);
 
 struct FoundMethod final {
     FoundDefinitionRef owner;
@@ -157,7 +171,7 @@ struct Modifier {
         return Modifier{this->kind, this->owner, this->loc, this->name, target};
     }
 };
-CheckSize(Modifier, 28, 4);
+CheckSize(Modifier, 24, 4);
 
 class FoundDefinitions final {
     // Contains references to items in _klasses, _methods, _staticFields, and _typeMembers.
@@ -317,7 +331,7 @@ const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &fo
 
 core::SymbolRef FoundDefinitionRef::symbol() const {
     ENFORCE(kind() == DefinitionKind::Symbol);
-    return core::SymbolRef::fromRaw(_id);
+    return core::SymbolRef::fromRaw(_storage.id);
 }
 
 struct SymbolFinderResult {
