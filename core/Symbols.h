@@ -13,7 +13,7 @@
 namespace sorbet::core {
 class ClassOrModule;
 class GlobalState;
-struct GlobalStateHash;
+struct DefinitionHash;
 class Type;
 class MutableContext;
 class Context;
