@@ -99,14 +99,14 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :i_like_ifs
-        :i_like_exps
-        :return_in_one_branch1
-        :return_in_one_branch2
-        :variables
-        :variables_and_loop
-        :variables_loop_if
-        :take_arguments
+        <runtime method definition of i_like_ifs>
+        <runtime method definition of i_like_exps>
+        <runtime method definition of return_in_one_branch1>
+        <runtime method definition of return_in_one_branch2>
+        <runtime method definition of variables>
+        <runtime method definition of variables_and_loop>
+        <runtime method definition of variables_loop_if>
+        <runtime method definition of take_arguments>
         <emptyTree>
       end
     end

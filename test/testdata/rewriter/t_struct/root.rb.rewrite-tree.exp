@@ -27,13 +27,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo = arg0
     end
 
-    :initialize
+    <runtime method definition of initialize>
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
   end
 
   <emptyTree>::<C Root>.new()

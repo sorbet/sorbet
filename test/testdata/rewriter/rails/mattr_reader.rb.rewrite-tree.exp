@@ -70,21 +70,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :both
+    <runtime method definition of both>
 
-    :both
+    <runtime method definition of self.both>
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo
+    <runtime method definition of self.foo>
 
-    :no_instance
+    <runtime method definition of self.no_instance>
 
-    :bar
+    <runtime method definition of self.bar>
 
-    :no_instance_reader
+    <runtime method definition of self.no_instance_reader>
 
-    :usages
+    <runtime method definition of usages>
 
     <self>.both()
 

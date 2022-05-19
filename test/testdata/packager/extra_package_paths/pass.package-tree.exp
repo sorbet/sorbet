@@ -27,9 +27,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :bar1
+    <runtime method definition of bar1>
 
-    :bar2
+    <runtime method definition of bar2>
   end
 end
 # -- test/testdata/packager/extra_package_paths/baz/__package.rb --
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :c
+      <runtime method definition of self.c>
     end
   end
 end
@@ -69,7 +69,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :b
+    <runtime method definition of self.b>
   end
 end
 # -- test/testdata/packager/extra_package_paths/foo/__package.rb --

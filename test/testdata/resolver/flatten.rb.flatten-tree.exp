@@ -27,8 +27,8 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     def foo(<blk>)
       begin
-        :food
-        :foos
+        <runtime method definition of food>
+        <runtime method definition of self.foos>
       end
     end
 
@@ -42,8 +42,8 @@ begin
 
     def self.sfoo(<blk>)
       begin
-        :sfood
-        :sfoos
+        <runtime method definition of sfood>
+        <runtime method definition of self.sfoos>
       end
     end
 
@@ -57,8 +57,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :foo
-        :sfoo
+        <runtime method definition of foo>
+        <runtime method definition of self.sfoo>
         <emptyTree>
       end
     end

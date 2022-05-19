@@ -83,11 +83,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :b
-        :b=
-        :y
-        :z
-        :example
+        <runtime method definition of b>
+        <runtime method definition of b=>
+        <runtime method definition of y>
+        <runtime method definition of z>
+        <runtime method definition of example>
         <emptyTree>
       end
     end

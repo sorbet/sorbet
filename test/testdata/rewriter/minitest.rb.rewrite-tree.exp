@@ -93,18 +93,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :outside_method
+    <runtime method definition of outside_method>
 
     begin
       "works outside"
-      :"<it \'works outside\'>"
+      <runtime method definition of <it 'works outside'>>
     end
 
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       begin
         "allows constants inside of IT"
-        :"<it \'allows constants inside of IT\'>"
+        <runtime method definition of <it 'allows constants inside of IT'>>
       end
     end
 
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C2> = ::T.let(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <emptyTree>::<C Integer>)
       begin
         "allows let-ed constants inside of IT"
-        :"<it \'allows let-ed constants inside of IT\'>"
+        <runtime method definition of <it 'allows let-ed constants inside of IT'>>
       end
     end
 
@@ -120,13 +120,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
       begin
         "allows path constants inside of IT"
-        :"<it \'allows path constants inside of IT\'>"
+        <runtime method definition of <it 'allows path constants inside of IT'>>
       end
     end
 
     begin
       ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
-      :"<it \'::<Magic>.<string-interpolate>(\"finds errors in the test name: \", <self>.bad_variable())\'>"
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'>>
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
@@ -146,26 +146,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        :inside_method
+        <runtime method definition of inside_method>
         begin
           "works inside"
-          :"<it \'works inside\'>"
+          <runtime method definition of <it 'works inside'>>
         end
       end
     end
 
-    :instance_helper
+    <runtime method definition of instance_helper>
 
-    :initialize
+    <runtime method definition of initialize>
 
-    :<after>
+    <runtime method definition of <after>>
 
     begin
       "can read foo"
-      :"<it \'can read foo\'>"
+      <runtime method definition of <it 'can read foo'>>
     end
 
-    :random_method
+    <runtime method definition of self.random_method>
 
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
@@ -191,16 +191,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         begin
           <emptyTree>::<C Object>
-          :"<it \'Object\'>"
+          <runtime method definition of <it 'Object'>>
         end
         begin
           <emptyTree>::<C Object>
-          :"<it \'Object\'>"
+          <runtime method definition of <it 'Object'>>
         end
       end
     end
 
-    :it
+    <runtime method definition of self.it>
 
     <self>.it("ignores methods without a block")
 
@@ -222,13 +222,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
         begin
           "contains nested describes"
-          :"<it \'contains nested describes\'>"
+          <runtime method definition of <it 'contains nested describes'>>
         end
       end
     end
   end
 
-  :junk
+  <runtime method definition of junk>
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)

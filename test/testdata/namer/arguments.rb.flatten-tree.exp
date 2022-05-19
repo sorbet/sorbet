@@ -21,7 +21,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :take_arguments
+      <runtime method definition of take_arguments>
     end
   end
   <emptyTree>

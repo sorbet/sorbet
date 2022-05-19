@@ -16,7 +16,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :Foo
+        <runtime method definition of Foo>
         begin
           <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::A::Foo)

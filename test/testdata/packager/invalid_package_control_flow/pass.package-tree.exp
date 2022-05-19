@@ -39,9 +39,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.some_method(1)
 
-    :package_method
+    <runtime method definition of package_method>
 
-    :static_method
+    <runtime method definition of self.static_method>
 
     @hello = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
   end
@@ -59,9 +59,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :some_method
+    <runtime method definition of self.some_method>
 
-    :method_call_arg
+    <runtime method definition of self.method_call_arg>
 
     <emptyTree>::<C ConstantArg> = 10
   end

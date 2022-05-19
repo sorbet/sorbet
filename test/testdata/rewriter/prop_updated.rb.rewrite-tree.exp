@@ -48,13 +48,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :updated_prop
+    <runtime method definition of self.updated_prop>
 
     <self>.updated_prop(:without_accessors, true)
 
-    :updated
+    <runtime method definition of updated>
 
-    :updated=
+    <runtime method definition of updated=>
   end
 
   updated_at = <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.new().updated())

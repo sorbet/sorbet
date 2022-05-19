@@ -38,7 +38,7 @@ begin
   end
   class ::A<<C A>> < (::<todo sym>)
     def outer_method(<blk>)
-      :inner_method
+      <runtime method definition of inner_method>
     end
 
     def inner_method(<blk>)
@@ -46,12 +46,12 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :outer_method
+      <runtime method definition of outer_method>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
     def outer_method(<blk>)
-      :inner_method
+      <runtime method definition of self.inner_method>
     end
 
     def inner_method(<blk>)
@@ -59,12 +59,12 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :outer_method
+      <runtime method definition of outer_method>
     end
   end
   class ::C<<C C>> < (::<todo sym>)
     def self.outer_method(<blk>)
-      :inner_method
+      <runtime method definition of inner_method>
     end
 
     def inner_method(<blk>)
@@ -72,12 +72,12 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :outer_method
+      <runtime method definition of self.outer_method>
     end
   end
   class ::D<<C D>> < (::<todo sym>)
     def self.outer_method(<blk>)
-      :inner_method
+      <runtime method definition of self.inner_method>
     end
 
     def self.inner_method(<blk>)
@@ -85,7 +85,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :outer_method
+      <runtime method definition of self.outer_method>
     end
   end
   <emptyTree>

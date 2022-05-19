@@ -7407,84 +7407,84 @@ ClassDef{
       }
     }
 
-    Literal{ value = :pos }
+    <runtime method definition of pos>
 
-    Literal{ value = :possplat }
+    <runtime method definition of possplat>
 
-    Literal{ value = :possplat_pos }
+    <runtime method definition of possplat_pos>
 
-    Literal{ value = :pos_possplat }
+    <runtime method definition of pos_possplat>
 
-    Literal{ value = :pos_possplat_pos }
+    <runtime method definition of pos_possplat_pos>
 
-    Literal{ value = :pos_blk }
+    <runtime method definition of pos_blk>
 
-    Literal{ value = :possplat_blk }
+    <runtime method definition of possplat_blk>
 
-    Literal{ value = :possplat_pos_blk }
+    <runtime method definition of possplat_pos_blk>
 
-    Literal{ value = :pos_possplat_blk }
+    <runtime method definition of pos_possplat_blk>
 
-    Literal{ value = :pos_possplat_pos_blk }
+    <runtime method definition of pos_possplat_pos_blk>
 
-    Literal{ value = :pos_kw }
+    <runtime method definition of pos_kw>
 
-    Literal{ value = :possplat_kw }
+    <runtime method definition of possplat_kw>
 
-    Literal{ value = :possplat_pos_kw }
+    <runtime method definition of possplat_pos_kw>
 
-    Literal{ value = :pos_possplat_kw }
+    <runtime method definition of pos_possplat_kw>
 
-    Literal{ value = :pos_possplat_pos_kw }
+    <runtime method definition of pos_possplat_pos_kw>
 
-    Literal{ value = :pos_kwsplat }
+    <runtime method definition of pos_kwsplat>
 
-    Literal{ value = :possplat_kwsplat }
+    <runtime method definition of possplat_kwsplat>
 
-    Literal{ value = :possplat_pos_kwsplat }
+    <runtime method definition of possplat_pos_kwsplat>
 
-    Literal{ value = :pos_possplat_kwsplat }
+    <runtime method definition of pos_possplat_kwsplat>
 
-    Literal{ value = :pos_possplat_pos_kwsplat }
+    <runtime method definition of pos_possplat_pos_kwsplat>
 
-    Literal{ value = :pos_kw_kwsplat }
+    <runtime method definition of pos_kw_kwsplat>
 
-    Literal{ value = :possplat_kw_kwsplat }
+    <runtime method definition of possplat_kw_kwsplat>
 
-    Literal{ value = :possplat_pos_kw_kwsplat }
+    <runtime method definition of possplat_pos_kw_kwsplat>
 
-    Literal{ value = :pos_possplat_kw_kwsplat }
+    <runtime method definition of pos_possplat_kw_kwsplat>
 
-    Literal{ value = :pos_possplat_pos_kw_kwsplat }
+    <runtime method definition of pos_possplat_pos_kw_kwsplat>
 
-    Literal{ value = :pos_kw_blk }
+    <runtime method definition of pos_kw_blk>
 
-    Literal{ value = :possplat_kw_blk }
+    <runtime method definition of possplat_kw_blk>
 
-    Literal{ value = :possplat_pos_kw_blk }
+    <runtime method definition of possplat_pos_kw_blk>
 
-    Literal{ value = :pos_possplat_kw_blk }
+    <runtime method definition of pos_possplat_kw_blk>
 
-    Literal{ value = :pos_possplat_pos_kw_blk }
+    <runtime method definition of pos_possplat_pos_kw_blk>
 
-    Literal{ value = :pos_kwsplat_blk }
+    <runtime method definition of pos_kwsplat_blk>
 
-    Literal{ value = :possplat_kwsplat_blk }
+    <runtime method definition of possplat_kwsplat_blk>
 
-    Literal{ value = :possplat_pos_kwsplat_blk }
+    <runtime method definition of possplat_pos_kwsplat_blk>
 
-    Literal{ value = :pos_possplat_kwsplat_blk }
+    <runtime method definition of pos_possplat_kwsplat_blk>
 
-    Literal{ value = :pos_possplat_pos_kwsplat_blk }
+    <runtime method definition of pos_possplat_pos_kwsplat_blk>
 
-    Literal{ value = :pos_kw_kwsplat_blk }
+    <runtime method definition of pos_kw_kwsplat_blk>
 
-    Literal{ value = :possplat_kw_kwsplat_blk }
+    <runtime method definition of possplat_kw_kwsplat_blk>
 
-    Literal{ value = :possplat_pos_kw_kwsplat_blk }
+    <runtime method definition of possplat_pos_kw_kwsplat_blk>
 
-    Literal{ value = :pos_possplat_kw_kwsplat_blk }
+    <runtime method definition of pos_possplat_kw_kwsplat_blk>
 
-    Literal{ value = :pos_possplat_pos_kw_kwsplat_blk }
+    <runtime method definition of pos_possplat_pos_kw_kwsplat_blk>
   ]
 }

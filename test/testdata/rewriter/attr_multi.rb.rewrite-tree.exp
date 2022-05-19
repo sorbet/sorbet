@@ -98,28 +98,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :a
+    <runtime method definition of a>
 
-    :a=
+    <runtime method definition of a=>
 
-    :b
+    <runtime method definition of b>
 
-    :c
+    <runtime method definition of c>
 
-    :b=
+    <runtime method definition of b=>
 
-    :c=
+    <runtime method definition of c=>
 
-    :d
+    <runtime method definition of d>
 
-    :e
+    <runtime method definition of e>
 
-    :f
+    <runtime method definition of f>
 
-    :g=
+    <runtime method definition of g=>
 
-    :h=
+    <runtime method definition of h=>
 
-    :i=
+    <runtime method definition of i=>
   end
 end

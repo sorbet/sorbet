@@ -236,14 +236,14 @@ InsSeq{
             }]
           rhs = InsSeq{
             stats = [
-              Literal{ value = :has_while }
-              Literal{ value = :has_constant_with_resolution_scope }
-              Literal{ value = :has_global_field }
-              Literal{ value = :has_class_field }
-              Literal{ value = :has_next }
-              Literal{ value = :has_break }
-              Literal{ value = :has_return }
-              Literal{ value = :has_cast }
+              <runtime method definition of has_while>
+              <runtime method definition of has_constant_with_resolution_scope>
+              <runtime method definition of has_global_field>
+              <runtime method definition of has_class_field>
+              <runtime method definition of has_next>
+              <runtime method definition of has_break>
+              <runtime method definition of has_return>
+              <runtime method definition of has_cast>
             ],
             expr = EmptyTree
           }

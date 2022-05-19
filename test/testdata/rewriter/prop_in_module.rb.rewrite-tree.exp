@@ -20,9 +20,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
   end
 
   class <emptyTree>::<C MyClass><<C <todo sym>>> < (::<todo sym>)

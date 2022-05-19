@@ -58,11 +58,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :yielder
-        :blockpass
-        :mixed
-        :blockyield
-        :main
+        <runtime method definition of yielder>
+        <runtime method definition of blockpass>
+        <runtime method definition of mixed>
+        <runtime method definition of blockyield>
+        <runtime method definition of main>
         <emptyTree>
       end
     end

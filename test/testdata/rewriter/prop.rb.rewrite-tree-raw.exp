@@ -1086,7 +1086,7 @@ ClassDef{
           rhs = EmptyTree
         }
 
-        Literal{ value = :prop }
+        <runtime method definition of self.prop>
 
         Send{
           flags = {privateOk}
@@ -1780,13 +1780,13 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :foo }
+        <runtime method definition of foo>
 
-        Literal{ value = :foo= }
+        <runtime method definition of foo=>
 
-        Literal{ value = :foo2 }
+        <runtime method definition of foo2>
 
-        Literal{ value = :foo2= }
+        <runtime method definition of foo2=>
       ]
     }
 
@@ -5877,9 +5877,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :default }
+        <runtime method definition of default>
 
-        Literal{ value = :default= }
+        <runtime method definition of default=>
 
         Send{
           flags = {privateOk}
@@ -5912,9 +5912,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :t_nilable }
+        <runtime method definition of t_nilable>
 
-        Literal{ value = :t_nilable= }
+        <runtime method definition of t_nilable=>
 
         Send{
           flags = {privateOk}
@@ -5935,9 +5935,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :array }
+        <runtime method definition of array>
 
-        Literal{ value = :array= }
+        <runtime method definition of array=>
 
         Send{
           flags = {privateOk}
@@ -5973,9 +5973,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :t_array }
+        <runtime method definition of t_array>
 
-        Literal{ value = :t_array= }
+        <runtime method definition of t_array=>
 
         Send{
           flags = {privateOk}
@@ -6015,9 +6015,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :hash_of }
+        <runtime method definition of hash_of>
 
-        Literal{ value = :hash_of= }
+        <runtime method definition of hash_of=>
 
         Send{
           flags = {privateOk}
@@ -6040,7 +6040,7 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :const_explicit }
+        <runtime method definition of const_explicit>
 
         Send{
           flags = {privateOk}
@@ -6061,7 +6061,7 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :const }
+        <runtime method definition of const>
 
         Send{
           flags = {privateOk}
@@ -6089,9 +6089,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :enum_prop }
+        <runtime method definition of enum_prop>
 
-        Literal{ value = :enum_prop= }
+        <runtime method definition of enum_prop=>
 
         Send{
           flags = {privateOk}
@@ -6117,9 +6117,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :foreign }
+        <runtime method definition of foreign>
 
-        Literal{ value = :foreign= }
+        <runtime method definition of foreign=>
 
         Send{
           flags = {privateOk}
@@ -6160,9 +6160,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :foreign_lazy }
+        <runtime method definition of foreign_lazy>
 
-        Literal{ value = :foreign_lazy= }
+        <runtime method definition of foreign_lazy=>
 
         Send{
           flags = {privateOk}
@@ -6202,9 +6202,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :foreign_proc }
+        <runtime method definition of foreign_proc>
 
-        Literal{ value = :foreign_proc= }
+        <runtime method definition of foreign_proc=>
 
         Send{
           flags = {privateOk}
@@ -6241,9 +6241,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :foreign_invalid }
+        <runtime method definition of foreign_invalid>
 
-        Literal{ value = :foreign_invalid= }
+        <runtime method definition of foreign_invalid=>
 
         Send{
           flags = {privateOk}
@@ -6266,9 +6266,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :ifunset }
+        <runtime method definition of ifunset>
 
-        Literal{ value = :ifunset= }
+        <runtime method definition of ifunset=>
 
         Send{
           flags = {privateOk}
@@ -6303,9 +6303,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :ifunset_nilable }
+        <runtime method definition of ifunset_nilable>
 
-        Literal{ value = :ifunset_nilable= }
+        <runtime method definition of ifunset_nilable=>
 
         Send{
           flags = {privateOk}
@@ -6332,9 +6332,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :empty_hash_rules }
+        <runtime method definition of empty_hash_rules>
 
-        Literal{ value = :empty_hash_rules= }
+        <runtime method definition of empty_hash_rules=>
 
         Send{
           flags = {privateOk}
@@ -6370,9 +6370,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :hash_rules }
+        <runtime method definition of hash_rules>
 
-        Literal{ value = :hash_rules= }
+        <runtime method definition of hash_rules=>
       ]
     }
 
@@ -6855,9 +6855,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :token_prop }
+        <runtime method definition of self.token_prop>
 
-        Literal{ value = :created_prop }
+        <runtime method definition of self.created_prop>
 
         Send{
           flags = {privateOk}
@@ -6873,9 +6873,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :token }
+        <runtime method definition of token>
 
-        Literal{ value = :token= }
+        <runtime method definition of token=>
 
         Send{
           flags = {privateOk}
@@ -6891,9 +6891,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :created }
+        <runtime method definition of created>
 
-        Literal{ value = :created= }
+        <runtime method definition of created=>
       ]
     }
 
@@ -7272,9 +7272,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :timestamped_token_prop }
+        <runtime method definition of self.timestamped_token_prop>
 
-        Literal{ value = :created_prop }
+        <runtime method definition of self.created_prop>
 
         Send{
           flags = {privateOk}
@@ -7290,9 +7290,9 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :token }
+        <runtime method definition of token>
 
-        Literal{ value = :token= }
+        <runtime method definition of token=>
 
         Send{
           flags = {privateOk}
@@ -7310,7 +7310,7 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :created }
+        <runtime method definition of created>
       ]
     }
 
@@ -8023,22 +8023,22 @@ ClassDef{
           ]
         }
 
-        Literal{ value = :encrypted_prop }
+        <runtime method definition of self.encrypted_prop>
 
-        Literal{ value = :foo }
+        <runtime method definition of foo>
 
-        Literal{ value = :encrypted_foo }
+        <runtime method definition of encrypted_foo>
 
-        Literal{ value = :foo= }
+        <runtime method definition of foo=>
 
-        Literal{ value = :encrypted_foo= }
+        <runtime method definition of encrypted_foo=>
 
-        Literal{ value = :bar }
+        <runtime method definition of bar>
 
-        Literal{ value = :encrypted_bar }
+        <runtime method definition of encrypted_bar>
       ]
     }
 
-    Literal{ value = :main }
+    <runtime method definition of main>
   ]
 }

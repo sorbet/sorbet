@@ -33,9 +33,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
 
-    :my_parent_method
+    <runtime method definition of my_parent_method>
 
-    :my_parent_method=
+    <runtime method definition of my_parent_method=>
   end
 
   class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
@@ -63,9 +63,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :my_child_method
+    <runtime method definition of my_child_method>
 
-    :my_child_method=
+    <runtime method definition of my_child_method=>
   end
 
   <emptyTree>::<C MyParentDocument>.new()

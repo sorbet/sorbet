@@ -53,12 +53,12 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :initialize
+        <runtime method definition of initialize>
         @@class_var = begin
           ::Sorbet::Private::Static.keep_for_typechecking(::String)
           T.let("hi", String)
         end
-        :hi
+        <runtime method definition of hi>
         <emptyTree>
       end
     end
@@ -91,7 +91,7 @@ begin
         @@class_var
         @@mixin_cvar
         @@undefined_cvar
-        :child_method
+        <runtime method definition of child_method>
         <emptyTree>
       end
     end

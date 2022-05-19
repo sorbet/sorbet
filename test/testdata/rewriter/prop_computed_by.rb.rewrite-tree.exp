@@ -111,40 +111,40 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.const(:num_ok, <emptyTree>::<C Integer>, :computed_by, :compute_num_ok, :without_accessors, true)
 
-    :num_ok
+    <runtime method definition of num_ok>
 
-    :compute_num_ok
+    <runtime method definition of self.compute_num_ok>
 
     <self>.const(:missing, <emptyTree>::<C Integer>, :computed_by, :compute_missing, :without_accessors, true)
 
-    :missing
+    <runtime method definition of missing>
 
     <self>.const(:num_wrong_value, <emptyTree>::<C Integer>, :computed_by, :compute_num_wrong_value, :without_accessors, true)
 
-    :num_wrong_value
+    <runtime method definition of num_wrong_value>
 
-    :compute_num_wrong_value
+    <runtime method definition of self.compute_num_wrong_value>
 
     <self>.const(:num_wrong_type, <emptyTree>::<C Integer>, :computed_by, :compute_num_wrong_type, :without_accessors, true)
 
-    :num_wrong_type
+    <runtime method definition of num_wrong_type>
 
-    :compute_num_wrong_type
+    <runtime method definition of self.compute_num_wrong_type>
 
     <self>.const(:not_a_symbol, <emptyTree>::<C String>, :computed_by, "not_a_symbol", :without_accessors, true)
 
-    :not_a_symbol
+    <runtime method definition of not_a_symbol>
 
     symbol_in_variable = :symbol_in_variable
 
     <self>.const(:symbol_in_variable, <emptyTree>::<C String>, :computed_by, symbol_in_variable, :without_accessors, true)
 
-    :symbol_in_variable
+    <runtime method definition of symbol_in_variable>
 
     <self>.const(:num_unknown_type, <emptyTree>::<C Integer>, :computed_by, :compute_num_unknown_type, :without_accessors, true)
 
-    :num_unknown_type
+    <runtime method definition of num_unknown_type>
 
-    :compute_num_unknown_type
+    <runtime method definition of self.compute_num_unknown_type>
   end
 end

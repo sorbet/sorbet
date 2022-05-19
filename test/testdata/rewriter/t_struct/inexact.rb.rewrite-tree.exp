@@ -34,15 +34,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
     <self>.prop(:bar, <emptyTree>::<C String>, :without_accessors, true)
 
-    :bar
+    <runtime method definition of bar>
 
-    :bar=
+    <runtime method definition of bar=>
   end
 
   <emptyTree>::<C Inexact>.new()
@@ -76,8 +76,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
 
-    :qux
+    <runtime method definition of qux>
 
-    :qux=
+    <runtime method definition of qux=>
   end
 end

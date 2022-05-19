@@ -19,7 +19,7 @@ begin
         ::Sorbet::Private::Static::ResolvedSig.sig(<self>, false, :test_resolve) do ||
           <self>.returns(::T2)
         end
-        :test_resolve
+        <runtime method definition of test_resolve>
         <emptyTree>
       end
     end

@@ -36,15 +36,15 @@ begin
           <self>.params(:x, ::Integer).void()
         end
         <self>.extend(::T::Sig)
-        :takes_integer_static
-        :takes_integer_instance
+        <runtime method definition of self.takes_integer_static>
+        <runtime method definition of takes_integer_instance>
         <emptyTree>
       end
     end
   end
   class ::Child<<C Child>> < (::Parent)
     def self.outer_static(<blk>)
-      <self>.takes_integer_static(:inner_static)
+      <self>.takes_integer_static(<runtime method definition of self.inner_static>)
     end
 
     def self.inner_static(<blk>)
@@ -52,7 +52,7 @@ begin
     end
 
     def outer_instance(<blk>)
-      <self>.takes_integer_instance(:inner_instance)
+      <self>.takes_integer_instance(<runtime method definition of inner_instance>)
     end
 
     def inner_instance(<blk>)
@@ -61,8 +61,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.takes_integer_static(:outer_static)
-        <self>.takes_integer_static(:outer_instance)
+        <self>.takes_integer_static(<runtime method definition of self.outer_static>)
+        <self>.takes_integer_static(<runtime method definition of outer_instance>)
         <emptyTree>
       end
     end

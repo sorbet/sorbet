@@ -28,7 +28,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :test_next_break
+      <runtime method definition of test_next_break>
     end
   end
   <emptyTree>

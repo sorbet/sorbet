@@ -22,9 +22,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :test
+    <runtime method definition of self.test>
 
-    :assert
+    <runtime method definition of assert>
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
@@ -49,9 +49,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :initialize
+    <runtime method definition of initialize>
 
-    :initialize
+    <runtime method definition of initialize>
   end
 
   class <emptyTree>::<C NoMatchTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
@@ -65,7 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :setup
+    <runtime method definition of self.setup>
 
     <self>.setup() do ||
       begin
@@ -118,14 +118,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :setup
+    <runtime method definition of self.setup>
 
-    :teardown
+    <runtime method definition of self.teardown>
 
-    :test
+    <runtime method definition of self.test>
 
-    :assert_equal
+    <runtime method definition of assert_equal>
 
-    :initialize
+    <runtime method definition of initialize>
   end
 end

@@ -16,13 +16,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :flatfile
+    <runtime method definition of self.flatfile>
 
-    :from
+    <runtime method definition of self.from>
 
-    :pattern
+    <runtime method definition of self.pattern>
 
-    :field
+    <runtime method definition of self.field>
   end
 
   class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
@@ -82,17 +82,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
-    :bar
+    <runtime method definition of bar>
 
-    :bar=
+    <runtime method definition of bar=>
 
-    :baz
+    <runtime method definition of baz>
 
-    :baz=
+    <runtime method definition of baz=>
   end
 
   t = <emptyTree>::<C Flatfile>.new()

@@ -18,12 +18,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :a_class_method
+      <runtime method definition of a_class_method>
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    :instance_method
+    <runtime method definition of instance_method>
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -58,14 +58,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :a_class_method
+      <runtime method definition of a_class_method>
 
-      :another_class_method
+      <runtime method definition of another_class_method>
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    :instance_method
+    <runtime method definition of instance_method>
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -100,16 +100,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      :a_class_method
+      <runtime method definition of a_class_method>
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :a_class_method_2
+      <runtime method definition of a_class_method_2>
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    :instance_method
+    <runtime method definition of instance_method>
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -138,14 +138,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      :a_class_method
+      <runtime method definition of a_class_method>
 
-      :a_class_method_2
+      <runtime method definition of a_class_method_2>
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    :instance_method
+    <runtime method definition of instance_method>
 
     ::<Magic>.mixes_in_class_methods(<self>, <emptyTree>::<C ClassMethods>)
   end
@@ -167,7 +167,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)
 
-    :instance_method
+    <runtime method definition of instance_method>
   end
 
   class <emptyTree>::<C E><<C <todo sym>>> < (::<todo sym>)
@@ -186,10 +186,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.class_methods() do ||
-      :a_class_method
+      <runtime method definition of a_class_method>
     end
 
-    :instance_method
+    <runtime method definition of instance_method>
   end
 
   class <emptyTree>::<C F><<C <todo sym>>> < (::<todo sym>)
@@ -210,9 +210,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      :a_class_method
+      <runtime method definition of a_class_method>
 
-      :another_class_method
+      <runtime method definition of another_class_method>
     end
 
     <self>.extend(<emptyTree>::<C ActiveSupport>::<C Concern>)

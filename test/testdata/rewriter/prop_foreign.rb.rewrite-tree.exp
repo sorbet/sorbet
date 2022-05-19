@@ -123,24 +123,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    :foreign_lazy
+    <runtime method definition of foreign_lazy>
 
-    :foreign_lazy=
+    <runtime method definition of foreign_lazy=>
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    :foreign_proc
+    <runtime method definition of foreign_proc>
 
-    :foreign_proc=
+    <runtime method definition of foreign_proc=>
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
 
-    :foreign_invalid
+    <runtime method definition of foreign_invalid>
 
-    :foreign_invalid=
+    <runtime method definition of foreign_invalid=>
   end
 end

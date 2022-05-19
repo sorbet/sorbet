@@ -27,13 +27,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo = arg0
     end
 
-    :initialize
+    <runtime method definition of initialize>
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :default, 3, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new().foo())
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       nil
     end
 
-    :initialize
+    <runtime method definition of initialize>
 
     <self>.prop(:no_type_on_prop)
 

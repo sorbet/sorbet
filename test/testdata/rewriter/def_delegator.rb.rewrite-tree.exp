@@ -106,23 +106,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C Forwardable>)
 
-    :foo
+    <runtime method definition of foo>
 
     <self>.def_delegator(:thing, :foo)
 
-    :aliased_bar
+    <runtime method definition of aliased_bar>
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
 
-    :baz
+    <runtime method definition of baz>
 
-    :qux
+    <runtime method definition of qux>
 
     <self>.def_delegators(:thing, :baz, :qux)
 
     <self>.def_delegators(:thing)
 
-    :usages
+    <runtime method definition of usages>
   end
 
   class <emptyTree>::<C WorksWithoutExtendingTSig><<C <todo sym>>> < (::<todo sym>)
@@ -160,17 +160,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C Forwardable>)
 
-    :foo
+    <runtime method definition of foo>
 
     <self>.def_delegator(:thing, :foo)
 
-    :aliased_bar
+    <runtime method definition of aliased_bar>
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
 
-    :baz
+    <runtime method definition of baz>
 
-    :qux
+    <runtime method definition of qux>
 
     <self>.def_delegators(:thing, :baz, :qux)
 
@@ -210,17 +210,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    :foo
+    <runtime method definition of foo>
 
     <self>.def_delegator(:thing, :foo)
 
-    :aliased_bar
+    <runtime method definition of aliased_bar>
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
 
-    :baz
+    <runtime method definition of baz>
 
-    :qux
+    <runtime method definition of qux>
 
     <self>.def_delegators(:thing, :baz, :qux)
 
@@ -282,7 +282,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Elem> = <self>.type_member()
 
-    :each
+    <runtime method definition of each>
 
     <self>.def_delegator(:thing, :each)
   end

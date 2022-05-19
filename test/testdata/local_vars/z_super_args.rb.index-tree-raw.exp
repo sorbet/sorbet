@@ -225,19 +225,19 @@ ClassDef{
           }
         }
 
-        Literal{ value = :takes_positional }
+        <runtime method definition of takes_positional>
 
-        Literal{ value = :takes_keyword }
+        <runtime method definition of takes_keyword>
 
-        Literal{ value = :takes_two_keyword }
+        <runtime method definition of takes_two_keyword>
 
-        Literal{ value = :takes_positional_then_keyword }
+        <runtime method definition of takes_positional_then_keyword>
 
-        Literal{ value = :takes_rest }
+        <runtime method definition of takes_rest>
 
-        Literal{ value = :takes_keyword_rest }
+        <runtime method definition of takes_keyword_rest>
 
-        Literal{ value = :takes_block }
+        <runtime method definition of takes_block>
       ]
     }
 
@@ -523,19 +523,19 @@ ClassDef{
           }
         }
 
-        Literal{ value = :takes_positional }
+        <runtime method definition of takes_positional>
 
-        Literal{ value = :takes_keyword }
+        <runtime method definition of takes_keyword>
 
-        Literal{ value = :takes_two_keyword }
+        <runtime method definition of takes_two_keyword>
 
-        Literal{ value = :takes_positional_then_keyword }
+        <runtime method definition of takes_positional_then_keyword>
 
-        Literal{ value = :takes_rest }
+        <runtime method definition of takes_rest>
 
-        Literal{ value = :takes_keyword_rest }
+        <runtime method definition of takes_keyword_rest>
 
-        Literal{ value = :takes_block }
+        <runtime method definition of takes_block>
       ]
     }
   ]

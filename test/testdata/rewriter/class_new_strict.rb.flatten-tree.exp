@@ -33,7 +33,7 @@ begin
           <self>.void()
         end
         <self>.extend(::T::Sig)
-        :make
+        <runtime method definition of self.make>
         <emptyTree>
       end
     end

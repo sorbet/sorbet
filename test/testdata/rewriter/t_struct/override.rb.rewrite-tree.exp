@@ -35,17 +35,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts("override")
     end
 
-    :initialize
+    <runtime method definition of initialize>
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
-    :initialize
+    <runtime method definition of initialize>
   end
 
   <emptyTree>::<C Override>.new()

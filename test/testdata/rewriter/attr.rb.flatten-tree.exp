@@ -116,18 +116,18 @@ begin
           <self>.params(:strv9, ::Float).returns(::Float)
         end
         <self>.extend(::T::Sig)
-        :initialize
-        :v1
-        :v1=
-        :v2
-        :v2=
-        :v3
-        :v4=
-        :v5=
-        :strv7
-        :strv8=
-        :strv9
-        :strv9=
+        <runtime method definition of initialize>
+        <runtime method definition of v1>
+        <runtime method definition of v1=>
+        <runtime method definition of v2>
+        <runtime method definition of v2=>
+        <runtime method definition of v3>
+        <runtime method definition of v4=>
+        <runtime method definition of v5=>
+        <runtime method definition of strv7>
+        <runtime method definition of strv8=>
+        <runtime method definition of strv9>
+        <runtime method definition of strv9=>
         <emptyTree>
       end
     end

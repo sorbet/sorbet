@@ -198,7 +198,7 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = Literal{ value = :take_arguments }
+          rhs = <runtime method definition of take_arguments>
         }
       ]
     }

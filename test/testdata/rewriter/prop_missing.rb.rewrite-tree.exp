@@ -35,12 +35,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
     <self>.const(:bar, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :bar
+    <runtime method definition of bar>
   end
 end

@@ -38,7 +38,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      :f
+      <runtime method definition of f>
     end
   end
   <emptyTree>

@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :stub_stuff!
+      <runtime method definition of self.stub_stuff!>
     end
 
     <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
@@ -163,7 +163,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :nesting_method
+      <runtime method definition of self.nesting_method>
 
       class <emptyTree>::<C OnlyForSelf><<C <todo sym>>> < (::<todo sym>)
       end
@@ -179,7 +179,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        :public_method
+        <runtime method definition of self.public_method>
       end
     end
   end

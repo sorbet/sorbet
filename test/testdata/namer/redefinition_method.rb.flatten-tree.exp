@@ -28,9 +28,9 @@ begin
           <self>.params(:a, ::Integer).returns(::Integer)
         end
         <self>.extend(::T::Sig)
-        :foo
-        :foo
-        :foo
+        <runtime method definition of foo>
+        <runtime method definition of foo>
+        <runtime method definition of foo>
         <emptyTree>
       end
     end

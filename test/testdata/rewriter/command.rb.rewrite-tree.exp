@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(nil)
     end
 
-    :call
+    <runtime method definition of call>
   end
 
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C MyCommand>.call(7), <emptyTree>::<C String>)
@@ -42,7 +42,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(nil)
     end
 
-    :call
+    <runtime method definition of call>
   end
 
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C OtherCommand>.call("8"), <emptyTree>::<C Integer>)
@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :call
+    <runtime method definition of call>
   end
 
   <emptyTree>::<C NotACommand>.call()
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.Integer(x)
     end
 
-    :call
+    <runtime method definition of call>
   end
 
   <emptyTree>::<C CallNoSig>.call()

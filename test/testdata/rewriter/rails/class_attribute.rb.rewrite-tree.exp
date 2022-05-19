@@ -282,71 +282,71 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :read_write_predicate
+    <runtime method definition of read_write_predicate>
 
-    :read_write_predicate
+    <runtime method definition of self.read_write_predicate>
 
-    :read_write_predicate=
+    <runtime method definition of read_write_predicate=>
 
-    :read_write_predicate=
+    <runtime method definition of self.read_write_predicate=>
 
-    :read_write_predicate?
+    <runtime method definition of read_write_predicate?>
 
-    :read_write_predicate?
+    <runtime method definition of self.read_write_predicate?>
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo
+    <runtime method definition of self.foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
-    :foo=
+    <runtime method definition of self.foo=>
 
-    :foo?
+    <runtime method definition of foo?>
 
-    :foo?
+    <runtime method definition of self.foo?>
 
-    :no_instance
+    <runtime method definition of self.no_instance>
 
-    :no_instance=
+    <runtime method definition of self.no_instance=>
 
-    :no_instance?
+    <runtime method definition of self.no_instance?>
 
-    :no_instance_reader
+    <runtime method definition of self.no_instance_reader>
 
-    :no_instance_reader=
+    <runtime method definition of no_instance_reader=>
 
-    :no_instance_reader=
+    <runtime method definition of self.no_instance_reader=>
 
-    :no_instance_reader?
+    <runtime method definition of self.no_instance_reader?>
 
-    :no_instance_writer
+    <runtime method definition of no_instance_writer>
 
-    :no_instance_writer
+    <runtime method definition of self.no_instance_writer>
 
-    :no_instance_writer=
+    <runtime method definition of self.no_instance_writer=>
 
-    :no_instance_writer?
+    <runtime method definition of no_instance_writer?>
 
-    :no_instance_writer?
+    <runtime method definition of self.no_instance_writer?>
 
-    :bar
+    <runtime method definition of bar>
 
-    :bar
+    <runtime method definition of self.bar>
 
-    :bar=
+    <runtime method definition of bar=>
 
-    :bar=
+    <runtime method definition of self.bar=>
 
-    :no_predicate
+    <runtime method definition of no_predicate>
 
-    :no_predicate
+    <runtime method definition of self.no_predicate>
 
-    :no_predicate=
+    <runtime method definition of no_predicate=>
 
-    :no_predicate=
+    <runtime method definition of self.no_predicate=>
 
-    :usages
+    <runtime method definition of usages>
 
     <self>.read_write_predicate()
 

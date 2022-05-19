@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :get_a
+      <runtime method definition of get_a>
     end
 
     module <emptyTree>::<C AModule><<C <todo sym>>> < ()
@@ -59,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :one
+      <runtime method definition of self.one>
     end
   end
 end
@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :get_one
+      <runtime method definition of get_one>
     end
 
     module <emptyTree>::<C BModule><<C <todo sym>>> < ()
@@ -101,7 +101,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :get_a
+      <runtime method definition of self.get_a>
     end
   end
 end

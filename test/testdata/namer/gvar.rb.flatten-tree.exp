@@ -22,7 +22,7 @@ begin
       begin
         $b = 2
         $a
-        :meth
+        <runtime method definition of meth>
         <emptyTree>
       end
     end

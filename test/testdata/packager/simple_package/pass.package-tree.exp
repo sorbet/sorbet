@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :initialize
+    <runtime method definition of initialize>
   end
 end
 # -- test/testdata/packager/simple_package/bar/calls_foo.rb --
@@ -45,9 +45,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :build_foo
+    <runtime method definition of self.build_foo>
 
-    :build_bar
+    <runtime method definition of self.build_bar>
   end
 end
 # -- test/testdata/packager/simple_package/foo/__package.rb --
@@ -73,7 +73,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :build_bar
+    <runtime method definition of self.build_bar>
   end
 end
 # -- test/testdata/packager/simple_package/foo/foo.rb --
@@ -89,6 +89,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :initialize
+    <runtime method definition of initialize>
   end
 end

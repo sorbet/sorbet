@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       nil
     end
 
-    :initialize
+    <runtime method definition of initialize>
   end
 
   <emptyTree>::<C None>.new()

@@ -38,19 +38,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :foo
+      <runtime method definition of foo>
 
-      :foo=
+      <runtime method definition of foo=>
 
-      :bar
+      <runtime method definition of bar>
 
-      :bar=
+      <runtime method definition of bar=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
 
     class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -78,19 +78,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :foo
+      <runtime method definition of foo>
 
-      :foo=
+      <runtime method definition of foo=>
 
-      :bar
+      <runtime method definition of bar>
 
-      :bar=
+      <runtime method definition of bar=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
   end
 
@@ -122,15 +122,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      :foo
+      <runtime method definition of foo>
 
-      :bar
+      <runtime method definition of bar>
 
-      :foo=
+      <runtime method definition of foo=>
 
-      :bar=
+      <runtime method definition of bar=>
 
-      :new
+      <runtime method definition of self.new>
     end
   end
 
@@ -152,15 +152,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :foo
+      <runtime method definition of foo>
 
-      :foo=
+      <runtime method definition of foo=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
 
     class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -180,15 +180,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :foo
+      <runtime method definition of foo>
 
-      :foo=
+      <runtime method definition of foo=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
   end
 
@@ -221,19 +221,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :foo
+      <runtime method definition of foo>
 
-      :foo=
+      <runtime method definition of foo=>
 
-      :bar
+      <runtime method definition of bar>
 
-      :bar=
+      <runtime method definition of bar=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
   end
 
@@ -255,15 +255,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :foo=
+      <runtime method definition of foo=>
 
-      :foo==
+      <runtime method definition of foo==>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
   end
 
@@ -273,7 +273,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      :foo
+      <runtime method definition of foo>
     end
 
     class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -293,15 +293,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :x
+      <runtime method definition of x>
 
-      :x=
+      <runtime method definition of x=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
@@ -327,15 +327,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :x
+      <runtime method definition of x>
 
-      :x=
+      <runtime method definition of x=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
@@ -388,7 +388,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    :main
+    <runtime method definition of main>
   end
 
   <self>.puts(<emptyTree>::<C Main>.new().main())
@@ -411,15 +411,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :a
+      <runtime method definition of a>
 
-      :a=
+      <runtime method definition of a=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
 
     class <emptyTree>::<C Bar><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -439,15 +439,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
 
-      :a
+      <runtime method definition of a>
 
-      :a=
+      <runtime method definition of a=>
 
       <emptyTree>::<C Elem> = <self>.type_member() do ||
         {:fixed => ::T.untyped()}
       end
 
-      :initialize
+      <runtime method definition of initialize>
     end
 
     <emptyTree>::<C Baz> = ::<root>::<C Foo>::<C Struct>.new()

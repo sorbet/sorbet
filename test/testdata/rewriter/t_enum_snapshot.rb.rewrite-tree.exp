@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    :something_outside
+    <runtime method definition of something_outside>
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)

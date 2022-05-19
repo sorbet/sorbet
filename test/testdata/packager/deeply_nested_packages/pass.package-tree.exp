@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :subpkg_class
+    <runtime method definition of self.subpkg_class>
   end
 end
 # -- test/testdata/packager/deeply_nested_packages/subdirectory/inner_class.rb --
@@ -50,6 +50,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :package_class
+    <runtime method definition of self.package_class>
   end
 end

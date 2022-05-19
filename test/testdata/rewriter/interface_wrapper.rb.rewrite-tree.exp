@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :some_method
+    <runtime method definition of some_method>
   end
 
   class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    :other_method
+    <runtime method definition of other_method>
   end
 
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
@@ -35,8 +35,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :wrap_instance
+    <runtime method definition of self.wrap_instance>
   end
 
-  :testit
+  <runtime method definition of testit>
 end

@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :main
+    <runtime method definition of main>
   end
 end
 # -- test/testdata/packager/nested_inner_namespaces/foo/__package.rb --

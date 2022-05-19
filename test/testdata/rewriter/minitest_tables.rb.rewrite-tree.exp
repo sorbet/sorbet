@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :foo
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
@@ -412,34 +412,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :outside_method
+    <runtime method definition of outside_method>
 
-    :test_each
+    <runtime method definition of self.test_each>
 
-    :test_each_hash
+    <runtime method definition of self.test_each_hash>
 
-    :it
+    <runtime method definition of self.it>
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |value|
-      :"<it \'works with instance methods\'>"
+      <runtime method definition of <it 'works with instance methods'>>
     end
 
     <emptyTree>::<C CONST_LIST> = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
 
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
-      :"<it \'succeeds with a constant list\'>"
+      <runtime method definition of <it 'succeeds with a constant list'>>
     end
 
     <emptyTree>::<C ANOTHER_CONST_LIST> = <emptyTree>::<C T>.let([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()], <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Parent>))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST>) do |value|
-      :"<it \'succeeds with a typed constant list\'>"
+      <runtime method definition of <it 'succeeds with a typed constant list'>>
     end
 
     local = [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]
 
     <self>.test_each(local) do |value|
-      :"<it \'succeed with a local variable but cannot type it\'>"
+      <runtime method definition of <it 'succeed with a local variable but cannot type it'>>
     end
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |x|
@@ -453,63 +453,63 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test_each(<emptyTree>::<C CONST_LIST>) do |value|
       begin
         x = value.foo()
-        :"<it \'fails with non-it statements\'>"
+        <runtime method definition of <it 'fails with non-it statements'>>
       end
     end
 
     <self>.test_each(["foo", 5, {:x => false}]) do |v|
-      :"<it \'handles lists with several types\'>"
+      <runtime method definition of <it 'handles lists with several types'>>
     end
 
     <self>.test_each([1, 2, 3]) do |k, v|
       begin
-        :"<it \'blocks get padded with NilClass arguments\'>"
-        :"<it \'multiple it blocks are ok with multiple arguments\'>"
+        <runtime method definition of <it 'blocks get padded with NilClass arguments'>>
+        <runtime method definition of <it 'multiple it blocks are ok with multiple arguments'>>
       end
     end
 
     <self>.test_each([1, 2, 3]) do |<destructure>$4|
       begin
-        :"<it \'destructured blocks get padded with NilClass arguments\'>"
-        :"<it \'multiple it blocks are ok with multiple destructured arguments\'>"
+        <runtime method definition of <it 'destructured blocks get padded with NilClass arguments'>>
+        <runtime method definition of <it 'multiple it blocks are ok with multiple destructured arguments'>>
       end
     end
 
     <self>.test_each([[1, ["hi", false]], [2, ["bye", true]]]) do |i, <destructure>$7, <destructure>$10|
       begin
-        :"<it \'handles mixed destructuring and positional arguments\'>"
-        :"<it \'multiple it blocks are ok with mixed argument styles\'>"
+        <runtime method definition of <it 'handles mixed destructuring and positional arguments'>>
+        <runtime method definition of <it 'multiple it blocks are ok with mixed argument styles'>>
       end
     end
 
     <emptyTree>::<C CONST_LIST_TUPLE> = [[1, "a"], [2, "b"]]
 
     <self>.test_each(<emptyTree>::<C CONST_LIST_TUPLE>) do |i, s|
-      :"<it \'succeeds with a constant list of tuples\'>"
+      <runtime method definition of <it 'succeeds with a constant list of tuples'>>
     end
 
     <self>.test_each(<emptyTree>::<C CONST_LIST_TUPLE>) do |<destructure>$13|
-      :"<it \'succeeds with a constant list of tuples and destructuring\'>"
+      <runtime method definition of <it 'succeeds with a constant list of tuples and destructuring'>>
     end
 
     <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE> = <emptyTree>::<C T>.let([[1, "a"], [2, "b"]], <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C Integer>, <emptyTree>::<C String>]))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>) do |i, s|
-      :"<it \'succeeds with a typed constant tuple list\'>"
+      <runtime method definition of <it 'succeeds with a typed constant tuple list'>>
     end
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>) do |<destructure>$16|
-      :"<it \'succeeds with a typed constant tuple list with destructuring\'>"
+      <runtime method definition of <it 'succeeds with a typed constant tuple list with destructuring'>>
     end
 
     local_tuple = [[1, "a"], [2, "b"]]
 
     <self>.test_each(local_tuple) do |i, s|
-      :"<it \'succeed with local variables but cannot type them\'>"
+      <runtime method definition of <it 'succeed with local variables but cannot type them'>>
     end
 
     <self>.test_each(local_tuple) do |<destructure>$19|
-      :"<it \'succeed with destructured local variables but cannot type them\'>"
+      <runtime method definition of <it 'succeed with destructured local variables but cannot type them'>>
     end
 
     <self>.test_each([1, 2, 3]) do ||
@@ -527,20 +527,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           s = <assignTemp>$23.[](1)
           <assignTemp>$22
         end
-        :"<it \'rejects manual destructuring of the list argument\'>"
+        <runtime method definition of <it 'rejects manual destructuring of the list argument'>>
       end
     end
 
     <self>.test_each([["red", <emptyTree>::<C NoShow>.new()], ["blue", <emptyTree>::<C NoShow>.new()]]) do |<destructure>$24|
-      :"<it \'::<Magic>.<string-interpolate>(\"color \", color, \" which is not purple is not number 1 \", ns)\'>"
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)'>>
     end
 
     <self>.test_each_hash({:foo => 1, :bar => 2, :baz => 3}) do |k, v|
-      :"<it \'handles lists with several types\'>"
+      <runtime method definition of <it 'handles lists with several types'>>
     end
 
     <self>.test_each_hash([1, 2, 3]) do |k, v|
-      :"<it \'fails to typecheck with non-hash arguments to `test_each-hash`\'>"
+      <runtime method definition of <it 'fails to typecheck with non-hash arguments to `test_each-hash`'>>
     end
 
     <self>.test_each_hash({:foo => 1, :bar => 2}) do |x|

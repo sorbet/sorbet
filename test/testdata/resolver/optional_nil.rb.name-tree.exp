@@ -36,13 +36,13 @@ begin
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        :foo
+        <runtime method definition of foo>
 
-        :bar
+        <runtime method definition of bar>
 
-        :qux
+        <runtime method definition of qux>
 
-        :baz
+        <runtime method definition of baz>
       end
       ::Sorbet::Private::Static.keep_for_ide(::Test)
       <emptyTree>

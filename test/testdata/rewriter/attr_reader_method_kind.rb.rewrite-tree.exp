@@ -30,13 +30,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    :using_attr_reader
+    <runtime method definition of using_attr_reader>
 
-    :using_attr_reader_sig_checked
+    <runtime method definition of using_attr_reader_sig_checked>
 
-    :using_attr_reader_sig_checked_tests
+    <runtime method definition of using_attr_reader_sig_checked_tests>
 
-    :using_attr_reader_sig_checked_never
+    <runtime method definition of using_attr_reader_sig_checked_never>
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
@@ -76,17 +76,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_t_struct_const
     end
 
-    :initialize
+    <runtime method definition of initialize>
 
     <self>.prop(:using_t_struct_prop, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :using_t_struct_prop
+    <runtime method definition of using_t_struct_prop>
 
-    :using_t_struct_prop=
+    <runtime method definition of using_t_struct_prop=>
 
     <self>.const(:using_t_struct_const, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :using_t_struct_const
+    <runtime method definition of using_t_struct_const>
   end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_bare_method
     end
 
-    :using_bare_method
+    <runtime method definition of using_bare_method>
   end
 
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
@@ -102,6 +102,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_bare_self_method
     end
 
-    :using_bare_self_method
+    <runtime method definition of self.using_bare_self_method>
   end
 end

@@ -64,14 +64,14 @@ begin
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        :baz1
-        :baz2
-        :baz3
-        :baz4
-        :baz5
-        :baz6
-        :baz7
-        :baz8
+        <runtime method definition of baz1>
+        <runtime method definition of baz2>
+        <runtime method definition of baz3>
+        <runtime method definition of baz4>
+        <runtime method definition of baz5>
+        <runtime method definition of baz6>
+        <runtime method definition of baz7>
+        <runtime method definition of baz8>
         <emptyTree>
       end
     end

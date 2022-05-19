@@ -8,7 +8,7 @@ begin
     end
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      :foo
+      <runtime method definition of foo>
     end
   end
   <emptyTree>

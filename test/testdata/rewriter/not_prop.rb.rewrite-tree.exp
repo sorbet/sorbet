@@ -30,9 +30,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>, :without_accessors, true)
 
-    :array_of_explicit
+    <runtime method definition of array_of_explicit>
 
-    :array_of_explicit=
+    <runtime method definition of array_of_explicit=>
 
     <self>.prop(:no_class_arg, :type, <emptyTree>::<C Array>, :immutable, true, :array, <emptyTree>::<C String>)
 

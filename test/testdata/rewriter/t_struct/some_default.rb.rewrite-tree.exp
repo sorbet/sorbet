@@ -44,19 +44,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @bar = arg0
     end
 
-    :initialize
+    <runtime method definition of initialize>
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
     <self>.prop(:bar, <emptyTree>::<C T>::<C Boolean>, :default, false, :without_accessors, true)
 
-    :bar
+    <runtime method definition of bar>
 
-    :bar=
+    <runtime method definition of bar=>
   end
 
   <emptyTree>::<C SomeDefault>.new(:foo, 1)

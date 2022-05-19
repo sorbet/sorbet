@@ -68,8 +68,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        :untyped
-        :test_casts
+        <runtime method definition of untyped>
+        <runtime method definition of test_casts>
         <emptyTree>
       end
     end

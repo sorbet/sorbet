@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :foo
+    <runtime method definition of foo>
   end
 
   <emptyTree>::<C A>.new().foo()
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       0
     end
 
-    :bar
+    <runtime method definition of bar>
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C B>.new().bar())
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :qux
+    <runtime method definition of self.qux>
   end
 
   <emptyTree>::<C D>.qux()
@@ -65,7 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :foo
+    <runtime method definition of self.foo>
   end
 
   class <emptyTree>::<C C1><<C <todo sym>>> < (::<todo sym>)
@@ -127,8 +127,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    :bar
+    <runtime method definition of bar>
 
-    :bar
+    <runtime method definition of self.bar>
   end
 end

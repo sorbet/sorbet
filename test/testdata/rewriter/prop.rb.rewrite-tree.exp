@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    :prop
+    <runtime method definition of self.prop>
 
     <self>.prop()
 
@@ -115,13 +115,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    :foo
+    <runtime method definition of foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
-    :foo2
+    <runtime method definition of foo2>
 
-    :foo2=
+    <runtime method definition of foo2=>
   end
 
   class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
@@ -514,101 +514,101 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:default, <emptyTree>::<C String>, :default, "", :without_accessors, true)
 
-    :default
+    <runtime method definition of default>
 
-    :default=
+    <runtime method definition of default=>
 
     <self>.prop(:t_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :without_accessors, true)
 
-    :t_nilable
+    <runtime method definition of t_nilable>
 
-    :t_nilable=
+    <runtime method definition of t_nilable=>
 
     <self>.prop(:array, <emptyTree>::<C Array>, :without_accessors, true)
 
-    :array
+    <runtime method definition of array>
 
-    :array=
+    <runtime method definition of array=>
 
     <self>.prop(:t_array, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>), :without_accessors, true)
 
-    :t_array
+    <runtime method definition of t_array>
 
-    :t_array=
+    <runtime method definition of t_array=>
 
     <self>.prop(:hash_of, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>), :without_accessors, true)
 
-    :hash_of
+    <runtime method definition of hash_of>
 
-    :hash_of=
+    <runtime method definition of hash_of=>
 
     <self>.prop(:const_explicit, <emptyTree>::<C String>, :immutable, true, :without_accessors, true)
 
-    :const_explicit
+    <runtime method definition of const_explicit>
 
     <self>.const(:const, <emptyTree>::<C String>, :without_accessors, true)
 
-    :const
+    <runtime method definition of const>
 
     <self>.prop(:enum_prop, <emptyTree>::<C String>, :enum, ["hello", "goodbye"], :without_accessors, true)
 
-    :enum_prop
+    <runtime method definition of enum_prop>
 
-    :enum_prop=
+    <runtime method definition of enum_prop=>
 
     <self>.prop(:foreign, <emptyTree>::<C String>, :foreign, <emptyTree>::<C ForeignClass>, :without_accessors, true)
 
-    :foreign
+    <runtime method definition of foreign>
 
-    :foreign=
+    <runtime method definition of foreign=>
 
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    :foreign_lazy
+    <runtime method definition of foreign_lazy>
 
-    :foreign_lazy=
+    <runtime method definition of foreign_lazy=>
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    :foreign_proc
+    <runtime method definition of foreign_proc>
 
-    :foreign_proc=
+    <runtime method definition of foreign_proc=>
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
 
-    :foreign_invalid
+    <runtime method definition of foreign_invalid>
 
-    :foreign_invalid=
+    <runtime method definition of foreign_invalid=>
 
     <self>.prop(:ifunset, <emptyTree>::<C String>, :ifunset, "", :without_accessors, true)
 
-    :ifunset
+    <runtime method definition of ifunset>
 
-    :ifunset=
+    <runtime method definition of ifunset=>
 
     <self>.prop(:ifunset_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :ifunset, "", :without_accessors, true)
 
-    :ifunset_nilable
+    <runtime method definition of ifunset_nilable>
 
-    :ifunset_nilable=
+    <runtime method definition of ifunset_nilable=>
 
     <self>.prop(:empty_hash_rules, <emptyTree>::<C String>, {:without_accessors => true})
 
-    :empty_hash_rules
+    <runtime method definition of empty_hash_rules>
 
-    :empty_hash_rules=
+    <runtime method definition of empty_hash_rules=>
 
     <self>.prop(:hash_rules, <emptyTree>::<C String>, {:enum => ["hello", "goodbye"], :without_accessors => true})
 
-    :hash_rules
+    <runtime method definition of hash_rules>
 
-    :hash_rules=
+    <runtime method definition of hash_rules=>
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
@@ -666,21 +666,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    :token_prop
+    <runtime method definition of self.token_prop>
 
-    :created_prop
+    <runtime method definition of self.created_prop>
 
     <self>.token_prop(:without_accessors, true)
 
-    :token
+    <runtime method definition of token>
 
-    :token=
+    <runtime method definition of token=>
 
     <self>.created_prop(:without_accessors, true)
 
-    :created
+    <runtime method definition of created>
 
-    :created=
+    <runtime method definition of created=>
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
@@ -727,19 +727,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    :timestamped_token_prop
+    <runtime method definition of self.timestamped_token_prop>
 
-    :created_prop
+    <runtime method definition of self.created_prop>
 
     <self>.timestamped_token_prop(:without_accessors, true)
 
-    :token
+    <runtime method definition of token>
 
-    :token=
+    <runtime method definition of token=>
 
     <self>.created_prop(:immutable, true, :without_accessors, true)
 
-    :created
+    <runtime method definition of created>
   end
 
   class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
@@ -803,20 +803,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    :encrypted_prop
+    <runtime method definition of self.encrypted_prop>
 
-    :foo
+    <runtime method definition of foo>
 
-    :encrypted_foo
+    <runtime method definition of encrypted_foo>
 
-    :foo=
+    <runtime method definition of foo=>
 
-    :encrypted_foo=
+    <runtime method definition of encrypted_foo=>
 
-    :bar
+    <runtime method definition of bar>
 
-    :encrypted_bar
+    <runtime method definition of encrypted_bar>
   end
 
-  :main
+  <runtime method definition of main>
 end
