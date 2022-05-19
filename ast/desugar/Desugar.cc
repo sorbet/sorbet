@@ -423,7 +423,6 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
 void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, unique_ptr<parser::Node> &node) {
     if (auto var = parser::cast_node<parser::MatchVar>(node.get())) {
         auto loc = var->loc;
-        auto recv = MK::Constant(loc, core::Symbols::Magic());
         auto val = MK::RaiseUnimplemented(loc);
         vars.emplace_back(MK::Assign(loc, var->name, std::move(val)));
     } else if (auto rest = parser::cast_node<parser::MatchRest>(node.get())) {
@@ -433,7 +432,6 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
     } else if (auto as_pattern = parser::cast_node<parser::MatchAs>(node.get())) {
         auto loc = as_pattern->as->loc;
         auto name = parser::cast_node<parser::MatchVar>(as_pattern->as.get())->name;
-        auto recv = MK::Constant(loc, core::Symbols::Magic());
         auto val = MK::RaiseUnimplemented(loc);
         vars.emplace_back(MK::Assign(loc, name, std::move(val)));
         desugarPatternMatchingVars(vars, dctx, as_pattern->value);
