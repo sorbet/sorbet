@@ -56,7 +56,7 @@ module Root
   sig {returns(NilClass)}
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
   def self.method
-# ^^^^^^^^^^^^^^^ error-with-dupes: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
     nil
   end
 end
