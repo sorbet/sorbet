@@ -288,7 +288,7 @@ class T::Enum
     # Historical note: We convert to lowercase names because the majority of existing calls to
     # `make_accessible` were arrays of lowercase strings. Doing this conversion allowed for the
     # least amount of repetition in migrated declarations.
-    const_name.to_s.downcase.freeze
+    -const_name.to_s.downcase.freeze
   end
 
   sig {returns(T::Boolean)}
