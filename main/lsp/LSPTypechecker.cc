@@ -270,8 +270,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
                 // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
                 // deduped later.
-                set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
-                               newMethodHashes.end(), std::back_inserter(changedMethodSymbolHashes));
+                absl::c_set_difference(oldMethodHashes, newMethodHashes,
+                                       std::back_inserter(changedMethodSymbolHashes));
 
                 const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
                 const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
@@ -279,8 +279,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes),
                         "definitionHash should have failed");
 
-                set_difference(oldFieldHashes.begin(), oldFieldHashes.end(), newFieldHashes.begin(),
-                               newFieldHashes.end(), std::back_inserter(changedFieldSymbolHashes));
+                absl::c_set_difference(oldFieldHashes, newFieldHashes,
+                                       std::back_inserter(changedFieldSymbolHashes));
 
                 gs->replaceFile(fref, updatedFile);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
@@ -290,9 +290,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         }
 
         changedMethodHashes.reserve(changedMethodSymbolHashes.size());
-        for (auto &changedMethodHash : changedMethodSymbolHashes) {
-            changedMethodHashes.push_back(changedMethodSymbolHashes.nameHash);
-        }
+        absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedMethodHashes),
+                          [](const auto &symhash) { return symhash.nameHash; });
         core::ShortNameHash::sortAndDedupe(changedMethodHashes);
         changedFieldHashes.reserve(changedFieldSymbolHashes.size());
         absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedFieldHashes),
@@ -315,8 +314,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::ShortNameHash> intersection;
-        std::set_intersection(changedMethodHashes.begin(), changedMethodHashes.end(), oldHash.usages.sends.begin(),
-                              oldHash.usages.sends.end(), std::back_inserter(intersection));
+        absl::c_set_intersection(changedMethodHashes, oldHash.usages.sends,
+                                 std::back_inserter(intersection));
         if (!intersection.empty()) {
             auto ref = core::FileRef(i);
             config->logger->debug("Added {} to update set as used a changed method",
@@ -325,8 +324,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             continue;
         }
 
-        std::set_intersection(changedFieldHashes.begin(), changedFieldHashes.end(), oldHash.usages.symbols.begin(),
-                              oldHash.usages.symbols.end(), std::back_inserter(intersection));
+        absl::c_set_intersection(changedFieldHashes, oldHash.usages.symbols,
+                                 std::back_inserter(intersection));
         if (!intersection.empty()) {
             auto ref = core::FileRef(i);
             config->logger->debug("Added {} to update set as used a changed field symbol",
