@@ -1083,6 +1083,12 @@ void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, 
                               errorPrefix
                                   << fmt::format("Expected file update to cause {} to also be typechecked.", f));
         }
+        vector<string> extraFiles;
+        absl::c_set_difference(info.filesTypechecked, expectedFilePaths, back_inserter(extraFiles));
+        for (auto &f : extraFiles) {
+            ADD_FAIL_CHECK_AT(updateFile.c_str(), assertionLine,
+                              errorPrefix << fmt::format("File update caused {} to be typechecked unexpectedly.", f));
+        }
     }
 }
 
