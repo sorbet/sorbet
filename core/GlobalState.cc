@@ -2174,9 +2174,6 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             auto &target = methodHashesMap[NameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
 
-            // TODO(jez) Remember that if you stop calling methodShapeHash here you'll still have to
-            // handle unresolvedAncestors somehow.
-            // TODO(jez) Ignore method flags for now (private, abstrct, final, etc.)
             uint32_t symhash = sym.methodShapeHash(*this);
             hierarchyHash = mix(hierarchyHash, symhash);
             methodHash = mix(methodHash, symhash);
