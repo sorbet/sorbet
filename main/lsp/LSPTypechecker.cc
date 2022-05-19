@@ -240,7 +240,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        vector<core::SymbolHash> changedMethodHashes;
+        vector<core::SymbolHash> changedMethodSymbolHashes;
         for (auto &updatedFile : updates.updatedFiles) {
             auto fref = gs->findFileByPath(updatedFile->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -267,7 +267,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
                 // deduped later.
                 set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
-                               newMethodHashes.end(), std::back_inserter(changedMethodHashes));
+                               newMethodHashes.end(), std::back_inserter(changedMethodSymbolHashes));
 
                 gs->replaceFile(fref, updatedFile);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
@@ -276,9 +276,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             }
         }
 
-        changedHashes.reserve(changedMethodHashes.size());
-        for (auto &changedMethodHash : changedMethodHashes) {
-            changedHashes.push_back(changedMethodHash.nameHash);
+        changedHashes.reserve(changedMethodSymbolHashes.size());
+        for (auto &changedMethodHash : changedMethodSymbolHashes) {
+            changedHashes.push_back(changedMethodSymbolHashes.nameHash);
         }
         core::ShortNameHash::sortAndDedupe(changedHashes);
     }
