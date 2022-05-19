@@ -55,6 +55,14 @@ struct SymbolHash {
     }
 };
 
+// When a file is edited, we run index and resolve it using an local (empty) GlobalState.
+// We then hash the symbols defined in that local GlobalState, and use the result to quickly decide
+// whether "something" changed, or whether nothing changed (and thus we can take the fast path).
+//
+// The something/nothing decision is tracked by hierarchyHash.
+//
+// The other things in this structure are either used for metrics purposes only, or for special
+// cases for e.g. when there are "no" changes, except changes to method types.
 struct LocalSymbolTableHashes {
     // Default value of hierarchyHash (and other hashes) tracked by this class.
     static constexpr int HASH_STATE_NOT_COMPUTED = 0;
@@ -91,6 +99,10 @@ struct LocalSymbolTableHashes {
     //
     // Stored as a vector instead of a map to optimize for set_difference and compact storage
     // representation.
+    //
+    // While the hierarchyHash stores only the methodShapeHash of the method symbol (which ignores
+    // things like types for the fast/slow path decision), this stores the complete method symbol
+    // hash, so that if anything including types change for a method we know what their names are.
     std::vector<SymbolHash> methodHashes;
 
     static uint32_t patchHash(uint32_t hash) {
