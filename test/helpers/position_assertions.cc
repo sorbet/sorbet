@@ -314,7 +314,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
     int lastSourceLineNum = 0;
 
     auto source = file->source();
-    auto filename = string(file->path().begin(), file->path().end());
+    auto filename = string(file->path());
     auto &lineBreaks = file->lineBreaks();
 
     for (auto lineBreak : lineBreaks) {
@@ -323,7 +323,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
             continue;
         }
         string_view lineView = source.substr(nextChar, lineBreak - nextChar);
-        string line = string(lineView.begin(), lineView.end());
+        auto line = string(lineView);
         nextChar = lineBreak + 1;
 
         // Groups: Line up until first caret, carets, assertion type, assertion contents.
@@ -853,7 +853,7 @@ string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceF
     } else {
         // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
         auto lineView = file->getLine(line + 1);
-        return string(lineView.begin(), lineView.end());
+        return string(lineView);
     }
 }
 
@@ -1077,8 +1077,7 @@ void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, 
         }
         fast_sort(info.filesTypechecked);
         vector<string> unTypecheckedFiles;
-        set_difference(expectedFilePaths.begin(), expectedFilePaths.end(), info.filesTypechecked.begin(),
-                       info.filesTypechecked.end(), back_inserter(unTypecheckedFiles));
+        absl::c_set_difference(expectedFilePaths, info.filesTypechecked, back_inserter(unTypecheckedFiles));
         for (auto &f : unTypecheckedFiles) {
             ADD_FAIL_CHECK_AT(updateFile.c_str(), assertionLine,
                               errorPrefix
@@ -1443,7 +1442,7 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         // First, sort the edits by increasing starting location
         fast_sort(edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
         // Apply the edits in the reverse order so that the indices don't change.
-        reverse(edits.begin(), edits.end());
+        absl::c_reverse(edits);
 
         string actualEditedFileContents = string(sourceFiles[sourceFilePath]);
         for (auto &edit : edits) {
@@ -1537,7 +1536,7 @@ std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::uniqu
     }
 
     // Now, apply the edits in the reverse order so that the indices don't change.
-    reverse(changes->edits.begin(), changes->edits.end());
+    absl::c_reverse(changes->edits);
     return changes;
 }
 
