@@ -77,6 +77,10 @@ public:
     const FoundTypeMember &typeMember(const FoundDefinitions &foundDefs) const;
 
     core::SymbolRef symbol() const;
+
+    static std::string kindToString(Kind kind);
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs) const;
 };
 CheckSize(FoundDefinitionRef, 4, 4);
 
@@ -85,6 +89,8 @@ struct FoundClassRef final {
     core::LocOffsets loc;
     // If !owner.exists(), owner is determined by reference site.
     FoundDefinitionRef owner;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
 CheckSize(FoundClassRef, 16, 4);
 
@@ -99,6 +105,8 @@ struct FoundClass final {
         Class,
     };
     Kind classKind;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
 CheckSize(FoundClass, 28, 4);
 
@@ -109,6 +117,8 @@ struct FoundStaticField final {
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
 CheckSize(FoundStaticField, 32, 4);
 
@@ -121,6 +131,8 @@ struct FoundTypeMember final {
     core::NameRef varianceName;
     bool isFixed = false;
     bool isTypeTemplete = false;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
 CheckSize(FoundTypeMember, 40, 4);
 
@@ -145,6 +157,8 @@ struct FoundMethod final {
     CheckSize(Flags, 1, 1);
     std::vector<core::ParsedArg> parsedArgs;
     std::vector<uint32_t> argsHash;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
 CheckSize(FoundMethod, 80, 8);
 
