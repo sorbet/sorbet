@@ -8,8 +8,8 @@ using namespace std;
 namespace sorbet::ast {
 
 namespace {
-ParsedArg parseArg(const ast::ExpressionPtr &arg) {
-    ParsedArg parsedArg;
+core::ParsedArg parseArg(const ast::ExpressionPtr &arg) {
+    core::ParsedArg parsedArg;
 
     typecase(
         arg,
@@ -58,8 +58,8 @@ ExpressionPtr getDefaultValue(ExpressionPtr arg) {
 
 } // namespace
 
-vector<ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) {
-    vector<ParsedArg> parsedArgs;
+vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) {
+    vector<core::ParsedArg> parsedArgs;
     for (auto &arg : args) {
         if (!ast::isa_reference(arg)) {
             Exception::raise("Must be a reference!");
@@ -70,7 +70,7 @@ vector<ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) 
     return parsedArgs;
 }
 
-std::vector<uint32_t> ArgParsing::hashArgs(core::Context ctx, const std::vector<ParsedArg> &args) {
+std::vector<uint32_t> ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
     std::vector<uint32_t> result;
     result.reserve(args.size());
     for (const auto &e : args) {
@@ -103,7 +103,7 @@ std::vector<uint32_t> ArgParsing::hashArgs(core::Context ctx, const std::vector<
     return result;
 }
 
-ExpressionPtr ArgParsing::getDefault(const ParsedArg &parsedArg, ExpressionPtr arg) {
+ExpressionPtr ArgParsing::getDefault(const core::ParsedArg &parsedArg, ExpressionPtr arg) {
     if (!parsedArg.flags.isDefault) {
         return nullptr;
     }

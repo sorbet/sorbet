@@ -3,6 +3,7 @@
 
 #include "common/common.h"
 #include "core/Context.h"
+#include "core/FoundDefinitions.h"
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
@@ -324,10 +325,7 @@ public:
     core::LocOffsets declLoc;
     core::ClassOrModuleRef symbol;
 
-    enum class Kind : uint8_t {
-        Module,
-        Class,
-    };
+    using Kind = core::FoundClass::Kind;
     Kind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
     using RHS_store = InlinedVector<ExpressionPtr, EXPECTED_RHS_COUNT>;
@@ -368,20 +366,7 @@ public:
 
     core::NameRef name;
 
-    struct Flags {
-        bool isSelfMethod : 1;
-        bool isRewriterSynthesized : 1;
-        bool isAttrReader : 1;
-        bool discardDef : 1;
-        bool genericPropGetter : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        Flags()
-            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), discardDef(false),
-              genericPropGetter(false) {}
-    };
-    CheckSize(Flags, 1, 1);
-
+    using Flags = core::FoundMethod::Flags;
     Flags flags;
 
     MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,

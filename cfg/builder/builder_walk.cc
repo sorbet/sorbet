@@ -434,7 +434,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 if (auto *block = s.block()) {
                     auto newRubyRegionId = ++cctx.inWhat.maxRubyRegionId;
                     auto &blockArgs = block->args;
-                    vector<ast::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
+                    vector<core::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);
