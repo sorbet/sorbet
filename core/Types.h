@@ -6,6 +6,7 @@
 #include "common/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
+#include "core/ParsedArg.h"
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include "core/TypeConstraint.h"
@@ -29,23 +30,7 @@ class TypeAndOrigins;
 
 class ArgInfo {
 public:
-    struct ArgFlags {
-        bool isKeyword : 1;
-        bool isRepeated : 1;
-        bool isDefault : 1;
-        bool isShadow : 1;
-        bool isBlock : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        ArgFlags() : isKeyword(false), isRepeated(false), isDefault(false), isShadow(false), isBlock(false) {}
-
-    private:
-        friend class Method;
-        friend class serialize::SerializerImpl;
-
-        void setFromU1(uint8_t flags);
-        uint8_t toU1() const;
-    };
+    using ArgFlags = core::ParsedArg::ArgFlags;
     ArgFlags flags;
     NameRef name;
     // Stores the `.bind(...)` symbol if the `&blk` arg's type had one

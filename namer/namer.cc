@@ -865,7 +865,7 @@ class SymbolDefiner {
         return existing;
     }
 
-    void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos, const ast::ParsedArg &parsedArg) {
+    void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos, const core::ParsedArg &parsedArg) {
         if (pos < methodData->arguments.size()) {
             // TODO: check that flags match;
             if (parsedArg.loc.exists()) {
@@ -910,7 +910,7 @@ class SymbolDefiner {
         argInfo.flags = parsedArg.flags;
     }
 
-    void defineArgs(core::MutableContext ctx, const vector<ast::ParsedArg> &parsedArgs) {
+    void defineArgs(core::MutableContext ctx, const vector<core::ParsedArg> &parsedArgs) {
         auto methodData = ctx.owner.asMethodRef().data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
@@ -943,7 +943,7 @@ class SymbolDefiner {
         }
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<ast::ParsedArg> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedArg> &parsedArgs) {
         auto sym = method.data(ctx)->dealiasMethod(ctx);
         if (sym.data(ctx)->arguments.size() != parsedArgs.size()) {
             return false;
@@ -963,7 +963,7 @@ class SymbolDefiner {
         return true;
     }
 
-    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<ast::ParsedArg> &parsedArgs) {
+    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedArg> &parsedArgs) {
         auto sym = ctx.owner.dealias(ctx);
         if (!sym.isMethod()) {
             return;
@@ -1532,7 +1532,7 @@ class TreeSymbolizer {
         return result.exists() ? make_optional<core::SymbolRef>(result) : nullopt;
     }
 
-    ast::ExpressionPtr arg2Symbol(int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
+    ast::ExpressionPtr arg2Symbol(int pos, core::ParsedArg parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
@@ -1725,7 +1725,7 @@ public:
         return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(vector<ast::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(vector<core::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
         ast::MethodDef::ARGS_store args;
         int i = -1;
         for (auto &arg : parsedArgs) {
