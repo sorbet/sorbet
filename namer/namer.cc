@@ -143,7 +143,7 @@ struct FoundMethod final {
 };
 CheckSize(FoundMethod, 80, 8);
 
-struct Modifier {
+struct FoundModifier {
     enum class Kind : uint8_t {
         Class = 0,
         Method = 1,
@@ -158,11 +158,11 @@ struct Modifier {
     // For constants: The name of the constant being modified.
     core::NameRef target;
 
-    Modifier withTarget(core::NameRef target) {
-        return Modifier{this->kind, this->owner, this->loc, this->name, target};
+    FoundModifier withTarget(core::NameRef target) {
+        return FoundModifier{this->kind, this->owner, this->loc, this->name, target};
     }
 };
-CheckSize(Modifier, 24, 4);
+CheckSize(FoundModifier, 24, 4);
 
 class FoundDefinitions final {
     // Contains references to items in _klasses, _methods, _staticFields, and _typeMembers.
@@ -180,7 +180,7 @@ class FoundDefinitions final {
     // Contains all type members defined in the file.
     vector<FoundTypeMember> _typeMembers;
     // Contains all method and class modifiers (e.g. private/public/protected).
-    vector<Modifier> _modifiers;
+    vector<FoundModifier> _modifiers;
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
@@ -238,7 +238,7 @@ public:
         return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.rawId());
     }
 
-    void addModifier(Modifier &&mod) {
+    void addModifier(FoundModifier &&mod) {
         _modifiers.emplace_back(move(mod));
     }
 
@@ -258,7 +258,7 @@ public:
     }
 
     // See documentation on _modifiers
-    const vector<Modifier> &modifiers() const {
+    const vector<FoundModifier> &modifiers() const {
         return _modifiers;
     }
 
@@ -376,7 +376,7 @@ class SymbolFinder {
     vector<FoundDefinitionRef> ownerStack;
     // `private` with no arguments toggles the visibility of all methods below in the class def.
     // This tracks those as they appear.
-    vector<optional<Modifier>> methodVisiStack = {nullopt};
+    vector<optional<FoundModifier>> methodVisiStack = {nullopt};
 
     void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::ExpressionPtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
@@ -389,8 +389,8 @@ class SymbolFinder {
             case core::Names::declareSealed().rawId():
             case core::Names::declareInterface().rawId():
             case core::Names::declareAbstract().rawId(): {
-                Modifier mod;
-                mod.kind = Modifier::Kind::Class;
+                FoundModifier mod;
+                mod.kind = FoundModifier::Kind::Class;
                 mod.owner = klass;
                 mod.loc = send->loc;
                 mod.name = send->fun;
@@ -532,8 +532,8 @@ public:
             case core::Names::public_().rawId():
                 if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
-                    methodVisiStack.back() = optional<Modifier>{Modifier{
-                        Modifier::Kind::Method,
+                    methodVisiStack.back() = optional<FoundModifier>{FoundModifier{
+                        FoundModifier::Kind::Method,
                         getOwner(),
                         original.loc,
                         original.fun,
@@ -580,8 +580,8 @@ public:
     void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
         auto target = unwrapLiteralToMethodName(ctx, arg);
         if (target.exists()) {
-            foundDefs->addModifier(Modifier{
-                Modifier::Kind::Method,
+            foundDefs->addModifier(FoundModifier{
+                FoundModifier::Kind::Method,
                 getOwner(),
                 arg.loc(),
                 /*name*/ modifierName,
@@ -601,8 +601,8 @@ public:
         }
 
         if (target.exists()) {
-            foundDefs->addModifier(Modifier{
-                Modifier::Kind::ClassOrStaticField,
+            foundDefs->addModifier(FoundModifier{
+                FoundModifier::Kind::ClassOrStaticField,
                 getOwner(),
                 arg.loc(),
                 /*name*/ modifierName,
@@ -1111,8 +1111,8 @@ class SymbolDefiner {
         return symbol;
     }
 
-    void modifyMethod(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == Modifier::Kind::Method);
+    void modifyMethod(core::MutableContext ctx, const FoundModifier &mod) {
+        ENFORCE(mod.kind == FoundModifier::Kind::Method);
 
         auto owner = ctx.owner.enclosingClass(ctx);
         if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::packagePrivateClassMethod()) {
@@ -1141,8 +1141,8 @@ class SymbolDefiner {
         }
     }
 
-    void modifyConstant(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == Modifier::Kind::ClassOrStaticField);
+    void modifyConstant(core::MutableContext ctx, const FoundModifier &mod) {
+        ENFORCE(mod.kind == FoundModifier::Kind::ClassOrStaticField);
 
         auto owner = ctx.owner.enclosingClass(ctx);
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
@@ -1240,8 +1240,8 @@ class SymbolDefiner {
         return symbol;
     }
 
-    void modifyClass(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == Modifier::Kind::Class);
+    void modifyClass(core::MutableContext ctx, const FoundModifier &mod) {
+        ENFORCE(mod.kind == FoundModifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         if (fun == core::Names::declareFinal()) {
@@ -1448,13 +1448,13 @@ public:
         for (const auto &modifier : foundDefs.modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
-                case Modifier::Kind::Method:
+                case FoundModifier::Kind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
                     break;
-                case Modifier::Kind::Class:
+                case FoundModifier::Kind::Class:
                     modifyClass(ctx.withOwner(owner), modifier);
                     break;
-                case Modifier::Kind::ClassOrStaticField:
+                case FoundModifier::Kind::ClassOrStaticField:
                     modifyConstant(ctx.withOwner(owner), modifier);
                     break;
             }
