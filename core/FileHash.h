@@ -36,6 +36,38 @@ template <typename H> H AbslHashValue(H h, const ShortNameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
+class FullNameHash {
+public:
+    /** Sorts an array of ShortNameHashes and removes duplicates. */
+    static void sortAndDedupe(std::vector<core::FullNameHash> &hashes);
+
+    FullNameHash(const GlobalState &gs, NameRef nm);
+    inline bool isDefined() const {
+        return _hashValue != 0;
+    }
+    FullNameHash(const FullNameHash &nm) noexcept = default;
+    FullNameHash() noexcept : _hashValue(0){};
+    inline bool operator==(const FullNameHash &rhs) const noexcept {
+        ENFORCE(isDefined());
+        ENFORCE(rhs.isDefined());
+        return _hashValue == rhs._hashValue;
+    }
+
+    inline bool operator!=(const FullNameHash &rhs) const noexcept {
+        return !(rhs == *this);
+    }
+
+    inline bool operator<(const FullNameHash &rhs) const noexcept {
+        return this->_hashValue < rhs._hashValue;
+    }
+
+    uint32_t _hashValue;
+};
+
+template <typename H> H AbslHashValue(H h, const FullNameHash &m) {
+    return H::combine(std::move(h), m._hashValue);
+}
+
 struct SymbolHash {
     // The hash of the symbol's name. Note that symbols with the same name owned by different
     // symbols map to the same ShortNameHash. This is fine, because our strategy for deciding which
