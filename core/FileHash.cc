@@ -54,6 +54,15 @@ void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
 
+void FoundMethodHash::sanityCheck() const {
+    ENFORCE(nameHash.isDefined());
+}
+
+string FoundMethodHash::toString() const {
+    return fmt::format("FoundMethodHash {{ ownerIdx = {}, nameHash = {}, arityHash = {}, isSelfMethod = {} }}",
+                       nameHash._hashValue, arityHash._hashValue, isSelfMethod);
+}
+
 FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages)
     : localSymbolTableHashes(move(localSymbolTableHashes)), usages(move(usages)) {}
 

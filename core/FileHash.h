@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_FILE_HASH_H
 #define RUBY_TYPER_FILE_HASH_H
 #include "common/common.h"
+#include "core/ArityHash.h"
 namespace sorbet::core {
 class NameRef;
 class GlobalState;
@@ -86,6 +87,36 @@ struct SymbolHash {
         return this->nameHash < h.nameHash || (!(h.nameHash < this->nameHash) && this->symbolHash < h.symbolHash);
     }
 };
+
+// TODO(jez) Some ideas:
+// - If we need to make this smaller, can probably bit pack one of the hashes into 31 bits and just
+//   eat the increased chance of collisions?
+// - If we want things to compile faster, can build a separate FoundDefinitionRefForHashing structure
+//   (might end up doing this if we do the bit packing idea above)
+struct FoundMethodHash {
+    // The owner of this method.
+    uint32_t ownerIdx;
+
+    // Hash of this method's name
+    const FullNameHash nameHash;
+
+    // A hash of the method's arity
+    ArityHash arityHash;
+
+    // Whether the method was defined as an instance method or a singleton class method
+    bool isSelfMethod;
+
+    FoundMethodHash(uint32_t ownerIdx, FullNameHash nameHash, ArityHash arityHash, bool isSelfMethod)
+        : ownerIdx(ownerIdx), nameHash(nameHash), arityHash(arityHash), isSelfMethod(isSelfMethod) {
+        sanityCheck();
+    };
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundMethodHash, 16, 4);
 
 // When a file is edited, we run index and resolve it using an local (empty) GlobalState.
 // We then hash the symbols defined in that local GlobalState, and use the result to quickly decide
