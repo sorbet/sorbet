@@ -1131,6 +1131,35 @@ new syntax:
 srb tc --isolate-error-code=4021 --autocorrect
 ```
 
+## 4022
+
+This error is experimental, currently reported only when running with
+--stripe-mode and --stripe-mode-namespace-collision-check-experimental flags.
+
+A "namespace" or "common prefix" in this context is defined as the lowest common
+prefix of all behavior-defining (see error 4019) classes/modules in a file. This
+error is reported when 2 files have the same lowest common prefix.
+
+```ruby
+# -- file1.rb --
+module A::B
+  class C
+    def foo; end
+  end
+
+  class D
+    def bar; end
+  end
+end
+
+# -- file2.rb --
+module A::B
+  def bar; end
+end
+```
+
+In this case, both files have the same lowest common prefix A::B.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs
