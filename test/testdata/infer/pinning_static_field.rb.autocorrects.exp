@@ -1,7 +1,7 @@
 # -- test/testdata/infer/pinning_static_field.rb --
 # typed: true
 
-T.let(StaticField1, T.any(FalseClass, Integer)) = T.let(0, Integer)
+StaticField1 = T.let(0, Integer)
 def example1
   x = StaticField1
   1.times do

@@ -1564,7 +1564,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                     "Attempting to change type to: `{}`\n", tp.type.show(ctx))));
 
                                 if (cur.origins.size() == 1 && cur.origins[0].exists() &&
-                                    !cur.origins[0].file().data(ctx).isPayload()) {
+                                    // sometimes a variable has a given type because of a constant outside this method
+                                    ctx.locAt(inWhat.loc).contains(cur.origins[0])) {
                                     // NOTE(nelhage): We assume that if there is a single definition location, that
                                     // corresponds to an initial assignment. This is not necessarily correct if the
                                     // variable came from some other source (e.g. a function argument)
