@@ -5,8 +5,8 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
+#include "core/FileHash.h"
 #include "core/GlobalState.h"
-#include "core/NameHash.h"
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"
 #include "lib/lz4.h"
@@ -239,9 +239,9 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         return;
     }
     p.putU1(1);
-    p.putU4(fh->definitions.hierarchyHash);
-    p.putU4(fh->definitions.methodHashes.size());
-    for (const auto &[key, value] : fh->definitions.methodHashes) {
+    p.putU4(fh->localSymbolTableHashes.hierarchyHash);
+    p.putU4(fh->localSymbolTableHashes.methodHashes.size());
+    for (const auto &[key, value] : fh->localSymbolTableHashes.methodHashes) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
@@ -262,13 +262,13 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     }
     FileHash ret;
 
-    ret.definitions.hierarchyHash = p.getU4();
+    ret.localSymbolTableHashes.hierarchyHash = p.getU4();
     auto methodHashSize = p.getU4();
-    ret.definitions.methodHashes.reserve(methodHashSize);
+    ret.localSymbolTableHashes.methodHashes.reserve(methodHashSize);
     for (int it = 0; it < methodHashSize; it++) {
         NameHash key;
         key._hashValue = p.getU4();
-        ret.definitions.methodHashes.emplace_back(key, p.getU4());
+        ret.localSymbolTableHashes.methodHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
     ret.usages.symbols.reserve(constantsSize);

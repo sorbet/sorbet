@@ -26,7 +26,7 @@ class TypeArgumentRef;
 class TypeMemberRef;
 class NameSubstitution;
 class ErrorQueue;
-struct DefinitionHash;
+struct LocalSymbolTableHashes;
 
 namespace lsp {
 class Task;
@@ -269,7 +269,7 @@ public:
 
     void trace(std::string_view msg) const;
 
-    std::unique_ptr<DefinitionHash> hash() const;
+    std::unique_ptr<LocalSymbolTableHashes> hash() const;
     const std::vector<std::shared_ptr<File>> &getFiles() const;
 
     // Contains a string to be used as the base of the error URL.

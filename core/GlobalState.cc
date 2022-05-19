@@ -3,7 +3,7 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/NullFlusher.h"
@@ -2108,16 +2108,7 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
     return what;
 }
 
-uint32_t patchHash(uint32_t hash) {
-    if (hash == DefinitionHash::HASH_STATE_NOT_COMPUTED) {
-        hash = DefinitionHash::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
-    } else if (hash == DefinitionHash::HASH_STATE_INVALID) {
-        hash = DefinitionHash::HASH_STATE_INVALID_COLLISION_AVOID;
-    }
-    return hash;
-}
-
-unique_ptr<DefinitionHash> GlobalState::hash() const {
+unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
     uint32_t classModuleHash = 0;
@@ -2125,7 +2116,7 @@ unique_ptr<DefinitionHash> GlobalState::hash() const {
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<NameHash, uint32_t> methodHashes;
+    UnorderedMap<NameHash, uint32_t> methodHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2180,7 +2171,7 @@ unique_ptr<DefinitionHash> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashes[NameHash(*this, sym.name)];
+            auto &target = methodHashesMap[NameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
             uint32_t symhash = sym.methodShapeHash(*this);
             hierarchyHash = mix(hierarchyHash, symhash);
@@ -2192,20 +2183,20 @@ unique_ptr<DefinitionHash> GlobalState::hash() const {
         }
     }
 
-    unique_ptr<DefinitionHash> result = make_unique<DefinitionHash>();
-    result->methodHashes.reserve(methodHashes.size());
-    for (const auto &e : methodHashes) {
-        result->methodHashes.emplace_back(e.first, patchHash(e.second));
+    unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
+    result->methodHashes.reserve(methodHashesMap.size());
+    for (const auto &[nameHash, symbolHash] : methodHashesMap) {
+        result->methodHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
     fast_sort(result->methodHashes);
 
-    result->hierarchyHash = patchHash(hierarchyHash);
-    result->classModuleHash = patchHash(classModuleHash);
-    result->typeArgumentHash = patchHash(typeArgumentHash);
-    result->typeMemberHash = patchHash(typeMemberHash);
-    result->fieldHash = patchHash(fieldHash);
-    result->methodHash = patchHash(methodHash);
+    result->hierarchyHash = LocalSymbolTableHashes::patchHash(hierarchyHash);
+    result->classModuleHash = LocalSymbolTableHashes::patchHash(classModuleHash);
+    result->typeArgumentHash = LocalSymbolTableHashes::patchHash(typeArgumentHash);
+    result->typeMemberHash = LocalSymbolTableHashes::patchHash(typeMemberHash);
+    result->fieldHash = LocalSymbolTableHashes::patchHash(fieldHash);
+    result->methodHash = LocalSymbolTableHashes::patchHash(methodHash);
     return result;
 }
 

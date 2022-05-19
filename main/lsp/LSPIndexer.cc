@@ -1,7 +1,7 @@
 #include "main/lsp/LSPIndexer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -118,34 +118,28 @@ bool LSPIndexer::canTakeFastPathInternal(
         ENFORCE(f->getFileHash() != nullptr);
         const auto &oldHash = *oldFile.getFileHash();
         const auto &newHash = *f->getFileHash();
-        ENFORCE(oldHash.definitions.hierarchyHash != core::DefinitionHash::HASH_STATE_NOT_COMPUTED);
-        if (newHash.definitions.hierarchyHash == core::DefinitionHash::HASH_STATE_INVALID) {
-            ENFORCE(newHash.definitions.classModuleHash == core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.typeArgumentHash == core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.typeMemberHash == core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.fieldHash == core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.methodHash == core::DefinitionHash::HASH_STATE_INVALID);
+        ENFORCE(oldHash.localSymbolTableHashes.hierarchyHash != core::LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED);
+        if (newHash.localSymbolTableHashes.isInvalidParse()) {
             logger.debug("Taking slow path because {} has a syntax error", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
             return false;
         }
 
-        if (newHash.definitions.hierarchyHash != core::DefinitionHash::HASH_STATE_INVALID &&
-            newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-            logger.debug("Taking slow path because {} has changed definitions", f->path());
-            ENFORCE(newHash.definitions.classModuleHash != core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.typeArgumentHash != core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.typeMemberHash != core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.fieldHash != core::DefinitionHash::HASH_STATE_INVALID);
-            ENFORCE(newHash.definitions.methodHash != core::DefinitionHash::HASH_STATE_INVALID);
+        if (!newHash.localSymbolTableHashes.isInvalidParse() &&
+            newHash.localSymbolTableHashes.hierarchyHash != oldHash.localSymbolTableHashes.hierarchyHash) {
+            logger.debug("Taking slow path because {} has changed localSymbolTableHashes", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
             // Also record some information about what might have changed.
-            const bool classesDiffer = newHash.definitions.classModuleHash != oldHash.definitions.classModuleHash;
+            const bool classesDiffer =
+                newHash.localSymbolTableHashes.classModuleHash != oldHash.localSymbolTableHashes.classModuleHash;
             const bool typeArgumentsDiffer =
-                newHash.definitions.typeArgumentHash != oldHash.definitions.typeArgumentHash;
-            const bool typeMembersDiffer = newHash.definitions.typeMemberHash != oldHash.definitions.typeMemberHash;
-            const bool fieldsDiffer = newHash.definitions.fieldHash != oldHash.definitions.fieldHash;
-            const bool methodsDiffer = newHash.definitions.methodHash != oldHash.definitions.methodHash;
+                newHash.localSymbolTableHashes.typeArgumentHash != oldHash.localSymbolTableHashes.typeArgumentHash;
+            const bool typeMembersDiffer =
+                newHash.localSymbolTableHashes.typeMemberHash != oldHash.localSymbolTableHashes.typeMemberHash;
+            const bool fieldsDiffer =
+                newHash.localSymbolTableHashes.fieldHash != oldHash.localSymbolTableHashes.fieldHash;
+            const bool methodsDiffer =
+                newHash.localSymbolTableHashes.methodHash != oldHash.localSymbolTableHashes.methodHash;
             const uint32_t differCount = int(classesDiffer) + int(typeArgumentsDiffer) + int(typeMembersDiffer) +
                                          int(fieldsDiffer) + int(methodsDiffer);
             if (classesDiffer) {

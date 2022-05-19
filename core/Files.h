@@ -12,7 +12,7 @@
 
 namespace sorbet::core {
 class GlobalState;
-struct DefinitionHash;
+struct LocalSymbolTableHashes;
 struct FileHash;
 namespace serialize {
 class SerializerImpl;

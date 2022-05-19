@@ -43,13 +43,13 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 
 // In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
 // methods in a file.
-bool validateMethodHashesHaveSameMethods(const std::vector<core::DefinitionFingerprint> &a,
-                                         const std::vector<core::DefinitionFingerprint> &b) {
+bool validateMethodHashesHaveSameMethods(const std::vector<core::SymbolHash> &a,
+                                         const std::vector<core::SymbolHash> &b) {
     if (a.size() != b.size()) {
         return false;
     }
 
-    core::DefinitionFingerprint previousHash;
+    core::SymbolHash previousHash; // Initializes to <0, 0>.
     auto bIt = b.begin();
     for (const auto &methodA : a) {
         const auto &methodB = *bIt;
@@ -241,7 +241,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        vector<core::DefinitionFingerprint> changedMethodHashes;
+        vector<core::SymbolHash> changedMethodHashes;
         for (auto &f : updates.updatedFiles) {
             auto fref = gs->findFileByPath(f->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -257,8 +257,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             if (fref.exists()) {
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
-                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->definitions.methodHashes;
-                const auto &newMethodHashes = f->getFileHash()->definitions.methodHashes;
+                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes.methodHashes;
+                const auto &newMethodHashes = f->getFileHash()->localSymbolTableHashes.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
                 ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),

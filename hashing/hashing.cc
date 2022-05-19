@@ -3,7 +3,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
-#include "core/NameHash.h"
+#include "core/FileHash.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
@@ -69,7 +69,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
             auto view = string_view{result.GetString(), result.GetLength()};
             logger.debug(view);
 
-            return make_unique<core::FileHash>(core::DefinitionHash::invalid(), move(usageHash));
+            return make_unique<core::FileHash>(core::LocalSymbolTableHashes::invalidParse(), move(usageHash));
         }
     }
 
