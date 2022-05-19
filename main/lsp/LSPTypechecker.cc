@@ -237,10 +237,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
     vector<core::ShortNameHash> changedMethodHashes;
+    vector<core::ShortNameHash> changedFieldHashes;
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
         vector<core::SymbolHash> changedMethodSymbolHashes;
+        vector<core::SymbolHash> changedFieldSymbolHashes;
         for (auto &updatedFile : updates.updatedFiles) {
             auto fref = gs->findFileByPath(updatedFile->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -256,8 +258,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             if (fref.exists()) {
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
-                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes.methodHashes;
-                const auto &newMethodHashes = updatedFile->getFileHash()->localSymbolTableHashes.methodHashes;
+                const auto &oldSymbolHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes;
+                const auto &newSymbolHashes = updatedFile->getFileHash()->localSymbolTableHashes;
+                const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
+                const auto &newMethodHashes = newSymbolHashes.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
                 ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
@@ -268,6 +272,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 // deduped later.
                 set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
                                newMethodHashes.end(), std::back_inserter(changedMethodSymbolHashes));
+
+                const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
+                const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
+
+                ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes),
+                        "definitionHash should have failed");
+
+                set_difference(oldFieldHashes.begin(), oldFieldHashes.end(), newFieldHashes.begin(),
+                               newFieldHashes.end(), std::back_inserter(changedFieldSymbolHashes));
 
                 gs->replaceFile(fref, updatedFile);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
@@ -281,6 +294,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             changedMethodHashes.push_back(changedMethodSymbolHashes.nameHash);
         }
         core::ShortNameHash::sortAndDedupe(changedMethodHashes);
+        changedFieldHashes.reserve(changedFieldSymbolHashes.size());
+        absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedFieldHashes),
+                          [](const auto &symhash) { return symhash.nameHash; });
+        core::ShortNameHash::sortAndDedupe(changedFieldHashes);
     }
 
     int i = -1;
@@ -303,6 +320,16 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         if (!intersection.empty()) {
             auto ref = core::FileRef(i);
             config->logger->debug("Added {} to update set as used a changed method",
+                                  !ref.exists() ? "" : ref.data(*gs).path());
+            subset.emplace_back(ref);
+            continue;
+        }
+
+        std::set_intersection(changedFieldHashes.begin(), changedFieldHashes.end(), oldHash.usages.symbols.begin(),
+                              oldHash.usages.symbols.end(), std::back_inserter(intersection));
+        if (!intersection.empty()) {
+            auto ref = core::FileRef(i);
+            config->logger->debug("Added {} to update set as used a changed field symbol",
                                   !ref.exists() ? "" : ref.data(*gs).path());
             subset.emplace_back(ref);
         }
