@@ -3658,6 +3658,16 @@ public:
     }
 } Kernel_proc;
 
+class Kernel_nil_p : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto intersection = Types::all(gs, args.selfType, core::Types::nilClass());
+        if (intersection.isBottom()) {
+            res.returnType = core::Types::falseClass();
+        }
+    }
+} Kernel_nil_p;
+
 class Enumerable_toH : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
@@ -3888,6 +3898,7 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::nil_p(), &Kernel_nil_p},
 
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 

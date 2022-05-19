@@ -13,7 +13,11 @@ end
 
 sig {params(x: String).void}
 def example3(x)
-  T.reveal_type(x.nil?) # error: `T::Boolean`
+  T.reveal_type(x.nil?) # error: `FalseClass`
+
+  if x.nil?
+    puts 'hello' # error: This code is unreachable
+  end
 end
 
 sig {params(x: Object).void}
