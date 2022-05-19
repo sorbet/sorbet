@@ -43,8 +43,7 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 
 // In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
 // methods in a file.
-bool validateMethodHashesHaveSameMethods(const std::vector<core::SymbolHash> &a,
-                                         const std::vector<core::SymbolHash> &b) {
+bool validateIdenticalFingerprints(const std::vector<core::SymbolHash> &a, const std::vector<core::SymbolHash> &b) {
     if (a.size() != b.size()) {
         return false;
     }
@@ -261,7 +260,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 const auto &newMethodHashes = updatedFile->getFileHash()->localSymbolTableHashes.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
-                ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),
+                ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
                         "definitionHash should have failed");
 
                 // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
