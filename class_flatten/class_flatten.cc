@@ -91,9 +91,14 @@ public:
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
 
-            // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
-            // available to the containing static-init
-            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+            // We only need a representation of the runtime definition of the class in the
+            // containing static-init if the file is compiled; such a definition is just
+            // noise otherwise.
+            if (ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
+                replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+            } else {
+                replacement = ast::MK::EmptyTree();
+            }
         }
         ENFORCE(!sym.data(ctx)->arguments.empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.show(ctx));
