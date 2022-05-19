@@ -1,0 +1,8 @@
+test/cli/conflicting-namespace/b.rb:4: `Foo::Bar` is a common prefix in multiple files https://srb.help/4022
+     4 |  module Bar
+          ^^^^^^^^^^
+  Note:
+    Additional file: `test/cli/conflicting-namespace/a.rb`
+Errors: 1
+without --stripe-mode-namespace-collision-check-experimental
+No errors! Great job.
