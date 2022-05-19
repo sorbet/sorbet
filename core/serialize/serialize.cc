@@ -266,21 +266,21 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     auto methodHashSize = p.getU4();
     ret.localSymbolTableHashes.methodHashes.reserve(methodHashSize);
     for (int it = 0; it < methodHashSize; it++) {
-        NameHash key;
+        ShortNameHash key;
         key._hashValue = p.getU4();
         ret.localSymbolTableHashes.methodHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
     ret.usages.symbols.reserve(constantsSize);
     for (int it = 0; it < constantsSize; it++) {
-        NameHash key;
+        ShortNameHash key;
         key._hashValue = p.getU4();
         ret.usages.symbols.emplace_back(key);
     }
     auto sendsSize = p.getU4();
     ret.usages.sends.reserve(sendsSize);
     for (int it = 0; it < sendsSize; it++) {
-        NameHash key;
+        ShortNameHash key;
         key._hashValue = p.getU4();
         ret.usages.sends.emplace_back(key);
     }

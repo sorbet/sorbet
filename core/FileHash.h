@@ -4,51 +4,51 @@
 namespace sorbet::core {
 class NameRef;
 class GlobalState;
-class NameHash {
+class ShortNameHash {
 public:
-    /** Sorts an array of NameHashes and removes duplicates. */
-    static void sortAndDedupe(std::vector<core::NameHash> &hashes);
+    /** Sorts an array of ShortNameHashes and removes duplicates. */
+    static void sortAndDedupe(std::vector<core::ShortNameHash> &hashes);
 
-    NameHash(const GlobalState &gs, NameRef nm);
+    ShortNameHash(const GlobalState &gs, NameRef nm);
     inline bool isDefined() const {
         return _hashValue != 0;
     }
-    NameHash(const NameHash &nm) noexcept = default;
-    NameHash() noexcept : _hashValue(0){};
-    inline bool operator==(const NameHash &rhs) const noexcept {
+    ShortNameHash(const ShortNameHash &nm) noexcept = default;
+    ShortNameHash() noexcept : _hashValue(0){};
+    inline bool operator==(const ShortNameHash &rhs) const noexcept {
         ENFORCE(isDefined());
         ENFORCE(rhs.isDefined());
         return _hashValue == rhs._hashValue;
     }
 
-    inline bool operator!=(const NameHash &rhs) const noexcept {
+    inline bool operator!=(const ShortNameHash &rhs) const noexcept {
         return !(rhs == *this);
     }
 
-    inline bool operator<(const NameHash &rhs) const noexcept {
+    inline bool operator<(const ShortNameHash &rhs) const noexcept {
         return this->_hashValue < rhs._hashValue;
     }
 
     uint32_t _hashValue;
 };
 
-template <typename H> H AbslHashValue(H h, const NameHash &m) {
+template <typename H> H AbslHashValue(H h, const ShortNameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
 struct SymbolHash {
     // The hash of the symbol's name. Note that symbols with the same name owned by different
-    // symbols map to the same NameHash. This is fine, because our strategy for deciding which
+    // symbols map to the same ShortNameHash. This is fine, because our strategy for deciding which
     // downstream files to retypecheck is "any file that mentions any method with this name,"
     // regardless of which method symbol(s) that call might dispatch to.
-    NameHash nameHash;
+    ShortNameHash nameHash;
     // The combined hash of all method symbols with the given nameHash. If this changes, it tells us
     // that at least one method symbol with the given name changed in some way, including type
     // information.
     uint32_t symbolHash;
 
     SymbolHash() noexcept = default;
-    SymbolHash(NameHash nameHash, uint32_t symbolHash) noexcept : nameHash(nameHash), symbolHash(symbolHash) {}
+    SymbolHash(ShortNameHash nameHash, uint32_t symbolHash) noexcept : nameHash(nameHash), symbolHash(symbolHash) {}
 
     inline bool operator<(const SymbolHash &h) const noexcept {
         return this->nameHash < h.nameHash || (!(h.nameHash < this->nameHash) && this->symbolHash < h.symbolHash);
@@ -94,7 +94,7 @@ struct LocalSymbolTableHashes {
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
 
-    // Essentially a map from NameHash -> uint32_t, where keys are names of methods and values are
+    // Essentially a map from ShortNameHash -> uint32_t, where keys are names of methods and values are
     // Symbol hashes for all methods defined in the file with that name (on any owner).
     //
     // Stored as a vector instead of a map to optimize for set_difference and compact storage
@@ -148,13 +148,13 @@ struct LocalSymbolTableHashes {
 struct UsageHash {
     // A sorted, deduplicated list of the hashes of all the method names called
     // by this file.
-    std::vector<core::NameHash> sends;
+    std::vector<core::ShortNameHash> sends;
     // A sorted, deduplicated list of the hashes of all the names referenced in this
     // file that will wind up referencing `core::Symbol` structures.  This includes
     // the obvious constant names (`T::Hash` counts as two constant names), but also
     // the names of the classes/methods defined in the file as well as any
     // @instance/@@class variables.
-    std::vector<core::NameHash> symbols;
+    std::vector<core::ShortNameHash> symbols;
 };
 
 struct FileHash {

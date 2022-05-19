@@ -20,7 +20,7 @@ struct Options;
 namespace sorbet::hashing {
 
 /**
- * Contains logic pertaining to producing NameHashes for files, which are used in LSP mode to:
+ * Contains logic pertaining to producing ShortNameHashes for files, which are used in LSP mode to:
  * - Determine if a file change can be typechecked incrementally or not.
  * - Determine if a file contains a reference to a particular identifier (fast filter for _find references_).
  *
@@ -41,7 +41,7 @@ public:
      * For each `ParsedFile`, this function:
      * - Parses and indexes the file with `gs`.
      * - Checks if the file has a hash. If not, it uses the AST for hashing purposes, which involves copying and
-     * rewriting the AST to refer to NameRefs in a fresh GlobalState object. The NameHash is stored in the file object.
+     * rewriting the AST to refer to NameRefs in a fresh GlobalState object. The ShortNameHash is stored in the file object.
      *
      * This procedure is more efficient than indexing and computing file hashes independently as files are parsed from
      * source text only once. If kvstore is supplied, this method attempts to fetch trees from the cache.

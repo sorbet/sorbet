@@ -109,7 +109,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     ENFORCE(symbol.exists());
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();
-    const core::NameHash symNameHash(gs, symbol.name(gs));
+    const core::ShortNameHash symShortNameHash(gs, symbol.name(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     int i = -1;
     for (auto &file : typechecker.state().getFiles()) {
@@ -126,8 +126,8 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
 
         const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
         if (fileIsValid &&
-            (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-             std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symNameHash) != usedSymbolNames.end())) {
+            (std::find(usedSends.begin(), usedSends.end(), symShortNameHash) != usedSends.end() ||
+             std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symShortNameHash) != usedSymbolNames.end())) {
             frefs.emplace_back(ref);
         }
     }

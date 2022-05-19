@@ -9,9 +9,9 @@ namespace sorbet::core {
 uint32_t incZero(uint32_t a) {
     return a == 0 ? 1 : a;
 };
-NameHash::NameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
+ShortNameHash::ShortNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
 
-void NameHash::sortAndDedupe(std::vector<core::NameHash> &hashes) {
+void ShortNameHash::sortAndDedupe(std::vector<core::ShortNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
