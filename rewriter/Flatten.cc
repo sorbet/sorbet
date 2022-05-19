@@ -367,22 +367,21 @@ public:
         // Stash some stuff from the methodDef before we move it
         auto loc = methodDef.declLoc;
         auto name = methodDef.name;
-        auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
 
-        auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter()
-                    : methodDef.flags.isAttrReader    ? core::Names::attrReader()
-                                                      : core::Names::normal();
         auto discardable = methodDef.flags.discardDef;
         methods.addExpr(*md, move(tree));
 
         if (discardable) {
             return ast::MK::EmptyTree();
         } else if (!this->compiledFile) {
-            // TODO(froydnj) We have to return something here so things like `module_function`
-            // work correctly, but it would be extremely nice if we didn't have to return anything
-            // here, because there's no point in the vast majority of cases.
-            return ast::MK::Symbol(loc.copyWithZeroLength(), name);
+            // We need to return something here so things like `module_function` and method
+            // visibility tracking can work correctly.
+            return ast::MK::RuntimeMethodDefinition(loc, name, methodDef.flags.isSelfMethod);
         } else {
+            auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
+            auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter()
+                        : methodDef.flags.isAttrReader    ? core::Names::attrReader()
+                                                          : core::Names::normal();
             return ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
                                   loc.copyWithZeroLength(), ast::MK::Self(loc), ast::MK::Symbol(loc, name),
                                   ast::MK::Symbol(loc, kind));

@@ -63,6 +63,8 @@ public:
 
     ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr original);
 
+    ExpressionPtr postTransformRuntimeMethodDefinition(core::MutableContext ctx, ExpressionPtr original);
+
     ExpressionPtr preTransformBlock(core::MutableContext ctx, ExpressionPtr original);
     ExpressionPtr postTransformBlock(core::MutableContext ctx, ExpressionPtr original);
 
@@ -81,6 +83,7 @@ GENERATE_HAS_MEMBER_VISITOR(preTransformLocal);
 GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedConstantLit);
 GENERATE_HAS_MEMBER_VISITOR(preTransformConstantLit);
 GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral);
+GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition);
 
 #define GENERATE_POSTPONE_PRECLASS(X)                                                                            \
     GENERATE_CALL_MEMBER(preTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
@@ -131,6 +134,7 @@ GENERATE_POSTPONE_POSTCLASS(ConstantLit);
 GENERATE_POSTPONE_POSTCLASS(Block);
 GENERATE_POSTPONE_POSTCLASS(InsSeq);
 GENERATE_POSTPONE_POSTCLASS(Cast);
+GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition);
 
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
@@ -161,6 +165,7 @@ private:
     static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>(), "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>(), "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformLocal<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformRuntimeMethodDefinition<FUNC>(), "use post*Transform instead");
 
     TreeMapper(FUNC &func) : func(func) {}
 
@@ -487,6 +492,14 @@ private:
         return v;
     }
 
+    ExpressionPtr mapRuntimeMethodDefinition(ExpressionPtr v, CTX ctx) {
+        if constexpr (HAS_MEMBER_postTransformRuntimeMethodDefinition<FUNC>()) {
+            return CALL_MEMBER_postTransformRuntimeMethodDefinition<FUNC>::call(func, ctx, std::move(v));
+        }
+
+        return v;
+    }
+
     ExpressionPtr mapIt(ExpressionPtr what, CTX ctx) {
         if (what == nullptr) {
             return what;
@@ -592,6 +605,9 @@ private:
 
                 case Tag::InsSeq:
                     return mapInsSeq(std::move(what), ctx);
+
+                case Tag::RuntimeMethodDefinition:
+                    return mapRuntimeMethodDefinition(std::move(what), ctx);
             }
         } catch (SorbetException &e) {
             Exception::failInFuzzer();

@@ -63,6 +63,7 @@ enum class Tag {
     ZSuperArgs,
     Block,
     InsSeq,
+    RuntimeMethodDefinition,
 };
 
 // A mapping from tree type to its corresponding tag.
@@ -1110,6 +1111,25 @@ public:
     void _sanityCheck();
 };
 CheckSize(InsSeq, 56, 8);
+
+EXPRESSION(RuntimeMethodDefinition) {
+public:
+    // This should be equivalent to MethodDef.declLoc.
+    const core::LocOffsets loc;
+    core::NameRef name;
+    const bool isSelfMethod;
+
+    RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod);
+
+    ExpressionPtr deepCopy() const;
+
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
+
+    void _sanityCheck();
+};
+CheckSize(RuntimeMethodDefinition, 16, 8);
 
 EXPRESSION(EmptyTree) {
 public:

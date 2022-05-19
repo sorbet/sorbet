@@ -272,6 +272,24 @@ public:
         return tree;
     }
 
+    ast::ExpressionPtr postTransformRuntimeMethodDefinition(core::Context, ast::ExpressionPtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::RuntimeMethodDefinition>(tree);
+
+        // visibility toggle doesn't look at `self.*` methods, only instance methods
+        // (need to use `class << self` to use nullary private with singleton class methods)
+        if (original.isSelfMethod) {
+            return tree;
+        }
+
+        ENFORCE(!methodVisiStack.empty());
+        if (!methodVisiStack.back().has_value()) {
+            return tree;
+        }
+
+        foundDefs->addModifier(methodVisiStack.back()->withTarget(original.name));
+        return tree;
+    }
+
     void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
         auto target = unwrapLiteralToMethodName(ctx, arg);
         if (target.exists()) {
@@ -313,6 +331,8 @@ public:
                 return core::NameRef::noName();
             }
             return sym->asSymbol(ctx);
+        } else if (auto *def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
+            return def->name;
         } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
             if (send->fun != core::Names::keepDef() && send->fun != core::Names::keepSelfDef()) {
                 return core::NameRef::noName();

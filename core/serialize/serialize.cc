@@ -1327,6 +1327,14 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             break;
         }
 
+        case ast::Tag::RuntimeMethodDefinition: {
+            auto &a = ast::cast_tree_nonnull<ast::RuntimeMethodDefinition>(what);
+            pickle(p, a.loc);
+            p.putU4(a.name.rawId());
+            p.putU1(a.isSelfMethod);
+            break;
+        }
+
         default:
             Exception::raise("Unimplemented AST Node: {}", what.nodeName());
             break;
@@ -1586,6 +1594,12 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto sym = SymbolRef::fromRaw(p.getU4());
             auto orig = unpickleExpr(p, gs);
             return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
+        }
+        case ast::Tag::RuntimeMethodDefinition: {
+            auto loc = unpickleLocOffsets(p);
+            NameRef name = unpickleNameRef(p, gs);
+            auto isSelfMethod = p.getU1();
+            return ast::make_expression<ast::RuntimeMethodDefinition>(loc, name, isSelfMethod);
         }
     }
 

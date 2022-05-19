@@ -431,6 +431,10 @@ public:
                     core::Names::defineTopClassOrModule(), loc, 1, SendArgs(Constant(loc, klass)), flags);
     }
 
+    static ExpressionPtr RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod) {
+        return make_expression<ast::RuntimeMethodDefinition>(loc, name, isSelfMethod);
+    }
+
     static ExpressionPtr RaiseUnimplemented(core::LocOffsets loc) {
         auto kernel = Constant(loc, core::Symbols::Kernel());
         auto msg = String(loc, core::Names::rewriterRaiseUnimplemented());
