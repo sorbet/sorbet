@@ -173,7 +173,7 @@ public:
         llvm::Value *res{nullptr};
         if (auto *blk = mcctx.blkAsFunction()) {
             if (!cMethodWithBlock.has_value()) {
-                core::Loc loc{mcctx.irctx.cfg.file, send->argLocs.back()};
+                core::Loc loc{mcctx.cs.file, send->argLocs.back()};
                 failCompilation(cs, loc, "Unable to handle a block with this intrinsic");
             }
             auto *forwarder = generateForwarder(mcctx);

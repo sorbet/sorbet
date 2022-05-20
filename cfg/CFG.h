@@ -107,7 +107,7 @@ public:
      */
     int numLocalVariables() const;
 
-    // Stores MethodDef::loc (MethodDef::declLoc).
+    // Stores MethodDef::loc (not the MethodDef::declLoc).
     //
     // Thus, this usually spans the full body of the method def (recall that sometime methods are
     // created synthetically, not from method defs written in the source).
