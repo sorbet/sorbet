@@ -451,6 +451,7 @@ private:
         CALL_PRE(Cast);
 
         CALL_MAP(cast_tree_nonnull<Cast>(v).arg, ctx);
+        CALL_MAP(cast_tree_nonnull<Cast>(v).typeExpr, ctx);
 
         CALL_POST(Cast);
     }

@@ -1827,7 +1827,6 @@ class ResolveTypeMembersAndFieldsWalk {
     struct ResolveCastItem {
         core::FileRef file;
         core::SymbolRef owner;
-        ast::ExpressionPtr *typeArg;
         ast::Cast *cast;
     };
 
@@ -1928,11 +1927,11 @@ class ResolveTypeMembersAndFieldsWalk {
     // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
     // `ResolveCastItem` is not simple.
     [[nodiscard]] static bool tryResolveSimpleClassCastItem(core::Context ctx, ResolveCastItem &job) {
-        if (!ast::isa_tree<ast::ConstantLit>(*job.typeArg)) {
+        if (!ast::isa_tree<ast::ConstantLit>(job.cast->typeExpr)) {
             return false;
         }
 
-        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(*job.typeArg);
+        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(job.cast->typeExpr);
         if (!lit.symbol.isClassOrModule()) {
             return false;
         }
@@ -1955,7 +1954,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto allowRebind = false;
         auto allowTypeMember = true;
         job.cast->type = TypeSyntax::getResultType(
-            ctx, *job.typeArg, emptySig,
+            ctx, job.cast->typeExpr, emptySig,
             TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
     }
 
@@ -2769,24 +2768,24 @@ public:
                     // method context.
                     item.owner = ctx.owner.enclosingClass(ctx);
 
-                    auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.getPosArg(1)));
                     auto expr = std::move(send.getPosArg(0));
+                    auto typeExpr = std::move(send.getPosArg(1));
                     // We only do this for `bind` because `bind` doesn't participate in the same
                     // sort of pinning decisions that the other casts do. Hiding pinning errors from
                     // arbitrary synthetic lets and casts would push confusing behavior downstream.
                     auto fun = (send.fun == core::Names::bind() && send.flags.isRewriterSynthesized)
                                    ? core::Names::syntheticBind()
                                    : send.fun;
-                    auto cast = ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), fun);
+                    auto cast = ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), fun,
+                                                                std::move(typeExpr));
                     item.cast = ast::cast_tree<ast::Cast>(cast);
-                    item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).getPosArg(0);
 
                     // We should be able to resolve simple casts immediately.
                     if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
                         todoResolveCastItems_.emplace_back(move(item));
                     }
 
-                    tree = ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
+                    tree = std::move(cast);
                     return;
                 }
                 case core::Names::revealType().rawId():
