@@ -1468,6 +1468,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
+            [&](cfg::VolatileRead &i) {
+                tp.type = core::Types::untypedUntracked();
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
+            },
             [&](cfg::GetCurrentException &i) {
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
