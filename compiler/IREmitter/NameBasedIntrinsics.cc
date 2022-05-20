@@ -422,7 +422,7 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
                 // Failing compilation because as of this writing, this case is not produced by the desugarer, so
                 // the above code is untested. In theory, once the case is implemented in the desugarer, it should
                 // be okay to remove this.
-                failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+                failCompilation(cs, core::Loc(cs.file, send->receiverLoc),
                                 "internal error: arg 3 to call-with-splat has odd length > 1");
             } else {
                 kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {kwHash1}, "kwHash");
@@ -436,7 +436,7 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
         builder.CreateCall(cs.getFunction("sorbet_arrayPush"), {splatArray, kwHash});
     } else {
         // This should not be possible (desugarer will only pass nil or a tuple).
-        failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+        failCompilation(cs, core::Loc(cs.file, send->receiverLoc),
                         "internal error: arg 3 to call-with-splat has neither nil nor tuple type");
     }
 
