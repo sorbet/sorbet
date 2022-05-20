@@ -71,7 +71,7 @@ public:
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         if (cfg) {
             for (auto &extension : ctx.state.semanticExtensions) {
-                extension->typecheck(ctx, *cfg, m);
+                extension->typecheck(ctx, ctx.file, *cfg, m);
             }
         }
         cfgs.push_back(move(cfg));

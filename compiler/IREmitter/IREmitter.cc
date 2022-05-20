@@ -480,7 +480,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     }
                     const auto a = irctx.rubyBlockArgs[rubyRegionId][i];
                     if (!a.data(cfg)._name.exists()) {
-                        failCompilation(cs, core::Loc(cfg.file, md.declLoc),
+                        failCompilation(cs, core::Loc(cs.file, md.declLoc),
                                         "this method has a block argument construct that's not supported");
                     }
 

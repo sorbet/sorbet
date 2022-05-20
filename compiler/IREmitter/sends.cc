@@ -460,11 +460,11 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     // gone wrong.
     if (auto *at = core::cast_type<core::AppliedType>(send->recv.type)) {
         if (at->klass == core::Symbols::MagicSingleton()) {
-            failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+            failCompilation(cs, core::Loc(cs.file, send->receiverLoc),
                             "No runtime implemention for <Magic> method exists");
         }
         if (at->klass == core::Symbols::Sorbet_Private_StaticSingleton()) {
-            failCompilation(cs, core::Loc(irctx.cfg.file, send->receiverLoc),
+            failCompilation(cs, core::Loc(cs.file, send->receiverLoc),
                             "No runtime implementation for Sorbet::Private::Static method exists");
         }
     }
