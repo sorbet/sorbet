@@ -185,8 +185,9 @@ public:
 
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override{};
 
-    virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg, ast::MethodDef &md) const override {
-        if (!shouldCompile(gs, cfg.file)) {
+    virtual void typecheck(const core::GlobalState &gs, core::FileRef file, cfg::CFG &cfg,
+                           ast::MethodDef &md) const override {
+        if (!shouldCompile(gs, file)) {
             return;
         }
 
@@ -217,7 +218,7 @@ public:
         // TODO: Figure out why this isn't true
         // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(),
         // loc.toString(gs));
-        ENFORCE(cfg.file.exists());
+        ENFORCE(file.exists());
         if (!module) {
             ENFORCE(threadState->globalConstructorsEntry == nullptr);
             ENFORCE(debug == nullptr);
@@ -237,14 +238,14 @@ public:
 
             // NOTE: we use C here because our generated functions follow its abi
             auto language = llvm::dwarf::DW_LANG_C;
-            auto filename = cfg.file.data(gs).path();
+            auto filename = file.data(gs).path();
             auto isOptimized = false;
             auto runtimeVersion = 0;
             compUnit = debug->createCompileUnit(
                 language, debug->createFile(llvm::StringRef(filename.data(), filename.size()), "."), "Sorbet LLVM",
                 isOptimized, "", runtimeVersion);
 
-            threadState->file = cfg.file;
+            threadState->file = file;
             threadState->stringTable.clear();
             threadState->idTable.clear();
             threadState->rubyStringTable.clear();
@@ -261,7 +262,7 @@ public:
             }
 
         } else {
-            ENFORCE(threadState->file == cfg.file);
+            ENFORCE(threadState->file == file);
             ENFORCE(threadState->globalConstructorsEntry != nullptr);
         }
         ENFORCE(threadState->file.exists());
@@ -275,7 +276,7 @@ public:
         };
         try {
             compiler::IREmitter::run(state, cfg, md);
-            string fileName = objectFileName(gs, cfg.file);
+            string fileName = objectFileName(gs, file);
             compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
             std::move(dropInternalState).Cancel();
         } catch (sorbet::compiler::AbortCompilation &) {
@@ -287,7 +288,7 @@ public:
             // This exception is thrown from within an optimizer pass, where GlobalState
             // is not available, so we need to emit an error here, where we do have
             // access to GlobalState.
-            if (auto e = gs.beginError(core::Loc(cfg.file, 0, 0), core::errors::Compiler::OptimizerFailure)) {
+            if (auto e = gs.beginError(core::Loc(file, 0, 0), core::errors::Compiler::OptimizerFailure)) {
                 e.setHeader("{}", oe.what());
             }
         }
