@@ -786,6 +786,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Cast &c) {
+                // This is kind of gross, but it is the only way to ensure that the bits in the
+                // type expression make it into the CFG for LSP to hit on their locations.
+                LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+                current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
+                // Ensure later passes don't delete the results of the typeExpr.
+                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<VolatileRead>(deadSym));
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 core::LocOffsets argLoc = c.arg.loc();
                 current = walk(cctx.withTarget(tmp), c.arg, current);
