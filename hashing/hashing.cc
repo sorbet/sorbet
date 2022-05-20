@@ -78,7 +78,6 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
 
     core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
     auto workers = WorkerPool::create(0, lgs->tracer());
-    // TODO(jez)
     realmain::pipeline::resolve(lgs, move(single), opts(), *workers);
 
     return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash));
