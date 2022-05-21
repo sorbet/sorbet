@@ -1122,7 +1122,9 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 2);
     fmt::format_to(std::back_inserter(buf), "arg = {}\n", this->arg.showRaw(gs, tabs + 2));
     printTabs(buf, tabs + 2);
-    fmt::format_to(std::back_inserter(buf), "type = {},\n", this->type.toString(gs));
+    fmt::format_to(std::back_inserter(buf), "type = {},\n", this->type.showWithMoreInfo(gs));
+    printTabs(buf, tabs + 2);
+    fmt::format_to(std::back_inserter(buf), "typeExpr = {},\n", this->typeExpr.showRaw(gs, tabs + 2));
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}\n");
 
