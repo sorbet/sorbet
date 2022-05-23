@@ -5,6 +5,10 @@ Running autogen with no changes: should exit early
 Checking 1 changed files
 All constant hashes unchanged; exiting
 
+Running autogen with no changes (and './' path): should exit early
+Checking 1 changed files
+All constant hashes unchanged; exiting
+
 Running autogen with non-constant-related changes: should exit early
 Checking 1 changed files
 All constant hashes unchanged; exiting
@@ -14,3 +18,6 @@ Checking 1 changed files
 Rerunning autogen: constant hash for file `example.rb` does not match stored hash
 Autogen still needs rerunning
 No errors! Great job.
+
+Producing a new constant cache with './' paths should produce the same cache file:
+Same!
