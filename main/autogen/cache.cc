@@ -13,6 +13,13 @@ namespace sorbet::autogen {
 
 const size_t MAX_SKIP_AMOUNT = 100;
 
+string_view trimPath(string_view path) {
+    if (path.size() > 2 && path[0] == '.' && path[1] == '/') {
+        return path.substr(2);
+    }
+    return path;
+}
+
 bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, const vector<string> &changedFiles) {
     // this is here as an escape valve: if a _bunch_ of files change
     // all at once, then don't let us skip at all. This should pretty
@@ -31,12 +38,17 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
         return false;
     }
 
-    auto changedFileSet = UnorderedSet<string>(changedFiles.begin(), changedFiles.end());
+    UnorderedSet<string_view> changedFileSet;
+    for (auto path : changedFiles) {
+        changedFileSet.insert(trimPath(path));
+    }
+
+    // auto changedFileSet = UnorderedSet<string>(changedFiles.begin(), changedFiles.end());
     auto cacheFile = FileOps::read(cachePath);
     auto cache = AutogenCache::unpackForFiles(cacheFile, changedFileSet);
 
-    for (auto &file : changedFiles) {
-        if (cache.constantHashMap().count(file) == 0) {
+    for (auto &file : changedFileSet) {
+        if (cache.constantHashMap().count(string(file)) == 0) {
             gs.tracer().info("Rerunning autogen: could not find `{}` in constant cache", file);
             return false;
         }
@@ -74,7 +86,7 @@ bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, 
 // this doesn't load the whole cache, since we never need to _consult_
 // the whole cache. Instead, we let it know which paths we care about
 // and load only those
-AutogenCache AutogenCache::unpackForFiles(string_view file_contents, const UnorderedSet<string> &changedFiles) {
+AutogenCache AutogenCache::unpackForFiles(string_view file_contents, const UnorderedSet<string_view> &changedFiles) {
     // we'll initialize an empty one and add files as we find them
     AutogenCache cache;
 
@@ -138,7 +150,8 @@ string AutogenCache::pack() const {
     mpack_writer_init_growable(&writer, &data, &size);
     mpack_start_map(&writer, _constantHashMap.size());
     for (auto &[path, hash] : _constantHashMap) {
-        mpack_write_str(&writer, path.data(), path.size());
+        auto shortPath = trimPath(path);
+        mpack_write_str(&writer, shortPath.data(), shortPath.size());
         mpack_write_u64(&writer, hash);
     }
     mpack_finish_map(&writer);

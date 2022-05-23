@@ -17,7 +17,7 @@ public:
     static bool canSkipAutogen(core::GlobalState &gs, std::string_view cachePath,
                                const std::vector<std::string> &changedFiles);
 
-    static AutogenCache unpackForFiles(std::string_view path, const UnorderedSet<std::string> &changedFiles);
+    static AutogenCache unpackForFiles(std::string_view path, const UnorderedSet<std::string_view> &changedFiles);
 
     AutogenCache(UnorderedMap<std::string, unsigned int> constantHashMap) : _constantHashMap(constantHashMap){};
     AutogenCache() = default;
