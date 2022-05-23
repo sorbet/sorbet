@@ -221,6 +221,11 @@ public:
     std::string toString(const core::GlobalState &gs) const {
         return toStringWithTabs(gs);
     }
+
+    void swap(ExpressionPtr &other) noexcept {
+        using std::swap;
+        swap(this->ptr, other.ptr);
+    }
 };
 
 template <class E, typename... Args> ExpressionPtr make_expression(Args &&...args) {
@@ -230,7 +235,17 @@ template <class E, typename... Args> ExpressionPtr make_expression(Args &&...arg
 struct ParsedFile {
     ExpressionPtr tree;
     core::FileRef file;
+
+    void swap(ParsedFile &other) noexcept {
+        using std::swap;
+        this->tree.swap(other.tree);
+        swap(this->file, other.file);
+    }
 };
+
+inline void swap(ParsedFile &a, ParsedFile &b) {
+    a.swap(b);
+}
 
 /**
  * Stores a vector of `ParsedFile`s. May be empty if pass was canceled or encountered an error.

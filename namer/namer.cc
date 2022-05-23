@@ -30,6 +30,11 @@ struct SymbolFinderResult {
     unique_ptr<core::FoundDefinitions> names;
 };
 
+void swap(SymbolFinderResult &a, SymbolFinderResult &b) {
+    a.tree.swap(b.tree);
+    a.names.swap(b.names);
+}
+
 core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
     ENFORCE(ctx.owner.exists() && ctx.owner != core::Symbols::todo());
     auto owner = ctx.owner.enclosingClass(ctx);
