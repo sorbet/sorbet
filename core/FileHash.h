@@ -157,6 +157,13 @@ struct UsageHash {
     std::vector<core::NameHash> symbols;
 };
 
+// This is stored on the core::File object directly, which is then cached.
+//
+// It's important that nothing in this structure (including transitively) contains information
+// that's specific to a particular GlobalState. This is why, e.g., all core::NameRefs are hashed
+// instead of storing their IDs. FileHash contains FoundDefinitionRef IDs transitively, but those
+// IDs auto-increment from 0 based on the order of definitions in the file, regardless of the
+// contents of a GlobalState.
 struct FileHash {
     LocalSymbolTableHashes localSymbolTableHashes;
     UsageHash usages;

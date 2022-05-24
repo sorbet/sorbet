@@ -194,7 +194,8 @@ bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit,
 bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
-    // Avoid expensively computing file hashes if there are too many files.
+    // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
+    // do a lot of hashing just to realize that something changed, requiring a slowpath anyways.
     if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
         config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
                               changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
