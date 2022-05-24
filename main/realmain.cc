@@ -751,7 +751,9 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
 
             indexed = pipeline::package(*gs, move(indexed), opts, *workers);
-            indexed = move(pipeline::name(*gs, move(indexed), opts, *workers).result());
+            // Only need to compute FoundMethodHashes when running to compute a FileHash
+            auto foundMethodHashes = nullptr;
+            indexed = move(pipeline::name(*gs, move(indexed), opts, *workers, foundMethodHashes).result());
 
             autogen::AutoloaderConfig autoloaderCfg;
             {
@@ -765,7 +767,9 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autoloaderCfg, *workers, indexed);
 #endif
         } else {
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
+            // Only need to compute FoundMethodHashes when running to compute a FileHash
+            auto foundMethodHashes = nullptr;
+            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundMethodHashes).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

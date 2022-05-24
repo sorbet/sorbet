@@ -238,7 +238,8 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             core::UnfreezeNameTable nameTable(gs);
             auto emptyWorkers = WorkerPool::create(0, gs.tracer());
 
-            auto result = sorbet::namer::Namer::run(gs, move(what), *emptyWorkers);
+            auto foundMethodHashes = nullptr;
+            auto result = sorbet::namer::Namer::run(gs, move(what), *emptyWorkers, foundMethodHashes);
             // Cancellation cannot occur during incremental namer.
             ENFORCE(result.hasResult());
             what = move(result.result());
@@ -755,11 +756,11 @@ ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, vec
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers) {
+                                 WorkerPool &workers, core::FoundMethodHashes *foundMethodHashes) {
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    auto result = namer::Namer::run(gs, move(what), workers);
+    auto result = namer::Namer::run(gs, move(what), workers, foundMethodHashes);
 
     return result;
 }
@@ -840,12 +841,13 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 }
 
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers) {
+                                    const options::Options &opts, WorkerPool &workers,
+                                    core::FoundMethodHashes *foundMethodHashes) {
     try {
         // packager intentionally runs outside of rewriter so that its output does not get cached.
         what = package(*gs, move(what), opts, workers);
 
-        auto result = name(*gs, move(what), opts, workers);
+        auto result = name(*gs, move(what), opts, workers, foundMethodHashes);
         if (!result.hasResult()) {
             return result;
         }
