@@ -24,7 +24,7 @@ begin
       <emptyTree>
     end
 
-    ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES
+    ::Routes::Helpers::MAX_NUM_ADDITIONAL_DEVBOXES
   end
   <emptyTree>
 end

@@ -274,7 +274,7 @@ private:
             core::SymbolRef resolved = id->symbol.dealias(ctx);
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
-                result = resolved.asClassOrModuleRef().data(ctx)->findMember(ctx, c.cnst);
+                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, c.cnst);
             }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
