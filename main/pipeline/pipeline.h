@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "core/FileHash.h"
 #include "main/options/options.h"
 
 namespace sorbet::core::lsp {
@@ -25,7 +26,8 @@ std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::Par
                                      const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers);
+                                    const options::Options &opts, WorkerPool &workers,
+                                    core::FoundMethodHashes *foundMethodHashes);
 
 std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 const options::Options &opts);
@@ -35,7 +37,7 @@ std::vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalStat
                                                           const options::Options &opts);
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers);
+                                 WorkerPool &workers, core::FoundMethodHashes *foundMethodHashes);
 
 ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 WorkerPool &workers);

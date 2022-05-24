@@ -479,7 +479,9 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 }
             }
         }
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
+        // Only need to compute FoundMethodHashes when running to compute a FileHash
+        auto foundMethodHashes = nullptr;
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundMethodHashes);
         if (!maybeResolved.hasResult()) {
             return;
         }

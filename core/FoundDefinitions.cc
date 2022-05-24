@@ -1,4 +1,5 @@
 #include "core/FoundDefinitions.h"
+#include "absl/base/casts.h"
 
 using namespace std;
 
