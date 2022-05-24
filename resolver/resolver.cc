@@ -737,8 +737,8 @@ private:
         return true;
     }
 
-    static bool resolveConstants(const core::GlobalState &gs, vector<ResolveItems<ResolutionItem>> &jobs,
-                                 WorkerPool &workers) {
+    static bool resolveResolutionItems(const core::GlobalState &gs, vector<ResolveItems<ResolutionItem>> &jobs,
+                                       WorkerPool &workers) {
         if (jobs.empty()) {
             return false;
         }
@@ -1609,7 +1609,7 @@ public:
                 }
                 {
                     Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                    bool resolvedSomeConstants = resolveConstants(gs, todo, workers);
+                    bool resolvedSomeConstants = resolveResolutionItems(gs, todo, workers);
                     progress = progress || resolvedSomeConstants;
                 }
                 {
