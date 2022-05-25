@@ -507,7 +507,10 @@ public:
  */
 class SymbolDefiner {
     const core::FoundDefinitions foundDefs;
+    const optional<core::FoundMethodHashes> oldFoundMethodHashes;
+    // See getOwnerSymbol
     vector<core::ClassOrModuleRef> definedClasses;
+    // See getOwnerSymbol
     vector<core::MethodRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
@@ -1199,8 +1202,65 @@ class SymbolDefiner {
         }
     }
 
+    // TODO(jez) This is a lot of GlobalState-looking code. Should we move it there?
+    // TODO(jez) This no longer uses NameHash. Pick a different name?
+    // TODO(jez) This only needs to run once per unique owner, but we run it once per found definition
+    void deleteViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
+        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.ownerIdx);
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+
+        // TODO(jez) I don't think we really need the arityHash anymore now that we're only looking
+        // at the owner. Worth removing that? Or keep it in, on the chance we might need it later?
+        // Honestly, we don't even need the nameHash at this rate, just the ownerIdx
+
+        // Because a change to classes would have take the slow path, should be safe
+        // to look up old owner in current foundDefs.
+        auto ownerSymbol = getOwnerSymbol(ownerRef);
+        ENFORCE(ownerSymbol.isClassOrModule());
+        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.isSelfMethod);
+        vector<core::MethodRef> toDelete;
+        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
+            if (!memberSym.isMethod()) {
+                continue;
+            }
+            auto memberMethod = memberSym.asMethodRef();
+
+            auto memberNameToHash = memberName;
+            if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
+                auto &uniqueData = memberNameToHash.dataUnique(ctx);
+                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
+                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
+                    memberNameToHash = uniqueData->original;
+                }
+            }
+
+            auto memberFullNameHash = core::FullNameHash(ctx, memberNameToHash);
+            if (memberFullNameHash != oldDefHash.nameHash) {
+                continue;
+            }
+
+            toDelete.emplace_back(memberMethod);
+        }
+
+        // TODO(jez) Find somewhere appropriate for this comment
+        // Only delete if the thing we found had the hash we expected to find.
+        // If we found something else, it likely means that even though there was previously a FoundMethod
+        // that would have caused a method with this name to be defined, it was delete and a
+        // different method with the same name took its place (that other method might not have been deleted,
+        // but if it was, we'll get to delete it on some future iteration.)
+        for (auto oldMethod : toDelete) {
+            // TODO(jez) Double check that if you end up removing all references in all files on a
+            // fast path, that the method does in fact get deleted.
+            oldMethod.data(ctx)->removeLocsForFile(ctx.file);
+            if (oldMethod.data(ctx)->locs().empty()) {
+                ctx.state.deleteMethodSymbol(oldMethod);
+            }
+        }
+    }
+
 public:
-    SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs) : foundDefs(move(*foundDefs)) {}
+    SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs, optional<core::FoundMethodHashes> oldFoundMethodHashes)
+        : foundDefs(move(*foundDefs)), oldFoundMethodHashes(move(oldFoundMethodHashes)) {}
 
     void run(core::MutableContext ctx) {
         definedClasses.reserve(foundDefs.klasses().size());
@@ -1208,6 +1268,20 @@ public:
 
         for (auto ref : foundDefs.nonMethodDefinitions()) {
             defineNonMethodSingle(ctx, ref);
+        }
+
+        // TODO(jez) This currently interleaves deleting and defining across files.
+        // It's possible that this causes problems at some point? Though I haven't found a test case.
+        // That being said, if it does cause problems, we should be able to not interleave, and have
+        // all the `nonMethodDefinitions` from all files get defined, then delete all the old
+        // methods, then define all the methods.
+        if (oldFoundMethodHashes.has_value()) {
+            for (const auto &oldMethodHash : oldFoundMethodHashes.value()) {
+                // Since we've already processed all the non-method symbols (which includes classes), we now
+                // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
+                // ref in the new definedClasses vector.
+                deleteViaFullNameHash(ctx, oldMethodHash);
+            }
         }
 
         for (auto &method : foundDefs.methods()) {
@@ -1861,8 +1935,10 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     return allFoundDefinitions;
 }
 
-ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
-                                          WorkerPool &workers, core::FoundMethodHashes *foundMethodHashesOut) {
+ast::ParsedFilesOrCancelled
+defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions, WorkerPool &workers,
+              UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
+              core::FoundMethodHashes *foundMethodHashesOut) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
@@ -1879,8 +1955,12 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
             }
             return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
         }
-        core::MutableContext ctx(gs, core::Symbols::root(), fileFoundDefinitions.tree.file);
-        SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names));
+        auto fref = fileFoundDefinitions.tree.file;
+        core::MutableContext ctx(gs, core::Symbols::root(), fref);
+        auto oldFoundMethodHashes = oldFoundMethodHashesForFiles.find(fref) == oldFoundMethodHashesForFiles.end()
+                                        ? optional<core::FoundMethodHashes>()
+                                        : std::move(oldFoundMethodHashesForFiles[fref]);
+        SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names), move(oldFoundMethodHashes));
         output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
         if (foundMethodHashesOut != nullptr) {
@@ -2021,7 +2101,36 @@ ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::Parsed
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    auto result = defineSymbols(gs, move(foundDefs), workers, foundMethodHashesOut);
+    // There were no old FoundMethodHashes; just defineSymbols like normal.
+    auto oldFoundMethodHashesForFiles = UnorderedMap<core::FileRef, core::FoundMethodHashes>{};
+    auto result =
+        defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundMethodHashesForFiles), foundMethodHashesOut);
+    if (!result.hasResult()) {
+        return result;
+    }
+    auto bestEffort = false;
+    trees = symbolizeTrees(gs, move(result.result()), workers, bestEffort);
+    return trees;
+}
+
+ast::ParsedFilesOrCancelled
+Namer::runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
+                      UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
+                      WorkerPool &workers) {
+    // TODO(jez) Clever way to de-dup this with Namer::run ?
+    auto foundDefs = findSymbols(gs, move(trees), workers);
+    if (gs.epochManager->wasTypecheckingCanceled()) {
+        trees.reserve(foundDefs.size());
+        for (auto &def : foundDefs) {
+            trees.emplace_back(move(def.tree));
+        }
+        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+    }
+
+    // We should never be combining Namer::runIncremental with the namer call that produces FileHashes
+    auto foundMethodHashesOut = nullptr;
+    auto result =
+        defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundMethodHashesForFiles), foundMethodHashesOut);
     if (!result.hasResult()) {
         return result;
     }

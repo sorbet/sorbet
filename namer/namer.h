@@ -23,6 +23,19 @@ public:
     static ast::ParsedFilesOrCancelled run(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                            WorkerPool &workers, core::FoundMethodHashes *foundMethodHashesOut);
 
+    // Version of Namer that accepts the old FoundMethodHashes for each file to run Namer, which
+    // it uses to figure out how to mutate the already-populated GlobalState into the right shape
+    // when considering that only the files in `trees` were edited.
+    //
+    // `trees` and `foundMethodHashesForFiles` should have the same number of elements, and
+    // `foundMethodHashesForFiles[i]` should be the `FoundMethodHashes` for `trees[i]`.
+    // (Done this way, instead of using something like a `std::pair`, to avoid intermidiate
+    // allocations for phases that don't actually need to operate on the `FoundMethodHashes`.)
+    static ast::ParsedFilesOrCancelled
+    runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
+                   UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
+                   WorkerPool &workers);
+
     Namer() = delete;
 };
 

@@ -29,9 +29,13 @@ ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std:
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundMethodHashes *foundMethodHashes);
 
-std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                                const options::Options &opts);
+std::vector<ast::ParsedFile>
+incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                   std::optional<UnorderedMap<core::FileRef, core::FoundMethodHashes>> &&foundMethodHashesForFiles,
+                   const options::Options &opts);
 
+// This function only calls Namer::symbolizeTreesBestEffort, not Namer::defineSymbols, which means
+// there's no point in taking any FoundMethodHashes.
 std::vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs,
                                                           std::vector<ast::ParsedFile> what,
                                                           const options::Options &opts);
