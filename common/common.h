@@ -138,6 +138,7 @@ template <class> inline constexpr bool always_false_v = false;
 } // namespace sorbet
 
 std::string demangle(const char *mangled);
+std::string exec(std::string cmd);
 
 /* use fast_sort */
 #pragma GCC poison sort c_sort

@@ -1,8 +1,8 @@
 #include "main/lsp/requests/document_formatting.h"
-#include "experimental/rubyfmt/rubyfmt.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include "common/common.h"
 
 using namespace std;
 
@@ -30,36 +30,22 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
 
     auto fref = index.uri2FileRef(params->textDocument->uri);
     if (fref.exists()) {
-        auto source = index.getFile(fref).source();
-        auto formatResult = experimental::rubyfmt::format(source);
-        switch (formatResult.status) {
-            // Note: I use different line numbers for the below exceptions so they show up differently in crash logs.
-            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_IO_ERROR:
-                // Fatal error -- crash
-                Exception::raise("Rubyfmt reported an IO error");
-            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_OTHER_RUBY_ERROR:
-                // Fatal error -- crash
-                Exception::raise("Rubyfmt reported a Ruby error");
-            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_INITIALIZE_ERROR:
-                // Fatal error -- crash
-                Exception::raise("Rubyfmt failed to initialize");
-            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_RIPPER_PARSE_FAILURE:
-            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_SYNTAX_ERROR:
-                // Non-fatal error. Returns null for result.
-                config.logger->debug("Rubyfmt returned non-fatal error code `{}` for file `{}`", formatResult.status,
-                                     params->textDocument->uri);
-                break;
-            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_OK:
-                // Construct text edit to replace entire document.
-                vector<unique_ptr<TextEdit>> edits;
-                // Note: VS Code uses 0-indexed lines, so the lineCount will be one more line than the size of the doc.
-                edits.emplace_back(
-                    make_unique<TextEdit>(make_unique<Range>(make_unique<Position>(0, 0),
-                                                             make_unique<Position>(index.getFile(fref).lineCount(), 0)),
-                                          formatResult.formatted));
-                result = move(edits);
-                break;
+        // Ensure that `rubyfmt` is in the user's path
+        auto rubyfmt_path = exec("which rubyfmt");
+        if (rubyfmt_path.empty()) {
+            Exception::raise("Could not find `rubyfmt` in PATH");
         }
+
+        auto formattedContents = exec(fmt::format("rubyfmt {}", index.getFile(fref).path()));
+
+        // Construct text edit to replace entire document.
+        vector<unique_ptr<TextEdit>> edits;
+        // Note: VS Code uses 0-indexed lines, so the lineCount will be one more line than the size of the doc.
+        edits.emplace_back(
+            make_unique<TextEdit>(make_unique<Range>(make_unique<Position>(0, 0),
+                                                        make_unique<Position>(index.getFile(fref).lineCount(), 0)),
+                                    formattedContents));
+        result = move(edits);
     }
     response->result = move(result);
     config.output->write(move(response));
