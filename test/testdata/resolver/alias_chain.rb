@@ -1,3 +1,4 @@
+# typed: strict
 module Constants
   MAX_NUM_ADDITIONAL_DEVBOXES = 200
 end
