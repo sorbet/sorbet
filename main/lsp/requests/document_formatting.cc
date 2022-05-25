@@ -1,8 +1,8 @@
 #include "main/lsp/requests/document_formatting.h"
+#include "common/common.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include "common/common.h"
 
 using namespace std;
 
@@ -41,10 +41,9 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
         // Construct text edit to replace entire document.
         vector<unique_ptr<TextEdit>> edits;
         // Note: VS Code uses 0-indexed lines, so the lineCount will be one more line than the size of the doc.
-        edits.emplace_back(
-            make_unique<TextEdit>(make_unique<Range>(make_unique<Position>(0, 0),
-                                                        make_unique<Position>(index.getFile(fref).lineCount(), 0)),
-                                    formattedContents));
+        edits.emplace_back(make_unique<TextEdit>(
+            make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(index.getFile(fref).lineCount(), 0)),
+            formattedContents));
         result = move(edits);
     }
     response->result = move(result);
