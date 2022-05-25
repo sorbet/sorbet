@@ -104,19 +104,19 @@ private:
     };
     shared_ptr<Nesting> nesting_;
 
-    struct ResolutionItem {
+    struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
         bool possibleGenericType = false;
 
-        ResolutionItem() = default;
-        ResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
-        ResolutionItem(ResolutionItem &&rhs) noexcept = default;
-        ResolutionItem &operator=(ResolutionItem &&rhs) noexcept = default;
+        ConstantResolutionItem() = default;
+        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
+        ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
+        ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;
 
-        ResolutionItem(const ResolutionItem &rhs) = delete;
-        const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
+        ConstantResolutionItem(const ConstantResolutionItem &rhs) = delete;
+        const ConstantResolutionItem &operator=(const ConstantResolutionItem &rhs) = delete;
     };
 
     template <class T> struct ResolveItems {
@@ -201,7 +201,7 @@ private:
         const RequireAncestorResolutionItem &operator=(const RequireAncestorResolutionItem &) = delete;
     };
 
-    vector<ResolutionItem> todo_;
+    vector<ConstantResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
     vector<ClassAliasResolutionItem> todoClassAliases_;
     vector<TypeAliasResolutionItem> todoTypeAliases_;
@@ -589,7 +589,7 @@ private:
 
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     template <typename StateType>
-    static void constantResolutionFailed(StateType &gs, core::FileRef file, ResolutionItem &job,
+    static void constantResolutionFailed(StateType &gs, core::FileRef file, ConstantResolutionItem &job,
                                          const ImportStubs &importStubs, int &suggestionCount) {
         static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
         constexpr bool isMutableStateType = !is_const_v<StateType>;
@@ -712,7 +712,7 @@ private:
         }
     }
 
-    static bool resolveJob(core::Context ctx, ResolutionItem &job) {
+    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
         if (isAlreadyResolved(ctx, *job.out)) {
             if (job.possibleGenericType) {
                 return false;
@@ -737,22 +737,23 @@ private:
         return true;
     }
 
-    static bool resolveResolutionItems(const core::GlobalState &gs, vector<ResolveItems<ResolutionItem>> &jobs,
-                                       WorkerPool &workers) {
+    static bool resolveConstantResolutionItems(const core::GlobalState &gs,
+                                               vector<ResolveItems<ConstantResolutionItem>> &jobs,
+                                               WorkerPool &workers) {
         if (jobs.empty()) {
             return false;
         }
-        auto outputq =
-            make_shared<BlockingBoundedQueue<pair<uint32_t, vector<ResolveItems<ResolutionItem>>>>>(jobs.size());
-        auto inputq = make_shared<ConcurrentBoundedQueue<ResolveItems<ResolutionItem>>>(jobs.size());
+        auto outputq = make_shared<BlockingBoundedQueue<pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>>>>(
+            jobs.size());
+        auto inputq = make_shared<ConcurrentBoundedQueue<ResolveItems<ConstantResolutionItem>>>(jobs.size());
         for (auto &job : jobs) {
             inputq->push(move(job), 1);
         }
         jobs.clear();
 
         workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
-            vector<ResolveItems<ResolutionItem>> leftover;
-            ResolveItems<ResolutionItem> job(core::FileRef(), {});
+            vector<ResolveItems<ConstantResolutionItem>> leftover;
+            ResolveItems<ConstantResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
             uint32_t retries = 0;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
@@ -760,8 +761,9 @@ private:
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(),
-                                            [&](ResolutionItem &item) -> bool { return resolveJob(ictx, item); });
+                    auto fileIt =
+                        remove_if(job.items.begin(), job.items.end(),
+                                  [&](ConstantResolutionItem &item) -> bool { return resolveJob(ictx, item); });
                     job.items.erase(fileIt, job.items.end());
                     retries += origSize - job.items.size();
                     if (!job.items.empty()) {
@@ -776,7 +778,7 @@ private:
         });
 
         uint32_t retries = 0;
-        pair<uint32_t, vector<ResolveItems<ResolutionItem>>> threadResult;
+        pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>> threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -1208,7 +1210,7 @@ private:
             c->scope = walkUnresolvedConstantLit(ctx, std::move(c->scope));
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
-            ResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
+            ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
             if (resolveJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
@@ -1419,7 +1421,7 @@ public:
                        ctx.state.singlePackageImports.has_value()) {
                 // In single-package RBI generation mode, we treat Constant[...] as
                 // possible generic types.
-                ResolutionItem job{nesting_, recvAsConstantLit};
+                ConstantResolutionItem job{nesting_, recvAsConstantLit};
                 job.possibleGenericType = true;
                 if (!resolveJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));
@@ -1463,7 +1465,7 @@ public:
     }
 
     struct ResolveWalkResult {
-        vector<ResolveItems<ResolutionItem>> todo_;
+        vector<ResolveItems<ConstantResolutionItem>> todo_;
         vector<ResolveItems<AncestorResolutionItem>> todoAncestors_;
         vector<ResolveItems<ClassAliasResolutionItem>> todoClassAliases_;
         vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases_;
@@ -1524,7 +1526,7 @@ public:
             }
         });
         trees.clear();
-        vector<ResolveItems<ResolutionItem>> todo;
+        vector<ResolveItems<ConstantResolutionItem>> todo;
         vector<ResolveItems<AncestorResolutionItem>> todoAncestors;
         vector<ResolveItems<ClassAliasResolutionItem>> todoClassAliases;
         vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases;
@@ -1609,7 +1611,7 @@ public:
                 }
                 {
                     Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                    bool resolvedSomeConstants = resolveResolutionItems(gs, todo, workers);
+                    bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, workers);
                     progress = progress || resolvedSomeConstants;
                 }
                 {
@@ -1699,7 +1701,7 @@ public:
                   [&gs](const auto &lhs, const auto &rhs) -> bool { return compareFiles(gs, lhs.file, rhs.file); });
 
         for (auto &todos : todo) {
-            fast_sort(todos.items, [](const ResolutionItem &lhs, const ResolutionItem &rhs) -> bool {
+            fast_sort(todos.items, [](const ConstantResolutionItem &lhs, const ConstantResolutionItem &rhs) -> bool {
                 if (lhs.out->loc == rhs.out->loc) {
                     return constantDepth(lhs.out) < constantDepth(rhs.out);
                 }
