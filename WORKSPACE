@@ -83,13 +83,6 @@ gemfile_lock_deps(
     ],
 )
 
-load("@rules_rust//rust:repositories.bzl", "rust_repositories")
-
-rust_repositories(
-    edition = "2018",
-    version = "1.51.0",
-)
-
 load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
 
 node_repositories()

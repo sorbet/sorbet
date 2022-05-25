@@ -39,7 +39,6 @@ mkdir -p _out_
 if [[ "${RUBYFMT:-}" == "true" ]]; then
   test_args+=(
     "//main:sorbet"
-    "//experimental/rubyfmt/..."
   )
 else
   test_args+=(
