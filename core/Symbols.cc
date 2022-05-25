@@ -2200,6 +2200,7 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
     if (!members().empty()) {
         // Rather than use membersStableOrderSlow, which is... slow..., use an order dictated by symbol ref ID.
         // It's faster to sort, and SymbolRef IDs are stable during hashing.
+        // TODO(jez) Why is this necessary, if everything already hashes its owner?
         vector<core::SymbolRef> membersToHash;
         membersToHash.reserve(this->members().size());
         for (auto e : this->members()) {
@@ -2207,7 +2208,8 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
-            if (e.second.isMethod() && e.second.asMethodRef().data(gs)->ignoreInHashing(gs)) {
+            // if (e.second.isMethod() && e.second.asMethodRef().data(gs)->ignoreInHashing(gs)) {
+            if (e.second.isMethod()) {
                 continue;
             }
 
@@ -2283,8 +2285,10 @@ uint32_t TypeParameter::hash(const GlobalState &gs) const {
 
 uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
+    // TODO(jez) Some flags we can put into the shape, some flags we can't
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
+    // TODO(jez) I think we can probably drop rebind even without Namer::runIncremental?
     result = mix(result, this->rebind.id());
     result = mix(result, this->hasSig());
     result = mix(result, this->methodArityHash(gs)._hashValue);
@@ -2416,6 +2420,11 @@ void Method::addLoc(const core::GlobalState &gs, core::Loc loc) {
     }
 
     addLocInternal(gs, loc, this->loc(), locs_);
+}
+
+void Method::removeLocsForFile(core::FileRef file) {
+    auto it = remove_if(locs_.begin(), locs_.end(), [&](const auto loc) { return loc.file() == file; });
+    locs_.erase(it, locs_.end());
 }
 
 void Field::addLoc(const core::GlobalState &gs, core::Loc loc) {

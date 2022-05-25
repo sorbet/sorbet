@@ -1711,6 +1711,23 @@ void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
+// TODO(jez) This is a particularly specialized method, and people are likely to misuse it.
+// Be sure to write a comment at least, and consider ways to potentially lock it down.
+void GlobalState::deleteMethodSymbol(MethodRef what) {
+    const auto &whatData = what.data(*this);
+    auto owner = whatData->owner;
+    auto &ownerMembers = owner.data(*this)->members();
+    auto fnd = ownerMembers.find(whatData->name);
+    ENFORCE(fnd != ownerMembers.end());
+    ENFORCE(fnd->second == what);
+    ownerMembers.erase(fnd);
+    // TODO(jez) In the future, we could even store a "fake" core::Method that essentially tracks a
+    // free list of slots in `this->methods` that can be overridden to save space / prevent memory bloat
+    // TODO(jez) There are some places where we ask for the number of method symbols.
+    // We probably want specialized helpers depending on the context of what's being counted.
+    this->methods[what.id()] = this->methods[0].deepCopy(*this);
+}
+
 unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
 }
@@ -2232,10 +2249,15 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = methodHashesMap[ShortNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
+            // TODO(jez) Have to figure out whether all the flags do the right thing (maybe just
+            // reset them in namer?)
+            if (sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
+                sym.name == Names::requiredAncestorsLin()) {
+                uint32_t symhash = sym.methodShapeHash(*this);
+                hierarchyHash = mix(hierarchyHash, symhash);
+                methodHash = mix(methodHash, symhash);
+            }
 
-            uint32_t symhash = sym.methodShapeHash(*this);
-            hierarchyHash = mix(hierarchyHash, symhash);
-            methodHash = mix(methodHash, symhash);
             counter++;
             if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
                 errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));
