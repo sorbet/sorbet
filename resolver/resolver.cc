@@ -212,7 +212,7 @@ private:
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
-                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMember(ctx, name);
+                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, name);
                 if (lookup.exists()) {
                     return lookup;
                 }
