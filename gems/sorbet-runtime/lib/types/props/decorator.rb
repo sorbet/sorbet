@@ -58,6 +58,14 @@ class T::Props::Decorator
     @props = @props.merge(prop => rules.freeze).freeze
   end
 
+  # Heads up!
+  #
+  # There are already too many ad-hoc options on the prop DSL.
+  #
+  # We have already done a lot of work to remove unnecessary and confusing
+  # options. If you're considering adding a new rule key, please come chat with
+  # the Sorbet team first, as we'd really like to learn more about how to best
+  # solve the problem you're encountering.
   VALID_RULE_KEYS = T.let(%i[
     enum
     foreign

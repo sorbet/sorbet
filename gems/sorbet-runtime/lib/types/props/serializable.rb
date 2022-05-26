@@ -179,6 +179,14 @@ end
 module T::Props::Serializable::DecoratorMethods
   include T::Props::HasLazilySpecializedMethods::DecoratorMethods
 
+  # Heads up!
+  #
+  # There are already too many ad-hoc options on the prop DSL.
+  #
+  # We have already done a lot of work to remove unnecessary and confusing
+  # options. If you're considering adding a new rule key, please come chat with
+  # the Sorbet team first, as we'd really like to learn more about how to best
+  # solve the problem you're encountering.
   VALID_RULE_KEYS = {dont_store: true, name: true, raise_on_nil_write: true}.freeze
   private_constant :VALID_RULE_KEYS
 
