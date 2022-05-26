@@ -1,4 +1,4 @@
-#include "main/lsp/requests/document_formatting.h"
+#include "main/lsp/requests/formatting/document_formatting.h"
 #include "common/common.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"

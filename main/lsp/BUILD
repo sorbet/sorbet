@@ -1,3 +1,11 @@
+config_setting(
+    name = "enable_rubyfmt",
+    values = {
+        "define": "rubyfmt=true",
+    },
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "lsp",
     srcs = glob([
@@ -7,7 +15,11 @@ cc_library(
         "notifications/*.h",
         "notifications/*.cc",
         "watchman/*.cc",
-    ]) + [
+    ]) + select({
+        ":enable_rubyfmt": ["requests/formatting/document_formatting.cc"],
+        "//conditions:default": ["requests/formatting/document_formatting_noop.cc"],
+    }) + [
+        "requests/formatting/document_formatting.h",
         ":lsp_messages",
         "LSPFileUpdates.h",
         "DefLocSaver.h",
