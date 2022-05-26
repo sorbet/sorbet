@@ -1,4 +1,4 @@
-#include "main/lsp/requests/formatting/document_formatting.h"
+#include "main/lsp/requests/document_formatting.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
@@ -47,7 +47,7 @@ enum RubyfmtStatus {
 
 void DocumentFormattingTask::index(LSPIndexer &index) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentFormatting);
-    if (!config.opts.lspDocumentFormatRubyfmtEnabled) {
+    if (!(config.opts.lspDocumentFormatRubyfmtEnabled && rubyfmt_enabled)) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest,
             "The `Document Formatting` LSP feature is experimental and disabled by default.");
