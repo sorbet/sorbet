@@ -22,10 +22,6 @@ elif [[ "mac" == "$platform" ]]; then
   test_args+=("--config=buildfarm-sanitized-mac")
 fi
 
-if [[ "${RUBYFMT:-}" == "true" ]]; then
-  test_args+=("--config=rubyfmt")
-fi
-
 export JOB_NAME=test-static-sanitized
 source .buildkite/tools/setup-bazel.sh
 
@@ -36,21 +32,15 @@ err=0
 mkdir -p _out_
 
 # NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
-if [[ "${RUBYFMT:-}" == "true" ]]; then
-  test_args+=(
-    "//main:sorbet"
-  )
-else
-  test_args+=(
-    "--test_tag_filters=-compiler"
-    "--build_tag_filters=-compiler"
-    "--build_tests_only"
-    "@gems//..."
-    "//gems/sorbet/test/snapshot"
-    "//gems/sorbet/test/hidden-method-finder"
-    "//..."
-  )
-fi
+test_args+=(
+  "--test_tag_filters=-compiler"
+  "--build_tag_filters=-compiler"
+  "--build_tests_only"
+  "@gems//..."
+  "//gems/sorbet/test/snapshot"
+  "//gems/sorbet/test/hidden-method-finder"
+  "//..."
+)
 
 ./bazel test \
   --experimental_generate_json_trace_profile \
