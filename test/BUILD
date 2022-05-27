@@ -207,13 +207,13 @@ cc_binary(
 load(":pipeline_test.bzl", "pipeline_tests", "single_package_rbi_test")
 
 filegroup(
-    name = "rbi_gen_typechecking",
-    srcs = glob(["testdata/packager/rbi_gen_typechecking/**/*.rb"]),
+    name = "rbi_gen_files",
+    srcs = glob(["testdata/packager/rbi_gen_files/**/*.rb"]),
 )
 
 single_package_rbi_test(
     name = "end_to_end_rbi_test",
-    rb_files = ["//test:rbi_gen_typechecking"],
+    rb_files = ["//test:rbi_gen_files"],
 )
 
 pipeline_tests(
