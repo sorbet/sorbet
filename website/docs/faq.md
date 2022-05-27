@@ -510,3 +510,8 @@ If for some reason it's still imperative to limit the Sorbet error output to
 only those errors coming from a single file and the steps above are not
 acceptable, we recommend post processing the errors reported by Sorbet with
 tools like `grep`.
+
+There are also third-party tools that offer the ability to sort and filter
+Sorbet's errors, like [spoom].
+
+[spoom]: https://github.com/Shopify/spoom#errors-sorting-and-filtering
