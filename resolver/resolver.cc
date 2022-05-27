@@ -212,7 +212,13 @@ private:
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
+                // We don't want to rely on existing information in the symbol table for the
+                // fast path in LSP, but we do need to explicitly look through type template
+                // static fields to find the field on the singleton class.
                 auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, name);
+                if (lookup.isFieldOrStaticField() && lookup.asFieldRef().data(ctx)->flags.isStaticFieldTypeTemplate) {
+                    lookup = lookup.dealias(ctx);
+                }
                 if (lookup.exists()) {
                     return lookup;
                 }
