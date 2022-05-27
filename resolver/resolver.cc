@@ -997,7 +997,6 @@ private:
             return;
         }
 
-        auto encounteredError = false;
         for (auto i = 0; i < numPosArgs; ++i) {
             auto &arg = send->getPosArg(i);
             if (arg.isSelfReference()) {
@@ -1017,28 +1016,31 @@ private:
                 }
                 continue;
             }
+            auto idLoc = core::Loc(todo.file, id->loc);
             if (!id->symbol.isClassOrModule()) {
-                if (auto e =
-                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
                 }
                 continue;
             }
-            if (id->symbol.asClassOrModuleRef().data(gs)->isClass()) {
-                if (auto e =
-                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+            auto idSymbol = id->symbol.asClassOrModuleRef();
+            if (idSymbol.data(gs)->isUndeclared()) {
+                if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Could not determine that `{}` was a module, not a class", id->symbol.show(gs));
+                    e.addErrorLine(idSymbol.data(gs)->loc(), "Defined here");
+                }
+                continue;
+            }
+            if (idSymbol.data(gs)->isClass()) {
+                if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.show(gs));
                 }
-                encounteredError = true;
+                continue;
             }
             if (id->symbol == owner) {
-                if (auto e =
-                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
                 }
-                encounteredError = true;
-            }
-            if (encounteredError) {
                 continue;
             }
 
@@ -1057,7 +1059,7 @@ private:
                     arg.flags.isBlock = true;
                 }
 
-                auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
+                auto type = core::make_type<core::ClassType>(idSymbol);
                 auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
                 // Make sure we are not adding existing symbols to our tuple
                 if (absl::c_find(elems, type) == elems.end()) {
