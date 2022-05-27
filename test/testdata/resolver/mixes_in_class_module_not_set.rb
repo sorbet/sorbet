@@ -3,5 +3,5 @@
 module A::B
   extend T::Helpers
 
-  mixes_in_class_methods(A) # error: Could not determine that `A` was a module, not a class
+  mixes_in_class_methods(A) # error: `A` is declared implicitly, but must be defined as a `module` explicitly
 end

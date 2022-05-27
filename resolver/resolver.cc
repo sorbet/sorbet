@@ -1026,8 +1026,11 @@ private:
             auto idSymbol = id->symbol.asClassOrModuleRef();
             if (idSymbol.data(gs)->isUndeclared()) {
                 if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Could not determine that `{}` was a module, not a class", id->symbol.show(gs));
-                    e.addErrorLine(idSymbol.data(gs)->loc(), "Defined here");
+                    e.setHeader("`{}` is declared implicitly, but must be defined as a `{}` explicitly",
+                                id->symbol.show(gs), "module");
+                    e.addErrorLine(idSymbol.data(gs)->loc(), "Defined implicitly here");
+                    e.addErrorNote("`{}` has the potential to be a `{}`, which is not allowed with `{}`",
+                                   id->symbol.show(gs), "class", send->fun.show(gs));
                 }
                 continue;
             }
