@@ -232,11 +232,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     CHECK(capabilities.codeActionProvider.has_value());
     CHECK(capabilities.renameProvider.has_value());
     CHECK_FALSE(capabilities.codeLensProvider.has_value());
-    if (rubyfmt_enabled) {
-        CHECK(capabilities.documentFormattingProvider.value_or(false));
-    } else {
-        CHECK_FALSE(capabilities.documentFormattingProvider.value_or(false));
-    }
+    CHECK(capabilities.documentFormattingProvider.value_or(false));
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
