@@ -1097,7 +1097,9 @@ class SymbolDefiner {
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
-                alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
+                auto aliasData = alias.data(ctx);
+                aliasData->flags.isStaticFieldTypeTemplate = true;
+                aliasData->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }
 

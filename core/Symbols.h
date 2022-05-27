@@ -201,15 +201,16 @@ public:
         // Static Field flags
         bool isStaticFieldTypeAlias : 1;
         bool isStaticFieldPrivate : 1;
+        bool isStaticFieldTypeTemplate : 1;
 
         bool isExported : 1;
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 5;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isField(false), isStaticField(false), isStaticFieldTypeAlias(false), isStaticFieldPrivate(false),
-              isExported(false) {}
+              isStaticFieldTypeTemplate(false), isExported(false) {}
 
         uint8_t serialize() const {
             ENFORCE(sizeof(Flags) == sizeof(uint8_t));
