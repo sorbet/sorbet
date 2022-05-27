@@ -120,10 +120,4 @@ steps:
     command: .buildkite/publish-ruby-gems.sh
     <<: *elastic
 
-  - label: ":linux: test-static-sanitized.sh (rubyfmt)"
-    command: .buildkite/test-static-sanitized.sh
-    env:
-      RUBYFMT: true
-    <<: *elastic
-
   - wait: ~

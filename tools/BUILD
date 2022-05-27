@@ -53,8 +53,6 @@ compilation_database(
         "//core/serialize:serialize_test",
         "//definition_validator:definition_validator",
         "//emscripten:main",
-        "//experimental/rubyfmt:rubyfmt",
-        "//experimental/rubyfmt:rubyfmt_test",
         "//gems/sorbet-runtime:generate_call_validation",
         "//hashing:hashing",
         "//hashing:hashing-orig",

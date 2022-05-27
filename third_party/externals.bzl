@@ -1,5 +1,4 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
-load("//third_party/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -298,13 +297,6 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "rubyfmt",
-        build_file = "@com_stripe_ruby_typer//third_party/rubyfmt:rubyfmt.BUILD",
-        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.7.6/rubyfmt-v0.7.6-sources.tar.gz"),
-        sha256 = "3642469b42d86d82ee58f87b82f10eac9c14112a2d03291def86f0851568cd5f",
-    )
-
-    http_archive(
         name = "rules_rust",
         sha256 = "727b93eb5d57ec411f2afda7e3993e22d7772d0b2555ba745c3dec7323ea955a",
         strip_prefix = "rules_rust-0768a7f00de134910c3cbdab7bbfdd011d995766",
@@ -414,8 +406,6 @@ def register_sorbet_dependencies():
         strip_prefix = "ruby-3.0.3",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
-
-    raze_fetch_remote_crates()
 
 def _github_public_urls(path):
     """

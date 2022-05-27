@@ -47,7 +47,7 @@ enum RubyfmtStatus {
 
 void DocumentFormattingTask::index(LSPIndexer &index) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentFormatting);
-    if (!(config.opts.lspDocumentFormatRubyfmtEnabled && rubyfmt_enabled)) {
+    if (!config.opts.lspDocumentFormatRubyfmtEnabled) {
         response->error = make_unique<ResponseError>(
             (int)LSPErrorCodes::InvalidRequest,
             "The `Document Formatting` LSP feature is experimental and disabled by default.");

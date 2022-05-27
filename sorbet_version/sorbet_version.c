@@ -56,9 +56,6 @@ const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD
 #ifdef DEBUG_MODE
     " debug_mode=true"
 #endif
-#ifdef RUBYFMT_ENABLED
-    " rubyfmt=true"
-#endif
     ;
 
 const char *sorbet_getVersion() {

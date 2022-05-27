@@ -16,12 +16,6 @@ extern "C" {
 #ifdef __cplusplus
 namespace sorbet {
 
-#ifdef RUBYFMT_ENABLED
-constexpr bool rubyfmt_enabled = true;
-#else
-constexpr bool rubyfmt_enabled = false;
-#endif
-
 #ifdef DEBUG_MODE
 constexpr bool debug_mode = true;
 #else
