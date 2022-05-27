@@ -108,6 +108,10 @@ public:
         return make_expression<ast::KeywordArg>(loc, Local(loc, name));
     }
 
+    static ExpressionPtr KeywordArgWithDefault(core::LocOffsets loc, core::NameRef name, ExpressionPtr default_) {
+        return OptionalArg(loc, KeywordArg(loc, name), std::move(default_));
+    }
+
     static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
         return make_expression<ast::RestArg>(loc, std::move(inner));
     }
@@ -387,6 +391,11 @@ public:
 
     static ExpressionPtr Nilable(core::LocOffsets loc, ExpressionPtr arg) {
         return Send1(loc, T(loc), core::Names::nilable(), loc, std::move(arg));
+    }
+
+    static ExpressionPtr T_Boolean(core::LocOffsets loc) {
+        return UnresolvedConstantParts(loc, EmptyTree(),
+                                       {core::Names::Constants::T(), core::Names::Constants::Boolean()});
     }
 
     static ExpressionPtr KeepForIDE(core::LocOffsets loc, ExpressionPtr arg) {
