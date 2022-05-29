@@ -194,6 +194,7 @@ using namespace std::string_literals;
   tFLOAT_IMAGINARY    1144
   tBDOT2              1145    // Used to avoid shift/reduce conflicts with productions using `tDOT2`
   tBDOT3              1146    // Used to avoid shift/reduce conflicts with productions using `tDOT3`
+  tBEFORE_EOF         1147
 ;
 
 %printer { yyo << $$->view(); } tIDENTIFIER
@@ -377,6 +378,7 @@ using namespace std::string_literals;
   then
   relop
   k_return
+  kend_or_eof
   lcurly_block_start
   lbrace_cmd_block_start
   until
@@ -503,6 +505,12 @@ void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 
 int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser::TYPEDRUBY &driver) {
   auto token = driver.lex.advance();
+  if (token->type() == ruby_parser::token_type::tBEFORE_EOF && !driver.indentationAware) {
+    // Only emit tBEFORE_EOF in indentation-aware error recovery mode.
+    // Otherwise, skip to eof token.
+    token = driver.lex.advance();
+    ENFORCE(token->type() == ruby_parser::token_type::eof);
+  }
   driver.last_token = token;
   int token_type = static_cast<int>(token->type());
   assert(token_type >= 0);
@@ -526,6 +534,15 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
          program: top_compstmt
                     {
                       driver.ast = $1;
+                    }
+                | program tBEFORE_EOF
+                    {
+                      // In indentation-aware recovery mode, we'll unconditionally emit a tBEFORE_EOF token
+                      // before the eof token. If indentationAware mode has allowed the parse to recovery
+                      // (somewhere earlier in the file), then the presence of this token at the end should
+                      // not fail the parse.
+                      //
+                      // No work to do, because `program` does not produce a semantic value.
                     }
 
     top_compstmt: top_stmts opt_terms
@@ -1930,6 +1947,8 @@ array_premature_end: eof
                     {
                       driver.replace_stack($<stack>2);
                       $$ = driver.build.beginKeyword(self, $1, $3->body, $4);
+                      // TODO(jez) Make rewind_if_dedented aware of tBEFORE_EOF
+                      // TODO(jez) Use kend_or_eof in all rules that use rewind_if_dedented
                       driver.rewind_if_dedented($1, $4);
                     }
                 | tLPAREN_ARG stmt
@@ -2175,7 +2194,7 @@ array_premature_end: eof
                       driver.lex.cond.push(false);
                       driver.lex.context.push(Context::State::CLASS);
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       if (!driver.lex.context.classDefintinionAllowed()) {
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ClassInDef, $1);
@@ -2225,7 +2244,7 @@ array_premature_end: eof
                       driver.lex.cmdarg.push(false);
                       driver.lex.context.push(Context::State::MODULE);
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       if (!driver.lex.context.moduleDefintinionAllowed()) {
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ModuleInDef, $1);
@@ -2247,7 +2266,7 @@ array_premature_end: eof
                       driver.lex.unextend();
                       driver.lex.context.pop();
                     }
-                | defn_head f_arglist bodystmt kEND
+                | defn_head f_arglist bodystmt kend_or_eof
                     {
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
@@ -2266,7 +2285,7 @@ array_premature_end: eof
 
                       $$ = driver.build.defMethod(self, defToken, $1->end, $2, newBody, endToken);
                     }
-                | defs_head f_arglist bodystmt kEND
+                | defs_head f_arglist bodystmt kend_or_eof
                     {
                       driver.lex.cmdarg.pop();
                       driver.lex.cond.pop();
@@ -2313,6 +2332,12 @@ array_premature_end: eof
                         YYERROR;
                       }
                     }
+
+     kend_or_eof: kEND
+                  // This is a special token that's only emitted during indentationAware mode.
+                  // It lets rules expecting a kEND to also effectively match the eof token,
+                  // but only in the indentation-aware error recovery parse mode.
+                | tBEFORE_EOF
 
             then: term
                 | kTHEN
