@@ -26,6 +26,10 @@ struct node_list {
         return nodes.size();
     }
 
+    inline bool empty() const {
+        return nodes.empty();
+    }
+
     inline void emplace_back(const ForeignPtr &ptr) {
         nodes.emplace_back(ptr);
     }

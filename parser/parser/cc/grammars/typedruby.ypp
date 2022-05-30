@@ -612,6 +612,14 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                 | stmts terms stmt_or_begin
                     {
                       auto *result = $1;
+                      if (result->inner->empty()) {
+                        // This set of stmts started with a leading tNL (common after e.g. class and module defs)
+                        // Since an empty stmts reduces without any tokens, it uses the begin/end location of the
+                        // most recently lexed token, despite that token not being included in the stmts.
+                        // Manually fix up the locations here.
+                        @$.begin = @3.begin;
+                        @$.end = @3.end;
+                      }
                       result->inner->emplace_back($3);
                       $$ = result;
 

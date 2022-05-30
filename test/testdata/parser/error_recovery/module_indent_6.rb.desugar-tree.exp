@@ -9,9 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module <emptyTree>::<C Inner><<C <todo sym>>> < ()
-      <emptyTree>
+      <self>.puts("hello")
     end
-
-    <self>.puts("hello")
   end
 end
