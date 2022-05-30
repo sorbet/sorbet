@@ -1,0 +1,2 @@
+# typed: false
+def BEGIN
