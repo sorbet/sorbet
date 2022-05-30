@@ -3042,9 +3042,7 @@ void lexer::rewind_and_reset_to_expr_beg(size_t newPos) {
 
   // rewind
   this->_p = this->source_buffer.data() + newPos;
-  if (!token_queue.empty()) {
-    token_queue.clear();
-  }
+  token_queue.clear();
 
   // reset
   set_state_expr_beg();
@@ -3056,9 +3054,7 @@ void lexer::rewind_and_reset_to_expr_end(size_t newPos) {
 
   // rewind
   this->_p = this->source_buffer.data() + newPos;
-  if (!token_queue.empty()) {
-    token_queue.clear();
-  }
+  token_queue.clear();
 
   // reset
   set_state_expr_end();
