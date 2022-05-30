@@ -1,0 +1,11 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(x, &<blk>)
+      if x
+        <self>.puts(x)
+      else
+        <emptyTree>
+      end
+    end
+  end
+end
