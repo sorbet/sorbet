@@ -6,4 +6,3 @@ test/cli/fuzz_def_begin/test.rb:2: Hint: this "def" token is not closed before t
      2 |def BEGIN
         ^^^
 Errors: 2
-Expected to fail
