@@ -142,8 +142,8 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
 
 void base_driver::rewind_for_end_token(token_t endToken) {
     if (endToken->type() == token_type::tBEFORE_EOF) {
-        // TODO(jez) I'm pretty sure that rewinding doesn't make sense here, because we're
-        // already at EOF (there's nothing left for ragel to scan). Double check this.
+        // Rewinding doesn't make sense here, because we're already at EOF (there's nothing left for ragel to scan).
+        // Instead, just put the tBEFORE_EOF token back onto the queue so that other rules can use it.
         this->lex.unadvance(endToken);
     } else {
         this->rewind_and_reset(endToken->start());
