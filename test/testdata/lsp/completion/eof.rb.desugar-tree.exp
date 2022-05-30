@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.sig() do ||
+      <self>.params(:x, <emptyTree>::<C A>).void()
+    end
+
+    def example<<todo method>>(x, &<blk>)
+      x.<method-name-missing>()
+    end
+  end
+end
