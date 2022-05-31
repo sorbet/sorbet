@@ -2306,7 +2306,7 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
         // straightforward to take the fast path for changes to regular fields by changing
         // this and the corresponding code in GlobalState, but one step at a time.
         !this->flags.isField &&
-        // Only normal static fields are ok (no class aliases, no type aliases).
+        // Only normal static fields are ok (no type aliases, no class aliases/type templates).
         (!this->flags.isStaticFieldTypeAlias && !isa_type<AliasType>(this->resultType));
 
     if (!canSkipType) {
