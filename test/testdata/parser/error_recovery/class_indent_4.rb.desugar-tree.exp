@@ -1,10 +1,8 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C Inner><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>
+      <self>.puts("hello")
     end
-
-    <self>.puts("hello")
 
     <self>.sig() do ||
       <self>.void()
