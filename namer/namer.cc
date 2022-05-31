@@ -1411,6 +1411,8 @@ public:
             if (prevLoc == classBehaviorLocs.end()) {
                 classBehaviorLocs[klass.symbol] = ctx.locAt(klass.declLoc);
             } else if (prevLoc->second.file() != ctx.file) {
+                // NB: Later on these are merged to find conflicts between files processed by
+                // different threads.
                 if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
@@ -1728,7 +1730,6 @@ public:
         }
     }
 
-private:
     UnorderedMap<core::ClassOrModuleRef, core::Loc> classBehaviorLocs;
 };
 
@@ -1804,10 +1805,37 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
+using ClassBehaviorLocs = UnorderedMap<core::ClassOrModuleRef, core::Loc>;
+struct SymbolizeTreesResult {
+    vector<ast::ParsedFile> trees;
+    ClassBehaviorLocs classBehaviorLocs;
+};
+
+void mergeClassBehaviorLocs(const core::GlobalState &gs, ClassBehaviorLocs &merged, ClassBehaviorLocs &threadRes) {
+    Timer timeit(gs.tracer(), "naming.symbolizeTreesMergeClass");
+    if (merged.empty()) {
+        swap(merged, threadRes);
+        return;
+    }
+    for (auto [ref, loc] : threadRes) {
+        auto &mergedLoc = merged[ref];
+        if (mergedLoc.empty()) {
+            mergedLoc = loc;
+        } else if (mergedLoc.file() != loc.file()) {
+            core::Context ctx(gs, core::Symbols::root(), loc.file());
+            if (auto e = ctx.beginError(loc.offsets(), core::errors::Namer::MultipleBehaviorDefs)) {
+                e.setHeader("`{}` has behavior defined in multiple files", ref.show(ctx));
+                e.addErrorLine(mergedLoc, "Previous definition");
+            }
+        }
+    }
+    threadRes.clear();
+}
+
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
                                        bool bestEffort) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<SymbolizeTreesResult>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     for (auto &tree : trees) {
         fileq->push(move(tree), 1);
@@ -1816,30 +1844,33 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, bestEffort]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter(bestEffort);
-        vector<ast::ParsedFile> output;
+        SymbolizeTreesResult output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
-                output.emplace_back(move(job));
+                output.trees.emplace_back(move(job));
             }
         }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
+        if (!output.trees.empty()) {
+            output.classBehaviorLocs = std::move(inserter.classBehaviorLocs);
+            resultq->push(move(output), output.trees.size());
         }
     });
     trees.clear();
 
     {
-        vector<ast::ParsedFile> threadResult;
+        UnorderedMap<core::ClassOrModuleRef, core::Loc> classBehaviorLocs;
+        SymbolizeTreesResult threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.begin()),
-                             make_move_iterator(threadResult.end()));
+                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
+                             make_move_iterator(threadResult.trees.end()));
+                mergeClassBehaviorLocs(gs, classBehaviorLocs, threadResult.classBehaviorLocs);
             }
         }
     }
