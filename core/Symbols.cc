@@ -2302,8 +2302,10 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
     // literally mention the name of this type alias. Add a test for this.
     // (also maybe double check this logic?)
     auto canSkipType =
-        // All fields are ok (don't participate in constant resolution)
-        this->flags.isField ||
+        // Only consider static fields for the fast path at the moment.  It is probably
+        // straightforward to take the fast path for changes to regular fields by changing
+        // this and the corresponding code in GlobalState, but one step at a time.
+        !this->flags.isField &&
         // Only normal static fields are ok (no class aliases, no type aliases).
         (!this->flags.isStaticFieldTypeAlias && !isa_type<AliasType>(this->resultType));
 
