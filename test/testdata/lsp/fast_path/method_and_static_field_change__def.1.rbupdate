@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: method_and_static_field_change__def.rb,method_and_static_field_change__method_use.rb
+
+module HoldingContainer
+  extend T::Sig
+
+  MEMBER_FIELD = T.let("", String)
+
+  sig {returns(Integer)}
+  def self.fancy_function
+    1729
+  end
+end
