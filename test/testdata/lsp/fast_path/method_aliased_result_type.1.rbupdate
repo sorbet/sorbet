@@ -1,0 +1,17 @@
+# typed: true
+# assert-fast-path: method_aliased_result_type.rb
+extend T::Sig
+
+class MyEnum < T::Enum
+  enums do
+    X = new
+    Y = new
+  end
+end
+
+MyEnum_X = MyEnum::X
+
+sig {returns(MyEnum_X)} # error: Constant `MyEnum_X` is not a class or type alias
+def example
+  MyEnum::X
+end

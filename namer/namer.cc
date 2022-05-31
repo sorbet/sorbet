@@ -1096,6 +1096,9 @@ class SymbolDefiner {
                                                oldSym.loc(ctx));
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
+                // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
+                // because resolver does not usually look on the singleton class to resolve constant
+                // literals, but type_template's are only ever entered on the singleton class.
                 auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
