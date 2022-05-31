@@ -118,7 +118,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterfac
     }
     auto resp = move(queryResponses[0]);
     if (auto constResp = resp->isConstant()) {
-        response->result = getPrepareRenameResult(gs, constResp->symbol);
+        response->result = getPrepareRenameResult(gs, constResp->symbolBeforeDealias);
     } else if (auto defResp = resp->isMethodDef()) {
         response->result = getPrepareRenameResult(gs, defResp->symbol);
     } else if (auto sendResp = resp->isSend()) {
