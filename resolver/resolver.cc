@@ -216,8 +216,19 @@ private:
                 // fast path in LSP, but we do need to explicitly look through type template
                 // static fields to find the field on the singleton class.
                 auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, name);
-                if (lookup.isFieldOrStaticField() && lookup.asFieldRef().data(ctx)->flags.isStaticFieldTypeTemplate) {
-                    lookup = lookup.dealias(ctx);
+                if (lookup.isStaticField(ctx)) {
+                    const auto &resultType = lookup.asFieldRef().data(ctx)->resultType;
+                    if (core::isa_type<core::AliasType>(resultType)) {
+                        auto dealiased = lookup.dealias(ctx);
+                        if (dealiased.isTypeMember()) {
+                            // This static field is a shim that exists only so that `MyTypeTemplate` resolves as normal
+                            // constant literal by looking for the thing with that name on the singleton class.
+                            // Should never be leaked externally, so in this case we forcibly dealias.
+                            ENFORCE(dealiased.asTypeMemberRef().data(ctx)->owner ==
+                                    lookup.owner(ctx).asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx));
+                            lookup = dealiased;
+                        }
+                    }
                 }
                 if (lookup.exists()) {
                     return lookup;
