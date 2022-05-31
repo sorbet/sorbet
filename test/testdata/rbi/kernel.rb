@@ -55,3 +55,8 @@ system(env, ['echo', 'echo'], 'hello', out: :err)
 y = loop do
 end
 puts y # error: This code is unreachable
+
+# then
+obj = T.let("foo", String)
+# Object#then, with a block
+T.reveal_type(obj.then(&:to_i)) # error: Revealed type: `T.untyped`
