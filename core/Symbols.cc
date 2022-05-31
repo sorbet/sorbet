@@ -2301,9 +2301,6 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
     // point, which could probably make something start to resolve in a file that doesn't
     // literally mention the name of this type alias. Add a test for this.
     // (also maybe double check this logic?)
-    // TODO(jez) There's actually some non-trivial logic in resolver to handle constant fields.
-    // They're no longer handled by resolveSigs; they're handled by ResolveTypeMembersAndFieldsWalk
-    // now. Stare at that code to see if this whole idea is not going to work.
     auto canSkipType =
         // All fields are ok (don't participate in constant resolution)
         this->flags.isField ||
