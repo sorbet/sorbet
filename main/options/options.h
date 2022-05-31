@@ -232,6 +232,8 @@ struct Options {
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;
+    // Path to the executable used for document formatting
+    std::string rubyfmtPath = "rubyfmt";
     // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
     bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
