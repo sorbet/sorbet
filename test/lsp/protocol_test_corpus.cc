@@ -660,12 +660,13 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
     assertDiagnostics(send(*changeFile("foo.rb",
                                        "# typed: true\n"
                                        "class A\n"
-                                       "def foo; en\n"
+                                       "def foo(; end\n"
                                        "end\n"
                                        "\n",
                                        2)),
                       {
-                          {"foo.rb", 5, "unexpected token \"end of file\""},
+                          {"foo.rb", 1, "class definition in method body"},
+                          {"foo.rb", 2, "unexpected token \";\""},
                       });
 
     auto counters = getCounters();
