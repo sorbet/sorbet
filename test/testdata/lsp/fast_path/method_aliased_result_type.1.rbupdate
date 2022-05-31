@@ -1,4 +1,5 @@
 # typed: true
+# assert-fast-path: method_aliased_result_type.rb
 extend T::Sig
 
 class MyEnum < T::Enum
