@@ -9,4 +9,4 @@ end
 
 MyEnum_Field1 = MyEnum::Field1
 
-Alias = T.let(MyEnum::Field1, MyEnum)
+TestAlias = T.let(MyEnum::Field1, MyEnum)

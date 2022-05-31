@@ -10,5 +10,5 @@ end
 
 MyEnum_Field1 = MyEnum::Field1
 
-Alias = T.let(MyEnum::Field1, MyEnum_F) # error: Unable to resolve constant
-T.reveal_type(Alias) # error: Revealed type: `<root>::MyEnum_F (unresolved)`
+TestAlias = T.let(MyEnum::Field1, MyEnum_F) # error: Unable to resolve constant
+T.reveal_type(TestAlias) # error: Revealed type: `<root>::MyEnum_F (unresolved)`

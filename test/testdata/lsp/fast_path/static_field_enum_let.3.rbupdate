@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: static_field_enum_let.rb
 
 class MyEnum < T::Enum
   enums do
@@ -10,5 +10,5 @@ end
 
 MyEnum_Field1 = MyEnum::Field1
 
-Alias = T.let(MyEnum::Field1, MyEnum_Field1) # error: Constant `MyEnum_Field1` is not a class or type alias
-T.reveal_type(Alias) # error: Revealed type: `T.untyped`
+TestAlias = T.let(MyEnum::Field1, MyEnum_Field1) # error: Constant `MyEnum_Field1` is not a class or type alias
+T.reveal_type(TestAlias) # error: Revealed type: `T.untyped`
