@@ -2297,10 +2297,6 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
 uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
 
-    // TODO(jez) type aliases and class aliases participate in the constant resolution fixed
-    // point, which could probably make something start to resolve in a file that doesn't
-    // literally mention the name of this type alias. Add a test for this.
-    // (also maybe double check this logic?)
     auto canSkipType =
         // Only consider static fields for the fast path at the moment.  It is probably
         // straightforward to take the fast path for changes to regular fields by changing
