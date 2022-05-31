@@ -220,12 +220,12 @@ private:
                     const auto &resultType = lookup.asFieldRef().data(ctx)->resultType;
                     if (core::isa_type<core::AliasType>(resultType)) {
                         auto dealiased = lookup.dealias(ctx);
-                        if (dealiased.isTypeMember()) {
+                        if (dealiased.isTypeMember() &&
+                            dealiased.asTypeMemberRef().data(ctx)->owner ==
+                                lookup.owner(ctx).asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx)) {
                             // This static field is a shim that exists only so that `MyTypeTemplate` resolves as normal
                             // constant literal by looking for the thing with that name on the singleton class.
                             // Should never be leaked externally, so in this case we forcibly dealias.
-                            ENFORCE(dealiased.asTypeMemberRef().data(ctx)->owner ==
-                                    lookup.owner(ctx).asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx));
                             lookup = dealiased;
                         }
                     }
