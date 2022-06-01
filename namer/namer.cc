@@ -1791,6 +1791,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
+        prodCounterAdd("types.input.founddefs.total", fileFoundDefinitions.names->definitions().size());
         count++;
         // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.
         if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
