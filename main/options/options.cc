@@ -319,8 +319,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
                                     "Enable experimental LSP feature: Document Symbol");
-    options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
-                                    "Enable experimental LSP feature: Document Formatting with Rubyfmt");
     options.add_options("advanced")(
         "rubyfmt-path",
         "Path to the rubyfmt executable used for document formatting. Defaults to using `rubyfmt` on your PATH.",
@@ -740,8 +738,6 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
-        opts.lspDocumentFormatRubyfmtEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
 
         // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
         // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers
