@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C A><<C <todo sym>>> < ()
+    module <emptyTree>::<C B><<C <todo sym>>> < ()
+      module <emptyTree>::<C C><<C <todo sym>>> < ()
+        <emptyTree>
+      end
+    end
+  end
+end

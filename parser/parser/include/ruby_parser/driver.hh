@@ -384,6 +384,9 @@ public:
     // what we rewind to if even the first thing in the body is improperly indented.
     ForeignPtr rewind_and_munge_body_if_dedented(SelfPtr self, token_t defToken, size_t headerEndPos, ForeignPtr body,
                                                  token_t bodyStartToken, token_t lastTokBeforeDedent, token_t endToken);
+
+private:
+    void rewind_for_end_token(token_t endToken);
 };
 
 class typedruby_release : public base_driver {

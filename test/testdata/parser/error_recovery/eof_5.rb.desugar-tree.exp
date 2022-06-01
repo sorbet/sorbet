@@ -1,0 +1,16 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    module <emptyTree>::<C B><<C <todo sym>>> < ()
+      def self.foo<<todo method>>(&<blk>)
+        begin
+          def bar<<todo method>>(&<blk>)
+            <emptyTree>
+          end
+          <self>.puts("inside foo")
+        end
+      end
+
+      <self>.puts("inside A")
+    end
+  end
+end

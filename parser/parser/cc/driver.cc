@@ -94,17 +94,26 @@ void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
 ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t beginToken, size_t headerEndPos,
                                                           ForeignPtr body, token_t bodyStartToken,
                                                           token_t lastTokBeforeDedent, token_t endToken) {
-    if (!this->indentationAware || this->lex.compare_indent_level(beginToken, endToken) <= 0) {
+    if (!this->indentationAware) {
+        return body;
+    }
+
+    auto beginTokenLTEendToken = this->lex.compare_indent_level(beginToken, endToken) <= 0;
+    if (beginTokenLTEendToken && endToken->type() != token_type::tBEFORE_EOF) {
         return body;
     }
 
     const char *token_str_name = this->token_name(beginToken->type());
-    this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, beginToken, token_str_name, endToken);
+    if (endToken->type() == token_type::tBEFORE_EOF) {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::EOFInsteadOfEnd, beginToken, token_str_name);
+    } else {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, beginToken, token_str_name, endToken);
+    }
 
     if (body == nullptr) {
         // Special case of "entire method was properly indented"
         // But bodyStartToken is tNL if empty body, which fails the assertion in compare_indent_level
-        this->rewind_and_reset(endToken->start());
+        this->rewind_for_end_token(endToken);
         return body;
     } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
         // Not even the very first thing in the body is indented. Treat this like emtpy method.
@@ -126,8 +135,18 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
         }
     } else {
         // Entire method body was properly indented, except for final kEND
-        this->rewind_and_reset(endToken->start());
+        this->rewind_for_end_token(endToken);
         return body;
+    }
+}
+
+void base_driver::rewind_for_end_token(token_t endToken) {
+    if (endToken->type() == token_type::tBEFORE_EOF) {
+        // Rewinding doesn't make sense here, because we're already at EOF (there's nothing left for ragel to scan).
+        // Instead, just put the tBEFORE_EOF token back onto the queue so that other rules can use it.
+        this->lex.unadvance(endToken);
+    } else {
+        this->rewind_and_reset(endToken->start());
     }
 }
 

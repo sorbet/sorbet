@@ -558,7 +558,12 @@ static bool eof_codepoint(char c) {
 token_t lexer::advance_() {
   if (!token_queue.empty()) {
     token_t token = token_queue.front();
-    token_queue.pop_front();
+    if (token->type() == token_type::eof) {
+      // spin on EOF forever, even if advance is called repeatedly
+      ENFORCE(token_queue.size() == 1);
+    } else {
+      token_queue.pop_front();
+    }
     return token;
   }
 
@@ -601,7 +606,8 @@ token_t lexer::advance_() {
     return mempool.alloc(token_type::error, start, start + 1, std::string_view(p - 1, 1), line_start(token_type::error, start));
   }
 
-  return mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0), line_start(token_type::eof, source_buffer.size()));
+  token_queue.push_back(mempool.alloc(token_type::eof, source_buffer.size(), source_buffer.size(), std::string_view("", 0), line_start(token_type::eof, source_buffer.size())));
+  return mempool.alloc(token_type::tBEFORE_EOF, source_buffer.size(), source_buffer.size(), std::string_view("", 0), line_start(token_type::tBEFORE_EOF, source_buffer.size()));
 }
 
 void lexer::emit(token_type type) {
@@ -3036,6 +3042,7 @@ void lexer::rewind_and_reset_to_expr_beg(size_t newPos) {
 
   // rewind
   this->_p = this->source_buffer.data() + newPos;
+  token_queue.clear();
 
   // reset
   set_state_expr_beg();
@@ -3047,6 +3054,7 @@ void lexer::rewind_and_reset_to_expr_end(size_t newPos) {
 
   // rewind
   this->_p = this->source_buffer.data() + newPos;
+  token_queue.clear();
 
   // reset
   set_state_expr_end();

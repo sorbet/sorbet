@@ -1,0 +1,8 @@
+test/cli/fuzz_def_begin/test.rb:2: unexpected token "end of file" https://srb.help/2001
+     2 |def BEGIN
+     3 |
+
+test/cli/fuzz_def_begin/test.rb:2: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     2 |def BEGIN
+        ^^^
+Errors: 2

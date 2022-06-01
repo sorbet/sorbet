@@ -363,6 +363,8 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                 range = RangeAssertion::makeRange(lastSourceLineNum, caretBeginPos, caretEndPos);
             } else if (assertionContents == "unexpected token tNL") {
                 range = RangeAssertion::makeRange(lineNum);
+            } else if (assertionContents == "unexpected token \"end of file\"") {
+                range = RangeAssertion::makeRange(lineNum);
             } else {
                 range = RangeAssertion::makeRange(lastSourceLineNum);
             }
