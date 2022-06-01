@@ -59,16 +59,21 @@ void base_driver::rewind_and_reset_to_beg(size_t newPos) {
 }
 
 void base_driver::rewind_if_dedented(token_t token, token_t endToken, bool force) {
-    if ((force || this->indentationAware) &&
-        (endToken->type() == token_type::tBEFORE_EOF || this->lex.compare_indent_level(token, endToken) > 0)) {
-        this->rewind_for_end_token(endToken);
+    if (!force && !this->indentationAware) {
+        return;
+    }
 
-        const char *token_str_name = this->token_name(token->type());
-        if (endToken->type() == token_type::tBEFORE_EOF) {
-            this->diagnostics.emplace_back(dlevel::ERROR, dclass::EOFInsteadOfEnd, token, token_str_name);
-        } else {
-            this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, token, token_str_name, endToken);
-        }
+    if (endToken->type() != token_type::tBEFORE_EOF && this->lex.compare_indent_level(token, endToken) <= 0) {
+        return;
+    }
+
+    this->rewind_for_end_token(endToken);
+
+    const char *token_str_name = this->token_name(token->type());
+    if (endToken->type() == token_type::tBEFORE_EOF) {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::EOFInsteadOfEnd, token, token_str_name);
+    } else {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, token, token_str_name, endToken);
     }
 }
 
