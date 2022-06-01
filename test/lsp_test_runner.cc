@@ -417,10 +417,10 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
                                                         make_unique<FormattingOptions>(4, 4));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentFormatting, move(params));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
-    { INFO("Did not receive exactly one response for a documentFormatting request."); }
 
     // successful response
     if (responses.at(0)->isResponse()) {
+        INFO("Did not receive exactly one response for a documentFormatting request.");
         REQUIRE_EQ(responses.size(), 1);
         auto &msg = responses.at(0);
         REQUIRE(msg->isResponse());
