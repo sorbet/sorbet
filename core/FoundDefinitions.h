@@ -184,9 +184,10 @@ struct FoundModifier {
 CheckSize(FoundModifier, 24, 4);
 
 class FoundDefinitions final {
-    // Contains references to items in _klasses, _methods, _staticFields, and _typeMembers.
+    // Contains references to items in _klasses, _staticFields, and _typeMembers.
     // Used to determine the order in which symbols are defined in SymbolDefiner.
-    std::vector<FoundDefinitionRef> _definitions;
+    // (All non-method definitions are defined before all method definitions)
+    std::vector<FoundDefinitionRef> _nonMethodDefinitions;
     // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
     // Symbols for classes that are referenced from but not present in the given file.
     std::vector<FoundClassRef> _klassRefs;
@@ -204,16 +205,16 @@ class FoundDefinitions final {
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
             case FoundDefinitionRef::Kind::Class:
-            case FoundDefinitionRef::Kind::Method:
             case FoundDefinitionRef::Kind::StaticField:
             case FoundDefinitionRef::Kind::TypeMember:
                 break;
+            case FoundDefinitionRef::Kind::Method:
             case FoundDefinitionRef::Kind::ClassRef:
             case FoundDefinitionRef::Kind::Empty:
             case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
         });
-        _definitions.emplace_back(ref);
+        _nonMethodDefinitions.emplace_back(ref);
         return ref;
     }
 
@@ -235,10 +236,8 @@ public:
         return FoundDefinitionRef(FoundDefinitionRef::Kind::ClassRef, idx);
     }
 
-    FoundDefinitionRef addMethod(FoundMethod &&method) {
-        const uint32_t idx = _methods.size();
+    void addMethod(FoundMethod &&method) {
         _methods.emplace_back(std::move(method));
-        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Method, idx));
     }
 
     FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
@@ -262,8 +261,8 @@ public:
     }
 
     // See documentation on _definitions
-    const std::vector<FoundDefinitionRef> &definitions() const {
-        return _definitions;
+    const std::vector<FoundDefinitionRef> &nonMethodDefinitions() const {
+        return _nonMethodDefinitions;
     }
 
     // See documentation on _klasses
