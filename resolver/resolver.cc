@@ -2080,6 +2080,8 @@ class ResolveTypeMembersAndFieldsWalk {
                 return resultType;
             }
         }
+        // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
+        // `resolvedStaticField`, which may produce an error message.
         return core::Types::todo();
     }
 
