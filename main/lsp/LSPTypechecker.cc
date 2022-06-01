@@ -237,7 +237,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
-    vector<core::NameHash> changedHashes;
+    vector<core::ShortNameHash> changedHashes;
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
@@ -281,7 +281,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         for (auto &changedMethodHash : changedMethodHashes) {
             changedHashes.push_back(changedMethodHash.nameHash);
         }
-        core::NameHash::sortAndDedupe(changedHashes);
+        core::ShortNameHash::sortAndDedupe(changedHashes);
     }
 
     int i = -1;
@@ -298,7 +298,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
-        vector<core::NameHash> intersection;
+        vector<core::ShortNameHash> intersection;
         std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
                               oldHash.usages.sends.end(), std::back_inserter(intersection));
         if (!intersection.empty()) {

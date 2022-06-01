@@ -2116,7 +2116,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<NameHash, uint32_t> methodHashesMap;
+    UnorderedMap<ShortNameHash, uint32_t> methodHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2171,7 +2171,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashesMap[NameHash(*this, sym.name)];
+            auto &target = methodHashesMap[ShortNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
 
             uint32_t symhash = sym.methodShapeHash(*this);
