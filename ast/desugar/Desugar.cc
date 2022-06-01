@@ -1068,6 +1068,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(dctx, std::move(asgn->lhs));
                 auto rhs = node2TreeImpl(dctx, std::move(asgn->rhs));
+                // Ensure that X = <ErrorNode> always looks like a proper static field, rather
+                // than a class alias.  Leaving it as a class alias would require taking the
+                // slow path; turning it into a proper static field gives us a chance to take
+                // the fast path.  T.let(<ErrorNode>, T.untyped) ensures that we don't get
+                // warnings in `typed: strict` files.
                 if (isa_tree<UnresolvedConstantLit>(lhs) && isa_tree<UnresolvedConstantLit>(rhs)) {
                     auto &rhsConst = cast_tree_nonnull<UnresolvedConstantLit>(rhs);
                     if (rhsConst.cnst == core::Names::Constants::ErrorNode()) {
