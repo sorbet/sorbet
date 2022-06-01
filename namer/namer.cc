@@ -1148,11 +1148,19 @@ public:
         definedClasses.reserve(foundDefs.klasses().size());
         definedMethods.reserve(foundDefs.methods().size());
 
+        // TODO(jez) Remember to comment why this is split it (it's for the sake of fast path methods)
         for (auto ref : foundDefs.definitions()) {
-            defineSingle(ctx, ref);
+            if (ref.kind() != core::FoundDefinitionRef::Kind::Method) {
+                defineSingle(ctx, ref);
+            }
         }
 
-        // TODO: Split up?
+        for (auto ref : foundDefs.definitions()) {
+            if (ref.kind() == core::FoundDefinitionRef::Kind::Method) {
+                defineSingle(ctx, ref);
+            }
+        }
+
         for (const auto &modifier : foundDefs.modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
