@@ -405,6 +405,8 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
                   "Mismatch on: " + expectedSymbolsPath);
 }
 
+static string RUBYFMT_TEST_FLAG = "# rubyfmt-force-exit";
+
 void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
                             string_view testFile) {
     auto expectationFileName = test.expectations["document-formatting-rubyfmt"][testFile];
@@ -417,27 +419,35 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
                                                         make_unique<FormattingOptions>(4, 4));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentFormatting, move(params));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
-    {
-        INFO("Did not receive exactly one response for a documentFormatting request.");
+    { INFO("Did not receive exactly one response for a documentFormatting request."); }
+
+    // successful response
+    if (responses.at(0)->isResponse()) {
         REQUIRE_EQ(responses.size(), 1);
+        auto &msg = responses.at(0);
+        REQUIRE(msg->isResponse());
+        auto &response = msg->asResponse();
+        REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
+        auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
+        if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
+            // We can support multiple edits, but right now the impl only returns one.
+            REQUIRE_EQ(1, edits->size());
+            auto formattedText = (*edits)[0]->newText;
+            auto expectedOutput = FileOps::read(test.folder + expectationFileName);
+            REQUIRE_EQ(expectedOutput, formattedText);
+        } else {
+            FAIL("Expected successful response to include edit list");
+        }
+    } else {
+        // Error responses return both a user notification and an LSP error
+        REQUIRE_EQ(responses.size(), 2);
+        REQUIRE(responses.at(0)->isNotification());
+        auto &errorMsg = responses.at(1);
+        REQUIRE(errorMsg->isResponse());
+        auto &receivedErrorResponse = *errorMsg->asResponse().error;
+        auto expectedOutput = FileOps::read(test.folder + expectationFileName);
+        REQUIRE_EQ(expectedOutput, receivedErrorResponse->message);
     }
-    auto &msg = responses.at(0);
-    REQUIRE(msg->isResponse());
-    auto &response = msg->asResponse();
-    REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
-    auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
-    string formattedText = string(test.sourceFileContents[testFile]->source());
-    if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
-        // We can support multiple edits, but right now the impl only returns one.
-        REQUIRE_EQ(1, edits->size());
-        formattedText = (*edits)[0]->newText;
-    }
-
-    auto expectedFormattingPath = test.folder + expectationFileName;
-    auto expectedFormattedText = FileOps::read(expectedFormattingPath);
-
-    // Simple string comparison, just like other *.exp files.
-    CHECK_EQ_DIFF(expectedFormattedText, formattedText, "Mismatch on: " + expectedFormattingPath);
 }
 
 enum class ExpectDiagnosticMessages {
@@ -519,6 +529,7 @@ TEST_CASE("LSPTest") {
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }
         opts->disableWatchman = true;
+        opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
 
         if (haveStaleUpdates) {
             opts->lspStaleStateEnabled = true;

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+exit_code=$(grep 'rubyfmt-force-exit' < "$1" | grep -Eow "[0-9]+")
+
+if [ "$exit_code" == 0 ]; then
+    echo "Stub output formatted by rubyfmt"
+fi
+
+exit "$exit_code"
