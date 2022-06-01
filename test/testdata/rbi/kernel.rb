@@ -57,6 +57,14 @@ obj = T.let("foo", String)
 # Object#then, with a block
 T.reveal_type(obj.then(&:to_i)) # error: Revealed type: `T.untyped`
 
+# object_id
+obj = T.let("foo", String)
+T.assert_type!(obj.object_id, Integer)
+
+# itself
+obj = T.let("foo", String)
+T.assert_type!(obj.itself, String)
+
 y = loop do
 end
 puts y # error: This code is unreachable
