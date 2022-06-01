@@ -156,7 +156,7 @@ struct FoundMethod final {
     Flags flags;
     CheckSize(Flags, 1, 1);
     std::vector<core::ParsedArg> parsedArgs;
-    std::vector<uint32_t> argsHash;
+    uint32_t argsHash;
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };

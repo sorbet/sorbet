@@ -2281,9 +2281,7 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
     result = mix(result, this->hasSig());
-    for (auto &arg : this->methodArgumentHash(gs)) {
-        result = mix(result, arg);
-    }
+    result = mix(result, this->methodArgumentHash(gs));
 
     if (name == core::Names::unresolvedAncestors()) {
         // This is a synthetic method that encodes the superclasses of its owning class in its return type.
@@ -2295,17 +2293,16 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     return result;
 }
 
-vector<uint32_t> Method::methodArgumentHash(const GlobalState &gs) const {
-    vector<uint32_t> result;
-    result.reserve(arguments.size());
+// This has to match the implementation of ArgParsing::hashArgs
+uint32_t Method::methodArgumentHash(const GlobalState &gs) const {
+    uint32_t result = 0;
     for (const auto &e : arguments) {
-        uint32_t arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
-            arg = mix(arg, _hash(e.name.shortName(gs)));
+            result = mix(result, _hash(e.name.shortName(gs)));
         }
         // Changing an argument from e.g. keyword to position-based is a shape change.
-        result.push_back(mix(arg, e.flags.toU1()));
+        result = mix(result, e.flags.toU1());
     }
     return result;
 }

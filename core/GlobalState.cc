@@ -924,8 +924,7 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
-                                                  const vector<uint32_t> &methodHash) const {
+MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, uint32_t methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
