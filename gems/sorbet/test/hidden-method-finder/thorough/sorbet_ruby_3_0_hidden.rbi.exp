@@ -2889,12 +2889,6 @@ module JSON
 end
 
 module Kernel
-  def itself(); end
-
-  def object_id(); end
-end
-
-module Kernel
   def self.at_exit(); end
 end
 
