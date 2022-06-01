@@ -405,8 +405,6 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
                   "Mismatch on: " + expectedSymbolsPath);
 }
 
-static string RUBYFMT_TEST_FLAG = "# rubyfmt-force-exit";
-
 void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
                             string_view testFile) {
     auto expectationFileName = test.expectations["document-formatting-rubyfmt"][testFile];
