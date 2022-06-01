@@ -73,6 +73,7 @@ vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &
 // This has to match the implementation of Method::methodArgumentHash
 uint32_t ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
     uint32_t result = 0;
+    result = core::mix(result, args.size());
     for (const auto &e : args) {
         if (e.flags.isKeyword) {
             if (e.flags.isRepeated && e.local._name != core::Names::fwdKwargs()) {

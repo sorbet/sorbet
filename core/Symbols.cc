@@ -2296,6 +2296,7 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
 // This has to match the implementation of ArgParsing::hashArgs
 uint32_t Method::methodArgumentHash(const GlobalState &gs) const {
     uint32_t result = 0;
+    result = mix(result, arguments.size());
     for (const auto &e : arguments) {
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
