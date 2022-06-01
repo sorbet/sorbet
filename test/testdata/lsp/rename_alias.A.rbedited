@@ -1,0 +1,10 @@
+# typed: true
+
+module MyModule
+
+end
+
+Foo = MyModule
+# ^ apply-rename: [A] newName: Foo placeholderText: MyAlias
+
+puts(Foo)

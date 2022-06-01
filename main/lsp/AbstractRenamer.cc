@@ -87,7 +87,6 @@ std::string AbstractRenamer::getError() {
 }
 
 std::shared_ptr<AbstractRenamer::UniqueSymbolQueue> AbstractRenamer::getQueue() {
-    // return symbolQueue;
     return symbolQueue;
 }
 

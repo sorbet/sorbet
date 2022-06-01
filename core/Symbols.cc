@@ -548,7 +548,13 @@ MethodRef ClassOrModule::findMethodNoDealias(const GlobalState &gs, NameRef name
 }
 
 SymbolRef ClassOrModule::findMemberTransitive(const GlobalState &gs, NameRef name) const {
-    return findMemberTransitiveInternal(gs, name, 100);
+    auto dealias = true;
+    return findMemberTransitiveInternal(gs, name, 100, dealias);
+}
+
+SymbolRef ClassOrModule::findMemberTransitiveNoDealias(const GlobalState &gs, NameRef name) const {
+    auto dealias = false;
+    return findMemberTransitiveInternal(gs, name, 100, dealias);
 }
 
 MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef name) const {
@@ -627,7 +633,8 @@ MethodRef ClassOrModule::findConcreteMethodTransitive(const GlobalState &gs, Nam
     return findConcreteMethodTransitiveInternal(gs, this->ref(gs), name, 100);
 }
 
-SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth) const {
+SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth,
+                                                      bool dealias) const {
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ", name.show(gs),
@@ -651,14 +658,14 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
         Exception::raise("findMemberTransitive hit a loop while resolving");
     }
 
-    SymbolRef result = findMember(gs, name);
+    SymbolRef result = dealias ? findMember(gs, name) : findMemberNoDealias(gs, name);
     if (result.exists()) {
         return result;
     }
     if (flags.isLinearizationComputed) {
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
-            result = it->data(gs)->findMember(gs, name);
+            result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(gs, name);
             if (result.exists()) {
                 return result;
             }
@@ -667,14 +674,14 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
     } else {
         for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             ENFORCE(it->exists());
-            result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1);
+            result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
             if (result.exists()) {
                 return result;
             }
         }
     }
     if (this->superClass().exists()) {
-        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1);
+        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
     }
     return Symbols::noSymbol();
 }
