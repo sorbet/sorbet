@@ -956,37 +956,6 @@ vector<SimilarMethod> computeDedupedMethods(const core::GlobalState &gs, const c
     return dedupedSimilarMethods;
 }
 
-void logEmptyCompletion(const core::GlobalState &gs, core::FileRef fref, core::Loc queryLoc, string_view explanation) {
-    rapidjson::StringBuffer result;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(result);
-
-    {
-        writer.StartObject();
-
-        writer.String("empty_completion_result");
-        writer.Bool(true);
-
-        writer.String("context");
-        writer.String(explanation.data(), explanation.size());
-
-        writer.String("file_path");
-        auto path = fref.data(gs).path();
-        writer.String(path.data(), path.size());
-
-        writer.String("query_pos");
-        writer.Uint(queryLoc.offsets().beginPos());
-
-        writer.String("contents");
-        auto source = fref.data(gs).source();
-        writer.String(source.data(), source.size());
-
-        writer.EndObject();
-    }
-
-    auto view = string_view{result.GetString(), result.GetLength()};
-    gs.tracer().debug(view);
-}
-
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
@@ -1249,7 +1218,6 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
             return response;
         }
 
-        logEmptyCompletion(gs, fref, queryLoc, "no query result");
         response->result = std::move(emptyResult);
         return response;
     }
@@ -1382,9 +1350,6 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
         }
     }
 
-    if (items.empty()) {
-        logEmptyCompletion(gs, fref, queryLoc, "no completion items for query");
-    }
     response->result = make_unique<CompletionList>(false, move(items));
     return response;
 }
