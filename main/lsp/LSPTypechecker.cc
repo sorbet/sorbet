@@ -242,13 +242,13 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
         vector<core::SymbolHash> changedMethodHashes;
-        for (auto &f : updates.updatedFiles) {
-            auto fref = gs->findFileByPath(f->path());
+        for (auto &updatedFile : updates.updatedFiles) {
+            auto fref = gs->findFileByPath(updatedFile->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
             // path logic in LSPPreprocessor.
             ENFORCE(fref.exists());
-            ENFORCE(f->getFileHash() != nullptr);
-            if (this->config->opts.stripePackages && f->isPackage()) {
+            ENFORCE(updatedFile->getFileHash() != nullptr);
+            if (this->config->opts.stripePackages && updatedFile->isPackage()) {
                 // Only relevant in --stripe-packages mode. Package declarations do not have method
                 // hashes. Instead we rely on recomputing packages if any __package.rb source
                 // changes.
@@ -258,7 +258,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
                 const auto &oldMethodHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes.methodHashes;
-                const auto &newMethodHashes = f->getFileHash()->localSymbolTableHashes.methodHashes;
+                const auto &newMethodHashes = updatedFile->getFileHash()->localSymbolTableHashes.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
                 ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),
@@ -270,7 +270,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
                                newMethodHashes.end(), std::back_inserter(changedMethodHashes));
 
-                gs->replaceFile(fref, f);
+                gs->replaceFile(fref, updatedFile);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                 fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
                 subset.emplace_back(fref);

@@ -253,8 +253,6 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
-            // TODO: We should eventually be able to freeze the symbol and name tables, but overloads currently pose
-            // a problem.
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
