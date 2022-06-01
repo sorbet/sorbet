@@ -104,7 +104,7 @@ _TEST_RUNNERS = {
     "PackagerTests": ":pipeline_test_runner",
 }
 
-def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tags = []):
+def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = []):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
@@ -172,6 +172,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_args = [], tag
             enabled_tests.append(test_name)
 
         data = []
+        data += extra_files
         if tests[name]["isDirectory"]:
             data += native.glob(["{}**/*".format(prefix)])
         elif tests[name]["isMultiFile"]:

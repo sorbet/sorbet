@@ -1,0 +1,2 @@
+`rubyfmt` failed to deserialize the parse tree from Ripper for test/testdata/lsp/ripper_parse_error_formatting.rb.
+This is valid Ruby but represents a bug in `rubyfmt`.

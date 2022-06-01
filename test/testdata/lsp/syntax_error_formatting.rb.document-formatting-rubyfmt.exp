@@ -1,0 +1,1 @@
+`rubyfmt` could not format test/testdata/lsp/syntax_error_formatting.rb because it contains syntax errors.

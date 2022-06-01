@@ -17,6 +17,9 @@ public:
     void index(LSPIndexer &index) override;
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+
+private:
+    void displayError(std::string errorMessage, std::unique_ptr<ResponseMessage> &response);
 };
 
 } // namespace sorbet::realmain::lsp

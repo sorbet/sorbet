@@ -73,6 +73,7 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
     CHECK_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
     CHECK_EQ(empty.lspDocumentFormatRubyfmtEnabled, opts.lspDocumentFormatRubyfmtEnabled);
+    CHECK_EQ(empty.rubyfmtPath, opts.rubyfmtPath);
     CHECK_EQ(empty.inlineInput, opts.inlineInput);
     CHECK_EQ(empty.debugLogFile, opts.debugLogFile);
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);

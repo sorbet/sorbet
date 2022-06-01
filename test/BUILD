@@ -264,6 +264,7 @@ pipeline_tests(
         ],
     ),
     "LSPTests",
+    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
 test_suite(

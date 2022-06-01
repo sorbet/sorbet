@@ -321,6 +321,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
                                     "Enable experimental LSP feature: Document Formatting with Rubyfmt");
+    options.add_options("advanced")(
+        "rubyfmt-path",
+        "Path to the rubyfmt executable used for document formatting. Defaults to using `rubyfmt` on your PATH.",
+        cxxopts::value<string>()->default_value(empty.rubyfmtPath));
     options.add_options("advanced")("enable-experimental-lsp-document-highlight",
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
