@@ -2821,10 +2821,6 @@ module Kernel
   def itself(); end
 
   def object_id(); end
-
-  def then(); end
-
-  def yield_self(); end
 end
 
 module Kernel
