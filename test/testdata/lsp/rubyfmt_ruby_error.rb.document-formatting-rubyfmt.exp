@@ -1,0 +1,2 @@
+`rubyfmt` encountered a ruby error while writing test/testdata/lsp/rubyfmt_ruby_error.rb.
+This is likely a bug in `rubyfmt`.
