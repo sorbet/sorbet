@@ -432,6 +432,7 @@ public:
     }
 
     static ExpressionPtr RaiseUnimplemented(core::LocOffsets loc) {
+        prodCategoryCounterInc("trees", "raiseunimplemented");
         auto kernel = Constant(loc, core::Symbols::Kernel());
         auto msg = String(loc, core::Names::rewriterRaiseUnimplemented());
         // T.unsafe so that Sorbet doesn't know this unconditionally raises (avoids introducing dead code errors)
