@@ -1,2 +1,2 @@
 # typed: strict
-# rubyfmt-force-exit 4
+# rubyfmt-force-exit: 4
