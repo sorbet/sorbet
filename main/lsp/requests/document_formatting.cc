@@ -113,7 +113,7 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
                              response);
                 break;
             case RubyfmtStatus::INITIALIZE_ERROR:
-                displayError(fmt::format("`rubyfmt` failed to initialize."), response);
+                displayError("`rubyfmt` failed to initialize.", response);
                 break;
             case RubyfmtStatus::RUBYFMT_NOT_IN_PATH:
                 displayError("`rubyfmt` could not be found. Ensure that it is properly configured in your PATH.",
