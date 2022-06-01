@@ -1111,6 +1111,36 @@ class SymbolDefiner {
         return sym;
     }
 
+    void defineSingle(core::MutableContext ctx, core::FoundDefinitionRef ref) {
+        switch (ref.kind()) {
+            case core::FoundDefinitionRef::Kind::Class: {
+                const auto &klass = ref.klass(foundDefs);
+                ENFORCE(definedClasses.size() == ref.idx());
+                definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
+                break;
+            }
+            case core::FoundDefinitionRef::Kind::Method: {
+                const auto &method = ref.method(foundDefs);
+                ENFORCE(definedMethods.size() == ref.idx());
+                definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+                break;
+            }
+            case core::FoundDefinitionRef::Kind::StaticField: {
+                const auto &staticField = ref.staticField(foundDefs);
+                insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
+                break;
+            }
+            case core::FoundDefinitionRef::Kind::TypeMember: {
+                const auto &typeMember = ref.typeMember(foundDefs);
+                insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
+                break;
+            }
+            default:
+                ENFORCE(false);
+                break;
+        }
+    }
+
 public:
     SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs) : foundDefs(move(*foundDefs)) {}
 
@@ -1118,34 +1148,8 @@ public:
         definedClasses.reserve(foundDefs.klasses().size());
         definedMethods.reserve(foundDefs.methods().size());
 
-        for (auto &ref : foundDefs.definitions()) {
-            switch (ref.kind()) {
-                case core::FoundDefinitionRef::Kind::Class: {
-                    const auto &klass = ref.klass(foundDefs);
-                    ENFORCE(definedClasses.size() == ref.idx());
-                    definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
-                    break;
-                }
-                case core::FoundDefinitionRef::Kind::Method: {
-                    const auto &method = ref.method(foundDefs);
-                    ENFORCE(definedMethods.size() == ref.idx());
-                    definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
-                    break;
-                }
-                case core::FoundDefinitionRef::Kind::StaticField: {
-                    const auto &staticField = ref.staticField(foundDefs);
-                    insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
-                    break;
-                }
-                case core::FoundDefinitionRef::Kind::TypeMember: {
-                    const auto &typeMember = ref.typeMember(foundDefs);
-                    insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
-                    break;
-                }
-                default:
-                    ENFORCE(false);
-                    break;
-            }
+        for (auto ref : foundDefs.definitions()) {
+            defineSingle(ctx, ref);
         }
 
         // TODO: Split up?
