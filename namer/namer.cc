@@ -1819,7 +1819,7 @@ void mergeClassBehaviorLocs(const core::GlobalState &gs, ClassBehaviorLocs &merg
     }
     for (auto [ref, loc] : threadRes) {
         auto &mergedLoc = merged[ref];
-        if (mergedLoc.empty()) {
+        if (!mergedLoc.exists()) {
             mergedLoc = loc;
         } else if (mergedLoc.file() != loc.file()) {
             core::Context ctx(gs, core::Symbols::root(), loc.file());
