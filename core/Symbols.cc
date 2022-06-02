@@ -2285,7 +2285,7 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
 
     if (name == Names::unresolvedAncestors() || name == Names::requiredAncestors() ||
         name == Names::requiredAncestorsLin()) {
-        // These are a synthetic methods that encode information about the class hierarchy in their types.
+        // These are synthetic methods that encode information about the class hierarchy in their types.
         // If the types change, ancestor information changed, and we must take the slow path.
         ENFORCE(resultType);
         result = mix(result, resultType.hash(gs));
