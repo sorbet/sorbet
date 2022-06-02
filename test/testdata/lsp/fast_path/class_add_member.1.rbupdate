@@ -11,3 +11,7 @@ class A extend T::Sig
   def foo
   end
 end
+
+A.new.bar # error: Not enough arguments provided for method `A#bar`. Expected: `1`, got: `0`
+A.new.foo.nope
+#         ^^^^ error: Cannot call method `nope` on void type
