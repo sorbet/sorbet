@@ -297,17 +297,23 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
+    const bool secondPass;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
+    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package, const bool secondPass)
+        : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()}, secondPass(secondPass) {}
 
     // `keep-def` will reference constants in a way that looks like a packaging violation, but is actually fine. This
     // boolean allows for an early exit when we know we're in the context of processing one of these sends. Currently
     // the only sends that we process this way will not have any nested method calls, but if that changes this will need
     // to become a stack.
     bool ignoreConstant = false;
+    UnorderedSet<core::SymbolRef> forSecondPass;
 
     ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+        if (secondPass) {
+            return tree;
+        }
+
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
         this->ignoreConstant = send.fun == core::Names::keepForIde();
@@ -315,25 +321,20 @@ public:
     }
 
     ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+        if (secondPass) {
+            return tree;
+        }
+
         this->ignoreConstant = false;
         return tree;
     }
 
-    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
-        if (this->ignoreConstant) {
-            return tree;
-        }
-
-        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-        if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
-            return tree;
-        }
-
+    void checkConstantVisibility(core::Context ctx, ast::ConstantLit &lit) {
         auto loc = lit.symbol.loc(ctx);
 
         auto otherFile = loc.file();
         if (!otherFile.exists() || !otherFile.data(ctx).isPackaged()) {
-            return tree;
+            return;
         }
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
@@ -349,7 +350,7 @@ public:
         // no need to check visibility for these cases
         auto otherPackage = db.getPackageNameForFile(otherFile);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
-            return tree;
+            return;
         }
 
         bool isExported = false;
@@ -382,7 +383,7 @@ public:
                 }
             }
 
-            return tree;
+            return;
         }
 
         auto importType = this->package.importsPackage(otherPackage);
@@ -420,6 +421,43 @@ public:
             }
         }
 
+        return;
+    }
+
+    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+        if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
+            return tree;
+        }
+
+        if (secondPass && forSecondPass.contains(lit.symbol)) {
+            checkConstantVisibility(ctx, lit);
+            return tree;
+        }
+
+        if (this->ignoreConstant) {
+            forSecondPass.emplace(lit.symbol);
+            return tree;
+        }
+
+        checkConstantVisibility(ctx, lit);
+
+        return tree;
+    }
+
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+            return tree;
+        }
+
+        auto &originalSym = (ast::cast_tree_nonnull<ast::ConstantLit>(original.name)).symbol;
+        std::cout << "pass " << secondPass << " ATTEMPTING " << forSecondPass.size() << " " << ctx.file.data(ctx).path() << " " << originalSym.showFullName(ctx) << std::endl;
+        if (forSecondPass.contains(originalSym)) {
+            forSecondPass.erase(originalSym);
+            std::cout << "pass " << secondPass << " ERASING " << ctx.file.data(ctx).path() << " " << originalSym.showFullName(ctx) << std::endl;
+        }
+
         return tree;
     }
 
@@ -441,8 +479,13 @@ public:
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
-                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName), false};
                         f.tree = ast::TreeMap::apply(ctx, pass, std::move(f.tree));
+                        if (!pass.forSecondPass.empty()) {
+                            VisibilityCheckerPass secondPass{ctx, gs.packageDB().getPackageInfo(pkgName), true};
+                            secondPass.forSecondPass = std::move(pass.forSecondPass);
+                            f.tree = ast::TreeMap::apply(ctx, secondPass, std::move(f.tree));
+                        }
                     }
                 }
 
