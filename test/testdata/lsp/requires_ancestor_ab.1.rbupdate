@@ -1,6 +1,6 @@
 # typed: true
 # enable-experimental-requires-ancestor: true
-# assert-fast-path: requires_ancestor_ab.rb
+# assert-slow-path: true
 
 module A
   extend T::Sig
@@ -26,13 +26,13 @@ module Target
   requires_ancestor { B }
 
   def foo_b
-    self.only_on_a
-    self.only_on_b # error: Method `only_on_b` does not exist on `Target`
+    self.only_on_a # error: Method `only_on_a` does not exist on `Target`
+    self.only_on_b
     res = self.on_both_a_and_b
-    T.reveal_type(res) # error: `Integer`
+    T.reveal_type(res) # error: `String`
   end
 end
 
-class C # error: `C` must include `A` (required by `Target`)
+class C # error: `C` must include `B` (required by `Target`)
   include Target
 end

@@ -2283,9 +2283,10 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->hasSig());
     result = mix(result, this->methodArgumentHash(gs));
 
-    if (name == core::Names::unresolvedAncestors()) {
-        // This is a synthetic method that encodes the superclasses of its owning class in its return type.
-        // If the return type changes, we must take the slow path.
+    if (name == Names::unresolvedAncestors() || name == Names::requiredAncestors() ||
+        name == Names::requiredAncestorsLin()) {
+        // These are a synthetic methods that encode information about the class hierarchy in their types.
+        // If the types change, ancestor information changed, and we must take the slow path.
         ENFORCE(resultType);
         result = mix(result, resultType.hash(gs));
     }
