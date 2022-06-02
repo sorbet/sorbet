@@ -1837,12 +1837,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
     }
     map.clear();
 
-    fast_sort(conflicts, [](const auto &lhs, const auto &rhs) -> bool {
-        if (lhs.first != rhs.first) {
-            return lhs.first.id() < rhs.first.id();
-        }
-        return lhs.second[0].file() < rhs.second[0].file();
-    });
+    fast_sort(conflicts, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first.id() < rhs.first.id(); });
     for (const auto &[ref, locs] : conflicts) {
         core::Loc mainLoc = locs[0];
         core::Context ctx(gs, core::Symbols::root(), mainLoc.file());
