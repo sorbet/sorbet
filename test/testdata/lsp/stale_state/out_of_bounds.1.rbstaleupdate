@@ -13,4 +13,6 @@ class Foo
   def bar(x)
     # ^ hover: null
   end
+
+  ForceSlowPath = true
 end
