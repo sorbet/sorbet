@@ -7,7 +7,6 @@ class Foo
   sig {returns(Integer)}
   def bar
     # ^ hover: ```ruby
-    # ^ hover: # note: information may be stale
     # ^ hover: sig {returns(Integer)}
     # ^ hover: def foo; end
     42
