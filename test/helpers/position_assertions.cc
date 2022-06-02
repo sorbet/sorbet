@@ -1046,6 +1046,12 @@ shared_ptr<FastPathAssertion> FastPathAssertion::make(string_view filename, uniq
                                                       string_view assertionContents, string_view assertionType) {
     optional<vector<string>> expectedFiles;
     if (!assertionContents.empty()) {
+        if (assertionContents == "true") {
+            auto filenameStr = string(filename);
+            ADD_FAIL_CHECK_AT(filenameStr.c_str(), assertionLine,
+                              "Unlike assert-slow-path, assert-fast-path takes a comma-separated list of file "
+                              "basenames which should be typechecked on the fast path");
+        }
         expectedFiles = absl::StrSplit(assertionContents, ',');
         fast_sort(*expectedFiles);
     }
