@@ -423,6 +423,16 @@ public:
         return tree;
     }
 
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
+            auto &superClass = original.ancestors[0];
+            superClass = ast::TreeMap::apply(ctx, *this, std::move(superClass));
+        }
+
+        return tree;
+    }
+
     static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
