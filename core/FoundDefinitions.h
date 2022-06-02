@@ -141,6 +141,8 @@ struct FoundMethod final {
     core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
+    std::vector<core::ParsedArg> parsedArgs;
+    uint32_t argsHash;
     struct Flags {
         bool isSelfMethod : 1;
         bool isRewriterSynthesized : 1;
@@ -155,12 +157,10 @@ struct FoundMethod final {
     };
     Flags flags;
     CheckSize(Flags, 1, 1);
-    std::vector<core::ParsedArg> parsedArgs;
-    uint32_t argsHash;
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundMethod, 64, 8);
+CheckSize(FoundMethod, 56, 8);
 
 struct FoundModifier {
     enum class Kind : uint8_t {
