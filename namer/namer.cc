@@ -202,16 +202,11 @@ public:
         foundMethod.flags = method.flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
-        ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
+        foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
         // visibility modifiers.
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
-        ownerStack.pop_back();
         return tree;
     }
 
@@ -1111,6 +1106,30 @@ class SymbolDefiner {
         return sym;
     }
 
+    void defineNonMethodSingle(core::MutableContext ctx, core::FoundDefinitionRef ref) {
+        switch (ref.kind()) {
+            case core::FoundDefinitionRef::Kind::Class: {
+                const auto &klass = ref.klass(foundDefs);
+                ENFORCE(definedClasses.size() == ref.idx());
+                definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
+                break;
+            }
+            case core::FoundDefinitionRef::Kind::StaticField: {
+                const auto &staticField = ref.staticField(foundDefs);
+                insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
+                break;
+            }
+            case core::FoundDefinitionRef::Kind::TypeMember: {
+                const auto &typeMember = ref.typeMember(foundDefs);
+                insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
+                break;
+            }
+            default:
+                ENFORCE(false);
+                break;
+        }
+    }
+
 public:
     SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs) : foundDefs(move(*foundDefs)) {}
 
@@ -1118,37 +1137,14 @@ public:
         definedClasses.reserve(foundDefs.klasses().size());
         definedMethods.reserve(foundDefs.methods().size());
 
-        for (auto &ref : foundDefs.definitions()) {
-            switch (ref.kind()) {
-                case core::FoundDefinitionRef::Kind::Class: {
-                    const auto &klass = ref.klass(foundDefs);
-                    ENFORCE(definedClasses.size() == ref.idx());
-                    definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
-                    break;
-                }
-                case core::FoundDefinitionRef::Kind::Method: {
-                    const auto &method = ref.method(foundDefs);
-                    ENFORCE(definedMethods.size() == ref.idx());
-                    definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
-                    break;
-                }
-                case core::FoundDefinitionRef::Kind::StaticField: {
-                    const auto &staticField = ref.staticField(foundDefs);
-                    insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
-                    break;
-                }
-                case core::FoundDefinitionRef::Kind::TypeMember: {
-                    const auto &typeMember = ref.typeMember(foundDefs);
-                    insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
-                    break;
-                }
-                default:
-                    ENFORCE(false);
-                    break;
-            }
+        for (auto ref : foundDefs.nonMethodDefinitions()) {
+            defineNonMethodSingle(ctx, ref);
         }
 
-        // TODO: Split up?
+        for (auto &method : foundDefs.methods()) {
+            definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+        }
+
         for (const auto &modifier : foundDefs.modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
@@ -1791,7 +1787,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
-        prodCounterAdd("types.input.founddefs.total", fileFoundDefinitions.names->definitions().size());
+        prodCounterAdd("types.input.foundmethods.total", fileFoundDefinitions.names->methods().size());
         count++;
         // defineSymbols is really fast. Avoid this mildly expensive check for most turns of the loop.
         if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
