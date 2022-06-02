@@ -70,35 +70,21 @@ vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &
     return parsedArgs;
 }
 
-std::vector<uint32_t> ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
-    std::vector<uint32_t> result;
-    result.reserve(args.size());
+// This has to match the implementation of Method::methodArgumentHash
+uint32_t ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
+    uint32_t result = 0;
+    result = core::mix(result, args.size());
     for (const auto &e : args) {
-        uint32_t arg = 0;
-        uint8_t flags = 0;
         if (e.flags.isKeyword) {
             if (e.flags.isRepeated && e.local._name != core::Names::fwdKwargs()) {
                 auto name = core::Names::kwargs();
-                arg = core::mix(arg, core::_hash(name.shortName(ctx)));
+                result = core::mix(result, core::_hash(name.shortName(ctx)));
             } else {
-                arg = core::mix(arg, core::_hash(e.local._name.shortName(ctx)));
+                result = core::mix(result, core::_hash(e.local._name.shortName(ctx)));
             }
-            flags += 1;
-        }
-        if (e.flags.isRepeated) {
-            flags += 2;
-        }
-        if (e.flags.isDefault) {
-            flags += 4;
-        }
-        if (e.flags.isShadow) {
-            flags += 8;
-        }
-        if (e.flags.isBlock) {
-            flags += 16;
         }
 
-        result.push_back(core::mix(arg, flags));
+        result = core::mix(result, e.flags.toU1());
     }
     return result;
 }

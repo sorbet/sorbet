@@ -17,10 +17,6 @@ struct ParsedArg {
         // In C++20 we can replace this with bit field initialzers
         ArgFlags() : isKeyword(false), isRepeated(false), isDefault(false), isShadow(false), isBlock(false) {}
 
-    private:
-        friend class Method;
-        friend class serialize::SerializerImpl;
-
         void setFromU1(uint8_t flags);
         uint8_t toU1() const;
     };

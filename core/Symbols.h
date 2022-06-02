@@ -84,7 +84,7 @@ public:
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     uint32_t hash(const GlobalState &gs) const;
     uint32_t methodShapeHash(const GlobalState &gs) const;
-    std::vector<uint32_t> methodArgumentHash(const GlobalState &gs) const;
+    uint32_t methodArgumentHash(const GlobalState &gs) const;
 
     inline void setMethodPublic() {
         flags.isPrivate = false;
