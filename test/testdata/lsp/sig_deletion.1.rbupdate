@@ -5,3 +5,5 @@ class Foo
 
   def foo; 1; end
 end
+
+T.reveal_type(Foo.new.foo) # error: `T.untyped`
