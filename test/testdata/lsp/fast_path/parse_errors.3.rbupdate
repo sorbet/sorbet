@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: true
+# assert-fast-path: parse_errors.rb
 class A
   def foo; end
 end
