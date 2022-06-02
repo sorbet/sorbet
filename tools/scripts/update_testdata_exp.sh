@@ -113,7 +113,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
   if [ -n "$basename" ]; then
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
-      args=()
+      if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
+        args=("--enable-experimental-requires-ancestor")
+      else
+        args=()
+      fi
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer --skip-rewriter-passes")
       elif [ "$pass" = "minimized-rbi" ]; then
