@@ -1,0 +1,21 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(x, y, &<blk>)
+      if x
+        <emptyTree>
+      else
+        while x
+          while x.!()
+            1.times() do ||
+              <emptyTree>::<C Kernel>.lambda() do ||
+                <self>.x(y) do ||
+                  <emptyTree>
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

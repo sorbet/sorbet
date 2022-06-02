@@ -1,0 +1,11 @@
+s(:case,
+  s(:send, nil, :x),
+  s(:when,
+    s(:true),
+    s(:case, nil,
+      s(:when,
+        s(:send, nil, :x),
+        s(:case,
+          s(:send, nil, :x),
+          s(:when,
+            s(:const, nil, :<ErrorNode>), nil), nil)), nil)), nil)

@@ -1,0 +1,16 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(x, &<blk>)
+      begin
+        <self>.puts("outside begin")
+        begin
+          <self>.puts("inside begin")
+          <self>.puts("between")
+          <self>.puts("second begin")
+        rescue => <rescueTemp>$2
+          <self>.puts("inside rescue")
+        end
+      end
+    end
+  end
+end

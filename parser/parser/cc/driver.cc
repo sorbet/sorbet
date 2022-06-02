@@ -58,11 +58,22 @@ void base_driver::rewind_and_reset_to_beg(size_t newPos) {
     this->lex.rewind_and_reset_to_expr_beg(newPos);
 }
 
-void base_driver::rewind_if_dedented(token_t token, token_t kEND, bool force) {
-    if ((force || this->indentationAware) && this->lex.compare_indent_level(token, kEND) > 0) {
-        this->rewind_and_reset(kEND->start());
-        const char *token_str_name = this->token_name(token->type());
-        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, token, token_str_name, kEND);
+void base_driver::rewind_if_dedented(token_t token, token_t endToken, bool force) {
+    if (!force && !this->indentationAware) {
+        return;
+    }
+
+    if (endToken->type() != token_type::tBEFORE_EOF && this->lex.compare_indent_level(token, endToken) <= 0) {
+        return;
+    }
+
+    this->rewind_for_end_token(endToken);
+
+    const char *token_str_name = this->token_name(token->type());
+    if (endToken->type() == token_type::tBEFORE_EOF) {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::EOFInsteadOfEnd, token, token_str_name);
+    } else {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::DedentedEnd, token, token_str_name, endToken);
     }
 }
 

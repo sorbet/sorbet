@@ -1943,12 +1943,10 @@ array_premature_end: eof
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       driver.replace_stack($<stack>2);
                       $$ = driver.build.beginKeyword(self, $1, $3->body, $4);
-                      // TODO(jez) Make rewind_if_dedented aware of tBEFORE_EOF
-                      // TODO(jez) Use kend_or_eof in all rules that use rewind_if_dedented
                       driver.rewind_if_dedented($1, $4);
                     }
                 | tLPAREN_ARG stmt
@@ -2068,7 +2066,7 @@ array_premature_end: eof
                         lambda->end);
                       DIAGCHECK();
                     }
-                | kIF expr_value then compstmt if_tail kEND
+                | kIF expr_value then compstmt if_tail kend_or_eof
                     {
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3, $4->body,
@@ -2090,7 +2088,7 @@ array_premature_end: eof
                         else_ ? else_->tok : nullptr,
                         else_ ? else_->nod : nullptr, $6);
                     }
-                | kUNLESS expr_value then compstmt opt_else kEND
+                | kUNLESS expr_value then compstmt opt_else kend_or_eof
                     {
                       auto &else_ = $5;
                       $$ = driver.build.condition(self, $1, $2, $3,
@@ -2104,7 +2102,7 @@ array_premature_end: eof
                       $$ = driver.build.condition(self, $1, err, nullptr, nullptr, nullptr, nullptr, nullptr);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
-                | while expr_value_do compstmt kEND
+                | while expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.loop_while(self, $1, $2->nod, $2->tok, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
@@ -2115,7 +2113,7 @@ array_premature_end: eof
                       $$ = driver.build.loop_while(self, $1, err, nullptr, nullptr, $1);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
-                | until expr_value_do compstmt kEND
+                | until expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.loopUntil(self, $1, $2->nod, $2->tok, $3->body, $4);
                       driver.rewind_if_dedented($1, $4);
@@ -2126,7 +2124,7 @@ array_premature_end: eof
                       $$ = driver.build.loopUntil(self, $1, err, nullptr, nullptr, $1);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
-                | kCASE expr_value opt_terms case_body kEND
+                | kCASE expr_value opt_terms case_body kend_or_eof
                     {
                       auto &case_body = $4;
                       auto &else_ = case_body->els;
@@ -2136,7 +2134,7 @@ array_premature_end: eof
 			                  else_ ? else_->nod : nullptr, $5);
                       driver.rewind_if_dedented($1, $5);
                     }
-                | kCASE            opt_terms case_body kEND
+                | kCASE            opt_terms case_body kend_or_eof
                     {
                       auto &case_body = $3;
                       auto &else_ = case_body->els;
@@ -2146,7 +2144,7 @@ array_premature_end: eof
 			                  else_ ? else_->nod : nullptr, $4);
                       driver.rewind_if_dedented($1, $4);
                     }
-                | kCASE expr_value opt_terms           kEND
+                | kCASE expr_value opt_terms           kend_or_eof
                     {
                       $$ = driver.build.case_error(self, $1, $2, $4);
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::EmptyCase, $1, driver.token_name($1->type()));
@@ -2154,7 +2152,7 @@ array_premature_end: eof
                       // even if we aren't in indentationAware mode.
                       driver.rewind_if_dedented($1, $4, /*force*/true);
                     }
-                | kCASE            opt_terms           kEND
+                | kCASE            opt_terms           kend_or_eof
                     {
                       auto cond = driver.build.error_node(self, @1.endPos(), @3.beginPos());
                       $$ = driver.build.case_error(self, $1, cond, $3);
@@ -2169,7 +2167,7 @@ array_premature_end: eof
                       $$ = driver.build.case_error(self, $1, cond, nullptr);
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, $1, driver.token_name($1->type()));
                     }
-                | kCASE expr_value opt_terms p_case_body kEND
+                | kCASE expr_value opt_terms p_case_body kend_or_eof
                     {
                       auto &case_body = $4;
                       auto &else_ = case_body->els;
@@ -2183,7 +2181,7 @@ array_premature_end: eof
                     {
                       driver.lex.cond.push(true);
                     }
-                    expr_value_do compstmt kEND
+                    expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.for_(self, $1, $2, $3, $5->nod, $5->tok, $6->body, $7);
                     }
@@ -2701,7 +2699,7 @@ opt_block_args_tail:
                     {
                       driver.lex.context.push(Context::State::LAMBDA);
                     }
-                  bodystmt kEND
+                  bodystmt kend_or_eof
                     {
                       $$ = driver.alloc.delimited_block($1, nullptr, $3->body, $4);
                       driver.lex.context.pop();
@@ -2712,7 +2710,7 @@ opt_block_args_tail:
                     {
                       driver.lex.context.push(Context::State::BLOCK);
                     }
-                  do_body kEND
+                  do_body kend_or_eof
                     {
                       auto &delimited_block = $3;
                       delimited_block->begin = $1;
@@ -2855,7 +2853,7 @@ lcurly_block_start:
                     {
                       driver.lex.context.push(Context::State::BLOCK);
                     }
-                  do_body kEND
+                  do_body kend_or_eof
                     {
                       auto &block = $3;
                       block->begin = $1;
