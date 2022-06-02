@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: simple_hover.rb
 
 class Foo
   extend T::Sig
