@@ -297,35 +297,18 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
+    UnorderedSet<core::SymbolRef> defs;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
 
-    // `keep-def` will reference constants in a way that looks like a packaging violation, but is actually fine. This
-    // boolean allows for an early exit when we know we're in the context of processing one of these sends. Currently
-    // the only sends that we process this way will not have any nested method calls, but if that changes this will need
-    // to become a stack.
-    bool ignoreConstant = false;
-
-    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
-        this->ignoreConstant = send.fun == core::Names::keepForIde();
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
-        this->ignoreConstant = false;
-        return tree;
-    }
-
     ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
-        if (this->ignoreConstant) {
+        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+        if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
             return tree;
         }
 
-        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-        if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
+        if (defs.contains(lit.symbol)) {
             return tree;
         }
 
@@ -419,6 +402,18 @@ public:
                 e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
+
+        return tree;
+    }
+
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
+            return tree;
+        }
+
+        auto &sym = (ast::cast_tree_nonnull<ast::ConstantLit>(original.name)).symbol;
+        defs.emplace(sym);
 
         return tree;
     }
