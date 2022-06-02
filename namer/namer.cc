@@ -1820,6 +1820,7 @@ void mergeClassBehaviorLocs(const core::GlobalState &gs, ClassBehaviorLocsMap &m
 }
 
 void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap &map) {
+    vector<pair<core::ClassOrModuleRef, BehaviorLocs>> conflicts;
     for (auto &[ref, locs] : map) {
         if (locs.size() < 2) {
             continue;
@@ -1832,7 +1833,17 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
         if (locs.size() < 2) {
             continue;
         }
+        conflicts.emplace_back(make_pair(ref, std::move(locs)));
+    }
+    map.clear();
 
+    fast_sort(conflicts, [](const auto &lhs, const auto &rhs) -> bool {
+        if (lhs.first != rhs.first) {
+            return lhs.first.id() < rhs.first.id();
+        }
+        return lhs.second[0].file() < rhs.second[0].file();
+    });
+    for (const auto &[ref, locs] : conflicts) {
         core::Loc mainLoc = locs[0];
         core::Context ctx(gs, core::Symbols::root(), mainLoc.file());
         if (auto e = ctx.beginError(mainLoc.offsets(), core::errors::Namer::MultipleBehaviorDefs)) {
