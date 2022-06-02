@@ -1824,7 +1824,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
         if (locs.size() < 2) {
             continue;
         }
-        fast_sort(locs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file().id() < rhs.file().id(); });
+        fast_sort(locs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() < rhs.file(); });
         // In rare cases we see multiple defs in same file. Ignore them.
         auto last = unique(locs.begin(), locs.end(),
                            [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() == rhs.file(); });
