@@ -297,7 +297,7 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
-    UnorderedSet<core::SymbolRef> defs;
+    UnorderedSet<core::SymbolRef> classDefinitions;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
@@ -308,7 +308,7 @@ public:
             return tree;
         }
 
-        if (defs.contains(lit.symbol)) {
+        if (classDefinitions.contains(lit.symbol)) {
             return tree;
         }
 
@@ -412,8 +412,7 @@ public:
             return tree;
         }
 
-        auto &sym = (ast::cast_tree_nonnull<ast::ConstantLit>(original.name)).symbol;
-        defs.emplace(sym);
+        classDefinitions.emplace((ast::cast_tree_nonnull<ast::ConstantLit>(original.name)).symbol);
 
         return tree;
     }
