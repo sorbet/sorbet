@@ -160,7 +160,7 @@ struct FoundMethod final {
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundMethod, 80, 8);
+CheckSize(FoundMethod, 64, 8);
 
 struct FoundModifier {
     enum class Kind : uint8_t {
