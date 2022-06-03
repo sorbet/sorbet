@@ -35,23 +35,19 @@ TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &re
 }
 
 TypePtr Types::top() {
-    static auto res = make_type<ClassType>(Symbols::top());
-    return res;
+    return make_type<ClassType>(Symbols::top());
 }
 
 TypePtr Types::bottom() {
-    static auto res = make_type<ClassType>(Symbols::bottom());
-    return res;
+    return make_type<ClassType>(Symbols::bottom());
 }
 
 TypePtr Types::nilClass() {
-    static auto res = make_type<ClassType>(Symbols::NilClass());
-    return res;
+    return make_type<ClassType>(Symbols::NilClass());
 }
 
 TypePtr Types::untypedUntracked() {
-    static auto res = make_type<ClassType>(Symbols::untyped());
-    return res;
+    return make_type<ClassType>(Symbols::untyped());
 }
 
 TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
@@ -63,18 +59,15 @@ TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::Symbol
 }
 
 TypePtr Types::void_() {
-    static auto res = make_type<ClassType>(Symbols::void_());
-    return res;
+    return make_type<ClassType>(Symbols::void_());
 }
 
 TypePtr Types::trueClass() {
-    static auto res = make_type<ClassType>(Symbols::TrueClass());
-    return res;
+    return make_type<ClassType>(Symbols::TrueClass());
 }
 
 TypePtr Types::falseClass() {
-    static auto res = make_type<ClassType>(Symbols::FalseClass());
-    return res;
+    return make_type<ClassType>(Symbols::FalseClass());
 }
 
 TypePtr Types::Boolean() {
@@ -83,13 +76,11 @@ TypePtr Types::Boolean() {
 }
 
 TypePtr Types::Integer() {
-    static auto res = make_type<ClassType>(Symbols::Integer());
-    return res;
+    return make_type<ClassType>(Symbols::Integer());
 }
 
 TypePtr Types::Float() {
-    static auto res = make_type<ClassType>(Symbols::Float());
-    return res;
+    return make_type<ClassType>(Symbols::Float());
 }
 
 TypePtr Types::arrayOfUntyped() {
@@ -111,33 +102,27 @@ TypePtr Types::hashOfUntyped() {
 }
 
 TypePtr Types::procClass() {
-    static auto res = make_type<ClassType>(Symbols::Proc());
-    return res;
+    return make_type<ClassType>(Symbols::Proc());
 }
 
 TypePtr Types::classClass() {
-    static auto res = make_type<ClassType>(Symbols::Class());
-    return res;
+    return make_type<ClassType>(Symbols::Class());
 }
 
 TypePtr Types::declBuilderForProcsSingletonClass() {
-    static auto res = make_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
-    return res;
+    return make_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
 }
 
 TypePtr Types::String() {
-    static auto res = make_type<ClassType>(Symbols::String());
-    return res;
+    return make_type<ClassType>(Symbols::String());
 }
 
 TypePtr Types::Symbol() {
-    static auto res = make_type<ClassType>(Symbols::Symbol());
-    return res;
+    return make_type<ClassType>(Symbols::Symbol());
 }
 
 TypePtr Types::Object() {
-    static auto res = make_type<ClassType>(Symbols::Object());
-    return res;
+    return make_type<ClassType>(Symbols::Object());
 }
 
 TypePtr Types::falsyTypes() {
@@ -146,8 +131,7 @@ TypePtr Types::falsyTypes() {
 }
 
 TypePtr Types::todo() {
-    static auto res = make_type<ClassType>(Symbols::todo());
-    return res;
+    return make_type<ClassType>(Symbols::todo());
 }
 
 TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass) {
