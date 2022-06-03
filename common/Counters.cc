@@ -144,7 +144,9 @@ void counterConsume(CounterState cs) {
 }
 
 void counterAdd(ConstExprStr counter, unsigned long value) {
-    counterState.counterAdd(counter.str, value);
+    if constexpr (enable_counters) {
+        counterState.counterAdd(counter.str, value);
+    }
 }
 
 void counterInc(ConstExprStr counter) {
@@ -168,7 +170,9 @@ void prodCategoryCounterInc(ConstExprStr category, ConstExprStr counter) {
 }
 
 void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value) {
-    counterState.categoryCounterAdd(category.str, counter.str, value);
+    if constexpr (enable_counters) {
+        counterState.categoryCounterAdd(category.str, counter.str, value);
+    }
 }
 
 int genThreadId() {
@@ -254,7 +258,9 @@ void histogramInc(ConstExprStr histogram, int key) {
 }
 
 void histogramAdd(ConstExprStr histogram, int key, unsigned long value) {
-    counterState.histogramAdd(histogram.str, key, value);
+    if constexpr (enable_counters) {
+        counterState.histogramAdd(histogram.str, key, value);
+    }
 }
 
 void prodHistogramInc(ConstExprStr histogram, int key) {
