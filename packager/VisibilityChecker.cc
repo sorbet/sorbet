@@ -160,14 +160,9 @@ class PropagateVisibility final {
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
-    // This currently checks for two cases:
-    //
-    // 1. The current package is the same as the package passed in, which means we're exporting a symbol we own
-    // 2. The current package imports the package, which is for allowing re-exports of public symbols from other
-    //    packages.
     void checkExportPackage(core::MutableContext &ctx, core::LocOffsets loc, core::SymbolRef sym) {
         auto symPackage = ctx.state.packageDB().getPackageNameForFile(sym.loc(ctx).file());
-        if (symPackage != this->package.mangledName() && !this->package.importsPackage(symPackage)) {
+        if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
                 e.addErrorLine(sym.loc(ctx), "Defined here");
