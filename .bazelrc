@@ -85,7 +85,7 @@ build:dbg-linux --config=dbg --platforms=@//tools/config:linux_x86_64
 # release version: optimized, with debug symbols and version information
 build:release-common --define release=true
 build:release-common --define jemalloc=true
-build:release-common --compilation_mode=opt
+build:release-common --compilation_mode=opt --copt=-Os
 build:release-common --config=backtracesymbols
 build:release-common --config=static-libs
 build:release-common --config=versioned
