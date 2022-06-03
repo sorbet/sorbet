@@ -741,9 +741,10 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
-        opts.lspDocumentFormatRubyfmtEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
+        opts.lspDocumentFormatRubyfmtEnabled =
+            FileOps::exists(opts.rubyfmtPath) &&
+            (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
 
         // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
         // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers
