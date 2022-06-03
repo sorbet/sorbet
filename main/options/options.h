@@ -144,7 +144,7 @@ struct Options {
     bool disableWatchman = false;
     std::string watchmanPath = "watchman";
     bool stressIncrementalResolver = false;
-    bool sleepInSlowPath = false;
+    std::optional<int> sleepInSlowPathSeconds = std::nullopt;
     bool traceLexer = false;
     bool traceParser = false;
     bool noErrorCount = false;

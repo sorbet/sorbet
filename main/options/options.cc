@@ -440,7 +440,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
                                "Force incremental updates to discover resolver & namer bugs");
-    options.add_options("dev")("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down");
+    options.add_options("dev")("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down",
+                               cxxopts::value<int>()->implicit_value("3"));
     options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options("dev")("censor-for-snapshot-tests",
@@ -869,7 +870,9 @@ void readOptions(Options &opts,
         opts.traceLexer = raw["trace-lexer"].as<bool>();
         opts.traceParser = raw["trace-parser"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
-        opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();
+        if (raw.count("sleep-in-slow-path") > 0) {
+            opts.sleepInSlowPathSeconds = raw["sleep-in-slow-path"].as<int>();
+        }
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
         opts.censorForSnapshotTests = raw["censor-for-snapshot-tests"].as<bool>();

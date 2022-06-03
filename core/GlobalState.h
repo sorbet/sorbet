@@ -232,7 +232,7 @@ public:
     bool runningUnderAutogen = false;
     bool censorForSnapshotTests = false;
 
-    bool sleepInSlowPath = false;
+    std::optional<int> sleepInSlowPathSeconds = std::nullopt;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
