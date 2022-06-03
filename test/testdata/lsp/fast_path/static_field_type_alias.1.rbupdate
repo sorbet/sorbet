@@ -1,6 +1,0 @@
-# typed: true
-# assert-slow-path: true
-
-class AliasContainer
-  ContainedThing = T.type_alias {T.any(Float, Integer)}
-end

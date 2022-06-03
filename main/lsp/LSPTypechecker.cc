@@ -43,7 +43,8 @@ void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &
 
 // In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
 // methods in a file.
-bool validateIdenticalFingerprints(const std::vector<core::SymbolHash> &a, const std::vector<core::SymbolHash> &b) {
+bool validateMethodHashesHaveSameMethods(const std::vector<core::SymbolHash> &a,
+                                         const std::vector<core::SymbolHash> &b) {
     if (a.size() != b.size()) {
         return false;
     }
@@ -236,13 +237,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
-    vector<core::ShortNameHash> changedMethodHashes;
-    vector<core::ShortNameHash> changedFieldHashes;
+    vector<core::ShortNameHash> changedHashes;
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        vector<core::SymbolHash> changedMethodSymbolHashes;
-        vector<core::SymbolHash> changedFieldSymbolHashes;
+        vector<core::SymbolHash> changedMethodHashes;
         for (auto &updatedFile : updates.updatedFiles) {
             auto fref = gs->findFileByPath(updatedFile->path());
             // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
@@ -258,27 +257,18 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             if (fref.exists()) {
                 // Update to existing file on fast path
                 ENFORCE(fref.data(*gs).getFileHash() != nullptr);
-                const auto &oldSymbolHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes;
-                const auto &newSymbolHashes = updatedFile->getFileHash()->localSymbolTableHashes;
-                const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
-                const auto &newMethodHashes = newSymbolHashes.methodHashes;
+                const auto &oldMethodHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes.methodHashes;
+                const auto &newMethodHashes = updatedFile->getFileHash()->localSymbolTableHashes.methodHashes;
 
                 // Both oldHash and newHash should have the same methods, since this is the fast path!
-                ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
+                ENFORCE(validateMethodHashesHaveSameMethods(oldMethodHashes, newMethodHashes),
                         "definitionHash should have failed");
 
                 // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
                 // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
                 // deduped later.
-                absl::c_set_difference(oldMethodHashes, newMethodHashes, std::back_inserter(changedMethodSymbolHashes));
-
-                const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
-                const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
-
-                ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes),
-                        "definitionHash should have failed");
-
-                absl::c_set_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
+                set_difference(oldMethodHashes.begin(), oldMethodHashes.end(), newMethodHashes.begin(),
+                               newMethodHashes.end(), std::back_inserter(changedMethodHashes));
 
                 gs->replaceFile(fref, updatedFile);
                 // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
@@ -287,14 +277,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             }
         }
 
-        changedMethodHashes.reserve(changedMethodSymbolHashes.size());
-        absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedMethodHashes),
-                          [](const auto &symhash) { return symhash.nameHash; });
-        core::ShortNameHash::sortAndDedupe(changedMethodHashes);
-        changedFieldHashes.reserve(changedFieldSymbolHashes.size());
-        absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedFieldHashes),
-                          [](const auto &symhash) { return symhash.nameHash; });
-        core::ShortNameHash::sortAndDedupe(changedFieldHashes);
+        changedHashes.reserve(changedMethodHashes.size());
+        for (auto &changedMethodHash : changedMethodHashes) {
+            changedHashes.push_back(changedMethodHash.nameHash);
+        }
+        core::ShortNameHash::sortAndDedupe(changedHashes);
     }
 
     int i = -1;
@@ -312,19 +299,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::ShortNameHash> intersection;
-        absl::c_set_intersection(changedMethodHashes, oldHash.usages.sends, std::back_inserter(intersection));
+        std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
+                              oldHash.usages.sends.end(), std::back_inserter(intersection));
         if (!intersection.empty()) {
             auto ref = core::FileRef(i);
             config->logger->debug("Added {} to update set as used a changed method",
-                                  !ref.exists() ? "" : ref.data(*gs).path());
-            subset.emplace_back(ref);
-            continue;
-        }
-
-        absl::c_set_intersection(changedFieldHashes, oldHash.usages.symbols, std::back_inserter(intersection));
-        if (!intersection.empty()) {
-            auto ref = core::FileRef(i);
-            config->logger->debug("Added {} to update set as used a changed field symbol",
                                   !ref.exists() ? "" : ref.data(*gs).path());
             subset.emplace_back(ref);
         }

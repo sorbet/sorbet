@@ -1,6 +1,0 @@
-# typed: true
-# assert-slow-path: true
-
-class A < TestThing
-  puts(Inner)
-end
