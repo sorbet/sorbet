@@ -1,0 +1,10 @@
+# typed: true
+# assert-slow-path: true
+
+class ChildContainer < FieldContainerB
+  def helper_method
+    x = 6 + MEMBER_FIELD # error: Expected `Integer` but found `String` for argument `arg0`
+    T.reveal_type(x) # error: Revealed type: `Integer`
+    puts x
+  end
+end

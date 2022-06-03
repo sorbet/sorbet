@@ -104,6 +104,7 @@ struct LocalSymbolTableHashes {
     // things like types for the fast/slow path decision), this stores the complete method symbol
     // hash, so that if anything including types change for a method we know what their names are.
     std::vector<SymbolHash> methodHashes;
+    std::vector<SymbolHash> staticFieldHashes;
 
     static uint32_t patchHash(uint32_t hash) {
         if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {

@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+
+class GenericPlaceholder
+  extend T::Helpers
+  extend T::Generic
+
+  ElementPlaceholder = type_template {{fixed: Integer}}
+end
