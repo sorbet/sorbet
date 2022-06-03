@@ -1,4 +1,5 @@
 # typed: true
+# assert-slow-path: true
 
 class Foo
   extend T::Sig
@@ -6,9 +7,8 @@ class Foo
   sig {params(x: Integer).returns(Integer)}
   def foo(x)
     # ^ hover: ```ruby
-    # ^ hover: # note: information may be stale
-    # ^ hover: sig {returns(Integer)}
-    # ^ hover: def foo; end
+    # ^ hover: sig {params(x: Integer).returns(Integer)}
+    # ^ hover: def foo(x); end
     42 + x
   end
 end
