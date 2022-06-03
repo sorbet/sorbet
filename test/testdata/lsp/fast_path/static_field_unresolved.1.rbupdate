@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: static_field_unresolved.rb
+
+class Outer
+  module A; end
+
+  A::B1 = T.let(0, Strin) # error: Unable to resolve constant `Strin`
+
+  A::B2 = T.let(0, String) # error: Argument does not have asserted type `String`
+end
+
+T.reveal_type(Outer::A::B1) # error: `Outer::Strin (unresolved)`
+
+T.reveal_type(Outer::A::B2) # error: `String`

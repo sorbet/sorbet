@@ -1,0 +1,12 @@
+# typed: strict
+# assert-slow-path: true
+
+class Outer
+  module A1; end
+  module Inner; end
+  module A2; end
+
+  A1::B = T.let('', String)
+  Inner::B = T.let('', String)
+  A2::B = T.let('', String)
+end
