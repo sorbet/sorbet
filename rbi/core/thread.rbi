@@ -401,7 +401,8 @@ class Thread < Object
   # and
   # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-fetch).
   sig {params(sym: T.untyped).returns(T.untyped)}
-  def fetch(*sym); end
+  sig {params(sym: T.untyped, blk: T.proc.returns(T.untyped)).returns(T.untyped)}
+  def fetch(*sym, &blk); end
 
   # Returns the
   # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html) which
