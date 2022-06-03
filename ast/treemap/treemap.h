@@ -138,7 +138,7 @@ struct ReportedRubyException {
     core::LocOffsets onLoc;
 };
 
-enum class MapKind {
+enum class TreeMapKind {
     Full,
     Shallow,
 };
@@ -149,7 +149,7 @@ enum class MapKind {
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC, class CTX, MapKind Kind> class TreeMapper {
+template <class FUNC, class CTX, TreeMapKind Kind> class TreeMapper {
 private:
     friend class TreeMap;
     friend class ShallowMap;
@@ -204,7 +204,7 @@ private:
             }
         }
 
-        if constexpr (Kind == MapKind::Full) {
+        if constexpr (Kind == TreeMapKind::Full) {
             cast_tree_nonnull<MethodDef>(v).rhs =
                 mapIt(std::move(cast_tree_nonnull<MethodDef>(v).rhs),
                       ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
@@ -604,7 +604,7 @@ private:
 class TreeMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
-        TreeMapper<FUNC, CTX, MapKind::Full> walker(func);
+        TreeMapper<FUNC, CTX, TreeMapKind::Full> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
         } catch (ReportedRubyException &exception) {
@@ -620,7 +620,7 @@ public:
 class ShallowMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
-        TreeMapper<FUNC, CTX, MapKind::Shallow> walker(func);
+        TreeMapper<FUNC, CTX, TreeMapKind::Shallow> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
         } catch (ReportedRubyException &exception) {
