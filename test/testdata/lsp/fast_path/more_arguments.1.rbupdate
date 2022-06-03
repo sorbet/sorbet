@@ -7,8 +7,8 @@ class Foo
   sig {params(x: Integer).returns(Integer)}
   def foo(x)
     # ^ hover: ```ruby
-    # ^ hover: sig {returns(Integer)}
-    # ^ hover: def foo; end
+    # ^ hover: sig {params(x: Integer).returns(Integer)}
+    # ^ hover: def foo(x); end
     42 + x
   end
 end
