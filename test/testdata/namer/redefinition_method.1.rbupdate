@@ -1,0 +1,16 @@
+# typed: true
+# assert-fast-path: redefinition_method.rb
+class Main
+    extend T::Sig
+
+    sig {params(a: Integer).returns(Integer)}
+    def foo(a)
+        a
+    end
+
+    def foo(a, b, c) # error: Method `Main#foo` redefined without matching argument count. Expected: `1`, got: `3`
+    end
+
+    def foo(a, b) # error: Method `Main#foo` redefined without matching argument count. Expected: `3`, got: `2`
+    end
+end

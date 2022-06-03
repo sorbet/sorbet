@@ -1,0 +1,9 @@
+# typed: true
+
+class A
+  def target; end
+
+  alias_method :inner, :targe # error: Can't make method alias from `inner` to non existing method `targe`
+
+  alias_method :outer, :inner
+end
