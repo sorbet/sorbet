@@ -1832,7 +1832,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
-    result->sleepInSlowPath = this->sleepInSlowPath;
+    result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
 
     if (keepId) {
@@ -1926,7 +1926,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
-    result->sleepInSlowPath = this->sleepInSlowPath;
+    result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->kvstoreUuid = this->kvstoreUuid;
     result->errorUrlBase = this->errorUrlBase;

@@ -480,8 +480,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 +[](bool *slowPathBlocked) -> bool { return !*slowPathBlocked; }, &slowPathBlocked));
         }
 
-        if (gs->sleepInSlowPath) {
-            Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
+        if (gs->sleepInSlowPathSeconds.has_value()) {
+            auto sleepDuration = gs->sleepInSlowPathSeconds.value();
+            for (int i = 0; i < sleepDuration * 10; i++) {
+                Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
+                if (epochManager.wasTypecheckingCanceled()) {
+                    break;
+                }
+            }
         }
         auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
@@ -492,8 +498,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         for (auto &tree : resolved) {
             ENFORCE(tree.file.exists());
         }
-        if (gs->sleepInSlowPath) {
-            Timer::timedSleep(3000ms, *logger, "slow_path.typecheck.sleep");
+        if (gs->sleepInSlowPathSeconds.has_value()) {
+            auto sleepDuration = gs->sleepInSlowPathSeconds.value();
+            for (int i = 0; i < sleepDuration * 10; i++) {
+                Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
+                if (epochManager.wasTypecheckingCanceled()) {
+                    break;
+                }
+            }
         }
 
         // Inform the fast path that this global state is OK for typechecking as resolution has completed.

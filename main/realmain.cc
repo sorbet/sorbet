@@ -505,9 +505,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.censorForSnapshotTests) {
         gs->censorForSnapshotTests = true;
     }
-    if (opts.sleepInSlowPath) {
-        gs->sleepInSlowPath = true;
-    }
+    gs->sleepInSlowPathSeconds = opts.sleepInSlowPathSeconds;
     gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
                           opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
