@@ -24,6 +24,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                      TypeSyntaxArgs args);
 } // namespace
 
+ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, core::SymbolRef blameSymbol) {
+    auto allowSelfType = true;
+    auto allowRebind = false;
+    auto allowTypeMember = true;
+    return TypeSyntax::parseSig(ctx, sigSend, nullptr,
+                                TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, blameSymbol});
+}
+
 ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                TypeSyntaxArgs args) {
     auto result = parseSigWithSelfTypeParams(ctx, sigSend, parent, args);
