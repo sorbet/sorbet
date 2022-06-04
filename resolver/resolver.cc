@@ -11,7 +11,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
-#include "resolver/type_syntax.h"
+#include "resolver/type_syntax/type_syntax.h"
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"

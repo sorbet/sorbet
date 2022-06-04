@@ -1,4 +1,4 @@
-#include "resolver/type_syntax.h"
+#include "resolver/type_syntax/type_syntax.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "common/typecase.h"

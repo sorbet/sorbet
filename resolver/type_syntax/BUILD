@@ -1,5 +1,5 @@
 cc_library(
-    name = "resolver",
+    name = "type_syntax",
     srcs = glob(
         [
             "*.cc",
@@ -11,7 +11,7 @@ cc_library(
         ],
     ),
     hdrs = [
-        "resolver.h",
+        "type_syntax.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -20,9 +20,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
-        "//ast/desugar",
         "//ast/treemap",
         "//core",
-        "//resolver/type_syntax",
     ],
 )
