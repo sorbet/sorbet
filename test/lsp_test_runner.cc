@@ -800,19 +800,29 @@ TEST_CASE("LSPTest") {
         // Apply updates in order.
         for (auto version : sortedUpdates) {
             auto errorPrefix = fmt::format("[*.{}.{}] ", version, haveStaleUpdates ? "rbstaleupdate" : "rbupdate");
-            auto &updates = testUpdates[version];
+            const auto &updates = testUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
 
-            for (auto &update : updates) {
+            for (const auto &update : updates) {
                 auto originalFile = test.folder + update.first;
                 auto updateFile = test.folder + update.second;
                 auto fileContents = FileOps::read(updateFile);
-                lspUpdates.push_back(makeChange(testFileUris[originalFile], fileContents, baseVersion + version));
                 updatesAndContents[originalFile] =
                     make_shared<core::File>(string(originalFile), move(fileContents), core::File::Type::Normal);
             }
             auto assertions = RangeAssertion::parseAssertions(updatesAndContents);
+            for (const auto &update : updates) {
+                auto originalFile = test.folder + update.first;
+                auto updateFile = test.folder + update.second;
+
+                auto fileContents = updatesAndContents[originalFile]->source();
+                if (!absl::StrContains(fileContents, "# exclude-from-file-update: true")) {
+                    // Allow some files in the version to only be used for the sake of asserting
+                    // errors that occur after the update, not extending the file update itself.
+                    lspUpdates.push_back(makeChange(testFileUris[originalFile], fileContents, baseVersion + version));
+                }
+            }
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
 
