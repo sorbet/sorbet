@@ -8,7 +8,7 @@ namespace sorbet::realmain::lsp {
 ast::ExpressionPtr NextMethodFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
-    auto loc = core::Loc(ctx.file, tree.loc());
+    auto loc = ctx.locAt(tree.loc());
 
     if (!this->narrowestClassDefRange.exists()) {
         // No narrowestClassDefRange yet, so take the <root> loc
@@ -52,20 +52,12 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
 
     auto currentMethod = methodDef.symbol;
 
-    auto &currentMethodLocs = currentMethod.data(ctx)->locs();
-    auto inFileOfQuery = [&](const auto &loc) { return loc.file() == this->queryLoc.file(); };
-    auto maybeCurrentLoc = absl::c_find_if(currentMethodLocs, inFileOfQuery);
-    if (maybeCurrentLoc == currentMethodLocs.end()) {
-        return tree;
-    }
-
-    auto currentLoc = *maybeCurrentLoc;
+    auto currentLoc = ctx.locAt(tree.loc());
     if (!currentLoc.exists()) {
         // Defensive in case location information is disabled (e.g., certain fuzzer modes)
         return tree;
     }
 
-    ENFORCE(currentLoc.file() == this->queryLoc.file());
     ENFORCE(this->narrowestClassDefRange.exists());
 
     if (!this->narrowestClassDefRange.contains(currentLoc)) {
@@ -83,10 +75,7 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
 
     if (this->result().exists()) {
         // Method defs are not guaranteed to be sorted in order by their declLocs
-        auto &resultLocs = this->result().data(ctx)->locs();
-        auto maybeResultLoc = absl::c_find_if(resultLocs, inFileOfQuery);
-        ENFORCE(maybeResultLoc != resultLocs.end(), "Must exist, because otherwise it wouldn't have been the result_");
-        auto resultLoc = *maybeResultLoc;
+        auto resultLoc = this->result_.first;
         if (currentLoc.beginPos() < resultLoc.beginPos()) {
             // Found a method defined after the query but earlier than previous result: overwrite previous result
             this->result_ = {currentLoc, currentMethod};
