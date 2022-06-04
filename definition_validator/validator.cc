@@ -388,28 +388,28 @@ void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef
     }
 }
 
-void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrModuleRef klass,
+void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass,
                                const core::ClassOrModuleRef errMsgClass) {
-    if (!klass.data(gs)->flags.isFinal) {
+    if (!klass.data(ctx)->flags.isFinal) {
         return;
     }
-    for (const auto [name, sym] : klass.data(gs)->members()) {
+    for (const auto [name, sym] : klass.data(ctx)->members()) {
         // We only care about method symbols that exist.
         if (!sym.exists() || !sym.isMethod() ||
             // Method is 'final', and passes the check.
-            sym.asMethodRef().data(gs)->flags.isFinal ||
+            sym.asMethodRef().data(ctx)->flags.isFinal ||
             // <static-init> is a fake method Sorbet synthesizes for typechecking.
-            sym.name(gs) == core::Names::staticInit() ||
+            sym.name(ctx) == core::Names::staticInit() ||
             // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
             // slow path.
-            sym.name(gs) == core::Names::unresolvedAncestors()) {
+            sym.name(ctx) == core::Names::unresolvedAncestors()) {
             continue;
         }
-        auto defLoc = sym.loc(gs);
-        if (auto e = gs.beginError(defLoc, core::errors::Resolver::FinalModuleNonFinalMethod)) {
+        auto defLoc = sym.loc(ctx);
+        if (auto e = ctx.state.beginError(defLoc, core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
-                        errMsgClass.show(gs), sym.name(gs).show(gs));
-            auto sigLoc = sorbet::sig_finder::findSignature(gs, sym);
+                        errMsgClass.show(ctx), sym.name(ctx).show(ctx));
+            auto sigLoc = sorbet::sig_finder::findSignature(ctx, sym);
 
             if (sigLoc.has_value()) {
                 e.replaceWith("Mark it as `sig(:final)`", core::Loc{defLoc.file(), sigLoc.value().sig}, "sig(:final)");
