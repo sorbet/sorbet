@@ -1,0 +1,12 @@
+# typed: true
+# exclude-from-file-update: true
+# assert-fast-path: alias_redefined_multi_file__1.rb,alias_redefined_multi_file__2.rb
+
+class A
+  def to_method_new; end
+end
+
+A.new.to_method # error: Method `to_method` does not exist on `A`
+A.new.to_method_new
+A.new.from_method
+A.new.from_method_new # error: Method `from_method_new` does not exist on `A`
