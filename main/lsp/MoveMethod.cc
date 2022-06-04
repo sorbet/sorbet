@@ -156,9 +156,9 @@ public:
     }
 }; // MethodCallSiteRenamer
 
-vector<unique_ptr<TextEdit>> moveMethod(const LSPConfiguration &config, const core::GlobalState &gs,
-                                        const core::lsp::MethodDefResponse &definition,
-                                        LSPTypecheckerInterface &typechecker, string_view newModuleName) {
+vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerInterface &typechecker, const LSPConfiguration &config,
+                                        const core::lsp::MethodDefResponse &definition, string_view newModuleName) {
+    auto &gs = typechecker.state();
     auto moduleStart =
         fmt::format("{}{}{}\n  ", moduleKeyword, newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
     auto moduleEnd = "\nend";
@@ -212,16 +212,17 @@ unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const cor
     return newModuleSymbol;
 }
 
-vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                                                        const core::lsp::MethodDefResponse &definition,
-                                                        LSPTypecheckerInterface &typechecker) {
+vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerInterface &typechecker,
+                                                        const LSPConfiguration &config,
+                                                        const core::lsp::MethodDefResponse &definition) {
     vector<unique_ptr<TextDocumentEdit>> res;
+    auto &gs = typechecker.state();
     auto newModuleName = getNewModuleName(gs, definition.name);
     if (!newModuleName.has_value()) {
         return res;
     }
 
-    auto edits = moveMethod(config, gs, definition, typechecker, newModuleName.value());
+    auto edits = moveMethod(typechecker, config, definition, newModuleName.value());
 
     auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
     renamer->getRenameEdits(typechecker, definition.symbol, newModuleName.value());
