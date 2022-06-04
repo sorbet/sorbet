@@ -28,15 +28,25 @@ bool UIntSet::contains(uint32_t item) const {
 
 void UIntSet::remove(const UIntSet &set) {
     ENFORCE_NO_TIMER(_members.size() == set._members.size());
+    // Manually lift the computation of the data pointer outside of the loop,
+    // since normal `InlinedVector` accesses branch on whether the vector is
+    // stored inline or not.
+    auto *ourptr = _members.data();
+    auto *setptr = set._members.data();
     for (int i = 0; i < _members.size(); i++) {
-        _members[i] &= ~set._members[i];
+        ourptr[i] &= ~setptr[i];
     }
 }
 
 void UIntSet::add(const UIntSet &set) {
     ENFORCE_NO_TIMER(_members.size() == set._members.size());
+    // Manually lift the computation of the data pointer outside of the loop,
+    // since normal `InlinedVector` accesses branch on whether the vector is
+    // stored inline or not.
+    auto *ourptr = _members.data();
+    auto *setptr = set._members.data();
     for (int i = 0; i < _members.size(); i++) {
-        _members[i] |= set._members[i];
+        ourptr[i] |= setptr[i];
     }
 }
 
@@ -51,8 +61,13 @@ bool UIntSet::empty() const {
 
 void UIntSet::intersect(const UIntSet &set) {
     ENFORCE_NO_TIMER(_members.size() == set._members.size());
+    // Manually lift the computation of the data pointer outside of the loop,
+    // since normal `InlinedVector` accesses branch on whether the vector is
+    // stored inline or not.
+    auto *ourptr = _members.data();
+    auto *setptr = set._members.data();
     for (int i = 0; i < _members.size(); i++) {
-        _members[i] &= set._members[i];
+        ourptr[i] &= setptr[i];
     }
 }
 
