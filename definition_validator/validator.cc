@@ -388,7 +388,7 @@ void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef
     }
 }
 
-void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass,
+void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass, ast::ExpressionPtr &tree,
                                const core::ClassOrModuleRef errMsgClass) {
     if (!klass.data(ctx)->flags.isFinal) {
         return;
@@ -409,16 +409,19 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
         if (auto e = ctx.state.beginError(defLoc, core::errors::Resolver::FinalModuleNonFinalMethod)) {
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
                         errMsgClass.show(ctx), sym.name(ctx).show(ctx));
-            auto sigLoc = sorbet::sig_finder::findSignature(ctx, sym);
+            auto queryLoc = defLoc.copyWithZeroLength();
+            auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, queryLoc);
 
-            if (sigLoc.has_value()) {
-                e.replaceWith("Mark it as `sig(:final)`", core::Loc{defLoc.file(), sigLoc.value().sig}, "sig(:final)");
+            if (parsedSig.has_value() && parsedSig->origSend->funLoc.exists()) {
+                auto funLoc = ctx.locAt(parsedSig->origSend->funLoc);
+                e.replaceWith("Mark it as `sig(:final)`", funLoc, "sig(:final)");
             }
         }
     }
 }
 
-void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
+void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, ast::ExpressionPtr &tree) {
+    const ast::ClassDef &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists()) {
         auto superClassData = superClass.data(ctx);
@@ -443,10 +446,10 @@ void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const 
         }
     }
     validateFinalAncestorHelper(ctx, klass, classDef, klass, "included");
-    validateFinalMethodHelper(ctx, klass, klass);
+    validateFinalMethodHelper(ctx, klass, tree, klass);
     const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
     validateFinalAncestorHelper(ctx, singleton, classDef, klass, "extended");
-    validateFinalMethodHelper(ctx, singleton, klass);
+    validateFinalMethodHelper(ctx, singleton, tree, klass);
 }
 
 // Ignore RBI files for the purpose of checking sealed (unless there are no other files).
@@ -782,7 +785,7 @@ public:
             }
         }
         validateAbstract(ctx, singleton);
-        validateFinal(ctx, sym, classDef);
+        validateFinal(ctx, sym, tree);
         validateSealed(ctx, sym, classDef);
         validateSuperClass(ctx, sym, classDef);
 

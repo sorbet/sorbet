@@ -37,22 +37,22 @@ optional<const ast::MethodDef *> findMethodTree(const ast::ExpressionPtr &tree, 
 }
 
 optional<pair<optional<core::LocOffsets>, core::LocOffsets>> methodLocs(const core::GlobalState &gs,
-                                                                        const ast::ExpressionPtr &rootTree,
-                                                                        const core::SymbolRef method,
+                                                                        ast::ExpressionPtr &rootTree,
+                                                                        const core::MethodRef method,
                                                                         const core::FileRef fref) {
-    auto maybeTree = findMethodTree(rootTree, method.asMethodRef());
+    auto maybeTree = findMethodTree(rootTree, method);
     if (!maybeTree.has_value()) {
         return nullopt;
     }
     auto methodLoc = maybeTree.value()->loc;
 
-    auto maybeSig = sorbet::sig_finder::findSignature(gs, method);
-    if (!maybeSig.has_value()) {
+    auto ctx = core::Context(gs, core::Symbols::root(), fref);
+    auto queryLoc = ctx.locAt(methodLoc.copyWithZeroLength());
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, rootTree, queryLoc);
+    if (!parsedSig.has_value()) {
         return make_pair(nullopt, methodLoc);
     }
-    core::LocOffsets sigLoc = {maybeSig->sig.beginPos(), maybeSig->body.endPos()};
-
-    return make_pair(sigLoc, methodLoc);
+    return make_pair(parsedSig->origSend->loc, methodLoc);
 }
 
 // Turns ruby_function_name__ to RubyFunctionName,
