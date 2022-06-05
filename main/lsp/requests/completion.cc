@@ -14,6 +14,7 @@
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include "main/sig_finder/sig_finder.h"
 #include "rapidjson/writer.h"
 
 using namespace std;
@@ -811,6 +812,41 @@ unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerInterface &typech
     return item;
 }
 
+unique_ptr<CompletionItem> trySuggestMethodDef(LSPTypecheckerInterface &typechecker,
+                                               const LSPClientConfiguration &clientConfig, core::MethodRef method,
+                                               const core::Loc queryLoc) {
+    auto &gs = typechecker.state();
+    auto &arguments = method.data(gs)->arguments;
+    auto effectivelyEmptyArgs = arguments.empty() || (arguments.size() == 1 && arguments[0].isSyntheticBlockArgument());
+    if (!effectivelyEmptyArgs) {
+        return nullptr;
+    }
+
+    auto fref = queryLoc.file();
+    auto files = vector<core::FileRef>{fref};
+    auto resolved = typechecker.getResolved(files);
+    ENFORCE(resolved.size() == 1);
+    auto ctx = core::Context(gs, core::Symbols::root(), fref);
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, resolved[0].tree, queryLoc);
+
+    if (!parsedSig.has_value()) {
+        return nullptr;
+    }
+
+    auto item = make_unique<CompletionItem>("Suggested arguments");
+    item->kind = CompletionItemKind::Snippet;
+    // item->sortText = 0;
+    item->detail = fmt::format("Suggested arguments for {}", method.data(gs)->name.shortName(gs));
+
+    auto argList =
+        fmt::map_join(parsedSig->argTypes, ", ", [&](const auto &argSpec) { return argSpec.name.shortName(gs); });
+    // TODO(jez) Fancy snippet support
+    item->textEdit = make_unique<TextEdit>(Range::fromLoc(gs, queryLoc), fmt::format("({})", argList));
+
+    // item->documentation = ...
+    return item;
+}
+
 bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::SymbolRef sym) {
     if (!sym.exists()) {
         return false;
@@ -1200,6 +1236,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
 
     auto &queryResponses = result.responses;
     vector<unique_ptr<CompletionItem>> items;
+    bool isIncomplete = false;
     if (queryResponses.empty()) {
         auto prevTwoChars = queryLoc.adjust(gs, -2, 0);
         if (prevTwoChars.source(gs) == "##") {
@@ -1349,9 +1386,16 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &
             auto params = searchParamsForEmptyAssign(gs, queryLoc, identResp->enclosingMethod, {});
             items = this->getCompletionItems(typechecker, params);
         }
+    } else if (auto methodDefResp = resp->isMethodDef()) {
+        auto completionItem =
+            trySuggestMethodDef(typechecker, config.getClientConfig(), methodDefResp->symbol, queryLoc);
+        if (completionItem != nullptr) {
+            items.emplace_back(move(completionItem));
+        }
+        isIncomplete = true;
     }
 
-    response->result = make_unique<CompletionList>(false, move(items));
+    response->result = make_unique<CompletionList>(isIncomplete, move(items));
     return response;
 }
 
