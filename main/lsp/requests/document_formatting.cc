@@ -78,12 +78,22 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
     variant<JSONNullObject, vector<unique_ptr<TextEdit>>> result = JSONNullObject();
 
     auto fref = index.uri2FileRef(params->textDocument->uri);
-    if (fref.exists() && documentIsFormattable(params->textDocument->uri)) {
+    if (fref.exists()) {
         vector<unique_ptr<TextEdit>> edits;
 
-        auto process = subprocess::Popen({config.opts.rubyfmtPath, std::string(index.getFile(fref).path()).c_str()},
-                                         subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
-        auto processResponse = process.communicate();
+        if (!documentIsFormattable(index.getFile(fref).path())) {
+            // If the file isn't allowlisted, return no edits and exit
+            result = move(edits);
+            response->result = move(result);
+            config.output->write(move(response));
+            return;
+        }
+
+        auto sourceView = index.getFile(fref).source();
+        string source(sourceView.begin(), sourceView.end());
+        auto process = subprocess::Popen({config.opts.rubyfmtPath}, subprocess::output{subprocess::PIPE},
+                                         subprocess::input{subprocess::PIPE});
+        auto processResponse = process.communicate(vector<char>(source.begin(), source.end()));
         process.wait();
         auto returnCode = process.retcode();
 
