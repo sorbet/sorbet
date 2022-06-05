@@ -53,6 +53,18 @@ void DocumentFormattingTask::displayError(string errorMessage, unique_ptr<Respon
         "2.0", LSPMethod::WindowShowMessage, make_unique<ShowMessageParams>(MessageType::Error, errorMessage)));
 }
 
+bool DocumentFormattingTask::documentIsFormattable(string_view path) {
+    if (config.opts.rubyfmtFormattableDirectories.empty()) {
+        return true;
+    }
+    for (string directory : config.opts.rubyfmtFormattableDirectories) {
+        if (path.find(directory) == 0 || path.find(fmt::format("./{}", directory)) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void DocumentFormattingTask::index(LSPIndexer &index) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentFormatting);
     if (!config.opts.lspDocumentFormatRubyfmtEnabled) {
@@ -66,7 +78,7 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
     variant<JSONNullObject, vector<unique_ptr<TextEdit>>> result = JSONNullObject();
 
     auto fref = index.uri2FileRef(params->textDocument->uri);
-    if (fref.exists()) {
+    if (fref.exists() && documentIsFormattable(params->textDocument->uri)) {
         vector<unique_ptr<TextEdit>> edits;
 
         auto process = subprocess::Popen({config.opts.rubyfmtPath, std::string(index.getFile(fref).path()).c_str()},

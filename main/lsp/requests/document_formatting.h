@@ -20,6 +20,7 @@ public:
 
 private:
     void displayError(std::string errorMessage, std::unique_ptr<ResponseMessage> &response);
+    bool documentIsFormattable(std::string_view path);
 };
 
 } // namespace sorbet::realmain::lsp

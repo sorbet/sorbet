@@ -325,6 +325,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "rubyfmt-path",
         "Path to the rubyfmt executable used for document formatting. Defaults to using `rubyfmt` on your PATH.",
         cxxopts::value<string>()->default_value(empty.rubyfmtPath));
+    options.add_options("advanced")(
+        "rubyfmt-formattable-directories",
+        "Opt-in a directory to be formatted with document formatting requests. Defaults to all files.",
+        cxxopts::value<vector<string>>());
     options.add_options("advanced")("enable-experimental-lsp-document-highlight",
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
@@ -742,6 +746,9 @@ void readOptions(Options &opts,
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
+        if (raw.count("rubyfmt-formattable-directories") > 0) {
+            opts.rubyfmtFormattableDirectories = raw["rubyfmt-formattable-directories"].as<vector<string>>();
+        }
         opts.lspDocumentFormatRubyfmtEnabled =
             FileOps::exists(opts.rubyfmtPath) &&
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
