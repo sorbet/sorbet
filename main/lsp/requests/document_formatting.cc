@@ -90,10 +90,9 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
         }
 
         auto sourceView = index.getFile(fref).source();
-        string source(sourceView.begin(), sourceView.end());
         auto process = subprocess::Popen({config.opts.rubyfmtPath}, subprocess::output{subprocess::PIPE},
                                          subprocess::input{subprocess::PIPE});
-        auto processResponse = process.communicate(vector<char>(source.begin(), source.end()));
+        auto processResponse = process.communicate(vector<char>(sourceView.begin(), sourceView.end()));
         process.wait();
         auto returnCode = process.retcode();
 
