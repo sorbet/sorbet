@@ -123,12 +123,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
 
     // Slow path edits two files. One introduces error.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
-    // Syntax error in foo.rb.
+    // Something that will introduce slow path in foo.rb
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
                           "\n"
                           "class Foo\n"
-                          "def noend\n"
+                          "  module Inner; end\n"
                           "end\n",
                           2, true));
     // Pause to differentiate message times
@@ -158,7 +158,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     // timer from the initial slow path.
     this_thread::sleep_for(chrono::milliseconds(5));
 
-    // Make another edit that fixes syntax error and should take fast path.
+    // Make another edit that undoes the slow path in foo.rb
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
                           "\n"
@@ -715,20 +715,19 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
 
     // Create new file
     assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "module M\n"
+                                               "end\n"
                                                "class Foo\n"
-                                               "extend T::Sig\n"
                                                "end")),
                       {});
 
     // Slow path: no errors
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
-                          "class Foo\n"
-                          "extend T::Sig\n"
-                          "sig{returns(Integer)}\n"
-                          "def str\n"
-                          "1\n"
+                          "module M\n"
                           "end\n"
+                          "class Foo\n"
+                          "  extend M\n"
                           "end",
                           2, true, 1));
 
@@ -739,16 +738,15 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    // Fast path [preempt]: Change return type and introduce an error
+    // Fast path [preempt]: Introduce an error with an edit that could take fast path
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
-                          "class Foo\n"
-                          "extend T::Sig\n"
-                          "sig{returns(Integer)}\n"
-                          "def str\n"
-                          "'hi'\n"
+                          "module M\n"
                           "end\n"
-                          "end\n",
+                          "class Foo\n"
+                          "  extend M\n"
+                          "  self.method_on_m()\n"
+                          "end",
                           3));
 
     // Wait for typechecking of fast path so it and subsequent slow path change aren't combined
@@ -761,16 +759,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
     // Slow path: error will be resolved
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
+                          "module M\n"
+                          "  def method_on_m; end\n"
+                          "end\n"
                           "class Foo\n"
-                          "extend T::Sig\n"
-                          "sig{returns(String)}\n"
-                          "def str\n"
-                          "'hi'\n"
-                          "end\n"
-                          "sig{returns(Integer)}\n"
-                          "def int\n"
-                          "1\n"
-                          "end\n"
+                          "  include M\n" // Force slow path
+                          "  extend M\n"
+                          "  self.method_on_m()\n"
                           "end",
                           4, false, 0));
 
@@ -814,8 +809,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
     setSlowPathBlocked(true);
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
-                          "class Foo\n"
-                          "  def bar\n"
+                          "class Bar\n"
+                          "  def foo\n"
                           "  end\n"
                           "end\n",
                           3, false, 0));
@@ -880,13 +875,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
         CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
     }
 
-    // Make an edit, renaming Foo::foo to Foo::bar.
+    // Make an edit, renaming Foo to Bar.
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
-                          "class Foo\n"
+                          "class Bar\n"
                           "extend T::Sig\n"
                           "sig{returns(Integer)}\n"
-                          "def bar\n"
+                          "def foo\n"
                           "1\n"
                           "end\n"
                           "end",
@@ -993,13 +988,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
         CHECK(!absl::StrContains(hoverText->contents->value, "note: information may be stale"));
     }
 
-    // Make an edit, renaming Foo::foo to Foo::bar.
+    // Make an edit, renaming Foo to Bar.
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
-                          "class Foo\n"
+                          "class Bar\n"
                           "extend T::Sig\n"
                           "sig{returns(Integer)}\n"
-                          "def bar\n"
+                          "def foo\n"
                           "1\n"
                           "end\n"
                           "end",
