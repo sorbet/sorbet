@@ -53,18 +53,6 @@ void DocumentFormattingTask::displayError(string errorMessage, unique_ptr<Respon
         "2.0", LSPMethod::WindowShowMessage, make_unique<ShowMessageParams>(MessageType::Error, errorMessage)));
 }
 
-bool DocumentFormattingTask::documentIsFormattable(string_view path) {
-    if (config.opts.rubyfmtFormattableDirectories.empty()) {
-        return true;
-    }
-    for (string directory : config.opts.rubyfmtFormattableDirectories) {
-        if (path.find(directory) == 0 || path.find(fmt::format("./{}", directory)) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void DocumentFormattingTask::index(LSPIndexer &index) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentFormatting);
     if (!config.opts.lspDocumentFormatRubyfmtEnabled) {
@@ -80,14 +68,6 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
     auto fref = index.uri2FileRef(params->textDocument->uri);
     if (fref.exists()) {
         vector<unique_ptr<TextEdit>> edits;
-
-        if (!documentIsFormattable(index.getFile(fref).path())) {
-            // If the file isn't allowlisted, return no edits and exit
-            result = move(edits);
-            response->result = move(result);
-            config.output->write(move(response));
-            return;
-        }
 
         auto sourceView = index.getFile(fref).source();
         auto process = subprocess::Popen({config.opts.rubyfmtPath}, subprocess::output{subprocess::PIPE},
