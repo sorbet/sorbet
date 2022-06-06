@@ -833,17 +833,26 @@ unique_ptr<CompletionItem> trySuggestMethodDef(LSPTypecheckerInterface &typechec
         return nullptr;
     }
 
-    auto item = make_unique<CompletionItem>("Suggested arguments");
+    auto item = make_unique<CompletionItem>("(sorbet) Suggested params");
     item->kind = CompletionItemKind::Snippet;
     // item->sortText = 0;
-    item->detail = fmt::format("Suggested arguments for {}", method.data(gs)->name.shortName(gs));
+    auto methodName = method.data(gs)->name.shortName(gs);
+    item->detail = fmt::format("Suggested parameters for {}", methodName);
 
-    auto argList =
+    auto commaSeparated =
         fmt::map_join(parsedSig->argTypes, ", ", [&](const auto &argSpec) { return argSpec.name.shortName(gs); });
     // TODO(jez) Fancy snippet support
-    item->textEdit = make_unique<TextEdit>(Range::fromLoc(gs, queryLoc), fmt::format("({})", argList));
+    auto argList = fmt::format("({})", commaSeparated);
+    item->textEdit = make_unique<TextEdit>(Range::fromLoc(gs, queryLoc), argList);
 
-    // item->documentation = ...
+    // TODO(jez) clientConfig to get preferred markup kind
+    item->documentation = make_unique<MarkupContent>(
+        MarkupKind::Markdown, fmt::format("Based on the preceding signature, Sorbet will insert this parameter list:\n"
+                                          "\n"
+                                          "```ruby\n"
+                                          "def {}{}\n"
+                                          "```\n",
+                                          methodName, argList));
     return item;
 }
 
