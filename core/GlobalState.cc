@@ -924,7 +924,7 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, uint32_t methodHash) const {
+MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, ArityHash arityHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -938,8 +938,7 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
         auto resSym = res->second;
         if (resSym.isMethod()) {
             auto resMethod = resSym.asMethodRef().data(*this);
-            if (resMethod->methodArgumentHash(*this) == methodHash ||
-                (resMethod->hasIntrinsic() && !resMethod->hasSig())) {
+            if (resMethod->methodArityHash(*this) == arityHash || (resMethod->hasIntrinsic() && !resMethod->hasSig())) {
                 return resSym.asMethodRef();
             }
         }

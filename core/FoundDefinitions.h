@@ -2,6 +2,7 @@
 #define SORBET_FOUND_DEFINITIONS_H
 
 #include "common/common.h"
+#include "core/ArityHash.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
 #include "core/ParsedArg.h"
@@ -142,7 +143,7 @@ struct FoundMethod final {
     core::LocOffsets loc;
     core::LocOffsets declLoc;
     std::vector<core::ParsedArg> parsedArgs;
-    uint32_t argsHash;
+    core::ArityHash arityHash;
     struct Flags {
         bool isSelfMethod : 1;
         bool isRewriterSynthesized : 1;

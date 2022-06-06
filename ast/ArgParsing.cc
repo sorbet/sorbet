@@ -70,8 +70,8 @@ vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &
     return parsedArgs;
 }
 
-// This has to match the implementation of Method::methodArgumentHash
-uint32_t ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
+// This has to match the implementation of Method::methodArityHash
+core::ArityHash ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedArg> &args) {
     uint32_t result = 0;
     result = core::mix(result, args.size());
     for (const auto &e : args) {
@@ -86,7 +86,7 @@ uint32_t ArgParsing::hashArgs(core::Context ctx, const std::vector<core::ParsedA
 
         result = core::mix(result, e.flags.toU1());
     }
-    return result;
+    return core::ArityHash(result);
 }
 
 ExpressionPtr ArgParsing::getDefault(const core::ParsedArg &parsedArg, ExpressionPtr arg) {
