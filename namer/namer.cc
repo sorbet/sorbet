@@ -246,7 +246,7 @@ public:
                 }
                 break;
             }
-            case core::Names::keepDef().rawId():
+            case core::Names::keepDef().rawId(): {
                 // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
                 // (need to use `class << self` to use nullary private with singleton class methods)
 
@@ -268,6 +268,11 @@ public:
                 foundDefs->addModifier(methodVisiStack.back()->withTarget(methodName));
 
                 break;
+            }
+            case core::Names::aliasMethod().rawId(): {
+                addMethodAlias(ctx, original);
+                break;
+            }
         }
         return tree;
     }
@@ -283,6 +288,42 @@ public:
                 target,
             });
         }
+    }
+
+    void addMethodAlias(core::Context ctx, const ast::Send &send) {
+        if (!send.recv.isSelfReference()) {
+            return;
+        }
+
+        if (send.numPosArgs() != 2) {
+            return;
+        }
+
+        auto parsedArgs = InlinedVector<core::NameRef, 2>{};
+
+        for (const auto &arg : send.posArgs()) {
+            auto lit = ast::cast_tree<ast::Literal>(arg);
+            if (lit == nullptr || !lit->isSymbol(ctx)) {
+                continue;
+            }
+            core::NameRef name = lit->asSymbol(ctx);
+
+            parsedArgs.emplace_back(name);
+        }
+
+        if (parsedArgs.size() != 2) {
+            return;
+        }
+
+        auto fromName = parsedArgs[0];
+
+        core::FoundMethod foundMethod;
+        foundMethod.owner = getOwner();
+        foundMethod.name = fromName;
+        foundMethod.loc = send.loc;
+        foundMethod.declLoc = send.loc;
+        foundMethod.arityHash = core::ArityHash::aliasMethodHash();
+        foundDefs->addMethod(move(foundMethod));
     }
 
     void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
@@ -1142,6 +1183,11 @@ public:
         }
 
         for (auto &method : foundDefs.methods()) {
+            if (method.arityHash.isAliasMethod()) {
+                // TODO(jez) Update this comment on the fast path namer branch
+                // alias methods will be defined in resolver.
+                continue;
+            }
             definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
         }
 
