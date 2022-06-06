@@ -88,15 +88,34 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three files.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n\nclass Foo\n\nend\n")), {});
-    assertDiagnostics(
-        send(*openFile(
-            "bar.rb",
-            "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(String)}\ndef hello\n\"hi\"\nend\nend\n")),
-        {});
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "\n"
+                                               "class Foo\n"
+                                               "\n"
+                                               "end\n")),
+                      {});
+    assertDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                               "\n"
+                                               "class Bar\n"
+                                               "extend T::Sig\n"
+                                               "\n"
+                                               "sig{returns(String)}\n"
+                                               "def hello\n"
+                                               "\"hi\"\n"
+                                               "end\n"
+                                               "end\n")),
+                      {});
     // baz calls the method defined in bar
-    assertDiagnostics(send(*openFile("baz.rb", "# typed: true\n\nclass Baz\nextend "
-                                               "T::Sig\n\nsig{returns(String)}\ndef hello\nBar.new.hello\nend\nend\n")),
+    assertDiagnostics(send(*openFile("baz.rb", "# typed: true\n"
+                                               "\n"
+                                               "class Baz\n"
+                                               "extend T::Sig\n"
+                                               "\n"
+                                               "sig{returns(String)}\n"
+                                               "def hello\n"
+                                               "Bar.new.hello\n"
+                                               "end\n"
+                                               "end\n")),
                       {});
 
     // clear counters
@@ -105,13 +124,28 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     // Slow path edits two files. One introduces error.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     // Syntax error in foo.rb.
-    sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\ndef noend\nend\n", 2, true));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "\n"
+                          "class Foo\n"
+                          "def noend\n"
+                          "end\n",
+                          2, true));
     // Pause to differentiate message times
     this_thread::sleep_for(chrono::milliseconds(2));
     // Typechecking error in bar.rb
-    sendAsync(*changeFile(
-        "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(Integer)}\ndef hello\n\"hi\"\nend\nend\n",
-        2, true));
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "\n"
+                          "class Bar\n"
+                          "extend T::Sig\n"
+                          "\n"
+                          "sig{returns(Integer)}\n" // String -> Integer
+                          "def hello\n"
+                          "\"hi\"\n"
+                          "end\n"
+                          "end\n",
+                          2, true));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
     // Wait for typechecking to begin to avoid races.
     {
@@ -125,7 +159,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     this_thread::sleep_for(chrono::milliseconds(5));
 
     // Make another edit that fixes syntax error and should take fast path.
-    sendAsync(*changeFile("foo.rb", "# typed: true\n\nclass Foo\nend\n", 2, false));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "\n"
+                          "class Foo\n"
+                          "end\n",
+                          2, false));
 
     // Wait for first typecheck run to get canceled.
     {
@@ -675,11 +714,23 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create new file
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class Foo\n"
+                                               "extend T::Sig\n"
+                                               "end")),
+                      {});
 
     // Slow path: no errors
-    sendAsync(*changeFile(
-        "foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef str\n1\nend\nend", 2, true, 1));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "extend T::Sig\n"
+                          "sig{returns(Integer)}\n"
+                          "def str\n"
+                          "1\n"
+                          "end\n"
+                          "end",
+                          2, true, 1));
 
     // Wait for typechecking to begin to avoid races.
     {
@@ -689,8 +740,16 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
     }
 
     // Fast path [preempt]: Change return type and introduce an error
-    sendAsync(*changeFile(
-        "foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef str\n'hi'\nend\nend\n", 3));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "extend T::Sig\n"
+                          "sig{returns(Integer)}\n"
+                          "def str\n"
+                          "'hi'\n"
+                          "end\n"
+                          "end\n",
+                          3));
 
     // Wait for typechecking of fast path so it and subsequent slow path change aren't combined
     {
@@ -701,8 +760,18 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
 
     // Slow path: error will be resolved
     sendAsync(*changeFile("foo.rb",
-                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(String)}\ndef "
-                          "str\n'hi'\nend\nsig{returns(Integer)}\ndef int\n1\nend\nend",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "extend T::Sig\n"
+                          "sig{returns(String)}\n"
+                          "def str\n"
+                          "'hi'\n"
+                          "end\n"
+                          "sig{returns(Integer)}\n"
+                          "def int\n"
+                          "1\n"
+                          "end\n"
+                          "end",
                           4, false, 0));
 
     // Send a no-op to clear out the pipeline.
@@ -719,7 +788,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
 
     // Create a simple file.
     assertDiagnostics(send(*openFile("foo.rb", "")), {});
-    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\n  def foo\n  end\nend\n", 2));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  def foo\n"
+                          "  end\n"
+                          "end\n",
+                          2));
 
     // Wait for initial typechecking to start.
     {
@@ -737,7 +812,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
 
     // Turn on slow path blocking, and send an edit that is going to cause a slow path.
     setSlowPathBlocked(true);
-    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\n  def bar\n  end\nend\n", 3, false, 0));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  def bar\n"
+                          "  end\n"
+                          "end\n",
+                          3, false, 0));
 
     // Wait for typechecking to start.
     {
@@ -777,10 +858,15 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Set initial file contents for foo.rb.
-    assertDiagnostics(
-        send(*openFile("foo.rb",
-                       "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\n1\nend\nend")),
-        {});
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class Foo\n"
+                                               "extend T::Sig\n"
+                                               "sig{returns(Integer)}\n"
+                                               "def foo\n"
+                                               "1\n"
+                                               "end\n"
+                                               "end")),
+                      {});
 
     // Send a hover.
     sendAsync(*hover("foo.rb", 4, 4));
@@ -796,7 +882,15 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoOneFile") {
 
     // Make an edit, renaming Foo::foo to Foo::bar.
     sendAsync(*changeFile("foo.rb",
-                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "extend T::Sig\n"
+                          "sig{returns(Integer)}\n"
+                          "def bar\n"
+                          "1\n"
+                          "end\n"
+                          "end",
+                          2));
 
     // Set slow-path blocking, and wait for typechecking to begin.
     setSlowPathBlocked(true);
@@ -856,14 +950,24 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Set initial file contents for foo.rb and bar.rb.
-    assertDiagnostics(
-        send(*openFile("foo.rb",
-                       "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\n1\nend\nend")),
-        {});
-    assertDiagnostics(
-        send(*openFile("bar.rb",
-                       "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend")),
-        {});
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class Foo\n"
+                                               "extend T::Sig\n"
+                                               "sig{returns(Integer)}\n"
+                                               "def foo\n"
+                                               "1\n"
+                                               "end\n"
+                                               "end")),
+                      {});
+    assertDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                               "class Bar\n"
+                                               "extend T::Sig\n"
+                                               "sig{returns(Integer)}\n"
+                                               "def bar\n"
+                                               "1\n"
+                                               "end\n"
+                                               "end")),
+                      {});
 
     // Send a hover in foo.rb.
     sendAsync(*hover("foo.rb", 4, 4));
@@ -891,7 +995,15 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "HoverReturnsStaleInfoTwoFiles") {
 
     // Make an edit, renaming Foo::foo to Foo::bar.
     sendAsync(*changeFile("foo.rb",
-                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef bar\n1\nend\nend", 2));
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "extend T::Sig\n"
+                          "sig{returns(Integer)}\n"
+                          "def bar\n"
+                          "1\n"
+                          "end\n"
+                          "end",
+                          2));
 
     // Set slow-path blocking, and wait for typechecking to begin.
     setSlowPathBlocked(true);
