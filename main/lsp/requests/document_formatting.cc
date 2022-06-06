@@ -69,9 +69,10 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
     if (fref.exists()) {
         vector<unique_ptr<TextEdit>> edits;
 
-        auto process = subprocess::Popen({config.opts.rubyfmtPath, std::string(index.getFile(fref).path()).c_str()},
-                                         subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
-        auto processResponse = process.communicate();
+        auto sourceView = index.getFile(fref).source();
+        auto process = subprocess::Popen({config.opts.rubyfmtPath}, subprocess::output{subprocess::PIPE},
+                                         subprocess::input{subprocess::PIPE});
+        auto processResponse = process.communicate(vector<char>(sourceView.begin(), sourceView.end()));
         process.wait();
         auto returnCode = process.retcode();
 
