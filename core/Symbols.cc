@@ -2095,12 +2095,19 @@ void Method::sanityCheck(const GlobalState &gs) const {
         ENFORCE_NO_TIMER(tp.exists(), name.toString(gs) + "." + tp.data(gs)->name.toString(gs) +
                                           " corresponds to a core::Symbols::noTypeArgument()");
     }
+
+    // There should always either be a block argument at the end, or the method should be an alias
+    ENFORCE_NO_TIMER(!this->arguments.empty(), ref(gs).show(gs));
+
     if (isa_type<AliasType>(this->resultType)) {
-        // If we have an alias method, we should never look at it's arguments;
-        // we should instead look at the arguments of whatever we're aliasing.
-        ENFORCE_NO_TIMER(this->arguments.empty(), ref(gs).show(gs));
-    } else {
-        ENFORCE_NO_TIMER(!this->arguments.empty(), ref(gs).show(gs));
+        // The arguments of an alias method don't mean anything. When calling a method alias,
+        // we dealias the symbol and use those arguments.
+        //
+        // This leaves the alias method's arguments vector free for us to stash some information. See resolver.
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+                         ref(gs).show(gs));
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+                         ref(gs).show(gs));
     }
 }
 
