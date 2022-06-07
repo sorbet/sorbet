@@ -12,12 +12,12 @@ class ::<root> < ::Object ()
     type-member(+) ::<Class:A>::<AttachedClass> -> T.attached_class (of A) @ test/testdata/resolver/multi_alias_method.rb:3
     method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=??? end=???}
-  class ::B < ::Object () @ test/testdata/resolver/multi_alias_method.rb:10
-    method ::B#from (does_not_exist1, does_not_exist2) -> <Alias: ::Sorbet::Private::Static#<bad-method-alias-stub> > @ test/testdata/resolver/multi_alias_method.rb:11
-      argument does_not_exist1<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=11:23 end=11:39}
-      argument does_not_exist2<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=12:23 end=12:39}
-  class ::<Class:B>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/resolver/multi_alias_method.rb:10
-    type-member(+) ::<Class:B>::<AttachedClass> -> T.attached_class (of B) @ test/testdata/resolver/multi_alias_method.rb:10
-    method ::<Class:B>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:10
+  class ::B < ::Object () @ test/testdata/resolver/multi_alias_method.rb:12
+    method ::B#from (does_not_exist1, does_not_exist2) -> <Alias: ::Sorbet::Private::Static#<bad-method-alias-stub> > @ test/testdata/resolver/multi_alias_method.rb:13
+      argument does_not_exist1<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=13:23 end=13:39}
+      argument does_not_exist2<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=14:23 end=14:39}
+  class ::<Class:B>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/resolver/multi_alias_method.rb:12
+    type-member(+) ::<Class:B>::<AttachedClass> -> T.attached_class (of B) @ test/testdata/resolver/multi_alias_method.rb:12
+    method ::<Class:B>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:12
       argument <blk><block> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=??? end=???}
 
