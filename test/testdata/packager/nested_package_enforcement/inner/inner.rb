@@ -3,7 +3,7 @@
 
 module Outer
   def self.bad
-# ^^^^^^^^^^^^ error-with-dupes: Class or method behavior may not be defined outside of the enclosing package namespace `Outer::Inner`
+# ^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Outer::Inner`
   end
 
 

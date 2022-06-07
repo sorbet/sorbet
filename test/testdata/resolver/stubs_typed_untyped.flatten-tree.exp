@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Foo)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Foo)
           <emptyTree>
         end

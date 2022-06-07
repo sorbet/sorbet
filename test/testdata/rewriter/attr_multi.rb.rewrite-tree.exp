@@ -98,28 +98,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
+    <runtime method definition of a>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
+    <runtime method definition of a=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :b, :normal)
+    <runtime method definition of b>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :c, :normal)
+    <runtime method definition of c>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :b=, :normal)
+    <runtime method definition of b=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :c=, :normal)
+    <runtime method definition of c=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :d, :normal)
+    <runtime method definition of d>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :e, :normal)
+    <runtime method definition of e>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :f, :normal)
+    <runtime method definition of f>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :g=, :normal)
+    <runtime method definition of g=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :h=, :normal)
+    <runtime method definition of h=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :i=, :normal)
+    <runtime method definition of i=>
   end
 end

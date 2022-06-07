@@ -1,37 +1,25 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=32]():
+bb0[rubyRegionId=0, firstDead=20]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$8: T.class_of(Object) = alias <C Object>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(Object))
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$13: T.class_of(Object) = alias <C Object>
-    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(Object))
-    <cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$19: T.class_of(Trigger) = alias <C Trigger>
-    <statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(Trigger))
-    <cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$24: T.class_of(Trigger) = alias <C Trigger>
-    <statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(Trigger))
-    <cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$30: T.class_of(Foo) = alias <C Foo>
-    <statTemp>$26: Sorbet::Private::Static::Void = <cfgAlias>$28: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$30: T.class_of(Foo))
+    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$9: T.class_of(Object) = alias <C Object>
+    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(Object))
+    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$16: T.class_of(Trigger) = alias <C Trigger>
+    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$16: T.class_of(Trigger))
+    <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$23: T.class_of(Foo) = alias <C Foo>
+    <statTemp>$19: Sorbet::Private::Static::Void = <cfgAlias>$21: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$23: T.class_of(Foo))
+    <cfgAlias>$26: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$28: T.class_of(Bar) = alias <C Bar>
+    <statTemp>$24: Sorbet::Private::Static::Void = <cfgAlias>$26: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$28: T.class_of(Bar))
     <cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$35: T.class_of(Foo) = alias <C Foo>
-    <statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$35: T.class_of(Foo))
+    <cfgAlias>$35: T.class_of(Bar) = alias <C Bar>
+    <statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$35: T.class_of(Bar))
     <cfgAlias>$38: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$40: T.class_of(Bar) = alias <C Bar>
-    <statTemp>$36: Sorbet::Private::Static::Void = <cfgAlias>$38: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$40: T.class_of(Bar))
-    <cfgAlias>$44: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$46: T.class_of(Bar) = alias <C Bar>
-    <statTemp>$42: Sorbet::Private::Static::Void = <cfgAlias>$44: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$46: T.class_of(Bar))
-    <cfgAlias>$49: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$51: T.class_of(Bar) = alias <C Bar>
-    <statTemp>$47: Sorbet::Private::Static::Void = <cfgAlias>$49: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$51: T.class_of(Bar))
-    <cfgAlias>$54: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$56: T.class_of(Foo) = alias <C Foo>
-    <statTemp>$52: Sorbet::Private::Static::Void = <cfgAlias>$54: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$56: T.class_of(Foo))
+    <cfgAlias>$40: T.class_of(Foo) = alias <C Foo>
+    <statTemp>$36: Sorbet::Private::Static::Void = <cfgAlias>$38: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$40: T.class_of(Foo))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -74,12 +62,9 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 method ::<Class:Trigger>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=6]():
+bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(Trigger) = cast(<self>: NilClass, T.class_of(Trigger));
-    <cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$6: Symbol(:trigger) = :trigger
-    <statTemp>$7: Symbol(:normal) = :normal
-    <returnMethodTemp>$2: Symbol(:trigger) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Trigger), <statTemp>$6: Symbol(:trigger), <statTemp>$7: Symbol(:normal))
+    <returnMethodTemp>$2: Symbol(:trigger) = :trigger
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:trigger)
     <unconditional> -> bb1
 

@@ -36,13 +36,13 @@ begin
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        <runtime method definition of foo>
 
-        ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+        <runtime method definition of bar>
 
-        ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
+        <runtime method definition of qux>
 
-        ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+        <runtime method definition of baz>
       end
       ::Sorbet::Private::Static.keep_for_ide(::Test)
       <emptyTree>

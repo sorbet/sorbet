@@ -4,12 +4,12 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer1)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer1)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2)
           <emptyTree>
         end
@@ -26,22 +26,22 @@ begin
     def self.<static-init>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2::C)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::C)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2::Inner1)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2::Inner1::Inner2)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2::Other)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::Other)
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
@@ -59,12 +59,12 @@ begin
     def self.<static-init>(<blk>)
       begin
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2::Inner1::A)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::A)
           <emptyTree>
         end
         begin
-          ::<Magic>.<define-top-class-or-module>(::Outer2::Inner1::Inner2)
+          <emptyTree>
           ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
         end

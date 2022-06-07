@@ -822,6 +822,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
+            [&](ast::RuntimeMethodDefinition &rmd) {
+                current->exprs.emplace_back(
+                    cctx.target, rmd.loc.copyWithZeroLength(),
+                    make_insn<Literal>(core::make_type<core::LiteralType>(core::Symbols::Symbol(), rmd.name)));
+                ret = current;
+            },
+
             [&](const ast::EmptyTree &n) { ret = current; },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },

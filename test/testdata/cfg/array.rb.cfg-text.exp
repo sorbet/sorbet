@@ -1,13 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$7: T.class_of(TestArray) = alias <C TestArray>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestArray))
-    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$12: T.class_of(TestArray) = alias <C TestArray>
-    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestArray))
+    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$8: T.class_of(TestArray) = alias <C TestArray>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(TestArray))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -128,24 +125,12 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(TestArray), <block-pre-call
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=18](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(TestArray)):
+bb7[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(TestArray)):
     <statTemp>$17: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, sig>
     <self>: T.class_of(TestArray) = <selfRestore>$24
     <cfgAlias>$34: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$36: T.class_of(T) = alias <C T>
     <statTemp>$31: T.class_of(TestArray) = <self>: T.class_of(TestArray).extend(<cfgAlias>$34: T.class_of(T::Sig))
-    <cfgAlias>$39: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$41: Symbol(:an_int) = :an_int
-    <statTemp>$42: Symbol(:normal) = :normal
-    <statTemp>$37: Symbol(:an_int) = <cfgAlias>$39: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$41: Symbol(:an_int), <statTemp>$42: Symbol(:normal))
-    <cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$47: Symbol(:a_string) = :a_string
-    <statTemp>$48: Symbol(:normal) = :normal
-    <statTemp>$43: Symbol(:a_string) = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$47: Symbol(:a_string), <statTemp>$48: Symbol(:normal))
-    <cfgAlias>$51: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$53: Symbol(:test_arrays) = :test_arrays
-    <statTemp>$54: Symbol(:normal) = :normal
-    <statTemp>$49: Symbol(:test_arrays) = <cfgAlias>$51: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestArray), <statTemp>$53: Symbol(:test_arrays), <statTemp>$54: Symbol(:normal))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

@@ -3,7 +3,7 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::<Magic>.<define-top-class-or-module>(::TestAttr)
+        <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::TestAttr)
         <emptyTree>
       end
@@ -116,18 +116,18 @@ begin
           <self>.params(:strv9, ::Float).returns(::Float)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v1, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v1=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v2, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v2=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v3, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v4=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :v5=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv7, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv8=, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv9, :normal)
-        ::Sorbet::Private::Static.keep_def(<self>, :strv9=, :normal)
+        <runtime method definition of initialize>
+        <runtime method definition of v1>
+        <runtime method definition of v1=>
+        <runtime method definition of v2>
+        <runtime method definition of v2=>
+        <runtime method definition of v3>
+        <runtime method definition of v4=>
+        <runtime method definition of v5=>
+        <runtime method definition of strv7>
+        <runtime method definition of strv8=>
+        <runtime method definition of strv9>
+        <runtime method definition of strv9=>
         <emptyTree>
       end
     end

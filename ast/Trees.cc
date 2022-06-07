@@ -18,37 +18,38 @@ namespace sorbet::ast {
         break;                       \
     }
 
-#define GENERATE_TAG_SWITCH(tag, CASE_BODY)              \
-    switch (tag) {                                       \
-        CASE_STATEMENT(CASE_BODY, EmptyTree)             \
-        CASE_STATEMENT(CASE_BODY, Send)                  \
-        CASE_STATEMENT(CASE_BODY, ClassDef)              \
-        CASE_STATEMENT(CASE_BODY, MethodDef)             \
-        CASE_STATEMENT(CASE_BODY, If)                    \
-        CASE_STATEMENT(CASE_BODY, While)                 \
-        CASE_STATEMENT(CASE_BODY, Break)                 \
-        CASE_STATEMENT(CASE_BODY, Retry)                 \
-        CASE_STATEMENT(CASE_BODY, Next)                  \
-        CASE_STATEMENT(CASE_BODY, Return)                \
-        CASE_STATEMENT(CASE_BODY, RescueCase)            \
-        CASE_STATEMENT(CASE_BODY, Rescue)                \
-        CASE_STATEMENT(CASE_BODY, Local)                 \
-        CASE_STATEMENT(CASE_BODY, UnresolvedIdent)       \
-        CASE_STATEMENT(CASE_BODY, RestArg)               \
-        CASE_STATEMENT(CASE_BODY, KeywordArg)            \
-        CASE_STATEMENT(CASE_BODY, OptionalArg)           \
-        CASE_STATEMENT(CASE_BODY, BlockArg)              \
-        CASE_STATEMENT(CASE_BODY, ShadowArg)             \
-        CASE_STATEMENT(CASE_BODY, Assign)                \
-        CASE_STATEMENT(CASE_BODY, Cast)                  \
-        CASE_STATEMENT(CASE_BODY, Hash)                  \
-        CASE_STATEMENT(CASE_BODY, Array)                 \
-        CASE_STATEMENT(CASE_BODY, Literal)               \
-        CASE_STATEMENT(CASE_BODY, UnresolvedConstantLit) \
-        CASE_STATEMENT(CASE_BODY, ConstantLit)           \
-        CASE_STATEMENT(CASE_BODY, ZSuperArgs)            \
-        CASE_STATEMENT(CASE_BODY, Block)                 \
-        CASE_STATEMENT(CASE_BODY, InsSeq)                \
+#define GENERATE_TAG_SWITCH(tag, CASE_BODY)                \
+    switch (tag) {                                         \
+        CASE_STATEMENT(CASE_BODY, EmptyTree)               \
+        CASE_STATEMENT(CASE_BODY, Send)                    \
+        CASE_STATEMENT(CASE_BODY, ClassDef)                \
+        CASE_STATEMENT(CASE_BODY, MethodDef)               \
+        CASE_STATEMENT(CASE_BODY, If)                      \
+        CASE_STATEMENT(CASE_BODY, While)                   \
+        CASE_STATEMENT(CASE_BODY, Break)                   \
+        CASE_STATEMENT(CASE_BODY, Retry)                   \
+        CASE_STATEMENT(CASE_BODY, Next)                    \
+        CASE_STATEMENT(CASE_BODY, Return)                  \
+        CASE_STATEMENT(CASE_BODY, RescueCase)              \
+        CASE_STATEMENT(CASE_BODY, Rescue)                  \
+        CASE_STATEMENT(CASE_BODY, Local)                   \
+        CASE_STATEMENT(CASE_BODY, UnresolvedIdent)         \
+        CASE_STATEMENT(CASE_BODY, RestArg)                 \
+        CASE_STATEMENT(CASE_BODY, KeywordArg)              \
+        CASE_STATEMENT(CASE_BODY, OptionalArg)             \
+        CASE_STATEMENT(CASE_BODY, BlockArg)                \
+        CASE_STATEMENT(CASE_BODY, ShadowArg)               \
+        CASE_STATEMENT(CASE_BODY, Assign)                  \
+        CASE_STATEMENT(CASE_BODY, Cast)                    \
+        CASE_STATEMENT(CASE_BODY, Hash)                    \
+        CASE_STATEMENT(CASE_BODY, Array)                   \
+        CASE_STATEMENT(CASE_BODY, Literal)                 \
+        CASE_STATEMENT(CASE_BODY, UnresolvedConstantLit)   \
+        CASE_STATEMENT(CASE_BODY, ConstantLit)             \
+        CASE_STATEMENT(CASE_BODY, ZSuperArgs)              \
+        CASE_STATEMENT(CASE_BODY, Block)                   \
+        CASE_STATEMENT(CASE_BODY, InsSeq)                  \
+        CASE_STATEMENT(CASE_BODY, RuntimeMethodDefinition) \
     }
 
 void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {
@@ -350,6 +351,12 @@ InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, ExpressionPtr expr)
     : loc(loc), stats(std::move(stats)), expr(std::move(expr)) {
     categoryCounterInc("trees", "insseq");
     histogramInc("trees.insseq.stats", this->stats.size());
+    _sanityCheck();
+}
+
+RuntimeMethodDefinition::RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod)
+    : loc(loc), name(name), isSelfMethod(isSelfMethod) {
+    categoryCounterInc("trees", "runtimemethoddefinition");
     _sanityCheck();
 }
 
@@ -959,6 +966,15 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     return fmt::to_string(buf);
 }
 
+std::string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+    string prefix = this->isSelfMethod ? "self." : "";
+    return fmt::format("<runtime method definition of {}{}>", prefix, this->name.toString(gs));
+}
+
+std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) {
+    return this->toStringWithTabs(gs, tabs);
+}
+
 const ast::Block *Send::block() const {
     if (hasBlock()) {
         auto block = ast::cast_tree<ast::Block>(this->args.back());
@@ -1413,6 +1429,10 @@ string ShadowArg::nodeName() {
 
 string BlockArg::nodeName() {
     return "BlockArg";
+}
+
+string RuntimeMethodDefinition::nodeName() {
+    return "RuntimeMethodDefinition";
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};

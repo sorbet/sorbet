@@ -125,6 +125,12 @@ public:
         original.scope = substClassName(ctx, std::move(original.scope));
         return tree;
     }
+
+    ExpressionPtr postTransformRuntimeMethodDefinition(core::MutableContext ctx, ExpressionPtr original) {
+        auto &def = cast_tree_nonnull<RuntimeMethodDefinition>(original);
+        def.name = subst.substitute(def.name);
+        return original;
+    }
 };
 } // namespace
 

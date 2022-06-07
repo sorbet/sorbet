@@ -1,13 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$7: T.class_of(TestRescue) = alias <C TestRescue>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestRescue))
-    <cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$12: T.class_of(TestRescue) = alias <C TestRescue>
-    <statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestRescue))
+    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$8: T.class_of(TestRescue) = alias <C TestRescue>
+    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(TestRescue))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -1111,92 +1108,8 @@ bb9[rubyRegionId=0, firstDead=3]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9
 
 method ::<Class:TestRescue>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=86]():
+bb0[rubyRegionId=0, firstDead=2]():
     <self>: T.class_of(TestRescue) = cast(<self>: NilClass, T.class_of(TestRescue));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$7: Symbol(:meth) = :meth
-    <statTemp>$8: Symbol(:normal) = :normal
-    <statTemp>$3: Symbol(:meth) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$7: Symbol(:meth), <statTemp>$8: Symbol(:normal))
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$13: Symbol(:foo) = :foo
-    <statTemp>$14: Symbol(:normal) = :normal
-    <statTemp>$9: Symbol(:foo) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$13: Symbol(:foo), <statTemp>$14: Symbol(:normal))
-    <cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$19: Symbol(:bar) = :bar
-    <statTemp>$20: Symbol(:normal) = :normal
-    <statTemp>$15: Symbol(:bar) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$19: Symbol(:bar), <statTemp>$20: Symbol(:normal))
-    <cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$25: Symbol(:baz) = :baz
-    <statTemp>$26: Symbol(:normal) = :normal
-    <statTemp>$21: Symbol(:baz) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$25: Symbol(:baz), <statTemp>$26: Symbol(:normal))
-    <cfgAlias>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$31: Symbol(:take_arg) = :take_arg
-    <statTemp>$32: Symbol(:normal) = :normal
-    <statTemp>$27: Symbol(:take_arg) = <cfgAlias>$29: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$31: Symbol(:take_arg), <statTemp>$32: Symbol(:normal))
-    <cfgAlias>$35: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$37: Symbol(:initialize) = :initialize
-    <statTemp>$38: Symbol(:normal) = :normal
-    <statTemp>$33: Symbol(:initialize) = <cfgAlias>$35: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$37: Symbol(:initialize), <statTemp>$38: Symbol(:normal))
-    <cfgAlias>$41: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$43: Symbol(:multiple_rescue) = :multiple_rescue
-    <statTemp>$44: Symbol(:normal) = :normal
-    <statTemp>$39: Symbol(:multiple_rescue) = <cfgAlias>$41: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$43: Symbol(:multiple_rescue), <statTemp>$44: Symbol(:normal))
-    <cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$49: Symbol(:multiple_rescue_classes) = :multiple_rescue_classes
-    <statTemp>$50: Symbol(:normal) = :normal
-    <statTemp>$45: Symbol(:multiple_rescue_classes) = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$49: Symbol(:multiple_rescue_classes), <statTemp>$50: Symbol(:normal))
-    <cfgAlias>$53: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$55: Symbol(:parse_rescue_ensure) = :parse_rescue_ensure
-    <statTemp>$56: Symbol(:normal) = :normal
-    <statTemp>$51: Symbol(:parse_rescue_ensure) = <cfgAlias>$53: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$55: Symbol(:parse_rescue_ensure), <statTemp>$56: Symbol(:normal))
-    <cfgAlias>$59: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$61: Symbol(:parse_bug_rescue_empty_else) = :parse_bug_rescue_empty_else
-    <statTemp>$62: Symbol(:normal) = :normal
-    <statTemp>$57: Symbol(:parse_bug_rescue_empty_else) = <cfgAlias>$59: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$61: Symbol(:parse_bug_rescue_empty_else), <statTemp>$62: Symbol(:normal))
-    <cfgAlias>$65: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$67: Symbol(:parse_ruby_bug_12686) = :parse_ruby_bug_12686
-    <statTemp>$68: Symbol(:normal) = :normal
-    <statTemp>$63: Symbol(:parse_ruby_bug_12686) = <cfgAlias>$65: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$67: Symbol(:parse_ruby_bug_12686), <statTemp>$68: Symbol(:normal))
-    <cfgAlias>$71: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$73: Symbol(:parse_rescue_mod) = :parse_rescue_mod
-    <statTemp>$74: Symbol(:normal) = :normal
-    <statTemp>$69: Symbol(:parse_rescue_mod) = <cfgAlias>$71: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$73: Symbol(:parse_rescue_mod), <statTemp>$74: Symbol(:normal))
-    <cfgAlias>$77: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$79: Symbol(:parse_resbody_list_var) = :parse_resbody_list_var
-    <statTemp>$80: Symbol(:normal) = :normal
-    <statTemp>$75: Symbol(:parse_resbody_list_var) = <cfgAlias>$77: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$79: Symbol(:parse_resbody_list_var), <statTemp>$80: Symbol(:normal))
-    <cfgAlias>$83: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$85: Symbol(:parse_rescue_else_ensure) = :parse_rescue_else_ensure
-    <statTemp>$86: Symbol(:normal) = :normal
-    <statTemp>$81: Symbol(:parse_rescue_else_ensure) = <cfgAlias>$83: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$85: Symbol(:parse_rescue_else_ensure), <statTemp>$86: Symbol(:normal))
-    <cfgAlias>$89: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$91: Symbol(:parse_rescue) = :parse_rescue
-    <statTemp>$92: Symbol(:normal) = :normal
-    <statTemp>$87: Symbol(:parse_rescue) = <cfgAlias>$89: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$91: Symbol(:parse_rescue), <statTemp>$92: Symbol(:normal))
-    <cfgAlias>$95: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$97: Symbol(:parse_resbody_var) = :parse_resbody_var
-    <statTemp>$98: Symbol(:normal) = :normal
-    <statTemp>$93: Symbol(:parse_resbody_var) = <cfgAlias>$95: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$97: Symbol(:parse_resbody_var), <statTemp>$98: Symbol(:normal))
-    <cfgAlias>$101: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$103: Symbol(:parse_resbody_var_1) = :parse_resbody_var_1
-    <statTemp>$104: Symbol(:normal) = :normal
-    <statTemp>$99: Symbol(:parse_resbody_var_1) = <cfgAlias>$101: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$103: Symbol(:parse_resbody_var_1), <statTemp>$104: Symbol(:normal))
-    <cfgAlias>$107: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$109: Symbol(:parse_rescue_mod_op_assign) = :parse_rescue_mod_op_assign
-    <statTemp>$110: Symbol(:normal) = :normal
-    <statTemp>$105: Symbol(:parse_rescue_mod_op_assign) = <cfgAlias>$107: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$109: Symbol(:parse_rescue_mod_op_assign), <statTemp>$110: Symbol(:normal))
-    <cfgAlias>$113: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$115: Symbol(:parse_ruby_bug_12402) = :parse_ruby_bug_12402
-    <statTemp>$116: Symbol(:normal) = :normal
-    <statTemp>$111: Symbol(:parse_ruby_bug_12402) = <cfgAlias>$113: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$115: Symbol(:parse_ruby_bug_12402), <statTemp>$116: Symbol(:normal))
-    <cfgAlias>$119: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$121: Symbol(:parse_ruby_bug_12402_1) = :parse_ruby_bug_12402_1
-    <statTemp>$122: Symbol(:normal) = :normal
-    <statTemp>$117: Symbol(:parse_ruby_bug_12402_1) = <cfgAlias>$119: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$121: Symbol(:parse_ruby_bug_12402_1), <statTemp>$122: Symbol(:normal))
-    <cfgAlias>$125: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$127: Symbol(:parse_ruby_bug_12402_2) = :parse_ruby_bug_12402_2
-    <statTemp>$128: Symbol(:normal) = :normal
-    <statTemp>$123: Symbol(:parse_ruby_bug_12402_2) = <cfgAlias>$125: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$127: Symbol(:parse_ruby_bug_12402_2), <statTemp>$128: Symbol(:normal))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

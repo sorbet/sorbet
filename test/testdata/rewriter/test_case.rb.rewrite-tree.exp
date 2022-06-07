@@ -22,9 +22,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :test, :normal)
+    <runtime method definition of self.test>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :assert, :normal)
+    <runtime method definition of assert>
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
@@ -49,9 +49,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    <runtime method definition of initialize>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    <runtime method definition of initialize>
   end
 
   class <emptyTree>::<C NoMatchTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
@@ -65,7 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :setup, :normal)
+    <runtime method definition of self.setup>
 
     <self>.setup() do ||
       begin
@@ -118,14 +118,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :setup, :normal)
+    <runtime method definition of self.setup>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :teardown, :normal)
+    <runtime method definition of self.teardown>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :test, :normal)
+    <runtime method definition of self.test>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :assert_equal, :normal)
+    <runtime method definition of assert_equal>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    <runtime method definition of initialize>
   end
 end

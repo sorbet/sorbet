@@ -109,27 +109,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    <runtime method definition of baz>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ball, :normal)
+    <runtime method definition of ball>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :string_foo, :normal)
+    <runtime method definition of string_foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :string_bar, :normal)
+    <runtime method definition of string_bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :symbol_foo, :normal)
+    <runtime method definition of symbol_foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :symbol_bar, :normal)
+    <runtime method definition of symbol_bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :true_foo, :normal)
+    <runtime method definition of true_foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :true_bar, :normal)
+    <runtime method definition of true_bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :usages, :normal)
+    <runtime method definition of usages>
   end
 
   class <emptyTree>::<C WorksWithoutExtendingTSig><<C <todo sym>>> < (::<todo sym>)
@@ -149,9 +149,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
   end
 
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
@@ -195,6 +195,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Elem> = <self>.type_member()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :each, :normal)
+    <runtime method definition of each>
   end
 end

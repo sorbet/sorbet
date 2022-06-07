@@ -43,6 +43,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(ZSuperArgs)
         SANITY_CHECK(Block)
         SANITY_CHECK(InsSeq)
+        SANITY_CHECK(RuntimeMethodDefinition)
     }
 #undef SANITY_CHECK
 }
@@ -227,5 +228,9 @@ void While::_sanityCheck() {
 }
 
 void ZSuperArgs::_sanityCheck() {}
+
+void RuntimeMethodDefinition::_sanityCheck() {
+    ENFORCE(name.exists());
+}
 
 } // namespace sorbet::ast

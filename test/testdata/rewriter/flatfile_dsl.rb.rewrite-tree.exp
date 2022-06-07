@@ -16,13 +16,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :flatfile, :normal)
+    <runtime method definition of self.flatfile>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :from, :normal)
+    <runtime method definition of self.from>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :pattern, :normal)
+    <runtime method definition of self.pattern>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :field, :normal)
+    <runtime method definition of self.field>
   end
 
   class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
@@ -82,17 +82,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    <runtime method definition of foo=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+    <runtime method definition of bar=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    <runtime method definition of baz>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz=, :normal)
+    <runtime method definition of baz=>
   end
 
   t = <emptyTree>::<C Flatfile>.new()

@@ -171,45 +171,45 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :both, :normal)
+    <runtime method definition of both>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :both, :normal)
+    <runtime method definition of self.both>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :both=, :normal)
+    <runtime method definition of both=>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :both=, :normal)
+    <runtime method definition of self.both=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :foo, :normal)
+    <runtime method definition of self.foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    <runtime method definition of foo=>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :foo=, :normal)
+    <runtime method definition of self.foo=>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance, :normal)
+    <runtime method definition of self.no_instance>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance=, :normal)
+    <runtime method definition of self.no_instance=>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance_reader, :normal)
+    <runtime method definition of self.no_instance_reader>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :no_instance_reader=, :normal)
+    <runtime method definition of no_instance_reader=>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance_reader=, :normal)
+    <runtime method definition of self.no_instance_reader=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :bar, :normal)
+    <runtime method definition of self.bar>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :bar=, :normal)
+    <runtime method definition of self.bar=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :no_instance_writer, :normal)
+    <runtime method definition of no_instance_writer>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance_writer, :normal)
+    <runtime method definition of self.no_instance_writer>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance_writer=, :normal)
+    <runtime method definition of self.no_instance_writer=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :usages, :normal)
+    <runtime method definition of usages>
 
     <self>.both()
 
