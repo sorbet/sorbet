@@ -2,6 +2,7 @@
 #define SORBET_SYMBOLS_H
 
 #include "common/common.h"
+#include "core/ArityHash.h"
 #include "core/Loc.h"
 #include "core/Names.h"
 #include "core/SymbolRef.h"
@@ -84,7 +85,7 @@ public:
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     uint32_t hash(const GlobalState &gs) const;
     uint32_t methodShapeHash(const GlobalState &gs) const;
-    uint32_t methodArgumentHash(const GlobalState &gs) const;
+    ArityHash methodArityHash(const GlobalState &gs) const;
 
     inline void setMethodPublic() {
         flags.isPrivate = false;

@@ -124,7 +124,7 @@ public:
     MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::Method, Symbols::noMethod()).asMethodRef();
     }
-    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, uint32_t methodHash) const;
+    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, ArityHash arityHash) const;
     FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
         // N.B.: Fields and static fields have entirely different types of names, so this should be unambiguous.
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::FieldOrStaticField, Symbols::noField()).asFieldRef();

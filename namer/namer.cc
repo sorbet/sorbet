@@ -201,7 +201,7 @@ public:
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
-        foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
+        foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
@@ -759,7 +759,7 @@ class SymbolDefiner {
         const bool isNewSymbol = symTableSize != ctx.state.methodsUsed();
         if (!isNewSymbol) {
             // See if this is == to the method we're defining now, or if we have a redefinition error.
-            auto matchingSym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash);
+            auto matchingSym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.arityHash);
             if (!matchingSym.exists()) {
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
@@ -790,7 +790,7 @@ class SymbolDefiner {
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->flags.isRewriterSynthesized = true;
         }
-        ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.argsHash).exists());
+        ENFORCE(ctx.state.lookupMethodSymbolWithHash(owner, method.name, method.arityHash).exists());
         return sym;
     }
 

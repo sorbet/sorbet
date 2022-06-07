@@ -2281,7 +2281,7 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
     result = mix(result, this->hasSig());
-    result = mix(result, this->methodArgumentHash(gs));
+    result = mix(result, this->methodArityHash(gs)._hashValue);
 
     if (name == Names::unresolvedAncestors() || name == Names::requiredAncestors() ||
         name == Names::requiredAncestorsLin()) {
@@ -2314,7 +2314,7 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
 }
 
 // This has to match the implementation of ArgParsing::hashArgs
-uint32_t Method::methodArgumentHash(const GlobalState &gs) const {
+ArityHash Method::methodArityHash(const GlobalState &gs) const {
     uint32_t result = 0;
     result = mix(result, arguments.size());
     for (const auto &e : arguments) {
@@ -2325,7 +2325,7 @@ uint32_t Method::methodArgumentHash(const GlobalState &gs) const {
         // Changing an argument from e.g. keyword to position-based is a shape change.
         result = mix(result, e.flags.toU1());
     }
-    return result;
+    return ArityHash(result);
 }
 
 bool ClassOrModule::ignoreInHashing(const GlobalState &gs) const {
