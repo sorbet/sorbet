@@ -1,0 +1,5 @@
+# typed: true
+# exclude-from-file-update: true
+
+A.new(0) # error: Expected `String` but found `Integer(0)`
+A.new('')

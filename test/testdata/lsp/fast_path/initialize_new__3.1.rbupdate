@@ -1,0 +1,10 @@
+# typed: true
+# exclude-from-file-update: true
+
+class A
+  sig {void}
+  def self.example
+    new(0) # error: Expected `String` but found `Integer(0)`
+    new('')
+  end
+end
