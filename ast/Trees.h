@@ -1115,6 +1115,7 @@ CheckSize(InsSeq, 56, 8);
 EXPRESSION(RuntimeMethodDefinition) {
 public:
     // This should be equivalent to MethodDef.declLoc.
+    // It's called `loc` because every node in the AST has to have a `loc` field.
     const core::LocOffsets loc;
     core::NameRef name;
     const bool isSelfMethod;
