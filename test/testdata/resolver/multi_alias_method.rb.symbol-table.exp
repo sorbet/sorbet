@@ -3,7 +3,9 @@ class ::<root> < ::Object ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=??? end=???}
   class ::A < ::Object () @ test/testdata/resolver/multi_alias_method.rb:3
-    method ::A#from () -> <Alias: ::A#to > @ test/testdata/resolver/multi_alias_method.rb:6
+    method ::A#from (to, to_bad) -> <Alias: ::A#to > @ test/testdata/resolver/multi_alias_method.rb:6
+      argument to<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=6:23 end=6:26}
+      argument to_bad<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=7:23 end=7:30}
     method ::A#to (<blk>) @ test/testdata/resolver/multi_alias_method.rb:4
       argument <blk><block> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=??? end=???}
   class ::<Class:A>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/resolver/multi_alias_method.rb:3
@@ -11,7 +13,9 @@ class ::<root> < ::Object ()
     method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=??? end=???}
   class ::B < ::Object () @ test/testdata/resolver/multi_alias_method.rb:10
-    method ::B#from () -> <Alias: ::Sorbet::Private::Static#<bad-method-alias-stub> > @ test/testdata/resolver/multi_alias_method.rb:11
+    method ::B#from (does_not_exist1, does_not_exist2) -> <Alias: ::Sorbet::Private::Static#<bad-method-alias-stub> > @ test/testdata/resolver/multi_alias_method.rb:11
+      argument does_not_exist1<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=11:23 end=11:39}
+      argument does_not_exist2<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=12:23 end=12:39}
   class ::<Class:B>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/resolver/multi_alias_method.rb:10
     type-member(+) ::<Class:B>::<AttachedClass> -> T.attached_class (of B) @ test/testdata/resolver/multi_alias_method.rb:10
     method ::<Class:B>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:10
