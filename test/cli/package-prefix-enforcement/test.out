@@ -27,10 +27,6 @@ nested/nested.rb:38: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:41: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
-    41 |  def self.method
-          ^^^^^^^^^^^^^^^
-
 nested/nested.rb:54: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     54 |module Root::ModNotInPackage
                ^^^^^^^^^^^^^^^^^^^^^
@@ -74,4 +70,4 @@ critic_prefix/real.test.rb:13: File belongs to package `Critic::SomePkg` but def
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 11
+Errors: 10
