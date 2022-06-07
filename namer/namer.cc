@@ -1162,6 +1162,9 @@ public:
     }
 };
 
+using BehaviorLocs = InlinedVector<core::Loc, 1>;
+using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
+
 /**
  * Inserts newly created symbols (from SymbolDefiner) into a tree.
  */
@@ -1406,15 +1409,8 @@ public:
         if (klass.symbol != core::Symbols::root() && !ctx.file.data(ctx).isRBI() &&
             ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
             // TODO(dmitry) This won't find errors in fast-incremental mode.
-            auto prevLoc = classBehaviorLocs.find(klass.symbol);
-            if (prevLoc == classBehaviorLocs.end()) {
-                classBehaviorLocs[klass.symbol] = ctx.locAt(klass.declLoc);
-            } else if (prevLoc->second.file() != ctx.file) {
-                if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
-                    e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
-                    e.addErrorLine(prevLoc->second, "Previous definition");
-                }
-            }
+            auto &locs = classBehaviorLocs[klass.symbol];
+            locs.emplace_back(ctx.locAt(klass.declLoc));
         }
 
         ast::InsSeq::STATS_store retSeqs;
@@ -1727,8 +1723,7 @@ public:
         }
     }
 
-private:
-    UnorderedMap<core::ClassOrModuleRef, core::Loc> classBehaviorLocs;
+    ClassBehaviorLocsMap classBehaviorLocs;
 };
 
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
@@ -1806,10 +1801,61 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
+struct SymbolizeTreesResult {
+    vector<ast::ParsedFile> trees;
+    ClassBehaviorLocsMap classBehaviorLocs;
+};
+
+void mergeClassBehaviorLocs(const core::GlobalState &gs, ClassBehaviorLocsMap &merged,
+                            ClassBehaviorLocsMap &threadRes) {
+    Timer timeit(gs.tracer(), "naming.symbolizeTreesMergeClass");
+    if (merged.empty()) {
+        swap(merged, threadRes);
+        return;
+    }
+    for (auto [ref, threadLocs] : threadRes) {
+        auto &mergedLocs = merged[ref];
+        mergedLocs.insert(mergedLocs.end(), make_move_iterator(threadLocs.begin()),
+                          make_move_iterator(threadLocs.end()));
+    }
+    threadRes.clear();
+}
+
+void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap &map) {
+    vector<pair<core::ClassOrModuleRef, BehaviorLocs>> conflicts;
+    for (auto &[ref, locs] : map) {
+        if (locs.size() < 2) {
+            continue;
+        }
+        fast_sort(locs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() < rhs.file(); });
+        // In rare cases we see multiple defs in same file. Ignore them.
+        auto last = unique(locs.begin(), locs.end(),
+                           [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() == rhs.file(); });
+        locs.erase(last, locs.end());
+        if (locs.size() < 2) {
+            continue;
+        }
+        conflicts.emplace_back(make_pair(ref, std::move(locs)));
+    }
+    map.clear();
+
+    fast_sort(conflicts, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first.id() < rhs.first.id(); });
+    for (const auto &[ref, locs] : conflicts) {
+        core::Loc mainLoc = locs[0];
+        core::Context ctx(gs, core::Symbols::root(), mainLoc.file());
+        if (auto e = ctx.beginError(mainLoc.offsets(), core::errors::Namer::MultipleBehaviorDefs)) {
+            e.setHeader("`{}` has behavior defined in multiple files", ref.show(ctx));
+            for (auto it = locs.begin() + 1; it != locs.end(); ++it) {
+                e.addErrorLine(*it, "Previous definition");
+            }
+        }
+    }
+}
+
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
                                        bool bestEffort) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<SymbolizeTreesResult>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     for (auto &tree : trees) {
         fileq->push(move(tree), 1);
@@ -1818,32 +1864,36 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq, bestEffort]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter(bestEffort);
-        vector<ast::ParsedFile> output;
+        SymbolizeTreesResult output;
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
-                output.emplace_back(move(job));
+                output.trees.emplace_back(move(job));
             }
         }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
+        if (!output.trees.empty()) {
+            output.classBehaviorLocs = std::move(inserter.classBehaviorLocs);
+            resultq->push(move(output), output.trees.size());
         }
     });
     trees.clear();
 
     {
-        vector<ast::ParsedFile> threadResult;
+        ClassBehaviorLocsMap classBehaviorLocs;
+        SymbolizeTreesResult threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.begin()),
-                             make_move_iterator(threadResult.end()));
+                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
+                             make_move_iterator(threadResult.trees.end()));
+                mergeClassBehaviorLocs(gs, classBehaviorLocs, threadResult.classBehaviorLocs);
             }
         }
+        findConflictingClassDefs(gs, classBehaviorLocs);
     }
     fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
     return trees;

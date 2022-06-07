@@ -1,0 +1,280 @@
+test/cli/conflicting-definition-multithread/a.rb:4: `A` has behavior defined in multiple files https://srb.help/4019
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:4: Previous definition
+     4 |class A
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:8: `B` has behavior defined in multiple files https://srb.help/4019
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:8: Previous definition
+     8 |class B
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:12: `C` has behavior defined in multiple files https://srb.help/4019
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:12: Previous definition
+    12 |class C
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:16: `D` has behavior defined in multiple files https://srb.help/4019
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:16: Previous definition
+    16 |class D
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:20: `E` has behavior defined in multiple files https://srb.help/4019
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:20: Previous definition
+    20 |class E
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:24: `F` has behavior defined in multiple files https://srb.help/4019
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:24: Previous definition
+    24 |class F
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:28: `G` has behavior defined in multiple files https://srb.help/4019
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:28: Previous definition
+    28 |class G
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:32: `H` has behavior defined in multiple files https://srb.help/4019
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:32: Previous definition
+    32 |class H
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:36: `I` has behavior defined in multiple files https://srb.help/4019
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:36: Previous definition
+    36 |class I
+        ^^^^^^^
+
+test/cli/conflicting-definition-multithread/a.rb:40: `J` has behavior defined in multiple files https://srb.help/4019
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/b.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/c.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/d.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/e.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/f.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/h.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/i.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+    test/cli/conflicting-definition-multithread/j.rb:40: Previous definition
+    40 |class J
+        ^^^^^^^
+Errors: 10
