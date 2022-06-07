@@ -2096,9 +2096,12 @@ void Method::sanityCheck(const GlobalState &gs) const {
                                           " corresponds to a core::Symbols::noTypeArgument()");
     }
     if (isa_type<AliasType>(this->resultType)) {
-        // If we have an alias method, we should never look at it's arguments;
-        // we should instead look at the arguments of whatever we're aliasing.
-        ENFORCE_NO_TIMER(this->arguments.empty(), ref(gs).show(gs));
+        // The arguments of an alias method don't mean anything. When calling a method alias,
+        // we dealias the symbol and use those arguments.
+        //
+        // This leaves the alias method's arguments vector free for us to stash some information. See resolver.
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+                         ref(gs).show(gs));
     } else {
         ENFORCE_NO_TIMER(!this->arguments.empty(), ref(gs).show(gs));
     }

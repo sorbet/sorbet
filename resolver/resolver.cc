@@ -2362,6 +2362,11 @@ class ResolveTypeMembersAndFieldsWalk {
                     e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
                     e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
                     e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
+
+                    // Add a fake keyword argument to remember the toName (for fast path hashing).
+                    // It has to be a keyword arg, because names of positional args are ignored in hashing.
+                    auto &arg = ctx.state.enterMethodArgumentSymbol(ctx.locAt(job.toNameLoc), fromMethod, job.toName);
+                    arg.flags.isKeyword = true;
                 }
             }
             return;
@@ -2374,6 +2379,11 @@ class ResolveTypeMembersAndFieldsWalk {
 
         auto alias = ctx.state.enterMethodSymbol(ctx.locAt(job.loc), job.owner, job.fromName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
+
+        // Add a fake keyword argument to remember the toName (for fast path hashing).
+        // It has to be a keyword arg, because names of positional args are ignored in hashing.
+        auto &arg = ctx.state.enterMethodArgumentSymbol(ctx.locAt(job.toNameLoc), alias, job.toName);
+        arg.flags.isKeyword = true;
     }
 
     // Returns `true` if `asgn` is a field declaration.
