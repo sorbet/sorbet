@@ -1,0 +1,6 @@
+# typed: true
+# exclude-from-file-update: true
+
+class A
+  alias_method :from_method, :to_method # error: Can't make method alias from `from_method` to non existing method `to_method`
+end
