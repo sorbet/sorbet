@@ -1,0 +1,61 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ParamOrder><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:bar, <emptyTree>::<C Integer>, :foo, <emptyTree>::<C Integer>).void()
+    end
+
+    def initialize<<todo method>>(bar:, foo: = 3, &<blk>)
+      begin
+        @foo = ::T.let(foo, <emptyTree>::<C Integer>)
+        @bar = ::T.let(bar, <emptyTree>::<C Integer>)
+        nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      @foo = arg0
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def bar<<todo method>>(&<blk>)
+      @bar
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def bar=<<todo method>>(arg0, &<blk>)
+      @bar = arg0
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.prop(:foo, <emptyTree>::<C Integer>, :default, 3, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+
+    <self>.prop(:bar, <emptyTree>::<C Integer>, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
+  end
+end

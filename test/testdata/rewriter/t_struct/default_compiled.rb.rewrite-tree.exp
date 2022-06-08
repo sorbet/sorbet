@@ -1,0 +1,62 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Default><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:foo, <emptyTree>::<C Integer>).void()
+    end
+
+    def initialize<<todo method>>(foo: = 3, &<blk>)
+      begin
+        @foo = ::T.let(foo, <emptyTree>::<C Integer>)
+        nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      @foo = arg0
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.prop(:foo, <emptyTree>::<C Integer>, :default, 3, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new().foo())
+
+  <emptyTree>::<C Default>.new(:foo, "no")
+
+  <emptyTree>::<C Default>.new(:foo, 3, :bar, 4)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new(:foo, 3).foo())
+
+  class <emptyTree>::<C Bad><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      nil
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
+    <self>.prop(:no_type_on_prop)
+
+    <self>.const(:no_type_on_const)
+  end
+end

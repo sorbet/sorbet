@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    <runtime method definition of merchant_prop>
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant_prop, :normal)
   end
 
   module <emptyTree>::<C ShardByMerchantBase><<C <todo sym>>> < ()
@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    <runtime method definition of merchant_token_prop>
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant_token_prop, :normal)
   end
 
   class <emptyTree>::<C MerchantPropModel><<C <todo sym>>> < (::<todo sym>)
@@ -26,7 +26,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@merchant)
+        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
+      end
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -35,7 +38,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.merchant_prop(:without_accessors, true)
 
-    <runtime method definition of merchant>
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :genericPropGetter)
   end
 
   class <emptyTree>::<C MerchantTokenPropModel><<C <todo sym>>> < (::<todo sym>)
@@ -44,7 +47,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@merchant)
+        <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
+      end
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -53,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.merchant_token_prop(:without_accessors, true)
 
-    <runtime method definition of merchant>
+    ::Sorbet::Private::Static.keep_def(<self>, :merchant, :genericPropGetter)
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C MerchantPropModel>.new().merchant())

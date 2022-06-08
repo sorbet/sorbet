@@ -8,7 +8,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign_lazy)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign_lazy, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -16,7 +19,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_lazy)
+        <self>.instance_variable_set(:@foreign_lazy, arg0)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -40,7 +46,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign_proc)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign_proc, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -48,7 +57,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_proc)
+        <self>.instance_variable_set(:@foreign_proc, arg0)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -72,7 +84,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@foreign_invalid)
+        <self>.class().decorator().prop_get_logic(<self>, :foreign_invalid, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -80,7 +95,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_invalid)
+        <self>.instance_variable_set(:@foreign_invalid, arg0)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -105,24 +123,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    <runtime method definition of foreign_lazy>
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :genericPropGetter)
 
-    <runtime method definition of foreign_lazy=>
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    <runtime method definition of foreign_proc>
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :genericPropGetter)
 
-    <runtime method definition of foreign_proc=>
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
 
-    <runtime method definition of foreign_invalid>
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :genericPropGetter)
 
-    <runtime method definition of foreign_invalid=>
+    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
   end
 end

@@ -5,7 +5,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@foo)
+        <self>.class().decorator().prop_get_logic(<self>, :foo, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -13,7 +16,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :foo)
+        <self>.instance_variable_set(:@foo, arg0)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -21,17 +27,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@bar)
+        <self>.class().decorator().prop_get_logic(<self>, :bar, arg2)
+      end
     end
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    <runtime method definition of foo>
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :genericPropGetter)
 
-    <runtime method definition of foo=>
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
 
     <self>.const(:bar, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    <runtime method definition of bar>
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :genericPropGetter)
   end
 end

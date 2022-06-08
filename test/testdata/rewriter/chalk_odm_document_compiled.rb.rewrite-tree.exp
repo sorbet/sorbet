@@ -25,14 +25,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :my_parent_method)
+        <self>.instance_variable_set(:@my_parent_method, arg0)
+      end
     end
 
     <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
 
-    <runtime method definition of my_parent_method>
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method, :attr_reader)
 
-    <runtime method definition of my_parent_method=>
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=, :normal)
   end
 
   class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
@@ -41,7 +44,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_child_method<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@my_child_method)
+        <self>.class().decorator().prop_get_logic(<self>, :my_child_method, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -49,14 +55,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_child_method=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :my_child_method)
+        <self>.instance_variable_set(:@my_child_method, arg0)
+      end
     end
 
     <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    <runtime method definition of my_child_method>
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method, :genericPropGetter)
 
-    <runtime method definition of my_child_method=>
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=, :normal)
   end
 
   <emptyTree>::<C MyParentDocument>.new()

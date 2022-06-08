@@ -5,7 +5,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        arg2 = <self>.instance_variable_get(:@array_of_explicit)
+        <self>.class().decorator().prop_get_logic(<self>, :array_of_explicit, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -13,7 +16,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        ::T::Configuration.prop_freeze_handler().call(<self>, :array_of_explicit)
+        <self>.instance_variable_set(:@array_of_explicit, arg0)
+      end
     end
 
     <self>.prop(:type, :type, <emptyTree>::<C String>)
@@ -24,9 +30,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:array_of_explicit, <emptyTree>::<C Array>, :array, <emptyTree>::<C String>, :without_accessors, true)
 
-    <runtime method definition of array_of_explicit>
+    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit, :genericPropGetter)
 
-    <runtime method definition of array_of_explicit=>
+    ::Sorbet::Private::Static.keep_def(<self>, :array_of_explicit=, :normal)
 
     <self>.prop(:no_class_arg, :type, <emptyTree>::<C Array>, :immutable, true, :array, <emptyTree>::<C String>)
 
