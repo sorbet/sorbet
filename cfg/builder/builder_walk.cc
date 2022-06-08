@@ -58,7 +58,35 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     return alias;
 }
 
-LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) {
+core::ClassOrModuleRef resolveBlockContext(CFGContext cctx, const core::ClassOrModuleRef outerClassOrModule) {
+    auto methodRef = outerClassOrModule.data(cctx.ctx)->findMethodTransitive(cctx.ctx, cctx.link->fun);
+    if (!methodRef.exists()) {
+        return outerClassOrModule;
+    }
+
+    // Let's find the block definition so we can look at the binding
+    auto &args = methodRef.data(cctx.ctx)->arguments;
+    auto block = absl::c_find_if(args, [&](const auto &arg) { return arg.name == core::Names::blkArg(); });
+    if (!block) {
+        return outerClassOrModule;
+    }
+
+    if (block->rebind == core::Symbols::MagicBindToAttachedClass()) {
+        // The proc is bound to T.attached_class, we bind to it
+        return outerClassOrModule.data(cctx.ctx)->attachedClass(cctx.ctx);
+    } else if (block->rebind == core::Symbols::MagicBindToSelfType()) {
+        // The proc is bound to T.self_type, we do nothing since we're already bound to self type
+        return outerClassOrModule;
+    } else if (block->rebind.exists()) {
+        // The proc is bound to an explicit type, we use it as the receiver context directly
+        return block->rebind;
+    } else {
+        // The proc is not bound to anything, we use the outer class as the receiver context
+        return outerClassOrModule;
+    }
+}
+
+core::ClassOrModuleRef resolveReceiverContext(CFGContext cctx, const ast::UnresolvedIdent &id) {
     core::ClassOrModuleRef klass;
 
     switch (id.kind) {
@@ -71,6 +99,12 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
         case ast::UnresolvedIdent::Kind::Instance:
             ENFORCE(cctx.ctx.owner.isMethod());
             klass = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
+
+            if (cctx.link != nullptr) {
+                // We're inside a block, so we may have to change the receiver to the proc's binding
+                klass = resolveBlockContext(cctx, klass);
+            }
+
             break;
         case ast::UnresolvedIdent::Kind::Global:
             klass = core::Symbols::root();
@@ -80,6 +114,11 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             Exception::notImplemented();
     }
 
+    return klass;
+}
+
+LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) {
+    auto klass = resolveReceiverContext(cctx, id);
     auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id.name);
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
