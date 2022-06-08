@@ -12,6 +12,9 @@ public:
     // Creates a new set with the given capacity as the maximum acceptable item ID.
     UIntSet(uint32_t capacity);
 
+    // Removes all elements from the set.
+    void clear();
+
     // Add number to set.
     void add(uint32_t item);
 

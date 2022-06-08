@@ -5,6 +5,12 @@ namespace sorbet {
 // Integer divide by 32 and round up to determine how many u4s we need.
 UIntSet::UIntSet(uint32_t size) : _members((size + 31) / 32, 0) {}
 
+void UIntSet::clear() {
+    for (auto &items : _members) {
+        items = 0;
+    }
+}
+
 void UIntSet::add(uint32_t item) {
     uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
