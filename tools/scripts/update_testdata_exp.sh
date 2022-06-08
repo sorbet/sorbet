@@ -172,3 +172,11 @@ done
 if ! parallel --joblog - < "$COMMAND_FILE"; then
   echo 'WARN: parallel exiited non-zero'
 fi
+
+# Just update the entire directory, rather than figuring
+# out exactly what got updated or didn't.
+if [ "${EMIT_SYNCBACK:-}" != "" ]; then
+  echo '### BEGIN SYNCBACK ###'
+  echo 'test/testdata/'
+  echo '### END SYNCBACK ###'
+fi
