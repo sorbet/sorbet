@@ -111,9 +111,13 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    needs_requires_ancestor=false
+    if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
+      needs_requires_ancestor=true
+    fi
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
-      if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
+      if $needs_requires_ancestor; then
         args=("--enable-experimental-requires-ancestor")
       else
         args=()
