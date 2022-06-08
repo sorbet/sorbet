@@ -87,7 +87,7 @@ assignment, it has to report an error on `x = nil`.
 
 ### Couldn't Sorbet at least special case `true` and `false`?
 
-Sorbet's type inference system is smart enough track things like this:
+Sorbet's type inference system is smart enough to track things like this:
 
 ```ruby
 sig {params(banking_account: String).returns(T::Boolean)}
