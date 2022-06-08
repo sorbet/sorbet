@@ -1282,13 +1282,13 @@ class Regexp < Object
         options: BasicObject,
         kcode: String,
     )
-    .returns(T.self_type)
+    .returns(Regexp)
   end
   sig do
     params(
         arg0: Regexp,
     )
-    .returns(T.self_type)
+    .returns(Regexp)
   end
   def self.compile(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
 
