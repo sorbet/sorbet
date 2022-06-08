@@ -439,7 +439,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 }
-            } else if (propContext.needsRealPropBodies){
+            } else if (propContext.needsRealPropBodies) {
                 // need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarSet =
                     ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
