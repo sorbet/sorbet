@@ -340,6 +340,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
         upperBounds1 = readsByBlock;
+        UIntSet toRemove(cfg.numLocalVariables());
         while (changed) {
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
@@ -358,7 +359,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                 // this block, and we do not require it.
                 const auto &deadForBlock = deadByBlock[bb->id];
                 if (!deadForBlock.empty()) {
-                    UIntSet toRemove(cfg.numLocalVariables());
+                    toRemove.clear();
                     deadForBlock.forEach([&bb, &cfg, &toRemove](uint32_t local) -> void {
                         // TODO(nelhage) We can't erase for variables inside loops, due
                         // to how our "pinning" type inference works. We can remove this
@@ -388,8 +389,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        upperBoundsForBlock.add(writesByBlock[edge->id]);
-                        upperBoundsForBlock.add(upperBounds2[edge->id]);
+                        upperBoundsForBlock.add(writesByBlock[edge->id], upperBounds2[edge->id]);
                     }
                 }
                 changed = changed || sz != upperBoundsForBlock.size();
