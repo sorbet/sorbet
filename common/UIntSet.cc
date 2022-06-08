@@ -71,6 +71,20 @@ void UIntSet::intersect(const UIntSet &set) {
     }
 }
 
+void UIntSet::overwriteWithUnion(const UIntSet &a, const UIntSet &b) {
+    ENFORCE_NO_TIMER(_members.size() == a._members.size());
+    ENFORCE_NO_TIMER(_members.size() == b._members.size());
+    // Manually lift the computation of the data pointer outside of the loop,
+    // since normal `InlinedVector` accesses branch on whether the vector is
+    // stored inline or not.
+    auto *ourptr = _members.data();
+    auto *aptr = a._members.data();
+    auto *bptr = b._members.data();
+    for (int i = 0; i < _members.size(); i++) {
+        ourptr[i] = aptr[i] | bptr[i];
+    }
+}
+
 size_t UIntSet::size() const {
     size_t sz = 0;
     for (auto member : _members) {
