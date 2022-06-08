@@ -373,7 +373,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     } else if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
         // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
-    } else if (propContext.needsRealPropBodies && ret.ifunset == nullptr) {
+    } else if (ret.ifunset == nullptr) {
         if (knownNonModel(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
             flags.isAttrReader = true;
@@ -385,7 +385,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                               ast::MK::Symbol(nameLoc, ivarName));
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
             }
-        } else {
+        } else if (propContext.needsRealPropBodies) {
             ast::MethodDef::Flags flags;
             flags.genericPropGetter = true;
 
@@ -406,6 +406,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
             auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
             nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq), flags));
+        } else {
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
         }
     } else {
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
@@ -424,7 +426,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
-        } else if (propContext.needsRealPropBodies && ret.enum_ == nullptr) {
+        } else if (ret.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                     auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
@@ -437,7 +439,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 }
-            } else {
+            } else if (propContext.needsRealPropBodies){
                 // need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarSet =
                     ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
@@ -449,6 +451,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                                       ast::MK::Self(loc), ast::MK::Symbol(loc, name));
                 auto insSeq = ast::MK::InsSeq1(loc, std::move(propFreezeLogic), std::move(ivarSet));
                 nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(insSeq)));
+            } else {
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
             }
         } else {
             nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));

@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      <self>.instance_variable_get(:@my_parent_method)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
