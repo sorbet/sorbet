@@ -49,6 +49,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    <self>.test("valid method call") do ||
+      <emptyTree>
+    end
+
+    <self>.test("block is evaluated in the context of an instance") do ||
+      <self>.assert(true)
+    end
+
+    <self>.test("setup instance variables are declared") do ||
+      <self>.assert(@a)
+    end
+
     <runtime method definition of initialize>
 
     <runtime method definition of initialize>
@@ -125,6 +137,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.test>
 
     <runtime method definition of assert_equal>
+
+    <self>.test("it works") do ||
+      <self>.assert_equal(1, @a)
+    end
 
     <runtime method definition of initialize>
   end

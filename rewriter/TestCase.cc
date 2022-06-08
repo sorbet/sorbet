@@ -18,7 +18,6 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
                     if (arg0 && arg0->isString(ctx)) {
                         isTest = true;
-                        continue;
                     }
                 }
             } else if (send->fun == core::Names::setup()) {

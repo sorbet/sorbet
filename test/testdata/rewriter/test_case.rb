@@ -33,6 +33,10 @@ class MyTest < ActiveSupport::TestCase
   test "block is evaluated in the context of an instance" do
     assert true
   end
+
+  test "setup instance variables are declared" do
+    assert @a
+  end
 end
 
 class NoMatchTest < ActiveSupport::TestCase
