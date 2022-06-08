@@ -147,9 +147,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     {
         Timer timeit(ctx.state.tracer(), "privates1");
 
+        UIntSet blockReadsAndWrites(this->numLocalVariables());
         for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
-            UIntSet blockReadsAndWrites = target.reads[blockId];
-            blockReadsAndWrites.add(target.writes[blockId]);
+            blockReadsAndWrites.overwriteWithUnion(target.reads[blockId], target.writes[blockId]);
             blockReadsAndWrites.forEach([&usageCounts, blockId](uint32_t local) -> void {
                 if (usageCounts[local].first == 0) {
                     usageCounts[local].second = blockId;

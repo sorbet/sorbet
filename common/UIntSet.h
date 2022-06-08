@@ -33,6 +33,9 @@ public:
     // Mutates the set to contain the intersection of this set and the passed-in set.
     void intersect(const UIntSet &set);
 
+    // Mutates the set to contain the union of the given sets.
+    void overwriteWithUnion(const UIntSet &a, const UIntSet &b);
+
     // Returns true if the set is empty.
     bool empty() const;
 
