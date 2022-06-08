@@ -388,8 +388,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        upperBoundsForBlock.add(writesByBlock[edge->id]);
-                        upperBoundsForBlock.add(upperBounds2[edge->id]);
+                        upperBoundsForBlock.add(writesByBlock[edge->id], upperBounds2[edge->id]);
                     }
                 }
                 changed = changed || sz != upperBoundsForBlock.size();

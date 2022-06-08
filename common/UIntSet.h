@@ -27,6 +27,9 @@ public:
     // Add items in `set` to this set. Sets must have the same size.
     void add(const UIntSet &set);
 
+    // Add items in the given sets to this set. Sets must have the same size.
+    void add(const UIntSet &a, const UIntSet &b);
+
     // Remove items in `set` from this set. Sets must have the same size.
     void remove(const UIntSet &set);
 

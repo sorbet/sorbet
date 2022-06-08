@@ -50,6 +50,20 @@ void UIntSet::add(const UIntSet &set) {
     }
 }
 
+void UIntSet::add(const UIntSet &a, const UIntSet &b) {
+    ENFORCE_NO_TIMER(_members.size() == a._members.size());
+    ENFORCE_NO_TIMER(_members.size() == b._members.size());
+    // Manually lift the computation of the data pointer outside of the loop,
+    // since normal `InlinedVector` accesses branch on whether the vector is
+    // stored inline or not.
+    auto *ourptr = _members.data();
+    auto *aptr = a._members.data();
+    auto *bptr = b._members.data();
+    for (int i = 0; i < _members.size(); i++) {
+        ourptr[i] |= aptr[i] | bptr[i];
+    }
+}
+
 bool UIntSet::empty() const {
     for (auto items : _members) {
         if (items > 0) {
