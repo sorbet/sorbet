@@ -341,6 +341,105 @@ class Fiddle::Closure
   def to_i; end
 end
 
+# A mixin that provides methods for parsing C struct and prototype signatures.
+#
+# ## Example
+#
+# ```ruby
+# require 'fiddle/import'
+#
+# include Fiddle::CParser
+#   #=> Object
+#
+# parse_ctype('int')
+#   #=> Fiddle::TYPE_INT
+#
+# parse_struct_signature(['int i', 'char c'])
+#   #=> [[Fiddle::TYPE_INT, Fiddle::TYPE_CHAR], ["i", "c"]]
+#
+# parse_signature('double sum(double, double)')
+#   #=> ["sum", Fiddle::TYPE_DOUBLE, [Fiddle::TYPE_DOUBLE, Fiddle::TYPE_DOUBLE]]
+# ```
+module Fiddle::CParser
+  # Given a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) of C
+  # type `ty`, returns the corresponding
+  # [`Fiddle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html) constant.
+  #
+  # `ty` can also accept an
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of C type Strings,
+  # and will be returned in a corresponding
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
+  #
+  # If [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `tymap` is
+  # provided, `ty` is expected to be the key, and the value will be the C type
+  # to be looked up.
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'fiddle/import'
+  #
+  # include Fiddle::CParser
+  #   #=> Object
+  #
+  # parse_ctype('int')
+  #   #=> Fiddle::TYPE_INT
+  #
+  # parse_ctype('double diff')
+  #   #=> Fiddle::TYPE_DOUBLE
+  #
+  # parse_ctype('unsigned char byte')
+  #   #=> -Fiddle::TYPE_CHAR
+  #
+  # parse_ctype('const char* const argv[]')
+  #   #=> -Fiddle::TYPE_VOIDP
+  # ```
+  def parse_ctype(ty, tymap=nil); end
+
+  # Parses a C prototype signature
+  #
+  # If [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `tymap` is
+  # provided, the return value and the arguments from the `signature` are
+  # expected to be keys, and the value will be the C type to be looked up.
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'fiddle/import'
+  #
+  # include Fiddle::CParser
+  #   #=> Object
+  #
+  # parse_signature('double sum(double, double)')
+  #   #=> ["sum", Fiddle::TYPE_DOUBLE, [Fiddle::TYPE_DOUBLE, Fiddle::TYPE_DOUBLE]]
+  #
+  # parse_signature('void update(void (*cb)(int code))')
+  #   #=> ["update", Fiddle::TYPE_VOID, [Fiddle::TYPE_VOIDP]]
+  #
+  # parse_signature('char (*getbuffer(void))[80]')
+  #   #=> ["getbuffer", Fiddle::TYPE_VOIDP, []]
+  # ```
+  def parse_signature(signature, tymap=nil); end
+
+  # Parses a C struct's members
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'fiddle/import'
+  #
+  # include Fiddle::CParser
+  #   #=> Object
+  #
+  # parse_struct_signature(['int i', 'char c'])
+  #   #=> [[Fiddle::TYPE_INT, Fiddle::TYPE_CHAR], ["i", "c"]]
+  #
+  # parse_struct_signature(['char buffer[80]'])
+  #   #=> [[[Fiddle::TYPE_CHAR, 80]], ["buffer"]]
+  # ```
+  def parse_struct_signature(signature, tymap=nil); end
+end
+
 # Extends
 # [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Closure.html)
 # to allow for building the closure in a block
