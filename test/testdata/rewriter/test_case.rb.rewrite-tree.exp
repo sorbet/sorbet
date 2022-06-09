@@ -1,13 +1,8 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C ActiveSupport>::<C TestCase><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params(:args, <emptyTree>::<C T>.untyped(), :block, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>.proc().bind(<emptyTree>::<C T>.attached_class()).void())).void()
-    end
+  end
 
-    def self.test<<todo method>>(*args, &block)
-      <emptyTree>
-    end
-
+  class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:test, <emptyTree>::<C T>.untyped()).returns(<emptyTree>::<C T>::<C Boolean>)
     end
@@ -20,14 +15,30 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:args, <emptyTree>::<C T>.untyped(), :block, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>.proc().void())).void()
+    end
 
-    <runtime method definition of self.test>
+    def self.test<<todo method>>(*args, &block)
+      <emptyTree>
+    end
 
-    <runtime method definition of assert>
-  end
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
 
-  class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
+    def test_valid_method_call<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def test_block_is_evaluated_in_the_context_of_an_instance<<todo method>>(&<blk>)
+      <self>.assert(true)
+    end
+
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
@@ -47,19 +58,73 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.bar()
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def teardown<<todo method>>(&<blk>)
+      <self>.fiz()
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def teardown<<todo method>>(&<blk>)
+      <self>.baz()
+    end
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+    <runtime method definition of assert>
+
+    <runtime method definition of self.test>
+
+    <self>.tesst("invalid", "method name") do ||
+      <emptyTree>
+    end
+
+    <self>.test("invalid", "parameter count") do ||
+      <emptyTree>
+    end
+
+    <self>.test("no block argument")
+
+    <self>.test(:not_a_string) do ||
+      <emptyTree>
+    end
+
+    <self>.test(:not_a_string) do ||
+      <self>.assert(true)
+    end
+
+    <runtime method definition of test_valid_method_call>
+
+    <runtime method definition of test_block_is_evaluated_in_the_context_of_an_instance>
+
     <runtime method definition of initialize>
 
     <runtime method definition of initialize>
+
+    <runtime method definition of teardown>
+
+    <runtime method definition of teardown>
   end
 
   class <emptyTree>::<C NoMatchTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params(:block, <emptyTree>::<C T>.proc().bind(<emptyTree>::<C T>.attached_class()).void()).void()
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
     def self.setup<<todo method>>(&block)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.teardown<<todo method>>(&block)
       <emptyTree>
     end
 
@@ -67,17 +132,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.setup>
 
+    <runtime method definition of self.teardown>
+
     <self>.setup() do ||
-      begin
-        @a = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
-        <self>.foo()
-      end
+      <self>.foo()
+    end
+
+    <self>.teardown() do ||
+      <self>.bar()
     end
   end
 
   class <emptyTree>::<C NoParentClass><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params(:block, <emptyTree>::<C T>.proc().bind(<emptyTree>::<C T>.attached_class()).void()).void()
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
     def self.setup<<todo method>>(&block)
@@ -85,18 +153,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params(:block, <emptyTree>::<C T>.proc().bind(<emptyTree>::<C T>.attached_class()).void()).void()
+      <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
     def self.teardown<<todo method>>(&block)
-      <emptyTree>
-    end
-
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params(:name, <emptyTree>::<C String>, :block, <emptyTree>::<C T>.proc().bind(<emptyTree>::<C T>.attached_class()).void()).void()
-    end
-
-    def self.test<<todo method>>(name, &block)
       <emptyTree>
     end
 
@@ -112,8 +172,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
+    def test_it_works<<todo method>>(&<blk>)
+      <self>.assert_equal(1, @a)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def initialize<<todo method>>(&<blk>)
       @a = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def teardown<<todo method>>(&<blk>)
+      @a = 5
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -122,10 +198,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.teardown>
 
-    <runtime method definition of self.test>
-
     <runtime method definition of assert_equal>
 
+    <runtime method definition of test_it_works>
+
     <runtime method definition of initialize>
+
+    <runtime method definition of teardown>
   end
 end

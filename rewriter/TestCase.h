@@ -24,15 +24,15 @@ namespace sorbet::rewriter {
  * into
  *
  *    class MyTest < AnyParent
- *      def initialize
+ *      def setup
  *        @a = 1
  *      end
  *
- *      test "the equality" do
+ *      def test_the_equality
  *        assert_equal 1, @a
  *      end
  *
- *      teardown do
+ *      def teardown
  *        @a = nil
  *      end
  *    end

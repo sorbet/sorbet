@@ -7,9 +7,8 @@ namespace sorbet::rewriter {
 void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
     std::vector<ast::ExpressionPtr> stats;
 
-    // Go through all class definition statements and find all setups
-    std::vector<ast::ExpressionPtr> setups;
-    bool isTest = false;
+    // Go through all class definition statements and find all setups, tests and teardowns
+    std::vector<ast::ExpressionPtr> testSends, setupAndTeardownSends;
     for (auto &stat : klass->rhs) {
         if (auto *send = ast::cast_tree<ast::Send>(stat)) {
             if (send->fun == core::Names::test()) {
@@ -17,14 +16,14 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     auto *arg0 = ast::cast_tree<ast::Literal>(send->getPosArg(0));
 
                     if (arg0 && arg0->isString(ctx)) {
-                        isTest = true;
+                        testSends.push_back(std::move(stat));
                         continue;
                     }
                 }
-            } else if (send->fun == core::Names::setup()) {
+            } else if (send->fun == core::Names::setup() || send->fun == core::Names::teardown()) {
                 if (send->hasBlock() && !send->hasPosArgs() && !send->hasKwArgs()) {
                     // send->args only contains block.
-                    setups.push_back(std::move(stat));
+                    setupAndTeardownSends.push_back(std::move(stat));
                     continue;
                 }
             }
@@ -32,22 +31,38 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
         stats.emplace_back(std::move(stat));
     }
 
-    // If there are test definitions, then rewrite setup block invocations into initialize to avoid having the nilable
-    // instance variables issue
-    if (isTest) {
-        for (auto &stat : setups) {
+    // Rewrite all test sends as method definitions
+    for (auto &stat : testSends) {
+        auto *send = ast::cast_tree<ast::Send>(stat);
+        auto loc = send->loc;
+        auto *arg0 = ast::cast_tree<ast::Literal>(send->getPosArg(0));
+        auto *block = send->block();
+
+        auto snake_case_name = absl::StrReplaceAll(arg0->asString(ctx).toString(ctx), {{" ", "_"}});
+        auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);
+        auto method = ast::MK::SyntheticMethod0(loc, loc, name, std::move(block->body));
+        auto method_with_sig = ast::MK::InsSeq1(method.loc(), ast::MK::SigVoid(method.loc(), {}), std::move(method));
+
+        stats.emplace_back(std::move(method_with_sig));
+    }
+
+    // If there are test definitions, then we can probably assume that the setup and teardown invocations are safe to
+    // rewrite as well. If there aren't any test sends, then emplace back the original statements into the class
+    if (!testSends.empty()) {
+        for (auto &stat : setupAndTeardownSends) {
             auto *send = ast::cast_tree<ast::Send>(stat);
             auto loc = send->loc;
             auto block = send->block();
+            auto method_name = send->fun == core::Names::setup() ? core::Names::initialize() : core::Names::teardown();
 
-            auto method = ast::MK::SyntheticMethod0(loc, loc, core::Names::initialize(), std::move(block->body));
+            auto method = ast::MK::SyntheticMethod0(loc, loc, method_name, std::move(block->body));
             auto method_with_sig =
                 ast::MK::InsSeq1(method.loc(), ast::MK::SigVoid(method.loc(), {}), std::move(method));
 
             stats.emplace_back(std::move(method_with_sig));
         }
     } else {
-        for (auto &stat : setups) {
+        for (auto &stat : setupAndTeardownSends) {
             stats.emplace_back(std::move(stat));
         }
     }
