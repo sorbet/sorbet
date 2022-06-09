@@ -5,6 +5,7 @@
 #include "common/UIntSetForEach.h"
 #include "common/formatting.h"
 #include "common/sort.h"
+#include "common/typecase.h"
 
 // helps debugging
 template class std::unique_ptr<sorbet::cfg::CFG>;
@@ -109,28 +110,21 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockReads.add(bind.bind.variable.id());
             }
 
-            if (auto *v = cast_instruction<Ident>(bind.value)) {
-                blockReads.add(v->what.id());
-            } else if (auto *v = cast_instruction<Send>(bind.value)) {
-                blockReads.add(v->recv.variable.id());
-                for (auto &arg : v->args) {
-                    blockReads.add(arg.variable.id());
-                }
-            } else if (auto *v = cast_instruction<TAbsurd>(bind.value)) {
-                blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Return>(bind.value)) {
-                blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<BlockReturn>(bind.value)) {
-                blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Cast>(bind.value)) {
-                blockReads.add(v->value.variable.id());
-            } else if (auto *v = cast_instruction<LoadSelf>(bind.value)) {
-                blockReads.add(v->fallback.id());
-            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value)) {
-                blockReads.add(v->send.id());
-            } else if (auto *v = cast_instruction<YieldLoadArg>(bind.value)) {
-                blockReads.add(v->yieldParam.variable.id());
-            }
+            typecase(
+                bind.value, [&blockReads](cfg::Ident &v) { blockReads.add(v.what.id()); },
+                [&blockReads](cfg::Send &v) {
+                    blockReads.add(v.recv.variable.id());
+                    for (auto &arg : v.args) {
+                        blockReads.add(arg.variable.id());
+                    }
+                },
+                [&blockReads](cfg::TAbsurd &v) { blockReads.add(v.what.variable.id()); },
+                [&blockReads](cfg::Return &v) { blockReads.add(v.what.variable.id()); },
+                [&blockReads](cfg::BlockReturn &v) { blockReads.add(v.what.variable.id()); },
+                [&blockReads](cfg::Cast &v) { blockReads.add(v.value.variable.id()); },
+                [&blockReads](cfg::LoadSelf &v) { blockReads.add(v.fallback.id()); },
+                [&blockReads](cfg::SolveConstraint &v) { blockReads.add(v.send.id()); },
+                [&blockReads](cfg::YieldLoadArg &v) { blockReads.add(v.yieldParam.variable.id()); });
 
             if (!blockReads.contains(bind.bind.variable.id())) {
                 blockDead.add(bind.bind.variable.id());
