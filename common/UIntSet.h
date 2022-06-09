@@ -3,7 +3,28 @@
 
 #include "common/common.h"
 
+#include "absl/types/span.h"
+
 namespace sorbet {
+class UIntSet;
+
+class UIntSetSpan final {
+    absl::Span<uint32_t> _members;
+    friend UIntSet;
+
+    UIntSetSpan(absl::Span<uint32_t> members) noexcept : _members(members) {}
+
+public:
+    // Add number to set.
+    void add(uint32_t item);
+
+    // Remove number from set.
+    void remove(uint32_t item);
+
+    // Returns true if the set contains the given item.
+    bool contains(uint32_t item) const;
+};
+
 class UIntSet final {
     // Most uses require < 128 members.
     InlinedVector<uint32_t, 4> _members;
@@ -11,6 +32,14 @@ class UIntSet final {
 public:
     // Creates a new set with the given capacity as the maximum acceptable item ID.
     UIntSet(uint32_t capacity);
+
+    UIntSetSpan span() {
+        return absl::MakeSpan(_members);
+    }
+
+    const UIntSetSpan span() const {
+        return absl::MakeSpan(const_cast<UIntSet *>(this)->_members);
+    }
 
     // Removes all elements from the set.
     void clear();

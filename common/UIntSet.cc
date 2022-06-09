@@ -11,25 +11,37 @@ void UIntSet::clear() {
     }
 }
 
-void UIntSet::add(uint32_t item) {
+void UIntSetSpan::add(uint32_t item) {
     uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
     uint32_t mask = 1 << (item & 0x1F);
     _members[memberIndex] |= mask;
 }
 
-void UIntSet::remove(uint32_t item) {
+void UIntSet::add(uint32_t item) {
+    this->span().add(item);
+}
+
+void UIntSetSpan::remove(uint32_t item) {
     uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
     uint32_t mask = 1 << (item & 0x1F);
     _members[memberIndex] &= ~mask;
 }
 
-bool UIntSet::contains(uint32_t item) const {
+void UIntSet::remove(uint32_t item) {
+    this->span().remove(item);
+}
+
+bool UIntSetSpan::contains(uint32_t item) const {
     uint32_t memberIndex = item >> 5;
     ENFORCE_NO_TIMER(memberIndex < _members.size());
     uint32_t mask = 1 << (item & 0x1F);
     return (_members[memberIndex] & mask) > 0;
+}
+
+bool UIntSet::contains(uint32_t item) const {
+    return this->span().contains(item);
 }
 
 void UIntSet::remove(const UIntSet &set) {

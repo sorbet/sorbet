@@ -94,9 +94,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     CFG::ReadsAndWrites target(maxBasicBlockId, numLocalVariables());
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
-        auto &blockWrites = target.writes[bb->id];
-        auto &blockReads = target.reads[bb->id];
-        auto &blockDead = target.dead[bb->id];
+        auto blockWrites = target.writes[bb->id].span();
+        auto blockReads = target.reads[bb->id].span();
+        auto blockDead = target.dead[bb->id].span();
         for (Binding &bind : bb->exprs) {
             blockWrites.add(bind.bind.variable.id());
             /*
