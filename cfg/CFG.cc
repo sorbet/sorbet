@@ -124,7 +124,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 [&blockReads](cfg::Cast &v) { blockReads.add(v.value.variable.id()); },
                 [&blockReads](cfg::LoadSelf &v) { blockReads.add(v.fallback.id()); },
                 [&blockReads](cfg::SolveConstraint &v) { blockReads.add(v.send.id()); },
-                [&blockReads](cfg::YieldLoadArg &v) { blockReads.add(v.yieldParam.variable.id()); });
+                [&blockReads](cfg::YieldLoadArg &v) { blockReads.add(v.yieldParam.variable.id()); },
+                [](cfg::InstructionPtr &) {});
 
             if (!blockReads.contains(bind.bind.variable.id())) {
                 blockDead.add(bind.bind.variable.id());
