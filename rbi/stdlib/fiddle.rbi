@@ -341,6 +341,105 @@ class Fiddle::Closure
   def to_i; end
 end
 
+# A mixin that provides methods for parsing C struct and prototype signatures.
+#
+# ## Example
+#
+# ```ruby
+# require 'fiddle/import'
+#
+# include Fiddle::CParser
+#   #=> Object
+#
+# parse_ctype('int')
+#   #=> Fiddle::TYPE_INT
+#
+# parse_struct_signature(['int i', 'char c'])
+#   #=> [[Fiddle::TYPE_INT, Fiddle::TYPE_CHAR], ["i", "c"]]
+#
+# parse_signature('double sum(double, double)')
+#   #=> ["sum", Fiddle::TYPE_DOUBLE, [Fiddle::TYPE_DOUBLE, Fiddle::TYPE_DOUBLE]]
+# ```
+module Fiddle::CParser
+  # Given a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) of C
+  # type `ty`, returns the corresponding
+  # [`Fiddle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html) constant.
+  #
+  # `ty` can also accept an
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of C type Strings,
+  # and will be returned in a corresponding
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
+  #
+  # If [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `tymap` is
+  # provided, `ty` is expected to be the key, and the value will be the C type
+  # to be looked up.
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'fiddle/import'
+  #
+  # include Fiddle::CParser
+  #   #=> Object
+  #
+  # parse_ctype('int')
+  #   #=> Fiddle::TYPE_INT
+  #
+  # parse_ctype('double diff')
+  #   #=> Fiddle::TYPE_DOUBLE
+  #
+  # parse_ctype('unsigned char byte')
+  #   #=> -Fiddle::TYPE_CHAR
+  #
+  # parse_ctype('const char* const argv[]')
+  #   #=> -Fiddle::TYPE_VOIDP
+  # ```
+  def parse_ctype(ty, tymap=nil); end
+
+  # Parses a C prototype signature
+  #
+  # If [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) `tymap` is
+  # provided, the return value and the arguments from the `signature` are
+  # expected to be keys, and the value will be the C type to be looked up.
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'fiddle/import'
+  #
+  # include Fiddle::CParser
+  #   #=> Object
+  #
+  # parse_signature('double sum(double, double)')
+  #   #=> ["sum", Fiddle::TYPE_DOUBLE, [Fiddle::TYPE_DOUBLE, Fiddle::TYPE_DOUBLE]]
+  #
+  # parse_signature('void update(void (*cb)(int code))')
+  #   #=> ["update", Fiddle::TYPE_VOID, [Fiddle::TYPE_VOIDP]]
+  #
+  # parse_signature('char (*getbuffer(void))[80]')
+  #   #=> ["getbuffer", Fiddle::TYPE_VOIDP, []]
+  # ```
+  def parse_signature(signature, tymap=nil); end
+
+  # Parses a C struct's members
+  #
+  # Example:
+  #
+  # ```ruby
+  # require 'fiddle/import'
+  #
+  # include Fiddle::CParser
+  #   #=> Object
+  #
+  # parse_struct_signature(['int i', 'char c'])
+  #   #=> [[Fiddle::TYPE_INT, Fiddle::TYPE_CHAR], ["i", "c"]]
+  #
+  # parse_struct_signature(['char buffer[80]'])
+  #   #=> [[[Fiddle::TYPE_CHAR, 80]], ["buffer"]]
+  # ```
+  def parse_struct_signature(signature, tymap=nil); end
+end
+
 # Extends
 # [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Closure.html)
 # to allow for building the closure in a block
@@ -563,6 +662,145 @@ class Fiddle::Handle
   # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) for the
   # function named `name`.
   def self.sym(_); end
+end
+
+# A DSL that provides the means to dynamically load libraries and build modules
+# around them including calling extern functions within the C library that has
+# been loaded.
+#
+# ## Example
+#
+# ```ruby
+# require 'fiddle'
+# require 'fiddle/import'
+#
+# module LibSum
+#   extend Fiddle::Importer
+#   dlload './libsum.so'
+#   extern 'double sum(double*, int)'
+#   extern 'double split(double)'
+# end
+# ```
+module Fiddle::Importer
+  # Returns the function mapped to `name`, that was created by either
+  # [`Fiddle::Importer.extern`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Importer.html#method-i-extern)
+  # or
+  # [`Fiddle::Importer.bind`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Importer.html#method-i-bind)
+  def [](name); end
+
+  # Creates a global method from the given C `signature` using the given `opts`
+  # as bind parameters with the given block.
+  def bind(signature, *opts, &blk); end
+
+  # Returns a new closure wrapper for the `name` function.
+  #
+  # *   `ctype` is the return type of the function
+  # *   `argtype` is an
+  #     [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of arguments,
+  #     passed to the callback function
+  # *   `call_type` is the abi of the closure
+  # *   `block` is passed to the callback
+  #
+  #
+  # See
+  # [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Closure.html)
+  def bind_function(name, ctype, argtype, call_type = nil, &block); end
+
+  # Creates a class to wrap the C struct with the value `ty`
+  #
+  # See also
+  # [`Fiddle::Importer.struct`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Importer.html#method-i-struct)
+  #
+  # Also aliased as:
+  # [`value`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Importer.html#method-i-value)
+  def create_value(ty, val=nil); end
+
+  # Creates an array of handlers for the given `libs`, can be an instance of
+  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html),
+  # [`Fiddle::Importer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Importer.html),
+  # or will create a new instance of
+  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html)
+  # using
+  # [`Fiddle.dlopen`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#method-c-dlopen)
+  #
+  # Raises a DLError if the library cannot be loaded.
+  #
+  # See
+  # [`Fiddle.dlopen`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#method-c-dlopen)
+  def dlload(*libs); end
+
+  # Creates a global method from the given C `signature`.
+  def extern(signature, *opts); end
+
+  # The
+  # [`Fiddle::CompositeHandler`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/CompositeHandler.html)
+  # instance
+  #
+  # Will raise an error if no handlers are open.
+  def handler; end
+
+  # Returns a new
+  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html)
+  # instance at the memory address of the given `name` function.
+  #
+  # Raises a DLError if the `name` doesn't exist.
+  #
+  # *   `argtype` is an
+  #     [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of arguments,
+  #     passed to the `name` function.
+  # *   `ctype` is the return type of the function
+  # *   `call_type` is the ABI of the function
+  #
+  #
+  # See also Fiddle:Function.new
+  #
+  # See
+  # [`Fiddle::CompositeHandler.sym`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/CompositeHandler.html#method-i-sym)
+  # and Fiddle::Handler.sym
+  def import_function(name, ctype, argtype, call_type = nil); end
+
+  # Returns a new
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
+  # instance at the memory address of the given `name` symbol.
+  #
+  # Raises a DLError if the `name` doesn't exist.
+  #
+  # See
+  # [`Fiddle::CompositeHandler.sym`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/CompositeHandler.html#method-i-sym)
+  # and
+  # [`Fiddle::Handle.sym`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#method-c-sym)
+  def import_symbol(name); end
+
+  # Returns a new instance of the C struct with the value `ty` at the `addr`
+  # address.
+  def import_value(ty, addr); end
+
+  # Returns the sizeof `ty`, using
+  # [`Fiddle::Importer.parse_ctype`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/CParser.html#method-i-parse_ctype)
+  # to determine the C type and the appropriate
+  # [`Fiddle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html) constant.
+  def sizeof(ty); end
+
+  # Creates a class to wrap the C struct described by `signature`.
+  #
+  # ```ruby
+  # MyStruct = struct ['int i', 'char c']
+  # ```
+  def struct(signature); end
+
+  # Sets the type alias for `alias_type` as `orig_type`
+  def typealias(alias_type, orig_type); end
+
+  # Creates a class to wrap the C union described by `signature`.
+  #
+  # ```ruby
+  # MyUnion = union ['int i', 'char c']
+  # ```
+  def union(signature); end
+
+  # Alias for:
+  # [`create_value`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Importer.html#method-i-create_value)
+  def value(ty, val=nil); end
 end
 
 # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
