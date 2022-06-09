@@ -11,19 +11,27 @@ begin
   end
   class ::A<<C A>> < (::<todo sym>)
     def self.make(<blk>)
-      cls = ::Class.new(::A) do ||
-        begin
+      cls = begin
+        ::Sorbet::Private::Static.keep_for_typechecking(::T.class_of(::A))
+        T.cast(::Class.new(::A) do ||
           begin
-            ::Sorbet::Private::Static.keep_for_typechecking(::T.class_of(::A))
-            T.<synthetic bind>(<self>, AppliedType {
-              klass = <S <C <U A>> $1>
-              targs = [
-                <C <U <AttachedClass>>> = A
-              ]
-            })
+            begin
+              ::Sorbet::Private::Static.keep_for_typechecking(::T.class_of(::A))
+              T.<synthetic bind>(<self>, AppliedType {
+                klass = <S <C <U A>> $1>
+                targs = [
+                  <C <U <AttachedClass>>> = A
+                ]
+              })
+            end
+            <emptyTree>
           end
-          <emptyTree>
-        end
+        end, AppliedType {
+          klass = <S <C <U A>> $1>
+          targs = [
+            <C <U <AttachedClass>>> = A
+          ]
+        })
       end
     end
 

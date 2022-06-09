@@ -373,6 +373,10 @@ public:
         return Send2(loc, T(loc), core::Names::bind(), loc, std::move(value), std::move(type));
     }
 
+    static ExpressionPtr Cast(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+        return Send2(loc, T(loc), core::Names::cast(), loc, std::move(value), std::move(type));
+    }
+
     static ExpressionPtr ClassOf(core::LocOffsets loc, ExpressionPtr value) {
         return Send1(loc, T(loc), core::Names::classOf(), loc, std::move(value));
     }

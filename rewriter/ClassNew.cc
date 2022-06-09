@@ -24,6 +24,20 @@ bool isRewrittenBind(ast::ExpressionPtr &expr) {
     return send->flags.isRewriterSynthesized;
 }
 
+// Is this expression a synthetic `T.cast` call we added from the `ClassNew` rewriter on sends?
+bool isRewrittenCast(ast::ExpressionPtr &expr) {
+    auto send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr) {
+        return false;
+    }
+
+    if (send->fun != core::Names::cast()) {
+        return false;
+    }
+
+    return send->flags.isRewriterSynthesized;
+}
+
 vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
     vector<ast::ExpressionPtr> empty;
 
@@ -39,7 +53,14 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
         return empty;
     }
 
-    auto send = ast::cast_tree<ast::Send>(asgn->rhs);
+    auto rhs = asgn->rhs.deepCopy();
+
+    if (isRewrittenCast(asgn->rhs)) {
+        // This is a synthetic cast we added from the `ClassNew` rewriter, we want to rewrite the value of the cast.
+        rhs = ast::cast_tree<ast::Send>(rhs)->getPosArg(0).deepCopy();
+    }
+
+    auto send = ast::cast_tree<ast::Send>(rhs);
     if (send == nullptr) {
         return empty;
     }
@@ -101,41 +122,46 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
     return stats;
 }
 
-bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
+ast::ExpressionPtr ClassNew::run(core::MutableContext ctx, ast::Send *send) {
     auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
     if (recv == nullptr) {
-        return false;
+        return nullptr;
     }
 
     if (!ast::isa_tree<ast::EmptyTree>(recv->scope) || recv->cnst != core::Names::Constants::Class() ||
         send->fun != core::Names::new_()) {
-        return false;
+        return nullptr;
     }
 
     auto argc = send->numPosArgs();
     if (argc > 1 || send->hasKwArgs()) {
-        return false;
+        return nullptr;
     }
 
-    if (argc == 1 && !ast::isa_tree<ast::UnresolvedConstantLit>(send->getPosArg(0))) {
-        return false;
+    if (argc == 1) {
+        auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
+        if (parent == nullptr) {
+            return nullptr;
+        }
     }
 
     auto *block = send->block();
     if (block == nullptr) {
-        return false;
+        return nullptr;
     }
 
+    bool hasParent = false;
     ast::ExpressionPtr type;
 
     if (argc == 0) {
         type = ast::MK::Constant(send->loc, core::Symbols::Class());
     } else {
+        hasParent = true;
         auto target = send->getPosArg(0).deepCopy();
         type = ast::MK::ClassOf(send->loc, std::move(target));
     }
 
-    auto bind = ast::MK::Bind(send->loc, ast::MK::Self(send->loc), std::move(type));
+    auto bind = ast::MK::Bind(send->loc, ast::MK::Self(send->loc), type.deepCopy());
 
     // Mark the bind as synthetic so we can spot it from the `ClassNew` rewriter on assigns and remove it from the tree.
     ast::cast_tree<ast::Send>(bind)->flags.isRewriterSynthesized = true;
@@ -152,7 +178,16 @@ bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
         block->body = ast::MK::InsSeq(block->loc, std::move(blockStats), std::move(block->body));
     }
 
-    return true;
+    if (ast::cast_tree<ast::Send>(type)) {
+        // The class inherits from someting else than `Class`, we need to wrap the call into a synthetic `T.cast`.
+        auto tree = ast::MK::Cast(send->loc, send->deepCopy(), type.deepCopy());
+        auto cast = ast::cast_tree<ast::Send>(tree);
+        // Mark the cast as synthetic so we can spot it from the `ClassNew` rewriter on assigns and remove it.
+        cast->flags.isRewriterSynthesized = true;
+        return cast->deepCopy();
+    }
+
+    return send->deepCopy();
 }
 
 }; // namespace sorbet::rewriter

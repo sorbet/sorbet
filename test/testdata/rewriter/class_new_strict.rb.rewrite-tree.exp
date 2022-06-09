@@ -5,12 +5,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def self.make<<todo method>>(&<blk>)
-      cls = <emptyTree>::<C Class>.new(<emptyTree>::<C A>) do ||
-        begin
-          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C A>))
-          <emptyTree>
-        end
-      end
+      cls = ::T.cast(<emptyTree>::<C Class>.new(<emptyTree>::<C A>) do ||
+          begin
+            ::T.bind(<self>, ::T.class_of(<emptyTree>::<C A>))
+            <emptyTree>
+          end
+        end, ::T.class_of(<emptyTree>::<C A>))
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)

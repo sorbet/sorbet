@@ -172,7 +172,8 @@ public:
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
 
-        if (ClassNew::run(ctx, send)) {
+        if (auto expr = ClassNew::run(ctx, send)) {
+            tree = std::move(expr);
             return;
         }
 

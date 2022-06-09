@@ -85,13 +85,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  c2 = <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
-    begin
-      ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
-      <emptyTree>::<C T>.reveal_type(<self>)
-      <self>.foo()
-    end
-  end
+  c2 = ::T.cast(<emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+      begin
+        ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+        <emptyTree>::<C T>.reveal_type(<self>)
+        <self>.foo()
+      end
+    end, ::T.class_of(<emptyTree>::<C Foo>))
 
   <emptyTree>::<C Class>.new() do ||
     begin
@@ -100,31 +100,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
-    begin
-      ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
-      <emptyTree>::<C T>.reveal_type(<self>)
-      <self>.foo()
-    end
-  end
+  ::T.cast(<emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+      begin
+        ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+        <emptyTree>::<C T>.reveal_type(<self>)
+        <self>.foo()
+      end
+    end, ::T.class_of(<emptyTree>::<C Foo>))
 
   class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
     def bar<<todo method>>(&<blk>)
-      <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
-        begin
-          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
-          <emptyTree>::<C T>.reveal_type(<self>)
-        end
-      end
+      ::T.cast(<emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+          begin
+            ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+            <emptyTree>::<C T>.reveal_type(<self>)
+          end
+        end, ::T.class_of(<emptyTree>::<C Foo>))
     end
 
     def self.bar<<todo method>>(&<blk>)
-      <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
-        begin
-          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
-          <emptyTree>::<C T>.reveal_type(<self>)
-        end
-      end
+      ::T.cast(<emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
+          begin
+            ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+            <emptyTree>::<C T>.reveal_type(<self>)
+          end
+        end, ::T.class_of(<emptyTree>::<C Foo>))
     end
 
     <runtime method definition of bar>

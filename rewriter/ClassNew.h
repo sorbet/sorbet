@@ -27,10 +27,10 @@ namespace sorbet::rewriter {
  *
  * Are rewritten into
  *
- *   c = Class.new(Parent) do
+ *   c = T.cast(Class.new(Parent) do
  *     T.bind(self, T.class_of(Parent))
  *     ...
- *   end
+ *   end, T.class_of(Parent))
  *
  * And sends such as
  *
@@ -40,15 +40,15 @@ namespace sorbet::rewriter {
  *
  * Are rewritten into
  *
- *   Class.new(Parent) do
+ *   T.cast(Class.new(Parent) do
  *     T.bind(self, T.class_of(Parent))
  *     ...
- *   end
+ *   end, T.class_of(Parent))
  */
 class ClassNew final {
 public:
     static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Assign *asgn);
-    static bool run(core::MutableContext ctx, ast::Send *send);
+    static ast::ExpressionPtr run(core::MutableContext ctx, ast::Send *send);
 
     ClassNew() = delete;
 };
