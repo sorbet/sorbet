@@ -9269,6 +9269,184 @@ class RDoc::Store::MissingFileError < ::RDoc::Store::Error
   def store; end
 end
 
+# [`RDoc::Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) creates the
+# following rake tasks to generate and clean up
+# [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) output:
+#
+# rdoc
+# :   Main task for this [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
+#     task.
+#
+# clobber\_rdoc
+# :   Delete all the rdoc files. This target is automatically added to the main
+#     clobber target.
+#
+# rerdoc
+# :   Rebuild the rdoc files from scratch, even if they are not out of date.
+#
+#
+# Simple Example:
+#
+# ```ruby
+# require 'rdoc/task'
+#
+# RDoc::Task.new do |rdoc|
+#   rdoc.main = "README.rdoc"
+#   rdoc.rdoc_files.include("README.rdoc", "lib/**/*.rb")
+# end
+# ```
+#
+# The `rdoc` object passed to the block is an
+# [`RDoc::Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) object. See
+# the attributes list for the
+# [`RDoc::Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) class for
+# available customization options.
+#
+# ## Specifying different task names
+#
+# You may wish to give the task a different name, such as if you are generating
+# two sets of documentation. For instance, if you want to have a development set
+# of documentation including private methods:
+#
+# ```ruby
+# require 'rdoc/task'
+#
+# RDoc::Task.new :rdoc_dev do |rdoc|
+#   rdoc.main = "README.doc"
+#   rdoc.rdoc_files.include("README.rdoc", "lib/**/*.rb")
+#   rdoc.options << "--all"
+# end
+# ```
+#
+# The tasks would then be named :*rdoc\_dev*, :clobber\_*rdoc\_dev*, and
+# :re*rdoc\_dev*.
+#
+# If you wish to have completely different task names, then pass a
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) as first argument.
+# With the `:rdoc`, `:clobber_rdoc` and `:rerdoc` options, you can customize the
+# task names to your liking.
+#
+# For example:
+#
+# ```ruby
+# require 'rdoc/task'
+#
+# RDoc::Task.new(:rdoc => "rdoc", :clobber_rdoc => "rdoc:clean",
+#                :rerdoc => "rdoc:force")
+# ```
+#
+# This will create the tasks `:rdoc`, `:rdoc:clean` and `:rdoc:force`.
+class RDoc::Task
+  # Whether to run the rdoc process as an external shell (default is false)
+  def external; end
+
+  # Whether to run the rdoc process as an external shell (default is false)
+  def external=(value); end
+
+  # Name of format generator (`--format`) used by rdoc. (defaults to rdoc's
+  # default)
+  def generator; end
+
+  # Name of format generator (`--format`) used by rdoc. (defaults to rdoc's
+  # default)
+  def generator=(value); end
+
+  # Name of file to be used as the main, top level file of the
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html). (default is none)
+  def main; end
+
+  # Name of file to be used as the main, top level file of the
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html). (default is none)
+  def main=(value); end
+
+  # Comment markup format. rdoc, rd and tomdoc are supported. (default is
+  # 'rdoc')
+  def markup; end
+
+  # Comment markup format. rdoc, rd and tomdoc are supported. (default is
+  # 'rdoc')
+  def markup=(value); end
+
+  # Name of the main, top level task. (default is :rdoc)
+  def name; end
+
+  # Name of the main, top level task. (default is :rdoc)
+  def name=(value); end
+
+  # Additional list of options to be passed rdoc. (default is [])
+  def options; end
+
+  # Additional list of options to be passed rdoc. (default is [])
+  def options=(value); end
+
+  # Name of directory to receive the html output files. (default is "html")
+  def rdoc_dir; end
+
+  # Name of directory to receive the html output files. (default is "html")
+  def rdoc_dir=(value); end
+
+  # List of files to be included in the rdoc generation. (default is [])
+  def rdoc_files; end
+
+  # List of files to be included in the rdoc generation. (default is [])
+  def rdoc_files=(value); end
+
+  # Name of template to be used by rdoc. (defaults to rdoc's default)
+  def template; end
+
+  # Name of template to be used by rdoc. (defaults to rdoc's default)
+  def template=(value); end
+
+  # Title of [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
+  # documentation. (defaults to rdoc's default)
+  def title; end
+
+  # Title of [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
+  # documentation. (defaults to rdoc's default)
+  def title=(value); end
+
+  # Create an [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) task with
+  # the given name. See the
+  # [`RDoc::Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) class
+  # overview for documentation.
+  def initialize(name = :rdoc, &block); end
+
+  # The block passed to this method will be called just before running the
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) generator. It is
+  # allowed to modify
+  # [`RDoc::Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html)
+  # attributes inside the block.
+  def before_running_rdoc(&block); end
+
+  # Ensures that `names` only includes names for the :rdoc, :clobber\_rdoc and
+  # :rerdoc. If other names are given an
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html) is
+  # raised.
+  def check_names(names); end
+
+  # [`Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) description for
+  # the clobber rdoc task or its renamed equivalent
+  def clobber_task_description(); end
+
+  # Sets default task values
+  def defaults(); end
+
+  # Create the tasks defined by this task lib.
+  def define(); end
+
+  # List of options that will be supplied to
+  # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html)
+  def option_list(); end
+
+  # [`Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) description for
+  # the rdoc task or its renamed equivalent
+  def rdoc_task_description(); end
+
+  # [`Task`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Task.html) description for
+  # the rerdoc task or its renamed description
+  def rerdoc_task_description(); end
+end
+
 # Methods for manipulating comment text
 module RDoc::Text
   # Maps markup formats to classes that can parse them. If the format is
