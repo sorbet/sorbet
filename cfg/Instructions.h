@@ -357,8 +357,6 @@ public:
         return get();
     }
     Instruction *get() const noexcept {
-        ENFORCE(ptr != 0);
-
         auto val = ptr & PTR_MASK;
         return reinterpret_cast<Instruction *>(val >> 16);
     }
