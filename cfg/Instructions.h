@@ -290,7 +290,7 @@ class InstructionPtr final {
 
     template <typename T, typename... Args> friend InstructionPtr make_insn(Args &&...);
 
-    static tagged_storage tagPtr(Tag tag, void *i) {
+    static tagged_storage tagPtr(Tag tag, void *i) noexcept {
         auto val = static_cast<tagged_storage>(tag);
         auto maskedPtr = reinterpret_cast<tagged_storage>(i) << 16;
 
@@ -299,7 +299,9 @@ class InstructionPtr final {
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
-    InstructionPtr(Tag tag, Instruction *i) : ptr(tagPtr(tag, i)) {}
+    InstructionPtr(Tag tag, Instruction *i) noexcept : ptr(tagPtr(tag, i)) {
+        ENFORCE(i != nullptr);
+    }
 
     void resetTagged(tagged_storage i) noexcept {
         Tag tagVal;
@@ -330,8 +332,6 @@ public:
         return const_cast<To &>(cast<To>(static_cast<const InstructionPtr &>(insn)));
     }
 
-    constexpr InstructionPtr() noexcept : ptr(0) {}
-    constexpr InstructionPtr(std::nullptr_t) : ptr(0) {}
     ~InstructionPtr() {
         if (ptr != 0) {
             deleteTagged(tag(), get());
@@ -357,6 +357,8 @@ public:
         return get();
     }
     Instruction *get() const noexcept {
+        ENFORCE(ptr != 0);
+
         auto val = ptr & PTR_MASK;
         return reinterpret_cast<Instruction *>(val >> 16);
     }
@@ -391,7 +393,7 @@ public:
 };
 
 template <class To> bool isa_instruction(const InstructionPtr &what) {
-    return what != nullptr && what.tag() == InsnToTag<To>::value;
+    return what.tag() == InsnToTag<To>::value;
 }
 
 template <class To> To *cast_instruction(InstructionPtr &what) {

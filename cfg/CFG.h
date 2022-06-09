@@ -44,7 +44,7 @@ public:
 
     Binding(LocalRef bind, core::LocOffsets loc, InstructionPtr value);
     Binding(Binding &&other) = default;
-    Binding() = default;
+    Binding() = delete;
 
     Binding &operator=(Binding &&) = default;
 };
