@@ -673,7 +673,8 @@ void readOptions(Options &opts,
                  vector<unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions, int argc,
                  char *argv[],
                  const vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
-                 shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
+                 shared_ptr<spdlog::logger> logger,
+                 bool skipFiles) noexcept(false) { // throw(EarlyReturnWithCode)
     Timer timeit(*logger, "readOptions");
     cxxopts::Options options = buildOptions(semanticExtensionProviders);
     try {
@@ -696,30 +697,32 @@ void readOptions(Options &opts,
         }
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
-        if (raw.count("files") > 0) {
-            auto rawFiles = raw["files"].as<vector<string>>();
-            struct stat s;
-            for (auto &file : rawFiles) {
-                if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    addFilesFromDir(opts, file, logger);
-                } else {
-                    opts.rawInputFileNames.push_back(file);
-                    opts.inputFileNames.push_back(file);
+        if (!skipFiles) {
+            if (raw.count("files") > 0) {
+                auto rawFiles = raw["files"].as<vector<string>>();
+                struct stat s;
+                for (auto &file : rawFiles) {
+                    if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
+                        addFilesFromDir(opts, file, logger);
+                    } else {
+                        opts.rawInputFileNames.push_back(file);
+                        opts.inputFileNames.push_back(file);
+                    }
                 }
             }
-        }
 
-        if (raw.count("file") > 0) {
-            auto files = raw["file"].as<vector<string>>();
-            opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
-            opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
-        }
+            if (raw.count("file") > 0) {
+                auto files = raw["file"].as<vector<string>>();
+                opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
+                opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
+            }
 
-        if (raw.count("dir") > 0) {
-            auto rawDirs = raw["dir"].as<vector<string>>();
-            for (auto &dir : rawDirs) {
-                // Since we don't stat here, we're unsure if the directory exists / is a directory.
-                addFilesFromDir(opts, dir, logger);
+            if (raw.count("dir") > 0) {
+                auto rawDirs = raw["dir"].as<vector<string>>();
+                for (auto &dir : rawDirs) {
+                    // Since we don't stat here, we're unsure if the directory exists / is a directory.
+                    addFilesFromDir(opts, dir, logger);
+                }
             }
         }
 
@@ -1016,7 +1019,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
-            opts.storeState.empty() && !opts.print.PayloadSources.enabled) {
+            opts.storeState.empty() && !opts.print.PayloadSources.enabled && !skipFiles) {
             logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
                           options.help({""}));
             throw EarlyReturnWithCode(1);

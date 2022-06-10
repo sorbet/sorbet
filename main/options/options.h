@@ -281,7 +281,8 @@ void readOptions(
     Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
     int argc, char *argv[],
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
-    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+    std::shared_ptr<spdlog::logger> logger,
+    bool skipFiles = false) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options

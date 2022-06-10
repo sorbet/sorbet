@@ -397,22 +397,26 @@ int realmain(int argc, char *argv[]) {
     auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");
 
-    options::Options opts;
     auto extensionProviders = sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders();
     vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+#ifndef SORBET_REALMAIN_MIN
+    {
+        options::Options opts;
+        options::readOptions(opts, extensions, argc, argv, extensionProviders, logger, /* skipFiles */ true);
+        // this is all about making sure we exit as quickly as possible,
+        // so test this as soon as we can: i.e. after we have parsed
+        // `opts`.
+        if (autogenCanExitEarly(logger, opts)) {
+            return 0;
+        }
+        StatsD::addExtraTags(opts.metricsExtraTags);
+    }
+#endif
+    options::Options opts;
     options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
     }
-#ifndef SORBET_REALMAIN_MIN
-    // this is all about making sure we exit as quickly as possible,
-    // so test this as soon as we can: i.e. after we have parsed
-    // `opts`.
-    if (autogenCanExitEarly(logger, opts)) {
-        return 0;
-    }
-    StatsD::addExtraTags(opts.metricsExtraTags);
-#endif
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
