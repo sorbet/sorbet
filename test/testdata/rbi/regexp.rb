@@ -9,3 +9,7 @@ end
 
 T.reveal_type(/foo/.match?('foo'))  # error: type: `T::Boolean`
 T.reveal_type(/foo/.match?('foo', 1))  # error: type: `T::Boolean`
+
+T.reveal_type(Regexp.compile('foo')) # error: type: `Regexp`
+T.reveal_type(Regexp.compile('foo', Regexp::EXTENDED | Regexp::IGNORECASE)) # error: type: `Regexp`
+T.reveal_type(Regexp.compile(/foo/)) # error: type: `Regexp`
