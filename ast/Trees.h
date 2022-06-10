@@ -194,15 +194,23 @@ public:
     }
 
     explicit operator bool() const noexcept {
-        return get() != nullptr;
+        return ptr != 0;
     }
 
     bool operator==(const ExpressionPtr &other) const noexcept {
-        return get() == other.get();
+        return ptr == other.ptr;
+    }
+
+    bool operator==(std::nullptr_t) const noexcept {
+        return ptr == 0;
     }
 
     bool operator!=(const ExpressionPtr &other) const noexcept {
-        return get() != other.get();
+        return ptr != other.ptr;
+    }
+
+    bool operator!=(std::nullptr_t) const noexcept {
+        return ptr != 0;
     }
 
     ExpressionPtr deepCopy() const;
