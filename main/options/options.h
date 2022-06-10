@@ -120,6 +120,13 @@ struct AutoloaderConfig {
     std::vector<std::string> relativeIgnorePatterns;
 };
 
+struct AutogenConstCacheConfig {
+    // A file which contains a cache that can be used to potentially skip autogen
+    std::string cacheFile;
+    // A list of files which have changed since the last autogen run.
+    std::vector<std::string> changedFiles;
+};
+
 struct Options {
     Printers print;
     AutoloaderConfig autoloaderConfig;
@@ -224,10 +231,7 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
-    // A file which contains a cache that can be used to potentially skip autogen
-    std::string autogenConstantCacheFile;
-    // A list of files which have changed since the last autogen run.
-    std::vector<std::string> autogenChangedFiles;
+    AutogenConstCacheConfig autogenConstantCacheConfig;
 
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
@@ -281,8 +285,11 @@ void readOptions(
     Options &, std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> &configuredExtensions,
     int argc, char *argv[],
     const std::vector<pipeline::semantic_extension::SemanticExtensionProvider *> &semanticExtensionProviders,
-    std::shared_ptr<spdlog::logger> logger,
-    bool skipFiles = false) noexcept(false); // throw(EarlyReturnWithCode);
+    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
+
+bool readAutogenConstCacheOptions(
+    AutogenConstCacheConfig &cfg, int argc, char *argv[],
+    std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);
 } // namespace sorbet::realmain::options
