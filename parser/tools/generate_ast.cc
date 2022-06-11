@@ -831,7 +831,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     }
     out << '\n';
     out << "{";
-    out << R"(    categoryCounterInc("nodes", ")" << node.name << "\");" << '\n';
+    out << "    categoryCounterInc(\"nodes\", \"" << node.name << "\");" << '\n';
     out << "}" << '\n';
     out << '\n';
 
@@ -918,7 +918,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
+    out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma
         << "\\n\");\n";
     int i = -1;
     // Generate fields
@@ -965,7 +965,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
@@ -993,8 +993,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
-        << "\\n\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma
+        << "\");\n";
     i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
@@ -1034,17 +1034,17 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
                 out << "      bool showFull = true;";
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "      fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", "
                     << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
         }
