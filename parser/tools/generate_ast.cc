@@ -808,6 +808,8 @@ string fieldType(FieldType arg) {
 }
 
 void emitNodeHeader(ostream &out, NodeDef &node) {
+    out << "class " << node.name << ";" << '\n';
+    out << "template <> struct NodeToTag<" << node.name << "> { static constexpr NodeTag value = NodeTag::" << node.name << "; };" << '\n';
     out << "class " << node.name << " final : public Node {" << '\n';
     out << "public:" << '\n';
 
@@ -1127,6 +1129,7 @@ int main(int argc, char **argv) {
             first = false;
         }
         header << "};" << '\n' << '\n';
+        header << "template <typename T> struct NodeToTag;" << '\n' << '\n';
         for (auto &node : nodes) {
             emitNodeHeader(header, node);
         }
