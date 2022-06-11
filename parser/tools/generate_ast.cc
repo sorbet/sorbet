@@ -1120,6 +1120,13 @@ int main(int argc, char **argv) {
             cerr << "unable to open " << argv[1] << '\n';
             return 1;
         }
+        header << "enum class NodeTag : uint32_t {" << '\n';
+        bool first = true;
+        for (auto &node : nodes) {
+            header << "    " << node.name << (first ? " = 1" : "") << ',' << '\n';
+            first = false;
+        }
+        header << "};" << '\n' << '\n';
         for (auto &node : nodes) {
             emitNodeHeader(header, node);
         }
