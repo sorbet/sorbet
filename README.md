@@ -883,6 +883,8 @@ To set up a new worktree with Sorbet:
 tools/scripts/make_worktree.sh <worktree_name>
 ```
 
+[multiple working trees]: https://git-scm.com/docs/git-worktree
+
 ### Shell
 
 Many of the build commands are very long. You might consider shortening the
