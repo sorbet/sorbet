@@ -1115,7 +1115,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
 }
 
 int main(int argc, char **argv) {
-    // emit headef file
+
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {
@@ -1130,15 +1130,24 @@ int main(int argc, char **argv) {
         }
         header << "};" << '\n' << '\n';
         header << "template <typename T> struct NodeToTag;" << '\n' << '\n';
+    }
+
+    // emit header file
+    {
+        ofstream header(argv[2], ios::trunc);
+        if (!header.good()) {
+            cerr << "unable to open " << argv[2] << '\n';
+            return 1;
+        }
         for (auto &node : nodes) {
             emitNodeHeader(header, node);
         }
     }
 
     {
-        ofstream classfile(argv[2], ios::trunc);
+        ofstream classfile(argv[3], ios::trunc);
         if (!classfile.good()) {
-            cerr << "unable to open " << argv[2] << '\n';
+            cerr << "unable to open " << argv[3] << '\n';
             return 1;
         }
         classfile << "#include \"parser/Node.h\"" << '\n' << '\n';

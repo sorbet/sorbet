@@ -8,6 +8,7 @@ cc_library(
         "Node.h",
         "Node_gen.cc",
         "Node_gen.h",
+        "Node_gen_tag.h",
         "Parser.cc",
         "diagnostics.cc",
         "parser.h",
@@ -44,9 +45,10 @@ genrule(
     outs = [
         "Node_gen.h",
         "Node_gen.cc",
+        "Node_gen_tag.h",
     ],
-    cmd = "$(location :generate_ast) $(location Node_gen.h) $(location Node_gen.cc) && \
-             $(location //tools:clang-format) -i $(location Node_gen.cc) $(location Node_gen.h)",
+    cmd = "$(location :generate_ast) $(location Node_gen_tag.h) $(location Node_gen.h) $(location Node_gen.cc) && \
+             $(location //tools:clang-format) -i $(location Node_gen.cc) $(location Node_gen.h) $(location Node_gen_tag.h)",
     tools = [
         ":generate_ast",
         "//tools:clang-format",
