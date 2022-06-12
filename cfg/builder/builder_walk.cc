@@ -121,29 +121,6 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
     inserted.value.setSynthetic();
 }
 
-BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
-    InlinedVector<cfg::LocalRef, 2> vars;
-    InlinedVector<core::LocOffsets, 2> locs;
-    for (int i = 0; i < h.keys.size(); i++) {
-        LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
-        LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
-        current = walk(cctx.withTarget(keyTmp), h.keys[i], current);
-        current = walk(cctx.withTarget(valTmp), h.values[i], current);
-        vars.emplace_back(keyTmp);
-        vars.emplace_back(valTmp);
-        locs.emplace_back(h.keys[i].loc());
-        locs.emplace_back(h.values[i].loc());
-    }
-    LocalRef magic = cctx.newTemporary(core::Names::magic());
-    synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
-
-    auto isPrivateOk = false;
-    current->exprs.emplace_back(
-        cctx.target, h.loc,
-        make_insn<Send>(magic, h.loc, method, core::LocOffsets::none(), vars.size(), vars, locs, isPrivateOk));
-    return current;
-}
-
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
     auto *join = cctx.inWhat.freshBlock(cctx.loops, a->rubyRegionId);
     unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
@@ -764,24 +741,31 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a.loc);
             },
 
-            [&](ast::Hash &h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
-
+            [&](ast::Hash &h) {
+                InlinedVector<cfg::VariableUseSite, 4> elems;
+                elems.reserve(h.keys.size() * 2);
+                for (int i = 0; i < h.keys.size(); i++) {
+                    LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
+                    LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
+                    current = walk(cctx.withTarget(keyTmp), h.keys[i], current);
+                    current = walk(cctx.withTarget(valTmp), h.values[i], current);
+                    elems.emplace_back(keyTmp);
+                    elems.emplace_back(valTmp);
+                }
+                current->exprs.emplace_back(cctx.target, h.loc,
+                                            make_insn<cfg::Hash>(std::move(elems)));
+                ret = current;
+            },
             [&](ast::Array &a) {
-                InlinedVector<LocalRef, 2> vars;
-                InlinedVector<core::LocOffsets, 2> locs;
+                InlinedVector<VariableUseSite, 2> elems;
+                elems.reserve(a.elems.size());
                 for (auto &elem : a.elems) {
                     LocalRef tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem, current);
-                    vars.emplace_back(tmp);
-                    locs.emplace_back(a.loc);
+                    elems.emplace_back(tmp);
                 }
-                LocalRef magic = cctx.newTemporary(core::Names::magic());
-                synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
-                auto isPrivateOk = false;
                 current->exprs.emplace_back(cctx.target, a.loc,
-                                            make_insn<Send>(magic, a.loc, core::Names::buildArray(),
-                                                            core::LocOffsets::none(), vars.size(), vars, locs,
-                                                            isPrivateOk));
+                                            make_insn<cfg::Array>(std::move(elems)));
                 ret = current;
             },
 
