@@ -44,6 +44,8 @@ string spacesForTabLevel(int tabs) {
         CASE_STATEMENT(body, YieldLoadArg)        \
         CASE_STATEMENT(body, Cast)                \
         CASE_STATEMENT(body, TAbsurd)             \
+        CASE_STATEMENT(body, Array) \
+        CASE_STATEMENT(body, Hash) \
     }
 
 std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -195,6 +197,14 @@ Alias::Alias(core::SymbolRef what, core::NameRef name) : what(what), name(name) 
     categoryCounterInc("cfg", "alias");
 }
 
+Array::Array(InlinedVector<VariableUseSite, 2> elems) : elems(std::move(elems)) {
+    categoryCounterInc("cfg", "array");
+}
+
+Hash::Hash(InlinedVector<VariableUseSite, 4> elems) : elems(std::move(elems)) {
+    categoryCounterInc("cfg", "hash");
+}
+
 string Ident::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return this->what.toString(gs, cfg);
 }
@@ -302,6 +312,31 @@ string TAbsurd::toString(const core::GlobalState &gs, const CFG &cfg) const {
 string TAbsurd::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("TAbsurd {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
                        this->what.showRaw(gs, cfg, tabs + 1));
+}
+
+string Array::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    return fmt::format(
+        "[{}]",
+        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.toString(gs, cfg); }));
+}
+
+string Array::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+    return fmt::format(
+        "Array {{\n{0}&nbsp;elems = {1}\n{0}}}", spacesForTabLevel(tabs),
+        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.showRaw(gs, cfg, tabs + 1); }));
+}
+
+// TODO: hash rocket syntax?
+string Hash::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    return fmt::format(
+        "{{{}}}",
+        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.toString(gs, cfg); }));
+}
+
+string Hash::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+    return fmt::format(
+        "Hash {{\n{0}&nbsp;elems = {1}\n{0}}}", spacesForTabLevel(tabs),
+        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.showRaw(gs, cfg, tabs + 1); }));
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {
