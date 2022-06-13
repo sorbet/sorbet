@@ -91,6 +91,9 @@ private:
     template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
+        ENFORCE(static_cast<size_t>(tag) != 0);
+        ENFORCE(expr != nullptr);
+
         // Store the tag in the lower 16 bits of the pointer, regardless of size.
         auto val = static_cast<tagged_storage>(tag);
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
