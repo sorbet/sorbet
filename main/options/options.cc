@@ -1098,14 +1098,14 @@ void readOptions(Options &opts,
     }
 }
 
-bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, char *argv[],
+bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, const char *argv[],
                                   shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
     options.allow_unrecognised_options(); // Don't raise error on other options
     buildAutogenCacheOptions(options);
 
     try {
-        cxxopts::ParseResult raw = ConfigParser::parseConfig(logger, argc, argv, options);
+        cxxopts::ParseResult raw = options.parse(argc, argv);
         extractAutogenConstCacheConfig(raw, cfg);
         return true;
     } catch (cxxopts::OptionParseException &e) {

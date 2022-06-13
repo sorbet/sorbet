@@ -288,7 +288,7 @@ void readOptions(
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 bool readAutogenConstCacheOptions(
-    AutogenConstCacheConfig &cfg, int argc, char *argv[],
+    AutogenConstCacheConfig &cfg, int argc, const char *argv[],
     std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
 
 void flushPrinters(Options &);

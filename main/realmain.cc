@@ -400,7 +400,7 @@ int realmain(int argc, char *argv[]) {
 #ifndef SORBET_REALMAIN_MIN
     {
         options::AutogenConstCacheConfig cfg;
-        bool optSuccess = options::readAutogenConstCacheOptions(cfg, argc, argv, logger);
+        bool optSuccess = options::readAutogenConstCacheOptions(cfg, argc, const_cast<const char **>(argv), logger);
         // this is all about making sure we exit as quickly as possible,
         // so test this as soon as we can: i.e. after we have parsed
         // `opts`.
