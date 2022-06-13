@@ -89,24 +89,24 @@ bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
     <statTemp>$95: Sorbet::Private::Static::Void = <cfgAlias>$97: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$99: T.class_of(Array))
     <cfgAlias>$103: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$106: T.class_of(Integer) = alias <C Integer>
+    <arrayTemp>$105: T.class_of(Integer) = <cfgAlias>$106
     <cfgAlias>$108: T.class_of(Integer) = alias <C Integer>
-    <magic>$109: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$104: [T.class_of(Integer), T.class_of(Integer)] = <magic>$109: T.class_of(<Magic>).<build-array>(<cfgAlias>$106: T.class_of(Integer), <cfgAlias>$108: T.class_of(Integer))
+    <arrayTemp>$107: T.class_of(Integer) = <cfgAlias>$108
+    <statTemp>$104: [T.class_of(Integer), T.class_of(Integer)] = [<arrayTemp>$105, <arrayTemp>$107]
     <statTemp>$101: Sorbet::Private::Static::Void = <cfgAlias>$103: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$104: [T.class_of(Integer), T.class_of(Integer)])
-    <arrayTemp>$112: Integer(1) = 1
-    <arrayTemp>$113: Integer(2) = 2
-    <magic>$114: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$111: [Integer(1), Integer(2)] = <magic>$114: T.class_of(<Magic>).<build-array>(<arrayTemp>$112: Integer(1), <arrayTemp>$113: Integer(2))
-    <castTemp>$110: [Integer(1), Integer(2)] = <statTemp>$111: [Integer(1), Integer(2)].returns_self()
-    <statTemp>$100: [Integer, Integer] = cast(<castTemp>$110: [Integer(1), Integer(2)], [Integer, Integer]);
-    <cfgAlias>$119: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$121: T.class_of(A) = alias <C A>
-    <statTemp>$117: Sorbet::Private::Static::Void = <cfgAlias>$119: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$121: T.class_of(A))
-    <cfgAlias>$126: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$128: T.class_of(B) = alias <C B>
-    <statTemp>$124: Sorbet::Private::Static::Void = <cfgAlias>$126: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$128: T.class_of(B))
-    <cfgAlias>$131: T.class_of(A) = alias <C A>
-    s: A = <cfgAlias>$131: T.class_of(A).new()
+    <arrayTemp>$111: Integer(1) = 1
+    <arrayTemp>$112: Integer(2) = 2
+    <statTemp>$110: [Integer(1), Integer(2)] = [<arrayTemp>$111, <arrayTemp>$112]
+    <castTemp>$109: [Integer(1), Integer(2)] = <statTemp>$110: [Integer(1), Integer(2)].returns_self()
+    <statTemp>$100: [Integer, Integer] = cast(<castTemp>$109: [Integer(1), Integer(2)], [Integer, Integer]);
+    <cfgAlias>$117: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$119: T.class_of(A) = alias <C A>
+    <statTemp>$115: Sorbet::Private::Static::Void = <cfgAlias>$117: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$119: T.class_of(A))
+    <cfgAlias>$124: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$126: T.class_of(B) = alias <C B>
+    <statTemp>$122: Sorbet::Private::Static::Void = <cfgAlias>$124: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$126: T.class_of(B))
+    <cfgAlias>$129: T.class_of(A) = alias <C A>
+    s: A = <cfgAlias>$129: T.class_of(A).new()
     <unconditional> -> bb5
 
 # backedges
@@ -115,13 +115,13 @@ bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
 # - bb9(rubyRegionId=0)
 bb5[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
     # outerLoops: 1
-    <whileTemp>$134: T.untyped = <self>: T.class_of(<root>).rnd()
-    <whileTemp>$134 -> (T.untyped ? bb8 : bb7)
+    <whileTemp>$132: T.untyped = <self>: T.class_of(<root>).rnd()
+    <whileTemp>$132 -> (T.untyped ? bb8 : bb7)
 
 # backedges
 # - bb5(rubyRegionId=0)
 bb7[rubyRegionId=0, firstDead=2](<self>: T.class_of(<root>), s: A):
-    <statTemp>$142: NilClass = <self>: T.class_of(<root>).puts(s: A)
+    <statTemp>$140: NilClass = <self>: T.class_of(<root>).puts(s: A)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -129,16 +129,16 @@ bb7[rubyRegionId=0, firstDead=2](<self>: T.class_of(<root>), s: A):
 # - bb5(rubyRegionId=0)
 bb8[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
     # outerLoops: 1
-    <cfgAlias>$140: T.class_of(B) = alias <C B>
-    <ifTemp>$137: T::Boolean = s: A.is_a?(<cfgAlias>$140: T.class_of(B))
-    <ifTemp>$137 -> (T::Boolean ? bb9 : bb5)
+    <cfgAlias>$138: T.class_of(B) = alias <C B>
+    <ifTemp>$135: T::Boolean = s: A.is_a?(<cfgAlias>$138: T.class_of(B))
+    <ifTemp>$135 -> (T::Boolean ? bb9 : bb5)
 
 # backedges
 # - bb8(rubyRegionId=0)
 bb9[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: T.all(A, B)):
     # outerLoops: 1
-    <statTemp>$141: T.all(A, B) = s
-    s: T.all(A, B) = <statTemp>$141: T.all(A, B).returns_self()
+    <statTemp>$139: T.all(A, B) = s
+    s: T.all(A, B) = <statTemp>$139: T.all(A, B).returns_self()
     <unconditional> -> bb5
 
 }
