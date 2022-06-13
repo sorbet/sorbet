@@ -323,7 +323,7 @@ string Array::toString(const core::GlobalState &gs, const CFG &cfg) const {
 string Array::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Array {{\n{0}&nbsp;elems = {1}\n{0}}}", spacesForTabLevel(tabs),
-        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.showRaw(gs, cfg, tabs + 1); }));
+        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.showRaw(gs, cfg); }));
 }
 
 // TODO: hash rocket syntax?
@@ -336,7 +336,7 @@ string Hash::toString(const core::GlobalState &gs, const CFG &cfg) const {
 string Hash::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Hash {{\n{0}&nbsp;elems = {1}\n{0}}}", spacesForTabLevel(tabs),
-        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.showRaw(gs, cfg, tabs + 1); }));
+        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.showRaw(gs, cfg); }));
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {
