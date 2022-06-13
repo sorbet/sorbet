@@ -69,6 +69,8 @@ enum class Tag {
 // A mapping from tree type to its corresponding tag.
 template <typename T> struct ExpressionToTag;
 
+class EmptyTree;
+
 class ExpressionPtr {
 public:
     // We store tagged pointers as 64-bit values.
@@ -91,6 +93,9 @@ private:
     template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
+        ENFORCE(static_cast<size_t>(tag) != 0);
+        ENFORCE(expr != nullptr);
+
         // Store the tag in the lower 16 bits of the pointer, regardless of size.
         auto val = static_cast<tagged_storage>(tag);
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
@@ -171,9 +176,7 @@ public:
         resetTagged(0);
     }
 
-    template <typename T> void reset(T *expr = nullptr) noexcept {
-        resetTagged(tagPtr(ExpressionToTag<T>::value, expr));
-    }
+    void resetToEmpty(EmptyTree *expr) noexcept;
 
     Tag tag() const noexcept {
         ENFORCE(ptr != 0);
@@ -194,15 +197,23 @@ public:
     }
 
     explicit operator bool() const noexcept {
-        return get() != nullptr;
+        return ptr != 0;
     }
 
     bool operator==(const ExpressionPtr &other) const noexcept {
-        return get() == other.get();
+        return ptr == other.ptr;
+    }
+
+    bool operator==(std::nullptr_t) const noexcept {
+        return ptr == 0;
     }
 
     bool operator!=(const ExpressionPtr &other) const noexcept {
-        return get() != other.get();
+        return ptr != other.ptr;
+    }
+
+    bool operator!=(std::nullptr_t) const noexcept {
+        return ptr != 0;
     }
 
     ExpressionPtr deepCopy() const;

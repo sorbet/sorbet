@@ -112,6 +112,11 @@ bool ExpressionPtr::isSelfReference() const {
     return false;
 }
 
+void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
+    ENFORCE(expr != nullptr);
+    resetTagged(tagPtr(ExpressionToTag<EmptyTree>::value, expr));
+}
+
 bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
@@ -373,7 +378,7 @@ EmptyTree singletonEmptyTree{};
 
 template <> ExpressionPtr make_expression<EmptyTree>() {
     ExpressionPtr result = nullptr;
-    result.reset(&singletonEmptyTree);
+    result.resetToEmpty(&singletonEmptyTree);
     return result;
 }
 
