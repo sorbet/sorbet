@@ -269,9 +269,9 @@ bb5[rubyRegionId=1, firstDead=6](<self>: T.class_of(Concrete), <block-pre-call-t
     <self>: T.class_of(Concrete) = loadSelf(type_template)
     <hashTemp>$16: Symbol(:fixed) = :fixed
     <cfgAlias>$18: T.class_of(String) = alias <C String>
-    <magic>$19: T.class_of(<Magic>) = alias <C <Magic>>
-    <blockReturnTemp>$15: {fixed: T.class_of(String)} = <magic>$19: T.class_of(<Magic>).<build-hash>(<hashTemp>$16: Symbol(:fixed), <cfgAlias>$18: T.class_of(String))
-    <blockReturnTemp>$20: T.noreturn = blockreturn<type_template> <blockReturnTemp>$15: {fixed: T.class_of(String)}
+    <hashTemp>$17: T.class_of(String) = <cfgAlias>$18
+    <blockReturnTemp>$15: {fixed: T.class_of(String)} = {<hashTemp>$16, <hashTemp>$17}
+    <blockReturnTemp>$19: T.noreturn = blockreturn<type_template> <blockReturnTemp>$15: {fixed: T.class_of(String)}
     <unconditional> -> bb2
 
 }
