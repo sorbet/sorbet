@@ -197,11 +197,11 @@ Alias::Alias(core::SymbolRef what, core::NameRef name) : what(what), name(name) 
     categoryCounterInc("cfg", "alias");
 }
 
-Array::Array(InlinedVector<VariableUseSite, 2> elems) : elems(std::move(elems)) {
+Array::Array(InlinedVector<LocalRef, 2> elems) : elems(std::move(elems)) {
     categoryCounterInc("cfg", "array");
 }
 
-Hash::Hash(InlinedVector<VariableUseSite, 4> elems) : elems(std::move(elems)) {
+Hash::Hash(InlinedVector<LocalRef, 4> elems) : elems(std::move(elems)) {
     categoryCounterInc("cfg", "hash");
 }
 

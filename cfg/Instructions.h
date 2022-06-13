@@ -279,25 +279,25 @@ CheckSize(TAbsurd, 24, 8);
 
 INSN(Array) : public Instruction {
 public:
-    InlinedVector<VariableUseSite, 2> elems;
+    InlinedVector<LocalRef, 4> elems;
 
-    Array(InlinedVector<VariableUseSite, 2> elems);
+    Array(InlinedVector<LocalRef, 4> elems);
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Array, 56);
+CheckSize(Array, 24);
 
 INSN(Hash) : public Instruction {
     // k0, v0, k1, v1, ..., kn, vn
-    InlinedVector<VariableUseSite, 4> elems;
+    InlinedVector<LocalRef, 4> elems;
 
-    Hash(InlinedVector<VariableUseSite, 4> elems);
+    Hash(InlinedVector<LocalRef, 4> elems);
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Hash, 104);
+CheckSize(Hash, 24);
 
 class InstructionPtr final {
     using tagged_storage = uint64_t;

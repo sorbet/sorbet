@@ -742,7 +742,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Hash &h) {
-                InlinedVector<cfg::VariableUseSite, 4> elems;
+                InlinedVector<cfg::LocalRef, 4> elems;
                 elems.reserve(h.keys.size() * 2);
                 for (int i = 0; i < h.keys.size(); i++) {
                     LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
@@ -757,7 +757,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](ast::Array &a) {
-                InlinedVector<VariableUseSite, 2> elems;
+                InlinedVector<LocalRef, 4> elems;
                 elems.reserve(a.elems.size());
                 for (auto &elem : a.elems) {
                     LocalRef tmp = cctx.newTemporary(core::Names::arrayTemp());
