@@ -69,6 +69,8 @@ enum class Tag {
 // A mapping from tree type to its corresponding tag.
 template <typename T> struct ExpressionToTag;
 
+class EmptyTree;
+
 class ExpressionPtr {
 public:
     // We store tagged pointers as 64-bit values.
@@ -174,9 +176,7 @@ public:
         resetTagged(0);
     }
 
-    template <typename T> void reset(T *expr = nullptr) noexcept {
-        resetTagged(tagPtr(ExpressionToTag<T>::value, expr));
-    }
+    void resetToEmpty(EmptyTree *expr) noexcept;
 
     Tag tag() const noexcept {
         ENFORCE(ptr != 0);
