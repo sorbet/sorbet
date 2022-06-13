@@ -130,10 +130,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "cxxopts",
-        urls = _github_public_urls("jarro2783/cxxopts/archive/b0f67a06de3446aa97a4943ad0ad6086460b2b61.zip"),
-        sha256 = "8635d7305e6623e7f4c635dae901891eb1151cee3106445d124c696361bb70fc",
+        urls = _github_public_urls("jarro2783/cxxopts/archive/c74846a891b3cc3bfa992d588b1295f528d43039.zip"),
+        sha256 = "4ba2b0a3c94e61501b974118a0fe171cd658f8efdd941e9ad82e71f48a98933a",
         build_file = "@com_stripe_ruby_typer//third_party:cxxopts.BUILD",
-        strip_prefix = "cxxopts-b0f67a06de3446aa97a4943ad0ad6086460b2b61",
+        strip_prefix = "cxxopts-c74846a891b3cc3bfa992d588b1295f528d43039",
     )
 
     http_archive(
