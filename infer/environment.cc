@@ -1412,8 +1412,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             [&](cfg::Hash &h) {
                 ENFORCE(h.elems.size() % 2 == 0);
 
+                // TODO: we had this separate loop because it seemed to better to not
+                // allocate `keys` and `values` if we didn't have a `ShapeType`, but
+                // maybe allocating `keys` to not do lookups in `getTypeAndOrigin` twice
+                // would actually be better?
                 for (size_t i = 0; i < h.elems.size(); i += 2) {
-                    if (!core::isa_type<core::LiteralType>(h.elems[i].type)) {
+                    if (!core::isa_type<core::LiteralType>(getTypeAndOrigin(ctx, h.elems[i]).type)) {
                         tp.type = core::Types::hashOfUntyped();
                         tp.origins.emplace_back(ctx.locAt(bind.loc));
                         return;
