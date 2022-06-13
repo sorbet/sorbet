@@ -44,8 +44,8 @@ string spacesForTabLevel(int tabs) {
         CASE_STATEMENT(body, YieldLoadArg)        \
         CASE_STATEMENT(body, Cast)                \
         CASE_STATEMENT(body, TAbsurd)             \
-        CASE_STATEMENT(body, Array) \
-        CASE_STATEMENT(body, Hash) \
+        CASE_STATEMENT(body, Array)               \
+        CASE_STATEMENT(body, Hash)                \
     }
 
 std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -316,8 +316,7 @@ string TAbsurd::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) c
 
 string Array::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format(
-        "[{}]",
-        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.toString(gs, cfg); }));
+        "[{}]", fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.toString(gs, cfg); }));
 }
 
 string Array::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
@@ -329,8 +328,7 @@ string Array::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 // TODO: hash rocket syntax?
 string Hash::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format(
-        "{{{}}}",
-        fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.toString(gs, cfg); }));
+        "{{{}}}", fmt::map_join(this->elems, ", ", [&](const auto &elem) -> string { return elem.toString(gs, cfg); }));
 }
 
 string Hash::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
