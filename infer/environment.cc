@@ -1420,8 +1420,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     }
                 }
 
-                vector<TypePtr> keys;
-                vector<TypePtr> values;
+                vector<core::TypePtr> keys;
+                vector<core::TypePtr> values;
                 keys.reserve(h.elems.size() / 2);
                 values.reserve(h.elems.size() / 2);
                 for (int i = 0; i < h.elems.size(); i += 2) {
@@ -1430,7 +1430,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     auto &valType = getTypeAndOrigin(ctx, h.elems[i+1]).type;
                     values.emplace_back(valType);
                 }
-                tp.type = res.returnType = make_type<ShapeType>(move(keys), move(values));
+                tp.type = res.returnType = core::make_type<core::ShapeType>(move(keys), move(values));
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
