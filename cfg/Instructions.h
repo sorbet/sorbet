@@ -46,6 +46,8 @@ enum class Tag : uint8_t {
     YieldLoadArg,
     Cast,
     TAbsurd,
+    Array,
+    Hash,
 };
 
 // A mapping from instruction type to its corresponding tag.
