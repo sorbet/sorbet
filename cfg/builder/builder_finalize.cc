@@ -219,6 +219,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 } else if (auto *v = cast_instruction<Return>(bind.value)) {
                     v->what = maybeDealias(ctx, cfg, v->what.variable, current);
                 }
+                // TODO: do `Array` and `Hash` need dealiasing treatment?
             }
 
             // record new aliases
