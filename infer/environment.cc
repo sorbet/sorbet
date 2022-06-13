@@ -1431,7 +1431,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 for (int i = 0; i < h.elems.size(); i += 2) {
                     auto &keyType = getTypeAndOrigin(ctx, h.elems[i]).type;
                     keys.emplace_back(keyType);
-                    auto &valType = getTypeAndOrigin(ctx, h.elems[i+1]).type;
+                    auto &valType = getTypeAndOrigin(ctx, h.elems[i + 1]).type;
                     values.emplace_back(valType);
                 }
                 tp.type = core::make_type<core::ShapeType>(move(keys), move(values));

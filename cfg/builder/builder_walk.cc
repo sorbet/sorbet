@@ -752,8 +752,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     elems.emplace_back(keyTmp);
                     elems.emplace_back(valTmp);
                 }
-                current->exprs.emplace_back(cctx.target, h.loc,
-                                            make_insn<cfg::Hash>(std::move(elems)));
+                current->exprs.emplace_back(cctx.target, h.loc, make_insn<cfg::Hash>(std::move(elems)));
                 ret = current;
             },
             [&](ast::Array &a) {
@@ -764,8 +763,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     current = walk(cctx.withTarget(tmp), elem, current);
                     elems.emplace_back(tmp);
                 }
-                current->exprs.emplace_back(cctx.target, a.loc,
-                                            make_insn<cfg::Array>(std::move(elems)));
+                current->exprs.emplace_back(cctx.target, a.loc, make_insn<cfg::Array>(std::move(elems)));
                 ret = current;
             },
 
