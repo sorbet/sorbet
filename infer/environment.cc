@@ -1430,7 +1430,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     auto &valType = getTypeAndOrigin(ctx, h.elems[i+1]).type;
                     values.emplace_back(valType);
                 }
-                tp.type = res.returnType = core::make_type<core::ShapeType>(move(keys), move(values));
+                tp.type = core::make_type<core::ShapeType>(move(keys), move(values));
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
