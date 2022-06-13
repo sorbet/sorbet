@@ -288,9 +288,10 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Array, 24);
+CheckSize(Array, 24, 8);
 
 INSN(Hash) : public Instruction {
+public:
     // k0, v0, k1, v1, ..., kn, vn
     InlinedVector<LocalRef, 4> elems;
 
@@ -299,7 +300,7 @@ INSN(Hash) : public Instruction {
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Hash, 24);
+CheckSize(Hash, 24, 8);
 
 class InstructionPtr final {
     using tagged_storage = uint64_t;
