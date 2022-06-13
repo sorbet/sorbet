@@ -1400,6 +1400,39 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
+            [&](cfg::Array &a) {
+                vector<core::TypePtr> elems;
+                elems.reserve(a.elems.size());
+                for (auto elem : a.elems) {
+                    elems.emplace_back(getTypeAndOrigin(ctx, elem).type);
+                }
+                tp.type = core::make_type<core::TupleType>(std::move(elems));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
+            },
+            [&](cfg::Hash &h) {
+                ENFORCE(h.elems.size() % 2 == 0);
+
+                for (size_t i = 0; i < h.elems.size(); i += 2) {
+                    if (!core::isa_type<core::LiteralType>(h.elems[i].type)) {
+                        tp.type = core::Types::hashOfUntyped();
+                        tp.origins.emplace_back(ctx.locAt(bind.loc));
+                        return;
+                    }
+                }
+
+                vector<TypePtr> keys;
+                vector<TypePtr> values;
+                keys.reserve(h.elems.size() / 2);
+                values.reserve(h.elems.size() / 2);
+                for (int i = 0; i < h.elems.size(); i += 2) {
+                    auto &keyType = getTypeAndOrigin(ctx, h.elems[i]).type;
+                    keys.emplace_back(keyType);
+                    auto &valType = getTypeAndOrigin(ctx, h.elems[i+1]).type;
+                    values.emplace_back(valType);
+                }
+                tp.type = res.returnType = make_type<ShapeType>(move(keys), move(values));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
+            },
             [&](cfg::GetCurrentException &i) {
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
