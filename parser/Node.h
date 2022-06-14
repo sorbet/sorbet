@@ -74,11 +74,70 @@ public:
 
     NodePtr(NodePtr &&p) = default;
     NodePtr &operator=(NodePtr &&p) = default;
+
+    // typecase support
+    template <class To> static bool isa(const NodePtr &node);
+    template <class To> static const To &cast(const NodePtr &node);
+    template <class To> static To &cast(NodePtr &node) {
+        return const_cast<To &>(cast<To>(static_cast<const NodePtr &>(node)));
+    }
+
+    NodeTag tag() const {
+        return get()->tag;
+    }
 };
 
 template <class N, typename... Args>
 NodePtr make_node(Args &&... args) {
     return NodePtr(new N(std::forward<Args>(args)...));
+}
+
+template <class To> bool isa_node(const NodePtr &what) {
+    return what != nullptr && what.tag() == NodeToTag<To>::value;
+}
+
+// We disallow casting on temporary values because the lifetime of the returned value is
+// tied to the temporary, but it is possible for the temporary to be destroyed at the end
+// of the current statement, leading to use-after-free bugs.
+template <class To> To *cast_node(NodePtr &&what) = delete;
+
+template <class To> To *cast_node(NodePtr &what) {
+    if (isa_node<To>(what)) {
+        return reinterpret_cast<To *>(what.get());
+    } else {
+        return nullptr;
+    }
+}
+
+template <class To> const To *cast_node(const NodePtr &what) {
+    if (isa_node<To>(what)) {
+        return reinterpret_cast<To *>(what.get());
+    } else {
+        return nullptr;
+    }
+}
+
+// We disallow casting on temporary values because the lifetime of the returned value is
+// tied to the temporary, but it is possible for the temporary to be destroyed at the end
+// of the current statement, leading to use-after-free bugs.
+template <class To> To &cast_node_nonnull(NodePtr &&what) = delete;
+
+template <class To> To &cast_node_nonnull(NodePtr &what) {
+    ENFORCE(isa_node<To>(what), "cast_node_nonnull failed!");
+    return *reinterpret_cast<To *>(what.get());
+}
+
+template <class To> const To &cast_node_nonnull(const NodePtr &what) {
+    ENFORCE(isa_node<To>(what), "cast_node_nonnull failed!");
+    return *reinterpret_cast<To *>(what.get());
+}
+
+template <class To> inline bool NodePtr::isa(const NodePtr &what) {
+    return isa_node<To>(what);
+}
+
+template <class To> inline const To &NodePtr::cast(const NodePtr &what) {
+    return cast_node_nonnull<To>(what);
 }
 
 using NodeVec = InlinedVector<NodePtr, 4>;
