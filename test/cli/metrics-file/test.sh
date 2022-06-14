@@ -22,4 +22,12 @@ echo ------------------------------
 main/sorbet --silence-dev-message --metrics-file=metrics4.json test/cli/metrics-file/with-error-branching.rb 2>&1
 grep -A1 "\"ruby_typer.unknown..error.total\"" metrics4.json || echo "No error metrics reported."
 
-grep -A1 "\"ruby_typer.unknown..error.total\"" metrics5.json || echo "No error metrics reported."
+echo ------------------------------
+
+# Compute metrics for classes, modules and methods
+
+main/sorbet --silence-dev-message --metrics-file=metrics5.json test/cli/metrics-file/files_for_metrics/ 2>&1
+grep -A1 "\"ruby_typer.unknown..types.input.modules.total\"" metrics5.json
+grep -A1 "\"ruby_typer.unknown..types.input.classes.total\"" metrics5.json
+grep -A1 "\"ruby_typer.unknown..types.input.singleton_classes.total\"" metrics5.json
+grep -A1 "\"ruby_typer.unknown..types.input.methods.total\"" metrics5.json
