@@ -1132,11 +1132,31 @@ int main(int argc, char **argv) {
         header << "template <typename T> struct NodeToTag;" << '\n' << '\n';
     }
 
-    // emit header file
     {
         ofstream header(argv[2], ios::trunc);
         if (!header.good()) {
             cerr << "unable to open " << argv[2] << '\n';
+            return 1;
+        }
+        header << "#define CASE_STATEMENT(CASE_BODY, T) \\" << '\n';
+        header << "    case NodeTag::T: { \\" << '\n';
+        header << "        CASE_BODY(T)   \\" << '\n';
+        header << "        break; \\" << '\n';
+        header << "}" << '\n' << '\n';
+
+        header << "#define GENERATE_TAG_SWITCH(tag, CASE_BODY) \\" << '\n';
+        header << "    switch (tag) { \\" << '\n';
+        for (auto &node : nodes) {
+            header << "        CASE_STATEMENT(CASE_BODY, " << node.name << ") \\" << '\n';
+        }
+        header << "}" << '\n' << '\n';
+    }
+
+    // emit header file
+    {
+        ofstream header(argv[3], ios::trunc);
+        if (!header.good()) {
+            cerr << "unable to open " << argv[3] << '\n';
             return 1;
         }
         for (auto &node : nodes) {
@@ -1145,9 +1165,9 @@ int main(int argc, char **argv) {
     }
 
     {
-        ofstream classfile(argv[3], ios::trunc);
+        ofstream classfile(argv[4], ios::trunc);
         if (!classfile.good()) {
-            cerr << "unable to open " << argv[3] << '\n';
+            cerr << "unable to open " << argv[4] << '\n';
             return 1;
         }
         classfile << "#include \"parser/Node.h\"" << '\n' << '\n';
