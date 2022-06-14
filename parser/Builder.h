@@ -10,8 +10,7 @@
 
 namespace sorbet::parser {
 
-class Node;
-struct NodeDeleter;
+class NodePtr;
 
 class Builder final {
 public:
