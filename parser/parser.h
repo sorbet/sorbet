@@ -21,7 +21,7 @@ public:
         }
     };
 
-    static std::unique_ptr<Node, NodeDeleter> run(core::GlobalState &gs, core::FileRef file, Settings settings,
+    static NodePtr run(core::GlobalState &gs, core::FileRef file, Settings settings,
                                                   std::vector<std::string> initialLocals = {});
 };
 
