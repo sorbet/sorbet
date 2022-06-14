@@ -20,10 +20,10 @@ private:
             return TreeMap::apply(ctx, *this, std::move(node));
         }
 
-        auto scope = substClassName(ctx, std::move(constLit->scope));
-        auto cnst = subst.substituteSymbolName(constLit->cnst);
+        constLit->scope = substClassName(ctx, std::move(constLit->scope));
+        constLit->cnst = subst.substituteSymbolName(constLit->cnst);
 
-        return make_expression<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
+        return node;
     }
 
     ExpressionPtr substArg(core::MutableContext ctx, ExpressionPtr argp) {
