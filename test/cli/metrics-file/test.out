@@ -9,3 +9,13 @@ Cannot write metrics file at `baz/metrics3.json`
 ------------------------------
 No errors! Great job.
 No error metrics reported.
+------------------------------
+No errors! Great job.
+   "name": "ruby_typer.unknown..types.input.modules.total",
+   "value": 1
+   "name": "ruby_typer.unknown..types.input.classes.total",
+   "value": 6
+   "name": "ruby_typer.unknown..types.input.singleton_classes.total",
+   "value": 4
+   "name": "ruby_typer.unknown..types.input.methods.total",
+   "value": 10
