@@ -819,7 +819,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
         out << ", " << constructorArgType(arg.type) << " " << arg.name;
     }
     out << ")" << '\n';
-    out << "        : Node(loc)";
+    out << "        : Node(NodeTag::" << node.name << ", loc)";
     for (auto &arg : node.fields) {
         out << ", " << arg.name << "(";
         if (arg.type == FieldType::Node || arg.type == FieldType::NodeVec) {
