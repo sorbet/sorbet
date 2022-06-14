@@ -60,10 +60,6 @@ template <class To> To *cast_node(Node *what) {
     return static_cast<To *>(what);
 }
 
-template <class To> bool isa_node(Node *what) {
-    return cast_node<To>(what) != nullptr;
-}
-
 class NodePtr : public std::unique_ptr<Node, NodeDeleter> {
     using Base = std::unique_ptr<Node, NodeDeleter>;
 
@@ -136,8 +132,16 @@ template <class To> inline bool NodePtr::isa(const NodePtr &what) {
     return isa_node<To>(what);
 }
 
+template <> inline bool NodePtr::isa<NodePtr>(const NodePtr &what) {
+    return true;
+}
+
 template <class To> inline const To &NodePtr::cast(const NodePtr &what) {
     return cast_node_nonnull<To>(what);
+}
+
+template <> inline const NodePtr &NodePtr::cast<NodePtr>(const NodePtr &what) {
+    return what;
 }
 
 using NodeVec = InlinedVector<NodePtr, 4>;
