@@ -893,7 +893,7 @@ public:
         core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
         core::LocOffsets loc = head->loc.join(tokLoc(end));
 
-        if (isLiteralNode(*(head->definee.get()))) {
+        if (isLiteralNode(head->definee)) {
             error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
         checkReservedForNumberedParameters(head->name.toString(gs_), declLoc);
@@ -1796,11 +1796,11 @@ public:
         return (name[0] != '_');
     }
 
-    bool isLiteralNode(parser::Node &node) {
-        return parser::isa_node<Integer>(&node) || parser::isa_node<String>(&node) ||
-               parser::isa_node<DString>(&node) || parser::isa_node<Symbol>(&node) ||
-               parser::isa_node<DSymbol>(&node) || parser::isa_node<Regexp>(&node) || parser::isa_node<Array>(&node) ||
-               parser::isa_node<Hash>(&node);
+    bool isLiteralNode(parser::NodePtr &node) {
+        return parser::isa_node<Integer>(node) || parser::isa_node<String>(node) ||
+               parser::isa_node<DString>(node) || parser::isa_node<Symbol>(node) ||
+               parser::isa_node<DSymbol>(node) || parser::isa_node<Regexp>(node) || parser::isa_node<Array>(node) ||
+               parser::isa_node<Hash>(node);
     }
 
     void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
