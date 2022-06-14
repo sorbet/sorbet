@@ -63,12 +63,24 @@ template <class To> bool isa_node(Node *what) {
     return cast_node<To>(what) != nullptr;
 }
 
+class NodePtr : public std::unique_ptr<Node, NodeDeleter> {
+    using Base = std::unique_ptr<Node, NodeDeleter>;
+
+public:
+    NodePtr() = default;
+    NodePtr(std::nullptr_t) : Base(nullptr) {}
+    NodePtr(Node *node) : Base(node) {}
+
+    NodePtr(NodePtr &&p) = default;
+    NodePtr &operator=(NodePtr &&p) = default;
+};
+
 template <class N, typename... Args>
-std::unique_ptr<Node, NodeDeleter> make_node(Args &&... args) {
-    return std::unique_ptr<Node, NodeDeleter>(new N(std::forward<Args>(args)...));
+NodePtr make_node(Args &&... args) {
+    return NodePtr(new N(std::forward<Args>(args)...));
 }
 
-using NodeVec = InlinedVector<std::unique_ptr<Node, NodeDeleter>, 4>;
+using NodeVec = InlinedVector<NodePtr, 4>;
 
 #include "parser/Node_gen.h"
 }; // namespace sorbet::parser
