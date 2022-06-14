@@ -71,7 +71,7 @@ template <typename T> struct ExpressionToTag;
 
 class EmptyTree;
 
-class ExpressionPtr {
+class __attribute__((trivial_abi)) ExpressionPtr final {
 public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = uint64_t;
