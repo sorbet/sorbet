@@ -809,7 +809,8 @@ string fieldType(FieldType arg) {
 
 void emitNodeHeader(ostream &out, NodeDef &node) {
     out << "class " << node.name << ";" << '\n';
-    out << "template <> struct NodeToTag<" << node.name << "> { static constexpr NodeTag value = NodeTag::" << node.name << "; };" << '\n';
+    out << "template <> struct NodeToTag<" << node.name << "> { static constexpr NodeTag value = NodeTag::" << node.name
+        << "; };" << '\n';
     out << "class " << node.name << " final : public Node {" << '\n';
     out << "public:" << '\n';
 
@@ -844,8 +845,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << '\n';
     out << "  std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
     out << "  std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
-        << '\n';
+    out << "  std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);" << '\n';
     out << "  std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
     out << "  std::string nodeName() const;" << '\n';
 
@@ -1115,7 +1115,6 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
 }
 
 int main(int argc, char **argv) {
-
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {

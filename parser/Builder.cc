@@ -166,10 +166,10 @@ public:
             o->right = transformCondition(std::move(o->right));
         } else if (auto *ir = parser::cast_node<IRange>(cond.get())) {
             return make_node<IFlipflop>(ir->loc, transformCondition(std::move(ir->from)),
-                                          transformCondition(std::move(ir->to)));
+                                        transformCondition(std::move(ir->to)));
         } else if (auto *er = parser::cast_node<ERange>(cond.get())) {
             return make_node<EFlipflop>(er->loc, transformCondition(std::move(er->from)),
-                                          transformCondition(std::move(er->to)));
+                                        transformCondition(std::move(er->to)));
         } else if (auto *re = parser::cast_node<Regexp>(cond.get())) {
             return make_node<MatchCurLine>(re->loc, std::move(cond));
         }
@@ -323,11 +323,11 @@ public:
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
             return make_node<Send>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
-                                     std::move(s->args));
+                                   std::move(s->args));
         } else if (auto *s = parser::cast_node<CSend>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
             return make_node<CSend>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
-                                      std::move(s->args));
+                                    std::move(s->args));
         } else {
             return make_node<Assign>(loc, std::move(lhs), std::move(rhs));
         }
@@ -433,15 +433,15 @@ public:
         return make_node<Begin>(loc, std::move(stmts));
     }
 
-    NodePtr beginBody(NodePtr body, sorbet::parser::NodeVec rescueBodies, const token *elseTok,
-                               NodePtr else_, const token *ensure_tok, NodePtr ensure) {
+    NodePtr beginBody(NodePtr body, sorbet::parser::NodeVec rescueBodies, const token *elseTok, NodePtr else_,
+                      const token *ensure_tok, NodePtr ensure) {
         if (!rescueBodies.empty()) {
             if (else_ == nullptr) {
                 body = make_node<Rescue>(maybe_loc(body).join(rescueBodies.back()->loc), std::move(body),
-                                           std::move(rescueBodies), nullptr);
+                                         std::move(rescueBodies), nullptr);
             } else {
                 body = make_node<Rescue>(maybe_loc(body).join(else_->loc), std::move(body), std::move(rescueBodies),
-                                           std::move(else_));
+                                         std::move(else_));
             }
         } else if (elseTok != nullptr) {
             sorbet::parser::NodeVec stmts;
@@ -495,11 +495,10 @@ public:
         args.emplace_back(std::move(arg));
 
         return make_node<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), tokLoc(oper),
-                                 std::move(args));
+                               std::move(args));
     }
 
-    NodePtr block(NodePtr methodCall, const token *begin, NodePtr args,
-                           NodePtr body, const token *end) {
+    NodePtr block(NodePtr methodCall, const token *begin, NodePtr args, NodePtr body, const token *end) {
         if (auto *y = parser::cast_node<Yield>(methodCall.get())) {
             error(ruby_parser::dclass::BlockGivenToYield, y->loc);
             return make_node<Yield>(y->loc, sorbet::parser::NodeVec());
@@ -528,16 +527,14 @@ public:
             isNumblock = true;
         }
 
-        if (parser::isa_node<parser::Send>(methodCall) ||
-            parser::isa_node<CSend>(methodCall) ||
-            parser::isa_node<Super>(methodCall) ||
-            parser::isa_node<ZSuper>(methodCall)) {
+        if (parser::isa_node<parser::Send>(methodCall) || parser::isa_node<CSend>(methodCall) ||
+            parser::isa_node<Super>(methodCall) || parser::isa_node<ZSuper>(methodCall)) {
             if (isNumblock) {
                 return make_node<NumBlock>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
-                                             std::move(body));
+                                           std::move(body));
             }
             return make_node<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
-                                      std::move(body));
+                                    std::move(body));
         }
 
         sorbet::parser::NodeVec *exprs;
@@ -592,8 +589,8 @@ public:
         return make_node<Send>(loc, std::move(kernel), core::Names::lambda(), loc, NodeVec());
     }
 
-    NodePtr call_method(NodePtr receiver, const token *dot, const token *selector,
-                                 const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
+    NodePtr call_method(NodePtr receiver, const token *dot, const token *selector, const token *lparen,
+                        sorbet::parser::NodeVec args, const token *rparen) {
         core::LocOffsets selectorLoc, startLoc;
         if (selector != nullptr) {
             selectorLoc = tokLoc(selector);
@@ -646,10 +643,10 @@ public:
         }
     }
 
-    NodePtr case_(const token *case_, NodePtr expr, sorbet::parser::NodeVec whenBodies,
-                           const token *elseTok, NodePtr elseBody, const token *end) {
+    NodePtr case_(const token *case_, NodePtr expr, sorbet::parser::NodeVec whenBodies, const token *elseTok,
+                  NodePtr elseBody, const token *end) {
         return make_node<Case>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(whenBodies),
-                                 std::move(elseBody));
+                               std::move(elseBody));
     }
 
     NodePtr case_error(const token *case_, NodePtr cond, const token *end) {
@@ -665,13 +662,13 @@ public:
         return make_node<Case>(loc, std::move(cond), std::move(whens), nullptr);
     }
 
-    NodePtr case_match(const token *case_, NodePtr expr, sorbet::parser::NodeVec inBodies,
-                                const token *elseTok, NodePtr elseBody, const token *end) {
+    NodePtr case_match(const token *case_, NodePtr expr, sorbet::parser::NodeVec inBodies, const token *elseTok,
+                       NodePtr elseBody, const token *end) {
         if (elseTok != nullptr && elseBody == nullptr) {
             elseBody = empty_else(elseTok);
         }
         return make_node<CaseMatch>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(inBodies),
-                                      std::move(elseBody));
+                                    std::move(elseBody));
     }
 
     NodePtr character(const token *char_) {
@@ -693,8 +690,8 @@ public:
         }
     }
 
-    NodePtr condition(const token *cond_tok, NodePtr cond, const token *then, NodePtr ifTrue,
-                               const token *else_, NodePtr ifFalse, const token *end) {
+    NodePtr condition(const token *cond_tok, NodePtr cond, const token *then, NodePtr ifTrue, const token *else_,
+                      NodePtr ifFalse, const token *end) {
         core::LocOffsets loc = tokLoc(cond_tok).join(cond->loc);
         if (then != nullptr) {
             loc = loc.join(tokLoc(then));
@@ -728,8 +725,7 @@ public:
         return make_node<Const>(tokLoc(name), nullptr, gs_.enterNameConstant(name->view()));
     }
 
-    NodePtr const_pattern(NodePtr const_, const token *begin, NodePtr pattern,
-                                   const token *end) {
+    NodePtr const_pattern(NodePtr const_, const token *begin, NodePtr pattern, const token *end) {
         return make_node<ConstPattern>(tokLoc(begin).join(tokLoc(end)), std::move(const_), std::move(pattern));
     }
 
@@ -739,12 +735,12 @@ public:
 
     NodePtr constFetchError(NodePtr scope, const token *colon) {
         return make_node<Const>(scope->loc.join(tokLoc(colon)), std::move(scope),
-                                  core::Names::Constants::ConstantNameMissing());
+                                core::Names::Constants::ConstantNameMissing());
     }
 
     NodePtr constGlobal(const token *colon, const token *name) {
         return make_node<Const>(tokLoc(colon).join(tokLoc(name)), make_node<Cbase>(tokLoc(colon)),
-                                  gs_.enterNameConstant(name->view()));
+                                gs_.enterNameConstant(name->view()));
     }
 
     NodePtr constOpAssignable(NodePtr node) {
@@ -786,8 +782,7 @@ public:
                         if (dedented && dedented->empty()) {
                             continue;
                         }
-                        NodePtr newstr =
-                            make_node<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
+                        NodePtr newstr = make_node<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
                         parts.emplace_back(std::move(newstr));
                     } else {
                         dedenter.interrupt();
@@ -809,8 +804,7 @@ public:
                         if (dedented && dedented->empty()) {
                             continue;
                         }
-                        NodePtr newstr =
-                            make_node<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
+                        NodePtr newstr = make_node<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
                         parts.emplace_back(std::move(newstr));
                     } else {
                         dedenter.interrupt();
@@ -825,16 +819,15 @@ public:
         return result;
     }
 
-    NodePtr def_class(const token *class_, NodePtr name, const token *lt_,
-                               NodePtr superclass, NodePtr body, const token *end_) {
+    NodePtr def_class(const token *class_, NodePtr name, const token *lt_, NodePtr superclass, NodePtr body,
+                      const token *end_) {
         core::LocOffsets declLoc = tokLoc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
         core::LocOffsets loc = tokLoc(class_, end_);
 
         return make_node<Class>(loc, declLoc, std::move(name), std::move(superclass), std::move(body));
     }
 
-    NodePtr defEndlessMethod(const token *def, const token *tname, NodePtr args, const token *equal,
-                                      NodePtr body) {
+    NodePtr defEndlessMethod(const token *def, const token *tname, NodePtr args, const token *equal, NodePtr body) {
         core::LocOffsets declLoc = tokLoc(def, tname).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def).join(body->loc);
         std::string name{tname->view()};
@@ -845,8 +838,7 @@ public:
         return make_node<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name), std::move(args), std::move(body));
     }
 
-    NodePtr defEndlessSingleton(NodePtr defHead, NodePtr args, const token *equal,
-                                         NodePtr body) {
+    NodePtr defEndlessSingleton(NodePtr defHead, NodePtr args, const token *equal, NodePtr body) {
         auto *head = parser::cast_node<DefsHead>(defHead.get());
         core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
         core::LocOffsets loc = head->loc.join(body->loc);
@@ -858,8 +850,7 @@ public:
         return make_node<DefS>(loc, declLoc, std::move(head->definee), head->name, std::move(args), std::move(body));
     }
 
-    NodePtr defMethod(const token *def, const token *name, NodePtr args, NodePtr body,
-                               const token *end) {
+    NodePtr defMethod(const token *def, const token *name, NodePtr args, NodePtr body, const token *end) {
         core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
         core::LocOffsets loc = tokLoc(def, end);
 
@@ -874,8 +865,7 @@ public:
         return make_node<Module>(loc, declLoc, std::move(name), std::move(body));
     }
 
-    NodePtr def_sclass(const token *class_, const token *lshft_, NodePtr expr, NodePtr body,
-                                const token *end_) {
+    NodePtr def_sclass(const token *class_, const token *lshft_, NodePtr expr, NodePtr body, const token *end_) {
         core::LocOffsets declLoc = tokLoc(class_);
         core::LocOffsets loc = tokLoc(class_, end_);
         return make_node<SClass>(loc, declLoc, std::move(expr), std::move(body));
@@ -887,8 +877,7 @@ public:
         return make_node<DefsHead>(declLoc, std::move(definee), gs_.enterNameUTF8(name->view()));
     }
 
-    NodePtr defSingleton(NodePtr defHead, NodePtr args, NodePtr body,
-                                  const token *end) {
+    NodePtr defSingleton(NodePtr defHead, NodePtr args, NodePtr body, const token *end) {
         auto *head = parser::cast_node<DefsHead>(defHead.get());
         core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
         core::LocOffsets loc = head->loc.join(tokLoc(end));
@@ -943,10 +932,10 @@ public:
         return make_node<Complex>(tokLoc(tok), tok->view());
     }
 
-    NodePtr for_(const token *for_, NodePtr iterator, const token *in_, NodePtr iteratee,
-                          const token *do_, NodePtr body, const token *end) {
+    NodePtr for_(const token *for_, NodePtr iterator, const token *in_, NodePtr iteratee, const token *do_,
+                 NodePtr body, const token *end) {
         return make_node<For>(tokLoc(for_).join(tokLoc(end)), std::move(iterator), std::move(iteratee),
-                                std::move(body));
+                              std::move(body));
     }
 
     NodePtr forward_arg(const token *begin, const token *dots, const token *end) {
@@ -985,23 +974,19 @@ public:
         return make_node<IfGuard>(tokLoc(tok).join(if_body->loc), std::move(if_body));
     }
 
-    NodePtr in_pattern(const token *inTok, NodePtr pattern, NodePtr guard,
-                                const token *thenTok, NodePtr body) {
+    NodePtr in_pattern(const token *inTok, NodePtr pattern, NodePtr guard, const token *thenTok, NodePtr body) {
         return make_node<InPattern>(tokLoc(inTok).join(maybe_loc(body)), std::move(pattern), std::move(guard),
-                                      std::move(body));
+                                    std::move(body));
     }
 
-    NodePtr index(NodePtr receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
-                           const token *rbrack) {
+    NodePtr index(NodePtr receiver, const token *lbrack, sorbet::parser::NodeVec indexes, const token *rbrack) {
         return make_node<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver), core::Names::squareBrackets(),
-                                 tokLoc(lbrack).copyWithZeroLength(), std::move(indexes));
+                               tokLoc(lbrack).copyWithZeroLength(), std::move(indexes));
     }
 
-    NodePtr indexAsgn(NodePtr receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
-                               const token *rbrack) {
-        return make_node<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver),
-                                 core::Names::squareBracketsEq(), tokLoc(lbrack).copyWithZeroLength(),
-                                 std::move(indexes));
+    NodePtr indexAsgn(NodePtr receiver, const token *lbrack, sorbet::parser::NodeVec indexes, const token *rbrack) {
+        return make_node<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver), core::Names::squareBracketsEq(),
+                               tokLoc(lbrack).copyWithZeroLength(), std::move(indexes));
     }
 
     NodePtr integer(const token *tok) {
@@ -1014,8 +999,7 @@ public:
         return make_node<IVar>(tokLoc(tok), name);
     }
 
-    NodePtr keywordBreak(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                  const token *rparen) {
+    NodePtr keywordBreak(const token *keyword, const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
         core::LocOffsets loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         return make_node<Break>(loc, std::move(args));
     }
@@ -1024,8 +1008,7 @@ public:
         return make_node<Defined>(tokLoc(keyword).join(arg->loc), std::move(arg));
     }
 
-    NodePtr keywordNext(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                 const token *rparen) {
+    NodePtr keywordNext(const token *keyword, const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
         return make_node<Next>(tokLoc(keyword).join(collectionLoc(lparen, args, rparen)), std::move(args));
     }
 
@@ -1038,13 +1021,12 @@ public:
     }
 
     NodePtr keywordReturn(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                   const token *rparen) {
+                          const token *rparen) {
         core::LocOffsets loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         return make_node<Return>(loc, std::move(args));
     }
 
-    NodePtr keywordSuper(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                  const token *rparen) {
+    NodePtr keywordSuper(const token *keyword, const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
         core::LocOffsets loc = tokLoc(keyword);
         core::LocOffsets argloc = collectionLoc(lparen, args, rparen);
         if (argloc.exists()) {
@@ -1053,8 +1035,7 @@ public:
         return make_node<Super>(loc, std::move(args));
     }
 
-    NodePtr keywordYield(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
-                                  const token *rparen) {
+    NodePtr keywordYield(const token *keyword, const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
         core::LocOffsets loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         if (!args.empty() && parser::isa_node<BlockPass>(args.back().get())) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
@@ -1078,7 +1059,7 @@ public:
         checkReservedForNumberedParameters(name->view(), loc);
 
         return make_node<Kwoptarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
-                                     std::move(value));
+                                   std::move(value));
     }
 
     NodePtr kwnilarg(const token *dstar, const token *nil) {
@@ -1117,8 +1098,7 @@ public:
         return make_node<Or>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
     }
 
-    NodePtr loopUntil(const token *keyword, NodePtr cond, const token *do_, NodePtr body,
-                               const token *end) {
+    NodePtr loopUntil(const token *keyword, NodePtr cond, const token *do_, NodePtr body, const token *end) {
         return make_node<Until>(tokLoc(keyword).join(tokLoc(end)), std::move(cond), std::move(body));
     }
 
@@ -1130,8 +1110,7 @@ public:
         return make_node<Until>(body->loc.join(cond->loc), std::move(cond), std::move(body));
     }
 
-    NodePtr loop_while(const token *keyword, NodePtr cond, const token *do_, NodePtr body,
-                                const token *end) {
+    NodePtr loop_while(const token *keyword, NodePtr cond, const token *do_, NodePtr body, const token *end) {
         return make_node<While>(tokLoc(keyword).join(tokLoc(end)), std::move(cond), std::move(body));
     }
 
@@ -1175,7 +1154,7 @@ public:
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
         return make_node<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), tokLoc(oper),
-                                 std::move(args));
+                               std::move(args));
     }
 
     NodePtr match_pattern(NodePtr lhs, const token *tok, NodePtr rhs) {
@@ -1280,13 +1259,13 @@ public:
                 loc = notLoc.join(receiver->loc);
             }
             return make_node<Send>(loc, transformCondition(std::move(receiver)), core::Names::bang(), notLoc,
-                                     sorbet::parser::NodeVec());
+                                   sorbet::parser::NodeVec());
         }
 
         ENFORCE(begin != nullptr && end != nullptr);
         auto body = make_node<Begin>(tokLoc(begin).join(tokLoc(end)), sorbet::parser::NodeVec());
         return make_node<Send>(notLoc.join(body->loc), std::move(body), core::Names::bang(),
-                                 notLoc.copyWithZeroLength(), sorbet::parser::NodeVec());
+                               notLoc.copyWithZeroLength(), sorbet::parser::NodeVec());
     }
 
     NodePtr nth_ref(const token *tok) {
@@ -1316,15 +1295,14 @@ public:
             return make_node<OrAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
         }
         return make_node<OpAsgn>(lhs->loc.join(rhs->loc), std::move(lhs), gs_.enterNameUTF8(op->view()), tokLoc(op),
-                                   std::move(rhs));
+                                 std::move(rhs));
     }
 
     NodePtr optarg_(const token *name, const token *eql, NodePtr value) {
         core::LocOffsets loc = tokLoc(name);
         checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_node<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
-                                   std::move(value));
+        return make_node<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name), std::move(value));
     }
 
     NodePtr p_ident(const token *tok) {
@@ -1351,7 +1329,7 @@ public:
         auto keyLoc = core::LocOffsets{start, end};
 
         return make_node<Pair>(tokLoc(key).join(maybe_loc(value)),
-                                 make_node<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())), std::move(value));
+                               make_node<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())), std::move(value));
     }
 
     NodePtr pair_label(const token *key) {
@@ -1366,15 +1344,13 @@ public:
             core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
         auto accessible_value = accessible(std::move(value));
         return make_node<Pair>(tokLoc(key).join(maybe_loc(accessible_value)),
-                                 make_node<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
-                                 std::move(accessible_value));
+                               make_node<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())), std::move(accessible_value));
     }
 
-    NodePtr pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
-                                 NodePtr value) {
+    NodePtr pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end, NodePtr value) {
         auto key = symbol_compose(begin, std::move(parts), end);
         return make_node<Pair>(tokLoc(begin).join(tokLoc(end)).join(maybe_loc(value)), std::move(key),
-                                 std::move(value));
+                               std::move(value));
     }
 
     NodePtr pin(const token *tok, NodePtr var) {
@@ -1413,8 +1389,7 @@ public:
         return make_node<Complex>(tokLoc(tok), tok->view());
     }
 
-    NodePtr regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
-                                    NodePtr options) {
+    NodePtr regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end, NodePtr options) {
         core::LocOffsets loc = tokLoc(begin).join(tokLoc(end)).join(maybe_loc(options));
         return make_node<Regexp>(loc, std::move(parts), std::move(options));
     }
@@ -1423,8 +1398,8 @@ public:
         return make_node<Regopt>(tokLoc(regopt), regopt->view());
     }
 
-    NodePtr rescue_body(const token *rescue, NodePtr excList, const token *assoc,
-                                 NodePtr excVar, const token *then, NodePtr body) {
+    NodePtr rescue_body(const token *rescue, NodePtr excList, const token *assoc, NodePtr excVar, const token *then,
+                        NodePtr body) {
         core::LocOffsets loc = tokLoc(rescue);
         if (excList != nullptr) {
             loc = loc.join(excList->loc);
@@ -1545,8 +1520,7 @@ public:
         return make_node<Array>(loc, std::move(outParts));
     }
 
-    NodePtr ternary(NodePtr cond, const token *question, NodePtr ifTrue, const token *colon,
-                             NodePtr ifFalse) {
+    NodePtr ternary(NodePtr cond, const token *question, NodePtr ifTrue, const token *colon, NodePtr ifFalse) {
         core::LocOffsets loc = cond->loc.join(ifFalse->loc);
         return make_node<If>(loc, transformCondition(std::move(cond)), std::move(ifTrue), std::move(ifFalse));
     }
@@ -1612,8 +1586,7 @@ public:
         return make_node<UnlessGuard>(tokLoc(tok).join(unless_body->loc), std::move(unless_body));
     }
 
-    NodePtr when(const token *when, sorbet::parser::NodeVec patterns, const token *then,
-                          NodePtr body) {
+    NodePtr when(const token *when, sorbet::parser::NodeVec patterns, const token *then, NodePtr body) {
         core::LocOffsets loc = tokLoc(when);
         if (body != nullptr) {
             loc = loc.join(body->loc);
@@ -1797,10 +1770,9 @@ public:
     }
 
     bool isLiteralNode(parser::NodePtr &node) {
-        return parser::isa_node<Integer>(node) || parser::isa_node<String>(node) ||
-               parser::isa_node<DString>(node) || parser::isa_node<Symbol>(node) ||
-               parser::isa_node<DSymbol>(node) || parser::isa_node<Regexp>(node) || parser::isa_node<Array>(node) ||
-               parser::isa_node<Hash>(node);
+        return parser::isa_node<Integer>(node) || parser::isa_node<String>(node) || parser::isa_node<DString>(node) ||
+               parser::isa_node<Symbol>(node) || parser::isa_node<DSymbol>(node) || parser::isa_node<Regexp>(node) ||
+               parser::isa_node<Array>(node) || parser::isa_node<Hash>(node);
     }
 
     void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {

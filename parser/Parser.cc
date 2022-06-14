@@ -118,7 +118,7 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
 } // namespace
 
 NodePtr Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
-                                          vector<string> initialLocals) {
+                    vector<string> initialLocals) {
     // Marked `const` so that we can re-use across multiple `build()` invocations
     const Builder builder(gs, file);
 
