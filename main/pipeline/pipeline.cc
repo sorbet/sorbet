@@ -109,8 +109,8 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
     return nullptr;
 }
 
-parser::NodePtr runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   bool traceLexer, bool traceParser) {
+parser::NodePtr runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print, bool traceLexer,
+                          bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
     parser::NodePtr nodes;
     {

@@ -1,5 +1,5 @@
-#include "parser/parser.h"
 #include "parser/Node_gen_case.h"
+#include "parser/parser.h"
 #include <algorithm>
 #include <iterator>
 
@@ -54,8 +54,7 @@ void Node::printTabs(fmt::memory_buffer &to, int count) const {
     }
 }
 
-void Node::printNode(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs,
-                     int tabs) const {
+void Node::printNode(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}\n", node->toStringWithTabs(gs, tabs));
     } else {
@@ -63,8 +62,7 @@ void Node::printNode(fmt::memory_buffer &to, const NodePtr &node, const core::Gl
     }
 }
 
-void Node::printNodeJSON(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs,
-                         int tabs) const {
+void Node::printNodeJSON(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toJSON(gs, tabs));
     } else {

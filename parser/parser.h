@@ -22,7 +22,7 @@ public:
     };
 
     static NodePtr run(core::GlobalState &gs, core::FileRef file, Settings settings,
-                                                  std::vector<std::string> initialLocals = {});
+                       std::vector<std::string> initialLocals = {});
 };
 
 } // namespace sorbet::parser

@@ -34,14 +34,11 @@ public:
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
-    void printNode(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs,
-                   int tabs) const;
-    void printNodeJSON(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs,
-                       int tabs) const;
+    void printNode(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs, int tabs) const;
+    void printNodeJSON(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs, int tabs) const;
     void printNodeJSONWithLocs(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs,
                                core::FileRef file, int tabs) const;
-    void printNodeWhitequark(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs,
-                             int tabs) const;
+    void printNodeWhitequark(fmt::memory_buffer &to, const NodePtr &node, const core::GlobalState &gs, int tabs) const;
 };
 
 struct NodeDeleter {
@@ -73,8 +70,7 @@ public:
     }
 };
 
-template <class N, typename... Args>
-NodePtr make_node(Args &&... args) {
+template <class N, typename... Args> NodePtr make_node(Args &&...args) {
     return NodePtr(new N(std::forward<Args>(args)...));
 }
 
@@ -84,7 +80,7 @@ template <class To> bool isa_node(const NodePtr &what) {
 
 template <class To> bool isa_node(const Node *what) {
     return what != nullptr && what->tag == NodeToTag<To>::value;
- }
+}
 
 // We disallow casting on temporary values because the lifetime of the returned value is
 // tied to the temporary, but it is possible for the temporary to be destroyed at the end
