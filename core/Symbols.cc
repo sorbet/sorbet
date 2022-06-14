@@ -1616,7 +1616,6 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     ClassOrModuleData singletonInfo = singleton.data(gs);
 
-    prodCounterInc("types.input.singleton_classes.total");
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
