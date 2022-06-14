@@ -22,7 +22,7 @@ public:
 
     // Marked `const` so that `Parser::run` can confidently reuse one `Builder` object across
     // multiple parses.
-    std::unique_ptr<Node, NodeDeleter> build(ruby_parser::base_driver *driver, bool trace) const;
+    NodePtr build(ruby_parser::base_driver *driver, bool trace) const;
 
     class Impl;
 

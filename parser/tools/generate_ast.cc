@@ -774,7 +774,7 @@ string constructorArgType(FieldType arg) {
         case FieldType::Name:
             return "core::NameRef";
         case FieldType::Node:
-            return "std::unique_ptr<Node, NodeDeleter>";
+            return "NodePtr";
         case FieldType::NodeVec:
             return "NodeVec";
         case FieldType::String:
@@ -793,7 +793,7 @@ string fieldType(FieldType arg) {
         case FieldType::Name:
             return "core::NameRef";
         case FieldType::Node:
-            return "std::unique_ptr<Node, NodeDeleter>";
+            return "NodePtr";
         case FieldType::NodeVec:
             return "NodeVec";
         case FieldType::String:
