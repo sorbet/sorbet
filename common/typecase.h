@@ -94,7 +94,7 @@ template <typename Base, typename... Subclasses> void typecase(Base &base, Subcl
         if (!base) {
             sorbet::Exception::raise("nullptr passed to typecase");
         }
-        sorbet::Exception::raise("not handled typecase case: {}", base.tag());
+        sorbet::Exception::raise("not handled tagged reference case: {}", base.tag());
     }
 }
 
