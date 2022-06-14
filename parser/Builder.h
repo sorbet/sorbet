@@ -11,6 +11,7 @@
 namespace sorbet::parser {
 
 class Node;
+struct NodeDeleter;
 
 class Builder final {
 public:
@@ -21,7 +22,7 @@ public:
 
     // Marked `const` so that `Parser::run` can confidently reuse one `Builder` object across
     // multiple parses.
-    std::unique_ptr<Node> build(ruby_parser::base_driver *driver, bool trace) const;
+    std::unique_ptr<Node, NodeDeleter> build(ruby_parser::base_driver *driver, bool trace) const;
 
     class Impl;
 

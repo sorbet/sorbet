@@ -10,7 +10,12 @@ namespace sorbet::parser {
 
 #include "parser/Node_gen_tag.h"
 
+struct NodeDeleter;
+
 class Node {
+    friend NodeDeleter;
+    void deleteTagged();
+
 public:
     Node(NodeTag tag, core::LocOffsets loc) : tag(tag), loc(loc) {
         ENFORCE(loc.exists(), "Location of parser node is none");
@@ -29,14 +34,20 @@ public:
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
-    void printNode(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNode(fmt::memory_buffer &to, const std::unique_ptr<Node, NodeDeleter> &node, const core::GlobalState &gs,
                    int tabs) const;
-    void printNodeJSON(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNodeJSON(fmt::memory_buffer &to, const std::unique_ptr<Node, NodeDeleter> &node, const core::GlobalState &gs,
                        int tabs) const;
-    void printNodeJSONWithLocs(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNodeJSONWithLocs(fmt::memory_buffer &to, const std::unique_ptr<Node, NodeDeleter> &node, const core::GlobalState &gs,
                                core::FileRef file, int tabs) const;
-    void printNodeWhitequark(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNodeWhitequark(fmt::memory_buffer &to, const std::unique_ptr<Node, NodeDeleter> &node, const core::GlobalState &gs,
                              int tabs) const;
+};
+
+struct NodeDeleter {
+    void operator()(Node *node) {
+        node->deleteTagged();
+    }
 };
 
 template <class To> To *cast_node(Node *what) {
@@ -50,7 +61,12 @@ template <class To> bool isa_node(Node *what) {
     return cast_node<To>(what) != nullptr;
 }
 
-using NodeVec = InlinedVector<std::unique_ptr<Node>, 4>;
+template <class N, typename... Args>
+std::unique_ptr<Node, NodeDeleter> make_node(Args &&... args) {
+    return std::unique_ptr<Node, NodeDeleter>(new N(std::forward<Args>(args)...));
+}
+
+using NodeVec = InlinedVector<std::unique_ptr<Node, NodeDeleter>, 4>;
 
 #include "parser/Node_gen.h"
 }; // namespace sorbet::parser

@@ -109,10 +109,10 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
     return nullptr;
 }
 
-unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+unique_ptr<parser::Node, parser::NodeDeleter> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                                    bool traceLexer, bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
-    unique_ptr<parser::Node> nodes;
+    unique_ptr<parser::Node, parser::NodeDeleter> nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
@@ -134,7 +134,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
-ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
+ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node, parser::NodeDeleter> parseTree,
                               const options::Printers &print) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;

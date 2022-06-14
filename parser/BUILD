@@ -8,6 +8,7 @@ cc_library(
         "Node.h",
         "Node_gen.cc",
         "Node_gen.h",
+        "Node_gen_case.h",
         "Node_gen_tag.h",
         "Parser.cc",
         "diagnostics.cc",
