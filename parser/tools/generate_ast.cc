@@ -842,19 +842,19 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
         out << "    " << fieldType(arg.type) << " " << arg.name << ";" << '\n';
     }
     out << '\n';
-    out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
-    out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
+    out << "  std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
+    out << "  std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
         << '\n';
-    out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string nodeName();" << '\n';
+    out << "  std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  std::string nodeName() const;" << '\n';
 
     out << "};" << '\n';
     out << '\n';
 }
 
 void emitNodeClassfile(ostream &out, NodeDef &node) {
-    out << "  std::string " << node.name << "::nodeName() {" << '\n';
+    out << "  std::string " << node.name << "::nodeName() const {" << '\n';
     out << "    return \"" << node.name << "\";" << '\n';
     out << "  };" << '\n' << '\n';
 

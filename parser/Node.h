@@ -20,15 +20,14 @@ public:
     Node(NodeTag tag, core::LocOffsets loc) : tag(tag), loc(loc) {
         ENFORCE(loc.exists(), "Location of parser node is none");
     }
-    virtual ~Node() = default;
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const = 0;
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string toString(const core::GlobalState &gs) const {
         return toStringWithTabs(gs);
     }
-    virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) = 0;
-    virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual std::string nodeName() = 0;
+    std::string toJSON(const core::GlobalState &gs, int tabs = 0);
+    std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);
+    std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName() const;
     NodeTag tag;
     core::LocOffsets loc;
 
