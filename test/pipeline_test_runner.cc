@@ -297,7 +297,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             continue;
         }
 
-        unique_ptr<parser::Node> nodes;
+        parser::NodePtr nodes;
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
