@@ -50,23 +50,13 @@ struct NodeDeleter {
     }
 };
 
-template <class To> To *cast_node(Node *what) {
-    static_assert(!std::is_pointer<To>::value, "To must not be a pointer");
-    static_assert(std::is_assignable<Node *&, To *>::value, "Ill Formed To, has to be a subclass of Node");
-    static_assert(std::is_final<To>::value, "To is not final");
-    if (what == nullptr || what->tag != NodeToTag<To>::value) {
-        return nullptr;
-    }
-    return static_cast<To *>(what);
-}
-
 class NodePtr : public std::unique_ptr<Node, NodeDeleter> {
     using Base = std::unique_ptr<Node, NodeDeleter>;
 
 public:
     NodePtr() = default;
     NodePtr(std::nullptr_t) : Base(nullptr) {}
-    NodePtr(Node *node) : Base(node) {}
+    explicit NodePtr(Node *node) : Base(node) {}
 
     NodePtr(NodePtr &&p) = default;
     NodePtr &operator=(NodePtr &&p) = default;
@@ -92,25 +82,37 @@ template <class To> bool isa_node(const NodePtr &what) {
     return what != nullptr && what.tag() == NodeToTag<To>::value;
 }
 
+template <class To> bool isa_node(const Node *what) {
+    return what != nullptr && what->tag == NodeToTag<To>::value;
+ }
+
 // We disallow casting on temporary values because the lifetime of the returned value is
 // tied to the temporary, but it is possible for the temporary to be destroyed at the end
 // of the current statement, leading to use-after-free bugs.
 template <class To> To *cast_node(NodePtr &&what) = delete;
 
-template <class To> To *cast_node(NodePtr &what) {
+template <class To> To *cast_node(Node *what) {
     if (isa_node<To>(what)) {
-        return reinterpret_cast<To *>(what.get());
+        return static_cast<To *>(what);
+    } else {
+        return nullptr;
+    }
+}
+
+template <class To> To *cast_node(NodePtr &what) {
+    return cast_node<To>(what.get());
+}
+
+template <class To> const To *cast_node(const Node *what) {
+    if (isa_node<To>(what)) {
+        return static_cast<To *>(what);
     } else {
         return nullptr;
     }
 }
 
 template <class To> const To *cast_node(const NodePtr &what) {
-    if (isa_node<To>(what)) {
-        return reinterpret_cast<To *>(what.get());
-    } else {
-        return nullptr;
-    }
+    return cast_node<To>(what.get());
 }
 
 // We disallow casting on temporary values because the lifetime of the returned value is
@@ -120,12 +122,12 @@ template <class To> To &cast_node_nonnull(NodePtr &&what) = delete;
 
 template <class To> To &cast_node_nonnull(NodePtr &what) {
     ENFORCE(isa_node<To>(what), "cast_node_nonnull failed!");
-    return *reinterpret_cast<To *>(what.get());
+    return *static_cast<To *>(what.get());
 }
 
 template <class To> const To &cast_node_nonnull(const NodePtr &what) {
     ENFORCE(isa_node<To>(what), "cast_node_nonnull failed!");
-    return *reinterpret_cast<To *>(what.get());
+    return *static_cast<To *>(what.get());
 }
 
 template <class To> inline bool NodePtr::isa(const NodePtr &what) {
