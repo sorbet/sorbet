@@ -53,7 +53,10 @@ template <class To> To *cast_node(Node *what) {
     static_assert(!std::is_pointer<To>::value, "To must not be a pointer");
     static_assert(std::is_assignable<Node *&, To *>::value, "Ill Formed To, has to be a subclass of Node");
     static_assert(std::is_final<To>::value, "To is not final");
-    return fast_cast<Node, To>(what);
+    if (what == nullptr || what->tag != NodeToTag<To>::value) {
+        return nullptr;
+    }
+    return static_cast<To *>(what);
 }
 
 template <class To> bool isa_node(Node *what) {
