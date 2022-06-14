@@ -528,9 +528,10 @@ public:
             isNumblock = true;
         }
 
-        Node &n = *methodCall;
-        const type_info &ty = typeid(n);
-        if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
+        if (parser::isa_node<parser::Send>(methodCall) ||
+            parser::isa_node<CSend>(methodCall) ||
+            parser::isa_node<Super>(methodCall) ||
+            parser::isa_node<ZSuper>(methodCall)) {
             if (isNumblock) {
                 return make_node<NumBlock>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
                                              std::move(body));
@@ -541,13 +542,13 @@ public:
 
         sorbet::parser::NodeVec *exprs;
         typecase(
-            methodCall.get(), [&](Break *b) { exprs = &b->exprs; },
+            methodCall, [&](Break &b) { exprs = &b.exprs; },
 
-            [&](Return *r) { exprs = &r->exprs; },
+            [&](Return &r) { exprs = &r.exprs; },
 
-            [&](Next *n) { exprs = &n->exprs; },
+            [&](Next &n) { exprs = &n.exprs; },
 
-            [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
+            [&](NodePtr &n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
         core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
@@ -765,17 +766,17 @@ public:
         NodePtr result;
 
         typecase(
-            node.get(),
+            node,
 
-            [&](String *s) {
-                auto str = s->val.shortName(gs_);
+            [&](String &s) {
+                auto str = s.val.shortName(gs_);
                 std::optional<std::string> dedented = dedenter.dedent(str);
-                result = make_node<String>(s->loc, dedented ? gs_.enterNameUTF8(*dedented) : s->val);
+                result = make_node<String>(s.loc, dedented ? gs_.enterNameUTF8(*dedented) : s.val);
             },
 
-            [&](DString *d) {
+            [&](DString &d) {
                 sorbet::parser::NodeVec parts;
-                for (auto &p : d->nodes) {
+                for (auto &p : d.nodes) {
                     if (auto *s = parser::cast_node<String>(p.get())) {
                         auto str = s->val.shortName(gs_);
                         std::optional<std::string> dedented = dedenter.dedent(str);
@@ -793,12 +794,12 @@ public:
                         parts.emplace_back(std::move(p));
                     }
                 }
-                result = make_node<DString>(d->loc, std::move(parts));
+                result = make_node<DString>(d.loc, std::move(parts));
             },
 
-            [&](XString *d) {
+            [&](XString &d) {
                 sorbet::parser::NodeVec parts;
-                for (auto &p : d->nodes) {
+                for (auto &p : d.nodes) {
                     if (auto *s = parser::cast_node<String>(p.get())) {
                         auto str = s->val.shortName(gs_);
                         std::optional<std::string> dedented = dedenter.dedent(str);
@@ -816,10 +817,10 @@ public:
                         parts.emplace_back(std::move(p));
                     }
                 }
-                result = make_node<XString>(d->loc, std::move(parts));
+                result = make_node<XString>(d.loc, std::move(parts));
             },
 
-            [&](Node *n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
+            [&](NodePtr &n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
 
         return result;
     }
