@@ -649,8 +649,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                 }
 
                 if (absl::c_any_of(send.args, [](auto &arg) {
-                        return parser::isa_node<parser::Splat>(arg.get()) ||
-                               parser::isa_node<parser::ForwardedArgs>(arg.get());
+                        return parser::isa_node<parser::Splat>(arg) ||
+                               parser::isa_node<parser::ForwardedArgs>(arg);
                     })) {
                     // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
                     // all keyword arguments as a single argument.
@@ -660,7 +660,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     // subsequent logic for dealing with the kwargs hash is simpler this way).
                     parser::NodePtr savedBlockPass = nullptr;
 
-                    if (!send.args.empty() && parser::isa_node<parser::BlockPass>(send.args.back().get())) {
+                    if (!send.args.empty() && parser::isa_node<parser::BlockPass>(send.args.back())) {
                         savedBlockPass = std::move(send.args.back());
                         send.args.pop_back();
                     }
@@ -679,9 +679,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                                 if (absl::c_any_of(hash->pairs, [](auto &node) {
                                         // the parser guarantees that if we see a kwargs hash it only contains pair or
                                         // kwsplat nodes
-                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node) ||
+                                                parser::isa_node<parser::Pair>(node));
+                                        return parser::isa_node<parser::Kwsplat>(node);
                                     })) {
                                     elts.emplace_back(std::move(node));
                                 } else {
@@ -725,7 +725,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     bool anonymousBlockPass = false;
                     core::LocOffsets bpLoc;
                     auto it = absl::c_find_if(argnodes,
-                                              [](auto &arg) { return parser::isa_node<parser::BlockPass>(arg.get()); });
+                                              [](auto &arg) { return parser::isa_node<parser::BlockPass>(arg); });
                     if (it != argnodes.end()) {
                         auto *bp = parser::cast_node<parser::BlockPass>(it->get());
                         if (bp->block == nullptr) {
@@ -739,7 +739,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
 
                     auto hasFwdArgs = false;
                     auto fwdIt = absl::c_find_if(
-                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg.get()); });
+                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedArgs>(arg); });
                     if (fwdIt != argnodes.end()) {
                         block = parser::make_node<parser::LVar>(loc, core::Names::fwdBlock());
                         hasFwdArgs = true;
@@ -820,9 +820,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                                 if (!absl::c_any_of(hash->pairs, [](auto &node) {
                                         // the parser guarantees that if we see a kwargs hash it only contains pair or
                                         // kwsplat nodes
-                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node) ||
+                                                parser::isa_node<parser::Pair>(node));
+                                        return parser::isa_node<parser::Kwsplat>(node);
                                     })) {
                                     // hold a reference to the node, and remove it from the back fo the send list
                                     auto node = std::move(send.args.back());
@@ -1523,7 +1523,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                 result = std::move(res);
             },
             [&](parser::WhilePost &wl) {
-                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl.body.get());
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl.body);
                 auto cond = node2TreeImpl(dctx, std::move(wl.cond));
                 auto body = node2TreeImpl(dctx, std::move(wl.body));
                 // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
@@ -1542,7 +1542,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
             },
             // This is the same as WhilePost, but the cond negation is in the other branch.
             [&](parser::UntilPost &wl) {
-                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl.body.get());
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl.body);
                 auto cond = node2TreeImpl(dctx, std::move(wl.cond));
                 auto body = node2TreeImpl(dctx, std::move(wl.body));
                 ExpressionPtr res =
@@ -1604,7 +1604,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                 auto mlhsNode = std::move(for_.vars);
                 if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
                     for (auto &c : mlhs->exprs) {
-                        if (!parser::isa_node<parser::LVarLhs>(c.get())) {
+                        if (!parser::isa_node<parser::LVarLhs>(c)) {
                             canProvideNiceDesugar = false;
                             break;
                         }
@@ -1615,7 +1615,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                         }
                     }
                 } else {
-                    canProvideNiceDesugar = parser::isa_node<parser::LVarLhs>(mlhsNode.get());
+                    canProvideNiceDesugar = parser::isa_node<parser::LVarLhs>(mlhsNode);
                     if (canProvideNiceDesugar) {
                         ExpressionPtr lhs = node2TreeImpl(dctx, std::move(mlhsNode));
                         args.emplace_back(move(lhs));
@@ -1815,7 +1815,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     Array::ENTRY_store elems;
                     elems.reserve(ret.exprs.size());
                     for (auto &stat : ret.exprs) {
-                        if (parser::isa_node<parser::BlockPass>(stat.get())) {
+                        if (parser::isa_node<parser::BlockPass>(stat)) {
                             if (auto e = dctx.ctx.beginError(ret.loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
@@ -1827,7 +1827,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     ExpressionPtr res = MK::Return(loc, std::move(arr));
                     result = std::move(res);
                 } else if (ret.exprs.size() == 1) {
-                    if (parser::isa_node<parser::BlockPass>(ret.exprs[0].get())) {
+                    if (parser::isa_node<parser::BlockPass>(ret.exprs[0])) {
                         if (auto e = dctx.ctx.beginError(ret.loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
@@ -1847,7 +1847,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     Array::ENTRY_store elems;
                     elems.reserve(ret.exprs.size());
                     for (auto &stat : ret.exprs) {
-                        if (parser::isa_node<parser::BlockPass>(stat.get())) {
+                        if (parser::isa_node<parser::BlockPass>(stat)) {
                             if (auto e = dctx.ctx.beginError(ret.loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
@@ -1859,7 +1859,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     ExpressionPtr res = MK::Break(loc, std::move(arr));
                     result = std::move(res);
                 } else if (ret.exprs.size() == 1) {
-                    if (parser::isa_node<parser::BlockPass>(ret.exprs[0].get())) {
+                    if (parser::isa_node<parser::BlockPass>(ret.exprs[0])) {
                         if (auto e = dctx.ctx.beginError(ret.loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
@@ -1879,7 +1879,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     Array::ENTRY_store elems;
                     elems.reserve(ret.exprs.size());
                     for (auto &stat : ret.exprs) {
-                        if (parser::isa_node<parser::BlockPass>(stat.get())) {
+                        if (parser::isa_node<parser::BlockPass>(stat)) {
                             if (auto e = dctx.ctx.beginError(ret.loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
@@ -1891,7 +1891,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     ExpressionPtr res = MK::Next(loc, std::move(arr));
                     result = std::move(res);
                 } else if (ret.exprs.size() == 1) {
-                    if (parser::isa_node<parser::BlockPass>(ret.exprs[0].get())) {
+                    if (parser::isa_node<parser::BlockPass>(ret.exprs[0])) {
                         if (auto e = dctx.ctx.beginError(ret.loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
@@ -2053,7 +2053,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                     ExpressionPtr cond;
                     for (auto &cnode : when->patterns) {
                         ExpressionPtr test;
-                        if (parser::isa_node<parser::Splat>(cnode.get())) {
+                        if (parser::isa_node<parser::Splat>(cnode)) {
                             ENFORCE(temp.exists(), "splats need something to test against");
                             auto recv = MK::Constant(loc, core::Symbols::Magic());
                             auto local = MK::Local(cloc, temp);
