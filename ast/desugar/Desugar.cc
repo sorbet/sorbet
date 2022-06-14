@@ -2234,7 +2234,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
                 result = std::move(res);
             },
 
-            [&](parser::BlockPass &blockPass) { Exception::raise("Send should have already handled the BlockPass"); });
+            [&](parser::BlockPass &blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
+            [&](parser::NodePtr &node) { Exception::raise("Unimplemented Parser Node: {}", node->nodeName()); });
         ENFORCE(result.get() != nullptr, "desugar result unset");
         return result;
     } catch (SorbetException &) {
