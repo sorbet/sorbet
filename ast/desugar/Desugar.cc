@@ -80,10 +80,10 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
     return MK::Local(core::LocOffsets::none(), name);
 }
 
-ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser::NodeDeleter> what);
+ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what);
 
 pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
-                                                             unique_ptr<parser::Node, parser::NodeDeleter> &argnode) {
+                                                             parser::NodePtr &argnode) {
     MethodDef::ARGS_store args;
     InsSeq::STATS_store destructures;
 
@@ -93,8 +93,8 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
             if (auto *lhs = parser::cast_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
                 args.emplace_back(MK::Local(arg->loc, temporary));
-                unique_ptr<parser::Node, parser::NodeDeleter> lvarNode = parser::make_node<parser::LVar>(arg->loc, temporary);
-                unique_ptr<parser::Node, parser::NodeDeleter> destructure =
+                parser::NodePtr lvarNode = parser::make_node<parser::LVar>(arg->loc, temporary);
+                parser::NodePtr destructure =
                     parser::make_node<parser::Masgn>(arg->loc, std::move(arg), std::move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(dctx, std::move(destructure)));
             } else if (auto *lhs = parser::cast_node<parser::Kwnilarg>(arg.get())) {
@@ -102,14 +102,14 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
             } else if (auto *fargs = parser::cast_node<parser::ForwardArg>(arg.get())) {
                 // we desugar (m, n, ...) into (m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
                 // add `*<fwd-args>`
-                unique_ptr<parser::Node, parser::NodeDeleter> rest =
+                parser::NodePtr rest =
                     parser::make_node<parser::Restarg>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
                 args.emplace_back(node2TreeImpl(dctx, std::move(rest)));
                 // add `**<fwd-kwargs>`
-                unique_ptr<parser::Node, parser::NodeDeleter> kwrest = parser::make_node<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
+                parser::NodePtr kwrest = parser::make_node<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
                 args.emplace_back(node2TreeImpl(dctx, std::move(kwrest)));
                 // add `&<fwd-block>`
-                unique_ptr<parser::Node, parser::NodeDeleter> block = parser::make_node<parser::Blockarg>(fargs->loc, core::Names::fwdBlock());
+                parser::NodePtr block = parser::make_node<parser::Blockarg>(fargs->loc, core::Names::fwdBlock());
                 args.emplace_back(node2TreeImpl(dctx, std::move(block)));
             } else {
                 args.emplace_back(node2TreeImpl(dctx, std::move(arg)));
@@ -130,7 +130,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
     return make_pair(std::move(args), std::move(destructures));
 }
 
-ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node, parser::NodeDeleter> &bodynode,
+ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, parser::NodePtr &bodynode,
                           InsSeq::STATS_store destructures) {
     auto body = node2TreeImpl(dctx, std::move(bodynode));
     if (!destructures.empty()) {
@@ -145,8 +145,8 @@ ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<
 }
 
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
-                           unique_ptr<parser::Node, parser::NodeDeleter> &blockSend, unique_ptr<parser::Node, parser::NodeDeleter> &blockArgs,
-                           unique_ptr<parser::Node, parser::NodeDeleter> &blockBody) {
+                           parser::NodePtr &blockSend, parser::NodePtr &blockArgs,
+                           parser::NodePtr &blockBody) {
     blockSend->loc = loc;
     auto recv = node2TreeImpl(dctx, std::move(blockSend));
     Send *send;
@@ -301,7 +301,7 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
 }
 
 ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                          unique_ptr<parser::Node, parser::NodeDeleter> &argnode, unique_ptr<parser::Node, parser::NodeDeleter> &body, bool isSelf) {
+                          parser::NodePtr &argnode, parser::NodePtr &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name);
@@ -420,7 +420,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
 }
 
 // Map all MatchVars used in `pattern` to local variables initialized from magic calls
-void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, unique_ptr<parser::Node, parser::NodeDeleter> &node) {
+void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, parser::NodePtr &node) {
     if (auto var = parser::cast_node<parser::MatchVar>(node.get())) {
         auto loc = var->loc;
         auto val = MK::RaiseUnimplemented(loc);
@@ -454,7 +454,7 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
 }
 
 // Desugar `in` and `=>` oneline pattern matching
-ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node, parser::NodeDeleter> &match) {
+ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, parser::NodePtr &match) {
     auto matchExpr = MK::RaiseUnimplemented(loc);
     auto bodyExpr = MK::RaiseUnimplemented(loc);
     auto elseExpr = MK::EmptyTree();
@@ -470,7 +470,7 @@ ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, u
 
 bool locReported = false;
 
-ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node, parser::NodeDeleter> node) {
+ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, parser::NodePtr node) {
     ClassDef::RHS_store body;
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
@@ -615,7 +615,7 @@ public:
     }
 };
 
-ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser::NodeDeleter> what) {
+ExpressionPtr node2TreeImpl(DesugarContext dctx, parser::NodePtr what) {
     try {
         if (what.get() == nullptr) {
             return MK::EmptyTree();
@@ -654,11 +654,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser
                     })) {
                     // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
                     // all keyword arguments as a single argument.
-                    unique_ptr<parser::Node, parser::NodeDeleter> kwArray;
+                    parser::NodePtr kwArray;
 
                     // If there's a &blk node in the last position, pop that off (we'll put it back later, but
                     // subsequent logic for dealing with the kwargs hash is simpler this way).
-                    unique_ptr<parser::Node, parser::NodeDeleter> savedBlockPass = nullptr;
+                    parser::NodePtr savedBlockPass = nullptr;
 
                     if (!send->args.empty() && parser::isa_node<parser::BlockPass>(send->args.back().get())) {
                         savedBlockPass = std::move(send->args.back());
@@ -720,7 +720,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser
                     //   Magic.callWithSplat(receiver, method, argArray, [&blk])
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call merchanism.
-                    unique_ptr<parser::Node, parser::NodeDeleter> block;
+                    parser::NodePtr block;
                     auto argnodes = std::move(send->args);
                     bool anonymousBlockPass = false;
                     core::LocOffsets bpLoc;
@@ -844,7 +844,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser
                     }
 
                     Send::ARGS_store args;
-                    unique_ptr<parser::Node, parser::NodeDeleter> block;
+                    parser::NodePtr block;
                     args.reserve(send->args.size());
                     bool anonymousBlockPass = false;
                     core::LocOffsets bpLoc;
@@ -1358,7 +1358,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser
                     MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
                               core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
 
-                unique_ptr<parser::Node, parser::NodeDeleter> sendNode =
+                parser::NodePtr sendNode =
                     parser::make_node<parser::Send>(loc, parser::make_node<parser::LVar>(recvLoc, tempRecv), csend->method,
                                               csend->methodLoc, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
@@ -1634,7 +1634,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node, parser
                 } else {
                     auto temp = dctx.freshNameUnique(core::Names::forTemp());
 
-                    unique_ptr<parser::Node, parser::NodeDeleter> masgn =
+                    parser::NodePtr masgn =
                         parser::make_node<parser::Masgn>(loc, std::move(mlhsNode), parser::make_node<parser::LVar>(loc, temp));
 
                     body = MK::InsSeq1(loc, node2TreeImpl(dctx, std::move(masgn)), move(body));
@@ -2269,7 +2269,7 @@ ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, Expression
 }
 } // namespace
 
-ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node, parser::NodeDeleter> what) {
+ExpressionPtr node2Tree(core::MutableContext ctx, parser::NodePtr what) {
     try {
         uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
