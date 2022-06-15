@@ -71,7 +71,16 @@ template <typename T> struct ExpressionToTag;
 
 class EmptyTree;
 
-class __attribute__((trivial_abi)) ExpressionPtr final {
+// When we added trivial_abi support, the version of Emscripten that we used did not
+// support trivial_abi.  Even if we upgraded to a version that did, the performance
+// gains of trivial_abi are not super-important for Emscripten'd Sorbet.
+#ifdef __EMSCRIPTEN__
+#define TRIVIAL_ABI
+#else
+#define TRIVIAL_ABI __attribute__((trivial_abi))
+#endif
+
+class TRIVIAL_ABI ExpressionPtr final {
 public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = uint64_t;
