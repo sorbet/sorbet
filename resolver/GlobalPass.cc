@@ -190,6 +190,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
+    int singletonClassCount = 0;
     int moduleCount = 0;
     for (size_t i = 1; i < gs.methodsUsed(); ++i) {
         auto ref = core::MethodRef(gs, i);
@@ -229,6 +230,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         auto attached = ref.data(gs)->attachedClass(gs);
         bool isSingleton = attached.exists() && attached != core::Symbols::untyped();
         if (isSingleton) {
+            singletonClassCount++;
             if (attached == core::Symbols::BasicObject()) {
                 ref.data(gs)->setSuperClass(core::Symbols::Class());
             } else if (attached.data(gs)->superClass() ==
@@ -256,6 +258,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
 
     prodCounterAdd("types.input.modules.total", moduleCount);
     prodCounterAdd("types.input.classes.total", classCount);
+    prodCounterAdd("types.input.singleton_classes.total", singletonClassCount);
     prodCounterAdd("types.input.methods.total", methodCount);
 }
 
