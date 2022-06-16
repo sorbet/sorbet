@@ -2,7 +2,7 @@
 # typed: true
 
 # Use as a mixin with extend (`extend T::Helpers`).
-# Docs at https://confluence.corp.stripe.com/display/PRODINFRA/Ruby+Types
+# Docs at https://sorbet.org/docs/
 module T::Helpers
   extend T::Sig
 
