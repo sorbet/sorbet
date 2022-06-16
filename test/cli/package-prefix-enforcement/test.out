@@ -70,4 +70,14 @@ critic_prefix/real.test.rb:13: File belongs to package `Critic::SomePkg` but def
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 10
+
+commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but defines a constant that does not match this namespace https://srb.help/3713
+     4 |  class Baz::Ban; end
+                ^^^^^^^^
+    commands/__package.rb:3: Enclosing package declared here
+     3 |class Root::Commands::Foo < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz::Ban`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 11
