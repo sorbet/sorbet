@@ -609,16 +609,13 @@ public:
             }
         }
 
-        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName()) {
+        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName() &&
+            nameParts.size() >= ctx.state.packageDB().getPackageInfo(packages[begin]).fullName().size()) {
             // We have descended into a package with no sub-packages. At this point it is safe to
             // skip tracking of deeper constants.
-            // Skip only if current pushed name is lexicographically equal to the nearest package name
-            if (core::packages::PackageInfo::isEqual(ctx.state.packageDB().getPackageInfo(packages[begin]).fullName(),
-                                                     nameParts)) {
-                curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
-                skips++;
-                return;
-            }
+            curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
+            skips++;
+            return;
         }
 
         bounds.emplace_back(begin, end);

@@ -61,7 +61,6 @@ public:
     // Utilities:
 
     static bool lexCmp(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
-    static bool isEqual(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs);
 };
 
 // Information about the imports of a package. The imports are split into two categories, packages whose name falls
