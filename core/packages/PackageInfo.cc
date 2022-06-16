@@ -25,6 +25,10 @@ bool PackageInfo::lexCmp(const std::vector<core::NameRef> &lhs, const std::vecto
                                         [](NameRef a, NameRef b) -> bool { return a.rawId() < b.rawId(); });
 }
 
+bool PackageInfo::isEqual(const std::vector<core::NameRef> &lhs, const std::vector<core::NameRef> &rhs) {
+    return (lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+}
+
 ImportInfo ImportInfo::fromPackage(const core::GlobalState &gs, const PackageInfo &info) {
     ImportInfo res;
     res.package = info.mangledName();
