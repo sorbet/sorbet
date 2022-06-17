@@ -24,9 +24,9 @@ public:
         : queryLoc(queryLoc), narrowestClassDefRange(core::Loc::none()), scopeContainsQueryLoc(std::vector<bool>{}),
           result_(core::Loc::none(), core::Symbols::noMethod()) {}
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree);
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree);
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree);
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree);
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree);
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree);
 
     const core::MethodRef result() const;
 };

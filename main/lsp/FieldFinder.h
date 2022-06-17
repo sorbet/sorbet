@@ -18,9 +18,9 @@ private:
 public:
     FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Kind queryKind);
 
-    ast::ExpressionPtr postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr ident);
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr classDef);
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr classDef);
+    void postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr &ident);
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &classDef);
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &classDef);
 
     const std::vector<core::NameRef> &result() const;
 };

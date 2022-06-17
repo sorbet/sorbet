@@ -9,9 +9,9 @@ namespace sorbet::realmain::lsp {
 
 class LocalVarSaver {
 public:
-    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr local);
-    ast::ExpressionPtr postTransformLocal(core::Context ctx, ast::ExpressionPtr local);
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &local);
+    void postTransformLocal(core::Context ctx, ast::ExpressionPtr &local);
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &methodDef);
 };
 }; // namespace sorbet::realmain::lsp
 
