@@ -39,7 +39,7 @@ struct ConstantHashWalk {
         return ast::isa_tree<ast::UnresolvedConstantLit>(tree) || ast::isa_tree<ast::ConstantLit>(tree);
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         hashSoFar =
             core::mix(hashSoFar, klass.kind == ast::ClassDef::Kind::Class ? core::_hash("(c") : core::_hash("(m"));
@@ -49,15 +49,13 @@ struct ConstantHashWalk {
             hashConstant(ctx, klass.ancestors.front());
         }
         hashSoFar = core::mix(hashSoFar, core::_hash(" "));
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         hashSoFar = core::mix(hashSoFar, core::_hash(")"));
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.fun == core::Names::require()) {
             hashSoFar = core::mix(hashSoFar, core::_hash("(r"));
@@ -77,10 +75,9 @@ struct ConstantHashWalk {
             }
             hashSoFar = core::mix(hashSoFar, core::_hash(")"));
         }
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         if (isConstant(asgn.lhs)) {
             if (isConstant(asgn.rhs)) {
@@ -108,14 +105,13 @@ struct ConstantHashWalk {
                 hashSoFar = core::mix(hashSoFar, core::_hash(")"));
             }
         }
-        return tree;
     }
 };
 
 HashedParsedFile constantHashTree(const core::GlobalState &gs, ast::ParsedFile pf) {
     core::Context ctx{gs, core::Symbols::root(), pf.file};
     ConstantHashWalk walk;
-    pf.tree = ast::ShallowMap::apply(ctx, walk, std::move(pf.tree));
+    ast::ShallowWalk::apply(ctx, walk, pf.tree);
     return {move(pf), walk.hashSoFar};
 }
 
