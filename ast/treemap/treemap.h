@@ -147,6 +147,10 @@ struct ReportedRubyException {
     core::LocOffsets onLoc;
 };
 
+enum class TreeMapKind {
+    Map,
+};
+
 enum class TreeMapDepthKind {
     Full,
     Shallow,
@@ -158,7 +162,7 @@ enum class TreeMapDepthKind {
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC, class CTX, TreeMapDepthKind DepthKind> class TreeMapper {
+template <class FUNC, class CTX, TreeMapKind Kind, TreeMapDepthKind DepthKind> class TreeMapper {
 private:
     friend class TreeMap;
     friend class ShallowMap;
@@ -625,7 +629,7 @@ private:
 class TreeMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
-        TreeMapper<FUNC, CTX, TreeMapDepthKind::Full> walker(func);
+        TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Full> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
         } catch (ReportedRubyException &exception) {
@@ -641,7 +645,7 @@ public:
 class ShallowMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
-        TreeMapper<FUNC, CTX, TreeMapDepthKind::Shallow> walker(func);
+        TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Shallow> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
         } catch (ReportedRubyException &exception) {
