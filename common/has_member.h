@@ -19,12 +19,12 @@ template <class> struct sfinae_true : std::true_type {};
  *
  * Adapted from https://stackoverflow.com/a/9154394
  */
-#define GENERATE_HAS_MEMBER(name, arg_types...)                         \
-    template <class T>                                                  \
+#define GENERATE_HAS_MEMBER(name, arg_types...)                                                        \
+    template <class T>                                                                                 \
     static constexpr auto __has_##name(int)->sfinae_true<decltype(std::declval<T>().name(arg_types))>; \
-    template <class> static constexpr auto __has_##name(long)->std::false_type; \
-    template <class T> static constexpr bool HAS_MEMBER_##name() {                                                \
-        return decltype(__has_##name<T>(0)){};                                        \
+    template <class> static constexpr auto __has_##name(long)->std::false_type;                        \
+    template <class T> static constexpr bool HAS_MEMBER_##name() {                                     \
+        return decltype(__has_##name<T>(0)){};                                                         \
     }
 
 /**
