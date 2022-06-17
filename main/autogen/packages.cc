@@ -26,35 +26,34 @@ class PackageWalk {
     }
 
 public:
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root() || classDef.ancestors.size() != 1 ||
             classDef.kind != ast::ClassDef::Kind::Class) {
-            return tree;
+            return;
         }
         auto cnst = ast::cast_tree<ast::ConstantLit>(classDef.name);
         if (!cnst) {
-            return tree;
+            return;
         }
 
         package = constantName(ctx, cnst);
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         // we're not going to report errors about ill-formed things here: those errors should get reported elsewhere,
         // and instead we'll bail if things don't look like we expect
         if (send.numPosArgs() != 1) {
-            return tree;
+            return;
         }
         if (send.fun != core::Names::export_() && send.fun != core::Names::import()) {
-            return tree;
+            return;
         }
 
         auto cnst = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
         if (!cnst) {
-            return tree;
+            return;
         }
 
         auto name = QualifiedName::fromFullName(constantName(ctx, cnst));
@@ -63,8 +62,6 @@ public:
         } else if (send.fun == core::Names::import()) {
             imports.emplace_back(move(name));
         }
-
-        return tree;
     }
 
     Package getPackage() {
@@ -78,7 +75,7 @@ public:
 
 Package Packages::extractPackage(core::Context ctx, ast::ParsedFile tree) {
     PackageWalk walk;
-    tree.tree = ast::TreeMap::apply(ctx, walk, move(tree.tree));
+    ast::TreeWalk::apply(ctx, walk, tree.tree);
     auto package = walk.getPackage();
     package.tree = move(tree);
     return package;
