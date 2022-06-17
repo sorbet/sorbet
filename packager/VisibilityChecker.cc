@@ -174,15 +174,15 @@ class PropagateVisibility final {
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.fun != core::Names::export_()) {
-            return tree;
+            return;
         }
 
         if (send.numPosArgs() != 1) {
             // an error will have been raised in the packager pass
-            return tree;
+            return;
         }
 
         auto *lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
@@ -191,7 +191,7 @@ public:
             //   1. Export is given a non-constant argument
             //   2. The argument failed to resolve
             // In both cases, errors will be raised by previous passes.
-            return tree;
+            return;
         }
 
         if (lit->symbol.isClassOrModule()) {
@@ -237,21 +237,17 @@ public:
                 e.addErrorNote("`{}` is a `{}`", lit->symbol.show(ctx), kind);
             }
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         if (original.symbol == core::Symbols::root()) {
-            return tree;
+            return;
         }
 
         ENFORCE(original.symbol != core::Symbols::todo());
         setPackageLocs(ctx, original.name.loc(), original.symbol);
-
-        return tree;
     }
 
     static ast::ParsedFile run(core::GlobalState &gs, ast::ParsedFile f) {
@@ -272,7 +268,7 @@ public:
         pass.exportPackageRoots(gs);
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        f.tree = ast::TreeMap::apply(ctx, pass, std::move(f.tree));
+        ast::TreeWalk::apply(ctx, pass, f.tree);
 
         return f;
     }
@@ -302,33 +298,31 @@ public:
     // to become a stack.
     bool ignoreConstant = false;
 
-    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
         this->ignoreConstant = send.fun == core::Names::keepForIde();
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         this->ignoreConstant = false;
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (this->ignoreConstant) {
-            return tree;
+            return;
         }
 
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
-            return tree;
+            return;
         }
 
         auto loc = lit.symbol.loc(ctx);
 
         auto otherFile = loc.file();
         if (!otherFile.exists() || !otherFile.data(ctx).isPackaged()) {
-            return tree;
+            return;
         }
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
@@ -344,7 +338,7 @@ public:
         // no need to check visibility for these cases
         auto otherPackage = db.getPackageNameForFile(otherFile);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
-            return tree;
+            return;
         }
 
         bool isExported = false;
@@ -377,7 +371,7 @@ public:
                 }
             }
 
-            return tree;
+            return;
         }
 
         auto importType = this->package.importsPackage(otherPackage);
@@ -414,18 +408,14 @@ public:
                 e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             auto &superClass = original.ancestors[0];
-            superClass = ast::TreeMap::apply(ctx, *this, std::move(superClass));
+            ast::TreeWalk::apply(ctx, *this, superClass);
         }
-
-        return tree;
     }
 
     static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
@@ -447,7 +437,7 @@ public:
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
                         VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
-                        f.tree = ast::TreeMap::apply(ctx, pass, std::move(f.tree));
+                        ast::TreeWalk::apply(ctx, pass, f.tree);
                     }
                 }
 
@@ -488,31 +478,29 @@ class ImportCheckerPass final {
     std::vector<Import> imports;
 
 public:
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.fun != core::Names::import() && send.fun != core::Names::test_import()) {
-            return tree;
+            return;
         }
 
         if (send.numPosArgs() != 1) {
             // an error will have been raised in the packager pass
-            return tree;
+            return;
         }
 
         auto *lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
         if (lit == nullptr) {
             // We don't raise an explicit error here, for the same reasons as in PropagateVisibility::postTransformSend.
-            return tree;
+            return;
         }
 
         if (lit->symbol == core::Symbols::StubModule()) {
             // An error was already reported in resolver when the StubModule was created.
-            return tree;
+            return;
         }
 
         this->imports.emplace_back(lit->symbol, send.loc);
-
-        return tree;
     }
 
     void checkImports(core::Context ctx) {
@@ -566,7 +554,7 @@ public:
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
-                        f.tree = ast::TreeMap::apply(ctx, pass, std::move(f.tree));
+                        ast::TreeWalk::apply(ctx, pass, f.tree);
                         pass.checkImports(ctx);
                     }
                 }
