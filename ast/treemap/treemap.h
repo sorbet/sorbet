@@ -197,10 +197,17 @@ private:
 
     TreeMapper(FUNC &func) : func(func) {}
 
-    return_type mapClassDef(ExpressionPtr v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformClassDef<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+#define CALL_PRE(member) \
+    if constexpr (Funcs::template HAS_MEMBER_preTransform##member<FUNC>()) { \
+        if constexpr (Kind == TreeMapKind::Map) {                           \
+            v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
+        } else if (Kind == TreeMapKind::Walk) {                         \
+            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
+        } \
+    }
+
+    return_type mapClassDef(arg_type v, CTX ctx) {
+        CALL_PRE(ClassDef);
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
         //
@@ -225,9 +232,7 @@ private:
     }
 
     return_type mapMethodDef(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformMethodDef<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(MethodDef);
 
         for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
@@ -251,9 +256,8 @@ private:
     }
 
     return_type mapIf(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformIf<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(If);
+
         cast_tree_nonnull<If>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).cond), ctx);
         cast_tree_nonnull<If>(v).thenp = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).thenp), ctx);
         cast_tree_nonnull<If>(v).elsep = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).elsep), ctx);
@@ -265,9 +269,8 @@ private:
     }
 
     return_type mapWhile(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformWhile<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(While);
+
         cast_tree_nonnull<While>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).cond), ctx);
         cast_tree_nonnull<While>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).body), ctx);
 
@@ -278,9 +281,7 @@ private:
     }
 
     return_type mapBreak(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformBreak<FUNC>()) {
-            return Funcs::template CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Break);
 
         cast_tree_nonnull<Break>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Break>(v).expr), ctx);
 
@@ -297,9 +298,7 @@ private:
     }
 
     return_type mapNext(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformNext<FUNC>()) {
-            return Funcs::template CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Next);
 
         cast_tree_nonnull<Next>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Next>(v).expr), ctx);
 
@@ -310,9 +309,8 @@ private:
     }
 
     return_type mapReturn(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformReturn<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Return);
+
         cast_tree_nonnull<Return>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Return>(v).expr), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformReturn<FUNC>()) {
@@ -323,9 +321,7 @@ private:
     }
 
     return_type mapRescueCase(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformRescueCase<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(RescueCase);
 
         for (auto &el : cast_tree_nonnull<RescueCase>(v).exceptions) {
             el = mapIt(Funcs::pass(el), ctx);
@@ -342,9 +338,7 @@ private:
         return v;
     }
     return_type mapRescue(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformRescue<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Rescue);
 
         cast_tree_nonnull<Rescue>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).body), ctx);
 
@@ -372,9 +366,7 @@ private:
     }
 
     return_type mapAssign(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformAssign<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Assign);
 
         cast_tree_nonnull<Assign>(v).lhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).lhs), ctx);
         cast_tree_nonnull<Assign>(v).rhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).rhs), ctx);
@@ -387,9 +379,7 @@ private:
     }
 
     return_type mapSend(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformSend<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Send);
 
         cast_tree_nonnull<Send>(v).recv = mapIt(Funcs::pass(cast_tree_nonnull<Send>(v).recv), ctx);
 
@@ -411,9 +401,8 @@ private:
     }
 
     return_type mapHash(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformHash<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Hash);
+
         for (auto &key : cast_tree_nonnull<Hash>(v).keys) {
             key = mapIt(Funcs::pass(key), ctx);
         }
@@ -429,9 +418,8 @@ private:
     }
 
     return_type mapArray(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformArray<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Array);
+
         for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
             elem = mapIt(Funcs::pass(elem), ctx);
         }
@@ -464,9 +452,7 @@ private:
     }
 
     return_type mapBlock(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformBlock<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Block);
 
         for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
@@ -483,9 +469,7 @@ private:
     }
 
     return_type mapInsSeq(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformInsSeq<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(InsSeq);
 
         for (auto &stat : cast_tree_nonnull<InsSeq>(v).stats) {
             stat = mapIt(Funcs::pass(stat), ctx);
@@ -508,9 +492,8 @@ private:
     }
 
     return_type mapCast(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_preTransformCast<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
+        CALL_PRE(Cast);
+
         cast_tree_nonnull<Cast>(v).arg = mapIt(Funcs::pass(cast_tree_nonnull<Cast>(v).arg), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformCast<FUNC>()) {
@@ -643,6 +626,8 @@ private:
             throw ReportedRubyException{e, loc};
         }
     }
+
+#undef CALL_PRE
 };
 
 class TreeMap {
