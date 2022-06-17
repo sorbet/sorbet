@@ -557,11 +557,11 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerInterface &typechec
     if (!files.empty()) {
         auto resolved = typechecker.getResolved(files);
 
-        // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeMap::apply
+        // Instantiate fieldFinder outside loop so that result accumulates over every time we TreeWalk::apply
         FieldFinder fieldFinder(klass, kind);
         for (auto &t : resolved) {
             auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-            t.tree = ast::TreeMap::apply(ctx, fieldFinder, move(t.tree));
+            ast::TreeWalk::apply(ctx, fieldFinder, t.tree);
         }
         auto fields = fieldFinder.result();
 
@@ -596,11 +596,11 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerInterface &typechecker, 
     }
     auto resolved = typechecker.getResolved(files);
 
-    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeMap::apply
+    // Instantiate localVarFinder outside loop so that result accumualates over every time we TreeWalk::apply
     LocalVarFinder localVarFinder(method, queryLoc);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        t.tree = ast::TreeMap::apply(ctx, localVarFinder, move(t.tree));
+        ast::TreeWalk::apply(ctx, localVarFinder, t.tree);
     }
 
     auto result = localVarFinder.result();
@@ -627,7 +627,7 @@ core::MethodRef firstMethodAfterQuery(LSPTypecheckerInterface &typechecker, cons
     NextMethodFinder nextMethodFinder(queryLoc);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        t.tree = ast::TreeMap::apply(ctx, nextMethodFinder, move(t.tree));
+        ast::TreeWalk::apply(ctx, nextMethodFinder, t.tree);
     }
 
     return nextMethodFinder.result();
