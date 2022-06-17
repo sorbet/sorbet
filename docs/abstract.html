@@ -218,6 +218,127 @@ are included, and some modules mixin class methods but also include other
 modules that mixin in their own class modules. In these cases, you will need to
 declare multiple modules in the <code>mixes_in_class_methods</code> call or make multiple
 <code>mixes_in_class_methods</code> calls.</p>
+<h2><a class="anchor" aria-hidden="true" id="runtime-reflection-on-abstract-classes"></a><a href="#runtime-reflection-on-abstract-classes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime reflection on abstract classes</h2>
+<p>From time to time, it’s useful to be able to ask whether a class or module
+object is abstract at runtime.</p>
+<p>This can be done with</p>
+<pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">mod:</span> Module).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(mod)</span></span>
+  <span class="hljs-keyword">if</span> T::AbstractUtils.abstract_module?(mod)
+    puts <span class="hljs-string">"<span class="hljs-subst">#{mod}</span> is abstract"</span>
+  <span class="hljs-keyword">else</span>
+    puts <span class="hljs-string">"<span class="hljs-subst">#{mod}</span> is concrete"</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Note that in general, having to ask whether a module is abstract is a <strong>code
+smell</strong>. There is usually a way to reorganize the code such that calling
+<code>abstract_module?</code> isn’t needed. In particular, this happens most frequently
+from the use of modules with abstract singleton class methods (abstract <code>self.</code>
+methods), and the fix is to stop using abstract singleton class methods.</p>
+<p>Here’s an example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+
+<span class="hljs-comment"># --- This is an example of what NOT to do ---</span>
+
+extend T::Sig
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AbstractFoo</span></span>
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">example</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> &lt; AbstractFoo</span>
+  sig {override.void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">example</span></span>
+    puts <span class="hljs-string">'Foo#example'</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calls_example_bad</span><span class="hljs-params">(mod)</span></span>
+  <span class="hljs-comment"># even though there are no errors,</span>
+  <span class="hljs-comment"># the call to mod.example is NOT always safe!</span>
+  <span class="hljs-comment"># (see comments below)</span>
+  mod.example
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">mod:</span> T.class_of(AbstractFoo)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calls_example_okay</span><span class="hljs-params">(mod)</span></span>
+  <span class="hljs-keyword">if</span> !T::AbstractUtils.abstract_module?(mod)
+    mod.example
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+calls_example_bad(Foo)         <span class="hljs-comment"># no errors</span>
+calls_example_bad(AbstractFoo) <span class="hljs-comment"># no static error, BUT raises at runtime!</span>
+
+calls_example_okay(Foo)         <span class="hljs-comment"># no errors</span>
+calls_example_okay(AbstractFoo) <span class="hljs-comment"># no errors, because of explicit check</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20AbstractFoo%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20abstract!%0A%0A%20%20sig%20%7Babstract.void%7D%0A%20%20def%20self.example%3B%20end%0Aend%0A%0Aclass%20Foo%20%3C%20AbstractFoo%0A%20%20sig%20%7Boverride.void%7D%0A%20%20def%20self.example%0A%20%20%20%20puts%20'Foo%23example'%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28mod%3A%20T.class_of%28AbstractFoo%29%29.void%7D%0Adef%20calls_example_bad%28mod%29%0A%20%20%23%20even%20though%20there%20are%20no%20errors%2C%0A%20%20%23%20the%20call%20to%20mod.example%20is%20NOT%20always%20safe!%0A%20%20%23%20%28see%20comments%20below%29%0A%20%20mod.example%0Aend%0A%0Asig%20%7Bparams%28mod%3A%20T.class_of%28AbstractFoo%29%29.void%7D%0Adef%20calls_example_okay%28mod%29%0A%20%20if%20!T%3A%3AAbstractUtils.abstract_module%3F%28mod%29%0A%20%20%20%20mod.example%0A%20%20end%0Aend%0A%0Acalls_example_bad%28Foo%29%20%20%20%20%20%20%20%20%20%23%20no%20errors%0Acalls_example_bad%28AbstractFoo%29%20%23%20no%20static%20error%2C%20BUT%20raises%20at%20runtime!%0A%0Acalls_example_okay%28Foo%29%20%20%20%20%20%20%20%20%20%23%20no%20errors%0Acalls_example_okay%28AbstractFoo%29%20%23%20no%20errors%2C%20because%20of%20explicit%20check">→ View on sorbet.run</a></p>
+<p>In the example above, <code>calls_example_bad</code> is bad because <code>mod.example</code> is not
+always okay to call, despite Sorbet reporting no errors. In particular,
+<code>calls_example_bad(AbstractFoo)</code> will raise an exception at runtime because
+<code>example</code> is an abstract method with no implementation.</p>
+<p>An okay, but not great, fix for this is to call <code>abstract_module?</code> before the
+call to <code>mod.example</code>, which is demonstrated in <code>calls_example_okay</code>.</p>
+<p>Most other languages simply do not allow defining abstract singleton class
+methods (for example, <code>static</code> methods in TypeScript, C++, Java, C#, and more
+are not allowed to be abstract). For historical reasons attempting to make
+migrating to Sorbet easier in existing Ruby codebases, Sorbet allows abstract
+singleton class methods.</p>
+<p>A better solution is to make an interface with abstract methods, and <code>extend</code>
+that interface into a class:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
+extend T::Sig
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">IFoo</span></span>
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
+  extend T::Sig
+  extend IFoo
+  sig {override.void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">example</span></span>
+    puts <span class="hljs-string">'Foo#example'</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+sig {params(<span class="hljs-symbol">mod:</span> IFoo).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">calls_example_good</span><span class="hljs-params">(mod)</span></span>
+  <span class="hljs-comment"># call to mod.example is always safe</span>
+  mod.example
+<span class="hljs-keyword">end</span>
+
+
+calls_example_good(Foo)  <span class="hljs-comment"># no errors</span>
+calls_example_good(IFoo) <span class="hljs-comment"># doesn't type check</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Amodule%20IFoo%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20abstract!%0A%0A%20%20sig%20%7Babstract.void%7D%0A%20%20def%20example%3B%20end%0Aend%0A%0Aclass%20Foo%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20IFoo%0A%20%20sig%20%7Boverride.void%7D%0A%20%20def%20self.example%0A%20%20%20%20puts%20'Foo%23example'%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28mod%3A%20IFoo%29.void%7D%0Adef%20calls_example_good%28mod%29%0A%20%20%23%20call%20to%20mod.example%20is%20always%20safe%0A%20%20mod.example%0Aend%0A%0A%0Acalls_example_good%28Foo%29%20%20%23%20no%20errors%0Acalls_example_good%28IFoo%29%20%23%20doesn't%20type%20check">→ View on sorbet.run</a></p>
+<p>In this example, unlike before, we have a module <code>IFoo</code> with an abstract
+<strong>instance</strong> method, instead of a class <code>AbstractFoo</code> with an abstract singleton
+class method. This module is then <code>extend</code>'ed into <code>class Foo</code> to implement the
+interface.</p>
+<p>This fixes all of our problems:</p>
+<ul>
+<li>We no longer need to use <code>abstract_module?</code> to check whether <code>mod</code> is
+abstract.</li>
+<li>Sorbet statically rejects <code>calls_example_good(IFoo)</code> (intuitively: because
+<code>IFoo.example</code> is not a method that even exists).</li>
+</ul>
+<p>Another benefit is that now we have an explicit interface that can be documented
+and implemented by any class, not just subclasses of <code>AbstractFoo</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/override-checking">Override Checking</a></p>
@@ -228,7 +349,7 @@ what kinds of overriding should be allowed.</p></li>
 <p>Abstract classes and interfaces are frequently used with sealed classes to
 recreate a sort of “algebraic data type” in Sorbet.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/procs"><span class="arrow-prev">← </span><span>Blocks, Procs, &amp; Lambdas</span></a><a class="docs-next button" href="/docs/final"><span>Final Methods &amp; Classes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-an-abstract-method">Creating an abstract method</a></li><li><a href="#implementing-an-abstract-method">Implementing an abstract method</a></li><li><a href="#additional-requirements">Additional Requirements</a></li><li><a href="#abstract-singleton-methods">Abstract singleton methods</a></li><li><a href="#interfaces-and-the-included-hook">Interfaces and the <code>included</code> hook</a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/procs"><span class="arrow-prev">← </span><span>Blocks, Procs, &amp; Lambdas</span></a><a class="docs-next button" href="/docs/final"><span>Final Methods &amp; Classes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-an-abstract-method">Creating an abstract method</a></li><li><a href="#implementing-an-abstract-method">Implementing an abstract method</a></li><li><a href="#additional-requirements">Additional Requirements</a></li><li><a href="#abstract-singleton-methods">Abstract singleton methods</a></li><li><a href="#interfaces-and-the-included-hook">Interfaces and the <code>included</code> hook</a></li><li><a href="#runtime-reflection-on-abstract-classes">Runtime reflection on abstract classes</a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2022 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
