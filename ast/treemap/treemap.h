@@ -219,6 +219,13 @@ private:
         } \
     }
 
+#define CALL_MAP(tree, ctx)           \
+    if constexpr (Kind == TreeMapKind::Map) { \
+        tree = mapIt(Funcs::pass(tree), ctx); \
+    } else if constexpr (Kind == TreeMapKind::Walk) { \
+        mapIt(Funcs::pass(tree), ctx); \
+    }
+
     return_type mapClassDef(arg_type v, CTX ctx) {
         CALL_PRE(ClassDef);
 
@@ -235,7 +242,7 @@ private:
         // and that will have the same effect, without having to retroactively change all TreeMaps.
 
         for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
-            def = mapIt(Funcs::pass(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
+            CALL_MAP(def, ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
         }
 
         CALL_POST(ClassDef);
@@ -247,15 +254,13 @@ private:
         for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ =
-                    mapIt(Funcs::pass(optArg->default_), ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
+                CALL_MAP(optArg->default_, ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
 
         if constexpr (DepthKind == TreeMapDepthKind::Full) {
-            cast_tree_nonnull<MethodDef>(v).rhs =
-                mapIt(Funcs::pass(cast_tree_nonnull<MethodDef>(v).rhs),
-                      ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
+            CALL_MAP(cast_tree_nonnull<MethodDef>(v).rhs,
+                     ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
         }
 
         CALL_POST(MethodDef);
@@ -264,9 +269,9 @@ private:
     return_type mapIf(arg_type v, CTX ctx) {
         CALL_PRE(If);
 
-        cast_tree_nonnull<If>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).cond), ctx);
-        cast_tree_nonnull<If>(v).thenp = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).thenp), ctx);
-        cast_tree_nonnull<If>(v).elsep = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).elsep), ctx);
+        CALL_MAP(cast_tree_nonnull<If>(v).cond, ctx);
+        CALL_MAP(cast_tree_nonnull<If>(v).thenp, ctx);
+        CALL_MAP(cast_tree_nonnull<If>(v).elsep, ctx);
 
         CALL_POST(If);
     }
@@ -274,8 +279,8 @@ private:
     return_type mapWhile(arg_type v, CTX ctx) {
         CALL_PRE(While);
 
-        cast_tree_nonnull<While>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).cond), ctx);
-        cast_tree_nonnull<While>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<While>(v).cond, ctx);
+        CALL_MAP(cast_tree_nonnull<While>(v).body, ctx);
 
         CALL_POST(While);
     }
@@ -283,7 +288,7 @@ private:
     return_type mapBreak(arg_type v, CTX ctx) {
         CALL_PRE(Break);
 
-        cast_tree_nonnull<Break>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Break>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<Break>(v).expr, ctx);
 
         CALL_POST(Break);
     }
@@ -294,7 +299,7 @@ private:
     return_type mapNext(arg_type v, CTX ctx) {
         CALL_PRE(Next);
 
-        cast_tree_nonnull<Next>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Next>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<Next>(v).expr, ctx);
 
         CALL_POST(Next);
     }
@@ -302,7 +307,7 @@ private:
     return_type mapReturn(arg_type v, CTX ctx) {
         CALL_PRE(Return);
 
-        cast_tree_nonnull<Return>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Return>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<Return>(v).expr, ctx);
 
         CALL_POST(Return);
     }
@@ -311,28 +316,32 @@ private:
         CALL_PRE(RescueCase);
 
         for (auto &el : cast_tree_nonnull<RescueCase>(v).exceptions) {
-            el = mapIt(Funcs::pass(el), ctx);
+            CALL_MAP(el, ctx);
         }
 
-        cast_tree_nonnull<RescueCase>(v).var = mapIt(Funcs::pass(cast_tree_nonnull<RescueCase>(v).var), ctx);
+        CALL_MAP(cast_tree_nonnull<RescueCase>(v).var, ctx);
 
-        cast_tree_nonnull<RescueCase>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<RescueCase>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<RescueCase>(v).body, ctx);
 
         CALL_POST(RescueCase);
     }
     return_type mapRescue(arg_type v, CTX ctx) {
         CALL_PRE(Rescue);
 
-        cast_tree_nonnull<Rescue>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<Rescue>(v).body, ctx);
 
         for (auto &el : cast_tree_nonnull<Rescue>(v).rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
-            el = mapRescueCase(Funcs::pass(el), ctx);
+            if constexpr (Kind == TreeMapKind::Map) {
+                el = mapRescueCase(Funcs::pass(el), ctx);
+            } else if constexpr (Kind == TreeMapKind::Walk) {
+                mapRescueCase(Funcs::pass(el), ctx);
+            }
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
-        cast_tree_nonnull<Rescue>(v).else_ = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).else_), ctx);
-        cast_tree_nonnull<Rescue>(v).ensure = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).ensure), ctx);
+        CALL_MAP(cast_tree_nonnull<Rescue>(v).else_, ctx);
+        CALL_MAP(cast_tree_nonnull<Rescue>(v).ensure, ctx);
 
         CALL_POST(Rescue);
     }
@@ -344,8 +353,8 @@ private:
     return_type mapAssign(arg_type v, CTX ctx) {
         CALL_PRE(Assign);
 
-        cast_tree_nonnull<Assign>(v).lhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).lhs), ctx);
-        cast_tree_nonnull<Assign>(v).rhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).rhs), ctx);
+        CALL_MAP(cast_tree_nonnull<Assign>(v).lhs, ctx);
+        CALL_MAP(cast_tree_nonnull<Assign>(v).rhs, ctx);
 
         CALL_POST(Assign);
     }
@@ -353,15 +362,15 @@ private:
     return_type mapSend(arg_type v, CTX ctx) {
         CALL_PRE(Send);
 
-        cast_tree_nonnull<Send>(v).recv = mapIt(Funcs::pass(cast_tree_nonnull<Send>(v).recv), ctx);
+        CALL_MAP(cast_tree_nonnull<Send>(v).recv, ctx);
 
         for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
-            arg = mapIt(Funcs::pass(arg), ctx);
+            CALL_MAP(arg, ctx);
             ENFORCE(arg != nullptr);
         }
 
         if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
-            *block = mapIt(Funcs::pass(*block), ctx);
+            CALL_MAP(*block, ctx);
             ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
 
@@ -372,11 +381,11 @@ private:
         CALL_PRE(Hash);
 
         for (auto &key : cast_tree_nonnull<Hash>(v).keys) {
-            key = mapIt(Funcs::pass(key), ctx);
+            CALL_MAP(key, ctx);
         }
 
         for (auto &value : cast_tree_nonnull<Hash>(v).values) {
-            value = mapIt(Funcs::pass(value), ctx);
+            CALL_MAP(value, ctx);
         }
 
         CALL_POST(Hash);
@@ -386,7 +395,7 @@ private:
         CALL_PRE(Array);
 
         for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
-            elem = mapIt(Funcs::pass(elem), ctx);
+            CALL_MAP(elem, ctx);
         }
 
         CALL_POST(Array);
@@ -410,10 +419,10 @@ private:
         for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ = mapIt(Funcs::pass(optArg->default_), ctx);
+                CALL_MAP(optArg->default_, ctx);
             }
         }
-        cast_tree_nonnull<Block>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<Block>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<Block>(v).body, ctx);
 
         CALL_POST(Block);
     }
@@ -422,10 +431,10 @@ private:
         CALL_PRE(InsSeq);
 
         for (auto &stat : cast_tree_nonnull<InsSeq>(v).stats) {
-            stat = mapIt(Funcs::pass(stat), ctx);
+            CALL_MAP(stat, ctx);
         }
 
-        cast_tree_nonnull<InsSeq>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<InsSeq>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<InsSeq>(v).expr, ctx);
 
         CALL_POST(InsSeq);
     }
@@ -437,7 +446,7 @@ private:
     return_type mapCast(arg_type v, CTX ctx) {
         CALL_PRE(Cast);
 
-        cast_tree_nonnull<Cast>(v).arg = mapIt(Funcs::pass(cast_tree_nonnull<Cast>(v).arg), ctx);
+        CALL_MAP(cast_tree_nonnull<Cast>(v).arg, ctx);
 
         CALL_POST(Cast);
     }
@@ -580,6 +589,7 @@ private:
 
 #undef CALL_PRE
 #undef CALL_POST
+#undef CALL_MAP
 };
 
 class TreeMap {
