@@ -61,14 +61,12 @@ public:
         ENFORCE(classStack.empty());
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         classStack.emplace_back(classes.size());
         classes.emplace_back();
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         ENFORCE(!classStack.empty());
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
@@ -124,7 +122,7 @@ public:
         classes[classStack.back()] = std::move(tree);
         classStack.pop_back();
 
-        return replacement;
+        tree = std::move(replacement);
     };
 
     ast::ExpressionPtr addClasses(core::Context ctx, ast::ExpressionPtr tree) {
@@ -175,7 +173,7 @@ private:
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     ClassFlattenWalk flatten;
-    tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+    ast::TreeWalk::apply(ctx, flatten, tree.tree);
     tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
 
     return tree;
