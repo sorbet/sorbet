@@ -254,17 +254,16 @@ private:
     public:
         bool seenUnresolved = false;
 
-        ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+        void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
             auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
             seenUnresolved |= !isAlreadyResolved(ctx, original);
-            return tree;
         };
     };
 
     static bool isFullyResolved(core::Context ctx, const ast::ExpressionPtr &expression) {
         ResolutionChecker checker;
         ast::ExpressionPtr dummy(expression.getTagged());
-        dummy = ast::TreeMap::apply(ctx, checker, std::move(dummy));
+        ast::TreeWalk::apply(ctx, checker, dummy);
         ENFORCE(dummy == expression);
         dummy.release();
         return !checker.seenUnresolved;
@@ -1185,7 +1184,7 @@ private:
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
             }
-            ancestor = postTransformUnresolvedConstantLit(ctx, std::move(ancestor));
+            postTransformUnresolvedConstantLit(ctx, ancestor);
             nesting_ = scopeTmp;
         }
         AncestorResolutionItem job;
@@ -1227,9 +1226,9 @@ private:
         todoAncestors_.emplace_back(std::move(job));
     }
 
-    ast::ExpressionPtr walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+    void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto *c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            c->scope = walkUnresolvedConstantLit(ctx, std::move(c->scope));
+            walkUnresolvedConstantLit(ctx, c->scope);
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
             ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
@@ -1238,30 +1237,30 @@ private:
             } else {
                 todo_.emplace_back(std::move(job));
             }
-            return out;
+            tree = std::move(out);
+            return;
         }
         if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            return tree;
+            return;
         }
 
         // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
         // Still want to do our best to recover (for e.g., LSP queries)
-        return ast::TreeMap::apply(ctx, *this, std::move(tree));
+        ast::TreeWalk::apply(ctx, *this, tree);
     }
 
 public:
     ResolveConstantsWalk() : nesting_(nullptr) {}
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
-        return walkUnresolvedConstantLit(ctx, std::move(tree));
+    void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        walkUnresolvedConstantLit(ctx, tree);
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto klass = original.symbol;
@@ -1297,7 +1296,6 @@ public:
         }
 
         nesting_ = nesting_->parent;
-        return tree;
     }
 
     const bool checkAmbiguousDefinition(core::Context ctx) {
@@ -1379,12 +1377,12 @@ public:
         return defaultSymbol;
     }
 
-    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.isStaticField(ctx)) {
-            return tree;
+            return;
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
@@ -1410,21 +1408,20 @@ public:
             // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
             this->todo_.emplace_back(nesting_, id);
-            return tree;
+            return;
         }
 
         auto *rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);
         if (rhs == nullptr) {
-            return tree;
+            return;
         }
 
         // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
         // We may be able to get some perf by using this
         this->todoClassAliases_.emplace_back(id->symbol, rhs);
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.recv.isSelfReference()) {
             if (send.fun == core::Names::mixesInClassMethods()) {
@@ -1450,7 +1447,6 @@ public:
                 }
             }
         }
-        return tree;
     }
 
     static bool compareFiles(const core::GlobalState &gs, core::FileRef lhs, core::FileRef rhs) {
@@ -1518,7 +1514,7 @@ public:
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::Context ictx(igs, core::Symbols::root(), job.file);
-                    job.tree = ast::TreeMap::apply(ictx, constants, std::move(job.tree));
+                    ast::TreeWalk::apply(ictx, constants, job.tree);
                     partiallyResolvedTrees.emplace_back(move(job));
                     if (!constants.todo_.empty()) {
                         walkResult.todo_.emplace_back(job.file, move(constants.todo_));
@@ -2620,7 +2616,7 @@ public:
         nestedBlockCounts.emplace_back(0);
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         nestedBlockCounts.emplace_back(0);
 
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -2631,38 +2627,31 @@ public:
         if (isGenericResolved(ctx, klass.symbol)) {
             todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         nestedBlockCounts.pop_back();
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         nestedBlockCounts.emplace_back(0);
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         nestedBlockCounts.pop_back();
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
         ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() += 1;
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
         ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() -= 1;
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         switch (send.fun.rawId()) {
             case core::Names::typeAlias().rawId():
@@ -2672,30 +2661,29 @@ public:
 
             default:
                 extendClassOfDepth(send);
-                return tree;
+                return;
         }
 
         if (send.fun == core::Names::typeAlias()) {
             // don't track dependencies if this is some other method named `type_alias`
             if (!isT(send.recv)) {
                 extendClassOfDepth(send);
-                return tree;
+                return;
             }
         }
 
         trackDependencies_ = true;
         classOfDepth_.clear();
         dependencies_.clear();
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
             core::SymbolRef symbol = lit.symbol.dealias(ctx);
             if (symbol == core::Symbols::T()) {
-                return tree;
+                return;
             }
 
             if (symbol.isClassOrModule()) {
@@ -2727,7 +2715,7 @@ public:
                     // members on the singleton.
                     klass = klass.data(ctx)->lookupSingletonClass(ctx);
                     if (!klass.exists()) {
-                        return tree;
+                        return;
                     }
                 }
 
@@ -2738,11 +2726,9 @@ public:
                 dependencies_.emplace_back(symbol);
             }
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (send.fun.rawId()) {
@@ -2761,7 +2747,7 @@ public:
 
         if (auto *id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
             if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
-                return tree;
+                return;
             }
 
             switch (send.fun.rawId()) {
@@ -2771,7 +2757,7 @@ public:
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
                     if (send.numPosArgs() < 2) {
-                        return tree;
+                        return;
                     }
 
                     ResolveCastItem item;
@@ -2799,7 +2785,8 @@ public:
                         todoResolveCastItems_.emplace_back(move(item));
                     }
 
-                    return ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
+                    tree = ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
+                    return;
                 }
                 case core::Names::revealType().rawId():
                 case core::Names::absurd().rawId(): {
@@ -2821,22 +2808,22 @@ public:
                             e.setHeader("`{}` can only {} in `{}` files (or higher)", fun, doWhat, "# typed: true");
                         }
                     }
-                    return tree;
+                    return;
                 }
                 case core::Names::nonForcingIsA_p().rawId():
                     validateNonForcingIsA(ctx, send);
-                    return tree;
+                    return;
                 default:
-                    return tree;
+                    return;
             }
         } else if (send.recv.isSelfReference()) {
             if (send.fun != core::Names::aliasMethod()) {
-                return tree;
+                return;
             }
 
             const auto numPosArgs = send.numPosArgs();
             if (numPosArgs != 2) {
-                return tree;
+                return;
             }
 
             InlinedVector<core::NameRef, 2> args;
@@ -2851,7 +2838,7 @@ public:
                 args.emplace_back(name);
             }
             if (args.size() != 2) {
-                return tree;
+                return;
             }
 
             auto fromName = args[0];
@@ -2867,19 +2854,17 @@ public:
                 fromName,
             });
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         if (handleFieldDeclaration(ctx, asgn)) {
-            return tree;
+            return;
         }
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.exists()) {
-            return tree;
+            return;
         }
 
         auto sym = id->symbol;
@@ -2897,7 +2882,7 @@ public:
             // > end
             if (sym.isTypeAlias(ctx) && send->fun == core::Names::let()) {
                 todoUntypedResultTypes_.emplace_back(sym);
-                return tree;
+                return;
             }
 
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
@@ -2924,14 +2909,12 @@ public:
         }
 
         if (send == nullptr) {
-            return tree;
+            return;
         }
 
         trackDependencies_ = false;
         dependencies_.clear();
         classOfDepth_.clear();
-
-        return tree;
     }
 
     template <typename StateType>
@@ -2955,7 +2938,7 @@ public:
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::Context ctx(gs, core::Symbols::root(), job.file);
-                    job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
+                    ast::TreeWalk::apply(ctx, walk, job.tree);
                     output.files.emplace_back(move(job));
                 }
             }
@@ -3673,21 +3656,19 @@ public:
         }
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformInsSeq(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
         processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
-        return tree;
     }
 };
 
 class ResolveSanityCheckWalk {
 public:
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 tree.toString(ctx));
@@ -3696,28 +3677,23 @@ public:
         } else {
             ENFORCE(ctx.state.lookupStaticInitForClass(original.symbol).exists());
         }
-        return tree;
     }
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
-        return tree;
     }
-    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
-        return tree;
     }
-    ast::ExpressionPtr postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 tree.toString(ctx));
-        return tree;
     }
-    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, original));
-        return tree;
     }
 };
 
@@ -3743,7 +3719,7 @@ ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> t
         for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
+                ast::ShallowWalk::apply(ctx, walk, job.tree);
                 if (!walk.signatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
                     output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
                         job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
@@ -3813,7 +3789,7 @@ void sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
             core::Context ctx(gs, core::Symbols::root(), tree.file);
-            tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));
+            ast::TreeWalk::apply(ctx, sanity, tree.tree);
         }
     }
 }
