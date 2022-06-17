@@ -158,7 +158,7 @@ enum class TreeMapDepthKind {
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC, class CTX, TreeMapDepthKind Kind> class TreeMapper {
+template <class FUNC, class CTX, TreeMapDepthKind DepthKind> class TreeMapper {
 private:
     friend class TreeMap;
     friend class ShallowMap;
@@ -214,7 +214,7 @@ private:
             }
         }
 
-        if constexpr (Kind == TreeMapDepthKind::Full) {
+        if constexpr (DepthKind == TreeMapDepthKind::Full) {
             cast_tree_nonnull<MethodDef>(v).rhs =
                 mapIt(std::move(cast_tree_nonnull<MethodDef>(v).rhs),
                       ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
