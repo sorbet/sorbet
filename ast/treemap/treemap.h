@@ -513,19 +513,31 @@ private:
 
     return_type mapIt(arg_type what, CTX ctx) {
         if (what == nullptr) {
-            return what;
+            if constexpr (Kind == TreeMapKind::Map) {
+                return what;
+            } else if constexpr (Kind == TreeMapKind::Walk) {
+                return;
+            }
         }
         auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency
             if constexpr (Funcs::template HAS_MEMBER_preTransformExpression<FUNC>()) {
-                what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                if constexpr (Kind == TreeMapKind::Map) {
+                    what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                } else if constexpr (Kind == TreeMapKind::Walk) {
+                    Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                }
             }
 
             switch (what.tag()) {
                 case Tag::EmptyTree:
-                    return what;
+                    if constexpr (Kind == TreeMapKind::Map) {
+                        return what;
+                    } else if constexpr (Kind == TreeMapKind::Walk) {
+                        return;
+                    }
 
                 case Tag::Send:
                     return mapSend(Funcs::pass(what), ctx);
@@ -609,7 +621,11 @@ private:
                     return mapConstantLit(Funcs::pass(what), ctx);
 
                 case Tag::ZSuperArgs:
-                    return what;
+                    if constexpr (Kind == TreeMapKind::Map) {
+                        return what;
+                    } else if constexpr (Kind == TreeMapKind::Walk) {
+                        return;
+                    }
 
                 case Tag::Block:
                     return mapBlock(Funcs::pass(what), ctx);
