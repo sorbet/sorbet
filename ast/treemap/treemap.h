@@ -183,6 +183,7 @@ private:
     friend class ShallowMap;
 
     using Funcs = MapFunctions<Kind>;
+    using return_type = typename Funcs::return_type;
 
     FUNC &func;
 
@@ -195,7 +196,7 @@ private:
 
     TreeMapper(FUNC &func) : func(func) {}
 
-    ExpressionPtr mapClassDef(ExpressionPtr v, CTX ctx) {
+    return_type mapClassDef(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformClassDef<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -222,7 +223,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapMethodDef(ExpressionPtr v, CTX ctx) {
+    return_type mapMethodDef(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformMethodDef<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -248,7 +249,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapIf(ExpressionPtr v, CTX ctx) {
+    return_type mapIf(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformIf<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -262,7 +263,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapWhile(ExpressionPtr v, CTX ctx) {
+    return_type mapWhile(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformWhile<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -275,7 +276,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapBreak(ExpressionPtr v, CTX ctx) {
+    return_type mapBreak(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformBreak<FUNC>()) {
             return Funcs::template CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -287,14 +288,14 @@ private:
         }
         return v;
     }
-    ExpressionPtr mapRetry(ExpressionPtr v, CTX ctx) {
+    return_type mapRetry(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformRetry<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
-    ExpressionPtr mapNext(ExpressionPtr v, CTX ctx) {
+    return_type mapNext(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformNext<FUNC>()) {
             return Funcs::template CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -307,7 +308,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapReturn(ExpressionPtr v, CTX ctx) {
+    return_type mapReturn(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformReturn<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -320,7 +321,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapRescueCase(ExpressionPtr v, CTX ctx) {
+    return_type mapRescueCase(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformRescueCase<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -339,7 +340,7 @@ private:
 
         return v;
     }
-    ExpressionPtr mapRescue(ExpressionPtr v, CTX ctx) {
+    return_type mapRescue(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformRescue<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -362,14 +363,14 @@ private:
         return v;
     }
 
-    ExpressionPtr mapUnresolvedIdent(ExpressionPtr v, CTX ctx) {
+    return_type mapUnresolvedIdent(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
-    ExpressionPtr mapAssign(ExpressionPtr v, CTX ctx) {
+    return_type mapAssign(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformAssign<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -384,7 +385,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
+    return_type mapSend(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformSend<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -408,7 +409,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapHash(ExpressionPtr v, CTX ctx) {
+    return_type mapHash(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformHash<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -426,7 +427,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapArray(ExpressionPtr v, CTX ctx) {
+    return_type mapArray(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformArray<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -440,28 +441,28 @@ private:
         return v;
     }
 
-    ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
+    return_type mapLiteral(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformLiteral<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
-    ExpressionPtr mapUnresolvedConstantLit(ExpressionPtr v, CTX ctx) {
+    return_type mapUnresolvedConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
-    ExpressionPtr mapConstantLit(ExpressionPtr v, CTX ctx) {
+    return_type mapConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformConstantLit<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
-    ExpressionPtr mapBlock(ExpressionPtr v, CTX ctx) {
+    return_type mapBlock(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformBlock<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -480,7 +481,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapInsSeq(ExpressionPtr v, CTX ctx) {
+    return_type mapInsSeq(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformInsSeq<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -498,14 +499,14 @@ private:
         return v;
     }
 
-    ExpressionPtr mapLocal(ExpressionPtr v, CTX ctx) {
+    return_type mapLocal(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformLocal<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
-    ExpressionPtr mapCast(ExpressionPtr v, CTX ctx) {
+    return_type mapCast(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformCast<FUNC>()) {
             v = Funcs::template CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -518,7 +519,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapRuntimeMethodDefinition(ExpressionPtr v, CTX ctx) {
+    return_type mapRuntimeMethodDefinition(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformRuntimeMethodDefinition<FUNC>()) {
             return Funcs::template CALL_MEMBER_postTransformRuntimeMethodDefinition<FUNC>::call(func, ctx, Funcs::pass(v));
         }
@@ -526,7 +527,7 @@ private:
         return v;
     }
 
-    ExpressionPtr mapIt(ExpressionPtr what, CTX ctx) {
+    return_type mapIt(ExpressionPtr what, CTX ctx) {
         if (what == nullptr) {
             return what;
         }
