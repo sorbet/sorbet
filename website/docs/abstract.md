@@ -179,6 +179,146 @@ modules that mixin in their own class modules. In these cases, you will need to
 declare multiple modules in the `mixes_in_class_methods` call or make multiple
 `mixes_in_class_methods` calls.
 
+## Runtime reflection on abstract classes
+
+From time to time, it's useful to be able to ask whether a class or module
+object is abstract at runtime.
+
+This can be done with
+
+```ruby
+sig {params(mod: Module).void}
+def example(mod)
+  if T::AbstractUtils.abstract_module?(mod)
+    puts "#{mod} is abstract"
+  else
+    puts "#{mod} is concrete"
+  end
+end
+```
+
+Note that in general, having to ask whether a module is abstract is a **code
+smell**. There is usually a way to reorganize the code such that calling
+`abstract_module?` isn't needed. In particular, this happens most frequently
+from the use of modules with abstract singleton class methods (abstract `self.`
+methods), and the fix is to stop using abstract singleton class methods.
+
+Here's an example:
+
+```ruby
+# typed: true
+
+# --- This is an example of what NOT to do ---
+
+extend T::Sig
+
+class AbstractFoo
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def self.example; end
+end
+
+class Foo < AbstractFoo
+  sig {override.void}
+  def self.example
+    puts 'Foo#example'
+  end
+end
+
+sig {params(mod: T.class_of(AbstractFoo)).void}
+def calls_example_bad(mod)
+  # even though there are no errors,
+  # the call to mod.example is NOT always safe!
+  # (see comments below)
+  mod.example
+end
+
+sig {params(mod: T.class_of(AbstractFoo)).void}
+def calls_example_okay(mod)
+  if !T::AbstractUtils.abstract_module?(mod)
+    mod.example
+  end
+end
+
+calls_example_bad(Foo)         # no errors
+calls_example_bad(AbstractFoo) # no static error, BUT raises at runtime!
+
+calls_example_okay(Foo)         # no errors
+calls_example_okay(AbstractFoo) # no errors, because of explicit check
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20AbstractFoo%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20abstract!%0A%0A%20%20sig%20%7Babstract.void%7D%0A%20%20def%20self.example%3B%20end%0Aend%0A%0Aclass%20Foo%20%3C%20AbstractFoo%0A%20%20sig%20%7Boverride.void%7D%0A%20%20def%20self.example%0A%20%20%20%20puts%20'Foo%23example'%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28mod%3A%20T.class_of%28AbstractFoo%29%29.void%7D%0Adef%20calls_example_bad%28mod%29%0A%20%20%23%20even%20though%20there%20are%20no%20errors%2C%0A%20%20%23%20the%20call%20to%20mod.example%20is%20NOT%20always%20safe!%0A%20%20%23%20%28see%20comments%20below%29%0A%20%20mod.example%0Aend%0A%0Asig%20%7Bparams%28mod%3A%20T.class_of%28AbstractFoo%29%29.void%7D%0Adef%20calls_example_okay%28mod%29%0A%20%20if%20!T%3A%3AAbstractUtils.abstract_module%3F%28mod%29%0A%20%20%20%20mod.example%0A%20%20end%0Aend%0A%0Acalls_example_bad%28Foo%29%20%20%20%20%20%20%20%20%20%23%20no%20errors%0Acalls_example_bad%28AbstractFoo%29%20%23%20no%20static%20error%2C%20BUT%20raises%20at%20runtime!%0A%0Acalls_example_okay%28Foo%29%20%20%20%20%20%20%20%20%20%23%20no%20errors%0Acalls_example_okay%28AbstractFoo%29%20%23%20no%20errors%2C%20because%20of%20explicit%20check)
+
+In the example above, `calls_example_bad` is bad because `mod.example` is not
+always okay to call, despite Sorbet reporting no errors. In particular,
+`calls_example_bad(AbstractFoo)` will raise an exception at runtime because
+`example` is an abstract method with no implementation.
+
+An okay, but not great, fix for this is to call `abstract_module?` before the
+call to `mod.example`, which is demonstrated in `calls_example_okay`.
+
+Most other languages simply do not allow defining abstract singleton class
+methods (for example, `static` methods in TypeScript, C++, Java, C#, and more
+are not allowed to be abstract). For historical reasons attempting to make
+migrating to Sorbet easier in existing Ruby codebases, Sorbet allows abstract
+singleton class methods.
+
+A better solution is to make an interface with abstract methods, and `extend`
+that interface into a class:
+
+```ruby
+# typed: true
+extend T::Sig
+
+module IFoo
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def example; end
+end
+
+class Foo
+  extend T::Sig
+  extend IFoo
+  sig {override.void}
+  def self.example
+    puts 'Foo#example'
+  end
+end
+
+sig {params(mod: IFoo).void}
+def calls_example_good(mod)
+  # call to mod.example is always safe
+  mod.example
+end
+
+
+calls_example_good(Foo)  # no errors
+calls_example_good(IFoo) # doesn't type check
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Amodule%20IFoo%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AHelpers%0A%20%20abstract!%0A%0A%20%20sig%20%7Babstract.void%7D%0A%20%20def%20example%3B%20end%0Aend%0A%0Aclass%20Foo%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20IFoo%0A%20%20sig%20%7Boverride.void%7D%0A%20%20def%20self.example%0A%20%20%20%20puts%20'Foo%23example'%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28mod%3A%20IFoo%29.void%7D%0Adef%20calls_example_good%28mod%29%0A%20%20%23%20call%20to%20mod.example%20is%20always%20safe%0A%20%20mod.example%0Aend%0A%0A%0Acalls_example_good%28Foo%29%20%20%23%20no%20errors%0Acalls_example_good%28IFoo%29%20%23%20doesn't%20type%20check)
+
+In this example, unlike before, we have a module `IFoo` with an abstract
+**instance** method, instead of a class `AbstractFoo` with an abstract singleton
+class method. This module is then `extend`'ed into `class Foo` to implement the
+interface.
+
+This fixes all of our problems:
+
+- We no longer need to use `abstract_module?` to check whether `mod` is
+  abstract.
+- Sorbet statically rejects `calls_example_good(IFoo)` (intuitively: because
+  `IFoo.example` is not a method that even exists).
+
+Another benefit is that now we have an explicit interface that can be documented
+and implemented by any class, not just subclasses of `AbstractFoo`.
+
 ## What's next?
 
 - [Override Checking](override-checking.md)
