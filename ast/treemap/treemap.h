@@ -181,6 +181,7 @@ template <class FUNC, class CTX, TreeMapKind Kind, TreeMapDepthKind DepthKind> c
 private:
     friend class TreeMap;
     friend class ShallowMap;
+    friend class TreeWalk;
 
     using Funcs = MapFunctions<Kind>;
     using return_type = typename Funcs::return_type;
@@ -587,6 +588,22 @@ public:
         TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Full> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+};
+
+class TreeWalk {
+public:
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, ExpressionPtr &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::Walk, TreeMapDepthKind::Full> walker(func);
+        try {
+            walker.mapIt(to, ctx);
         } catch (ReportedRubyException &exception) {
             Exception::failInFuzzer();
             if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
