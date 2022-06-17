@@ -153,10 +153,16 @@ enum class TreeMapKind {
 template <TreeMapKind> struct MapFunctions;
 
 template <> struct MapFunctions<TreeMapKind::Map> {
+    using return_type = ExpressionPtr;
+    using arg_type = ExpressionPtr;
+    static ExpressionPtr &&pass(ExpressionPtr &p) { return static_cast<ExpressionPtr &&>(p); }
     GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<ExpressionPtr>());
 };
 
 template <> struct MapFunctions<TreeMapKind::Walk> {
+    using return_type = void;
+    using arg_type = ExpressionPtr &;
+    static ExpressionPtr &pass(ExpressionPtr &p) { return p; }
     GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<ExpressionPtr &>());
 };
 
@@ -191,7 +197,7 @@ private:
 
     ExpressionPtr mapClassDef(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformClassDef<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
@@ -207,36 +213,36 @@ private:
         // and that will have the same effect, without having to retroactively change all TreeMaps.
 
         for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
-            def = mapIt(std::move(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
+            def = mapIt(Funcs::pass(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
         }
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformClassDef<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformClassDef<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformClassDef<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapMethodDef(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformMethodDef<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
                 optArg->default_ =
-                    mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
+                    mapIt(Funcs::pass(optArg->default_), ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
 
         if constexpr (DepthKind == TreeMapDepthKind::Full) {
             cast_tree_nonnull<MethodDef>(v).rhs =
-                mapIt(std::move(cast_tree_nonnull<MethodDef>(v).rhs),
+                mapIt(Funcs::pass(cast_tree_nonnull<MethodDef>(v).rhs),
                       ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
         }
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformMethodDef<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformMethodDef<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -244,71 +250,71 @@ private:
 
     ExpressionPtr mapIf(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformIf<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, Funcs::pass(v));
         }
-        cast_tree_nonnull<If>(v).cond = mapIt(std::move(cast_tree_nonnull<If>(v).cond), ctx);
-        cast_tree_nonnull<If>(v).thenp = mapIt(std::move(cast_tree_nonnull<If>(v).thenp), ctx);
-        cast_tree_nonnull<If>(v).elsep = mapIt(std::move(cast_tree_nonnull<If>(v).elsep), ctx);
+        cast_tree_nonnull<If>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).cond), ctx);
+        cast_tree_nonnull<If>(v).thenp = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).thenp), ctx);
+        cast_tree_nonnull<If>(v).elsep = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).elsep), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformIf<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformIf<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformIf<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapWhile(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformWhile<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, Funcs::pass(v));
         }
-        cast_tree_nonnull<While>(v).cond = mapIt(std::move(cast_tree_nonnull<While>(v).cond), ctx);
-        cast_tree_nonnull<While>(v).body = mapIt(std::move(cast_tree_nonnull<While>(v).body), ctx);
+        cast_tree_nonnull<While>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).cond), ctx);
+        cast_tree_nonnull<While>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).body), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformWhile<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformWhile<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformWhile<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapBreak(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformBreak<FUNC>()) {
-            return Funcs::template CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
-        cast_tree_nonnull<Break>(v).expr = mapIt(std::move(cast_tree_nonnull<Break>(v).expr), ctx);
+        cast_tree_nonnull<Break>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Break>(v).expr), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformBreak<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformBreak<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformBreak<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
     ExpressionPtr mapRetry(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformRetry<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapNext(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformNext<FUNC>()) {
-            return Funcs::template CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
-        cast_tree_nonnull<Next>(v).expr = mapIt(std::move(cast_tree_nonnull<Next>(v).expr), ctx);
+        cast_tree_nonnull<Next>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Next>(v).expr), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformNext<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformNext<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformNext<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapReturn(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformReturn<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, Funcs::pass(v));
         }
-        cast_tree_nonnull<Return>(v).expr = mapIt(std::move(cast_tree_nonnull<Return>(v).expr), ctx);
+        cast_tree_nonnull<Return>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Return>(v).expr), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformReturn<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformReturn<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformReturn<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -316,41 +322,41 @@ private:
 
     ExpressionPtr mapRescueCase(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformRescueCase<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         for (auto &el : cast_tree_nonnull<RescueCase>(v).exceptions) {
-            el = mapIt(std::move(el), ctx);
+            el = mapIt(Funcs::pass(el), ctx);
         }
 
-        cast_tree_nonnull<RescueCase>(v).var = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).var), ctx);
+        cast_tree_nonnull<RescueCase>(v).var = mapIt(Funcs::pass(cast_tree_nonnull<RescueCase>(v).var), ctx);
 
-        cast_tree_nonnull<RescueCase>(v).body = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).body), ctx);
+        cast_tree_nonnull<RescueCase>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<RescueCase>(v).body), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformRescueCase<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformRescueCase<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
     }
     ExpressionPtr mapRescue(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformRescue<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
-        cast_tree_nonnull<Rescue>(v).body = mapIt(std::move(cast_tree_nonnull<Rescue>(v).body), ctx);
+        cast_tree_nonnull<Rescue>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).body), ctx);
 
         for (auto &el : cast_tree_nonnull<Rescue>(v).rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
-            el = mapRescueCase(std::move(el), ctx);
+            el = mapRescueCase(Funcs::pass(el), ctx);
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
-        cast_tree_nonnull<Rescue>(v).else_ = mapIt(std::move(cast_tree_nonnull<Rescue>(v).else_), ctx);
-        cast_tree_nonnull<Rescue>(v).ensure = mapIt(std::move(cast_tree_nonnull<Rescue>(v).ensure), ctx);
+        cast_tree_nonnull<Rescue>(v).else_ = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).else_), ctx);
+        cast_tree_nonnull<Rescue>(v).ensure = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).ensure), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformRescue<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRescue<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformRescue<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -358,21 +364,21 @@ private:
 
     ExpressionPtr mapUnresolvedIdent(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapAssign(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformAssign<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
-        cast_tree_nonnull<Assign>(v).lhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).lhs), ctx);
-        cast_tree_nonnull<Assign>(v).rhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).rhs), ctx);
+        cast_tree_nonnull<Assign>(v).lhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).lhs), ctx);
+        cast_tree_nonnull<Assign>(v).rhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).rhs), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformAssign<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformAssign<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformAssign<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -380,23 +386,23 @@ private:
 
     ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformSend<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
-        cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
+        cast_tree_nonnull<Send>(v).recv = mapIt(Funcs::pass(cast_tree_nonnull<Send>(v).recv), ctx);
 
         for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
-            arg = mapIt(std::move(arg), ctx);
+            arg = mapIt(Funcs::pass(arg), ctx);
             ENFORCE(arg != nullptr);
         }
 
         if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
-            *block = mapIt(std::move(*block), ctx);
+            *block = mapIt(Funcs::pass(*block), ctx);
             ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformSend<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -404,89 +410,89 @@ private:
 
     ExpressionPtr mapHash(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformHash<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         for (auto &key : cast_tree_nonnull<Hash>(v).keys) {
-            key = mapIt(std::move(key), ctx);
+            key = mapIt(Funcs::pass(key), ctx);
         }
 
         for (auto &value : cast_tree_nonnull<Hash>(v).values) {
-            value = mapIt(std::move(value), ctx);
+            value = mapIt(Funcs::pass(value), ctx);
         }
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformArray<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformHash<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformHash<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapArray(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformArray<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
-            elem = mapIt(std::move(elem), ctx);
+            elem = mapIt(Funcs::pass(elem), ctx);
         }
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformArray<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformArray<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformArray<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformLiteral<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapUnresolvedConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformConstantLit<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapBlock(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformBlock<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ = mapIt(std::move(optArg->default_), ctx);
+                optArg->default_ = mapIt(Funcs::pass(optArg->default_), ctx);
             }
         }
-        cast_tree_nonnull<Block>(v).body = mapIt(std::move(cast_tree_nonnull<Block>(v).body), ctx);
+        cast_tree_nonnull<Block>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<Block>(v).body), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformBlock<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformBlock<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformBlock<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapInsSeq(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformInsSeq<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         for (auto &stat : cast_tree_nonnull<InsSeq>(v).stats) {
-            stat = mapIt(std::move(stat), ctx);
+            stat = mapIt(Funcs::pass(stat), ctx);
         }
 
-        cast_tree_nonnull<InsSeq>(v).expr = mapIt(std::move(cast_tree_nonnull<InsSeq>(v).expr), ctx);
+        cast_tree_nonnull<InsSeq>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<InsSeq>(v).expr), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformInsSeq<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformInsSeq<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -494,19 +500,19 @@ private:
 
     ExpressionPtr mapLocal(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformLocal<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, Funcs::pass(v));
         }
         return v;
     }
 
     ExpressionPtr mapCast(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_preTransformCast<FUNC>()) {
-            v = Funcs::template CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, std::move(v));
+            v = Funcs::template CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, Funcs::pass(v));
         }
-        cast_tree_nonnull<Cast>(v).arg = mapIt(std::move(cast_tree_nonnull<Cast>(v).arg), ctx);
+        cast_tree_nonnull<Cast>(v).arg = mapIt(Funcs::pass(cast_tree_nonnull<Cast>(v).arg), ctx);
 
         if constexpr (Funcs::template HAS_MEMBER_postTransformCast<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformCast<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformCast<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -514,7 +520,7 @@ private:
 
     ExpressionPtr mapRuntimeMethodDefinition(ExpressionPtr v, CTX ctx) {
         if constexpr (Funcs::template HAS_MEMBER_postTransformRuntimeMethodDefinition<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRuntimeMethodDefinition<FUNC>::call(func, ctx, std::move(v));
+            return Funcs::template CALL_MEMBER_postTransformRuntimeMethodDefinition<FUNC>::call(func, ctx, Funcs::pass(v));
         }
 
         return v;
@@ -529,7 +535,7 @@ private:
         try {
             // TODO: reorder by frequency
             if constexpr (Funcs::template HAS_MEMBER_preTransformExpression<FUNC>()) {
-                what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, std::move(what));
+                what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
             }
 
             switch (what.tag()) {
@@ -537,44 +543,44 @@ private:
                     return what;
 
                 case Tag::Send:
-                    return mapSend(std::move(what), ctx);
+                    return mapSend(Funcs::pass(what), ctx);
 
                 case Tag::ClassDef:
-                    return mapClassDef(std::move(what), ctx);
+                    return mapClassDef(Funcs::pass(what), ctx);
 
                 case Tag::MethodDef:
-                    return mapMethodDef(std::move(what), ctx);
+                    return mapMethodDef(Funcs::pass(what), ctx);
 
                 case Tag::If:
-                    return mapIf(std::move(what), ctx);
+                    return mapIf(Funcs::pass(what), ctx);
 
                 case Tag::While:
-                    return mapWhile(std::move(what), ctx);
+                    return mapWhile(Funcs::pass(what), ctx);
 
                 case Tag::Break:
-                    return mapBreak(std::move(what), ctx);
+                    return mapBreak(Funcs::pass(what), ctx);
 
                 case Tag::Retry:
-                    return mapRetry(std::move(what), ctx);
+                    return mapRetry(Funcs::pass(what), ctx);
 
                 case Tag::Next:
-                    return mapNext(std::move(what), ctx);
+                    return mapNext(Funcs::pass(what), ctx);
 
                 case Tag::Return:
-                    return mapReturn(std::move(what), ctx);
+                    return mapReturn(Funcs::pass(what), ctx);
 
                 case Tag::RescueCase:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::Rescue:
-                    return mapRescue(std::move(what), ctx);
+                    return mapRescue(Funcs::pass(what), ctx);
 
                 case Tag::Local:
-                    return mapLocal(std::move(what), ctx);
+                    return mapLocal(Funcs::pass(what), ctx);
 
                 case Tag::UnresolvedIdent:
-                    return mapUnresolvedIdent(std::move(what), ctx);
+                    return mapUnresolvedIdent(Funcs::pass(what), ctx);
 
                 case Tag::RestArg:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
@@ -597,37 +603,37 @@ private:
                     break;
 
                 case Tag::Assign:
-                    return mapAssign(std::move(what), ctx);
+                    return mapAssign(Funcs::pass(what), ctx);
 
                 case Tag::Cast:
-                    return mapCast(std::move(what), ctx);
+                    return mapCast(Funcs::pass(what), ctx);
 
                 case Tag::Hash:
-                    return mapHash(std::move(what), ctx);
+                    return mapHash(Funcs::pass(what), ctx);
 
                 case Tag::Array:
-                    return mapArray(std::move(what), ctx);
+                    return mapArray(Funcs::pass(what), ctx);
 
                 case Tag::Literal:
-                    return mapLiteral(std::move(what), ctx);
+                    return mapLiteral(Funcs::pass(what), ctx);
 
                 case Tag::UnresolvedConstantLit:
-                    return mapUnresolvedConstantLit(std::move(what), ctx);
+                    return mapUnresolvedConstantLit(Funcs::pass(what), ctx);
 
                 case Tag::ConstantLit:
-                    return mapConstantLit(std::move(what), ctx);
+                    return mapConstantLit(Funcs::pass(what), ctx);
 
                 case Tag::ZSuperArgs:
                     return what;
 
                 case Tag::Block:
-                    return mapBlock(std::move(what), ctx);
+                    return mapBlock(Funcs::pass(what), ctx);
 
                 case Tag::InsSeq:
-                    return mapInsSeq(std::move(what), ctx);
+                    return mapInsSeq(Funcs::pass(what), ctx);
 
                 case Tag::RuntimeMethodDefinition:
-                    return mapRuntimeMethodDefinition(std::move(what), ctx);
+                    return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
             }
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
