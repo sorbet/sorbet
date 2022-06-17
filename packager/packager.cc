@@ -609,7 +609,8 @@ public:
             }
         }
 
-        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName()) {
+        if (!boundsEmpty && end - begin == 1 && packages[begin] == filePkg.mangledName() &&
+            nameParts.size() >= ctx.state.packageDB().getPackageInfo(packages[begin]).fullName().size()) {
             // We have descended into a package with no sub-packages. At this point it is safe to
             // skip tracking of deeper constants.
             curPkg.emplace_back(packages[begin], SKIP_BOUND_VAL);
@@ -619,6 +620,7 @@ public:
 
         bounds.emplace_back(begin, end);
         nameParts.emplace_back(name);
+
         auto lb = std::lower_bound(packages.begin() + begin, packages.begin() + end, nameParts,
                                    [ctx](auto pkgNr, auto &nameParts) -> bool {
                                        return core::packages::PackageInfo::lexCmp(
