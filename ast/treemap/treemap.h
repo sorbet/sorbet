@@ -206,6 +206,18 @@ private:
         } \
     }
 
+#define CALL_POST(member) \
+    if constexpr (Kind == TreeMapKind::Map) { \
+        if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) { \
+            return Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
+        } \
+        return v; \
+    } else if constexpr (Kind == TreeMapKind::Walk) {   \
+        if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) { \
+            Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
+        } \
+    }
+
     return_type mapClassDef(arg_type v, CTX ctx) {
         CALL_PRE(ClassDef);
 
@@ -225,10 +237,7 @@ private:
             def = mapIt(Funcs::pass(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
         }
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformClassDef<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformClassDef<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(ClassDef);
     }
 
     return_type mapMethodDef(arg_type v, CTX ctx) {
@@ -248,11 +257,7 @@ private:
                       ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
         }
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformMethodDef<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformMethodDef<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(MethodDef);
     }
 
     return_type mapIf(arg_type v, CTX ctx) {
@@ -262,10 +267,7 @@ private:
         cast_tree_nonnull<If>(v).thenp = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).thenp), ctx);
         cast_tree_nonnull<If>(v).elsep = mapIt(Funcs::pass(cast_tree_nonnull<If>(v).elsep), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformIf<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformIf<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(If);
     }
 
     return_type mapWhile(arg_type v, CTX ctx) {
@@ -274,10 +276,7 @@ private:
         cast_tree_nonnull<While>(v).cond = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).cond), ctx);
         cast_tree_nonnull<While>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<While>(v).body), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformWhile<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformWhile<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(While);
     }
 
     return_type mapBreak(arg_type v, CTX ctx) {
@@ -285,16 +284,10 @@ private:
 
         cast_tree_nonnull<Break>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Break>(v).expr), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformBreak<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformBreak<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Break);
     }
     return_type mapRetry(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformRetry<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Retry);
     }
 
     return_type mapNext(arg_type v, CTX ctx) {
@@ -302,10 +295,7 @@ private:
 
         cast_tree_nonnull<Next>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Next>(v).expr), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformNext<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformNext<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Next);
     }
 
     return_type mapReturn(arg_type v, CTX ctx) {
@@ -313,11 +303,7 @@ private:
 
         cast_tree_nonnull<Return>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<Return>(v).expr), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformReturn<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformReturn<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(Return);
     }
 
     return_type mapRescueCase(arg_type v, CTX ctx) {
@@ -331,11 +317,7 @@ private:
 
         cast_tree_nonnull<RescueCase>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<RescueCase>(v).body), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformRescueCase<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRescueCase<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(RescueCase);
     }
     return_type mapRescue(arg_type v, CTX ctx) {
         CALL_PRE(Rescue);
@@ -351,18 +333,11 @@ private:
         cast_tree_nonnull<Rescue>(v).else_ = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).else_), ctx);
         cast_tree_nonnull<Rescue>(v).ensure = mapIt(Funcs::pass(cast_tree_nonnull<Rescue>(v).ensure), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformRescue<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRescue<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(Rescue);
     }
 
     return_type mapUnresolvedIdent(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(UnresolvedIdent);
     }
 
     return_type mapAssign(arg_type v, CTX ctx) {
@@ -371,11 +346,7 @@ private:
         cast_tree_nonnull<Assign>(v).lhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).lhs), ctx);
         cast_tree_nonnull<Assign>(v).rhs = mapIt(Funcs::pass(cast_tree_nonnull<Assign>(v).rhs), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformAssign<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformAssign<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(Assign);
     }
 
     return_type mapSend(arg_type v, CTX ctx) {
@@ -393,11 +364,7 @@ private:
             ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformSend<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(Send);
     }
 
     return_type mapHash(arg_type v, CTX ctx) {
@@ -411,10 +378,7 @@ private:
             value = mapIt(Funcs::pass(value), ctx);
         }
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformArray<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformHash<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Hash);
     }
 
     return_type mapArray(arg_type v, CTX ctx) {
@@ -424,31 +388,19 @@ private:
             elem = mapIt(Funcs::pass(elem), ctx);
         }
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformArray<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformArray<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Array);
     }
 
     return_type mapLiteral(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformLiteral<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Literal);
     }
 
     return_type mapUnresolvedConstantLit(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(UnresolvedConstantLit);
     }
 
     return_type mapConstantLit(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformConstantLit<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(ConstantLit);
     }
 
     return_type mapBlock(arg_type v, CTX ctx) {
@@ -462,10 +414,7 @@ private:
         }
         cast_tree_nonnull<Block>(v).body = mapIt(Funcs::pass(cast_tree_nonnull<Block>(v).body), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformBlock<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformBlock<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Block);
     }
 
     return_type mapInsSeq(arg_type v, CTX ctx) {
@@ -477,18 +426,11 @@ private:
 
         cast_tree_nonnull<InsSeq>(v).expr = mapIt(Funcs::pass(cast_tree_nonnull<InsSeq>(v).expr), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformInsSeq<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformInsSeq<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(InsSeq);
     }
 
     return_type mapLocal(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformLocal<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-        return v;
+        CALL_POST(Local);
     }
 
     return_type mapCast(arg_type v, CTX ctx) {
@@ -496,19 +438,11 @@ private:
 
         cast_tree_nonnull<Cast>(v).arg = mapIt(Funcs::pass(cast_tree_nonnull<Cast>(v).arg), ctx);
 
-        if constexpr (Funcs::template HAS_MEMBER_postTransformCast<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformCast<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(Cast);
     }
 
     return_type mapRuntimeMethodDefinition(arg_type v, CTX ctx) {
-        if constexpr (Funcs::template HAS_MEMBER_postTransformRuntimeMethodDefinition<FUNC>()) {
-            return Funcs::template CALL_MEMBER_postTransformRuntimeMethodDefinition<FUNC>::call(func, ctx, Funcs::pass(v));
-        }
-
-        return v;
+        CALL_POST(RuntimeMethodDefinition);
     }
 
     return_type mapIt(arg_type what, CTX ctx) {
@@ -644,6 +578,7 @@ private:
     }
 
 #undef CALL_PRE
+#undef CALL_POST
 };
 
 class TreeMap {
