@@ -74,67 +74,72 @@ public:
 
 // NOTE: Implementations must use a context type parameter that `MutableContext` is convertable to.
 // That is, either `Context` or `MutableContext`.
-#define GENERATE_HAS_MEMBER_VISITOR(X) \
-    GENERATE_HAS_MEMBER(X, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
+#define GENERATE_HAS_MEMBER_VISITOR(X, arg_types...)                               \
+    GENERATE_HAS_MEMBER(X, arg_types)
 
 // used to check for ABSENCE of method
-GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedIdent);
-GENERATE_HAS_MEMBER_VISITOR(preTransformLocal);
-GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedConstantLit);
-GENERATE_HAS_MEMBER_VISITOR(preTransformConstantLit);
-GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral);
-GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition);
 
-#define GENERATE_POSTPONE_PRECLASS(X)                                                                            \
+#define GENERATE_POSTPONE_PRECLASS(X, arg_types...)                                  \
     GENERATE_CALL_MEMBER(preTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
-                         return nullptr, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
+                         return nullptr, arg_types)
 
-#define GENERATE_POSTPONE_POSTCLASS(X)                                                                            \
+#define GENERATE_POSTPONE_POSTCLASS(X, arg_types...)                                 \
     GENERATE_CALL_MEMBER(postTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
-                         return nullptr, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
+                         return nullptr, arg_types)
 
-GENERATE_POSTPONE_PRECLASS(Expression);
-GENERATE_POSTPONE_PRECLASS(ClassDef);
-GENERATE_POSTPONE_PRECLASS(MethodDef);
-GENERATE_POSTPONE_PRECLASS(If);
-GENERATE_POSTPONE_PRECLASS(While);
-GENERATE_POSTPONE_PRECLASS(Break);
-GENERATE_POSTPONE_PRECLASS(Retry);
-GENERATE_POSTPONE_PRECLASS(Next);
-GENERATE_POSTPONE_PRECLASS(Return);
-GENERATE_POSTPONE_PRECLASS(RescueCase);
-GENERATE_POSTPONE_PRECLASS(Rescue);
-GENERATE_POSTPONE_PRECLASS(Assign);
-GENERATE_POSTPONE_PRECLASS(Send);
-GENERATE_POSTPONE_PRECLASS(Hash);
-GENERATE_POSTPONE_PRECLASS(Array);
-GENERATE_POSTPONE_PRECLASS(Block);
-GENERATE_POSTPONE_PRECLASS(InsSeq);
-GENERATE_POSTPONE_PRECLASS(Cast);
 
-GENERATE_POSTPONE_POSTCLASS(ClassDef);
-GENERATE_POSTPONE_POSTCLASS(MethodDef);
-GENERATE_POSTPONE_POSTCLASS(If);
-GENERATE_POSTPONE_POSTCLASS(While);
-GENERATE_POSTPONE_POSTCLASS(Break);
-GENERATE_POSTPONE_POSTCLASS(Retry);
-GENERATE_POSTPONE_POSTCLASS(Next);
-GENERATE_POSTPONE_POSTCLASS(Return);
-GENERATE_POSTPONE_POSTCLASS(RescueCase);
-GENERATE_POSTPONE_POSTCLASS(Rescue);
-GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
-GENERATE_POSTPONE_POSTCLASS(Assign);
-GENERATE_POSTPONE_POSTCLASS(Send);
-GENERATE_POSTPONE_POSTCLASS(Hash);
-GENERATE_POSTPONE_POSTCLASS(Array);
-GENERATE_POSTPONE_POSTCLASS(Local);
-GENERATE_POSTPONE_POSTCLASS(Literal);
-GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit);
-GENERATE_POSTPONE_POSTCLASS(ConstantLit);
-GENERATE_POSTPONE_POSTCLASS(Block);
-GENERATE_POSTPONE_POSTCLASS(InsSeq);
-GENERATE_POSTPONE_POSTCLASS(Cast);
-GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition);
+#define GENERATE_METAPROGRAMMING_FOR(arg_types...) \
+GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedIdent, arg_types); \
+GENERATE_HAS_MEMBER_VISITOR(preTransformLocal, arg_types); \
+GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedConstantLit, arg_types); \
+GENERATE_HAS_MEMBER_VISITOR(preTransformConstantLit, arg_types); \
+GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral, arg_types); \
+GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition, arg_types); \
+ \
+GENERATE_POSTPONE_PRECLASS(Expression, arg_types); \
+GENERATE_POSTPONE_PRECLASS(ClassDef, arg_types); \
+GENERATE_POSTPONE_PRECLASS(MethodDef, arg_types); \
+GENERATE_POSTPONE_PRECLASS(If, arg_types); \
+GENERATE_POSTPONE_PRECLASS(While, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Break, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Retry, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Next, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Return, arg_types); \
+GENERATE_POSTPONE_PRECLASS(RescueCase, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Rescue, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Assign, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Send, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Hash, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Array, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Block, arg_types); \
+GENERATE_POSTPONE_PRECLASS(InsSeq, arg_types); \
+GENERATE_POSTPONE_PRECLASS(Cast, arg_types); \
+\
+GENERATE_POSTPONE_POSTCLASS(ClassDef, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(MethodDef, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(If, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(While, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Break, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Retry, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Next, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Return, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(RescueCase, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Rescue, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Assign, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Send, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Hash, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Array, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Local, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Literal, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(ConstantLit, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Block, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(InsSeq, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(Cast, arg_types); \
+GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types); \
+
+GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<ExpressionPtr>());
 
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
