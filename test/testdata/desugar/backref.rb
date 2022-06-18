@@ -16,10 +16,10 @@ x5 = $+ # contains last capture group;
 T.reveal_type(x5) # error: Revealed type: `T.nilable(String)`
 
 x6 = $1 # contains the first match group;
-T.reveal_type(x6) # error: Revealed type: `T.untyped`
+T.reveal_type(x6) # error: Revealed type: `T.nilable(String)`
 
 x7 = $9 # contains the 9th match group;
-T.reveal_type(x7) # error: Revealed type: `T.untyped`
+T.reveal_type(x7) # error: Revealed type: `T.nilable(String)`
 
 class TestNotPinningBackrefs
   /foo/.match("foo") do |m|
