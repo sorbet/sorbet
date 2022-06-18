@@ -1584,9 +1584,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::NthRef *var) {
-                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global,
-                                                                     dctx.ctx.state.enterNameUTF8(to_string(var->ref)));
-                result = std::move(res);
+                auto recv = MK::Constant(loc, core::Symbols::Magic());
+                auto arg = MK::Int(var->loc, var->ref);
+                result = MK::Send1(loc, std::move(recv), core::Names::regexBackref(), locZeroLen, std::move(arg));
             },
             [&](parser::Super *super) {
                 // Desugar super into a call to a normal method named `super`;
