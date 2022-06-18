@@ -97,8 +97,9 @@ SORBET_ALIVE(void, sorbet_pushBlockFrame, (const struct rb_captured_block *));
 SORBET_ALIVE(void, sorbet_popFrame, (void));
 
 SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
+// Takes varargs of the IDs for keyword arguments, if any.
 SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
-             (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, VALUE *keys));
+             (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, ...));
 SORBET_ALIVE(VALUE, sorbet_callFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
 SORBET_ALIVE(VALUE, sorbet_callSuperFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
 SORBET_ALIVE(void, sorbet_vmMethodSearch, (struct FunctionInlineCache * cache, VALUE recv));

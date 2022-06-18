@@ -508,27 +508,23 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
         auto *argcVal = llvm::ConstantInt::get(cs, llvm::APInt(32, argc, true));
 
         auto *keywordsLenVal = llvm::ConstantInt::get(cs, llvm::APInt(32, keywords.size(), true));
-        llvm::Value *keywordsVal = nullptr;
 
-        if (keywords.empty()) {
-            keywordsVal = llvm::ConstantPointerNull::get(llvm::Type::getInt64Ty(cs)->getPointerTo());
-        } else {
-            // NOTE: we may want to create one array that has the max number of slots available and re-use it for each
-            // initialization
-            auto *numKeywords = llvm::ConstantInt::get(cs, llvm::APInt(32, keywords.size()));
-            keywordsVal = builder.CreateAlloca(llvm::Type::getInt64Ty(cs), numKeywords, "keywords");
+        auto *flagVal = flags.build(cs, builder);
 
-            int index = 0;
+        vector<llvm::Value *> args;
+        args.push_back(cache);
+        args.push_back(midVal);
+        args.push_back(flagVal);
+        args.push_back(argcVal);
+        args.push_back(keywordsLenVal);
+        if (!keywords.empty()) {
             for (auto kw : keywords) {
                 auto *kwVal = Payload::idIntern(cs, builder, kw);
-                auto *symVal = builder.CreateCall(cs.getFunction("sorbet_IDToSym"), {kwVal}, "symbol");
-
-                builder.CreateStore(symVal, builder.CreateConstGEP1_32(keywordsVal, index++));
+                args.push_back(kwVal);
             }
         }
 
-        auto *flagVal = flags.build(cs, builder);
-        builder.CreateCall(setupFn, {cache, midVal, flagVal, argcVal, keywordsLenVal, keywordsVal});
+        builder.CreateCall(setupFn, args);
 
         builder.restoreIP(restore);
     }

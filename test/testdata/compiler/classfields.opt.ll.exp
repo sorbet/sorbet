@@ -121,7 +121,7 @@ declare %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64) local_
 
 declare void @sorbet_popFrame() local_unnamed_addr #1
 
-declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, i64*) local_unnamed_addr #1
+declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) local_unnamed_addr #1
 
 declare i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache*, i64) local_unnamed_addr #1
 
@@ -180,19 +180,19 @@ allocRubyIds:
   tail call void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef getelementptr inbounds ([29 x i64], [29 x i64]* @iseqEncodedArray, i32 0, i32 0), i32 noundef 29)
   tail call fastcc void @"Constr_stackFramePrecomputed_func_<root>.17<static-init>$153"(i64 %realpath)
   %rubyId_new = load i64, i64* getelementptr inbounds ([10 x i64], [10 x i64]* @sorbet_moduleIDTable, i64 0, i64 1), align 8, !dbg !10, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_new, i64 %rubyId_new, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !10
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_new, i64 %rubyId_new, i32 noundef 16, i32 noundef 0, i32 noundef 0), !dbg !10
   %rubyId_initialize = load i64, i64* getelementptr inbounds ([10 x i64], [10 x i64]* @sorbet_moduleIDTable, i64 0, i64 2), align 8, !dbg !10, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_initialize, i64 %rubyId_initialize, i32 noundef 20, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !10
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_initialize, i64 %rubyId_initialize, i32 noundef 20, i32 noundef 0, i32 noundef 0), !dbg !10
   %rubyId_write = load i64, i64* getelementptr inbounds ([10 x i64], [10 x i64]* @sorbet_moduleIDTable, i64 0, i64 3), align 8, !dbg !10, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_write, i64 %rubyId_write, i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !10
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_write, i64 %rubyId_write, i32 noundef 16, i32 noundef 1, i32 noundef 0), !dbg !10
   %rubyId_read = load i64, i64* getelementptr inbounds ([10 x i64], [10 x i64]* @sorbet_moduleIDTable, i64 0, i64 4), align 8, !dbg !15, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_read, i64 %rubyId_read, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !15
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_read, i64 %rubyId_read, i32 noundef 16, i32 noundef 0, i32 noundef 0), !dbg !15
   %rubyId_puts = load i64, i64* getelementptr inbounds ([10 x i64], [10 x i64]* @sorbet_moduleIDTable, i64 0, i64 5), align 8, !dbg !16, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !16
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_new.1, i64 %rubyId_new, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !17
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_initialize.2, i64 %rubyId_initialize, i32 noundef 20, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !17
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_read.3, i64 %rubyId_read, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !17
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts.4, i64 %rubyId_puts, i32 noundef 20, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !18
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts, i32 noundef 20, i32 noundef 1, i32 noundef 0), !dbg !16
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_new.1, i64 %rubyId_new, i32 noundef 16, i32 noundef 0, i32 noundef 0), !dbg !17
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_initialize.2, i64 %rubyId_initialize, i32 noundef 20, i32 noundef 0, i32 noundef 0), !dbg !17
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_read.3, i64 %rubyId_read, i32 noundef 16, i32 noundef 0, i32 noundef 0), !dbg !17
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts.4, i64 %rubyId_puts, i32 noundef 20, i32 noundef 1, i32 noundef 0), !dbg !18
   tail call fastcc void @"Constr_stackFramePrecomputed_func_B#5write"(i64 %realpath)
   tail call fastcc void @"Constr_stackFramePrecomputed_func_B#4read"(i64 %realpath)
   tail call fastcc void @Constr_stackFramePrecomputed_func_B.4read(i64 %realpath)
