@@ -21,8 +21,8 @@ public:
         }
     };
 
-    static std::unique_ptr<Node> run(core::GlobalState &gs, core::FileRef file, Settings settings,
-                                     std::vector<std::string> initialLocals = {});
+    static NodePtr run(core::GlobalState &gs, core::FileRef file, Settings settings,
+                       std::vector<std::string> initialLocals = {});
 };
 
 } // namespace sorbet::parser

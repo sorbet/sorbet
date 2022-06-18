@@ -774,7 +774,7 @@ string constructorArgType(FieldType arg) {
         case FieldType::Name:
             return "core::NameRef";
         case FieldType::Node:
-            return "std::unique_ptr<Node>";
+            return "NodePtr";
         case FieldType::NodeVec:
             return "NodeVec";
         case FieldType::String:
@@ -793,7 +793,7 @@ string fieldType(FieldType arg) {
         case FieldType::Name:
             return "core::NameRef";
         case FieldType::Node:
-            return "std::unique_ptr<Node>";
+            return "NodePtr";
         case FieldType::NodeVec:
             return "NodeVec";
         case FieldType::String:
@@ -808,6 +808,9 @@ string fieldType(FieldType arg) {
 }
 
 void emitNodeHeader(ostream &out, NodeDef &node) {
+    out << "class " << node.name << ";" << '\n';
+    out << "template <> struct NodeToTag<" << node.name << "> { static constexpr NodeTag value = NodeTag::" << node.name
+        << "; };" << '\n';
     out << "class " << node.name << " final : public Node {" << '\n';
     out << "public:" << '\n';
 
@@ -817,7 +820,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
         out << ", " << constructorArgType(arg.type) << " " << arg.name;
     }
     out << ")" << '\n';
-    out << "        : Node(loc)";
+    out << "        : Node(NodeTag::" << node.name << ", loc)";
     for (auto &arg : node.fields) {
         out << ", " << arg.name << "(";
         if (arg.type == FieldType::Node || arg.type == FieldType::NodeVec) {
@@ -831,7 +834,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     }
     out << '\n';
     out << "{";
-    out << R"(    categoryCounterInc("nodes", ")" << node.name << "\");" << '\n';
+    out << "    categoryCounterInc(\"nodes\", \"" << node.name << "\");" << '\n';
     out << "}" << '\n';
     out << '\n';
 
@@ -840,19 +843,18 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
         out << "    " << fieldType(arg.type) << " " << arg.name << ";" << '\n';
     }
     out << '\n';
-    out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
-    out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
-        << '\n';
-    out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string nodeName();" << '\n';
+    out << "  std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
+    out << "  std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);" << '\n';
+    out << "  std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  std::string nodeName() const;" << '\n';
 
     out << "};" << '\n';
     out << '\n';
 }
 
 void emitNodeClassfile(ostream &out, NodeDef &node) {
-    out << "  std::string " << node.name << "::nodeName() {" << '\n';
+    out << "  std::string " << node.name << "::nodeName() const {" << '\n';
     out << "    return \"" << node.name << "\";" << '\n';
     out << "  };" << '\n' << '\n';
 
@@ -918,7 +920,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
+    out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma
         << "\\n\");\n";
     int i = -1;
     // Generate fields
@@ -965,7 +967,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
@@ -993,8 +995,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
-        << "\\n\");\n";
+    out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma
+        << "\");\n";
     i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
@@ -1034,17 +1036,17 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Uint:
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
             case FieldType::Loc:
                 out << "      bool showFull = true;";
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "      fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", "
                     << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:
-                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \\\"{}\\\""
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
         }
@@ -1113,11 +1115,47 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
 }
 
 int main(int argc, char **argv) {
-    // emit headef file
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {
             cerr << "unable to open " << argv[1] << '\n';
+            return 1;
+        }
+        header << "enum class NodeTag : uint32_t {" << '\n';
+        bool first = true;
+        for (auto &node : nodes) {
+            header << "    " << node.name << (first ? " = 1" : "") << ',' << '\n';
+            first = false;
+        }
+        header << "};" << '\n' << '\n';
+        header << "template <typename T> struct NodeToTag;" << '\n' << '\n';
+    }
+
+    {
+        ofstream header(argv[2], ios::trunc);
+        if (!header.good()) {
+            cerr << "unable to open " << argv[2] << '\n';
+            return 1;
+        }
+        header << "#define CASE_STATEMENT(CASE_BODY, T) \\" << '\n';
+        header << "    case NodeTag::T: { \\" << '\n';
+        header << "        CASE_BODY(T)   \\" << '\n';
+        header << "        break; \\" << '\n';
+        header << "}" << '\n' << '\n';
+
+        header << "#define GENERATE_TAG_SWITCH(tag, CASE_BODY) \\" << '\n';
+        header << "    switch (tag) { \\" << '\n';
+        for (auto &node : nodes) {
+            header << "        CASE_STATEMENT(CASE_BODY, " << node.name << ") \\" << '\n';
+        }
+        header << "}" << '\n' << '\n';
+    }
+
+    // emit header file
+    {
+        ofstream header(argv[3], ios::trunc);
+        if (!header.good()) {
+            cerr << "unable to open " << argv[3] << '\n';
             return 1;
         }
         for (auto &node : nodes) {
@@ -1126,9 +1164,9 @@ int main(int argc, char **argv) {
     }
 
     {
-        ofstream classfile(argv[2], ios::trunc);
+        ofstream classfile(argv[4], ios::trunc);
         if (!classfile.good()) {
-            cerr << "unable to open " << argv[2] << '\n';
+            cerr << "unable to open " << argv[4] << '\n';
             return 1;
         }
         classfile << "#include \"parser/Node.h\"" << '\n' << '\n';

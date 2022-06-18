@@ -6,7 +6,7 @@
 #include "ruby_parser/driver.hh"
 #include <algorithm>
 
-template class std::unique_ptr<sorbet::parser::Node>;
+template class std::unique_ptr<sorbet::parser::Node, sorbet::parser::NodeDeleter>;
 
 using namespace std;
 
@@ -117,8 +117,8 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
 
 } // namespace
 
-unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
-                             vector<string> initialLocals) {
+NodePtr Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Settings settings,
+                    vector<string> initialLocals) {
     // Marked `const` so that we can re-use across multiple `build()` invocations
     const Builder builder(gs, file);
 
@@ -162,7 +162,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
 
     if (astRetry == nullptr) {
         // Retry did not produce a parse result
-        return make_unique<Begin>(core::LocOffsets{0, 0}, NodeVec{});
+        return make_node<Begin>(core::LocOffsets{0, 0}, NodeVec{});
     }
 
     ENFORCE(absl::c_any_of(driverRetry->diagnostics,
