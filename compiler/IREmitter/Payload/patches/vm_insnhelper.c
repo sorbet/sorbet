@@ -1,3 +1,4 @@
+#include <stdarg.h>
 
 // compiler is closely aware of layout of this struct
 struct FunctionInlineCache {
@@ -106,7 +107,9 @@ void sorbet_setMethodStackFrame(rb_execution_context_t *ec, rb_control_frame_t *
 // Initialize a method send cache. The values passed in for the keys must all be symbol values, and argc includes
 // num_kwargs.
 void sorbet_setupFunctionInlineCache(struct FunctionInlineCache *cache, ID mid, unsigned int flags, int argc,
-                                     int num_kwargs, VALUE *keys) {
+                                     int num_kwargs, ...) {
+    va_list kw_ids;
+    va_start(kw_ids, num_kwargs);
     struct rb_kwarg_call_data *cd = &cache->cd;
 
     cd->ci_kw.ci.mid = mid;
@@ -120,12 +123,16 @@ void sorbet_setupFunctionInlineCache(struct FunctionInlineCache *cache, ID mid, 
             num_kwargs - 1, sizeof(VALUE), sizeof(struct rb_call_info_kw_arg));
 
         kw_arg->keyword_len = num_kwargs;
-        memcpy(&kw_arg->keywords, keys, num_kwargs * sizeof(VALUE));
+        for (int i = 0; i < num_kwargs; ++i) {
+            ID id = va_arg(kw_ids, ID);
+            kw_arg->keywords[i] = ID2SYM(id);
+        }
 
         cd->ci_kw.kw_arg = kw_arg;
     } else {
         cd->ci_kw.kw_arg = NULL;
     }
+    va_end(kw_ids);
 }
 
 void sorbet_vmMethodSearch(struct FunctionInlineCache *cache, VALUE recv) {
