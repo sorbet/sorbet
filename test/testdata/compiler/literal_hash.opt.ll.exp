@@ -106,7 +106,7 @@ declare void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo*, i64*, i32
 
 declare i64 @sorbet_readRealpath() local_unnamed_addr #1
 
-declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, i64*) local_unnamed_addr #1
+declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) local_unnamed_addr #1
 
 declare i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache*, i64) local_unnamed_addr #1
 
@@ -155,7 +155,7 @@ allocRubyIds:
   tail call fastcc void @Constr_ruby_hashLiteral6() #8
   tail call fastcc void @Constr_ruby_hashLiteral7() #8
   %rubyId_puts = load i64, i64* getelementptr inbounds ([4 x i64], [4 x i64]* @sorbet_moduleIDTable, i64 0, i64 3), align 8, !dbg !10, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts, i32 noundef 20, i32 noundef 7, i32 noundef 0, i64* noundef null), !dbg !10
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts, i32 noundef 20, i32 noundef 7, i32 noundef 0), !dbg !10
   ret void
 }
 

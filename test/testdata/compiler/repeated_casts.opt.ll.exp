@@ -118,7 +118,7 @@ declare %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64) local_
 
 declare void @sorbet_popFrame() local_unnamed_addr #3
 
-declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, i64*) local_unnamed_addr #3
+declare void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) local_unnamed_addr #3
 
 declare i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache*, i64) local_unnamed_addr #3
 
@@ -171,8 +171,8 @@ allocRubyIds:
   tail call void @sorbet_initLineNumberInfo(%struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef getelementptr inbounds ([12 x i64], [12 x i64]* @iseqEncodedArray, i32 0, i32 0), i32 noundef 12)
   tail call fastcc void @"Constr_stackFramePrecomputed_func_Object#10doubleCast"(i64 %realpath)
   %rubyId_foo = load i64, i64* getelementptr inbounds ([6 x i64], [6 x i64]* @sorbet_moduleIDTable, i64 0, i64 1), align 8, !dbg !10, !invariant.load !5
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_foo, i64 %rubyId_foo, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !10
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_foo.1, i64 %rubyId_foo, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !15
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_foo, i64 %rubyId_foo, i32 noundef 16, i32 noundef 0, i32 noundef 0), !dbg !10
+  tail call void (%struct.FunctionInlineCache*, i64, i32, i32, i32, ...) @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_foo.1, i64 %rubyId_foo, i32 noundef 16, i32 noundef 0, i32 noundef 0), !dbg !15
   tail call fastcc void @"Constr_stackFramePrecomputed_func_<root>.17<static-init>$153"(i64 %realpath)
   tail call fastcc void @"Constr_stackFramePrecomputed_func_A#3foo"(i64 %realpath)
   tail call fastcc void @"Constr_stackFramePrecomputed_func_A.13<static-init>"(i64 %realpath)
