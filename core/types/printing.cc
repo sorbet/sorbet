@@ -88,9 +88,9 @@ string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
 string LiteralType::showValue(const GlobalState &gs) const {
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::String:
-            return fmt::format("\"{}\"", absl::CEscape(asName(gs).show(gs)));
+            return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
         case LiteralType::LiteralTypeKind::Symbol: {
-            auto shown = asName(gs).show(gs);
+            auto shown = asName().show(gs);
             if (absl::StrContains(shown, " ")) {
                 return fmt::format(":\"{}\"", absl::CEscape(shown));
             } else {
@@ -159,8 +159,8 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
 
         // properties beginning with $ need to be printed as :$prop => type.
         if (keyLiteral.literalKind == core::LiteralType::LiteralTypeKind::Symbol &&
-            !absl::StartsWith(keyLiteral.asName(gs).shortName(gs), "$")) {
-            fmt::format_to(std::back_inserter(buf), "{}: {}", keyLiteral.asName(gs).show(gs), value.show(gs, options));
+            !absl::StartsWith(keyLiteral.asName().shortName(gs), "$")) {
+            fmt::format_to(std::back_inserter(buf), "{}: {}", keyLiteral.asName().show(gs), value.show(gs, options));
         } else {
             fmt::format_to(std::back_inserter(buf), "{} => {}",
                            options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options),

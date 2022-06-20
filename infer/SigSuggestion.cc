@@ -145,7 +145,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
             if (core::isa_type<core::LiteralType>(snd->args[i].type)) {
                 auto lit = core::cast_type_nonnull<core::LiteralType>(snd->args[i].type);
                 if (lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol) {
-                    keyword = lit.asName(ctx);
+                    keyword = lit.asName();
                 }
             }
 

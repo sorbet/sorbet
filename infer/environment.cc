@@ -1063,7 +1063,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (fun == core::Names::checkAndAnd() && core::isa_type<core::LiteralType>(args[2]->type)) {
                         auto lit = core::cast_type_nonnull<core::LiteralType>(args[2]->type);
                         if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
-                            fun = lit.asName(ctx);
+                            fun = lit.asName();
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(

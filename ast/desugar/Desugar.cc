@@ -332,7 +332,7 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     ENFORCE(lit && lit->isSymbol());
 
     // &:foo => {|temp| temp.foo() }
-    core::NameRef name = core::cast_type_nonnull<core::LiteralType>(lit->value).asName(dctx.ctx);
+    core::NameRef name = core::cast_type_nonnull<core::LiteralType>(lit->value).asName();
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
     ExpressionPtr recv = MK::Local(zeroLengthLoc, temp);

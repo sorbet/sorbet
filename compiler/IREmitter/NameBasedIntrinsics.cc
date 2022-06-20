@@ -165,7 +165,7 @@ public:
         auto recv = send->args[0].variable;
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName(cs);
+        auto methodName = lit.asName();
 
         llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
@@ -467,7 +467,7 @@ public:
 
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName(cs);
+        auto methodName = lit.asName();
 
         // setup the inline cache
         // Note that in the case of calling `super`, the VM's search mechanism will
@@ -528,7 +528,7 @@ public:
 
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName(cs);
+        auto methodName = lit.asName();
 
         // setup the inline cache
         // Note that in the case of calling `super`, the VM's search mechanism will
@@ -677,7 +677,7 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto varName = lit.asName(cs);
+        auto varName = lit.asName();
         auto varNameStr = varName.shortName(cs);
 
         auto *callCache = mcctx.getInlineCache();
@@ -715,7 +715,7 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto varName = lit.asName(cs);
+        auto varName = lit.asName();
         auto varNameStr = varName.shortName(cs);
 
         auto *callCache = mcctx.getInlineCache();

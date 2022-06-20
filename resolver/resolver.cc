@@ -2501,7 +2501,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // if we got keyword args, then package should be non-null
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
-        auto name = literal.asName(ctx);
+        auto name = literal.asName();
         auto shortName = name.shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
@@ -2532,7 +2532,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
             auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-            auto name = package.asName(ctx).shortName(ctx);
+            auto name = package.asName().shortName(ctx);
             vector<string> pkgParts = absl::StrSplit(name, "::");
             // add the initial empty string to mimic the leading `::`
             if (ctx.state.packageDB().empty()) {
