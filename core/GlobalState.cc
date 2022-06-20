@@ -237,20 +237,20 @@ InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLin
 
 } // namespace
 
-ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, uint32_t superclass, bool isModule) {
+ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
     ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
     classAndModules.emplace_back();
     ClassOrModuleData data =
         symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
-    data->name = nameId;
+    data->name = name;
     data->owner = Symbols::root();
     data->setIsModule(isModule);
     data->setSuperClass(ClassOrModuleRef(*this, superclass));
 
     if (symRef.id() > Symbols::root().id()) {
-        Symbols::root().data(*this)->members()[nameId] = symRef;
+        Symbols::root().data(*this)->members()[name] = symRef;
     }
     return symRef;
 }
