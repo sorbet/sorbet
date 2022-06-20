@@ -151,8 +151,8 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     for (int i = 0; i < numKwArgs; ++i) {
         auto *argName = ast::cast_tree<ast::Literal>(params->getKwKey(i));
         auto *argVal = &params->getKwValue(i);
-        if (argName->isSymbol(ctx)) {
-            argTypeMap[argName->asSymbol(ctx)] = argVal;
+        if (argName->isSymbol()) {
+            argTypeMap[argName->asSymbol()] = argVal;
         }
     }
 

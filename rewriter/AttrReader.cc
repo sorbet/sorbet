@@ -19,14 +19,14 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Exp
     core::LocOffsets loc;
     core::NameRef res;
     if (auto *lit = ast::cast_tree<ast::Literal>(name)) {
-        if (lit->isSymbol(ctx)) {
-            res = lit->asSymbol(ctx);
+        if (lit->isSymbol()) {
+            res = lit->asSymbol();
             loc = lit->loc;
             ENFORCE(ctx.locAt(loc).exists());
             ENFORCE(ctx.locAt(loc).source(ctx).value().size() > 1 && ctx.locAt(loc).source(ctx).value()[0] == ':');
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
-        } else if (lit->isString(ctx)) {
-            core::NameRef nameRef = lit->asString(ctx);
+        } else if (lit->isString()) {
+            core::NameRef nameRef = lit->asString();
             auto shortName = nameRef.shortName(ctx);
             bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
                              absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
@@ -166,14 +166,14 @@ bool sigIsUnchecked(core::MutableContext ctx, ast::Send *sig) {
     }
 
     auto lit = ast::cast_tree<ast::Literal>(checked->getPosArg(0));
-    if (lit == nullptr || !lit->isSymbol(ctx)) {
+    if (lit == nullptr || !lit->isSymbol()) {
         // Unknown: default to false
         return false;
     }
 
     // Treats `.checked(:tests)` as unknown, therefore not unchecked.
     // Also treats `.checked(:compiled)` as unknown, therefore not unchecked.
-    return lit->asSymbol(ctx) == core::Names::never();
+    return lit->asSymbol() == core::Names::never();
 }
 
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`

@@ -134,10 +134,10 @@ string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
     if (argLit != nullptr) {
-        if (argLit->isString(ctx)) {
-            return argLit->asString(ctx).show(ctx);
-        } else if (argLit->isSymbol(ctx)) {
-            return argLit->asSymbol(ctx).show(ctx);
+        if (argLit->isString()) {
+            return argLit->asString().show(ctx);
+        } else if (argLit->isSymbol()) {
+            return argLit->asSymbol().show(ctx);
         }
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);

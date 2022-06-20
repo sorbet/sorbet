@@ -44,10 +44,10 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
         return empty;
     }
     auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-    if (sym == nullptr || !sym->isSymbol(ctx)) {
+    if (sym == nullptr || !sym->isSymbol()) {
         return empty;
     }
-    name = sym->asSymbol(ctx);
+    name = sym->asSymbol();
 
     ENFORCE(ctx.locAt(sym->loc).exists());
     ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');

@@ -43,24 +43,24 @@ vector<ast::ExpressionPtr> runDefDelegator(core::MutableContext ctx, const ast::
     }
 
     auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-    if (!accessor || !(accessor->isSymbol(ctx) || accessor->isString(ctx))) {
+    if (!accessor || !(accessor->isSymbol() || accessor->isString())) {
         return methodStubs;
     }
 
     auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(1));
-    if (!method || !method->isSymbol(ctx)) {
+    if (!method || !method->isSymbol()) {
         return methodStubs;
     }
 
-    core::NameRef methodName = method->asSymbol(ctx);
+    core::NameRef methodName = method->asSymbol();
 
     if (send->numPosArgs() == 3) {
         auto *alias = ast::cast_tree<ast::Literal>(send->getPosArg(2));
-        if (!alias || !alias->isSymbol(ctx)) {
+        if (!alias || !alias->isSymbol()) {
             return methodStubs;
         }
 
-        methodName = alias->asSymbol(ctx);
+        methodName = alias->asSymbol();
     }
 
     generateStub(methodStubs, loc, methodName);
@@ -88,7 +88,7 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
     }
 
     auto *accessor = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-    if (!accessor || !(accessor->isSymbol(ctx) || accessor->isString(ctx))) {
+    if (!accessor || !(accessor->isSymbol() || accessor->isString())) {
         return methodStubs;
     }
 
@@ -96,11 +96,11 @@ vector<ast::ExpressionPtr> runDefDelegators(core::MutableContext ctx, const ast:
         auto *method = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         // Skip method names that we don't understand, but continue to emit
         // desugared calls for the ones we do.
-        if (!method || !method->isSymbol(ctx)) {
+        if (!method || !method->isSymbol()) {
             continue;
         }
 
-        generateStub(methodStubs, loc, method->asSymbol(ctx));
+        generateStub(methodStubs, loc, method->asSymbol());
     }
 
     // Include the original call to def_delegators so sorbet will still type-check it

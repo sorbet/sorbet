@@ -94,8 +94,8 @@ public:
 
     ExpressionPtr postTransformLiteral(core::MutableContext ctx, ExpressionPtr tree) {
         auto &original = cast_tree_nonnull<Literal>(tree);
-        if (original.isString(ctx)) {
-            auto nameRef = original.asString(ctx);
+        if (original.isString()) {
+            auto nameRef = original.asString();
             // The 'from' and 'to' GlobalState in this substitution will always be the same,
             // because the newly created nameRef reuses our current GlobalState id
             bool allowSameFromTo = true;
@@ -105,8 +105,8 @@ public:
             }
             return MK::String(original.loc, newName);
         }
-        if (original.isSymbol(ctx)) {
-            auto nameRef = original.asSymbol(ctx);
+        if (original.isSymbol()) {
+            auto nameRef = original.asSymbol();
             // The 'from' and 'to' GlobalState in this substitution will always be the same,
             // because the newly created nameRef reuses our current GlobalState id
             bool allowSameFromTo = true;

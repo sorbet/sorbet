@@ -117,10 +117,10 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
         } else if (auto lit = ast::cast_tree<ast::Literal>(arg)) {
             core::NameRef methodName;
             auto loc = send->loc;
-            if (lit->isSymbol(ctx)) {
-                methodName = lit->asSymbol(ctx);
-            } else if (lit->isString(ctx)) {
-                core::NameRef nameRef = lit->asString(ctx);
+            if (lit->isSymbol()) {
+                methodName = lit->asSymbol();
+            } else if (lit->isString()) {
+                core::NameRef nameRef = lit->asString();
                 auto shortName = nameRef.shortName(ctx);
                 bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
                                  absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });

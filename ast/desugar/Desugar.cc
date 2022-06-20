@@ -179,7 +179,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
 
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
     Literal *lit;
-    return (lit = cast_tree<Literal>(expr)) && lit->isString(dctx.ctx);
+    return (lit = cast_tree<Literal>(expr)) && lit->isString();
 }
 
 ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
@@ -192,7 +192,7 @@ ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
                                        if (isa_tree<EmptyTree>(expr)) {
                                            return ""sv;
                                        } else {
-                                           return cast_tree<Literal>(expr)->asString(dctx.ctx).shortName(dctx.ctx);
+                                           return cast_tree<Literal>(expr)->asString().shortName(dctx.ctx);
                                        }
                                    }))));
     }
@@ -329,7 +329,7 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
     Literal *lit = cast_tree<Literal>(expr);
-    ENFORCE(lit && lit->isSymbol(dctx.ctx));
+    ENFORCE(lit && lit->isSymbol());
 
     // &:foo => {|temp| temp.foo() }
     core::NameRef name = core::cast_type_nonnull<core::LiteralType>(lit->value).asName(dctx.ctx);
@@ -567,15 +567,15 @@ public:
             return;
         }
 
-        auto isSymbol = lit->isSymbol(gs);
+        auto isSymbol = lit->isSymbol();
         core::NameRef nameRef;
         if (!lit) {
             return;
         }
         if (isSymbol) {
-            nameRef = lit->asSymbol(gs);
-        } else if (lit->isString(gs)) {
-            nameRef = lit->asString(gs);
+            nameRef = lit->asSymbol();
+        } else if (lit->isString()) {
+            nameRef = lit->asString();
         } else {
             return;
         }
@@ -795,7 +795,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             convertedBlock = node2TreeImpl(dctx, std::move(block));
                         }
                         Literal *lit;
-                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
+                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
                             res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
                                            locZeroLen, 4, std::move(sendargs), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
@@ -882,7 +882,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             convertedBlock = node2TreeImpl(dctx, std::move(block));
                         }
                         Literal *lit;
-                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {
+                        if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
                             res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs,
                                            std::move(args), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(

@@ -2156,7 +2156,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 for (const auto &keyExpr : hash->keys) {
                     i++;
                     const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                    if (key == nullptr || !key->isSymbol(ctx)) {
+                    if (key == nullptr || !key->isSymbol()) {
                         // Namer reported an error already
                         continue;
                     }
@@ -2170,7 +2170,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
-                    switch (key->asSymbol(ctx).rawId()) {
+                    switch (key->asSymbol().rawId()) {
                         case core::Names::fixed().rawId():
                             memberType->lowerBound = resTy;
                             memberType->upperBound = resTy;
@@ -2476,7 +2476,7 @@ class ResolveTypeMembersAndFieldsWalk {
         if (send.hasKwArgs()) {
             // this means we got the third package arg
             auto *key = ast::cast_tree<ast::Literal>(send.getKwKey(0));
-            if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
+            if (!key || !key->isSymbol() || key->asSymbol() != ctx.state.lookupNameUTF8("package")) {
                 return;
             }
 
@@ -2843,10 +2843,10 @@ public:
             for (auto i = 0; i < numPosArgs; ++i) {
                 auto &arg = send.getPosArg(i);
                 auto lit = ast::cast_tree<ast::Literal>(arg);
-                if (lit == nullptr || !lit->isSymbol(ctx)) {
+                if (lit == nullptr || !lit->isSymbol()) {
                     continue;
                 }
-                core::NameRef name = lit->asSymbol(ctx);
+                core::NameRef name = lit->asSymbol();
 
                 args.emplace_back(name);
             }
