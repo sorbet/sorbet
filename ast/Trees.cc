@@ -1325,32 +1325,32 @@ string Literal::nodeName() {
     return "Literal";
 }
 
-core::NameRef Literal::asString(const core::GlobalState &gs) const {
-    ENFORCE(isString(gs));
+core::NameRef Literal::asString() const {
+    ENFORCE(isString());
     auto t = core::cast_type_nonnull<core::LiteralType>(value);
-    core::NameRef res = t.asName(gs);
+    core::NameRef res = t.asName();
     return res;
 }
 
-core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
-    ENFORCE(isSymbol(gs));
+core::NameRef Literal::asSymbol() const {
+    ENFORCE(isSymbol());
     auto t = core::cast_type_nonnull<core::LiteralType>(value);
-    core::NameRef res = t.asName(gs);
+    core::NameRef res = t.asName();
     return res;
 }
 
-bool Literal::isSymbol(const core::GlobalState &gs) const {
+bool Literal::isSymbol() const {
     return core::isa_type<core::LiteralType>(value) &&
-           core::cast_type_nonnull<core::LiteralType>(value).derivesFrom(gs, core::Symbols::Symbol());
+           core::cast_type_nonnull<core::LiteralType>(value).literalKind == core::LiteralType::LiteralTypeKind::Symbol;
 }
 
 bool Literal::isNil(const core::GlobalState &gs) const {
     return value.derivesFrom(gs, core::Symbols::NilClass());
 }
 
-bool Literal::isString(const core::GlobalState &gs) const {
+bool Literal::isString() const {
     return core::isa_type<core::LiteralType>(value) &&
-           core::cast_type_nonnull<core::LiteralType>(value).derivesFrom(gs, core::Symbols::String());
+           core::cast_type_nonnull<core::LiteralType>(value).literalKind == core::LiteralType::LiteralTypeKind::String;
 }
 
 bool Literal::isTrue(const core::GlobalState &gs) const {

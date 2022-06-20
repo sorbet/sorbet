@@ -318,7 +318,7 @@ LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKin
 }
 
 LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
-    : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
+    : name(val), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     if (klass == Symbols::String()) {
         categoryCounterInc("types.allocated", "literaltype.string");
     } else {
@@ -337,14 +337,14 @@ double LiteralType::asFloat() const {
     return floatval;
 }
 
-core::NameRef LiteralType::asName(const core::GlobalState &gs) const {
+core::NameRef LiteralType::asName() const {
     ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
-    return NameRef::fromRaw(gs, nameId);
+    return name;
 }
 
 core::NameRef LiteralType::unsafeAsName() const {
     ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
-    return NameRef::fromRawUnchecked(nameId);
+    return name;
 }
 
 TypePtr LiteralType::underlying(const GlobalState &gs) const {
@@ -385,7 +385,7 @@ bool LiteralType::equals(const LiteralType &rhs) const {
             return this->value == rhs.value;
         case LiteralTypeKind::Symbol:
         case LiteralTypeKind::String:
-            return this->nameId == rhs.nameId;
+            return this->name == rhs.name;
     }
 }
 

@@ -477,7 +477,7 @@ TYPE_INLINED(LiteralType) final {
     union {
         const int64_t value;
         const double floatval;
-        const uint32_t nameId;
+        const NameRef name;
     };
 
 public:
@@ -491,7 +491,7 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     int64_t asInteger() const;
     double asFloat() const;
-    core::NameRef asName(const core::GlobalState &gs) const;
+    core::NameRef asName() const;
     core::NameRef unsafeAsName() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
