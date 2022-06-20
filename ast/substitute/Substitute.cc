@@ -96,10 +96,7 @@ public:
         auto &original = cast_tree_nonnull<Literal>(tree);
         if (original.isString()) {
             auto nameRef = original.asString();
-            // The 'from' and 'to' GlobalState in this substitution will always be the same,
-            // because the newly created nameRef reuses our current GlobalState id
-            bool allowSameFromTo = true;
-            auto newName = subst.substitute(nameRef, allowSameFromTo);
+            auto newName = subst.substitute(nameRef);
             if (newName == nameRef) {
                 return tree;
             }
@@ -107,10 +104,7 @@ public:
         }
         if (original.isSymbol()) {
             auto nameRef = original.asSymbol();
-            // The 'from' and 'to' GlobalState in this substitution will always be the same,
-            // because the newly created nameRef reuses our current GlobalState id
-            bool allowSameFromTo = true;
-            auto newName = subst.substitute(nameRef, allowSameFromTo);
+            auto newName = subst.substitute(nameRef);
             if (newName == nameRef) {
                 return tree;
             }
