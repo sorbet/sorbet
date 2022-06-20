@@ -187,14 +187,14 @@ ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
     if (stringsAccumulated.size() == 1) {
         return move(stringsAccumulated[0]);
     } else {
-        return MK::String(loc, dctx.ctx.state.enterNameUTF8(fmt::format(
-                                   "{}", fmt::map_join(stringsAccumulated, "", [&](const auto &expr) {
-                                       if (isa_tree<EmptyTree>(expr)) {
-                                           return ""sv;
-                                       } else {
-                                           return cast_tree<Literal>(expr)->asString().shortName(dctx.ctx);
-                                       }
-                                   }))));
+        return MK::String(loc, dctx.ctx.state.enterNameUTF8(
+                                   fmt::format("{}", fmt::map_join(stringsAccumulated, "", [&](const auto &expr) {
+                                                   if (isa_tree<EmptyTree>(expr)) {
+                                                       return ""sv;
+                                                   } else {
+                                                       return cast_tree<Literal>(expr)->asString().shortName(dctx.ctx);
+                                                   }
+                                               }))));
     }
 }
 
