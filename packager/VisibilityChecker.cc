@@ -161,7 +161,15 @@ class PropagateVisibility final {
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
     void checkExportPackage(core::MutableContext &ctx, core::LocOffsets loc, core::SymbolRef sym) {
-        auto symPackage = ctx.state.packageDB().getPackageNameForFile(sym.loc(ctx).file());
+        auto definingFile = sym.loc(ctx).file();
+        if (definingFile.data(ctx).isRBI()) {
+            if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                e.setHeader("Cannot export `{}` because it is only defined in an RBI file", sym.show(ctx));
+                e.addErrorLine(sym.loc(ctx), "Defined here");
+            }
+        }
+
+        auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
