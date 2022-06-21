@@ -236,8 +236,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
-    vector<core::ShortNameHash> changedMethodHashes;
-    vector<core::ShortNameHash> changedFieldHashes;
+    vector<core::ShortNameHash> changedSymbolNameHashes;
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
@@ -287,14 +286,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             }
         }
 
-        changedMethodHashes.reserve(changedMethodSymbolHashes.size());
-        absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedMethodHashes),
+        changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedFieldSymbolHashes.size());
+        absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedSymbolNameHashes),
                           [](const auto &symhash) { return symhash.nameHash; });
-        core::ShortNameHash::sortAndDedupe(changedMethodHashes);
-        changedFieldHashes.reserve(changedFieldSymbolHashes.size());
-        absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedFieldHashes),
+        absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedSymbolNameHashes),
                           [](const auto &symhash) { return symhash.nameHash; });
-        core::ShortNameHash::sortAndDedupe(changedFieldHashes);
+        core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
     }
 
     int i = -1;
@@ -312,23 +309,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::ShortNameHash> intersection;
-        absl::c_set_intersection(changedMethodHashes, oldHash.usages.nameHashes, std::back_inserter(intersection));
-        if (!intersection.empty()) {
-            auto ref = core::FileRef(i);
-            config->logger->debug("Added {} to update set as used a changed method",
-                                  !ref.exists() ? "" : ref.data(*gs).path());
-            subset.emplace_back(ref);
+        absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes, std::back_inserter(intersection));
+        if (intersection.empty()) {
             continue;
         }
 
-        // TODO(jez) Just have "changedSymbolHashes" and be done with it.
-        absl::c_set_intersection(changedFieldHashes, oldHash.usages.nameHashes, std::back_inserter(intersection));
-        if (!intersection.empty()) {
-            auto ref = core::FileRef(i);
-            config->logger->debug("Added {} to update set as used a changed field symbol",
-                                  !ref.exists() ? "" : ref.data(*gs).path());
-            subset.emplace_back(ref);
-        }
+        auto ref = core::FileRef(i);
+        config->logger->debug("Added {} to update set as used a changed symbol",
+                              !ref.exists() ? "" : ref.data(*gs).path());
+        subset.emplace_back(ref);
     }
     // Remove any duplicate files.
     fast_sort(subset);

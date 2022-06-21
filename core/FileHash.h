@@ -104,6 +104,8 @@ struct LocalSymbolTableHashes {
     // things like types for the fast/slow path decision), this stores the complete method symbol
     // hash, so that if anything including types change for a method we know what their names are.
     std::vector<SymbolHash> methodHashes;
+    // TODO(jez) Is it worth having two of these? After http://go/srbi/5808 lands, re-evaluate
+    // whether we should merge these into one vector like "symbolShapeHashes" or something
     std::vector<SymbolHash> staticFieldHashes;
 
     static uint32_t patchHash(uint32_t hash) {
