@@ -5,5 +5,7 @@ extend T::Sig
 sig {returns(String)}
 def foo
   T.reveal_type(STATIC_FIELD) # error: Revealed type: `T::Hash[Symbol, T.untyped]`
-  STATIC_FIELD.fetch(:key, "default") + "suffix"
+  fetched = STATIC_FIELD.fetch(:key, "default")
+  result = fetched + "suffix"
+  result
 end
