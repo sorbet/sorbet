@@ -162,7 +162,7 @@ private:
     // them by their starts, so that `class A; class B; end; end` --> `class A;
     // end; class B; end`.
     //
-    // In order to make TreeMap work out, we can't remove them from the AST
+    // In order to make TreeWalk work out, we can't remove them from the AST
     // until the `postTransform*` hook. Appending them to a list at that point
     // would result in an "bottom-up" ordering, so instead we store a stack of
     // "where does the next definition belong" into `classStack`

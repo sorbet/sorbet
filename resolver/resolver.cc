@@ -1635,7 +1635,7 @@ public:
                 {
                     Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
                     // This is an optimization. The order should not matter semantically
-                    // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
+                    // This is done as a "pre-step" because the first iteration of this effectively ran in TreeWalk.
                     // every item in todoClassAliases implicitly depends on an item in item in todo
                     // there would be no point in running the todoClassAliases step before todo
 
