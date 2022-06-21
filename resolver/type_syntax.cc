@@ -1070,7 +1070,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
 
             if (recvi->symbol() == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
-                if (auto e = ctx.beginError(recvi->loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
