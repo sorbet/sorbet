@@ -711,20 +711,20 @@ public:
         ENFORCE(pkg.exists());
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
-            return tree;
+            return;
         }
         if (errorDepth > 0) {
             errorDepth++;
-            return tree;
+            return;
         }
 
         ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
-            return tree;
+            return;
         }
 
         pushConstantLit(ctx, constantLit);
@@ -742,39 +742,37 @@ public:
                 }
             }
         }
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Sanity check bookkeeping
             ENFORCE(rootConsts == 0);
             ENFORCE(errorDepth == 0);
-            return tree;
+            return;
         }
 
         if (errorDepth > 0) {
             errorDepth--;
             // only continue if this was the first occurrence of the error
             if (errorDepth > 0) {
-                return tree;
+                return;
             }
         }
 
         ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
-            return tree;
+            return;
         }
 
         popConstantLit(constantLit);
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformAssign(core::Context ctx, ast::ExpressionPtr original) {
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
-            return original;
+            return;
         }
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(original);
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
@@ -792,48 +790,41 @@ public:
 
             popConstantLit(lhs);
         }
-
-        return original;
     }
 
-    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr original) {
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
-        return original;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr original) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
-            return original;
+            return;
         }
         auto &def = ast::cast_tree_nonnull<ast::MethodDef>(original);
         checkBehaviorLoc(ctx, def.declLoc);
-        return original;
     }
 
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr original) {
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
-        return original;
     }
 
-    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr original) {
+    void preTransformSend(core::Context ctx, ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
-            return original;
+            return;
         }
         checkBehaviorLoc(ctx, original.loc());
-        return original;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr original) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
-        return original;
     }
 
     void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
@@ -938,12 +929,12 @@ struct PackageInfoFinder {
     unique_ptr<PackageInfoImpl> info = nullptr;
     vector<Export> exported;
 
-    ast::ExpressionPtr postTransformSend(ContextType ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(ContextType ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
         if (send.fun == core::Names::keepDef() || send.fun == core::Names::keepSelfDef()) {
-            return tree;
+            return;
         }
 
         // Disallowed methods
@@ -951,7 +942,7 @@ struct PackageInfoFinder {
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
                 e.setHeader("Invalid expression in package: `{}` is not allowed", send.fun.shortName(ctx));
             }
-            return tree;
+            return;
         }
 
         // Sanity check arguments for unrecognized methods
@@ -969,7 +960,7 @@ struct PackageInfoFinder {
 
         if (info == nullptr) {
             // We haven't yet entered the package class.
-            return tree;
+            return;
         }
 
         if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
@@ -987,7 +978,7 @@ struct PackageInfoFinder {
                 auto name = getPackageName(ctx, target);
                 if (!name.has_value()) {
                     ENFORCE(!isMutableContext);
-                    return tree;
+                    return;
                 }
 
                 if (name.value().mangledName == info->name.mangledName) {
@@ -1012,15 +1003,13 @@ struct PackageInfoFinder {
             ENFORCE(send.numPosArgs() == 0);
             send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformClassDef(ContextType ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(ContextType ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
-            return tree;
+            return;
         }
 
         if (classDef.ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef.ancestors[0]) ||
@@ -1036,7 +1025,7 @@ struct PackageInfoFinder {
             if (!packageName.has_value()) {
                 ENFORCE(!isMutableContext);
                 dropRhs(classDef);
-                return tree;
+                return;
             }
 
             info->name = move(packageName.value());
@@ -1052,15 +1041,13 @@ struct PackageInfoFinder {
                 e.addErrorLine(info->loc, "Previous package declaration found here");
             }
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(ContextType ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(ContextType ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
-            return tree;
+            return;
         }
 
         if constexpr (!isMutableContext) {
@@ -1069,11 +1056,11 @@ struct PackageInfoFinder {
                 // As a best effort in immutable packager mode, just imagine that the file did not
                 // define a package.
                 info = nullptr;
-                return ast::MK::EmptyTree();
+                tree = ast::MK::EmptyTree();
             }
         }
 
-        return tree;
+        return;
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
@@ -1161,74 +1148,60 @@ struct PackageInfoFinder {
         }
     }
 
-    ast::ExpressionPtr preTransformIf(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformIf(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`if`");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformWhile(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformWhile(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`while`");
-        return original;
     }
 
-    ast::ExpressionPtr postTransformBreak(ContextType ctx, ast::ExpressionPtr original) {
+    void postTransformBreak(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`break`");
-        return original;
     }
 
-    ast::ExpressionPtr postTransformRetry(ContextType ctx, ast::ExpressionPtr original) {
+    void postTransformRetry(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`retry`");
-        return original;
     }
 
-    ast::ExpressionPtr postTransformNext(ContextType ctx, ast::ExpressionPtr original) {
+    void postTransformNext(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`next`");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformReturn(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformReturn(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`return`");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformRescueCase(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformRescueCase(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`rescue case`");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformRescue(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformRescue(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`rescue`");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformAssign(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformAssign(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`=`");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformHash(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformHash(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "hash literals");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformArray(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformArray(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "array literals");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformMethodDef(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "method definitions");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformBlock(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformBlock(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "blocks");
-        return original;
     }
 
-    ast::ExpressionPtr preTransformInsSeq(ContextType ctx, ast::ExpressionPtr original) {
+    void preTransformInsSeq(ContextType ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`begin` and `end`");
-        return original;
     }
 };
 
@@ -1246,7 +1219,7 @@ unique_ptr<PackageInfoImpl> runPackageInfoFinder(ContextType ctx, ast::ParsedFil
     auto packageFilePath = package.file.data(ctx).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     PackageInfoFinder<ContextType> finder;
-    package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
+    ast::TreeWalk::apply(ctx, finder, package.tree);
     finder.finalize(ctx);
     if (finder.info) {
         const auto numPrefixes = extraPackageFilesDirectoryPrefixes.size() + 1;
@@ -1303,7 +1276,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
     auto &pkgImpl = PackageInfoImpl::from(pkg);
 
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl, file.isPackagedTest());
-    parsedFile.tree = ast::ShallowMap::apply(ctx, enforcePrefix, move(parsedFile.tree));
+    ast::ShallowWalk::apply(ctx, enforcePrefix, parsedFile.tree);
 
     return parsedFile;
 }

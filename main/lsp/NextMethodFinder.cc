@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ast::ExpressionPtr NextMethodFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+void NextMethodFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
     auto loc = ctx.locAt(tree.loc());
@@ -26,18 +26,14 @@ ast::ExpressionPtr NextMethodFinder::preTransformClassDef(core::Context ctx, ast
     }
 
     this->scopeContainsQueryLoc.emplace_back(loc.contains(this->queryLoc));
-
-    return tree;
 }
 
-ast::ExpressionPtr NextMethodFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+void NextMethodFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
     ENFORCE(!this->scopeContainsQueryLoc.empty());
     this->scopeContainsQueryLoc.pop_back();
-
-    return tree;
 }
 
-ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+void NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
@@ -47,7 +43,7 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
         // Regardless of whether this method is after the queryLoc or inside the narrowestClassDefRange,
         // we're in a ClassDef whose scope doesn't contain the queryLoc.
         // (one case where this happens: nested Inner class)
-        return tree;
+        return;
     }
 
     auto currentMethod = methodDef.symbol;
@@ -55,7 +51,7 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
     auto currentLoc = ctx.locAt(tree.loc());
     if (!currentLoc.exists()) {
         // Defensive in case location information is disabled (e.g., certain fuzzer modes)
-        return tree;
+        return;
     }
 
     ENFORCE(this->narrowestClassDefRange.exists());
@@ -64,10 +60,10 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
         // This method occurs outside the current narrowest range we know of for a ClassDef that
         // still contains queryLoc, so even if this MethodDef is after the queryLoc, it would not be
         // in the right scope.
-        return tree;
+        return;
     } else if (currentLoc.beginPos() < queryLoc.beginPos()) {
         // Current method is before query, not after.
-        return tree;
+        return;
     }
 
     // Current method starts at or after query loc. Starting 'at' is fine, because it can happen in cases like this:
@@ -79,15 +75,15 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
         if (currentLoc.beginPos() < resultLoc.beginPos()) {
             // Found a method defined after the query but earlier than previous result: overwrite previous result
             this->result_ = {currentLoc, currentMethod};
-            return tree;
+            return;
         } else {
             // We've already found an earlier result, so the current is not the first
-            return tree;
+            return;
         }
     } else {
         // Haven't found a result yet, so this one is the best so far.
         this->result_ = {currentLoc, currentMethod};
-        return tree;
+        return;
     }
 }
 

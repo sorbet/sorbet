@@ -437,58 +437,51 @@ class LocalNameInserter {
         return tree;
     }
 
-    ast::ExpressionPtr walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         if (auto *lit = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            lit->scope = walkConstantLit(ctx, std::move(lit->scope));
-            return tree;
+            walkConstantLit(ctx, lit->scope);
         } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            return tree;
+            // Do nothing.
         } else {
             // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
             // Still want to do our best to recover (for e.g., LSP queries)
-            return ast::TreeMap::apply(ctx, *this, std::move(tree));
+            ast::TreeWalk::apply(ctx, *this, tree);
         }
     }
 
 public:
-    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         for (auto &ancestor : klass.ancestors) {
-            ancestor = ast::TreeMap::apply(ctx, *this, std::move(ancestor));
+            ast::TreeWalk::apply(ctx, *this, ancestor);
         }
 
         enterClass();
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         exitScope();
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         method.args = fillInArgs(nameArgs(ctx, method.args));
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         exitScope();
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         if (original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0))) {
-            return lowerZSuperArgs(ctx, std::move(tree));
+            tree = lowerZSuperArgs(ctx, std::move(tree));
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &blk = ast::cast_tree_nonnull<ast::Block>(tree);
         auto outerArgs = scopeStack.back().args;
         auto &frame = enterBlock();
@@ -503,16 +496,13 @@ public:
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
         blk.args = fillInArgs(nameArgs(ctx, blk.args));
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         exitScope();
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &nm = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (nm.kind == ast::UnresolvedIdent::Kind::Local) {
             auto &frame = scopeStack.back();
@@ -521,14 +511,12 @@ public:
                 cur = enterLocal(nm.name);
             }
             ENFORCE(cur.exists());
-            return ast::make_expression<ast::Local>(nm.loc, cur);
-        } else {
-            return tree;
+            tree = ast::make_expression<ast::Local>(nm.loc, cur);
         }
     }
 
-    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        return walkConstantLit(ctx, std::move(tree));
+    void postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        walkConstantLit(ctx, tree);
     }
 
 private:
@@ -542,7 +530,7 @@ private:
 ast::ParsedFile LocalVars::run(core::GlobalState &gs, ast::ParsedFile tree) {
     LocalNameInserter localNameInserter;
     sorbet::core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
-    tree.tree = ast::TreeMap::apply(ctx, localNameInserter, move(tree.tree));
+    ast::TreeWalk::apply(ctx, localNameInserter, tree.tree);
     return tree;
 }
 

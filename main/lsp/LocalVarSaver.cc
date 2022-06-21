@@ -21,7 +21,7 @@ core::MethodRef enclosingMethod(core::Context ctx) {
 }
 } // namespace
 
-ast::ExpressionPtr LocalVarSaver::postTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
+void LocalVarSaver::postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
     auto method = enclosingMethod(ctx);
 
@@ -35,11 +35,9 @@ ast::ExpressionPtr LocalVarSaver::postTransformBlock(core::Context ctx, ast::Exp
             }
         }
     }
-
-    return tree;
 }
 
-ast::ExpressionPtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::ExpressionPtr tree) {
+void LocalVarSaver::postTransformLocal(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
     auto method = enclosingMethod(ctx);
 
@@ -51,11 +49,9 @@ ast::ExpressionPtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::Exp
         core::lsp::QueryResponse::pushQueryResponse(
             ctx, core::lsp::IdentResponse(ctx.locAt(local.loc), local.localVariable, tp, method));
     }
-
-    return tree;
 }
 
-ast::ExpressionPtr LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+void LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     // Check args.
@@ -72,7 +68,5 @@ ast::ExpressionPtr LocalVarSaver::postTransformMethodDef(core::Context ctx, ast:
             }
         }
     }
-
-    return tree;
 }
 } // namespace sorbet::realmain::lsp

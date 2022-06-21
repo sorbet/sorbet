@@ -11,22 +11,21 @@ template <typename T> class SubstWalk {
 private:
     T &subst;
 
-    ExpressionPtr substClassName(core::MutableContext ctx, ExpressionPtr node) {
+    void substClassName(core::MutableContext ctx, ExpressionPtr &node) {
         auto *constLit = cast_tree<UnresolvedConstantLit>(node);
         if (constLit == nullptr) { // uncommon case. something is strange
             if (isa_tree<EmptyTree>(node)) {
-                return node;
+                return;
             }
-            return TreeMap::apply(ctx, *this, std::move(node));
+            TreeWalk::apply(ctx, *this, node);
+            return;
         }
 
-        constLit->scope = substClassName(ctx, std::move(constLit->scope));
+        substClassName(ctx, constLit->scope);
         constLit->cnst = subst.substituteSymbolName(constLit->cnst);
-
-        return node;
     }
 
-    ExpressionPtr substArg(core::MutableContext ctx, ExpressionPtr argp) {
+    void substArg(core::MutableContext ctx, ExpressionPtr &argp) {
         ExpressionPtr *arg = &argp;
         while (arg != nullptr) {
             typecase(
@@ -39,104 +38,94 @@ private:
                 },
                 [&](const UnresolvedIdent &nm) { Exception::raise("UnresolvedIdent remaining after local_vars"); });
         }
-        return argp;
     }
 
 public:
     SubstWalk(T &subst) : subst(subst) {}
 
-    ExpressionPtr preTransformClassDef(core::MutableContext ctx, ExpressionPtr tree) {
+    void preTransformClassDef(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<ClassDef>(tree);
-        original.name = substClassName(ctx, std::move(original.name));
+        substClassName(ctx, original.name);
         for (auto &anc : original.ancestors) {
-            anc = substClassName(ctx, std::move(anc));
+            substClassName(ctx, anc);
         }
-        return tree;
     }
 
-    ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ExpressionPtr tree) {
+    void preTransformMethodDef(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<MethodDef>(tree);
         original.name = subst.substituteSymbolName(original.name);
         for (auto &arg : original.args) {
-            arg = substArg(ctx, std::move(arg));
+            substArg(ctx, arg);
         }
-        return tree;
     }
 
-    ExpressionPtr preTransformBlock(core::MutableContext ctx, ExpressionPtr tree) {
+    void preTransformBlock(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<Block>(tree);
         for (auto &arg : original.args) {
-            arg = substArg(ctx, std::move(arg));
+            substArg(ctx, arg);
         }
-        return tree;
     }
 
-    ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ExpressionPtr original) {
+    void postTransformUnresolvedIdent(core::MutableContext ctx, ExpressionPtr &original) {
         auto &id = cast_tree_nonnull<UnresolvedIdent>(original);
         if (id.kind != ast::UnresolvedIdent::Kind::Local) {
             id.name = subst.substituteSymbolName(cast_tree<UnresolvedIdent>(original)->name);
         } else {
             id.name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
         }
-        return original;
     }
 
-    ExpressionPtr postTransformLocal(core::MutableContext ctx, ExpressionPtr local) {
+    void postTransformLocal(core::MutableContext ctx, ExpressionPtr &local) {
         cast_tree_nonnull<Local>(local).localVariable._name =
             subst.substitute(cast_tree_nonnull<Local>(local).localVariable._name);
-        return local;
     }
 
-    ExpressionPtr preTransformSend(core::MutableContext ctx, ExpressionPtr original) {
+    void preTransformSend(core::MutableContext ctx, ExpressionPtr &original) {
         cast_tree_nonnull<Send>(original).fun = subst.substituteSend(cast_tree_nonnull<Send>(original).fun);
-        return original;
     }
 
-    ExpressionPtr postTransformLiteral(core::MutableContext ctx, ExpressionPtr tree) {
+    void postTransformLiteral(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<Literal>(tree);
         if (original.isString()) {
             auto nameRef = original.asString();
             auto newName = subst.substitute(nameRef);
-            if (newName == nameRef) {
-                return tree;
+            if (nameRef != newName) {
+                original.value = core::make_type<core::LiteralType>(core::Symbols::String(), newName);
             }
-            return MK::String(original.loc, newName);
+            return;
         }
         if (original.isSymbol()) {
             auto nameRef = original.asSymbol();
             auto newName = subst.substitute(nameRef);
-            if (newName == nameRef) {
-                return tree;
+            if (newName != nameRef) {
+                original.value = core::make_type<core::LiteralType>(core::Symbols::Symbol(), newName);
             }
-            return MK::Symbol(original.loc, newName);
+            return;
         }
-        return tree;
     }
 
-    ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr tree) {
+    void postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<UnresolvedConstantLit>(tree);
         original.cnst = subst.substituteSymbolName(original.cnst);
-        original.scope = substClassName(ctx, std::move(original.scope));
-        return tree;
+        substClassName(ctx, original.scope);
     }
 
-    ExpressionPtr postTransformRuntimeMethodDefinition(core::MutableContext ctx, ExpressionPtr original) {
+    void postTransformRuntimeMethodDefinition(core::MutableContext ctx, ExpressionPtr &original) {
         auto &def = cast_tree_nonnull<RuntimeMethodDefinition>(original);
         def.name = subst.substitute(def.name);
-        return original;
     }
 };
 } // namespace
 
 ParsedFile Substitute::run(core::MutableContext ctx, const core::NameSubstitution &subst, ParsedFile what) {
     SubstWalk walk(subst);
-    what.tree = TreeMap::apply(ctx, walk, std::move(what.tree));
+    TreeWalk::apply(ctx, walk, what.tree);
     return what;
 }
 
 ParsedFile Substitute::run(core::MutableContext ctx, core::LazyNameSubstitution &subst, ParsedFile what) {
     SubstWalk walk(subst);
-    what.tree = TreeMap::apply(ctx, walk, std::move(what.tree));
+    TreeWalk::apply(ctx, walk, what.tree);
     return what;
 }
 

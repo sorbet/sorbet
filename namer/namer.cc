@@ -69,7 +69,7 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
 }
 
 /**
- * Used with TreeMap to locate all of the class, method, static field, and type member symbols defined in the tree.
+ * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
  * Does not report any errors, which lets us cache its output.
  * Produces a vector of symbols to insert, and a vector of modifiers to those symbols.
@@ -142,7 +142,7 @@ public:
         return rv;
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         core::FoundClass found;
@@ -170,10 +170,9 @@ public:
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
         methodVisiStack.emplace_back(nullopt);
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         core::FoundDefinitionRef klassName = ownerStack.back();
@@ -183,21 +182,17 @@ public:
         for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
         }
-
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
+    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
         methodVisiStack.emplace_back(nullopt);
-        return block;
     }
 
-    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
         methodVisiStack.pop_back();
-        return block;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         core::FoundMethod foundMethod;
         foundMethod.owner = getOwner();
@@ -212,10 +207,9 @@ public:
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
         // visibility modifiers.
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (original.fun.rawId()) {
@@ -279,25 +273,23 @@ public:
                 break;
             }
         }
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformRuntimeMethodDefinition(core::Context, ast::ExpressionPtr tree) {
+    void postTransformRuntimeMethodDefinition(core::Context, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::RuntimeMethodDefinition>(tree);
 
         // visibility toggle doesn't look at `self.*` methods, only instance methods
         // (need to use `class << self` to use nullary private with singleton class methods)
         if (original.isSelfMethod) {
-            return tree;
+            return;
         }
 
         ENFORCE(!methodVisiStack.empty());
         if (!methodVisiStack.back().has_value()) {
-            return tree;
+            return;
         }
 
         foundDefs->addModifier(methodVisiStack.back()->withTarget(original.name));
-        return tree;
     }
 
     void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
@@ -480,12 +472,12 @@ public:
         return foundRef;
     }
 
-    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
-            return tree;
+            return;
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
@@ -506,7 +498,6 @@ public:
                     break;
             }
         }
-        return tree;
     }
 };
 
@@ -1383,7 +1374,7 @@ class TreeSymbolizer {
 public:
     TreeSymbolizer(bool bestEffort) : bestEffort(bestEffort) {}
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
@@ -1412,7 +1403,6 @@ public:
                 ENFORCE(symbol == core::Symbols::root());
             }
         }
-        return tree;
     }
 
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
@@ -1428,7 +1418,7 @@ public:
         return true;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         if (klass.symbol == core::Symbols::todo()) {
@@ -1438,7 +1428,8 @@ public:
             // symbol in preTransformClassDef. Now that we're in postTransformClassDef, we're
             // allowed to return something that's not a ClassDef node, which we can use to delete
             // the tree.
-            return ast::MK::EmptyTree();
+            tree = ast::MK::EmptyTree();
+            return;
         }
 
         // NameDefiner should have forced this class's singleton class into existence.
@@ -1449,7 +1440,8 @@ public:
             ENFORCE(this->bestEffort);
             // Even though we found a symbol for this, we don't have a <static-init> for it, which is
             // an invariant that namer must introduce (all ClassDef's have `<static-init>` methods).
-            return ast::MK::EmptyTree();
+            tree = ast::MK::EmptyTree();
+            return;
         }
 
         for (auto &exp : klass.rhs) {
@@ -1489,7 +1481,7 @@ public:
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
         }
-        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
+        tree = ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(vector<core::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
@@ -1512,7 +1504,7 @@ public:
         return args;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, method.flags);
@@ -1523,24 +1515,22 @@ public:
             // We're going to delete this tree when we get to the postTransformMethodDef.
             // Drop the RHS to make it get there faster.
             method.rhs = ast::MK::EmptyTree();
-            return tree;
+            return;
         }
         method.symbol = sym;
         method.args = fillInArgs(move(parsedArgs), std::move(method.args));
-
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (method.symbol == core::Symbols::todoMethod() && this->bestEffort) {
             // See the similar code in postTransformClassDef for an explanation.
-            return ast::MK::EmptyTree();
+            tree = ast::MK::EmptyTree();
+            return;
         }
 
         ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
                 method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
-        return tree;
     }
 
     ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {
@@ -1768,29 +1758,35 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
-            return tree;
+            return;
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
-            return handleAssignment(ctx, std::move(tree));
+            tree = handleAssignment(ctx, std::move(tree));
+            return;
         }
 
         if (!send->recv.isSelfReference()) {
-            return handleAssignment(ctx, std::move(tree));
+            tree = handleAssignment(ctx, std::move(tree));
+            return;
         }
 
         switch (send->fun.rawId()) {
             case core::Names::typeTemplate().rawId():
-            case core::Names::typeMember().rawId():
-                return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
-            default:
-                return handleAssignment(ctx, std::move(tree));
+            case core::Names::typeMember().rawId(): {
+                tree = handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
+                return;
+            }
+            default: {
+                tree = handleAssignment(ctx, std::move(tree));
+                return;
+            }
         }
     }
 
@@ -1817,7 +1813,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, finder, std::move(job.tree));
+                ast::ShallowWalk::apply(ctx, finder, job.tree);
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
@@ -1941,7 +1937,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
+                ast::ShallowWalk::apply(ctx, inserter, job.tree);
                 output.trees.emplace_back(move(job));
             }
         }

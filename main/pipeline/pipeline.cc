@@ -55,16 +55,16 @@ class CFGCollectorAndTyper {
 public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || m.symbol.data(ctx)->flags.isOverloaded) {
-            return tree;
+            return;
         }
         auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
 
         if (opts.stopAfterPhase == options::Phase::CFG) {
-            return tree;
+            return;
         }
         cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
         if (cfg) {
@@ -81,7 +81,6 @@ public:
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
-        return tree;
     }
 };
 
@@ -699,7 +698,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         CFGCollectorAndTyper collector(opts);
         {
-            ast::ShallowMap::apply(ctx, collector, move(resolved.tree));
+            ast::ShallowWalk::apply(ctx, collector, resolved.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
@@ -767,14 +766,13 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
-    ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto unresolvedPath = ast::cast_tree_nonnull<ast::ConstantLit>(tree).fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
                 fmt::map_join(unresolvedPath->second, "::", [&](const auto &el) -> string { return el.show(ctx); })));
         }
-        return tree;
     }
 };
 
@@ -784,7 +782,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
         core::MutableContext ctx(gs, core::Symbols::root(), resolved.file);
-        resolved.tree = ast::TreeMap::apply(ctx, walk, move(resolved.tree));
+        ast::TreeWalk::apply(ctx, walk, resolved.tree);
     }
     auto &missing = walk.unresolvedConstants;
     fast_sort(missing);
@@ -826,20 +824,18 @@ public:
         ENFORCE(file.exists());
     };
 
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
-        return tree;
     }
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
-        return tree;
     }
 };
 
 ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
                                                         int prohibitedLinesStart, int prohibitedLinesEnd) {
     DefinitionLinesDenylistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
-    what.tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, move(what.tree));
+    ast::TreeWalk::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, what.tree);
     return what;
 }
 

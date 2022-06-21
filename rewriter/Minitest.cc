@@ -31,12 +31,13 @@ public:
         return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(raiseUnimplemented));
     }
 
-    ast::ExpressionPtr postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *asgn = ast::cast_tree<ast::Assign>(tree);
         if (auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
             if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->rhs)) {
                 movedConstants.emplace_back(move(tree));
-                return ast::MK::EmptyTree();
+                tree = ast::MK::EmptyTree();
+                return;
             }
             auto name = ast::MK::Symbol(cnst->loc, cnst->cnst);
 
@@ -44,49 +45,45 @@ public:
             movedConstants.emplace_back(createConstAssign(*asgn));
 
             auto module = ast::MK::Constant(asgn->loc, core::Symbols::Module());
-            return ast::MK::Send2(asgn->loc, move(module), core::Names::constSet(), asgn->loc.copyWithZeroLength(),
+            tree = ast::MK::Send2(asgn->loc, move(module), core::Names::constSet(), asgn->loc.copyWithZeroLength(),
                                   move(name), move(asgn->rhs));
+            return;
         }
-
-        return tree;
     }
 
     // classdefs define new constants, so we always move those if they're the "top-level" classdef (i.e. if we have
     // nested classdefs, we should only move the outermost one)
-    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr classDef) {
+    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &classDef) {
         classDepth++;
-        return classDef;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr classDef) {
+    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &classDef) {
         classDepth--;
         if (classDepth == 0) {
             movedConstants.emplace_back(move(classDef));
-            return ast::MK::EmptyTree();
+            classDef = ast::MK::EmptyTree();
         }
-        return classDef;
     }
 
     // we move sends if they are other minitest `describe` blocks, as those end up being classes anyway: consequently,
     // we treat those the same way we treat classes
-    ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void preTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
         if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
-        return tree;
     }
 
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
         if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
                 movedConstants.emplace_back(move(tree));
-                return ast::MK::EmptyTree();
+                tree = ast::MK::EmptyTree();
+                return;
             }
         }
-        return tree;
     }
 
     vector<ast::ExpressionPtr> getMovedConstants() {
@@ -202,7 +199,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             // pull constants out of the block
             ConstantMover constantMover;
             ast::ExpressionPtr body = move(send->block()->body);
-            body = ast::TreeMap::apply(ctx, constantMover, move(body));
+            ast::TreeWalk::apply(ctx, constantMover, body);
 
             // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
             ast::MethodDef::ARGS_store new_args;
@@ -358,7 +355,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
-        block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
+        ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto method = addSigVoid(
             ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, isClass, std::move(block->body))));
         return constantMover.addConstantsToExpression(send->loc, move(method));
@@ -387,7 +384,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
     } else if (send->fun == core::Names::it()) {
         ConstantMover constantMover;
-        block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
+        ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         const bool bodyIsClass = false;
         auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name),

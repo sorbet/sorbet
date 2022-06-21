@@ -6,7 +6,7 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
-ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
@@ -34,7 +34,7 @@ ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::E
                 core::lsp::QueryResponse::pushQueryResponse(
                     ctx,
                     core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, methodDef.symbol));
-                return tree;
+                return;
             }
         }
 
@@ -43,11 +43,9 @@ ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::E
         core::lsp::QueryResponse::pushQueryResponse(
             ctx, core::lsp::MethodDefResponse(methodDef.symbol, ctx.locAt(methodDef.declLoc), methodDef.name, tp));
     }
-
-    return tree;
 }
 
-ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
+void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
@@ -75,7 +73,6 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
                 ctx, core::lsp::FieldResponse(field, ctx.locAt(id.loc), id.name, tp));
         }
     }
-    return tree;
 }
 
 namespace {
@@ -138,11 +135,10 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 
 } // namespace
 
-ast::ExpressionPtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
+void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     matchesQuery(ctx, &lit, lspQuery, lit.symbol);
-    return tree;
 }
 
 } // namespace sorbet::realmain::lsp

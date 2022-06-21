@@ -767,7 +767,7 @@ private:
     }
 
 public:
-    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         auto sym = classDef.symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
@@ -789,10 +789,9 @@ public:
         if (ctx.state.requiresAncestorEnabled) {
             validateRequiredAncestors(ctx, singleton);
         }
-        return tree;
     }
 
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);
@@ -807,7 +806,6 @@ public:
         }
 
         validateOverriding(ctx, methodDef.symbol);
-        return tree;
     }
 };
 } // namespace
@@ -816,7 +814,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
-    tree.tree = ast::ShallowMap::apply(ctx, validate, std::move(tree.tree));
+    ast::ShallowWalk::apply(ctx, validate, tree.tree);
     return tree;
 }
 

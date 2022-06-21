@@ -74,67 +74,68 @@ public:
 
 // NOTE: Implementations must use a context type parameter that `MutableContext` is convertable to.
 // That is, either `Context` or `MutableContext`.
-#define GENERATE_HAS_MEMBER_VISITOR(X) \
-    GENERATE_HAS_MEMBER(X, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
+#define GENERATE_HAS_MEMBER_VISITOR(X, arg_types...) GENERATE_HAS_MEMBER(X, arg_types)
 
 // used to check for ABSENCE of method
-GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedIdent);
-GENERATE_HAS_MEMBER_VISITOR(preTransformLocal);
-GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedConstantLit);
-GENERATE_HAS_MEMBER_VISITOR(preTransformConstantLit);
-GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral);
-GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition);
 
-#define GENERATE_POSTPONE_PRECLASS(X)                                                                            \
+#define GENERATE_POSTPONE_PRECLASS(X, arg_types...)                                                              \
     GENERATE_CALL_MEMBER(preTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
-                         return nullptr, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
+                         return nullptr, arg_types)
 
-#define GENERATE_POSTPONE_POSTCLASS(X)                                                                            \
+#define GENERATE_POSTPONE_POSTCLASS(X, arg_types...)                                                              \
     GENERATE_CALL_MEMBER(postTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
-                         return nullptr, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
+                         return nullptr, arg_types)
 
-GENERATE_POSTPONE_PRECLASS(Expression);
-GENERATE_POSTPONE_PRECLASS(ClassDef);
-GENERATE_POSTPONE_PRECLASS(MethodDef);
-GENERATE_POSTPONE_PRECLASS(If);
-GENERATE_POSTPONE_PRECLASS(While);
-GENERATE_POSTPONE_PRECLASS(Break);
-GENERATE_POSTPONE_PRECLASS(Retry);
-GENERATE_POSTPONE_PRECLASS(Next);
-GENERATE_POSTPONE_PRECLASS(Return);
-GENERATE_POSTPONE_PRECLASS(RescueCase);
-GENERATE_POSTPONE_PRECLASS(Rescue);
-GENERATE_POSTPONE_PRECLASS(Assign);
-GENERATE_POSTPONE_PRECLASS(Send);
-GENERATE_POSTPONE_PRECLASS(Hash);
-GENERATE_POSTPONE_PRECLASS(Array);
-GENERATE_POSTPONE_PRECLASS(Block);
-GENERATE_POSTPONE_PRECLASS(InsSeq);
-GENERATE_POSTPONE_PRECLASS(Cast);
-
-GENERATE_POSTPONE_POSTCLASS(ClassDef);
-GENERATE_POSTPONE_POSTCLASS(MethodDef);
-GENERATE_POSTPONE_POSTCLASS(If);
-GENERATE_POSTPONE_POSTCLASS(While);
-GENERATE_POSTPONE_POSTCLASS(Break);
-GENERATE_POSTPONE_POSTCLASS(Retry);
-GENERATE_POSTPONE_POSTCLASS(Next);
-GENERATE_POSTPONE_POSTCLASS(Return);
-GENERATE_POSTPONE_POSTCLASS(RescueCase);
-GENERATE_POSTPONE_POSTCLASS(Rescue);
-GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
-GENERATE_POSTPONE_POSTCLASS(Assign);
-GENERATE_POSTPONE_POSTCLASS(Send);
-GENERATE_POSTPONE_POSTCLASS(Hash);
-GENERATE_POSTPONE_POSTCLASS(Array);
-GENERATE_POSTPONE_POSTCLASS(Local);
-GENERATE_POSTPONE_POSTCLASS(Literal);
-GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit);
-GENERATE_POSTPONE_POSTCLASS(ConstantLit);
-GENERATE_POSTPONE_POSTCLASS(Block);
-GENERATE_POSTPONE_POSTCLASS(InsSeq);
-GENERATE_POSTPONE_POSTCLASS(Cast);
-GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition);
+#define GENERATE_METAPROGRAMMING_FOR(arg_types...)                               \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedIdent, arg_types);         \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformLocal, arg_types);                   \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedConstantLit, arg_types);   \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformConstantLit, arg_types);             \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral, arg_types);                 \
+    GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition, arg_types); \
+                                                                                 \
+    GENERATE_POSTPONE_PRECLASS(Expression, arg_types);                           \
+    GENERATE_POSTPONE_PRECLASS(ClassDef, arg_types);                             \
+    GENERATE_POSTPONE_PRECLASS(MethodDef, arg_types);                            \
+    GENERATE_POSTPONE_PRECLASS(If, arg_types);                                   \
+    GENERATE_POSTPONE_PRECLASS(While, arg_types);                                \
+    GENERATE_POSTPONE_PRECLASS(Break, arg_types);                                \
+    GENERATE_POSTPONE_PRECLASS(Retry, arg_types);                                \
+    GENERATE_POSTPONE_PRECLASS(Next, arg_types);                                 \
+    GENERATE_POSTPONE_PRECLASS(Return, arg_types);                               \
+    GENERATE_POSTPONE_PRECLASS(RescueCase, arg_types);                           \
+    GENERATE_POSTPONE_PRECLASS(Rescue, arg_types);                               \
+    GENERATE_POSTPONE_PRECLASS(Assign, arg_types);                               \
+    GENERATE_POSTPONE_PRECLASS(Send, arg_types);                                 \
+    GENERATE_POSTPONE_PRECLASS(Hash, arg_types);                                 \
+    GENERATE_POSTPONE_PRECLASS(Array, arg_types);                                \
+    GENERATE_POSTPONE_PRECLASS(Block, arg_types);                                \
+    GENERATE_POSTPONE_PRECLASS(InsSeq, arg_types);                               \
+    GENERATE_POSTPONE_PRECLASS(Cast, arg_types);                                 \
+                                                                                 \
+    GENERATE_POSTPONE_POSTCLASS(ClassDef, arg_types);                            \
+    GENERATE_POSTPONE_POSTCLASS(MethodDef, arg_types);                           \
+    GENERATE_POSTPONE_POSTCLASS(If, arg_types);                                  \
+    GENERATE_POSTPONE_POSTCLASS(While, arg_types);                               \
+    GENERATE_POSTPONE_POSTCLASS(Break, arg_types);                               \
+    GENERATE_POSTPONE_POSTCLASS(Retry, arg_types);                               \
+    GENERATE_POSTPONE_POSTCLASS(Next, arg_types);                                \
+    GENERATE_POSTPONE_POSTCLASS(Return, arg_types);                              \
+    GENERATE_POSTPONE_POSTCLASS(RescueCase, arg_types);                          \
+    GENERATE_POSTPONE_POSTCLASS(Rescue, arg_types);                              \
+    GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent, arg_types);                     \
+    GENERATE_POSTPONE_POSTCLASS(Assign, arg_types);                              \
+    GENERATE_POSTPONE_POSTCLASS(Send, arg_types);                                \
+    GENERATE_POSTPONE_POSTCLASS(Hash, arg_types);                                \
+    GENERATE_POSTPONE_POSTCLASS(Array, arg_types);                               \
+    GENERATE_POSTPONE_POSTCLASS(Local, arg_types);                               \
+    GENERATE_POSTPONE_POSTCLASS(Literal, arg_types);                             \
+    GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit, arg_types);               \
+    GENERATE_POSTPONE_POSTCLASS(ConstantLit, arg_types);                         \
+    GENERATE_POSTPONE_POSTCLASS(Block, arg_types);                               \
+    GENERATE_POSTPONE_POSTCLASS(InsSeq, arg_types);                              \
+    GENERATE_POSTPONE_POSTCLASS(Cast, arg_types);                                \
+    GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types);
 
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
@@ -143,6 +144,31 @@ struct ReportedRubyException {
 };
 
 enum class TreeMapKind {
+    Map,
+    Walk,
+};
+
+template <TreeMapKind> struct MapFunctions;
+
+template <> struct MapFunctions<TreeMapKind::Map> {
+    using return_type = ExpressionPtr;
+    using arg_type = ExpressionPtr;
+    static ExpressionPtr &&pass(ExpressionPtr &p) {
+        return static_cast<ExpressionPtr &&>(p);
+    }
+    GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<ExpressionPtr>());
+};
+
+template <> struct MapFunctions<TreeMapKind::Walk> {
+    using return_type = void;
+    using arg_type = ExpressionPtr &;
+    static ExpressionPtr &pass(ExpressionPtr &p) {
+        return p;
+    }
+    GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<ExpressionPtr &>());
+};
+
+enum class TreeMapDepthKind {
     Full,
     Shallow,
 };
@@ -153,26 +179,59 @@ enum class TreeMapKind {
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC, class CTX, TreeMapKind Kind> class TreeMapper {
+template <class FUNC, class CTX, TreeMapKind Kind, TreeMapDepthKind DepthKind> class TreeMapper {
 private:
     friend class TreeMap;
     friend class ShallowMap;
+    friend class TreeWalk;
+    friend class ShallowWalk;
+
+    using Funcs = MapFunctions<Kind>;
+    using return_type = typename Funcs::return_type;
+    using arg_type = typename Funcs::arg_type;
 
     FUNC &func;
 
-    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>(), "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>(), "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>(), "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>(), "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>(), "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformRuntimeMethodDefinition<FUNC>(), "use post*Transform instead");
+    static_assert(!Funcs::template HAS_MEMBER_preTransformUnresolvedIdent<FUNC>(), "use post*Transform instead");
+    static_assert(!Funcs::template HAS_MEMBER_preTransformLiteral<FUNC>(), "use post*Transform instead");
+    static_assert(!Funcs::template HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>(), "use post*Transform instead");
+    static_assert(!Funcs::template HAS_MEMBER_preTransformConstantLit<FUNC>(), "use post*Transform instead");
+    static_assert(!Funcs::template HAS_MEMBER_preTransformLocal<FUNC>(), "use post*Transform instead");
+    static_assert(!Funcs::template HAS_MEMBER_preTransformRuntimeMethodDefinition<FUNC>(),
+                  "use post*Transform instead");
 
     TreeMapper(FUNC &func) : func(func) {}
 
-    ExpressionPtr mapClassDef(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>()) {
-            v = CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, std::move(v));
-        }
+#define CALL_PRE(member)                                                                                 \
+    if constexpr (Funcs::template HAS_MEMBER_preTransform##member<FUNC>()) {                             \
+        if constexpr (Kind == TreeMapKind::Map) {                                                        \
+            v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
+        } else if (Kind == TreeMapKind::Walk) {                                                          \
+            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));     \
+        }                                                                                                \
+    }
+
+#define CALL_POST(member)                                                                                    \
+    if constexpr (Kind == TreeMapKind::Map) {                                                                \
+        if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                            \
+            return Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
+        }                                                                                                    \
+        return v;                                                                                            \
+    } else if constexpr (Kind == TreeMapKind::Walk) {                                                        \
+        if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                            \
+            Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));        \
+        }                                                                                                    \
+    }
+
+#define CALL_MAP(tree, ctx)                           \
+    if constexpr (Kind == TreeMapKind::Map) {         \
+        tree = mapIt(Funcs::pass(tree), ctx);         \
+    } else if constexpr (Kind == TreeMapKind::Walk) { \
+        mapIt(Funcs::pass(tree), ctx);                \
+    }
+
+    return_type mapClassDef(arg_type v, CTX ctx) {
+        CALL_PRE(ClassDef);
 
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
         //
@@ -187,374 +246,286 @@ private:
         // and that will have the same effect, without having to retroactively change all TreeMaps.
 
         for (auto &def : cast_tree_nonnull<ClassDef>(v).rhs) {
-            def = mapIt(std::move(def), ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
+            CALL_MAP(def, ctx.withOwner(cast_tree_nonnull<ClassDef>(v).symbol).withFile(ctx.file));
         }
 
-        if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>()) {
-            return CALL_MEMBER_postTransformClassDef<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_POST(ClassDef);
     }
 
-    ExpressionPtr mapMethodDef(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>()) {
-            v = CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapMethodDef(arg_type v, CTX ctx) {
+        CALL_PRE(MethodDef);
 
         for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ =
-                    mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
+                CALL_MAP(optArg->default_, ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
 
-        if constexpr (Kind == TreeMapKind::Full) {
-            cast_tree_nonnull<MethodDef>(v).rhs =
-                mapIt(std::move(cast_tree_nonnull<MethodDef>(v).rhs),
-                      ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
+        if constexpr (DepthKind == TreeMapDepthKind::Full) {
+            CALL_MAP(cast_tree_nonnull<MethodDef>(v).rhs,
+                     ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol).withFile(ctx.file));
         }
 
-        if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>()) {
-            return CALL_MEMBER_postTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+        CALL_POST(MethodDef);
     }
 
-    ExpressionPtr mapIf(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
-            v = CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, std::move(v));
-        }
-        cast_tree_nonnull<If>(v).cond = mapIt(std::move(cast_tree_nonnull<If>(v).cond), ctx);
-        cast_tree_nonnull<If>(v).thenp = mapIt(std::move(cast_tree_nonnull<If>(v).thenp), ctx);
-        cast_tree_nonnull<If>(v).elsep = mapIt(std::move(cast_tree_nonnull<If>(v).elsep), ctx);
+    return_type mapIf(arg_type v, CTX ctx) {
+        CALL_PRE(If);
 
-        if constexpr (HAS_MEMBER_postTransformIf<FUNC>()) {
-            return CALL_MEMBER_postTransformIf<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_MAP(cast_tree_nonnull<If>(v).cond, ctx);
+        CALL_MAP(cast_tree_nonnull<If>(v).thenp, ctx);
+        CALL_MAP(cast_tree_nonnull<If>(v).elsep, ctx);
+
+        CALL_POST(If);
     }
 
-    ExpressionPtr mapWhile(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
-            v = CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, std::move(v));
-        }
-        cast_tree_nonnull<While>(v).cond = mapIt(std::move(cast_tree_nonnull<While>(v).cond), ctx);
-        cast_tree_nonnull<While>(v).body = mapIt(std::move(cast_tree_nonnull<While>(v).body), ctx);
+    return_type mapWhile(arg_type v, CTX ctx) {
+        CALL_PRE(While);
 
-        if constexpr (HAS_MEMBER_postTransformWhile<FUNC>()) {
-            return CALL_MEMBER_postTransformWhile<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_MAP(cast_tree_nonnull<While>(v).cond, ctx);
+        CALL_MAP(cast_tree_nonnull<While>(v).body, ctx);
+
+        CALL_POST(While);
     }
 
-    ExpressionPtr mapBreak(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformBreak<FUNC>()) {
-            return CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapBreak(arg_type v, CTX ctx) {
+        CALL_PRE(Break);
 
-        cast_tree_nonnull<Break>(v).expr = mapIt(std::move(cast_tree_nonnull<Break>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<Break>(v).expr, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformBreak<FUNC>()) {
-            return CALL_MEMBER_postTransformBreak<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_POST(Break);
     }
-    ExpressionPtr mapRetry(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformRetry<FUNC>()) {
-            return CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+    return_type mapRetry(arg_type v, CTX ctx) {
+        CALL_POST(Retry);
     }
 
-    ExpressionPtr mapNext(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformNext<FUNC>()) {
-            return CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapNext(arg_type v, CTX ctx) {
+        CALL_PRE(Next);
 
-        cast_tree_nonnull<Next>(v).expr = mapIt(std::move(cast_tree_nonnull<Next>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<Next>(v).expr, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformNext<FUNC>()) {
-            return CALL_MEMBER_postTransformNext<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_POST(Next);
     }
 
-    ExpressionPtr mapReturn(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
-            v = CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, std::move(v));
-        }
-        cast_tree_nonnull<Return>(v).expr = mapIt(std::move(cast_tree_nonnull<Return>(v).expr), ctx);
+    return_type mapReturn(arg_type v, CTX ctx) {
+        CALL_PRE(Return);
 
-        if constexpr (HAS_MEMBER_postTransformReturn<FUNC>()) {
-            return CALL_MEMBER_postTransformReturn<FUNC>::call(func, ctx, std::move(v));
-        }
+        CALL_MAP(cast_tree_nonnull<Return>(v).expr, ctx);
 
-        return v;
+        CALL_POST(Return);
     }
 
-    ExpressionPtr mapRescueCase(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>()) {
-            v = CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapRescueCase(arg_type v, CTX ctx) {
+        CALL_PRE(RescueCase);
 
         for (auto &el : cast_tree_nonnull<RescueCase>(v).exceptions) {
-            el = mapIt(std::move(el), ctx);
+            CALL_MAP(el, ctx);
         }
 
-        cast_tree_nonnull<RescueCase>(v).var = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).var), ctx);
+        CALL_MAP(cast_tree_nonnull<RescueCase>(v).var, ctx);
 
-        cast_tree_nonnull<RescueCase>(v).body = mapIt(std::move(cast_tree_nonnull<RescueCase>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<RescueCase>(v).body, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>()) {
-            return CALL_MEMBER_postTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+        CALL_POST(RescueCase);
     }
-    ExpressionPtr mapRescue(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformRescue<FUNC>()) {
-            v = CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapRescue(arg_type v, CTX ctx) {
+        CALL_PRE(Rescue);
 
-        cast_tree_nonnull<Rescue>(v).body = mapIt(std::move(cast_tree_nonnull<Rescue>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<Rescue>(v).body, ctx);
 
         for (auto &el : cast_tree_nonnull<Rescue>(v).rescueCases) {
             ENFORCE(isa_tree<RescueCase>(el), "invalid tree where rescue case was expected");
-            el = mapRescueCase(std::move(el), ctx);
+            if constexpr (Kind == TreeMapKind::Map) {
+                el = mapRescueCase(Funcs::pass(el), ctx);
+            } else if constexpr (Kind == TreeMapKind::Walk) {
+                mapRescueCase(Funcs::pass(el), ctx);
+            }
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
         }
 
-        cast_tree_nonnull<Rescue>(v).else_ = mapIt(std::move(cast_tree_nonnull<Rescue>(v).else_), ctx);
-        cast_tree_nonnull<Rescue>(v).ensure = mapIt(std::move(cast_tree_nonnull<Rescue>(v).ensure), ctx);
+        CALL_MAP(cast_tree_nonnull<Rescue>(v).else_, ctx);
+        CALL_MAP(cast_tree_nonnull<Rescue>(v).ensure, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformRescue<FUNC>()) {
-            return CALL_MEMBER_postTransformRescue<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+        CALL_POST(Rescue);
     }
 
-    ExpressionPtr mapUnresolvedIdent(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
-            return CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+    return_type mapUnresolvedIdent(arg_type v, CTX ctx) {
+        CALL_POST(UnresolvedIdent);
     }
 
-    ExpressionPtr mapAssign(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformAssign<FUNC>()) {
-            v = CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapAssign(arg_type v, CTX ctx) {
+        CALL_PRE(Assign);
 
-        cast_tree_nonnull<Assign>(v).lhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).lhs), ctx);
-        cast_tree_nonnull<Assign>(v).rhs = mapIt(std::move(cast_tree_nonnull<Assign>(v).rhs), ctx);
+        CALL_MAP(cast_tree_nonnull<Assign>(v).lhs, ctx);
+        CALL_MAP(cast_tree_nonnull<Assign>(v).rhs, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformAssign<FUNC>()) {
-            return CALL_MEMBER_postTransformAssign<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+        CALL_POST(Assign);
     }
 
-    ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
-            v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapSend(arg_type v, CTX ctx) {
+        CALL_PRE(Send);
 
-        cast_tree_nonnull<Send>(v).recv = mapIt(std::move(cast_tree_nonnull<Send>(v).recv), ctx);
+        CALL_MAP(cast_tree_nonnull<Send>(v).recv, ctx);
 
         for (auto &arg : cast_tree_nonnull<Send>(v).nonBlockArgs()) {
-            arg = mapIt(std::move(arg), ctx);
+            CALL_MAP(arg, ctx);
             ENFORCE(arg != nullptr);
         }
 
         if (auto *block = cast_tree_nonnull<Send>(v).rawBlock()) {
-            *block = mapIt(std::move(*block), ctx);
+            CALL_MAP(*block, ctx);
             ENFORCE(cast_tree_nonnull<Send>(v).block() != nullptr, "block was mapped into not-a block");
         }
 
-        if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
-            return CALL_MEMBER_postTransformSend<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+        CALL_POST(Send);
     }
 
-    ExpressionPtr mapHash(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
-            v = CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapHash(arg_type v, CTX ctx) {
+        CALL_PRE(Hash);
+
         for (auto &key : cast_tree_nonnull<Hash>(v).keys) {
-            key = mapIt(std::move(key), ctx);
+            CALL_MAP(key, ctx);
         }
 
         for (auto &value : cast_tree_nonnull<Hash>(v).values) {
-            value = mapIt(std::move(value), ctx);
+            CALL_MAP(value, ctx);
         }
 
-        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
-            return CALL_MEMBER_postTransformHash<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_POST(Hash);
     }
 
-    ExpressionPtr mapArray(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
-            v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapArray(arg_type v, CTX ctx) {
+        CALL_PRE(Array);
+
         for (auto &elem : cast_tree_nonnull<Array>(v).elems) {
-            elem = mapIt(std::move(elem), ctx);
+            CALL_MAP(elem, ctx);
         }
 
-        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
-            return CALL_MEMBER_postTransformArray<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_POST(Array);
     }
 
-    ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
-            return CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+    return_type mapLiteral(arg_type v, CTX ctx) {
+        CALL_POST(Literal);
     }
 
-    ExpressionPtr mapUnresolvedConstantLit(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
-            return CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+    return_type mapUnresolvedConstantLit(arg_type v, CTX ctx) {
+        CALL_POST(UnresolvedConstantLit);
     }
 
-    ExpressionPtr mapConstantLit(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>()) {
-            return CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+    return_type mapConstantLit(arg_type v, CTX ctx) {
+        CALL_POST(ConstantLit);
     }
 
-    ExpressionPtr mapBlock(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformBlock<FUNC>()) {
-            v = CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapBlock(arg_type v, CTX ctx) {
+        CALL_PRE(Block);
 
         for (auto &arg : cast_tree_nonnull<Block>(v).args) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
-                optArg->default_ = mapIt(std::move(optArg->default_), ctx);
+                CALL_MAP(optArg->default_, ctx);
             }
         }
-        cast_tree_nonnull<Block>(v).body = mapIt(std::move(cast_tree_nonnull<Block>(v).body), ctx);
+        CALL_MAP(cast_tree_nonnull<Block>(v).body, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformBlock<FUNC>()) {
-            return CALL_MEMBER_postTransformBlock<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+        CALL_POST(Block);
     }
 
-    ExpressionPtr mapInsSeq(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>()) {
-            v = CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
-        }
+    return_type mapInsSeq(arg_type v, CTX ctx) {
+        CALL_PRE(InsSeq);
 
         for (auto &stat : cast_tree_nonnull<InsSeq>(v).stats) {
-            stat = mapIt(std::move(stat), ctx);
+            CALL_MAP(stat, ctx);
         }
 
-        cast_tree_nonnull<InsSeq>(v).expr = mapIt(std::move(cast_tree_nonnull<InsSeq>(v).expr), ctx);
+        CALL_MAP(cast_tree_nonnull<InsSeq>(v).expr, ctx);
 
-        if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>()) {
-            return CALL_MEMBER_postTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+        CALL_POST(InsSeq);
     }
 
-    ExpressionPtr mapLocal(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformLocal<FUNC>()) {
-            return CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, std::move(v));
-        }
-        return v;
+    return_type mapLocal(arg_type v, CTX ctx) {
+        CALL_POST(Local);
     }
 
-    ExpressionPtr mapCast(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
-            v = CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, std::move(v));
-        }
-        cast_tree_nonnull<Cast>(v).arg = mapIt(std::move(cast_tree_nonnull<Cast>(v).arg), ctx);
+    return_type mapCast(arg_type v, CTX ctx) {
+        CALL_PRE(Cast);
 
-        if constexpr (HAS_MEMBER_postTransformCast<FUNC>()) {
-            return CALL_MEMBER_postTransformCast<FUNC>::call(func, ctx, std::move(v));
-        }
+        CALL_MAP(cast_tree_nonnull<Cast>(v).arg, ctx);
 
-        return v;
+        CALL_POST(Cast);
     }
 
-    ExpressionPtr mapRuntimeMethodDefinition(ExpressionPtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformRuntimeMethodDefinition<FUNC>()) {
-            return CALL_MEMBER_postTransformRuntimeMethodDefinition<FUNC>::call(func, ctx, std::move(v));
-        }
-
-        return v;
+    return_type mapRuntimeMethodDefinition(arg_type v, CTX ctx) {
+        CALL_POST(RuntimeMethodDefinition);
     }
 
-    ExpressionPtr mapIt(ExpressionPtr what, CTX ctx) {
+    return_type mapIt(arg_type what, CTX ctx) {
         if (what == nullptr) {
-            return what;
+            if constexpr (Kind == TreeMapKind::Map) {
+                return what;
+            } else if constexpr (Kind == TreeMapKind::Walk) {
+                return;
+            }
         }
         auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency
-            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>()) {
-                what = CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, std::move(what));
+            if constexpr (Funcs::template HAS_MEMBER_preTransformExpression<FUNC>()) {
+                if constexpr (Kind == TreeMapKind::Map) {
+                    what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                } else if constexpr (Kind == TreeMapKind::Walk) {
+                    Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                }
             }
 
             switch (what.tag()) {
                 case Tag::EmptyTree:
-                    return what;
+                    if constexpr (Kind == TreeMapKind::Map) {
+                        return what;
+                    } else if constexpr (Kind == TreeMapKind::Walk) {
+                        return;
+                    }
 
                 case Tag::Send:
-                    return mapSend(std::move(what), ctx);
+                    return mapSend(Funcs::pass(what), ctx);
 
                 case Tag::ClassDef:
-                    return mapClassDef(std::move(what), ctx);
+                    return mapClassDef(Funcs::pass(what), ctx);
 
                 case Tag::MethodDef:
-                    return mapMethodDef(std::move(what), ctx);
+                    return mapMethodDef(Funcs::pass(what), ctx);
 
                 case Tag::If:
-                    return mapIf(std::move(what), ctx);
+                    return mapIf(Funcs::pass(what), ctx);
 
                 case Tag::While:
-                    return mapWhile(std::move(what), ctx);
+                    return mapWhile(Funcs::pass(what), ctx);
 
                 case Tag::Break:
-                    return mapBreak(std::move(what), ctx);
+                    return mapBreak(Funcs::pass(what), ctx);
 
                 case Tag::Retry:
-                    return mapRetry(std::move(what), ctx);
+                    return mapRetry(Funcs::pass(what), ctx);
 
                 case Tag::Next:
-                    return mapNext(std::move(what), ctx);
+                    return mapNext(Funcs::pass(what), ctx);
 
                 case Tag::Return:
-                    return mapReturn(std::move(what), ctx);
+                    return mapReturn(Funcs::pass(what), ctx);
 
                 case Tag::RescueCase:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::Rescue:
-                    return mapRescue(std::move(what), ctx);
+                    return mapRescue(Funcs::pass(what), ctx);
 
                 case Tag::Local:
-                    return mapLocal(std::move(what), ctx);
+                    return mapLocal(Funcs::pass(what), ctx);
 
                 case Tag::UnresolvedIdent:
-                    return mapUnresolvedIdent(std::move(what), ctx);
+                    return mapUnresolvedIdent(Funcs::pass(what), ctx);
 
                 case Tag::RestArg:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
@@ -577,37 +548,41 @@ private:
                     break;
 
                 case Tag::Assign:
-                    return mapAssign(std::move(what), ctx);
+                    return mapAssign(Funcs::pass(what), ctx);
 
                 case Tag::Cast:
-                    return mapCast(std::move(what), ctx);
+                    return mapCast(Funcs::pass(what), ctx);
 
                 case Tag::Hash:
-                    return mapHash(std::move(what), ctx);
+                    return mapHash(Funcs::pass(what), ctx);
 
                 case Tag::Array:
-                    return mapArray(std::move(what), ctx);
+                    return mapArray(Funcs::pass(what), ctx);
 
                 case Tag::Literal:
-                    return mapLiteral(std::move(what), ctx);
+                    return mapLiteral(Funcs::pass(what), ctx);
 
                 case Tag::UnresolvedConstantLit:
-                    return mapUnresolvedConstantLit(std::move(what), ctx);
+                    return mapUnresolvedConstantLit(Funcs::pass(what), ctx);
 
                 case Tag::ConstantLit:
-                    return mapConstantLit(std::move(what), ctx);
+                    return mapConstantLit(Funcs::pass(what), ctx);
 
                 case Tag::ZSuperArgs:
-                    return what;
+                    if constexpr (Kind == TreeMapKind::Map) {
+                        return what;
+                    } else if constexpr (Kind == TreeMapKind::Walk) {
+                        return;
+                    }
 
                 case Tag::Block:
-                    return mapBlock(std::move(what), ctx);
+                    return mapBlock(Funcs::pass(what), ctx);
 
                 case Tag::InsSeq:
-                    return mapInsSeq(std::move(what), ctx);
+                    return mapInsSeq(Funcs::pass(what), ctx);
 
                 case Tag::RuntimeMethodDefinition:
-                    return mapRuntimeMethodDefinition(std::move(what), ctx);
+                    return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
             }
         } catch (SorbetException &e) {
             Exception::failInFuzzer();
@@ -615,14 +590,34 @@ private:
             throw ReportedRubyException{e, loc};
         }
     }
+
+#undef CALL_PRE
+#undef CALL_POST
+#undef CALL_MAP
 };
 
 class TreeMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
-        TreeMapper<FUNC, CTX, TreeMapKind::Full> walker(func);
+        TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Full> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+};
+
+class TreeWalk {
+public:
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, ExpressionPtr &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::Walk, TreeMapDepthKind::Full> walker(func);
+        try {
+            walker.mapIt(to, ctx);
         } catch (ReportedRubyException &exception) {
             Exception::failInFuzzer();
             if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
@@ -636,9 +631,25 @@ public:
 class ShallowMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
-        TreeMapper<FUNC, CTX, TreeMapKind::Shallow> walker(func);
+        TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Shallow> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+};
+
+class ShallowWalk {
+public:
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, ExpressionPtr &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::Walk, TreeMapDepthKind::Shallow> walker(func);
+        try {
+            walker.mapIt(to, ctx);
         } catch (ReportedRubyException &exception) {
             Exception::failInFuzzer();
             if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {

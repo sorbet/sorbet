@@ -39,7 +39,7 @@ class Rewriterer {
     friend class Rewriter;
 
 public:
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
 
         auto isClass = classDef->kind == ast::ClassDef::Kind::Class;
@@ -147,7 +147,7 @@ public:
         }
         if (replaceNodes.empty()) {
             ModuleFunction::run(ctx, classDef);
-            return tree;
+            return;
         }
 
         auto oldRHS = std::move(classDef->rhs);
@@ -165,32 +165,30 @@ public:
             }
         }
         ModuleFunction::run(ctx, classDef);
-
-        return tree;
     }
 
     // NOTE: this case differs from the `Send` typecase branch in `postTransformClassDef` above, as it will apply to all
     // sends, not just those that are present in the RHS of a `ClassDef`.
-    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
 
         if (ClassNew::run(ctx, send)) {
-            return tree;
+            return;
         }
 
         if (auto expr = InterfaceWrapper::run(ctx, send)) {
-            return expr;
+            tree = std::move(expr);
+            return;
         }
 
         if (auto expr = SelfNew::run(ctx, send)) {
-            return expr;
+            tree = std::move(expr);
+            return;
         }
 
         if (SigRewriter::run(ctx, send)) {
-            return tree;
+            return;
         }
-
-        return tree;
     }
 
 private:
@@ -201,7 +199,7 @@ ast::ExpressionPtr Rewriter::run(core::MutableContext ctx, ast::ExpressionPtr tr
     auto ast = std::move(tree);
 
     Rewriterer rewriter;
-    ast = ast::TreeMap::apply(ctx, rewriter, std::move(ast));
+    ast::TreeWalk::apply(ctx, rewriter, ast);
     // This AST flattening pass requires that we mutate the AST in a way that our previous DSL passes were not designed
     // around, which is why it runs all at once and is not expressed as a `patch` method like the other DSL passes. This
     // is a rare case: in general, we should *not* add new DSL passes here.
