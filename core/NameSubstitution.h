@@ -21,10 +21,8 @@ class NameSubstitution final {
 public:
     NameSubstitution(const GlobalState &from, GlobalState &to);
 
-    NameRef substitute(NameRef from, bool allowSameFromTo = false) const {
-        if (!allowSameFromTo) {
-            from.sanityCheckSubstitution(*this);
-        }
+    NameRef substitute(NameRef from) const {
+        from.sanityCheckSubstitution(*this);
         switch (from.kind()) {
             case NameKind::UTF8:
                 ENFORCE(from.utf8Index() < utf8NameSubstitution.size(),
@@ -44,12 +42,12 @@ public:
         }
     }
 
-    NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) const {
-        return substitute(from, allowSameFromTo);
+    NameRef substituteSymbolName(NameRef from) const {
+        return substitute(from);
     }
 
-    NameRef substituteSend(NameRef from, bool allowSameFromTo = false) const {
-        return substitute(from, allowSameFromTo);
+    NameRef substituteSend(NameRef from) const {
+        return substitute(from);
     }
 
 private:
@@ -78,32 +76,32 @@ class LazyNameSubstitution final {
     UnorderedMap<core::NameRef, core::NameRef> nameSubstitution;
     core::UsageHash acc;
 
-    NameRef defineName(NameRef from, bool allowSameFromTo);
+    NameRef defineName(NameRef from);
 
 public:
     LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS);
     ~LazyNameSubstitution() = default;
 
-    NameRef substitute(NameRef from, bool allowSameFromTo = false) {
+    NameRef substitute(NameRef from) {
         if (&fromGS == &toGS) {
             return from;
         }
 
         auto it = nameSubstitution.find(from);
         if (it == nameSubstitution.end()) {
-            return defineName(from, allowSameFromTo);
+            return defineName(from);
         }
         return it->second;
     }
 
-    NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) {
+    NameRef substituteSymbolName(NameRef from) {
         acc.symbols.emplace_back(fromGS, from);
-        return substitute(from, allowSameFromTo);
+        return substitute(from);
     }
 
-    NameRef substituteSend(NameRef from, bool allowSameFromTo = false) {
+    NameRef substituteSend(NameRef from) {
         acc.sends.emplace_back(fromGS, from);
-        return substitute(from, allowSameFromTo);
+        return substitute(from);
     }
 
     core::UsageHash getAllNames();
