@@ -1321,7 +1321,6 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
-            pickle(p, a.loc);
             p.putU4(a.symbol().rawId());
             pickle(p, a.original);
             break;
@@ -1590,10 +1589,9 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::make_expression<ast::UnresolvedIdent>(loc, kind, name);
         }
         case ast::Tag::ConstantLit: {
-            auto loc = unpickleLocOffsets(p);
             auto sym = SymbolRef::fromRaw(p.getU4());
             auto orig = unpickleExpr(p, gs);
-            return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
+            return ast::make_expression<ast::ConstantLit>(sym, std::move(orig));
         }
         case ast::Tag::RuntimeMethodDefinition: {
             auto loc = unpickleLocOffsets(p);

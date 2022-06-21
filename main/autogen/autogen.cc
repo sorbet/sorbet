@@ -212,12 +212,12 @@ public:
             ref.nesting.pop_back();
             ref.scope = nesting.back();
         }
-        ref.loc = original.loc;
+        ref.loc = original.loc();
 
         // the reference location is the location of constant, but this might get updated if the reference corresponds
         // to the definition of the constant, because in that case we'll later on extend the location to cover the whole
         // class or assignment
-        ref.definitionLoc = original.loc;
+        ref.definitionLoc = original.loc();
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original.symbol();
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {

@@ -22,7 +22,7 @@ ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOf
 }
 
 ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
-    return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
+    return ASTUtil::mkNilable(loc, ast::MK::Constant(core::Symbols::String()));
 }
 
 } // namespace

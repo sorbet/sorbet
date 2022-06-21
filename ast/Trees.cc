@@ -85,12 +85,26 @@ string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) {
 #undef SHOW_RAW
 }
 
+namespace {
+template <typename T> struct LocGetter {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<T *>(ptr)->loc;
+    }
+};
+
+template <> struct LocGetter<ConstantLit> {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<ConstantLit *>(ptr)->loc();
+    }
+};
+}
+
 core::LocOffsets ExpressionPtr::loc() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name) return reinterpret_cast<name *>(ptr)->loc;
+#define CASE(name) return LocGetter<name>::loc(ptr);
     GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
@@ -298,10 +312,17 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original)
-    : loc(loc), resolutionScopesOrSymbol(symbol), original(std::move(original)) {
+ConstantLit::ConstantLit(core::SymbolRef symbol, ExpressionPtr original)
+    : resolutionScopesOrSymbol(symbol), original(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
+}
+
+core::LocOffsets ConstantLit::loc() const {
+    if (original == nullptr) {
+        return core::LocOffsets::none();
+    }
+    return original.loc();
 }
 
 optional<pair<core::SymbolRef, vector<core::NameRef>>>

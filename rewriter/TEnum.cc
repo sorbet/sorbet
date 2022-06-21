@@ -131,7 +131,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
         stat.loc(), std::move(asgn->lhs),
-        ast::MK::Send2(stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
+        ast::MK::Send2(stat.loc(), ast::MK::Constant(core::Symbols::T()), core::Names::uncheckedLet(),
                        stat.loc().copyWithZeroLength(),
                        rhs->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
@@ -169,7 +169,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     auto loc = klass->declLoc;
     auto locZero = loc.copyWithZeroLength();
     klass->rhs.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::extend(), locZero,
-                                           ast::MK::Constant(loc, core::Symbols::T_Helpers())));
+                                           ast::MK::Constant(core::Symbols::T_Helpers())));
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract(), locZero));
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed(), locZero));
     for (auto &stat : oldRHS) {

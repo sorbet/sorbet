@@ -91,7 +91,7 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
     if (argc == 1) {
         ancestors.emplace_back(move(send->getPosArg(0)));
     } else {
-        ancestors.emplace_back(ast::MK::Constant(send->loc, core::Symbols::todo()));
+        ancestors.emplace_back(ast::MK::Constant(core::Symbols::todo()));
     }
 
     auto loc = asgn->loc;
@@ -129,7 +129,7 @@ bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
     ast::ExpressionPtr type;
 
     if (argc == 0) {
-        type = ast::MK::Constant(send->loc, core::Symbols::Class());
+        type = ast::MK::Constant(core::Symbols::Class());
     } else {
         auto target = send->getPosArg(0).deepCopy();
         type = ast::MK::ClassOf(send->loc, std::move(target));
