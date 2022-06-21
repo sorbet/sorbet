@@ -55,6 +55,7 @@ public:
 
     const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
     const std::vector<std::string> &extraPackageFilesDirectoryPrefixes() const;
+    const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
 
     const std::string_view errorHint() const;
 
@@ -62,6 +63,7 @@ private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
     std::string errorHint_;
+    std::vector<std::string> skipRBIExportEnforcementDirs_;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having

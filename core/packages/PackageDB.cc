@@ -216,6 +216,10 @@ const std::vector<core::NameRef> &PackageDB::secondaryTestPackageNamespaceRefs()
     return secondaryTestPackageNamespaceRefs_;
 }
 
+const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const {
+    return skipRBIExportEnforcementDirs_;
+}
+
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryPrefixes() const {
     return extraPackageFilesDirectoryPrefixes_;
 }
