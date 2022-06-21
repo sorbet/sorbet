@@ -1,0 +1,11 @@
+# typed: true
+# assert-fast-path: same_method_multiple_files__1.rb,same_method_multiple_files__2.rb
+
+# Pretend this is an RBI file that declares only a sig
+
+class A
+  extend T::Sig
+
+  sig {returns(String)}
+  def foo; ''; end
+end
