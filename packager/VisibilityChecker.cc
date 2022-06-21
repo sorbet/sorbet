@@ -1,5 +1,6 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
+#include "absl/strings/match.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/formatting.h"
@@ -160,11 +161,21 @@ class PropagateVisibility final {
         }
     }
 
+    bool ignoreRBIExportEnforcement(core::MutableContext &ctx, core::FileRef file) {
+        const auto path = file.data(ctx).path();
+
+        return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
+                              [&](const std::string &dir) { return absl::StartsWith(path, dir); });
+    }
+
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
     void checkExportPackage(core::MutableContext &ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
-        bool allRBI = absl::c_all_of(sym.locs(ctx), [&](const core::Loc &loc) { return loc.file().data(ctx).isRBI(); });
+        bool allRBI = absl::c_all_of(sym.locs(ctx), [&](const core::Loc &loc) {
+            return loc.file().data(ctx).isRBI() && !ignoreRBIExportEnforcement(ctx, loc.file());
+        });
+
         if (allRBI) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is only defined in an RBI file", sym.show(ctx));

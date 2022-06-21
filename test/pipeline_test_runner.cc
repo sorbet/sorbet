@@ -412,6 +412,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (enablePackager) {
         vector<std::string> extraPackageFilesDirectoryPrefixes;
         vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
+        vector<std::string> skipRBIExportEnforcementDirs;
 
         auto extraDir = StringPropertyAssertion::getValue("extra-package-files-directory-prefix", assertions);
         if (extraDir.has_value()) {
@@ -422,7 +423,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeNameTable packageNS(*gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
             gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryPrefixes,
-                                   "PACKAGE_ERROR_HINT");
+                                   skipRBIExportEnforcementDirs, "PACKAGE_ERROR_HINT");
         }
 
         // Packager runs over all trees.

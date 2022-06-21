@@ -212,6 +212,7 @@ struct Options {
     std::string dumpPackageInfo = "";
     std::string singlePackage = "";
     std::string packageRBIDir = "";
+    std::vector<std::string> packageSkipRBIExportEnforcementDirs;
 
     // Contains the allowed extensions Sorbet can parse.
     UnorderedSet<std::string> allowedExtensions;

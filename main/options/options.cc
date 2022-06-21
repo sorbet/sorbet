@@ -461,6 +461,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<bool>());
     options.add_options("dev")("package-rbi-dir", "The location of generated package rbis",
                                cxxopts::value<string>()->default_value(""));
+    options.add_options("dev")(
+        "package-skip-rbi-export-enforcement",
+        "Constants defined in RBIs in these directories can be exported (otherwise, this behavior is disallowed)."
+        "This option can only be used in conjunction with --stripe-packages",
+        cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")("dump-package-info", "Dump package info in JSON form to the given file.",
                                cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("suppress-error-code",
@@ -960,6 +965,16 @@ void readOptions(Options &opts,
             if (opts.stripePackages) {
                 logger->error("--package-rbi-dir must not be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
+            }
+        }
+
+        if (raw.count("package-skip-rbi-export-enforcement")) {
+            if (!opts.stripePackages) {
+                logger->error("--package-skip-rbi-export-enforcement can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            for (const string &ns : raw["package-skip-rbi-export-enforcement"].as<vector<string>>()) {
+                opts.packageSkipRBIExportEnforcementDirs.emplace_back(ns);
             }
         }
 

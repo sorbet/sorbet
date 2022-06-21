@@ -2084,6 +2084,7 @@ const packages::PackageDB &GlobalState::packageDB() const {
 
 void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
                                      const std::vector<std::string> &extraPackageFilesDirectoryPrefixes,
+                                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                                      std::string errorHint) {
     ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
     ENFORCE(!packageDB_.frozen);
@@ -2093,6 +2094,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
     }
 
     packageDB_.extraPackageFilesDirectoryPrefixes_ = extraPackageFilesDirectoryPrefixes;
+    packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
     packageDB_.errorHint_ = errorHint;
 }
 

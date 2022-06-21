@@ -670,7 +670,7 @@ int realmain(int argc, char *argv[]) {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
                 gs->setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryPrefixes,
-                                       opts.stripePackagesHint);
+                                       opts.packageSkipRBIExportEnforcementDirs, opts.stripePackagesHint);
             }
 
             packages = packager::Packager::findPackages(*gs, *workers, move(packages));
