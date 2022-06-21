@@ -53,7 +53,7 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
 }
 
 ast::ExpressionPtr convertSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
-    auto magic = ast::MK::Constant(send->loc, core::Symbols::Magic());
+    auto magic = ast::MK::Constant(core::Symbols::Magic());
     auto &arg0 = send->getPosArg(0);
     arg0 = std::move(magic);
 

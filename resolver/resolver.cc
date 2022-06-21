@@ -459,7 +459,7 @@ private:
 
     static core::ClassOrModuleRef stubConstant(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                                ast::ConstantLit *out, bool possibleGenericType) {
-        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc), owner,
+        auto symbol = ctx.state.enterClassSymbol(ctx.locAt(out->loc()), owner,
                                                  ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
 
         auto data = symbol.data(ctx);
@@ -719,7 +719,7 @@ private:
                     if (!suggested.empty()) {
                         for (auto suggestion : suggested) {
                             const auto replacement = suggestion.symbol.show(ctx);
-                            e.didYouMean(replacement, ctx.locAt(job.out->loc));
+                            e.didYouMean(replacement, ctx.locAt(job.out->loc()));
                             e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
                         }
                     }
@@ -844,10 +844,10 @@ private:
         }
 
         if (rhsSym.isTypeAlias(ctx)) {
-            if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
+            if (auto e = ctx.beginError(it.rhs->loc(), core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
-                auto rhsLoc = ctx.locAt(it.rhs->loc);
+                auto rhsLoc = ctx.locAt(it.rhs->loc());
                 if (rhsLoc.exists()) {
                     e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
                 }
@@ -920,7 +920,7 @@ private:
                 if (!lastRun) {
                     return false;
                 }
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
                 resolved = stubSymbolForAncestor(job);
@@ -937,7 +937,7 @@ private:
                     }
                     return false;
                 }
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
                 }
                 resolved = stubSymbolForAncestor(job);
@@ -946,13 +946,13 @@ private:
         }
 
         if (resolvedClass == job.klass) {
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.show(ctx));
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
             resolvedClass = stubSymbolForAncestor(job);
         } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.show(ctx), resolvedClass.show(ctx));
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
@@ -971,14 +971,14 @@ private:
                        job.klass.data(ctx)->superClass() == resolvedClass) {
                 job.klass.data(ctx)->setSuperClass(resolvedClass);
             } else {
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                 job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                 }
             }
         } else {
             if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolvedClass.show(ctx));
                     e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
@@ -1034,7 +1034,7 @@ private:
                 }
                 continue;
             }
-            auto idLoc = core::Loc(todo.file, id->loc);
+            auto idLoc = core::Loc(todo.file, id->loc());
             if (!id->symbol().isClassOrModule()) {
                 if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
@@ -1196,7 +1196,7 @@ private:
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor)) {
             auto sym = cnst->symbol();
             if (sym.exists() && sym.isTypeAlias(ctx)) {
-                if (auto e = ctx.beginError(cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
+                if (auto e = ctx.beginError(cnst->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
                 return;
@@ -1215,7 +1215,7 @@ private:
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
+            auto out = ast::make_expression<ast::ConstantLit>(enclosingClass, std::move(nw));
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -1230,8 +1230,7 @@ private:
     ast::ExpressionPtr walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         if (auto *c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             c->scope = walkUnresolvedConstantLit(ctx, std::move(c->scope));
-            auto loc = c->loc;
-            auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+            auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(), std::move(tree));
             ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
             if (resolveJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
@@ -1724,10 +1723,12 @@ public:
 
         for (auto &todos : todo) {
             fast_sort(todos.items, [](const ConstantResolutionItem &lhs, const ConstantResolutionItem &rhs) -> bool {
-                if (lhs.out->loc == rhs.out->loc) {
+                auto lhsLoc = lhs.out->loc();
+                auto rhsLoc = rhs.out->loc();
+                if (lhsLoc == rhsLoc) {
                     return constantDepth(lhs.out) < constantDepth(rhs.out);
                 }
-                return compareLocOffsets(lhs.out->loc, rhs.out->loc);
+                return compareLocOffsets(lhsLoc, rhsLoc);
             });
         }
 
@@ -1736,10 +1737,12 @@ public:
 
         for (auto &todos : todoAncestors) {
             fast_sort(todos.items, [](const AncestorResolutionItem &lhs, const AncestorResolutionItem &rhs) -> bool {
-                if (lhs.ancestor->loc == rhs.ancestor->loc) {
+                auto lhsLoc = lhs.ancestor->loc();
+                auto rhsLoc = rhs.ancestor->loc();
+                if (lhsLoc == rhsLoc) {
                     return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
                 }
-                return compareLocOffsets(lhs.ancestor->loc, rhs.ancestor->loc);
+                return compareLocOffsets(lhsLoc, rhsLoc);
             });
         }
 
@@ -2103,7 +2106,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     // In that case, use the assign's loc instead.
                     loc = job.asgn->loc;
                 }
-                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(core::Symbols::Magic()),
                                                core::Names::suggestType(), loc.copyWithZeroLength(), move(rhs));
             }
         }

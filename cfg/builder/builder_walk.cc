@@ -292,12 +292,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::ConstantLit &a) {
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
                 if (a.symbol() == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(core::Symbols::untyped()));
+                    current->exprs.emplace_back(aliasName, a.loc(), make_insn<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(a.symbol()));
+                    current->exprs.emplace_back(aliasName, a.loc(), make_insn<Alias>(a.symbol()));
                 }
 
-                synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
+                synthesizeExpr(current, cctx.target, a.loc(), make_insn<Ident>(aliasName));
 
                 if (a.original) {
                     auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a.original);
@@ -720,7 +720,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         exceptions.emplace_back(
-                            ast::MK::Constant(rescueCase->var.loc(), core::Symbols::StandardError()));
+                            ast::MK::Constant(core::Symbols::StandardError()));
                         added = true;
                     }
                     for (auto &ex : exceptions) {

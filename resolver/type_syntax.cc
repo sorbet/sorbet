@@ -865,6 +865,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
 
             auto sym = maybeAliased.dealias(ctx);
+            auto loc = i.loc();
             if (sym.isClassOrModule()) {
                 auto klass = sym.asClassOrModuleRef();
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
@@ -883,14 +884,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                                                klass == core::Symbols::Enumerator();
                     auto level = isStdlibWhitelisted ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                                      : core::errors::Resolver::GenericClassWithoutTypeArgs;
-                    if (auto e = ctx.beginError(i.loc, level)) {
+                    if (auto e = ctx.beginError(loc, level)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                     klass.show(ctx));
                         // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
                         // if we're already looking at `T::Array` instead.
                         auto typePrefix = isBuiltinGeneric ? "" : "T::";
 
-                        auto loc = ctx.locAt(i.loc);
+                        core::Loc loc = ctx.locAt(i.loc());
                         if (auto locSource = loc.source(ctx)) {
                             if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
                                 // Hash is special because it has arity 3 but you're only supposed to write the first 2
@@ -956,7 +957,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
+                        if (auto e = ctx.beginError(loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";
                             string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 
@@ -992,21 +993,21 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                     }
                 } else {
                     // a type member has occurred in a context that doesn't allow them
-                    if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    if (auto e = ctx.beginError(loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
                         e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
                     }
                     result.type = core::Types::untypedUntracked();
                 }
             } else if (sym.isStaticField(ctx)) {
-                if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));
                     e.addErrorLine(sym.loc(ctx), "If you are trying to define a type alias, you should use `{}` here",
                                    "T.type_alias");
                 }
                 result.type = core::Types::untypedUntracked();
             } else {
-                if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Not a class type `{}`", maybeAliased.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
@@ -1069,7 +1070,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
 
             if (recvi->symbol() == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
-                if (auto e = ctx.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                if (auto e = ctx.beginError(recvi->loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
@@ -1153,7 +1154,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         "`{}` will raise at runtime because this generic was defined in the standard library",
                         recvi->symbol().show(ctx) + "[...]");
                     e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol().show(ctx), corrected.show(ctx)),
-                                  ctx.locAt(recvi->loc), "{}", corrected.show(ctx));
+                                  ctx.locAt(recvi->loc()), "{}", corrected.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
                 return;
@@ -1178,7 +1179,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();
             core::CallLocs locs{
-                ctx.file, s.loc, recvi->loc, s.loc.copyWithZeroLength(), argLocs,
+                ctx.file, s.loc, recvi->loc(), s.loc.copyWithZeroLength(), argLocs,
             };
             auto suppressErrors = false;
             core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),

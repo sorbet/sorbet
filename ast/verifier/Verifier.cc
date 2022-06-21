@@ -9,7 +9,7 @@ class VerifierWalker {
 
 public:
     ExpressionPtr preTransformExpression(core::Context ctx, ExpressionPtr original) {
-        if (!isa_tree<EmptyTree>(original)) {
+        if (!isa_tree<EmptyTree>(original) && !isa_tree<ConstantLit>(original)) {
             ENFORCE(original.loc().exists(), "location is unset");
         }
 

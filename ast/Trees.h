@@ -1161,17 +1161,15 @@ public:
 CheckSize(ResolutionScopesOrSymbol, 8, 8);
 
 EXPRESSION(ConstantLit) {
-public:
-    const core::LocOffsets loc;
-
 private:
     ResolutionScopesOrSymbol resolutionScopesOrSymbol;
 
 public:
     ExpressionPtr original;
 
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
+    ConstantLit(core::SymbolRef symbol, ExpressionPtr original);
 
+    core::LocOffsets loc() const;
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
@@ -1203,7 +1201,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ConstantLit, 24, 8);
+CheckSize(ConstantLit, 16, 8);
 
 EXPRESSION(ZSuperArgs) {
 public:

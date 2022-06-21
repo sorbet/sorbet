@@ -1292,7 +1292,7 @@ class TreeSymbolizer {
             return core::Symbols::noSymbol();
         }
 
-        node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, std::move(node));
+        node = ast::make_expression<ast::ConstantLit>(existing, std::move(node));
         return existing;
     }
 
@@ -1568,8 +1568,7 @@ public:
             ENFORCE(this->bestEffort);
             return ast::MK::EmptyTree();
         }
-        auto loc = lhs.loc;
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, std::move(asgn.lhs));
 
         return tree;
     }
@@ -1739,7 +1738,7 @@ public:
 
                 // one of fixed or bounds were provided
                 if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
+                    asgn.lhs = ast::MK::Constant(sym);
 
                     // Leave it in the tree for the resolver to chew on.
                     return tree;

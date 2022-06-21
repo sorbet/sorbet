@@ -382,7 +382,7 @@ public:
             auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter()
                         : methodDef.flags.isAttrReader    ? core::Names::attrReader()
                                                           : core::Names::normal();
-            return ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
+            return ast::MK::Send3(loc, ast::MK::Constant(core::Symbols::Sorbet_Private_Static()), keepName,
                                   loc.copyWithZeroLength(), ast::MK::Self(loc), ast::MK::Symbol(loc, name),
                                   ast::MK::Symbol(loc, kind));
         }
