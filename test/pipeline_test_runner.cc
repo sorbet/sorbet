@@ -197,8 +197,8 @@ void immutableNamerResolver(const core::GlobalState &gs, vector<ast::ParsedFile>
         auto file = resolvedTree.file;
 
         core::Context ctx(gs, core::Symbols::root(), file);
-        resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
         resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
+        resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
 
         // Don't run typecheck on RBI files.
         if (resolvedTree.file.data(gs).isRBI()) {
@@ -605,10 +605,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto file = resolvedTree.file;
 
         core::Context ctx(*gs, core::Symbols::root(), file);
+        resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
+
         resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
         handler.drainErrors(*gs);
-
-        resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
         handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
