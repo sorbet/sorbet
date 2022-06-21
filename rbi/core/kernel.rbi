@@ -1217,7 +1217,7 @@ module Kernel
   end
   sig do
     params(
-        arg0: Class,
+        arg0: Exception,
         arg1: String,
         arg2: T::Array[String],
     )
