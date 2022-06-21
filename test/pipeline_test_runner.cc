@@ -60,11 +60,11 @@ string singleTest;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         if (m.symbol.data(ctx)->flags.isOverloaded) {
-            return tree;
+            return;
         }
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
         auto symbol = cfg->symbol;
@@ -75,7 +75,6 @@ public:
             }
         }
         cfgs.push_back(move(cfg));
-        return tree;
     }
 };
 
@@ -208,7 +207,7 @@ void immutableNamerResolver(const core::GlobalState &gs, vector<ast::ParsedFile>
 
         if (file.data(gs).strictLevel >= core::StrictLevel::True) {
             CFGCollectorAndTyper collector;
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
         }
     }
 
@@ -641,7 +640,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
             core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
             }
@@ -687,7 +686,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             checkTree();
             CFGCollectorAndTyper collector;
             core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
             }
