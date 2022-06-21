@@ -68,3 +68,18 @@ T.assert_type!(obj.itself, String)
 y = loop do
 end
 puts y # error: This code is unreachable
+
+class CustomError < StandardError
+  def initialize(cause, team)
+    @cause = cause
+    @team = team
+  end
+end
+
+def raises_fail
+  fail CustomError.new("Problem", "DevOops")
+end
+
+def raises_raise
+  raise CustomError.new("Problem", "DevOops")
+end
