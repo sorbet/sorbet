@@ -17,7 +17,7 @@ namespace {
 
 bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
-        return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
+        return lit->isSymbol() && lit->asSymbol() == core::Names::keywordInit();
     }
     return false;
 }
@@ -114,10 +114,10 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
     for (int i = 0; i < send->numPosArgs(); i++) {
         auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
-        if (!sym || !sym->isSymbol(ctx)) {
+        if (!sym || !sym->isSymbol()) {
             return empty;
         }
-        core::NameRef name = sym->asSymbol(ctx);
+        core::NameRef name = sym->asSymbol();
         auto symLoc = sym->loc;
         auto strname = name.shortName(ctx);
         if (!strname.empty() && strname.back() == '=') {

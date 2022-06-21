@@ -331,14 +331,14 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
             return value;
         }
         case core::LiteralType::LiteralTypeKind::Symbol: {
-            auto str = litType.asName(cs).shortName(cs);
+            auto str = litType.asName().shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             auto *value = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
             Payload::assumeType(cs, builder, value, core::Symbols::Symbol());
             return value;
         }
         case core::LiteralType::LiteralTypeKind::String: {
-            auto str = litType.asName(cs).shortName(cs);
+            auto str = litType.asName().shortName(cs);
             auto *value = Payload::cPtrToRubyString(cs, builder, str, true);
             Payload::assumeType(cs, builder, value, core::Symbols::String());
             return value;

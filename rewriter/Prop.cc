@@ -214,10 +214,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return nullopt;
         }
         auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-        if (!sym || !sym->isSymbol(ctx)) {
+        if (!sym || !sym->isSymbol()) {
             return nullopt;
         }
-        ret.name = sym->asSymbol(ctx);
+        ret.name = sym->asSymbol();
         ENFORCE(ctx.locAt(sym->loc).exists());
         ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
@@ -292,9 +292,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::computedBy())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::computedBy());
             auto lit = ast::cast_tree<ast::Literal>(val);
-            if (lit != nullptr && lit->isSymbol(ctx)) {
+            if (lit != nullptr && lit->isSymbol()) {
                 ret.computedByMethodNameLoc = lit->loc;
-                ret.computedByMethodName = lit->asSymbol(ctx);
+                ret.computedByMethodName = lit->asSymbol();
             } else {
                 if (auto e = ctx.beginError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
                     e.setHeader("Value for `{}` must be a symbol literal", "computed_by");

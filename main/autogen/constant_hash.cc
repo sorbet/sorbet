@@ -63,8 +63,8 @@ struct ConstantHashWalk {
             hashSoFar = core::mix(hashSoFar, core::_hash("(r"));
             if (send.hasPosArgs()) {
                 if (auto str = ast::cast_tree<ast::Literal>(send.posArgs().front())) {
-                    if (str->isString(ctx)) {
-                        hashSoFar = core::mix(hashSoFar, core::_hash(str->asString(ctx).shortName(ctx)));
+                    if (str->isString()) {
+                        hashSoFar = core::mix(hashSoFar, core::_hash(str->asString().shortName(ctx)));
                     }
                 }
             }

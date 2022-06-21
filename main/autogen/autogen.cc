@@ -303,8 +303,8 @@ public:
         // This means it's a `require`; mark it as such
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->numPosArgs() == 1) {
             auto *lit = ast::cast_tree<ast::Literal>(original->getPosArg(0));
-            if (lit && lit->isString(ctx)) {
-                requireStatements.emplace_back(lit->asString(ctx));
+            if (lit && lit->isString()) {
+                requireStatements.emplace_back(lit->asString());
             }
         }
         return tree;

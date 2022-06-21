@@ -37,7 +37,7 @@ optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::Instructi
         return std::nullopt;
     }
 
-    return lit.asName(gs).shortName(gs);
+    return lit.asName().shortName(gs);
 }
 
 struct AliasesAndKeywords {

@@ -326,10 +326,10 @@ public:
 
         for (const auto &arg : send.posArgs()) {
             auto lit = ast::cast_tree<ast::Literal>(arg);
-            if (lit == nullptr || !lit->isSymbol(ctx)) {
+            if (lit == nullptr || !lit->isSymbol()) {
                 continue;
             }
-            core::NameRef name = lit->asSymbol(ctx);
+            core::NameRef name = lit->asSymbol();
 
             parsedArgs.emplace_back(name);
         }
@@ -352,10 +352,10 @@ public:
     void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
         auto target = core::NameRef::noName();
         if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
-            if (sym->isSymbol(ctx)) {
-                target = sym->asSymbol(ctx);
-            } else if (sym->isString(ctx)) {
-                target = sym->asString(ctx);
+            if (sym->isSymbol()) {
+                target = sym->asSymbol();
+            } else if (sym->isString()) {
+                target = sym->asString();
             }
         }
 
@@ -373,10 +373,10 @@ public:
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
-            if (!sym->isSymbol(ctx)) {
+            if (!sym->isSymbol()) {
                 return core::NameRef::noName();
             }
-            return sym->asSymbol(ctx);
+            return sym->asSymbol();
         } else if (auto *def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
         } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
@@ -447,8 +447,8 @@ public:
             // If there are positional arguments, there might be a variance annotation
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-                if (lit != nullptr && lit->isSymbol(ctx)) {
-                    found.varianceName = lit->asSymbol(ctx);
+                if (lit != nullptr && lit->isSymbol()) {
+                    found.varianceName = lit->asSymbol();
                     found.litLoc = lit->loc;
                 }
             }
@@ -457,8 +457,8 @@ public:
                 if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
                     for (const auto &keyExpr : hash->keys) {
                         const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                        if (key != nullptr && key->isSymbol(ctx)) {
-                            switch (key->asSymbol(ctx).rawId()) {
+                        if (key != nullptr && key->isSymbol()) {
+                            switch (key->asSymbol().rawId()) {
                                 case core::Names::fixed().rawId():
                                     found.isFixed = true;
                                     break;
@@ -1701,7 +1701,7 @@ public:
                 if (const auto *hash = ast::cast_tree<ast::Hash>(send->block()->body)) {
                     for (const auto &keyExpr : hash->keys) {
                         const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                        if (key == nullptr || !key->isSymbol(ctx)) {
+                        if (key == nullptr || !key->isSymbol()) {
                             if (auto e = ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
                                 e.setHeader("Hash provided in block to `{}` must have symbol keys",
                                             send->fun.show(ctx));
@@ -1709,7 +1709,7 @@ public:
                             return tree;
                         }
 
-                        switch (key->asSymbol(ctx).rawId()) {
+                        switch (key->asSymbol().rawId()) {
                             case core::Names::fixed().rawId():
                                 fixed = true;
                                 break;
@@ -1722,8 +1722,8 @@ public:
                             default:
                                 if (auto e =
                                         ctx.beginError(keyExpr.loc(), core::errors::Namer::InvalidTypeDefinition)) {
-                                    e.setHeader("Unknown key `{}` provided in block to `{}`",
-                                                key->asSymbol(ctx).show(ctx), send->fun.show(ctx));
+                                    e.setHeader("Unknown key `{}` provided in block to `{}`", key->asSymbol().show(ctx),
+                                                send->fun.show(ctx));
                                 }
                                 return tree;
                         }
@@ -1757,7 +1757,7 @@ public:
 
             if (send->numPosArgs() > 0) {
                 auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-                if (!lit || !lit->isSymbol(ctx)) {
+                if (!lit || !lit->isSymbol()) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Invalid param, must be a :symbol");
                     }

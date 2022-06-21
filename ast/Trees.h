@@ -1022,11 +1022,11 @@ public:
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
-    bool isString(const core::GlobalState &gs) const;
-    bool isSymbol(const core::GlobalState &gs) const;
+    bool isString() const;
+    bool isSymbol() const;
     bool isNil(const core::GlobalState &gs) const;
-    core::NameRef asString(const core::GlobalState &gs) const;
-    core::NameRef asSymbol(const core::GlobalState &gs) const;
+    core::NameRef asString() const;
+    core::NameRef asSymbol() const;
     bool isTrue(const core::GlobalState &gs) const;
     bool isFalse(const core::GlobalState &gs) const;
 

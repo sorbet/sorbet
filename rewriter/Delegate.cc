@@ -10,7 +10,7 @@ namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, const ast::ExpressionPtr &node, core::NameRef name) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
-        return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
+        return lit->isSymbol() && lit->asSymbol() == name;
     }
     return false;
 }
@@ -27,10 +27,10 @@ static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs
     if (!lit) {
         return nullopt;
     }
-    if (lit->isSymbol(gs)) {
-        return lit->asSymbol(gs);
-    } else if (lit->isString(gs)) {
-        return lit->asString(gs);
+    if (lit->isSymbol()) {
+        return lit->asSymbol();
+    } else if (lit->isString()) {
+        return lit->asString();
     } else {
         return nullopt;
     }
@@ -91,7 +91,7 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
     vector<ast::ExpressionPtr> methodStubs;
     for (int i = 0; i < send->numPosArgs(); i++) {
         auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(i));
-        if (!lit || !lit->isSymbol(ctx)) {
+        if (!lit || !lit->isSymbol()) {
             return empty;
         }
         core::NameRef methodName;
@@ -101,9 +101,9 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
                 return empty;
             }
             methodName =
-                ctx.state.enterNameUTF8(fmt::format("{}_{}", beforeUnderscore, lit->asSymbol(ctx).shortName(ctx)));
+                ctx.state.enterNameUTF8(fmt::format("{}_{}", beforeUnderscore, lit->asSymbol().shortName(ctx)));
         } else {
-            methodName = lit->asSymbol(ctx);
+            methodName = lit->asSymbol();
         }
         // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
         auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),

@@ -193,7 +193,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 
     if (sigSend.numPosArgs() == 2) {
         auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(1));
-        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final_()) {
+        if (lit != nullptr && lit->isSymbol() && lit->asSymbol() == core::Names::final_()) {
             sig.seen.final = true;
         }
     }
@@ -217,14 +217,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     continue;
                 }
 
-                if (!c->isSymbol(ctx)) {
+                if (!c->isSymbol()) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`: Type parameters are specified with symbols", "sig");
                     }
                     continue;
                 }
 
-                auto name = c->asSymbol(ctx);
+                auto name = c->asSymbol();
                 auto &typeArgSpec = sig.enterTypeArgByName(name);
                 if (typeArgSpec.type) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
@@ -371,8 +371,8 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     auto &key = send->getKwKey(i);
                     auto &value = send->getKwValue(i);
                     auto *lit = ast::cast_tree<ast::Literal>(key);
-                    if (lit && lit->isSymbol(ctx)) {
-                        core::NameRef name = lit->asSymbol(ctx);
+                    if (lit && lit->isSymbol()) {
+                        core::NameRef name = lit->asSymbol();
                         TypeSyntax::ResultType resultAndBind;
 
                         if (isProc) {
@@ -426,8 +426,8 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         auto &key = send->getKwKey(i);
                         auto &value = send->getKwValue(i);
                         auto lit = ast::cast_tree<ast::Literal>(key);
-                        if (lit && lit->isSymbol(ctx)) {
-                            if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
+                        if (lit && lit->isSymbol()) {
+                            if (lit->asSymbol() == core::Names::allowIncompatible()) {
                                 auto val = ast::cast_tree<ast::Literal>(value);
                                 if (val && val->isTrue(ctx)) {
                                     sig.seen.incompatibleOverride = true;
@@ -628,13 +628,13 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto arr = ast::cast_tree<ast::Literal>(send.getPosArg(0));
-            if (!arr || !arr->isSymbol(ctx)) {
+            if (!arr || !arr->isSymbol()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("type_parameter requires a symbol");
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto fnd = sig.findTypeArgByName(arr->asSymbol(ctx));
+            auto fnd = sig.findTypeArgByName(arr->asSymbol());
             if (!fnd.type) {
                 if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unspecified type parameter");
@@ -826,7 +826,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 auto &vtree = hash.values[&ktree - &hash.keys.front()];
                 auto val = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args.withoutSelfType());
                 auto lit = ast::cast_tree<ast::Literal>(ktree);
-                if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
+                if (lit && (lit->isSymbol() || lit->isString())) {
                     ENFORCE(core::isa_type<core::LiteralType>(lit->value));
                     keys.emplace_back(lit->value);
                     values.emplace_back(val);

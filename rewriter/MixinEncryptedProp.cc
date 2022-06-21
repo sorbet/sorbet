@@ -47,10 +47,10 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
 
     auto loc = send->loc;
     auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(0));
-    if (!sym || !sym->isSymbol(ctx)) {
+    if (!sym || !sym->isSymbol()) {
         return empty;
     }
-    name = sym->asSymbol(ctx);
+    name = sym->asSymbol();
     ENFORCE(ctx.locAt(sym->loc).exists());
     ENFORCE(ctx.locAt(sym->loc).source(ctx).value().size() > 1 && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};

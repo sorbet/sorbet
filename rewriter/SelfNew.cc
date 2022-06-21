@@ -45,7 +45,7 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
         return false;
     }
 
-    if (litType.asName(ctx) != core::Names::new_()) {
+    if (litType.asName() != core::Names::new_()) {
         return false;
     }
 

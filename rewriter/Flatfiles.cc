@@ -12,14 +12,14 @@ using namespace std;
 namespace sorbet::rewriter {
 optional<core::NameRef> getFieldName(core::MutableContext ctx, ast::Send &send) {
     if (auto propLit = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
-        if (propLit->isSymbol(ctx)) {
-            return propLit->asSymbol(ctx);
+        if (propLit->isSymbol()) {
+            return propLit->asSymbol();
         }
     }
     if (send.numPosArgs() >= 2) {
         if (auto propLit = ast::cast_tree<ast::Literal>(send.getPosArg(1))) {
-            if (propLit->isSymbol(ctx)) {
-                return propLit->asSymbol(ctx);
+            if (propLit->isSymbol()) {
+                return propLit->asSymbol();
             }
         }
     }

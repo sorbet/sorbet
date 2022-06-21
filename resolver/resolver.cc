@@ -2156,7 +2156,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 for (const auto &keyExpr : hash->keys) {
                     i++;
                     const auto *key = ast::cast_tree<ast::Literal>(keyExpr);
-                    if (key == nullptr || !key->isSymbol(ctx)) {
+                    if (key == nullptr || !key->isSymbol()) {
                         // Namer reported an error already
                         continue;
                     }
@@ -2170,7 +2170,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
-                    switch (key->asSymbol(ctx).rawId()) {
+                    switch (key->asSymbol().rawId()) {
                         case core::Names::fixed().rawId():
                             memberType->lowerBound = resTy;
                             memberType->upperBound = resTy;
@@ -2476,7 +2476,7 @@ class ResolveTypeMembersAndFieldsWalk {
         if (send.hasKwArgs()) {
             // this means we got the third package arg
             auto *key = ast::cast_tree<ast::Literal>(send.getKwKey(0));
-            if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
+            if (!key || !key->isSymbol() || key->asSymbol() != ctx.state.lookupNameUTF8("package")) {
                 return;
             }
 
@@ -2501,7 +2501,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // if we got keyword args, then package should be non-null
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
-        auto name = literal.asName(ctx);
+        auto name = literal.asName();
         auto shortName = name.shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
@@ -2532,7 +2532,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
             auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-            auto name = package.asName(ctx).shortName(ctx);
+            auto name = package.asName().shortName(ctx);
             vector<string> pkgParts = absl::StrSplit(name, "::");
             // add the initial empty string to mimic the leading `::`
             if (ctx.state.packageDB().empty()) {
@@ -2843,10 +2843,10 @@ public:
             for (auto i = 0; i < numPosArgs; ++i) {
                 auto &arg = send.getPosArg(i);
                 auto lit = ast::cast_tree<ast::Literal>(arg);
-                if (lit == nullptr || !lit->isSymbol(ctx)) {
+                if (lit == nullptr || !lit->isSymbol()) {
                     continue;
                 }
-                core::NameRef name = lit->asSymbol(ctx);
+                core::NameRef name = lit->asSymbol();
 
                 args.emplace_back(name);
             }

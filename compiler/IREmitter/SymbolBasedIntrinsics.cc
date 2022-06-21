@@ -474,13 +474,13 @@ public:
         // Second arg: name of method to define
         auto litName = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(litName.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto funcNameRef = litName.asName(cs);
+        auto funcNameRef = litName.asName();
         auto name = Payload::toCString(cs, funcNameRef.show(cs), builder);
 
         // Third arg: method kind (normal, attr_reader, or genericPropGetter)
         auto litMethodKind = core::cast_type_nonnull<core::LiteralType>(send->args[2].type);
         ENFORCE(litMethodKind.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        auto methodKind = litMethodKind.asName(cs);
+        auto methodKind = litMethodKind.asName();
 
         auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
         if (ownerSym == core::Symbols::Object() && !isSelf) {
@@ -708,7 +708,7 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto &builder = mcctx.builder;
-        auto str = literal.asName(cs).shortName(cs);
+        auto str = literal.asName().shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
 

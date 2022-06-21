@@ -9,7 +9,7 @@ namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, const ast::ExpressionPtr &node, core::NameRef name) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
-        return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
+        return lit->isSymbol() && lit->asSymbol() == name;
     }
     return false;
 }
@@ -89,13 +89,13 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
     vector<ast::ExpressionPtr> result;
     for (int i = 0; i < symbolArgsBound; i++) {
         auto *lit = ast::cast_tree<ast::Literal>(send->getPosArg(i));
-        if (!lit || !lit->isSymbol(ctx)) {
+        if (!lit || !lit->isSymbol()) {
             return empty;
         }
         auto loc = lit->loc;
         if (doReaders) {
             auto sig = ast::MK::Sig0(loc, ast::MK::Untyped(loc));
-            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(ctx), ast::MK::EmptyTree());
+            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader) {
                 addInstanceCounterPart(result, sig, def);
@@ -106,7 +106,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
         if (doWriters) {
             auto sig = ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                      ast::MK::Untyped(loc));
-            auto def = ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol(ctx).addEq(ctx),
+            auto def = ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol().addEq(ctx),
                                                  ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceWriter) {
@@ -120,7 +120,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
             // from being generated.
             auto sig = ast::MK::Sig0(
                 loc, ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean()));
-            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(ctx).addQuestion(ctx), ast::MK::False(loc));
+            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol().addQuestion(ctx), ast::MK::False(loc));
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader && instancePredicate) {
                 addInstanceCounterPart(result, sig, def);

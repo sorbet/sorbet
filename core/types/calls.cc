@@ -1213,7 +1213,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        NameRef arg = key.asName(gs);
+                        NameRef arg = key.asName();
                         if (consumed.contains(arg)) {
                             continue;
                         }
@@ -1240,7 +1240,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
-                           lit.asName(gs) == spec.name;
+                           lit.asName() == spec.name;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -1293,10 +1293,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 auto underlying = key.underlying(gs);
                 ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
-                if (klass == Symbols::Symbol() && consumed.find(key.asName(gs)) != consumed.end()) {
+                if (klass == Symbols::Symbol() && consumed.find(key.asName()) != consumed.end()) {
                     continue;
                 }
-                NameRef arg = key.asName(gs);
+                NameRef arg = key.asName();
 
                 if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(gs),
@@ -2258,7 +2258,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName(gs);
+        NameRef fn = lit.asName();
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -2507,7 +2507,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName(gs);
+        NameRef fn = lit.asName();
 
         uint16_t numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -2577,7 +2577,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName(gs);
+        NameRef fn = lit.asName();
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
@@ -2752,7 +2752,7 @@ public:
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
-        auto fun = lit.asName(gs);
+        auto fun = lit.asName();
 
         uint16_t numPosArgs = args.numPosArgs - 3;
 
@@ -3138,7 +3138,7 @@ public:
 
                     if (args.fullType.origins.size() == 1 &&
                         argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
-                        auto key = argLit.asName(gs);
+                        auto key = argLit.asName();
                         auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
 
                         if (loc.has_value() && loc->exists()) {
