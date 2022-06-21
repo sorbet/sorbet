@@ -43,88 +43,71 @@ TEST_CASE("CountTrees") {
     class Counter {
     public:
         int count = 0;
-        ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
-        ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformIf(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformIf(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformWhile(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformWhile(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr postTransformBreak(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void postTransformBreak(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr postTransformNext(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void postTransformNext(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformReturn(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformReturn(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformRescue(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformRescue(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformSend(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformHash(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformHash(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformArray(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformArray(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr postTransformLiteral(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void postTransformLiteral(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
 
-        ast::ExpressionPtr preTransformInsSeq(core::MutableContext ctx, ast::ExpressionPtr original) {
+        void preTransformInsSeq(core::MutableContext ctx, ast::ExpressionPtr &original) {
             count++;
-            return original;
         }
     };
 
@@ -166,7 +149,7 @@ TEST_CASE("CountTrees") {
     Counter c;
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), loc.file());
 
-    auto r = ast::TreeMap::apply(ctx, c, std::move(tree));
+    ast::TreeWalk::apply(ctx, c, tree);
     CHECK_EQ(c.count, 3);
 }
 
