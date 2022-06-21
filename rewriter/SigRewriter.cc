@@ -9,7 +9,7 @@ namespace {
 
 bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
     if (auto *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
-        return cnst->symbol == core::Symbols::T_Sig_WithoutRuntime();
+        return cnst->symbol() == core::Symbols::T_Sig_WithoutRuntime();
     } else {
         auto *withoutRuntime = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
         if (withoutRuntime == nullptr || withoutRuntime->cnst != core::Names::Constants::WithoutRuntime()) {
@@ -51,7 +51,7 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
     // Keep track of old receiver at this point so that we can report whether a method called
     // sig with the right arity even existed at this point.
     auto oldRecv = std::move(send->recv);
-    send->recv = ast::MK::Constant(send->loc, core::Symbols::Sorbet_Private_Static());
+    send->recv = ast::MK::Constant(core::Symbols::Sorbet_Private_Static());
     send->insertPosArg(0, std::move(oldRecv));
     return true;
 }

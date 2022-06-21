@@ -145,14 +145,14 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.name = core::Names::token();
             auto beginPos = send->loc.beginPos() + (send->fun == core::Names::timestampedTokenProp() ? 12 : 0);
             ret.nameLoc = core::LocOffsets{beginPos, beginPos + 5}; // get the 'token' part of it
-            ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
+            ret.type = ast::MK::Constant(core::Symbols::String());
             break;
         }
         case core::Names::createdProp().rawId():
             ret.name = core::Names::created();
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
+            ret.type = ast::MK::Constant(core::Symbols::Float());
             break;
         case core::Names::updatedProp().rawId(): {
             ret.name = send->fun == core::Names::createdProp() ? core::Names::created() : core::Names::updated();
@@ -172,7 +172,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.name = core::Names::merchant();
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
+            ret.type = ast::MK::Constant(core::Symbols::String());
             break;
         case core::Names::merchantTokenProp().rawId():
             ret.isImmutable = true;
@@ -444,7 +444,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                 auto ivarSet =
                     ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
                                    ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
-                auto tConfig = ast::MK::Constant(loc, core::Symbols::T_Configuration());
+                auto tConfig = ast::MK::Constant(core::Symbols::T_Configuration());
                 auto propFreezeHandler =
                     ast::MK::Send0(loc, std::move(tConfig), core::Names::propFreezeHandler(), locZero);
                 auto propFreezeLogic = ast::MK::Send2(loc, std::move(propFreezeHandler), core::Names::call(), locZero,

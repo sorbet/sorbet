@@ -87,7 +87,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     // def self.<prop>
     if (!skipSetter) {
         stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, name), ASTUtil::dupType(type),
-                                         ast::MK::Constant(loc, core::Symbols::NilClass())));
+                                         ast::MK::Constant(core::Symbols::NilClass())));
         auto arg = ast::MK::Local(nameLoc, name);
         if (implied) {
             auto default_ = ast::MK::UntypedNil(loc);

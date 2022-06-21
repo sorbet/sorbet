@@ -108,7 +108,7 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
         // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
         auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                          ast::MK::Symbol(loc, core::Names::blkArg()),
-                                         ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
+                                         ast::MK::Nilable(loc, ast::MK::Constant(core::Symbols::Proc())));
 
         methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
 

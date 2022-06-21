@@ -43,7 +43,7 @@ public:
             // if the constant is already in a T.let, preserve it, otherwise decay it to unsafe
             movedConstants.emplace_back(createConstAssign(*asgn));
 
-            auto module = ast::MK::Constant(asgn->loc, core::Symbols::Module());
+            auto module = ast::MK::Constant(core::Symbols::Module());
             return ast::MK::Send2(asgn->loc, move(module), core::Names::constSet(), asgn->loc.copyWithZeroLength(),
                                   move(name), move(asgn->rhs));
         }

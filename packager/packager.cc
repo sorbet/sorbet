@@ -486,8 +486,7 @@ ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
         lastConstLit = constLit;
     }
-    auto loc = lastConstLit->scope.loc();
-    lastConstLit->scope = ast::MK::Constant(loc, core::Symbols::root());
+    lastConstLit->scope = ast::MK::Constant(core::Symbols::root());
     return scope;
 }
 
@@ -863,7 +862,7 @@ private:
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol == core::Symbols::root());
+                ENFORCE(scope->symbol() == core::Symbols::root());
                 rootConsts++;
             }
         }
@@ -890,7 +889,7 @@ private:
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
-                ENFORCE(scope->symbol == core::Symbols::root());
+                ENFORCE(scope->symbol() == core::Symbols::root());
                 rootConsts--;
             }
         }

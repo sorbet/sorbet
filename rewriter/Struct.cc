@@ -132,7 +132,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
 
         sigArgs.emplace_back(ast::MK::Symbol(symLoc, name));
-        sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
+        sigArgs.emplace_back(ast::MK::Constant(core::Symbols::BasicObject()));
         auto argName = ast::MK::Local(symLoc, name);
         if (keywordInit) {
             argName = ast::make_expression<ast::KeywordArg>(symLoc, move(argName));
@@ -176,7 +176,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     }
 
     ast::ClassDef::ANCESTORS_store ancestors;
-    ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
+    ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(core::Symbols::root()),
                                                        core::Names::Constants::Struct()));
 
     vector<ast::ExpressionPtr> stats;

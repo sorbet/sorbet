@@ -103,7 +103,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original) {
         auto &unresolved = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(lit->original);
-        if (lspQuery.matchesLoc(ctx.locAt(lit->loc)) || lspQuery.matchesSymbol(symbol) ||
+        if (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
             lspQuery.matchesSymbol(symbolBeforeDealias)) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
@@ -118,19 +118,20 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 
             core::lsp::ConstantResponse::Scopes scopes;
             if (symbol == core::Symbols::StubModule()) {
-                scopes = *lit->resolutionScopes;
+                auto resolutionScopes = lit->resolutionScopes();
+                std::copy(resolutionScopes->begin(), resolutionScopes->end(), scopes.begin());
             } else {
                 scopes = {symbol.owner(ctx)};
             }
 
             auto enclosingMethod = enclosingMethodFromContext(ctx);
-            auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, ctx.locAt(lit->loc), scopes,
+            auto resp = core::lsp::ConstantResponse(symbol, symbolBeforeDealias, ctx.locAt(lit->loc()), scopes,
                                                     unresolved.cnst, tp, enclosingMethod);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
         if (lit) {
-            symbolBeforeDealias = lit->symbol;
+            symbolBeforeDealias = lit->symbol();
             symbol = symbolBeforeDealias.dealias(ctx);
         }
     }
@@ -141,7 +142,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 ast::ExpressionPtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    matchesQuery(ctx, &lit, lspQuery, lit.symbol);
+    matchesQuery(ctx, &lit, lspQuery, lit.symbol());
     return tree;
 }
 

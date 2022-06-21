@@ -291,13 +291,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](ast::ConstantLit &a) {
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
-                if (a.symbol == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(core::Symbols::untyped()));
+                if (a.symbol() == core::Symbols::StubModule()) {
+                    current->exprs.emplace_back(aliasName, a.loc(), make_insn<Alias>(core::Symbols::untyped()));
                 } else {
-                    current->exprs.emplace_back(aliasName, a.loc, make_insn<Alias>(a.symbol));
+                    current->exprs.emplace_back(aliasName, a.loc(), make_insn<Alias>(a.symbol()));
                 }
 
-                synthesizeExpr(current, cctx.target, a.loc, make_insn<Ident>(aliasName));
+                synthesizeExpr(current, cctx.target, a.loc(), make_insn<Ident>(aliasName));
 
                 if (a.original) {
                     auto *orig = ast::cast_tree<ast::UnresolvedConstantLit>(a.original);
@@ -323,7 +323,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Assign &a) {
                 LocalRef lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
-                    lhs = global2Local(cctx, lhsIdent->symbol);
+                    lhs = global2Local(cctx, lhsIdent->symbol());
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
@@ -349,7 +349,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 if (s.fun == core::Names::absurd()) {
                     if (auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
-                        if (cnst->symbol == core::Symbols::T()) {
+                        if (cnst->symbol() == core::Symbols::T()) {
                             if (s.hasKwArgs()) {
                                 if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                                     e.setHeader("`{}` does not accept keyword arguments", "T.absurd");
@@ -720,7 +720,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         exceptions.emplace_back(
-                            ast::MK::Constant(rescueCase->var.loc(), core::Symbols::StandardError()));
+                            ast::MK::Constant(core::Symbols::StandardError()));
                         added = true;
                     }
                     for (auto &ex : exceptions) {

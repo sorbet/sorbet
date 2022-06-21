@@ -118,7 +118,7 @@ class SymbolFinder {
     core::FoundDefinitionRef squashNames(core::Context ctx, const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol.dealias(ctx);
+            auto sym = id->symbol().dealias(ctx);
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
@@ -265,7 +265,7 @@ public:
                 }
 
                 auto recv = ast::cast_tree<ast::ConstantLit>(original.recv);
-                if (recv == nullptr || recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+                if (recv == nullptr || recv->symbol() != core::Symbols::Sorbet_Private_Static()) {
                     break;
                 }
 
@@ -389,7 +389,7 @@ public:
                 return core::NameRef::noName();
             }
 
-            if (recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+            if (recv->symbol() != core::Symbols::Sorbet_Private_Static()) {
                 return core::NameRef::noName();
             }
 
@@ -1249,7 +1249,7 @@ class TreeSymbolizer {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol.dealias(ctx);
+                return id->symbol().dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
@@ -1292,7 +1292,7 @@ class TreeSymbolizer {
             return core::Symbols::noSymbol();
         }
 
-        node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, std::move(node));
+        node = ast::make_expression<ast::ConstantLit>(existing, std::move(node));
         return existing;
     }
 
@@ -1422,7 +1422,7 @@ public:
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
-        if (rcl && rcl->symbol == core::Symbols::todo()) {
+        if (rcl && rcl->symbol() == core::Symbols::todo()) {
             return false;
         }
         return true;
@@ -1568,8 +1568,7 @@ public:
             ENFORCE(this->bestEffort);
             return ast::MK::EmptyTree();
         }
-        auto loc = lhs.loc;
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, std::move(asgn.lhs));
 
         return tree;
     }
@@ -1739,7 +1738,7 @@ public:
 
                 // one of fixed or bounds were provided
                 if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
+                    asgn.lhs = ast::MK::Constant(sym);
 
                     // Leave it in the tree for the resolver to chew on.
                     return tree;
