@@ -81,7 +81,7 @@ public:
     }
 
     void preTransformSend(core::MutableContext ctx, ExpressionPtr &original) {
-        cast_tree_nonnull<Send>(original).fun = subst.substituteSend(cast_tree_nonnull<Send>(original).fun);
+        cast_tree_nonnull<Send>(original).fun = subst.substituteSymbolName(cast_tree_nonnull<Send>(original).fun);
     }
 
     void postTransformLiteral(core::MutableContext ctx, ExpressionPtr &tree) {

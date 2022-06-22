@@ -120,14 +120,12 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
 
         ENFORCE(file->getFileHash() != nullptr);
         const auto &hash = *file->getFileHash();
-        const auto &usedSends = hash.usages.sends;
-        const auto &usedSymbolNames = hash.usages.symbols;
+        const auto &usedSymbolNameHashes = hash.usages.nameHashes;
         auto ref = core::FileRef(i);
 
         const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid &&
-            (std::find(usedSends.begin(), usedSends.end(), symShortNameHash) != usedSends.end() ||
-             std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symShortNameHash) != usedSymbolNames.end())) {
+        if (fileIsValid && (std::find(usedSymbolNameHashes.begin(), usedSymbolNameHashes.end(), symShortNameHash) !=
+                            usedSymbolNameHashes.end())) {
             frefs.emplace_back(ref);
         }
     }

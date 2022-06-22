@@ -145,17 +145,23 @@ struct LocalSymbolTableHashes {
     }
 };
 
-// This structure represents all the uses of various constructs contained in a single file.
+// This structure represents every time a name was used in a place where it could be referencing the
+// name of a (Sorbet) symbol. For example, this program:
+//
+//     self.foo()
+//     @bar
+//     Qux
+//     :example
+//
+// references some (possibly non-existent) symbols with the names `foo`, `@bar`, and `Qux` (but
+// _not_ `:example`, because that's a Ruby `Symbol` literal not a Sorbet symbol).
+//
+// These hashes are used for quickly lowering the upper bound on the set of files that might need to
+// be retypechecked when there is a fast path edit or when there is a find-all-references request.
+//
+// (Useful for _over_ approximating the set of files that might be affected.)
 struct UsageHash {
-    // A sorted, deduplicated list of the hashes of all the method names called
-    // by this file.
-    std::vector<core::ShortNameHash> sends;
-    // A sorted, deduplicated list of the hashes of all the names referenced in this
-    // file that will wind up referencing `core::Symbol` structures.  This includes
-    // the obvious constant names (`T::Hash` counts as two constant names), but also
-    // the names of the classes/methods defined in the file as well as any
-    // @instance/@@class variables.
-    std::vector<core::ShortNameHash> symbols;
+    std::vector<core::ShortNameHash> nameHashes;
 };
 
 // This is stored on the core::File object directly, which is then cached.
