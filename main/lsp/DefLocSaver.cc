@@ -121,9 +121,8 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             if (symbolBeforeDealias == core::Symbols::StubModule()) {
                 // If the symbol is an alias to a stub symbol, it actually resolved, and so it won't
                 // have resolutionScopes.
-                auto resolutionScopes = lit->resolutionScopes();
-                std::copy(resolutionScopes->begin(), resolutionScopes->end(), scopes.begin());
-
+                auto *resolutionScopes = lit->resolutionScopes();
+                scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
             } else {
                 scopes = {symbol.owner(ctx)};
             }
