@@ -1,0 +1,9 @@
+# typed: true
+# assert-fast-path: alias_method_change_type__1.rb
+
+class A
+  extend T::Sig
+
+  sig {returns(String)}
+  def to_method; ''; end
+end
