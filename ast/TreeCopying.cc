@@ -134,7 +134,8 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::Cast: {
             auto *exp = reinterpret_cast<const Cast *>(tree);
-            return make_expression<Cast>(exp->loc, exp->type, deepCopy(avoid, exp->arg), exp->cast, deepCopy(avoid, exp->typeExpr));
+            return make_expression<Cast>(exp->loc, exp->type, deepCopy(avoid, exp->arg), exp->cast,
+                                         deepCopy(avoid, exp->typeExpr));
         }
 
         case Tag::Hash: {

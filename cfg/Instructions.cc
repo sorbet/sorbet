@@ -44,7 +44,7 @@ string spacesForTabLevel(int tabs) {
         CASE_STATEMENT(body, YieldLoadArg)        \
         CASE_STATEMENT(body, Cast)                \
         CASE_STATEMENT(body, TAbsurd)             \
-        CASE_STATEMENT(body, VolatileRead)             \
+        CASE_STATEMENT(body, VolatileRead)        \
     }
 
 std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -310,7 +310,8 @@ string VolatileRead::toString(const core::GlobalState &gs, const CFG &cfg) const
 }
 
 string VolatileRead::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("VolatileRead {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs), this->what.showRaw(gs, cfg));
+    return fmt::format("VolatileRead {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
+                       this->what.showRaw(gs, cfg));
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {
