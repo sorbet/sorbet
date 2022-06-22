@@ -1,10 +1,11 @@
 # typed: strict
-# assert-fast-path: static_field_change_type__def.rb,static_field_change_type__use.rb
+# exclude-from-file-update: true
 extend T::Sig
 
 sig {returns(String)}
 def foo
   T.reveal_type(STATIC_FIELD) # error: Revealed type: `T::Hash[Symbol, Integer]`
-  STATIC_FIELD.fetch(:key, "default") + "suffix" # error: Expected `String` but found `T.any(Integer, String)`
-                                      # ^^^^^^^^ error: Expected `Integer`
+  fetched = STATIC_FIELD.fetch(:key, "default")
+  fetched + "suffix" # error: Expected `Integer`
+  result # error: Expected `String` but found `T.any(Integer, String)`
 end

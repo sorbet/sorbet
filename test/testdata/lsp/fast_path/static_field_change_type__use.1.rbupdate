@@ -1,9 +1,11 @@
 # typed: strict
-# assert-fast-path: static_field_change_type__def.rb,static_field_change_type__use.rb
+# exclude-from-file-update: true
 extend T::Sig
 
 sig {returns(String)}
 def foo
   T.reveal_type(STATIC_FIELD) # error: Revealed type: `T::Hash[Symbol, T.untyped]`
-  STATIC_FIELD.fetch(:key, "default") + "suffix"
+  fetched = STATIC_FIELD.fetch(:key, "default")
+  result = fetched + "suffix"
+  result
 end
