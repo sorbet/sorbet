@@ -2510,16 +2510,14 @@ public:
         NameRef fn = lit.asName();
 
         uint16_t numPosArgs = args.numPosArgs - 3;
-        InlinedVector<TypeAndOrigins, 2> sendArgStore;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
-        for (int i = 3; i < args.args.size(); i++) {
-            sendArgStore.emplace_back(*args.args[i]);
-            sendArgLocs.emplace_back(args.locs.args[i]);
-        }
+        size_t numArgs = args.args.size() - 3;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        sendArgs.reserve(sendArgStore.size());
-        for (auto &arg : sendArgStore) {
-            sendArgs.emplace_back(&arg);
+        InlinedVector<LocOffsets, 2> sendArgLocs;
+        sendArgs.reserve(numArgs);
+        sendArgLocs.reserve(numArgs);
+        for (int i = 3; i < args.args.size(); i++) {
+            sendArgs.emplace_back(args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
