@@ -228,8 +228,8 @@ typeTestSuccess:                                  ; preds = %4
   store i64 %rawArg_a, i64* %14, align 8, !dbg !15, !tbaa !6
   %15 = getelementptr inbounds i64, i64* %14, i64 1, !dbg !15
   store i64* %15, i64** %13, align 8, !dbg !15
-  %send32 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_foo.1, i64 0), !dbg !15
-  ret i64 %send32
+  %send35 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_foo.1, i64 0), !dbg !15
+  ret i64 %send35
 
 codeRepl:                                         ; preds = %4
   tail call fastcc void @"func_Object#10doubleCast.cold.1"(i64 %rawArg_a) #15, !dbg !10
