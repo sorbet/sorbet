@@ -467,9 +467,7 @@ private:
                 return;
             }
         }
-        auto loc = what.loc();
 
-        try {
             // TODO: reorder by frequency
             if constexpr (Funcs::template HAS_MEMBER_preTransformExpression<FUNC>()) {
                 if constexpr (Kind == TreeMapKind::Map) {
@@ -584,11 +582,6 @@ private:
                 case Tag::RuntimeMethodDefinition:
                     return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
             }
-        } catch (SorbetException &e) {
-            Exception::failInFuzzer();
-
-            throw ReportedRubyException{e, loc};
-        }
     }
 
 #undef CALL_PRE
