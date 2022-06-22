@@ -250,12 +250,8 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
-    p.putU4(fh->usages.symbols.size());
-    for (const auto &e : fh->usages.symbols) {
-        p.putU4(e._hashValue);
-    }
-    p.putU4(fh->usages.sends.size());
-    for (const auto &e : fh->usages.sends) {
+    p.putU4(fh->usages.nameHashes.size());
+    for (const auto &e : fh->usages.nameHashes) {
         p.putU4(e._hashValue);
     }
 }
@@ -283,18 +279,11 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         ret.localSymbolTableHashes.staticFieldHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
-    ret.usages.symbols.reserve(constantsSize);
+    ret.usages.nameHashes.reserve(constantsSize);
     for (int it = 0; it < constantsSize; it++) {
         ShortNameHash key;
         key._hashValue = p.getU4();
-        ret.usages.symbols.emplace_back(key);
-    }
-    auto sendsSize = p.getU4();
-    ret.usages.sends.reserve(sendsSize);
-    for (int it = 0; it < sendsSize; it++) {
-        ShortNameHash key;
-        key._hashValue = p.getU4();
-        ret.usages.sends.emplace_back(key);
+        ret.usages.nameHashes.emplace_back(key);
     }
     return make_unique<const FileHash>(move(ret));
 }

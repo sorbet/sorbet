@@ -95,12 +95,7 @@ public:
     }
 
     NameRef substituteSymbolName(NameRef from) {
-        acc.symbols.emplace_back(fromGS, from);
-        return substitute(from);
-    }
-
-    NameRef substituteSend(NameRef from) {
-        acc.sends.emplace_back(fromGS, from);
+        acc.nameHashes.emplace_back(fromGS, from);
         return substitute(from);
     }
 

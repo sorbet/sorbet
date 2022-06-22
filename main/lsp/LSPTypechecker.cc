@@ -312,7 +312,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::ShortNameHash> intersection;
-        absl::c_set_intersection(changedMethodHashes, oldHash.usages.sends, std::back_inserter(intersection));
+        absl::c_set_intersection(changedMethodHashes, oldHash.usages.nameHashes, std::back_inserter(intersection));
         if (!intersection.empty()) {
             auto ref = core::FileRef(i);
             config->logger->debug("Added {} to update set as used a changed method",
@@ -321,7 +321,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             continue;
         }
 
-        absl::c_set_intersection(changedFieldHashes, oldHash.usages.symbols, std::back_inserter(intersection));
+        // TODO(jez) Just have "changedSymbolHashes" and be done with it.
+        absl::c_set_intersection(changedFieldHashes, oldHash.usages.nameHashes, std::back_inserter(intersection));
         if (!intersection.empty()) {
             auto ref = core::FileRef(i);
             config->logger->debug("Added {} to update set as used a changed field symbol",

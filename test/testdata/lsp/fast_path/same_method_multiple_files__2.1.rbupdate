@@ -1,0 +1,15 @@
+# typed: true
+# exclude-from-file-update: true
+
+# Pretend this is a source file that implements a method with the type from
+# the RBI. This files does not have any calls to `foo`
+
+class A
+  def foo
+    if T.unsafe(nil)
+      return 0 # error: Expected `String` but found `Integer(0)` for method result type
+    else
+      return ''
+    end
+  end
+end
