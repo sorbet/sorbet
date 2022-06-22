@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: alias_method_change_type__1.rb
+# assert-fast-path: alias_method_change_type__1.rb,alias_method_change_type__2.rb
 
 class A
   extend T::Sig
