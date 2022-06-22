@@ -323,8 +323,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     fast_sort(subset);
     subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
 
-    config->logger->debug("Running fast path");
-    prodHistogramInc("lsp.fast_path_files_retypechecked", subset.size());
+    config->logger->debug("Running fast path over num_files={}", subset.size());
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
     for (auto &f : subset) {
