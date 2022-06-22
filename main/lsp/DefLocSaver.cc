@@ -118,8 +118,8 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 
             core::lsp::ConstantResponse::Scopes scopes;
             if (symbol == core::Symbols::StubModule()) {
-                auto resolutionScopes = lit->resolutionScopes();
-                std::copy(resolutionScopes->begin(), resolutionScopes->end(), scopes.begin());
+                auto *resolutionScopes = lit->resolutionScopes();
+                scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
             } else {
                 scopes = {symbol.owner(ctx)};
             }
