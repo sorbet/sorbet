@@ -308,7 +308,6 @@ TEST_SUITE("TypePtr") {
             CHECK_EQ(1, counter->load());
 
             // Moving should clear counter from ptrCopy and make it an empty TypePtr
-            CHECK_EQ(0, TypePtrTestHelper::value(ptrCopy));
             CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
             CHECK_EQ(TypePtr(), ptrCopy);
 
@@ -348,10 +347,9 @@ TEST_SUITE("TypePtr") {
 
         for (auto values : valuesArray) {
             SUBCASE(fmt::format("{}, {}", values.first, values.second).c_str()) {
-                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::SelfType, values.first, values.second);
+                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::SelfType, values.first);
                 CHECK_EQ(TypePtr::Tag::SelfType, type.tag());
                 CHECK_EQ(values.first, TypePtrTestHelper::inlinedValue(type));
-                CHECK_EQ(values.second, TypePtrTestHelper::value(type));
             }
         }
     }
