@@ -22,14 +22,14 @@ test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass
     12 |  nil
           ^^^
 
-test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(String, Integer)` for argument `x` https://srb.help/7002
+test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(Integer, String)` for argument `x` https://srb.help/7002
     27 |  takes_integer(x)
                         ^
   Expected `Integer` for argument `x` of method `Object#takes_integer`:
     test/cli/expected-got/expected-got.rb:15:
     15 |sig {params(x: Integer).void}
                     ^
-  Got `T.any(String, Integer)` originating from:
+  Got `T.any(Integer, String)` originating from:
     test/cli/expected-got/expected-got.rb:22:
     22 |    x = ''
                 ^^
