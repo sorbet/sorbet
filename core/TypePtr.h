@@ -48,6 +48,8 @@ public:
         SelfTypeParam,
         AliasType,
         SelfType,
+        LiteralIntegerType,
+        FloatLiteralType,
         LiteralType,
         TypeVar,
         OrType,
@@ -59,8 +61,6 @@ public:
         BlamedUntyped,
         UnresolvedClassType,
         UnresolvedAppliedType,
-        LiteralIntegerType,
-        FloatLiteralType,
     };
 
     // A mapping from type to its corresponding tag.

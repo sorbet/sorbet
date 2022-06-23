@@ -93,30 +93,30 @@ int TypePtr::kind() const {
         case Tag::UnresolvedClassType:
         case Tag::ClassType:
             return 2;
-        case Tag::LiteralType:
+        case Tag::LiteralIntegerType:
             return 3;
-        case Tag::ShapeType:
+        case Tag::FloatLiteralType:
             return 4;
-        case Tag::TupleType:
+        case Tag::LiteralType:
             return 5;
+        case Tag::ShapeType:
+            return 6;
+        case Tag::TupleType:
+            return 7;
         case Tag::LambdaParam:
         case Tag::SelfTypeParam:
-            return 6;
-        case Tag::MetaType:
-            return 7;
-        case Tag::TypeVar:
             return 8;
-        case Tag::AliasType:
+        case Tag::MetaType:
             return 9;
-        case Tag::OrType:
+        case Tag::TypeVar:
             return 10;
-        case Tag::AndType:
+        case Tag::AliasType:
             return 11;
-        case Tag::SelfType:
+        case Tag::OrType:
             return 12;
-        case Tag::LiteralIntegerType:
+        case Tag::AndType:
             return 13;
-        case Tag::FloatLiteralType:
+        case Tag::SelfType:
             return 14;
     }
 }
