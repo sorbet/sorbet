@@ -320,15 +320,6 @@ TEST_SUITE("TypePtr") {
     }
 
     TEST_CASE("Tagging works as expected") {
-        // This tag is < 8. Will be deleted / managed by TypePtr.
-        {
-            auto rawPtr = new SelfType();
-            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::SelfType, rawPtr);
-            CHECK_EQ(TypePtr::Tag::SelfType, ptr.tag());
-            CHECK_EQ(rawPtr, TypePtrTestHelper::get(ptr));
-        }
-
-        // This tag is > 8
         {
             auto rawPtr = new UnresolvedClassType(Symbols::untyped(), {});
             auto ptr = TypePtrTestHelper::create(TypePtr::Tag::UnresolvedClassType, rawPtr);
