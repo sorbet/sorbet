@@ -90,7 +90,7 @@ public:
             auto nameRef = original.asString();
             auto newName = subst.substitute(nameRef);
             if (nameRef != newName) {
-                original.value = core::make_type<core::LiteralType>(core::Symbols::String(), newName);
+                original.value = core::make_type<core::NamedLiteralType>(core::Symbols::String(), newName);
             }
             return;
         }
@@ -98,7 +98,7 @@ public:
             auto nameRef = original.asSymbol();
             auto newName = subst.substitute(nameRef);
             if (newName != nameRef) {
-                original.value = core::make_type<core::LiteralType>(core::Symbols::Symbol(), newName);
+                original.value = core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), newName);
             }
             return;
         }

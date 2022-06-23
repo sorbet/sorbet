@@ -36,12 +36,12 @@ bool isSelfNewCallWithSplat(core::MutableContext ctx, ast::Send *send) {
         return false;
     }
 
-    if (!core::isa_type<core::LiteralType>(lit->value)) {
+    if (!core::isa_type<core::NamedLiteralType>(lit->value)) {
         return false;
     }
 
-    const auto &litType = core::cast_type_nonnull<core::LiteralType>(lit->value);
-    if (litType.literalKind != core::LiteralType::LiteralTypeKind::Symbol) {
+    const auto &litType = core::cast_type_nonnull<core::NamedLiteralType>(lit->value);
+    if (litType.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
         return false;
     }
 

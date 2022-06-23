@@ -27,15 +27,15 @@ uint32_t UnresolvedAppliedType::hash(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t LiteralType::hash(const GlobalState &gs) const {
-    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::LiteralType);
+uint32_t NamedLiteralType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::NamedLiteralType);
     auto underlying = this->underlying(gs);
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());
 
     switch (literalKind) {
-        case LiteralType::LiteralTypeKind::String:
-        case LiteralType::LiteralTypeKind::Symbol:
+        case NamedLiteralType::LiteralTypeKind::String:
+        case NamedLiteralType::LiteralTypeKind::Symbol:
             return mix(result, _hash(asName().shortName(gs)));
     }
 }

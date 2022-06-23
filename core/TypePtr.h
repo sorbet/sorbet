@@ -50,7 +50,7 @@ public:
         SelfType,
         IntegerLiteralType,
         FloatLiteralType,
-        LiteralType,
+        NamedLiteralType,
         TypeVar,
         OrType,
         AndType,

@@ -213,7 +213,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
             return true;
-        case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::NamedLiteralType:
         case TypePtr::Tag::IntegerLiteralType:
         case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
@@ -234,7 +234,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         return false;
     }
     switch (what.tag()) {
-        case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::NamedLiteralType:
         case TypePtr::Tag::IntegerLiteralType:
         case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
@@ -477,7 +477,7 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
     return SelfType();
 }
 
-TYPE_INLINED(LiteralType) final {
+TYPE_INLINED(NamedLiteralType) final {
     union {
         const NameRef name;
     };
@@ -485,7 +485,7 @@ TYPE_INLINED(LiteralType) final {
 public:
     enum class LiteralTypeKind : uint8_t { String, Symbol };
     const LiteralTypeKind literalKind;
-    LiteralType(ClassOrModuleRef klass, NameRef val);
+    NamedLiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
@@ -501,33 +501,33 @@ public:
     std::string showValue(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
 
-    bool equals(const LiteralType &rhs) const;
+    bool equals(const NamedLiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(LiteralType, 8, 8);
+CheckSize(NamedLiteralType, 8, 8);
 
 // TODO(froydnj) it would be more work, but maybe it would be cleaner to split this
 // type into distinct types, rather than doing this manual tagging.
-template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
-    LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
+template <> inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
+    NamedLiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
 }
 
-template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
-    LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
+template <> inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
+    NamedLiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
 }
 
-template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
-    ENFORCE_NO_TIMER(isa_type<LiteralType>(what));
+template <> inline NamedLiteralType cast_type_nonnull<NamedLiteralType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<NamedLiteralType>(what));
     uint64_t tagged = what.inlinedValue();
     uint32_t id = static_cast<uint32_t>(tagged >> 8);
-    auto literalKind = static_cast<LiteralType::LiteralTypeKind>(tagged & 0xff);
+    auto literalKind = static_cast<NamedLiteralType::LiteralTypeKind>(tagged & 0xff);
     switch (literalKind) {
-        case LiteralType::LiteralTypeKind::String:
-            return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(id));
-        case LiteralType::LiteralTypeKind::Symbol:
-            return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(id));
+        case NamedLiteralType::LiteralTypeKind::String:
+            return NamedLiteralType(Symbols::String(), NameRef::fromRawUnchecked(id));
+        case NamedLiteralType::LiteralTypeKind::Symbol:
+            return NamedLiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(id));
     }
 }
 
@@ -748,7 +748,7 @@ public:
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 
     std::optional<size_t> indexForKey(const TypePtr &t) const;
-    std::optional<size_t> indexForKey(const LiteralType &lit) const;
+    std::optional<size_t> indexForKey(const NamedLiteralType &lit) const;
     std::optional<size_t> indexForKey(const IntegerLiteralType &lit) const;
     std::optional<size_t> indexForKey(const FloatLiteralType &lit) const;
 };

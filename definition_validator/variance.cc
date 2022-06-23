@@ -71,7 +71,7 @@ private:
         typecase(
             type, [&](const core::ClassType &klass) {},
 
-            [&](const core::LiteralType &lit) {},
+            [&](const core::NamedLiteralType &lit) {},
 
             [&](const core::SelfType &self) {},
 

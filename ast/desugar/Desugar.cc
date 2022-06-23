@@ -332,7 +332,7 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     ENFORCE(lit && lit->isSymbol());
 
     // &:foo => {|temp| temp.foo() }
-    core::NameRef name = core::cast_type_nonnull<core::LiteralType>(lit->value).asName();
+    core::NameRef name = core::cast_type_nonnull<core::NamedLiteralType>(lit->value).asName();
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
     ExpressionPtr recv = MK::Local(zeroLengthLoc, temp);
@@ -771,7 +771,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                     auto kwargs = node2TreeImpl(dctx, std::move(kwArray));
                     auto method =
-                        MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
+                        MK::Literal(loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
 
                     if (auto *array = cast_tree<Array>(kwargs)) {
                         DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
@@ -873,7 +873,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                        flags);
                     } else {
                         auto method =
-                            MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
+                            MK::Literal(loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
                         ExpressionPtr convertedBlock;
                         if (anonymousBlockPass) {
                             ENFORCE(block == nullptr, "encountered a block while processing an anonymous block pass");

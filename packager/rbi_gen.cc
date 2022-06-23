@@ -436,7 +436,7 @@ private:
                 maybeEmit(classType.symbol);
                 break;
             }
-            case core::TypePtr::Tag::LiteralType:
+            case core::TypePtr::Tag::NamedLiteralType:
             case core::TypePtr::Tag::IntegerLiteralType:
             case core::TypePtr::Tag::FloatLiteralType: {
                 // No symbols here.

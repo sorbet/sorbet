@@ -356,12 +356,12 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             pickle(p, o.right);
             break;
         }
-        case TypePtr::Tag::LiteralType: {
-            auto c = cast_type_nonnull<LiteralType>(what);
+        case TypePtr::Tag::NamedLiteralType: {
+            auto c = cast_type_nonnull<NamedLiteralType>(what);
             p.putU1((uint8_t)c.literalKind);
             switch (c.literalKind) {
-                case LiteralType::LiteralTypeKind::Symbol:
-                case LiteralType::LiteralTypeKind::String:
+                case NamedLiteralType::LiteralTypeKind::Symbol:
+                case NamedLiteralType::LiteralTypeKind::String:
                     p.putS8(c.unsafeAsName().rawId());
                     break;
             }
@@ -454,14 +454,14 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<ClassType>(ClassOrModuleRef::fromRaw(p.getU4()));
         case TypePtr::Tag::OrType:
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
-        case TypePtr::Tag::LiteralType: {
-            auto kind = (core::LiteralType::LiteralTypeKind)p.getU1();
+        case TypePtr::Tag::NamedLiteralType: {
+            auto kind = (core::NamedLiteralType::LiteralTypeKind)p.getU1();
             auto value = p.getS8();
             switch (kind) {
-                case LiteralType::LiteralTypeKind::String:
-                    return make_type<LiteralType>(Symbols::String(), NameRef::fromRawUnchecked(value));
-                case LiteralType::LiteralTypeKind::Symbol:
-                    return make_type<LiteralType>(Symbols::Symbol(), NameRef::fromRawUnchecked(value));
+                case NamedLiteralType::LiteralTypeKind::String:
+                    return make_type<NamedLiteralType>(Symbols::String(), NameRef::fromRawUnchecked(value));
+                case NamedLiteralType::LiteralTypeKind::Symbol:
+                    return make_type<NamedLiteralType>(Symbols::Symbol(), NameRef::fromRawUnchecked(value));
             }
             Exception::notImplemented();
         }

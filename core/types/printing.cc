@@ -72,11 +72,11 @@ string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) c
                        resolvedString);
 }
 
-string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+string NamedLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("{}({})", this->underlying(gs).toStringWithTabs(gs, tabs), showValue(gs));
 }
 
-string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
+string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const {
     if (options.showForRBI) {
         // RBI generator: Users type the class name, not `String("value")`.
         return fmt::format("{}", this->underlying(gs).show(gs, options));
@@ -85,11 +85,11 @@ string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
 }
 
-string LiteralType::showValue(const GlobalState &gs) const {
+string NamedLiteralType::showValue(const GlobalState &gs) const {
     switch (literalKind) {
-        case LiteralType::LiteralTypeKind::String:
+        case NamedLiteralType::LiteralTypeKind::String:
             return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
-        case LiteralType::LiteralTypeKind::Symbol: {
+        case NamedLiteralType::LiteralTypeKind::Symbol: {
             auto shown = asName().show(gs);
             if (absl::StrContains(shown, " ")) {
                 return fmt::format(":\"{}\"", absl::CEscape(shown));
@@ -190,9 +190,9 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
         string keyStr;
         string_view sepStr = " => ";
         // properties beginning with $ need to be printed as :$prop => type.
-        if (isa_type<LiteralType>(key)) {
-            const auto &keyLiteral = cast_type_nonnull<LiteralType>(key);
-            if (keyLiteral.literalKind == core::LiteralType::LiteralTypeKind::Symbol &&
+        if (isa_type<NamedLiteralType>(key)) {
+            const auto &keyLiteral = cast_type_nonnull<NamedLiteralType>(key);
+            if (keyLiteral.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol &&
                 !absl::StartsWith(keyLiteral.asName().shortName(gs), "$")) {
                 keyStr = keyLiteral.asName().show(gs);
                 sepStr = ": ";

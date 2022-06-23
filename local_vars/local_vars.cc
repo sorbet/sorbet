@@ -293,7 +293,7 @@ class LocalNameInserter {
                 ENFORCE(kwArgsHash == nullptr, "Saw keyword arg after keyword splat");
 
                 kwArgKeyEntries.emplace_back(ast::MK::Literal(
-                    original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), arg.arg._name)));
+                    original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), arg.arg._name)));
                 kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
             } else if (arg.flags.isKeywordSplat()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
@@ -334,7 +334,7 @@ class LocalNameInserter {
         }
 
         auto method = ast::MK::Literal(
-            original.loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::super()));
+            original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), core::Names::super()));
 
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and

@@ -22,7 +22,7 @@ public:
     static com::stripe::rubytyper::Symbol::ArgumentInfo toProto(const GlobalState &gs, const ArgInfo &arg);
     static com::stripe::rubytyper::Symbol toProto(const GlobalState &gs, SymbolRef sym, bool showFull);
 
-    static com::stripe::rubytyper::Type::Literal toProto(const GlobalState &gs, const LiteralType &lit);
+    static com::stripe::rubytyper::Type::Literal toProto(const GlobalState &gs, const NamedLiteralType &lit);
     static com::stripe::rubytyper::Type::LiteralInteger toProto(const GlobalState &gs, const IntegerLiteralType &lit);
     static com::stripe::rubytyper::Type::LiteralFloat toProto(const GlobalState &gs, const FloatLiteralType &lit);
     static com::stripe::rubytyper::Type toProto(const GlobalState &gs, const TypePtr &typ);

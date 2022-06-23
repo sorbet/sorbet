@@ -825,7 +825,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::RuntimeMethodDefinition &rmd) {
                 current->exprs.emplace_back(
                     cctx.target, rmd.loc.copyWithZeroLength(),
-                    make_insn<Literal>(core::make_type<core::LiteralType>(core::Symbols::Symbol(), rmd.name)));
+                    make_insn<Literal>(core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), rmd.name)));
                 ret = current;
             },
 

@@ -52,7 +52,7 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
                 result.emplace_back(loc);
             }
         },
-        [&](const core::LiteralType &_) {
+        [&](const core::NamedLiteralType &_) {
             // nothing
         },
         [&](const core::ShapeType &_) {

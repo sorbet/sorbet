@@ -161,7 +161,7 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
 string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
     string res;
     typecase(
-        this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
+        this->value, [&](const core::NamedLiteralType &l) { res = l.showValue(gs); },
         [&](const core::IntegerLiteralType &i) { res = i.showValue(gs); },
         [&](const core::FloatLiteralType &i) { res = i.showValue(gs); },
         [&](const core::ClassType &l) {

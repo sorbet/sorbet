@@ -330,16 +330,16 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
         return value;
     }
 
-    auto litType = core::cast_type_nonnull<core::LiteralType>(lit);
+    auto litType = core::cast_type_nonnull<core::NamedLiteralType>(lit);
     switch (litType.literalKind) {
-        case core::LiteralType::LiteralTypeKind::Symbol: {
+        case core::NamedLiteralType::LiteralTypeKind::Symbol: {
             auto str = litType.asName().shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             auto *value = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
             Payload::assumeType(cs, builder, value, core::Symbols::Symbol());
             return value;
         }
-        case core::LiteralType::LiteralTypeKind::String: {
+        case core::NamedLiteralType::LiteralTypeKind::String: {
             auto str = litType.asName().shortName(cs);
             auto *value = Payload::cPtrToRubyString(cs, builder, str, true);
             Payload::assumeType(cs, builder, value, core::Symbols::String());

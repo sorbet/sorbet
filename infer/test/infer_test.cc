@@ -60,7 +60,7 @@ TEST_CASE("Infer") {
         auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
         auto trueLit = core::Types::trueClass();
         auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
-        auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
+        auto stringLit = core::make_type<core::NamedLiteralType>(core::Symbols::String(), core::Names::assignTemp());
         auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
         REQUIRE(core::Types::isSubType(gs, intLit, intClass));
         REQUIRE(core::Types::isSubType(gs, floatLit, floatClass));
