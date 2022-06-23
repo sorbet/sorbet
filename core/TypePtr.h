@@ -121,7 +121,7 @@ private:
         return val;
     }
 
-    static tagged_storage tagPtr(Tag tag, void *expr) {
+    static tagged_storage tagPtr(Tag tag, Refcounted *expr) {
         auto val = tagToMask(tag);
 
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
