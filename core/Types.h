@@ -485,7 +485,6 @@ TYPE_INLINED(LiteralType) final {
 public:
     enum class LiteralTypeKind : uint8_t { String, Symbol };
     const LiteralTypeKind literalKind;
-    LiteralType(double val);
     LiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
