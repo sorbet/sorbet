@@ -16,6 +16,7 @@ struct DispatchArgs;
 class NonRefcounted {};
 
 class Refcounted {
+    friend class TypePtrTestHelper;
     std::atomic<uint32_t> counter{0};
 
 public:
