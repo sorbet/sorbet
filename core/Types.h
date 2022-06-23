@@ -478,9 +478,7 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 }
 
 TYPE_INLINED(NamedLiteralType) final {
-    union {
-        const NameRef name;
-    };
+    const NameRef name;
 
 public:
     enum class LiteralTypeKind : uint8_t { String, Symbol };
