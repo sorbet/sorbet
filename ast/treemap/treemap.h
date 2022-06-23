@@ -137,6 +137,12 @@ public:
     GENERATE_POSTPONE_POSTCLASS(Cast, arg_types);                                \
     GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types);
 
+// Used to indicate that TreeMap has already reported location for this exception
+struct ReportedRubyException {
+    SorbetException reported;
+    core::LocOffsets onLoc;
+};
+
 enum class TreeMapKind {
     Map,
     Walk,
@@ -587,7 +593,15 @@ class TreeMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
         TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Full> walker(func);
-        return walker.mapIt(std::move(to), ctx);
+        try {
+            return walker.mapIt(std::move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
     }
 };
 
@@ -595,7 +609,15 @@ class TreeWalk {
 public:
     template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, ExpressionPtr &to) {
         TreeMapper<FUNC, CTX, TreeMapKind::Walk, TreeMapDepthKind::Full> walker(func);
-        walker.mapIt(to, ctx);
+        try {
+            walker.mapIt(to, ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
     }
 };
 
@@ -603,7 +625,15 @@ class ShallowMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
         TreeMapper<FUNC, CTX, TreeMapKind::Map, TreeMapDepthKind::Shallow> walker(func);
-        return walker.mapIt(std::move(to), ctx);
+        try {
+            return walker.mapIt(std::move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
     }
 };
 
@@ -611,7 +641,15 @@ class ShallowWalk {
 public:
     template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, ExpressionPtr &to) {
         TreeMapper<FUNC, CTX, TreeMapKind::Walk, TreeMapDepthKind::Shallow> walker(func);
-        walker.mapIt(to, ctx);
+        try {
+            walker.mapIt(to, ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
     }
 };
 
