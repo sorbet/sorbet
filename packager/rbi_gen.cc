@@ -437,7 +437,7 @@ private:
                 break;
             }
             case core::TypePtr::Tag::LiteralType:
-            case core::TypePtr::Tag::LiteralIntegerType:
+            case core::TypePtr::Tag::IntegerLiteralType:
             case core::TypePtr::Tag::FloatLiteralType: {
                 // No symbols here.
                 break;

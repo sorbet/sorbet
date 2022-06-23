@@ -54,8 +54,8 @@ uint32_t FloatLiteralType::hash(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t LiteralIntegerType::hash(const GlobalState &gs) const {
-    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::LiteralIntegerType);
+uint32_t IntegerLiteralType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::IntegerLiteralType);
     auto underlying = this->underlying(gs);
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());

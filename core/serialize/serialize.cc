@@ -367,8 +367,8 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             }
             break;
         }
-        case TypePtr::Tag::LiteralIntegerType: {
-            auto &i = cast_type_nonnull<LiteralIntegerType>(what);
+        case TypePtr::Tag::IntegerLiteralType: {
+            auto &i = cast_type_nonnull<IntegerLiteralType>(what);
             p.putS8(i.value);
             break;
         }
@@ -465,8 +465,8 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             }
             Exception::notImplemented();
         }
-        case TypePtr::Tag::LiteralIntegerType:
-            return make_type<LiteralIntegerType>(p.getS8());
+        case TypePtr::Tag::IntegerLiteralType:
+            return make_type<IntegerLiteralType>(p.getS8());
         case TypePtr::Tag::FloatLiteralType:
             return make_type<FloatLiteralType>(absl::bit_cast<double>(p.getS8()));
         case TypePtr::Tag::AndType:

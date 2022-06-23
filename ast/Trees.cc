@@ -811,7 +811,7 @@ string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string res;
     typecase(
         this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
-        [&](const core::LiteralIntegerType &i) { res = i.showValue(gs); },
+        [&](const core::IntegerLiteralType &i) { res = i.showValue(gs); },
         [&](const core::FloatLiteralType &i) { res = i.showValue(gs); },
         [&](const core::ClassType &l) {
             if (l.symbol == core::Symbols::NilClass()) {

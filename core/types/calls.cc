@@ -41,7 +41,7 @@ bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klas
     return underlying(gs).derivesFrom(gs, klass);
 }
 
-bool LiteralIntegerType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
+bool IntegerLiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying(gs).derivesFrom(gs, klass);
 }
 
@@ -61,7 +61,7 @@ DispatchResult LiteralType::dispatchCall(const GlobalState &gs, const DispatchAr
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
-DispatchResult LiteralIntegerType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+DispatchResult IntegerLiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
@@ -514,7 +514,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<LiteralType>(tp) || isa_type<LiteralIntegerType>(tp) || isa_type<FloatLiteralType>(tp)) {
+    } else if (isa_type<LiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
         }
@@ -2109,7 +2109,7 @@ public:
         ENFORCE(args.args.size() % 2 == 0);
 
         for (int i = 0; i < args.args.size(); i += 2) {
-            if (!isa_type<LiteralType>(args.args[i]->type) && !isa_type<LiteralIntegerType>(args.args[i]->type) &&
+            if (!isa_type<LiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
                 !isa_type<FloatLiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
@@ -2199,12 +2199,12 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        if (!(isa_type<LiteralIntegerType>(args.args[1]->type) && isa_type<LiteralIntegerType>(args.args[2]->type))) {
+        if (!(isa_type<IntegerLiteralType>(args.args[1]->type) && isa_type<IntegerLiteralType>(args.args[2]->type))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
-        auto &beforeLit = cast_type_nonnull<LiteralIntegerType>(args.args[1]->type);
-        auto &afterLit = cast_type_nonnull<LiteralIntegerType>(args.args[2]->type);
+        auto &beforeLit = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
+        auto &afterLit = cast_type_nonnull<IntegerLiteralType>(args.args[2]->type);
         int before = (int)beforeLit.value;
         int after = (int)afterLit.value;
         res.returnType = expandArray(gs, val, before + after);
@@ -2958,11 +2958,11 @@ public:
         if (args.args.size() == 1) {
             argType = args.args.front()->type;
         }
-        if (!isa_type<LiteralIntegerType>(argType)) {
+        if (!isa_type<IntegerLiteralType>(argType)) {
             return;
         }
 
-        auto &lit = cast_type_nonnull<LiteralIntegerType>(argType);
+        auto &lit = cast_type_nonnull<IntegerLiteralType>(argType);
 
         auto idx = lit.value;
         if (idx < 0) {
@@ -3132,7 +3132,7 @@ public:
         }
 
         auto &arg = args.args.front()->type;
-        if (!isa_type<LiteralType>(arg) && !isa_type<LiteralIntegerType>(arg) && !isa_type<FloatLiteralType>(arg)) {
+        if (!isa_type<LiteralType>(arg) && !isa_type<IntegerLiteralType>(arg) && !isa_type<FloatLiteralType>(arg)) {
             return;
         }
 
@@ -3237,7 +3237,7 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                if (!isa_type<LiteralType>(keyType) && !isa_type<LiteralIntegerType>(keyType) &&
+                if (!isa_type<LiteralType>(keyType) && !isa_type<IntegerLiteralType>(keyType) &&
                     !isa_type<FloatLiteralType>(keyType)) {
                     return;
                 }
@@ -3481,14 +3481,14 @@ public:
             ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
                     args.locs.args.size());
 
-            if (!isa_type<LiteralIntegerType>(argTyp)) {
+            if (!isa_type<IntegerLiteralType>(argTyp)) {
                 if (auto e = gs.beginError(args.argLoc(0), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
             }
 
-            auto &lt = cast_type_nonnull<LiteralIntegerType>(argTyp);
+            auto &lt = cast_type_nonnull<IntegerLiteralType>(argTyp);
 
             if (lt.value >= 0) {
                 depth = lt.value;

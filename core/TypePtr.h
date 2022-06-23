@@ -48,7 +48,7 @@ public:
         SelfTypeParam,
         AliasType,
         SelfType,
-        LiteralIntegerType,
+        IntegerLiteralType,
         FloatLiteralType,
         LiteralType,
         TypeVar,

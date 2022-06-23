@@ -175,7 +175,7 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
     return proto;
 }
 
-com::stripe::rubytyper::Type::LiteralInteger Proto::toProto(const GlobalState &gs, const LiteralIntegerType &lit) {
+com::stripe::rubytyper::Type::LiteralInteger Proto::toProto(const GlobalState &gs, const IntegerLiteralType &lit) {
     com::stripe::rubytyper::Type::LiteralInteger proto;
     proto.set_integer(lit.value);
     return proto;
@@ -225,7 +225,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
             proto.set_kind(com::stripe::rubytyper::Type::LITERAL);
             *proto.mutable_literal() = toProto(gs, t);
         },
-        [&](const LiteralIntegerType &t) {
+        [&](const IntegerLiteralType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::LITERALINTEGER);
             *proto.mutable_literalinteger() = toProto(gs, t);
         },

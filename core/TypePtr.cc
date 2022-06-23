@@ -20,7 +20,7 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, AliasType)             \
         CASE_STATEMENT(CASE_BODY, SelfType)              \
         CASE_STATEMENT(CASE_BODY, LiteralType)           \
-        CASE_STATEMENT(CASE_BODY, LiteralIntegerType)    \
+        CASE_STATEMENT(CASE_BODY, IntegerLiteralType)    \
         CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
         CASE_STATEMENT(CASE_BODY, TypeVar)               \
         CASE_STATEMENT(CASE_BODY, OrType)                \
@@ -93,7 +93,7 @@ int TypePtr::kind() const {
         case Tag::UnresolvedClassType:
         case Tag::ClassType:
             return 2;
-        case Tag::LiteralIntegerType:
+        case Tag::IntegerLiteralType:
             return 3;
         case Tag::FloatLiteralType:
             return 4;
@@ -139,7 +139,7 @@ bool TypePtr::isFullyDefined() const {
         case Tag::BlamedUntyped:
         case Tag::ClassType:
         case Tag::LiteralType:
-        case Tag::LiteralIntegerType:
+        case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
@@ -180,7 +180,7 @@ bool TypePtr::hasUntyped() const {
     switch (tag()) {
         case Tag::TypeVar:
         case Tag::LiteralType:
-        case Tag::LiteralIntegerType:
+        case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::SelfType:
         case Tag::AliasType:
@@ -239,7 +239,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::TupleType:
         case Tag::ShapeType:
         case Tag::LiteralType:
-        case Tag::LiteralIntegerType:
+        case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType: {
             return this->underlying(gs).getCallArguments(gs, name);
         }
@@ -303,7 +303,7 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
         case Tag::ClassType:
         case Tag::TypeVar:
         case Tag::LiteralType:
-        case Tag::LiteralIntegerType:
+        case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:

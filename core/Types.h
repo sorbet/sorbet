@@ -214,7 +214,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::AndType:
             return true;
         case TypePtr::Tag::LiteralType:
-        case TypePtr::Tag::LiteralIntegerType:
+        case TypePtr::Tag::IntegerLiteralType:
         case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
@@ -235,7 +235,7 @@ inline bool is_proxy_type(const TypePtr &what) {
     }
     switch (what.tag()) {
         case TypePtr::Tag::LiteralType:
-        case TypePtr::Tag::LiteralIntegerType:
+        case TypePtr::Tag::IntegerLiteralType:
         case TypePtr::Tag::FloatLiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
@@ -531,11 +531,11 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
     }
 }
 
-TYPE(LiteralIntegerType) final : public Refcounted {
+TYPE(IntegerLiteralType) final : public Refcounted {
 public:
     const int64_t value;
 
-    LiteralIntegerType(int64_t val);
+    IntegerLiteralType(int64_t val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
@@ -548,21 +548,21 @@ public:
     std::string showValue(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
 
-    bool equals(const LiteralIntegerType &rhs) const;
+    bool equals(const IntegerLiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(LiteralIntegerType, 16, 8);
+CheckSize(IntegerLiteralType, 16, 8);
 
-template <> inline TypePtr make_type<LiteralIntegerType, int64_t>(int64_t &&val) {
-    return make_type<LiteralIntegerType>(absl::bit_cast<uint64_t>(val));
+template <> inline TypePtr make_type<IntegerLiteralType, int64_t>(int64_t &&val) {
+    return make_type<IntegerLiteralType>(absl::bit_cast<uint64_t>(val));
 }
 
-template <> inline TypePtr make_type<LiteralIntegerType, long &>(long &val) {
-    return make_type<LiteralIntegerType>(static_cast<int64_t>(val));
+template <> inline TypePtr make_type<IntegerLiteralType, long &>(long &val) {
+    return make_type<IntegerLiteralType>(static_cast<int64_t>(val));
 }
 
-template <> inline TypePtr make_type<LiteralIntegerType, long long &>(long long &val) {
-    return make_type<LiteralIntegerType>(static_cast<int64_t>(val));
+template <> inline TypePtr make_type<IntegerLiteralType, long long &>(long long &val) {
+    return make_type<IntegerLiteralType>(static_cast<int64_t>(val));
 }
 
 TYPE(FloatLiteralType) final : public Refcounted {
@@ -749,7 +749,7 @@ public:
 
     std::optional<size_t> indexForKey(const TypePtr &t) const;
     std::optional<size_t> indexForKey(const LiteralType &lit) const;
-    std::optional<size_t> indexForKey(const LiteralIntegerType &lit) const;
+    std::optional<size_t> indexForKey(const IntegerLiteralType &lit) const;
     std::optional<size_t> indexForKey(const FloatLiteralType &lit) const;
 };
 CheckSize(ShapeType, 56, 8);

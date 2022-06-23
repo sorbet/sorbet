@@ -1230,7 +1230,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             core::TypePtr underlying;
             if (core::isa_type<core::LiteralType>(lit.value)) {
                 underlying = lit.value.underlying(ctx);
-            } else if (core::isa_type<core::LiteralIntegerType>(lit.value)) {
+            } else if (core::isa_type<core::IntegerLiteralType>(lit.value)) {
                 underlying = lit.value.underlying(ctx);
             } else if (core::isa_type<core::FloatLiteralType>(lit.value)) {
                 underlying = lit.value.underlying(ctx);

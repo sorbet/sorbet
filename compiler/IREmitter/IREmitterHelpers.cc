@@ -317,8 +317,8 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     if (lit.derivesFrom(cs, core::Symbols::NilClass())) {
         return Payload::rubyNil(cs, builder);
     }
-    if (core::isa_type<core::LiteralIntegerType>(lit)) {
-        const auto &litInt = core::cast_type_nonnull<core::LiteralIntegerType>(lit);
+    if (core::isa_type<core::IntegerLiteralType>(lit)) {
+        const auto &litInt = core::cast_type_nonnull<core::IntegerLiteralType>(lit);
         auto *value = Payload::longToRubyValue(cs, builder, litInt.value);
         Payload::assumeType(cs, builder, value, core::Symbols::Integer());
         return value;

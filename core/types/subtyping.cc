@@ -436,9 +436,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         result = lub(gs, l1.underlying(gs), t2.underlying(gs));
                     }
                 },
-                [&](const LiteralIntegerType &l1) {
-                    if (isa_type<LiteralIntegerType>(t2)) {
-                        auto &l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                [&](const IntegerLiteralType &l1) {
+                    if (isa_type<IntegerLiteralType>(t2)) {
+                        auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
                         if (l1.equals(l2)) {
                             result = t1;
                         } else {
@@ -802,8 +802,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         result = Types::bottom();
                     }
                 },
-                [&](const LiteralIntegerType &l1) {
-                    auto &l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                [&](const IntegerLiteralType &l1) {
+                    auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
                     if (l1.equals(l2)) {
                         result = t1;
                     } else {
@@ -1277,14 +1277,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     auto l2 = cast_type_nonnull<LiteralType>(t2);
                     result = l1.equals(l2);
                 },
-                [&](const LiteralIntegerType &l1) {
-                    if (!isa_type<LiteralIntegerType>(t2)) {
+                [&](const IntegerLiteralType &l1) {
+                    if (!isa_type<IntegerLiteralType>(t2)) {
                         // is a literal a subtype of a different kind of proxy
                         result = false;
                         return;
                     }
 
-                    auto &l2 = cast_type_nonnull<LiteralIntegerType>(t2);
+                    auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
                     result = l1.equals(l2);
                 },
                 [&](const FloatLiteralType &l1) {

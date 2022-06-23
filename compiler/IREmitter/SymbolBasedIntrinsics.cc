@@ -688,10 +688,10 @@ public:
         auto options = 0;
         if (send->args.size() == 2) {
             auto &arg1 = send->args[1];
-            if (!core::isa_type<core::LiteralIntegerType>(arg1.type)) {
+            if (!core::isa_type<core::IntegerLiteralType>(arg1.type)) {
                 return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
             }
-            const auto &literalOptions = core::cast_type_nonnull<core::LiteralIntegerType>(arg1.type);
+            const auto &literalOptions = core::cast_type_nonnull<core::IntegerLiteralType>(arg1.type);
             options = literalOptions.value;
         }
 

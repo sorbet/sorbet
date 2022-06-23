@@ -279,7 +279,7 @@ public:
             return true;
         }
 
-        if (core::isa_type<core::LiteralIntegerType>(t)) {
+        if (core::isa_type<core::IntegerLiteralType>(t)) {
             return true;
         }
 
