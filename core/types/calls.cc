@@ -985,7 +985,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
                 if (!isa_type<NamedLiteralType>(key->type) ||
-                    cast_type_nonnull<NamedLiteralType>(key->type).literalKind != NamedLiteralType::LiteralTypeKind::Symbol) {
+                    cast_type_nonnull<NamedLiteralType>(key->type).literalKind !=
+                        NamedLiteralType::LiteralTypeKind::Symbol) {
                     // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
                     // error here.
 
@@ -3132,7 +3133,8 @@ public:
         }
 
         auto &arg = args.args.front()->type;
-        if (!isa_type<NamedLiteralType>(arg) && !isa_type<IntegerLiteralType>(arg) && !isa_type<FloatLiteralType>(arg)) {
+        if (!isa_type<NamedLiteralType>(arg) && !isa_type<IntegerLiteralType>(arg) &&
+            !isa_type<FloatLiteralType>(arg)) {
             return;
         }
 

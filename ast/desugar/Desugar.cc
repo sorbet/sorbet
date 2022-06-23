@@ -770,8 +770,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
 
                     auto kwargs = node2TreeImpl(dctx, std::move(kwArray));
-                    auto method =
-                        MK::Literal(loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
+                    auto method = MK::Literal(
+                        loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
 
                     if (auto *array = cast_tree<Array>(kwargs)) {
                         DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
@@ -872,8 +872,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         res = MK::Send(loc, std::move(rec), send->method, send->methodLoc, numPosArgs, std::move(args),
                                        flags);
                     } else {
-                        auto method =
-                            MK::Literal(loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
+                        auto method = MK::Literal(
+                            loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
                         ExpressionPtr convertedBlock;
                         if (anonymousBlockPass) {
                             ENFORCE(block == nullptr, "encountered a block while processing an anonymous block pass");

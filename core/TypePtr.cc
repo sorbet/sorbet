@@ -19,7 +19,7 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, SelfTypeParam)         \
         CASE_STATEMENT(CASE_BODY, AliasType)             \
         CASE_STATEMENT(CASE_BODY, SelfType)              \
-        CASE_STATEMENT(CASE_BODY, NamedLiteralType)           \
+        CASE_STATEMENT(CASE_BODY, NamedLiteralType)      \
         CASE_STATEMENT(CASE_BODY, IntegerLiteralType)    \
         CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
         CASE_STATEMENT(CASE_BODY, TypeVar)               \

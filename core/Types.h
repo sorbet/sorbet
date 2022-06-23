@@ -506,14 +506,18 @@ CheckSize(NamedLiteralType, 8, 8);
 
 // TODO(froydnj) it would be more work, but maybe it would be cleaner to split this
 // type into distinct types, rather than doing this manual tagging.
-template <> inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
+template <>
+inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
     NamedLiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
+    return TypePtr(TypePtr::Tag::NamedLiteralType,
+                   (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
 }
 
-template <> inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
+template <>
+inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
     NamedLiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
+    return TypePtr(TypePtr::Tag::NamedLiteralType,
+                   (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
 }
 
 template <> inline NamedLiteralType cast_type_nonnull<NamedLiteralType>(const TypePtr &what) {
