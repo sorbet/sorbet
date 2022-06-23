@@ -1211,7 +1211,7 @@ module Kernel
   sig do
     params(
         arg0: Class,
-        arg1: T::Array[String],
+        arg1: T.any(String, T::Array[String]),
     )
     .returns(T.noreturn)
   end

@@ -83,3 +83,7 @@ end
 def raises_raise
   raise CustomError.new("Problem", "DevOops")
 end
+
+def fail_class_message
+  fail StandardError, "message"
+end
