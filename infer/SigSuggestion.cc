@@ -28,7 +28,7 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
     }
 
     auto inFileOfMethod = [&](const auto &loc) { return loc.file() == method->loc().file(); };
-    auto classLocs = enclosingClass.data(ctx)->locs();
+    auto &classLocs = enclosingClass.data(ctx)->locs();
     auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
 
     if (classLoc == classLocs.end()) {

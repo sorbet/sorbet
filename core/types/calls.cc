@@ -594,7 +594,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendModule(const GlobalState
     }
 
     auto inFileOfMethod = [&](const auto &loc) { return loc.file() == call.file(); };
-    auto classLocs = enclosingClass.data(gs)->locs();
+    auto &classLocs = enclosingClass.data(gs)->locs();
     auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
 
     if (classLoc == classLocs.end()) {
