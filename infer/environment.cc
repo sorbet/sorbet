@@ -919,7 +919,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     int64_t flattenDepth = 1;
     auto mapType = core::Types::arrayOf(ctx, returnType);
 
-    const core::TypeAndOrigins recvType = {mapType, {loc}};
+    const core::TypeAndOrigins recvType{mapType, loc};
     core::TypeAndOrigins arg{core::make_type<core::IntegerLiteralType>((int64_t)flattenDepth), recvType.origins};
     InlinedVector<const core::TypeAndOrigins *, 2> args{&arg};
 
@@ -1277,9 +1277,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
                 core::TypePtr argType = core::make_type<core::IntegerLiteralType>((int64_t)i.argId);
 
-                core::TypeAndOrigins arg;
-                arg.type = argType;
-                arg.origins = recvType.origins;
+                core::TypeAndOrigins arg{argType, recvType.origins};
                 InlinedVector<const core::TypeAndOrigins *, 2> args;
                 args.emplace_back(&arg);
 
@@ -1674,9 +1672,7 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
     // I'd love to have this, but keepForIDE intentionally has Loc::none() and
     // sometimes ends up here...
     // ENFORCE(loc.exists());
-    core::TypeAndOrigins ret;
-    ret.type = core::Types::nilClass();
-    ret.origins.emplace_back(loc);
+    core::TypeAndOrigins ret{core::Types::nilClass(), loc};
     return ret;
 }
 } // namespace
