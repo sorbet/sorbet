@@ -1,4 +1,4 @@
-test/cli/ivar-with-cast/ivar-with-cast.rb:6: Use `T.let` to specify the type of constants https://srb.help/5013
+test/cli/ivar-with-cast/ivar-with-cast.rb:6: Use `T.let` to specify the type of instance variables https://srb.help/5013
      6 |    @val = T.cast(0, Integer)
                    ^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
