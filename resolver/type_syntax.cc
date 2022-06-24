@@ -796,9 +796,7 @@ core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::Expr
 }
 
 unique_ptr<core::TypeAndOrigins> makeTypeAndOrigins(core::Context ctx, core::LocOffsets origin, core::TypePtr type) {
-    auto ty = make_unique<core::TypeAndOrigins>();
-    ty->origins.emplace_back(ctx.locAt(origin));
-    ty->type = move(type);
+    auto ty = make_unique<core::TypeAndOrigins>(move(type), ctx.locAt(origin));
     return ty;
 }
 
@@ -1172,7 +1170,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto correctedSingleton = corrected.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
             ENFORCE_NO_TIMER(correctedSingleton.exists());
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
-            auto ctypeAndOrigins = core::TypeAndOrigins{ctype, {ctx.locAt(s.loc)}};
+            core::TypeAndOrigins ctypeAndOrigins{ctype, ctx.locAt(s.loc)};
             // In `dispatchArgs` this is ordinarily used to specify the origin tag for
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();

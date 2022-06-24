@@ -1238,10 +1238,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         // TODO(trevor) this location could be more precise, as we can track the location of the inlined
                         // keyword arguments separately from the ones that come from the kwsplat
-                        TypeAndOrigins tpe;
-                        tpe.origins = {kwargsLoc};
                         auto offset = it - hash->keys.begin();
-                        tpe.type = hash->values[offset];
+                        TypeAndOrigins tpe{hash->values[offset], kwargsLoc};
                         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec,
                                                   args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
                             stopInDebugger();
@@ -1281,7 +1279,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // + 1 moves us to the value being passed.
                 ENFORCE(!sawKwSplat);
                 auto kwaValue = kwait + (offset * 2) + 1;
-                TypeAndOrigins tpe;
                 ENFORCE(args.args.size() == args.locs.args.size(), "Send arg and loc vectors did not match in length");
                 // This in-bounds check is unusual, but it's necessary for cases
                 // where we are processing a kwarg that comes from a non-kwsplat
@@ -1302,8 +1299,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto kwargOffset = kwaValue - args.args.begin();
                 auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
                 auto argLoc = argInBounds ? args.argLoc(kwargOffset) : args.callLoc();
-                tpe.origins = {originLoc};
-                tpe.type = hash->values[offset];
+                TypeAndOrigins tpe{hash->values[offset], originLoc};
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec, args.selfType,
                                           targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
@@ -2225,18 +2221,14 @@ private:
         sendArgStore.reserve(posTuple->elems.size() + numKwArgs);
 
         for (auto &arg : posTuple->elems) {
-            TypeAndOrigins tao;
-            tao.type = arg;
-            tao.origins.emplace_back(argsLoc);
+            TypeAndOrigins tao{arg, argsLoc};
             sendArgStore.emplace_back(std::move(tao));
         }
 
         // kwTuple is a nullptr when there are no keyword args present
         if (kwTuple != nullptr) {
             for (auto &arg : kwTuple->elems) {
-                TypeAndOrigins tao;
-                tao.type = arg;
-                tao.origins.emplace_back(argsLoc);
+                TypeAndOrigins tao{arg, argsLoc};
                 sendArgStore.emplace_back(std::move(tao));
             }
         }
@@ -3695,7 +3687,7 @@ public:
         CallLocs locs{
             args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs,
         };
-        TypeAndOrigins myType{args.selfType, {args.receiverLoc()}};
+        TypeAndOrigins myType{args.selfType, args.receiverLoc()};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
 
         DispatchArgs dispatch{core::Names::enumerableToH(),
