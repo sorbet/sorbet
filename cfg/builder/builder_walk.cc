@@ -80,7 +80,7 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             Exception::notImplemented();
     }
 
-    auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id.name);
+    auto sym = klass.data(cctx.ctx)->findMember(cctx.ctx, id.name);
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
