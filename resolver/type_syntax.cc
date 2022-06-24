@@ -1085,8 +1085,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             holders.reserve(argSize);
 
             for (auto &arg : s.posArgs()) {
-                auto type = core::make_type<core::MetaType>(getResultTypeWithSelfTypeParams(
-                                                 ctx, arg, sigBeingParsed, args.withoutSelfType()));
+                auto type = core::make_type<core::MetaType>(
+                    getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
                 auto &argtao = holders.emplace_back(std::move(type), ctx.locAt(arg.loc()));
                 targs.emplace_back(&argtao);
                 argLocs.emplace_back(arg.loc());
