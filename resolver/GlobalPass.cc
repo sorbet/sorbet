@@ -134,8 +134,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
             }
         }
     }
-    auto mixins = sym.data(gs)->mixins();
-    for (auto mixin : mixins) {
+    for (auto mixin : sym.data(gs)->mixins()) {
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
         auto typeMembers = mixin.data(gs)->typeMembers();
         for (core::SymbolRef tp : typeMembers) {
