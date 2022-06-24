@@ -54,12 +54,12 @@ class Parent
   extend T::Sig
 
   sig {overridable.params(x: T.any(Integer, String)).void}
-  def takes_integer_or_string; end
+  def takes_integer_or_string(x); end
 end
 
 class Child < Parent
   sig {override.params(x: Integer).void}
-  def takes_integer_or_string; end # error
+  def takes_integer_or_string(x); end # error
 end
 ```
 
