@@ -795,11 +795,6 @@ core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::Expr
     return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
-unique_ptr<core::TypeAndOrigins> makeTypeAndOrigins(core::Context ctx, core::LocOffsets origin, core::TypePtr type) {
-    auto ty = make_unique<core::TypeAndOrigins>(move(type), ctx.locAt(origin));
-    return ty;
-}
-
 TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
                                                               const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
@@ -1081,7 +1076,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 return;
             }
 
-            InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> holders;
+            InlinedVector<core::TypeAndOrigins, 2> holders;
             InlinedVector<const core::TypeAndOrigins *, 2> targs;
             InlinedVector<core::LocOffsets, 2> argLocs;
             const auto argSize = s.numPosArgs() + (2 * s.numKwArgs()) + (s.hasKwSplat() ? 1 : 0);
@@ -1090,11 +1085,10 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             holders.reserve(argSize);
 
             for (auto &arg : s.posArgs()) {
-                auto ty = makeTypeAndOrigins(ctx, arg.loc(),
-                                             core::make_type<core::MetaType>(getResultTypeWithSelfTypeParams(
-                                                 ctx, arg, sigBeingParsed, args.withoutSelfType())));
-                holders.emplace_back(move(ty));
-                targs.emplace_back(holders.back().get());
+                auto type = core::make_type<core::MetaType>(getResultTypeWithSelfTypeParams(
+                                                 ctx, arg, sigBeingParsed, args.withoutSelfType()));
+                auto &argtao = holders.emplace_back(std::move(type), ctx.locAt(arg.loc()));
+                targs.emplace_back(&argtao);
                 argLocs.emplace_back(arg.loc());
             }
 
@@ -1103,26 +1097,22 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 auto &kw = s.getKwKey(i);
                 auto &val = s.getKwValue(i);
 
-                // Fill these in with a dummy type. We don't want to parse this as type syntax
-                // because we already know it's garbage.
+                // Fill the keyword and val args in with a dummy type. We don't want to parse this as type
+                // syntax because we already know it's garbage.
                 // But we still want to record some sort of arg (for the loc specifically) so
                 // that the calls.cc intrinsic can craft an autocorrect.
-                auto kwty = makeTypeAndOrigins(ctx, kw.loc(), core::Types::untypedUntracked());
-                auto valty = makeTypeAndOrigins(ctx, val.loc(), core::Types::untypedUntracked());
-
-                holders.emplace_back(move(kwty));
-                targs.emplace_back(holders.back().get());
+                auto &kwtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(kw.loc()));
+                targs.emplace_back(&kwtao);
                 argLocs.emplace_back(kw.loc());
 
-                holders.emplace_back(move(valty));
-                targs.emplace_back(holders.back().get());
+                auto &valtao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(val.loc()));
+                targs.emplace_back(&valtao);
                 argLocs.emplace_back(val.loc());
             }
 
             if (auto *splat = s.kwSplat()) {
-                auto ty = makeTypeAndOrigins(ctx, splat->loc(), core::Types::untypedUntracked());
-                holders.emplace_back(move(ty));
-                targs.emplace_back(holders.back().get());
+                auto &splattao = holders.emplace_back(core::Types::untypedUntracked(), ctx.locAt(splat->loc()));
+                targs.emplace_back(&splattao);
                 argLocs.emplace_back(splat->loc());
             }
 
