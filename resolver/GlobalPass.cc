@@ -282,7 +282,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
 
-            auto resultType = mixedInClassMethods.data(gs)->resultType;
+            auto &resultType = mixedInClassMethods.data(gs)->resultType;
             ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
             auto types = core::cast_type<core::TupleType>(resultType);
 
