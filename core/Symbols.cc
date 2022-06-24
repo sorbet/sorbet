@@ -163,7 +163,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
             }
         }
 
-        resultType = make_type<AppliedType>(ref, targs);
+        resultType = make_type<AppliedType>(ref, std::move(targs));
     }
     return resultType;
 }
