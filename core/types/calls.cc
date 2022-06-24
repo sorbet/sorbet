@@ -3360,7 +3360,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
 
-        TypeAndOrigins argument{argType, {}};
+        TypeAndOrigins argument{argType, InlinedVector<Loc, 1>{}};
         sendArgs.emplace_back(&argument);
 
         auto hashLoc = args.locs.args[1].join(args.locs.args.back());
