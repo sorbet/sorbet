@@ -2221,15 +2221,13 @@ private:
         sendArgStore.reserve(posTuple->elems.size() + numKwArgs);
 
         for (auto &arg : posTuple->elems) {
-            TypeAndOrigins tao{arg, argsLoc};
-            sendArgStore.emplace_back(std::move(tao));
+            sendArgStore.emplace_back(arg, argsLoc);
         }
 
         // kwTuple is a nullptr when there are no keyword args present
         if (kwTuple != nullptr) {
             for (auto &arg : kwTuple->elems) {
-                TypeAndOrigins tao{arg, argsLoc};
-                sendArgStore.emplace_back(std::move(tao));
+                sendArgStore.emplace_back(arg, argsLoc);
             }
         }
 
