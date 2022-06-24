@@ -416,9 +416,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         }
                     }
                 },
-                [&](const LiteralType &l1) {
-                    if (isa_type<LiteralType>(t2)) {
-                        auto l2 = cast_type_nonnull<LiteralType>(t2);
+                [&](const NamedLiteralType &l1) {
+                    if (isa_type<NamedLiteralType>(t2)) {
+                        auto l2 = cast_type_nonnull<NamedLiteralType>(t2);
                         auto underlyingL1 = l1.underlying(gs);
                         auto underlyingL2 = l2.underlying(gs);
                         auto class1 = cast_type_nonnull<ClassType>(underlyingL1);
@@ -431,6 +431,30 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             }
                         } else {
                             result = lubGround(gs, l1.underlying(gs), l2.underlying(gs));
+                        }
+                    } else {
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
+                    }
+                },
+                [&](const IntegerLiteralType &l1) {
+                    if (isa_type<IntegerLiteralType>(t2)) {
+                        auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
+                        if (l1.equals(l2)) {
+                            result = t1;
+                        } else {
+                            result = l1.underlying(gs);
+                        }
+                    } else {
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
+                    }
+                },
+                [&](const FloatLiteralType &l1) {
+                    if (isa_type<FloatLiteralType>(t2)) {
+                        auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
+                        if (l1.equals(l2)) {
+                            result = t1;
+                        } else {
+                            result = l1.underlying(gs);
                         }
                     } else {
                         result = lub(gs, l1.underlying(gs), t2.underlying(gs));
@@ -762,8 +786,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     }
 
                 },
-                [&](const LiteralType &l1) {
-                    auto l2 = cast_type_nonnull<LiteralType>(t2);
+                [&](const NamedLiteralType &l1) {
+                    auto l2 = cast_type_nonnull<NamedLiteralType>(t2);
                     auto underlyingL1 = l1.underlying(gs);
                     auto underlyingL2 = l2.underlying(gs);
                     auto class1 = cast_type_nonnull<ClassType>(underlyingL1);
@@ -774,6 +798,22 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         } else {
                             result = Types::bottom();
                         }
+                    } else {
+                        result = Types::bottom();
+                    }
+                },
+                [&](const IntegerLiteralType &l1) {
+                    auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
+                    if (l1.equals(l2)) {
+                        result = t1;
+                    } else {
+                        result = Types::bottom();
+                    }
+                },
+                [&](const FloatLiteralType &l1) {
+                    auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
+                    if (l1.equals(l2)) {
+                        result = t1;
                     } else {
                         result = Types::bottom();
                     }
@@ -1227,14 +1267,34 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         }
                     }
                 },
-                [&](const LiteralType &l1) {
-                    if (!isa_type<LiteralType>(t2)) {
+                [&](const NamedLiteralType &l1) {
+                    if (!isa_type<NamedLiteralType>(t2)) {
                         // is a literal a subtype of a different kind of proxy
                         result = false;
                         return;
                     }
 
-                    auto l2 = cast_type_nonnull<LiteralType>(t2);
+                    auto l2 = cast_type_nonnull<NamedLiteralType>(t2);
+                    result = l1.equals(l2);
+                },
+                [&](const IntegerLiteralType &l1) {
+                    if (!isa_type<IntegerLiteralType>(t2)) {
+                        // is a literal a subtype of a different kind of proxy
+                        result = false;
+                        return;
+                    }
+
+                    auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
+                    result = l1.equals(l2);
+                },
+                [&](const FloatLiteralType &l1) {
+                    if (!isa_type<FloatLiteralType>(t2)) {
+                        // is a literal a subtype of a different kind of proxy
+                        result = false;
+                        return;
+                    }
+
+                    auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                     result = l1.equals(l2);
                 },
                 [&](const MetaType &m1) {

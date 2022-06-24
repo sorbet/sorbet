@@ -221,19 +221,21 @@ public:
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
-        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_expression<ast::Literal>(loc, core::make_type<core::IntegerLiteralType>(val));
     }
 
     static ExpressionPtr Float(core::LocOffsets loc, double val) {
-        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_expression<ast::Literal>(loc, core::make_type<core::FloatLiteralType>(val));
     }
 
     static ExpressionPtr Symbol(core::LocOffsets loc, core::NameRef name) {
-        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), name));
+        return make_expression<ast::Literal>(loc,
+                                             core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name));
     }
 
     static ExpressionPtr String(core::LocOffsets loc, core::NameRef value) {
-        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
+        return make_expression<ast::Literal>(loc,
+                                             core::make_type<core::NamedLiteralType>(core::Symbols::String(), value));
     }
 
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,

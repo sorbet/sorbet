@@ -810,7 +810,9 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string res;
     typecase(
-        this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
+        this->value, [&](const core::NamedLiteralType &l) { res = l.showValue(gs); },
+        [&](const core::IntegerLiteralType &i) { res = i.showValue(gs); },
+        [&](const core::FloatLiteralType &i) { res = i.showValue(gs); },
         [&](const core::ClassType &l) {
             if (l.symbol == core::Symbols::NilClass()) {
                 res = "nil";
@@ -1327,21 +1329,22 @@ string Literal::nodeName() {
 
 core::NameRef Literal::asString() const {
     ENFORCE(isString());
-    auto t = core::cast_type_nonnull<core::LiteralType>(value);
+    auto t = core::cast_type_nonnull<core::NamedLiteralType>(value);
     core::NameRef res = t.asName();
     return res;
 }
 
 core::NameRef Literal::asSymbol() const {
     ENFORCE(isSymbol());
-    auto t = core::cast_type_nonnull<core::LiteralType>(value);
+    auto t = core::cast_type_nonnull<core::NamedLiteralType>(value);
     core::NameRef res = t.asName();
     return res;
 }
 
 bool Literal::isSymbol() const {
-    return core::isa_type<core::LiteralType>(value) &&
-           core::cast_type_nonnull<core::LiteralType>(value).literalKind == core::LiteralType::LiteralTypeKind::Symbol;
+    return core::isa_type<core::NamedLiteralType>(value) &&
+           core::cast_type_nonnull<core::NamedLiteralType>(value).literalKind ==
+               core::NamedLiteralType::LiteralTypeKind::Symbol;
 }
 
 bool Literal::isNil(const core::GlobalState &gs) const {
@@ -1349,8 +1352,9 @@ bool Literal::isNil(const core::GlobalState &gs) const {
 }
 
 bool Literal::isString() const {
-    return core::isa_type<core::LiteralType>(value) &&
-           core::cast_type_nonnull<core::LiteralType>(value).literalKind == core::LiteralType::LiteralTypeKind::String;
+    return core::isa_type<core::NamedLiteralType>(value) &&
+           core::cast_type_nonnull<core::NamedLiteralType>(value).literalKind ==
+               core::NamedLiteralType::LiteralTypeKind::String;
 }
 
 bool Literal::isTrue(const core::GlobalState &gs) const {

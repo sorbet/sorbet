@@ -163,8 +163,8 @@ public:
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
         auto recv = send->args[0].variable;
-        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName();
 
         llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
@@ -275,7 +275,15 @@ public:
 
     bool isLiteralish(CompilerState &cs, const core::TypePtr &t) const {
         // See IREmitterHelpers::emitLiteralish; we put the expected fast test first.
-        if (core::isa_type<core::LiteralType>(t)) {
+        if (core::isa_type<core::NamedLiteralType>(t)) {
+            return true;
+        }
+
+        if (core::isa_type<core::IntegerLiteralType>(t)) {
+            return true;
+        }
+
+        if (core::isa_type<core::FloatLiteralType>(t)) {
             return true;
         }
 
@@ -465,8 +473,8 @@ public:
 
         auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
 
-        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName();
 
         // setup the inline cache
@@ -526,8 +534,8 @@ public:
         flags.blockarg = true;
         auto *blockHandler = prepareBlockHandler(mcctx, send->args[4]);
 
-        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName();
 
         // setup the inline cache
@@ -669,11 +677,11 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto &var = mcctx.send->args[0].type;
-        if (!core::isa_type<core::LiteralType>(var)) {
+        if (!core::isa_type<core::NamedLiteralType>(var)) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
-        auto lit = core::cast_type_nonnull<core::LiteralType>(var);
-        if (lit.literalKind != core::LiteralType::LiteralTypeKind::Symbol) {
+        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(var);
+        if (lit.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
@@ -707,11 +715,11 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = mcctx.builder;
         auto &var = mcctx.send->args[0].type;
-        if (!core::isa_type<core::LiteralType>(var)) {
+        if (!core::isa_type<core::NamedLiteralType>(var)) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
-        auto lit = core::cast_type_nonnull<core::LiteralType>(var);
-        if (lit.literalKind != core::LiteralType::LiteralTypeKind::Symbol) {
+        auto lit = core::cast_type_nonnull<core::NamedLiteralType>(var);
+        if (lit.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 

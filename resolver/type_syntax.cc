@@ -63,8 +63,8 @@ core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr
         expr,
         [&](const ast::Literal &lit) {
             result = lit.value;
-            if (core::isa_type<core::LiteralType>(result)) {
-                result = core::cast_type_nonnull<core::LiteralType>(result).underlying(ctx);
+            if (core::isa_type<core::NamedLiteralType>(result)) {
+                result = core::cast_type_nonnull<core::NamedLiteralType>(result).underlying(ctx);
             }
         },
         [&](const ast::ExpressionPtr &e) {
@@ -827,7 +827,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 auto val = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args.withoutSelfType());
                 auto lit = ast::cast_tree<ast::Literal>(ktree);
                 if (lit && (lit->isSymbol() || lit->isString())) {
-                    ENFORCE(core::isa_type<core::LiteralType>(lit->value));
+                    ENFORCE(core::isa_type<core::NamedLiteralType>(lit->value));
                     keys.emplace_back(lit->value);
                     values.emplace_back(val);
                 } else {
@@ -1227,7 +1227,16 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
         },
         [&](const ast::Literal &lit) {
-            auto underlying = core::isa_type<core::LiteralType>(lit.value) ? lit.value.underlying(ctx) : lit.value;
+            core::TypePtr underlying;
+            if (core::isa_type<core::NamedLiteralType>(lit.value)) {
+                underlying = lit.value.underlying(ctx);
+            } else if (core::isa_type<core::IntegerLiteralType>(lit.value)) {
+                underlying = lit.value.underlying(ctx);
+            } else if (core::isa_type<core::FloatLiteralType>(lit.value)) {
+                underlying = lit.value.underlying(ctx);
+            } else {
+                underlying = lit.value;
+            }
             if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported literal in type syntax", lit.value.show(ctx));
                 e.replaceWith("Replace with underlying type", ctx.locAt(lit.loc), "{}", underlying.show(ctx));

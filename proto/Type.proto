@@ -20,6 +20,7 @@ message Type {
 
     message Literal {
         enum Kind {
+            // Unused, but kept for backwards compatibility (?)
             INTEGER = 0;
             STRING = 1;
             SYMBOL = 2;
@@ -35,12 +36,19 @@ message Type {
             string string = 101;
             string symbol = 102;
             bool bool = 103;
-            float float = 104;
         }
     }
 
     message Tuple {
         repeated Type elems = 2;
+    }
+
+    message LiteralInteger {
+        int64 integer = 1;
+    }
+
+    message LiteralFloat {
+        float float = 1;
     }
 
     enum Kind {
@@ -56,6 +64,9 @@ message Type {
         // skip a few
         OR = 10;
         AND = 11;
+        // skip some more
+        LITERALINTEGER = 13;
+        LITERALFLOAT = 14;
     }
 
     Kind kind = 1;
@@ -68,5 +79,7 @@ message Type {
         Shape shape = 104;
         Literal literal = 105;
         Tuple tuple = 106;
+        LiteralInteger literalinteger= 107;
+        LiteralFloat literalfloat = 108;
     }
 }

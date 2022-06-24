@@ -124,7 +124,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 144, 8);
+CheckSize(Send, 120, 8);
 
 INSN(Return) : public Instruction {
 public:
@@ -135,7 +135,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Return, 32, 8);
+CheckSize(Return, 24, 8);
 
 INSN(BlockReturn) : public Instruction {
 public:
@@ -146,7 +146,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(BlockReturn, 40, 8);
+CheckSize(BlockReturn, 32, 8);
 
 INSN(LoadSelf) : public Instruction {
 public:
@@ -166,7 +166,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Literal, 16, 8);
+CheckSize(Literal, 8, 8);
 
 INSN(GetCurrentException) : public Instruction {
 public:
@@ -245,7 +245,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(YieldLoadArg, 32, 8);
+CheckSize(YieldLoadArg, 24, 8);
 
 INSN(Cast) : public Instruction {
 public:
@@ -262,7 +262,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Cast, 56, 8);
+CheckSize(Cast, 40, 8);
 
 INSN(TAbsurd) : public Instruction {
 public:
@@ -275,7 +275,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(TAbsurd, 24, 8);
+CheckSize(TAbsurd, 16, 8);
 
 class InstructionPtr final {
     using tagged_storage = uint64_t;

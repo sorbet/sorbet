@@ -619,7 +619,7 @@ void GlobalState::initEmpty() {
     // Sorbet::Private::Static::VERSION
     field = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::VERSION());
     field.data(*this)->resultType =
-        make_type<LiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
+        make_type<NamedLiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
 
     // ::<ErrorNode>
     field = enterStaticFieldSymbol(Loc::none(), Symbols::root(), Names::Constants::ErrorNode());

@@ -142,9 +142,9 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         // extract the keyword argument name when the send contains inlined keyword arguments
         optional<core::NameRef> keyword;
         if (inKwArgs) {
-            if (core::isa_type<core::LiteralType>(snd->args[i].type)) {
-                auto lit = core::cast_type_nonnull<core::LiteralType>(snd->args[i].type);
-                if (lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol) {
+            if (core::isa_type<core::NamedLiteralType>(snd->args[i].type)) {
+                auto lit = core::cast_type_nonnull<core::NamedLiteralType>(snd->args[i].type);
+                if (lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol) {
                     keyword = lit.asName();
                 }
             }

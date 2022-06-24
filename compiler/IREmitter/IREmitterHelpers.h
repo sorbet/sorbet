@@ -151,7 +151,7 @@ public:
     static void emitTypeTestForRestArg(CompilerState &gs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                        const core::TypePtr &expectedType, std::string_view description);
 
-    // Return a value representing the literalish thing, which is either a LiteralType
+    // Return a value representing the literalish thing, which is either a NamedLiteralType
     // or a type representing nil, false, or true.
     static llvm::Value *emitLiteralish(CompilerState &gs, llvm::IRBuilderBase &builder,
                                        const core::TypePtr &literalish);

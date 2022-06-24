@@ -472,14 +472,14 @@ public:
         }
 
         // Second arg: name of method to define
-        auto litName = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
-        ENFORCE(litName.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto litName = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
+        ENFORCE(litName.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
         auto funcNameRef = litName.asName();
         auto name = Payload::toCString(cs, funcNameRef.show(cs), builder);
 
         // Third arg: method kind (normal, attr_reader, or genericPropGetter)
-        auto litMethodKind = core::cast_type_nonnull<core::LiteralType>(send->args[2].type);
-        ENFORCE(litMethodKind.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto litMethodKind = core::cast_type_nonnull<core::NamedLiteralType>(send->args[2].type);
+        ENFORCE(litMethodKind.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
         auto methodKind = litMethodKind.asName();
 
         auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
@@ -688,23 +688,20 @@ public:
         auto options = 0;
         if (send->args.size() == 2) {
             auto &arg1 = send->args[1];
-            if (!core::isa_type<core::LiteralType>(arg1.type)) {
+            if (!core::isa_type<core::IntegerLiteralType>(arg1.type)) {
                 return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
             }
-            auto literalOptions = core::cast_type_nonnull<core::LiteralType>(arg1.type);
-            if (literalOptions.literalKind != core::LiteralType::LiteralTypeKind::Integer) {
-                return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
-            }
-            options = literalOptions.asInteger();
+            const auto &literalOptions = core::cast_type_nonnull<core::IntegerLiteralType>(arg1.type);
+            options = literalOptions.value;
         }
 
         auto &arg0 = send->args[0];
-        if (!core::isa_type<core::LiteralType>(arg0.type)) {
+        if (!core::isa_type<core::NamedLiteralType>(arg0.type)) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto literal = core::cast_type_nonnull<core::LiteralType>(arg0.type);
-        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
+        auto literal = core::cast_type_nonnull<core::NamedLiteralType>(arg0.type);
+        if (literal.literalKind != core::NamedLiteralType::LiteralTypeKind::String) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto &builder = mcctx.builder;

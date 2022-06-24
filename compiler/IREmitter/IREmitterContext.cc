@@ -28,12 +28,12 @@ optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::Instructi
         return std::nullopt;
     }
 
-    if (!core::isa_type<core::LiteralType>(liti->value)) {
+    if (!core::isa_type<core::NamedLiteralType>(liti->value)) {
         return std::nullopt;
     }
 
-    const auto &lit = core::cast_type_nonnull<core::LiteralType>(liti->value);
-    if (lit.literalKind != core::LiteralType::LiteralTypeKind::Symbol) {
+    const auto &lit = core::cast_type_nonnull<core::NamedLiteralType>(liti->value);
+    if (lit.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
         return std::nullopt;
     }
 

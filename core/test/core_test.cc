@@ -249,15 +249,10 @@ class TypePtrTestHelper {
 public:
     static std::atomic<uint32_t> *counter(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
-        return ptr.counter;
+        return &ptr.get()->counter;
     }
 
-    static uint64_t value(const TypePtr &ptr) {
-        CHECK(!ptr.containsPtr());
-        return ptr.value;
-    }
-
-    static uint32_t inlinedValue(const TypePtr &ptr) {
+    static uint64_t inlinedValue(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.inlinedValue();
     }
@@ -266,24 +261,24 @@ public:
         return ptr.store;
     }
 
-    static void *get(const TypePtr &ptr) {
+    static Refcounted *get(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
         return ptr.get();
     }
 
-    static TypePtr create(TypePtr::Tag tag, void *type) {
+    static TypePtr create(TypePtr::Tag tag, Refcounted *type) {
         return TypePtr(tag, type);
     }
 
-    static TypePtr createInlined(TypePtr::Tag tag, uint32_t inlinedValue, uint64_t value) {
-        return TypePtr(tag, inlinedValue, value);
+    static TypePtr createInlined(TypePtr::Tag tag, uint64_t inlinedValue) {
+        return TypePtr(tag, inlinedValue);
     }
 };
 
 TEST_SUITE("TypePtr") {
     TEST_CASE("Does not allocate a counter for null type") {
         TypePtr ptr;
-        CHECK_EQ(0, TypePtrTestHelper::value(ptr));
+        CHECK_EQ(0, TypePtrTestHelper::store(ptr));
     }
 
     TEST_CASE("Properly manages counter") {
@@ -313,7 +308,6 @@ TEST_SUITE("TypePtr") {
             CHECK_EQ(1, counter->load());
 
             // Moving should clear counter from ptrCopy and make it an empty TypePtr
-            CHECK_EQ(0, TypePtrTestHelper::value(ptrCopy));
             CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
             CHECK_EQ(TypePtr(), ptrCopy);
 
@@ -326,15 +320,6 @@ TEST_SUITE("TypePtr") {
     }
 
     TEST_CASE("Tagging works as expected") {
-        // This tag is < 8. Will be deleted / managed by TypePtr.
-        {
-            auto rawPtr = new SelfType();
-            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::SelfType, rawPtr);
-            CHECK_EQ(TypePtr::Tag::SelfType, ptr.tag());
-            CHECK_EQ(rawPtr, TypePtrTestHelper::get(ptr));
-        }
-
-        // This tag is > 8
         {
             auto rawPtr = new UnresolvedClassType(Symbols::untyped(), {});
             auto ptr = TypePtrTestHelper::create(TypePtr::Tag::UnresolvedClassType, rawPtr);
@@ -353,10 +338,9 @@ TEST_SUITE("TypePtr") {
 
         for (auto values : valuesArray) {
             SUBCASE(fmt::format("{}, {}", values.first, values.second).c_str()) {
-                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::SelfType, values.first, values.second);
+                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::SelfType, values.first);
                 CHECK_EQ(TypePtr::Tag::SelfType, type.tag());
                 CHECK_EQ(values.first, TypePtrTestHelper::inlinedValue(type));
-                CHECK_EQ(values.second, TypePtrTestHelper::value(type));
             }
         }
     }

@@ -27,25 +27,40 @@ uint32_t UnresolvedAppliedType::hash(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t LiteralType::hash(const GlobalState &gs) const {
-    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::LiteralType);
+uint32_t NamedLiteralType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::NamedLiteralType);
     auto underlying = this->underlying(gs);
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());
 
-    uint64_t rawValue;
     switch (literalKind) {
-        case LiteralType::LiteralTypeKind::String:
-        case LiteralType::LiteralTypeKind::Symbol:
+        case NamedLiteralType::LiteralTypeKind::String:
+        case NamedLiteralType::LiteralTypeKind::Symbol:
             return mix(result, _hash(asName().shortName(gs)));
-        case LiteralType::LiteralTypeKind::Float:
-            rawValue = absl::bit_cast<uint64_t>(asFloat());
-            break;
-        case LiteralType::LiteralTypeKind::Integer:
-            rawValue = absl::bit_cast<uint64_t>(asInteger());
-            break;
     }
+}
 
+uint32_t FloatLiteralType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::FloatLiteralType);
+    auto underlying = this->underlying(gs);
+    ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
+    result = mix(result, undSymbol.id());
+
+    uint64_t rawValue = absl::bit_cast<uint64_t>(this->value);
+    uint32_t topBits = static_cast<uint32_t>(rawValue >> 32);
+    uint32_t bottomBits = static_cast<uint32_t>(rawValue & 0xFFFFFFFF);
+    result = mix(result, topBits);
+    result = mix(result, bottomBits);
+    return result;
+}
+
+uint32_t IntegerLiteralType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::IntegerLiteralType);
+    auto underlying = this->underlying(gs);
+    ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
+    result = mix(result, undSymbol.id());
+
+    uint64_t rawValue = this->value;
     uint32_t topBits = static_cast<uint32_t>(rawValue >> 32);
     uint32_t bottomBits = static_cast<uint32_t>(rawValue & 0xFFFFFFFF);
     result = mix(result, topBits);

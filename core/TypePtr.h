@@ -13,6 +13,23 @@ class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
 
+class NonRefcounted {};
+
+class Refcounted {
+    friend class TypePtrTestHelper;
+    std::atomic<uint32_t> counter{0};
+
+public:
+    void addref() {
+        this->counter.fetch_add(1);
+    }
+
+    uint32_t release() {
+        // fetch_sub returns value prior to subtract
+        return this->counter.fetch_sub(1) - 1;
+    }
+};
+
 class TypePtr final {
     template <class To> static To &const_cast_type(const To &what) {
         return const_cast<To &>(what);
@@ -31,7 +48,9 @@ public:
         SelfTypeParam,
         AliasType,
         SelfType,
-        LiteralType,
+        IntegerLiteralType,
+        FloatLiteralType,
+        NamedLiteralType,
         TypeVar,
         OrType,
         AndType,
@@ -72,12 +91,6 @@ public:
     static std::string tagToString(Tag tag);
 
 private:
-    union {
-        // If containsPtr()
-        std::atomic<uint32_t> *counter;
-        // If !containsPtr()
-        uint64_t value;
-    };
     tagged_storage store;
 
     // We use a 0 to indicate not inlined so that nullptr (which has counter value 0) is naturally viewed as
@@ -94,13 +107,13 @@ private:
         return static_cast<tagged_storage>(tag);
     }
 
-    static tagged_storage tagValue(Tag tag, uint32_t inlinedValue) {
+    static tagged_storage tagValue(Tag tag, uint64_t inlinedValue) {
+        // Ensure the upper bits aren't getting used for anything exciting.
+        ENFORCE_NO_TIMER((inlinedValue >> 48) == 0);
         auto val = tagToMask(tag);
 
-        // Store value into val.  It doesn't much matter where we put it in
-        // the upper 48 bits, but we put it in the uppermost 32 bits to
-        // ensure that retrieving it requires only a shift and no masking.
-        val |= static_cast<tagged_storage>(inlinedValue) << 32;
+        // Store value into val.  Put it in the same place as pointer values.
+        val |= static_cast<tagged_storage>(inlinedValue) << 16;
 
         // Asserts that tag isn't using the bit which we use to indicate that value is _not_ inlined.
         ENFORCE((val & NOT_INLINED_MASK) == 0);
@@ -108,7 +121,7 @@ private:
         return val;
     }
 
-    static tagged_storage tagPtr(Tag tag, void *expr) {
+    static tagged_storage tagPtr(Tag tag, Refcounted *expr) {
         auto val = tagToMask(tag);
 
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
@@ -116,13 +129,8 @@ private:
         return maskedPtr | val | NOT_INLINED_MASK;
     }
 
-    TypePtr(Tag tag, std::atomic<uint32_t> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
-        ENFORCE_NO_TIMER(counter != nullptr);
-        counter->fetch_add(1);
-    }
-
     // Inlined TypePtr constructor
-    TypePtr(Tag tag, uint32_t value1, uint64_t value2) : value(value2), store(tagValue(tag, value1)) {}
+    TypePtr(Tag tag, uint64_t inlinedValue) noexcept : store(tagValue(tag, inlinedValue)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -137,67 +145,41 @@ private:
         return saved;
     }
 
-    std::atomic<uint32_t> *releaseCounter() noexcept {
-        ENFORCE_NO_TIMER(containsPtr());
-        auto saved = counter;
-        counter = nullptr;
-        return saved;
-    }
-
-    uint64_t releaseValue() noexcept {
-        ENFORCE_NO_TIMER(!containsPtr());
-        auto saved = value;
-        value = 0;
-        return saved;
-    }
-
     void handleDelete() noexcept {
         if (containsPtr()) {
-            // fetch_sub returns value prior to subtract
-            const uint32_t counterVal = counter->fetch_sub(1) - 1;
+            auto *ptr = this->get();
+            const uint32_t counterVal = ptr->release();
             if (counterVal == 0) {
-                deleteTagged(tag(), get());
-                delete counter;
+                deleteTagged(tag(), ptr);
             }
         }
     }
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    uint32_t inlinedValue() const {
+    uint64_t inlinedValue() const {
         ENFORCE_NO_TIMER(!containsPtr());
-        auto val = store >> 32;
-        return static_cast<uint32_t>(val);
+        auto val = store >> 16;
+        return val;
     }
 
-    void *get() const {
+    Refcounted *get() const {
         auto val = store & PTR_MASK;
-        return reinterpret_cast<void *>(val >> 16);
+        return reinterpret_cast<Refcounted *>(val >> 16);
     }
 
 public:
-    constexpr TypePtr() noexcept : value(0), store(0) {}
+    constexpr TypePtr() noexcept : store(0) {}
 
     TypePtr(std::nullptr_t) noexcept : TypePtr() {}
 
     TypePtr(TypePtr &&other) noexcept {
-        if (other.containsPtr()) {
-            counter = other.releaseCounter();
-            ENFORCE_NO_TIMER(counter != nullptr);
-        } else {
-            value = other.releaseValue();
-        }
-        // Has to happen last to avoid releaseCounter() triggering an ENFORCE.
         store = other.releaseTagged();
     }
 
     TypePtr(const TypePtr &other) noexcept : store(other.store) {
         if (other.containsPtr()) {
-            counter = other.counter;
-            ENFORCE_NO_TIMER(counter != nullptr);
-            counter->fetch_add(1);
-        } else {
-            value = other.value;
+            this->get()->addref();
         }
     };
 
@@ -211,11 +193,6 @@ public:
         }
 
         handleDelete();
-        if (other.containsPtr()) {
-            counter = other.releaseCounter();
-        } else {
-            value = other.releaseValue();
-        }
         store = other.releaseTagged();
         return *this;
     };
@@ -226,20 +203,16 @@ public:
         }
 
         handleDelete();
-
         if (other.containsPtr()) {
-            counter = other.counter;
-            if (counter != nullptr) {
-                counter->fetch_add(1);
-            }
-        } else {
-            value = other.value;
+            other.get()->addref();
         }
         store = other.store;
         return *this;
     };
 
-    explicit TypePtr(Tag tag, void *expr) : TypePtr(tag, new std::atomic<uint32_t>(), expr) {}
+    explicit TypePtr(Tag tag, Refcounted *expr) noexcept : store(tagPtr(tag, expr)) {
+        expr->addref();
+    }
 
     operator bool() const {
         return (bool)store;
@@ -253,16 +226,10 @@ public:
     }
 
     bool operator!=(const TypePtr &other) const {
-        // There's a lot going on in this line.
-        // * If store == other.store, both `this` and `other` have the same value of `containsPtr()`.
-        // * If store == other.store and both contain a pointer, there's no need to compare `counter`; they point to the
-        // same Type object.
-        // * If store == other.store and both do not contain a pointer, then we need to compare the inlined values.
-        return store != other.store || (!containsPtr() && value != other.value);
+        return store != other.store;
     }
     bool operator==(const TypePtr &other) const {
-        // Inverse of !=
-        return store == other.store && (containsPtr() || value == other.value);
+        return store == other.store;
     }
     bool operator!=(std::nullptr_t n) const {
         return store != 0;
@@ -340,7 +307,7 @@ public:
     friend typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what);
     friend class TypePtrTestHelper;
 };
-CheckSize(TypePtr, 16, 8);
+CheckSize(TypePtr, 8, 8);
 } // namespace sorbet::core
 
 #endif

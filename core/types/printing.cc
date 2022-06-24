@@ -72,11 +72,11 @@ string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) c
                        resolvedString);
 }
 
-string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+string NamedLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("{}({})", this->underlying(gs).toStringWithTabs(gs, tabs), showValue(gs));
 }
 
-string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
+string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const {
     if (options.showForRBI) {
         // RBI generator: Users type the class name, not `String("value")`.
         return fmt::format("{}", this->underlying(gs).show(gs, options));
@@ -85,11 +85,11 @@ string LiteralType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
 }
 
-string LiteralType::showValue(const GlobalState &gs) const {
+string NamedLiteralType::showValue(const GlobalState &gs) const {
     switch (literalKind) {
-        case LiteralType::LiteralTypeKind::String:
+        case NamedLiteralType::LiteralTypeKind::String:
             return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
-        case LiteralType::LiteralTypeKind::Symbol: {
+        case NamedLiteralType::LiteralTypeKind::Symbol: {
             auto shown = asName().show(gs);
             if (absl::StrContains(shown, " ")) {
                 return fmt::format(":\"{}\"", absl::CEscape(shown));
@@ -97,11 +97,41 @@ string LiteralType::showValue(const GlobalState &gs) const {
                 return fmt::format(":{}", shown);
             }
         }
-        case LiteralType::LiteralTypeKind::Integer:
-            return to_string(asInteger());
-        case LiteralType::LiteralTypeKind::Float:
-            return to_string(asFloat());
     }
+}
+
+string IntegerLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return fmt::format("{}({})", this->underlying(gs).toStringWithTabs(gs, tabs), showValue(gs));
+}
+
+string IntegerLiteralType::show(const GlobalState &gs, ShowOptions options) const {
+    if (options.showForRBI) {
+        // RBI generator: Users type the class name, not `String("value")`.
+        return fmt::format("{}", this->underlying(gs).show(gs, options));
+    }
+
+    return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
+}
+
+string IntegerLiteralType::showValue(const GlobalState &gs) const {
+    return to_string(this->value);
+}
+
+string FloatLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return fmt::format("{}({})", this->underlying(gs).toStringWithTabs(gs, tabs), showValue(gs));
+}
+
+string FloatLiteralType::show(const GlobalState &gs, ShowOptions options) const {
+    if (options.showForRBI) {
+        // RBI generator: Users type the class name, not `String("value")`.
+        return fmt::format("{}", this->underlying(gs).show(gs, options));
+    }
+
+    return fmt::format("{}({})", this->underlying(gs).show(gs, options), showValue(gs));
+}
+
+string FloatLiteralType::showValue(const GlobalState &gs) const {
+    return to_string(this->value);
 }
 
 string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -154,20 +184,31 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
             fmt::format_to(std::back_inserter(buf), ", ");
         }
 
-        const auto &keyLiteral = cast_type_nonnull<LiteralType>(key);
         const auto &value = *valueIterator;
+        ++valueIterator;
 
+        string keyStr;
+        string_view sepStr = " => ";
         // properties beginning with $ need to be printed as :$prop => type.
-        if (keyLiteral.literalKind == core::LiteralType::LiteralTypeKind::Symbol &&
-            !absl::StartsWith(keyLiteral.asName().shortName(gs), "$")) {
-            fmt::format_to(std::back_inserter(buf), "{}: {}", keyLiteral.asName().show(gs), value.show(gs, options));
+        if (isa_type<NamedLiteralType>(key)) {
+            const auto &keyLiteral = cast_type_nonnull<NamedLiteralType>(key);
+            if (keyLiteral.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol &&
+                !absl::StartsWith(keyLiteral.asName().shortName(gs), "$")) {
+                keyStr = keyLiteral.asName().show(gs);
+                sepStr = ": ";
+            } else {
+                keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
+            }
+        } else if (isa_type<IntegerLiteralType>(key)) {
+            const auto &keyLiteral = cast_type_nonnull<IntegerLiteralType>(key);
+            keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
         } else {
-            fmt::format_to(std::back_inserter(buf), "{} => {}",
-                           options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options),
-                           value.show(gs, options));
+            ENFORCE(isa_type<FloatLiteralType>(key));
+            const auto &keyLiteral = cast_type_nonnull<FloatLiteralType>(key);
+            keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
         }
 
-        ++valueIterator;
+        fmt::format_to(std::back_inserter(buf), "{}{}{}", keyStr, sepStr, value.show(gs, options));
     }
     fmt::format_to(std::back_inserter(buf), "}}");
     return to_string(buf);

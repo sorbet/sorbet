@@ -317,27 +317,29 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     if (lit.derivesFrom(cs, core::Symbols::NilClass())) {
         return Payload::rubyNil(cs, builder);
     }
+    if (core::isa_type<core::IntegerLiteralType>(lit)) {
+        const auto &litInt = core::cast_type_nonnull<core::IntegerLiteralType>(lit);
+        auto *value = Payload::longToRubyValue(cs, builder, litInt.value);
+        Payload::assumeType(cs, builder, value, core::Symbols::Integer());
+        return value;
+    }
+    if (core::isa_type<core::FloatLiteralType>(lit)) {
+        const auto &litFloat = core::cast_type_nonnull<core::FloatLiteralType>(lit);
+        auto *value = Payload::doubleToRubyValue(cs, builder, litFloat.value);
+        Payload::assumeType(cs, builder, value, core::Symbols::Float());
+        return value;
+    }
 
-    auto litType = core::cast_type_nonnull<core::LiteralType>(lit);
+    auto litType = core::cast_type_nonnull<core::NamedLiteralType>(lit);
     switch (litType.literalKind) {
-        case core::LiteralType::LiteralTypeKind::Integer: {
-            auto *value = Payload::longToRubyValue(cs, builder, litType.asInteger());
-            Payload::assumeType(cs, builder, value, core::Symbols::Integer());
-            return value;
-        }
-        case core::LiteralType::LiteralTypeKind::Float: {
-            auto *value = Payload::doubleToRubyValue(cs, builder, litType.asFloat());
-            Payload::assumeType(cs, builder, value, core::Symbols::Float());
-            return value;
-        }
-        case core::LiteralType::LiteralTypeKind::Symbol: {
+        case core::NamedLiteralType::LiteralTypeKind::Symbol: {
             auto str = litType.asName().shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             auto *value = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
             Payload::assumeType(cs, builder, value, core::Symbols::Symbol());
             return value;
         }
-        case core::LiteralType::LiteralTypeKind::String: {
+        case core::NamedLiteralType::LiteralTypeKind::String: {
             auto str = litType.asName().shortName(cs);
             auto *value = Payload::cPtrToRubyString(cs, builder, str, true);
             Payload::assumeType(cs, builder, value, core::Symbols::String());

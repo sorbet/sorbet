@@ -2454,15 +2454,15 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        if (!core::isa_type<core::LiteralType>(literalNode->value)) {
+        if (!core::isa_type<core::NamedLiteralType>(literalNode->value)) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
             }
             return;
         }
 
-        auto literal = core::cast_type_nonnull<core::LiteralType>(literalNode->value);
-        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
+        auto literal = core::cast_type_nonnull<core::NamedLiteralType>(literalNode->value);
+        if (literal.literalKind != core::NamedLiteralType::LiteralTypeKind::String) {
             // Infer will report a type error
             return;
         }
@@ -2485,9 +2485,9 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
 
-            if (!core::isa_type<core::LiteralType>(packageNode->value) ||
-                core::cast_type_nonnull<core::LiteralType>(packageNode->value).literalKind !=
-                    core::LiteralType::LiteralTypeKind::String) {
+            if (!core::isa_type<core::NamedLiteralType>(packageNode->value) ||
+                core::cast_type_nonnull<core::NamedLiteralType>(packageNode->value).literalKind !=
+                    core::NamedLiteralType::LiteralTypeKind::String) {
                 // Infer will report a type error
                 return;
             }
@@ -2527,7 +2527,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
                 return;
             }
-            auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
+            auto package = core::cast_type_nonnull<core::NamedLiteralType>(packageType);
             auto name = package.asName().shortName(ctx);
             vector<string> pkgParts = absl::StrSplit(name, "::");
             // add the initial empty string to mimic the leading `::`

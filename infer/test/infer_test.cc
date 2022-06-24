@@ -54,13 +54,13 @@ TEST_CASE("Infer") {
     gs.initEmpty();
 
     SUBCASE("LiteralsSubtyping") {
-        auto intLit = core::make_type<core::LiteralType>(int64_t(1));
+        auto intLit = core::make_type<core::IntegerLiteralType>(int64_t(1));
         auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
-        auto floatLit = core::make_type<core::LiteralType>(1.0f);
+        auto floatLit = core::make_type<core::FloatLiteralType>(1.0f);
         auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
         auto trueLit = core::Types::trueClass();
         auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
-        auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
+        auto stringLit = core::make_type<core::NamedLiteralType>(core::Symbols::String(), core::Names::assignTemp());
         auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
         REQUIRE(core::Types::isSubType(gs, intLit, intClass));
         REQUIRE(core::Types::isSubType(gs, floatLit, floatClass));

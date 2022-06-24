@@ -37,7 +37,15 @@ bool allComponentsPresent(DispatchResult &res) {
 }
 } // namespace
 
-bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
+bool NamedLiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
+    return underlying(gs).derivesFrom(gs, klass);
+}
+
+bool IntegerLiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
+    return underlying(gs).derivesFrom(gs, klass);
+}
+
+bool FloatLiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying(gs).derivesFrom(gs, klass);
 }
 
@@ -49,7 +57,15 @@ bool TupleType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass)
     return underlying(gs).derivesFrom(gs, klass);
 }
 
-DispatchResult LiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+DispatchResult NamedLiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return dispatchCallProxyType(gs, underlying(gs), args);
+}
+
+DispatchResult IntegerLiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return dispatchCallProxyType(gs, underlying(gs), args);
+}
+
+DispatchResult FloatLiteralType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
@@ -498,7 +514,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<LiteralType>(tp)) {
+    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
         }
@@ -641,11 +657,11 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
     }
 
     if (!absl::c_all_of(hash->keys, [&gs](const auto &key) {
-            if (!isa_type<LiteralType>(key)) {
+            if (!isa_type<NamedLiteralType>(key)) {
                 return false;
             }
 
-            auto klass = cast_type_nonnull<LiteralType>(key).underlying(gs);
+            auto klass = cast_type_nonnull<NamedLiteralType>(key).underlying(gs);
             if (!isa_type<ClassType>(klass)) {
                 return false;
             }
@@ -968,8 +984,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             while (kwit != kwend) {
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
-                if (!isa_type<LiteralType>(key->type) ||
-                    cast_type_nonnull<LiteralType>(key->type).literalKind != LiteralType::LiteralTypeKind::Symbol) {
+                if (!isa_type<NamedLiteralType>(key->type) ||
+                    cast_type_nonnull<NamedLiteralType>(key->type).literalKind !=
+                        NamedLiteralType::LiteralTypeKind::Symbol) {
                     // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
                     // error here.
 
@@ -1206,7 +1223,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     break;
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = cast_type_nonnull<LiteralType>(*it);
+                        auto key = cast_type_nonnull<NamedLiteralType>(*it);
                         auto underlying = key.underlying(gs);
                         ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                         if (klass != Symbols::Symbol()) {
@@ -1237,7 +1254,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                    auto lit = cast_type_nonnull<LiteralType>(litType);
+                    if (!isa_type<NamedLiteralType>(litType)) {
+                        return false;
+                    }
+                    auto lit = cast_type_nonnull<NamedLiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
                            lit.asName() == spec.name;
@@ -1290,7 +1310,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             for (auto &keyType : hash->keys) {
-                auto key = cast_type_nonnull<LiteralType>(keyType);
+                auto key = cast_type_nonnull<NamedLiteralType>(keyType);
                 auto underlying = key.underlying(gs);
                 ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                 if (klass == Symbols::Symbol() && consumed.find(key.asName()) != consumed.end()) {
@@ -2090,7 +2110,8 @@ public:
         ENFORCE(args.args.size() % 2 == 0);
 
         for (int i = 0; i < args.args.size(); i += 2) {
-            if (!isa_type<LiteralType>(args.args[i]->type)) {
+            if (!isa_type<NamedLiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
+                !isa_type<FloatLiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -2179,15 +2200,14 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        auto beforeLit = cast_type_nonnull<LiteralType>(args.args[1]->type);
-        auto afterLit = cast_type_nonnull<LiteralType>(args.args[2]->type);
-        if (!(beforeLit.underlying(gs).derivesFrom(gs, Symbols::Integer()) &&
-              afterLit.underlying(gs).derivesFrom(gs, Symbols::Integer()))) {
+        if (!(isa_type<IntegerLiteralType>(args.args[1]->type) && isa_type<IntegerLiteralType>(args.args[2]->type))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit.asInteger();
-        int after = (int)afterLit.asInteger();
+        auto &beforeLit = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
+        auto &afterLit = cast_type_nonnull<IntegerLiteralType>(args.args[2]->type);
+        int before = (int)beforeLit.value;
+        int after = (int)afterLit.value;
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -2250,10 +2270,10 @@ public:
             return;
         }
 
-        if (!isa_type<LiteralType>(args.args[1]->type)) {
+        if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
         }
-        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
@@ -2499,10 +2519,10 @@ public:
             return;
         }
 
-        if (!isa_type<LiteralType>(args.args[1]->type)) {
+        if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
         }
-        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
@@ -2569,10 +2589,10 @@ public:
             return;
         }
 
-        if (!isa_type<LiteralType>(args.args[1]->type)) {
+        if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
         }
-        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
@@ -2745,10 +2765,10 @@ public:
         auto selfTy = *args.args[0];
         auto selfTyAndAnd = *args.args[1];
 
-        if (!isa_type<LiteralType>(args.args[2]->type)) {
+        if (!isa_type<NamedLiteralType>(args.args[2]->type)) {
             return;
         }
-        auto lit = cast_type_nonnull<LiteralType>(args.args[2]->type);
+        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[2]->type);
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
@@ -2939,16 +2959,13 @@ public:
         if (args.args.size() == 1) {
             argType = args.args.front()->type;
         }
-        if (!isa_type<LiteralType>(argType)) {
+        if (!isa_type<IntegerLiteralType>(argType)) {
             return;
         }
 
-        auto lit = cast_type_nonnull<LiteralType>(argType);
-        if (!lit.underlying(gs).derivesFrom(gs, Symbols::Integer())) {
-            return;
-        }
+        auto &lit = cast_type_nonnull<IntegerLiteralType>(argType);
 
-        auto idx = lit.asInteger();
+        auto idx = lit.value;
         if (idx < 0) {
             idx = tuple->elems.size() + idx;
         }
@@ -3115,12 +3132,13 @@ public:
             return;
         }
 
-        if (!isa_type<LiteralType>(args.args.front()->type)) {
+        auto &arg = args.args.front()->type;
+        if (!isa_type<NamedLiteralType>(arg) && !isa_type<IntegerLiteralType>(arg) &&
+            !isa_type<FloatLiteralType>(arg)) {
             return;
         }
 
-        auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
-        if (auto idx = shape.indexForKey(argLit)) {
+        if (auto idx = shape.indexForKey(arg)) {
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
@@ -3136,14 +3154,16 @@ public:
                                      args.fullType.origins2Explanations(gs, args.originForUninitialized)));
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
 
-                    if (args.fullType.origins.size() == 1 &&
-                        argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
-                        auto key = argLit.asName();
-                        auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
+                    if (args.fullType.origins.size() == 1 && isa_type<NamedLiteralType>(arg)) {
+                        auto argLit = cast_type_nonnull<NamedLiteralType>(arg);
+                        if (argLit.literalKind == NamedLiteralType::LiteralTypeKind::Symbol) {
+                            auto key = argLit.asName();
+                            auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
 
-                        if (loc.has_value() && loc->exists()) {
-                            e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs).value(),
-                                          Types::any(gs, expectedType, actualType.type).show(gs));
+                            if (loc.has_value() && loc->exists()) {
+                                e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs).value(),
+                                              Types::any(gs, expectedType, actualType.type).show(gs));
+                            }
                         }
                     }
                 }
@@ -3188,43 +3208,46 @@ public:
             }
         }
 
-        auto keys = shape->keys;
-        auto values = shape->values;
-        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
-            auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) { return key.equals(cast_type_nonnull<LiteralType>(lit)); });
-            if (fnd == keys.end()) {
-                keys.emplace_back(keyType);
-                values.emplace_back(value);
+        // Deliberately copy the keys and values, since we may be adding entries.
+        auto copyTypePtr = make_type<ShapeType>(shape->keys, shape->values);
+        auto *copy = cast_type<ShapeType>(copyTypePtr);
+        ENFORCE(copy != nullptr);
+        auto addShapeEntry = [&copy](const TypePtr &keyType, const TypePtr &value) {
+            if (auto optind = copy->indexForKey(keyType)) {
+                copy->values[*optind] = value;
             } else {
-                values[fnd - keys.begin()] = value;
+                copy->keys.emplace_back(keyType);
+                copy->values.emplace_back(value);
             }
         };
 
         // inlined keyword arguments first
         for (auto i = 0; i < numKwargs; i += 2) {
             auto &keyType = args.args[i]->type;
-            if (!isa_type<LiteralType>(keyType)) {
+            if (!isa_type<NamedLiteralType>(keyType)) {
                 return;
             }
 
-            auto key = cast_type_nonnull<LiteralType>(keyType);
-            if (key.literalKind != LiteralType::LiteralTypeKind::Symbol) {
+            auto key = cast_type_nonnull<NamedLiteralType>(keyType);
+            if (key.literalKind != NamedLiteralType::LiteralTypeKind::Symbol) {
                 return;
             }
 
-            addShapeEntry(keyType, key, args.args[i + 1]->type);
+            addShapeEntry(keyType, args.args[i + 1]->type);
         }
 
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                auto key = cast_type_nonnull<LiteralType>(keyType);
-                addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
+                if (!isa_type<NamedLiteralType>(keyType) && !isa_type<IntegerLiteralType>(keyType) &&
+                    !isa_type<FloatLiteralType>(keyType)) {
+                    return;
+                }
+                addShapeEntry(keyType, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
         }
 
-        res.returnType = make_type<ShapeType>(std::move(keys), std::move(values));
+        res.returnType = std::move(copyTypePtr);
     }
 } Shape_merge;
 
@@ -3320,7 +3343,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
 
             // Guard shape construction on keys being valid, falling back on T::Hash[T.untyped, T.untyped] if it's
             // invalid.
-            if (!isa_type<LiteralType>(key->type)) {
+            if (!isa_type<NamedLiteralType>(key->type)) {
                 argType = Types::hashOfUntyped();
                 break;
             }
@@ -3460,18 +3483,17 @@ public:
             ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
                     args.locs.args.size());
 
-            if (!isa_type<LiteralType>(argTyp)) {
+            if (!isa_type<IntegerLiteralType>(argTyp)) {
                 if (auto e = gs.beginError(args.argLoc(0), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
             }
 
-            auto lt = cast_type_nonnull<LiteralType>(argTyp);
-            ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
+            auto &lt = cast_type_nonnull<IntegerLiteralType>(argTyp);
 
-            if (lt.asInteger() >= 0) {
-                depth = lt.asInteger();
+            if (lt.value >= 0) {
+                depth = lt.value;
             } else {
                 // Negative values behave like no depth was given
                 depth = MAX_DEPTH;
