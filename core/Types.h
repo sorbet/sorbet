@@ -877,7 +877,7 @@ public:
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
     TypeAndOrigins(TypePtr type, Loc origin);
-    TypeAndOrigins(TypePtr type, InlinedVector<Loc, 1> origins) : type(type), origins(origins) {}
+    TypeAndOrigins(TypePtr type, InlinedVector<Loc, 1> origins) : type(std::move(type)), origins(std::move(origins)) {}
     TypeAndOrigins(const TypeAndOrigins &) = default;
     TypeAndOrigins(TypeAndOrigins &&) = default;
     TypeAndOrigins &operator=(const TypeAndOrigins &) = default;
