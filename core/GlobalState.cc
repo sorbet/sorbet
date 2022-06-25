@@ -924,6 +924,13 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
+namespace {
+bool matchesArityHash(const GlobalState &gs, ArityHash arityHash, MethodRef method) {
+    auto methodData = method.data(gs);
+    return methodData->methodArityHash(gs) == arityHash || (methodData->hasIntrinsic() && !methodData->hasSig());
+}
+} // namespace
+
 MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, ArityHash arityHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
@@ -937,11 +944,23 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
         ENFORCE(res->second.exists());
         auto resSym = res->second;
         if (resSym.isMethod()) {
-            auto resMethod = resSym.asMethodRef().data(*this);
-            if (resMethod->methodArityHash(*this) == arityHash || (resMethod->hasIntrinsic() && !resMethod->hasSig())) {
-                return resSym.asMethodRef();
+            auto resMethod = resSym.asMethodRef();
+            if (matchesArityHash(*this, arityHash, resMethod)) {
+                return resMethod;
             }
         }
+
+        auto lookupNameOverload = lookupNameUnique(UniqueNameKind::MangleRenameOverload, lookupName, 1);
+        if (lookupNameOverload.exists()) {
+            auto overloadIt = ownerScope->members().find(lookupNameOverload);
+            if (overloadIt != ownerScope->members().end() && overloadIt->second.isMethod()) {
+                auto resMethod = overloadIt->second.asMethodRef();
+                if (matchesArityHash(*this, arityHash, resMethod)) {
+                    return resMethod;
+                }
+            }
+        }
+
         lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
         if (!lookupName.exists()) {
             break;
@@ -1172,27 +1191,34 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
     auto owner = original.data(*this)->owner;
     auto res = enterMethodSymbol(loc, owner, name);
-    ENFORCE(res != original);
-    if (res.data(*this)->arguments.size() != original.data(*this)->arguments.size()) {
-        ENFORCE(res.data(*this)->arguments.empty());
-        res.data(*this)->arguments.reserve(original.data(*this)->arguments.size());
-        const auto &originalArguments = original.data(*this)->arguments;
-        int i = -1;
-        for (auto &arg : originalArguments) {
-            i += 1;
-            Loc loc = arg.loc;
-            if (!argsToKeep[i]) {
-                if (arg.flags.isBlock) {
-                    loc = Loc::none();
-                } else {
-                    continue;
-                }
+    bool newMethod = res != original;
+    const auto &resArguments = res.data(*this)->arguments;
+    ENFORCE(newMethod || !resArguments.empty(), "must be at least the block arg");
+    auto resInitialArgSize = resArguments.size();
+    ENFORCE(original.data(*this)->arguments.size() == argsToKeep.size());
+    const auto &originalArguments = original.data(*this)->arguments;
+    int i = -1;
+    for (auto &arg : originalArguments) {
+        i += 1;
+        Loc loc = arg.loc;
+        if (!argsToKeep[i]) {
+            if (arg.flags.isBlock) {
+                loc = Loc::none();
+            } else {
+                DEBUG_ONLY(if (!newMethod) {
+                    auto f = [&](const auto &resArg) { return arg.name == resArg.name; };
+                    auto it = absl::c_find_if(resArguments, move(f));
+                    ENFORCE(it == resArguments.end(), "fast path should not remove arguments from existing overload");
+                });
+                continue;
             }
-            NameRef nm = arg.name;
-            auto &newArg = enterMethodArgumentSymbol(loc, res, nm);
-            newArg = arg.deepCopy();
-            newArg.loc = loc;
         }
+        NameRef nm = arg.name;
+        auto &newArg = enterMethodArgumentSymbol(loc, res, nm);
+        ENFORCE(newMethod || resArguments.size() == resInitialArgSize,
+                "fast path should not add new arguments to existing overload");
+        newArg = arg.deepCopy();
+        newArg.loc = loc;
     }
     return res;
 }
@@ -1617,7 +1643,7 @@ FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }
 
-void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
+void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind) {
     auto owner = what.owner(*this).asClassOrModuleRef();
     auto ownerData = owner.data(*this);
     auto &ownerMembers = ownerData->members();
@@ -1627,9 +1653,14 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
     ENFORCE(what.name(*this) == origName);
     uint32_t collisionCount = 1;
     NameRef name;
-    do {
-        name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
-    } while (ownerData->findMember(*this, name).exists());
+    if (kind == UniqueNameKind::MangleRename) {
+        do {
+            name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
+        } while (ownerData->findMember(*this, name).exists());
+    } else {
+        ENFORCE(kind == UniqueNameKind::MangleRenameOverload);
+        name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
+    }
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
     switch (what.kind()) {
@@ -1655,6 +1686,13 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
             what.asTypeMemberRef().data(*this)->name = name;
             break;
     }
+}
+
+void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
+    mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRename);
+}
+void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
+    mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
 unsigned int GlobalState::classAndModulesUsed() const {

@@ -3570,8 +3570,15 @@ public:
 
         bool isOverloaded = job.isOverloaded;
         auto originalName = mdef.symbol.data(ctx)->name;
-        if (isOverloaded) {
-            ctx.state.mangleRenameSymbol(mdef.symbol, originalName);
+
+        bool existingIsAlreadyMangled =
+            originalName.kind() == core::NameKind::UNIQUE &&
+            originalName.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
+        if (isOverloaded && !existingIsAlreadyMangled) {
+            ctx.state.mangleRenameForOverload(mdef.symbol, originalName);
+        }
+        if (existingIsAlreadyMangled) {
+            originalName = originalName.dataUnique(ctx)->original;
         }
 
         int i = -1;
