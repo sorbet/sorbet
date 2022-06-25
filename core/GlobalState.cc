@@ -927,7 +927,10 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 namespace {
 bool matchesArityHash(const GlobalState &gs, ArityHash arityHash, MethodRef method) {
     auto methodData = method.data(gs);
-    return methodData->methodArityHash(gs) == arityHash || (methodData->hasIntrinsic() && !methodData->hasSig());
+    // lookupMethodSymbolWithHash is called from namer, before resolver enters overloads.
+    // It wants to be able to find the "namer version" of the method, not the overload.
+    return !methodData->flags.isOverloaded &&
+           (methodData->methodArityHash(gs) == arityHash || (methodData->hasIntrinsic() && !methodData->hasSig()));
 }
 } // namespace
 
