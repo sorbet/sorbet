@@ -111,12 +111,12 @@ no more.</p>
   extend T::Sig
 
   sig {overridable.params(<span class="hljs-symbol">x:</span> T.any(Integer, String)).void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span>;</span> <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
   sig {override.params(<span class="hljs-symbol">x:</span> Integer).void}
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_integer_or_string</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>This code has an error because the child class overrides
