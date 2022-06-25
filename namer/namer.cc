@@ -1218,6 +1218,7 @@ class SymbolDefiner {
             if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
                 auto &uniqueData = memberNameToHash.dataUnique(ctx);
                 if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
+                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
                     uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
                     memberNameToHash = uniqueData->original;
                 }

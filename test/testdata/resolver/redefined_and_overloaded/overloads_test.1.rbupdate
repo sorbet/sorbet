@@ -1,0 +1,26 @@
+# typed: true
+# assert-fast-path: overloads_test.rb
+
+class A
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  sig {params(x: Integer, y: String).void}
+  def self.example(x, y='')
+  end
+
+  sig {params(x: Integer).void}
+  sig {params(x: Integer, y: String).void}
+  sig {params(x: Integer, y: String, z: Float).void}
+  def self.example1(x, y='', z=0.0)
+  end
+end
+
+A.example # error: Not enough arguments
+A.example(0)
+A.example(0, '')
+A.example(0, '', 0.0) # error: Too many arguments provided
+A.example1 # error: Not enough arguments
+A.example1(0)
+A.example1(0, '')
+A.example1(0, '', 0.0)
