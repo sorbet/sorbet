@@ -1,5 +1,4 @@
 # typed: true
-# disable-stress-incremental: true
 
 class I; end
 class S; end
@@ -16,7 +15,7 @@ end
 # The order here doesn't particularly matter; if you're here because you made a
 # change to the order that broke this test, feel free to update the test.
 
-A.new.my_method(${1:S})${0} # error: does not exist
+A.new.my_method(${1:I})${0} # error: does not exist
 #             ^ completion: my_method, my_method
 #             ^ apply-completion: [A] item: 0
 #             ^ apply-completion: [B] item: 1

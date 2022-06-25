@@ -1,6 +1,4 @@
 # typed: true
-# disable-fast-path: true
-# disable-stress-incremental: true
 extend T::Sig
 
 sig {params(s: Integer).void}
@@ -11,7 +9,7 @@ sig {params(s: Symbol).void}
 sig {params(s: Float).void}
 def f(s); end
 
-f(0)
-f('')
-f(:s)  # error: Expected `Integer`
-f(0.0) # error: Expected `Integer`
+f(0) # error: Expected `Symbol`
+f('') # error: Expected `Symbol`
+f(:s)
+f(0.0)

@@ -1,0 +1,17 @@
+# typed: true
+
+class A
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  sig {params(x: Integer, y: String).void}
+  def self.example1(x, y='')
+  end
+end
+
+A.example(0) # error: Method `example` does not exist
+A.example(0, '') # error: Method `example` does not exist
+A.example # error: Method `example` does not exist
+A.example1(0)
+A.example1(0, '')
+A.example1 # error: Not enough arguments
