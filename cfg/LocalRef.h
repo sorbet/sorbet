@@ -25,7 +25,7 @@ public:
     int maxLoopWrite(const CFG &cfg) const;
     bool exists() const;
     bool isAliasForGlobal(const core::GlobalState &gs, const CFG &cfg) const;
-    bool isSyntheticTemporary(const core::GlobalState &gs, const CFG &cfg) const;
+    bool isSyntheticTemporary(const CFG &cfg) const;
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg) const;
     bool operator==(const LocalRef &rhs) const;

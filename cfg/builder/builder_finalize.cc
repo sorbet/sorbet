@@ -134,7 +134,7 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
 }
 
 LocalRef maybeDealias(core::Context ctx, CFG &cfg, LocalRef what, UnorderedMap<LocalRef, LocalRef> &aliases) {
-    if (what.isSyntheticTemporary(ctx, cfg)) {
+    if (what.isSyntheticTemporary(cfg)) {
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
             return fnd->second;

@@ -22,7 +22,7 @@ public:
 
     bool exists() const;
 
-    bool isSyntheticTemporary(const GlobalState &gs) const;
+    bool isSyntheticTemporary() const;
 
     bool isAliasForGlobal(const GlobalState &gs) const;
 
