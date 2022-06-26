@@ -1,4 +1,5 @@
 #include "environment.h"
+#include "absl/strings/match.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "common/typecase.h"
@@ -507,6 +508,13 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
 
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
+    if (!send->fun.isUpdateKnowledgeName()) {
+        // We short circuit here (1) for an honestly negligible performance improvement, but
+        // importantly (2) so that if a new method is added to this method, you'll be forced to add it
+        // to the above list, as that list of names is special more than just inside this method.
+        return;
+    }
+
     if (send->fun == core::Names::bang()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
@@ -939,9 +947,11 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
-                                          int bindMinLoops, KnowledgeFilter &knowledgeFilter,
-                                          core::TypeConstraint &constr, core::TypePtr &methodReturnType) {
+core::TypePtr
+Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
+                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                            core::TypePtr &methodReturnType,
+                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -989,7 +999,67 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto multipleComponents = it->secondary != nullptr;
                 while (it != nullptr) {
                     for (auto &err : it->main.errors) {
-                        ctx.state._error(std::move(err));
+                        if (err->what != core::errors::Infer::UnknownMethod ||
+                            !parentUpdateKnowledgeReceiver.has_value()) {
+                            ctx.state._error(std::move(err));
+                            continue;
+                        }
+
+                        auto &parentRecv = parentUpdateKnowledgeReceiver.value();
+                        auto recvLoc = ctx.locAt(send.receiverLoc);
+                        auto parentRecvLoc = ctx.locAt(parentRecv.loc);
+
+                        if (recvLoc.source(ctx) != parentRecvLoc.source(ctx) ||
+                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type)) {
+                            // Safeguard against most unrelated missing method errors
+                            // Out of ~~laziness~~ simplicitity, this does not account for things
+                            // like `==` or `===` where the relevant type to check is arg0, not recv
+                            ctx.state._error(std::move(err));
+                            continue;
+                        }
+
+                        if (auto e = ctx.state.beginError(err->loc, core::errors::Infer::UnknownMethod)) {
+                            e.setHeader("{}", err->header);
+
+                            // This copies the section intentionally (no auto&) because all err fields are const
+                            for (auto section : err->sections) {
+                                if (!absl::StartsWith(section.header, "Autocorrect") &&
+                                    !absl::StartsWith(section.header, "Did you mean")) {
+                                    // Calling addAutocorrect below recreates the sections that go with autocorrects
+                                    e.addErrorSection(std::move(section));
+                                }
+                            }
+
+                            e.addErrorSection(core::ErrorSection(
+                                "Possible misuse of flow-sensitive typing:",
+                                {
+                                    core::ErrorLine::from(
+                                        parentRecvLoc,
+                                        "The preceding condition calls `{}` on an expression, not a variable",
+                                        parentRecv.fun.show(ctx)),
+                                    core::ErrorLine::fromWithoutLoc(
+                                        "Sorbet only tracks flow-sensitive knowledge on variables, not methods."),
+                                    core::ErrorLine::fromWithoutLoc(
+                                        "See https://sorbet.org/docs/flow-sensitive#limitations-of-flow-sensitivity"),
+                                    core::ErrorLine::fromWithoutLoc(
+                                        "To fix, refactor so the `{}` call is on a variable and use that variable "
+                                        "everywhere{}",
+                                        parentRecv.fun.show(ctx),
+                                        err->autocorrects.empty()
+                                            ? "."
+                                            : ",\n    or accept the autocorrect to silence this error."),
+                                }));
+
+                            // It would be nice to report an autocorrect suggestion to factor out a
+                            // variable, but we don't have an easy way to find all expressions in
+                            // the body that would need to be factored out. So we pass through any
+                            // autocorrects untouched.
+
+                            // This copies the section intentionally (no auto&) because all err fields are const
+                            for (auto autocorrect : err->autocorrects) {
+                                e.addAutocorrect(std::move(autocorrect));
+                            }
+                        }
                     }
 
                     // Sometimes we hit a method here where the method symbol is Symbols::noSymbol().

@@ -86,6 +86,21 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         Environment &current = outEnvironments[bb->id];
         current.initializeBasicBlockArgs(*bb);
+
+        // We very much want to limit access to "global" data structures downstream.
+        // In particular, processBinding should only need to know about the current binding (nothing
+        // about the surrounding BasicBlock, and definitely nothing about BasicBlocks that don't
+        // contain the current binding being processed).
+        //
+        // That means that only here in inference do we know about the structure of the CFG.
+        // But we want to pluck some limited information about the parent block and pass it into
+        // processBinding, only so that some errors that would already be reported can be improved.
+        // parentUpdateKnowledgeReceiver is such a thing.
+        //
+        // In general we should carefully limit the set of information that processBinding requires,
+        // to make it easy to reason about correctness.
+        optional<cfg::BasicBlock::BlockExitCondInfo> parentUpdateKnowledgeReceiver;
+
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
@@ -94,6 +109,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 current.populateFrom(ctx, envAsSeenFromBranch);
+
+                parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
             } else {
                 current.isDead = true;
             }
@@ -238,7 +255,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
                 bind.bind.type =
                     current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType);
+                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
                 if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
