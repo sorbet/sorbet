@@ -243,9 +243,6 @@ public:
                                  int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
                                  core::TypePtr &methodReturnType);
 
-    void ensureGoodCondition(core::Context ctx, cfg::LocalRef cond) {}
-    void ensureGoodAssignTarget(core::Context ctx, cfg::LocalRef target) {}
-
     core::Loc locForUninitialized() const {
         return ownerLoc;
     }

@@ -236,7 +236,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         for (cfg::Binding &bind : bb->exprs) {
             i++;
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
-                current.ensureGoodAssignTarget(ctx, bind.bind.variable);
                 bind.bind.type =
                     current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
                                            knowledgeFilter, *constr, methodReturnType);
@@ -274,7 +273,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
             current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
-            current.ensureGoodCondition(ctx, bb->bexit.cond.variable);
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
