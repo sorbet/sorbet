@@ -302,9 +302,9 @@ ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, Expressio
     : loc(loc), symbol(symbol), original(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     if (this->original == nullptr) {
-        histogramInc("trees.constantlit.original", 0);
+        prodHistogramInc("trees.constantlit.original", 0);
     } else {
-        histogramInc("trees.constantlit.original", 1);
+        prodHistogramInc("trees.constantlit.original", 1);
     }
     _sanityCheck();
 }
