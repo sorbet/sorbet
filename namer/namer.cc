@@ -1258,7 +1258,7 @@ public:
             defineNonMethodSingle(ctx, ref);
         }
 
-        // TODO(jez) This currently interleaves deleting and defining across files.
+        // This currently interleaves deleting and defining across files.
         // It's possible that this causes problems at some point? Though I haven't found a test case.
         // That being said, if it does cause problems, we should be able to not interleave, and have
         // all the `nonMethodDefinitions` from all files get defined, then delete all the old
@@ -1274,8 +1274,9 @@ public:
 
         for (auto &method : foundDefs.methods()) {
             if (method.arityHash.isAliasMethod()) {
-                // TODO(jez) Update this comment on the fast path namer branch
-                // alias methods will be defined in resolver.
+                // We need alias methods in the FoundDefinitions list not so that we can actually
+                // create method symbols for them yet, but just so we can know which alias methods
+                // to delete on the fast path. Alias methods will be defined later, in resolver.
                 continue;
             }
             definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
