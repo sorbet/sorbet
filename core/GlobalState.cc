@@ -1664,7 +1664,7 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
         // We don't loop in this case because we're not trying to find an actually unique name, we
         // just want to essentially move the existing, non-overloaded `what` out of the way to allow
         // the first overload to have the name that `what` currently has. We also need to be able to
-        // map predictable between the new, overloaded symbol and the original it came from, so the
+        // map predictably between the new, overloaded symbol and the original it came from, so the
         // unique name is always chosen using `1` for the `num` argument.
         ENFORCE(kind == UniqueNameKind::MangleRenameOverload);
         ENFORCE(what.isMethod());
