@@ -1813,7 +1813,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::ShallowWalk::apply(ctx, finder, job.tree);
+                ast::TreeWalk::apply(ctx, finder, job.tree);
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
@@ -1937,7 +1937,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::ShallowWalk::apply(ctx, inserter, job.tree);
+                ast::TreeWalk::apply(ctx, inserter, job.tree);
                 output.trees.emplace_back(move(job));
             }
         }
