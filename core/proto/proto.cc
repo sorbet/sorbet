@@ -36,6 +36,9 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::MangleRename:
                     protoName.set_unique(com::stripe::rubytyper::Name::MANGLE_RENAME);
                     break;
+                case UniqueNameKind::MangleRenameOverload:
+                    protoName.set_unique(com::stripe::rubytyper::Name::MANGLE_RENAME_OVERLOAD);
+                    break;
                 case UniqueNameKind::Singleton:
                     protoName.set_unique(com::stripe::rubytyper::Name::SINGLETON);
                     break;

@@ -1,5 +1,4 @@
 # typed: true
-# disable-stress-incremental: true
 
 # MutableContext::permitOverloadDefinitions is aware of this file name. Don't rename this file.
 class HasOverloads

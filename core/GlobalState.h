@@ -167,6 +167,7 @@ public:
     packages::UnfreezePackages unfreezePackages();
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
+    void mangleRenameForOverload(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;
     unsigned int namesUsedTotal() const;
     unsigned int utf8NamesUsed() const;
@@ -343,6 +344,8 @@ private:
 
     SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
+
+    void mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

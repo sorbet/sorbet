@@ -26,6 +26,7 @@ message Name {
          DEFAULT_ARG = 12;
          PACKAGER = 13;
          // PACKAGER_PRIVATE = 14;
+         MANGLE_RENAME_OVERLOAD = 15;
     };
 
     Kind kind = 1;
