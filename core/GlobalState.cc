@@ -1666,10 +1666,17 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
         // the first overload to have the name that `what` currently has. We also need to be able to
         // map predictably between the new, overloaded symbol and the original it came from, so the
         // unique name is always chosen using `1` for the `num` argument.
+        //
+        // We know that there is no method with this name, because otherwise resolver would not have
+        // called mangleRenameForOverload.
         ENFORCE(kind == UniqueNameKind::MangleRenameOverload);
         ENFORCE(what.isMethod());
         name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
     }
+    // Both branches of the above `if` condition should ENFORCE this (either due to the loop post
+    // condition, or by way of the resolveMultiSignatureJob call site guaranteeing this).
+    ENFORCE(!ownerData->findMember(*this, name).exists(), "would overwrite the Symbol with name {}",
+            name.showRaw(*this));
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
     switch (what.kind()) {
