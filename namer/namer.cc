@@ -1239,8 +1239,6 @@ class SymbolDefiner {
         // different method with the same name took its place (that other method might not have been deleted,
         // but if it was, we'll get to delete it on some future iteration.)
         for (auto oldMethod : toDelete) {
-            // TODO(jez) Double check that if you end up removing all references in all files on a
-            // fast path, that the method does in fact get deleted.
             oldMethod.data(ctx)->removeLocsForFile(ctx.file);
             if (oldMethod.data(ctx)->locs().empty()) {
                 ctx.state.deleteMethodSymbol(oldMethod);
