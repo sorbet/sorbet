@@ -1669,6 +1669,7 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
         ENFORCE(kind == UniqueNameKind::MangleRenameOverload);
         ENFORCE(what.isMethod());
         name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
+        ENFORCE(!ownerData->findMember(*this, name).exists());
     }
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
