@@ -11,6 +11,11 @@ class WorkerPool;
 namespace sorbet::namer {
 
 class Namer final {
+    static ast::ParsedFilesOrCancelled
+    runInternal(core::GlobalState &gs, std::vector<ast::ParsedFile> trees, WorkerPool &workers,
+                UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
+                core::FoundMethodHashes *foundMethodHashesOut);
+
 public:
     static ast::ParsedFilesOrCancelled
     symbolizeTreesBestEffort(const core::GlobalState &gs, std::vector<ast::ParsedFile> trees, WorkerPool &workers);
