@@ -873,9 +873,15 @@ TEST_CASE("LSPTest") {
                 verifyTypecheckRunInfo(
                     errorPrefix, responses, SorbetTypecheckRunStatus::Ended, ExpectDiagnosticMessages::Yes,
                     [&errorPrefix, assertSlowPath, &assertFastPath, &test, &version](auto &params) -> void {
-                        if (assertSlowPath.value_or(false)) {
-                            INFO(errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.");
-                            CHECK_EQ(params->fastPath, false);
+                        if (assertSlowPath.has_value()) {
+                            if (params->fastPath && assertSlowPath.value()) {
+                                INFO(errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.");
+                                CHECK_NE(params->fastPath, assertSlowPath.value());
+                            } else if (!params->fastPath && !assertSlowPath.value()) {
+                                INFO(errorPrefix
+                                     << "Expected Sorbet to not take slow path, but it took the slow path.");
+                                CHECK_NE(params->fastPath, assertSlowPath.value());
+                            }
                         }
                         if (assertFastPath.has_value()) {
                             (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
