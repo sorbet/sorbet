@@ -133,7 +133,7 @@ end
 
 sig {params(x: T::Array[Integer]).void}
 def bad_example7(x)
-  if Integer === x.first # Should have sepcial message, but doesn't (bug, annoying to fix)
+  if Integer === x.first # Should have special message, but doesn't (bug, annoying to fix)
     x.first.even?
   end
 end
