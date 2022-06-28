@@ -49,7 +49,7 @@ class Method final {
 
 public:
     Method(const Method &) = delete;
-    Method &operator=(Method &) = delete;
+    Method &operator=(const Method &) = delete;
     Method() = default;
     Method(Method &&) noexcept = default;
     class Flags {

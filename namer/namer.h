@@ -34,7 +34,7 @@ public:
     //
     // `trees` and `foundMethodHashesForFiles` should have the same number of elements, and
     // `foundMethodHashesForFiles[i]` should be the `FoundMethodHashes` for `trees[i]`.
-    // (Done this way, instead of using something like a `std::pair`, to avoid intermidiate
+    // (Done this way, instead of using something like a `std::pair`, to avoid intermediate
     // allocations for phases that don't actually need to operate on the `FoundMethodHashes`.)
     static ast::ParsedFilesOrCancelled
     runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,

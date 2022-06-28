@@ -1202,7 +1202,7 @@ class SymbolDefiner {
         auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
 
         // We have to accumulate a list of methods to delete, instead of deleting them in the loop
-        // below, because deleteing a method invalidates the members() iterator.
+        // below, because deleting a method invalidates the members() iterator.
         vector<core::MethodRef> toDelete;
 
         // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per method
@@ -1292,6 +1292,8 @@ public:
     }
 
     void populateFoundMethodHashes(core::Context ctx, core::FoundMethodHashes &foundMethodHashesOut) {
+        ENFORCE(foundMethodHashesOut.empty());
+        foundMethodHashesOut.reserve(foundDefs.methods().size());
         for (const auto &method : foundDefs.methods()) {
             auto owner = method.owner;
             auto fullNameHash = core::FullNameHash(ctx, method.name);
