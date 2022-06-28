@@ -134,9 +134,9 @@ public:
         }
 
         if (original.isString()) {
-            tree = MK::String(original.loc, newName);
+            original.value = core::make_type<core::NamedLiteralType>(core::Symbols::String(), newName);
         } else if (original.isSymbol()) {
-            tree = MK::Symbol(original.loc, newName);
+            original.value = core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), newName);
         } else {
             ENFORCE(false, "Should be guaranteed by unwrapLiteralToName");
         }
