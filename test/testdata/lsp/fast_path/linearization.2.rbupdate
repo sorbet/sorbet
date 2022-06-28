@@ -1,6 +1,6 @@
 # typed: true
 # frozen_string_literal: true
-# assert-slow-path: linearization.rb
+# assert-fast-path: linearization.rb
 
 module Base
 end

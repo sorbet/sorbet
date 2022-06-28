@@ -988,6 +988,11 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
 shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                                     int assertionLine, string_view assertionContents,
                                                                     string_view assertionType) {
+    {
+        INFO("Unrecognized boolean property assertion value: " << assertionContents);
+        auto trueOrFalse = assertionContents == "true" || assertionContents == "false";
+        CHECK(trueOrFalse);
+    }
     return make_shared<BooleanPropertyAssertion>(filename, range, assertionLine, assertionContents == "true",
                                                  assertionType);
 }
