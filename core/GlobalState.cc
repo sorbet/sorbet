@@ -1711,8 +1711,23 @@ void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
-// TODO(jez) This is a particularly specialized method, and people are likely to misuse it.
-// Be sure to write a comment at least, and consider ways to potentially lock it down.
+// This method should be used sparingly, because using it correctly is tricky.
+// Consider using mangleRenameSymbol instead, unless you absolutely know that you must use this method.
+//
+// This method's existence can introduce use-after-free style problems, but with Symbol IDs instead of
+// pointers. Importantly, callers of this method assume the burden of ensuring that the deleted
+// symbol's ID is not referenced by any other symbols or by any ASTs.
+//
+// (In our case, we're lucky that core::Method objects do not generally store sensitive information
+// that an attacker would be trying to exfiltrate, so the downside is not quite as severe as
+// arbitrary malloc/free use-after-free bugs. But it does mean that this could be the source of
+// particularly confusing user-visible errors or even crashes.)
+//
+// In particular, this method should basically be considered a private namer/namer.cc helper
+// function. The only reason why it's a method on GlobalState and not an anonymous helper in Namer
+// is because it requires direct (private) access to `this->methods` (and also because it looks very
+// similar to mangleRenameSymbol, so it's nice to have the implementation in the same file). But in
+// spirit, this is a private Namer helper function.
 void GlobalState::deleteMethodSymbol(MethodRef what) {
     const auto &whatData = what.data(*this);
     auto owner = whatData->owner;
