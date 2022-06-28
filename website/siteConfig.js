@@ -141,7 +141,7 @@ const siteConfig = {
   //   ]
   // },
 
-  // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
+  // This copyright info is used in blog RSS/Atom feeds.
   copyright: `© ${new Date().getFullYear()} Stripe`,
 
   highlight: {

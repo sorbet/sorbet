@@ -51,6 +51,12 @@ a:hover {
   color: var(--sorbet-purple-6);
 }
 
+.nav-footer .wrapper svg {
+  position: relative;
+  top: +7px;
+  margin: 0 32px 0 0;
+}
+
 /* Don't highlight the logo in the header on hover:
  *
  * .fixedHeaderContainer is hard coded here:
@@ -150,6 +156,11 @@ sup {
   .productShowcaseSection .link {
     /* 64px for the image + (2 x 20px) for the padding. */
     max-width: 104px;
+  }
+
+  .nav-footer .wrapper svg {
+    display: block;
+    margin: 0 0 8px;
   }
 }
 
