@@ -29,6 +29,12 @@ ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std:
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundMethodHashes *foundMethodHashes);
 
+// If `foundMethodHashesForFiles` is non-nullopt, incrementalResolve invokes Namer in runIncremental mode.
+//
+// This is most useful when running incrementalResolve for the purpose of a file update.
+//
+// It's not required when running incrementalResolve just to turn an AST into a resolved AST, if
+// that AST has already been resolved once before on the fast path
 std::vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                    std::optional<UnorderedMap<core::FileRef, core::FoundMethodHashes>> &&foundMethodHashesForFiles,

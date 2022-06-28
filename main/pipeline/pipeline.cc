@@ -901,11 +901,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     auto reIndexed = indexOne(opts, *gs, f.file);
                     vector<ast::ParsedFile> toBeReResolved;
                     toBeReResolved.emplace_back(move(reIndexed));
-                    // TODO(jez) It's an open question what we want the behavior of `--stress-incremental-resolver` to
-                    // be. On the one hand, LSPTypechecker::getResolved will _not_ use Namer::runIncremental.
-                    // On the other, if we don't test it in `--stress-incremental-resolver`, we'll have to write
-                    // extra tests to be sure of correctness, because pipeline tests won't test our feature for free.
-                    // TODO(jez) Once you've made a decision, explain what `nullopt` means here for posterity
+                    // We don't compute file hashes when running for incrementalResolve.
                     auto foundMethodHashesForFiles = nullopt;
                     auto reresolved =
                         pipeline::incrementalResolve(*gs, move(toBeReResolved), foundMethodHashesForFiles, opts);

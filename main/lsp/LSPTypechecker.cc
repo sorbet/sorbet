@@ -710,9 +710,13 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
             updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
         }
     }
-    // TODO(jez) I think it should be fine to not need a foundMethodHashesForFiles list...
-    // Makes the type signatures somewhat annoying but we can make it work.
-    return pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
+
+    // There are two incrementalResolve modes: one when running for the purpose of processing a file update,
+    // and one for running an LSP query on an already-resolved file.
+    // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
+    auto foundMethodHashesForFiles = nullopt;
+
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundMethodHashesForFiles), config->opts);
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
