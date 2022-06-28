@@ -263,15 +263,28 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
                 const auto &newMethodHashes = newSymbolHashes.methodHashes;
 
-                // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
-                // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
-                // deduped later.
-                absl::c_set_symmetric_difference(oldMethodHashes, newMethodHashes,
-                                                 std::back_inserter(changedMethodSymbolHashes));
+                if (config->opts.lspExperimentalFastPathEnabled) {
+                    // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
+                    // This will insert two entries into `changedMethodHashes` for each changed method, but they will
+                    // get deduped later.
+                    absl::c_set_symmetric_difference(oldMethodHashes, newMethodHashes,
+                                                     std::back_inserter(changedMethodSymbolHashes));
 
-                // Okay to `move` here (steals component of getFileHash) because we're about to use
-                // replaceFile to clobber fref.data(*gs) anyways.
-                oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundMethodHashes));
+                    // Okay to `move` here (steals component of getFileHash) because we're about to use
+                    // replaceFile to clobber fref.data(*gs) anyways.
+                    oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundMethodHashes));
+
+                } else {
+                    // Both oldHash and newHash should have the same methods, since this is the fast path!
+                    ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
+                            "definitionHash should have failed");
+
+                    // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
+                    // This will insert two entries into `changedMethodHashes` for each changed method, but they will
+                    // get deduped later.
+                    absl::c_set_difference(oldMethodHashes, newMethodHashes,
+                                           std::back_inserter(changedMethodSymbolHashes));
+                }
 
                 const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
                 const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
@@ -334,7 +347,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
-        if (oldFoundMethodHashesForFiles.find(f) == oldFoundMethodHashesForFiles.end()) {
+        if (config->opts.lspExperimentalFastPathEnabled &&
+            oldFoundMethodHashesForFiles.find(f) == oldFoundMethodHashesForFiles.end()) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
@@ -344,8 +358,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved =
-        pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundMethodHashesForFiles), config->opts);
+    auto resolved = config->opts.lspExperimentalFastPathEnabled
+                        ? pipeline::incrementalResolve(*gs, move(updatedIndexed),
+                                                       std::move(oldFoundMethodHashesForFiles), config->opts)
+                        : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;

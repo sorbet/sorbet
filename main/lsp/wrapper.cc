@@ -25,6 +25,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
     }
 
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
+    gs.lspExperimentalFastPathEnabled = options.lspExperimentalFastPathEnabled;
 
     // Ensure LSP is enabled.
     options.runLSP = true;
@@ -162,6 +163,7 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentFormat);
+    enableExperimentalFeature(LSPExperimentalFeature::ExperimentalFastPath);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
@@ -177,6 +179,9 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             break;
         case LSPExperimentalFeature::DocumentFormat:
             opts->lspDocumentFormatRubyfmtEnabled = true;
+            break;
+        case LSPExperimentalFeature::ExperimentalFastPath:
+            opts->lspExperimentalFastPathEnabled = true;
             break;
     }
 }

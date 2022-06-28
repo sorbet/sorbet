@@ -1915,6 +1915,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
+    result->lspExperimentalFastPathEnabled = this->lspExperimentalFastPathEnabled;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -2007,6 +2008,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
+    result->lspExperimentalFastPathEnabled = this->lspExperimentalFastPathEnabled;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->kvstoreUuid = this->kvstoreUuid;
@@ -2260,8 +2262,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = methodHashesMap[ShortNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
-            if (sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
-                sym.name == Names::requiredAncestorsLin()) {
+            auto needMethodShapeHash =
+                this->lspExperimentalFastPathEnabled
+                    ? (sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
+                       sym.name == Names::requiredAncestorsLin())
+                    : true;
+            if (needMethodShapeHash) {
                 uint32_t symhash = sym.methodShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, symhash);
                 methodHash = mix(methodHash, symhash);

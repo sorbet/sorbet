@@ -2207,7 +2207,8 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
-            if (e.second.isMethod()) {
+            if (e.second.isMethod() &&
+                (gs.lspExperimentalFastPathEnabled || e.second.asMethodRef().data(gs)->ignoreInHashing(gs))) {
                 continue;
             }
 

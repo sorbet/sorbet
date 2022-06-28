@@ -90,6 +90,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
                                           const realmain::options::Options &hashingOpts) {
     lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger);
     lgs->requiresAncestorEnabled = hashingOpts.requiresAncestorEnabled;
+    lgs->lspExperimentalFastPathEnabled = hashingOpts.lspExperimentalFastPathEnabled;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
         auto fref = lgs->enterFile(forWhat);
