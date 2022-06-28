@@ -253,11 +253,11 @@ test/cli/flow-sensitivity-hint/test.rb:137: This code is unreachable https://srb
      137 |    x.first.even?
               ^^^^^^^^^^^^^
     test/cli/flow-sensitivity-hint/test.rb:136: This condition was always `falsy` (`FalseClass`)
-     136 |  if Integer === x.first # Should have sepcial message, but doesn't (bug, annoying to fix)
+     136 |  if Integer === x.first # Should have special message, but doesn't (bug, annoying to fix)
                ^^^^^^^^^^^^^^^^^^^
   Got `FalseClass` originating from:
     test/cli/flow-sensitivity-hint/test.rb:136:
-     136 |  if Integer === x.first # Should have sepcial message, but doesn't (bug, annoying to fix)
+     136 |  if Integer === x.first # Should have special message, but doesn't (bug, annoying to fix)
                ^^^^^^^^^^^^^^^^^^^
 
 test/cli/flow-sensitivity-hint/test.rb:144: Method `even?` does not exist on `T.class_of(Integer)` component of `T.nilable(T.class_of(Integer))` https://srb.help/7003
