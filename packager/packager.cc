@@ -1262,6 +1262,17 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
     auto &file = parsedFile.file.data(ctx);
     ENFORCE(!file.isPackage());
 
+    if (file.isPayload()) {
+        // Files in Sorbet's payload are parsed and loaded in the --store-state phase, which runs
+        // outside of the packager mode. They're allowed to not belong to a package.
+        //
+        // Note that other RBIs that are not in Sorbet's payload follow the normal packaging rules.
+        //
+        // We normally skip running the packager when building in sorbet-orig mode, which computes
+        // the stored state, but payload files can be retypechecked by the fast path during LSP.
+        return parsedFile;
+    }
+
     auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (!pkg.exists()) {
         // Don't transform, but raise an error on the first line.
