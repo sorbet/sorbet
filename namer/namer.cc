@@ -1939,9 +1939,10 @@ defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefiniti
         }
         auto fref = fileFoundDefinitions.tree.file;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
-        auto oldFoundMethodHashes = oldFoundMethodHashesForFiles.find(fref) == oldFoundMethodHashesForFiles.end()
-                                        ? optional<core::FoundMethodHashes>()
-                                        : std::move(oldFoundMethodHashesForFiles[fref]);
+
+        auto frefIt = oldFoundMethodHashesForFiles.find(fref);
+        auto oldFoundMethodHashes = frefIt == oldFoundMethodHashesForFiles.end() ? optional<core::FoundMethodHashes>()
+                                                                                 : std::move(frefIt->second);
         SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names), move(oldFoundMethodHashes));
         output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
