@@ -1192,14 +1192,14 @@ class SymbolDefiner {
     }
 
     void deleteViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
-        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.ownerIdx);
+        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
         // Because a change to classes would have take the slow path, should be safe
         // to look up old owner in current foundDefs.
         auto ownerSymbol = getOwnerSymbol(ownerRef);
         ENFORCE(ownerSymbol.isClassOrModule());
-        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.isSelfMethod);
+        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
 
         // We have to accumulate a list of methods to delete, instead of deleting them in the loop
         // below, because deleteing a method invalidates the members() iterator.
@@ -1295,7 +1295,7 @@ public:
         for (const auto &method : foundDefs.methods()) {
             auto owner = method.owner;
             auto fullNameHash = core::FullNameHash(ctx, method.name);
-            foundMethodHashesOut.emplace_back(owner.idx(), fullNameHash, method.arityHash, method.flags.isSelfMethod);
+            foundMethodHashesOut.emplace_back(owner.idx(), method.flags.isSelfMethod, fullNameHash, method.arityHash);
         }
     }
 };

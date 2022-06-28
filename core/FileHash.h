@@ -88,14 +88,15 @@ struct SymbolHash {
     }
 };
 
-// TODO(jez) Some ideas:
-// - If we need to make this smaller, can probably bit pack one of the hashes into 31 bits and just
-//   eat the increased chance of collisions?
-// - If we want things to compile faster, can build a separate FoundDefinitionRefForHashing structure
-//   (might end up doing this if we do the bit packing idea above)
+// A fingerprint of a FoundDefinition suitable for storing on a File.
+// Allows a current Namer run to reference information about a previous Namer run.
 struct FoundMethodHash {
-    // The owner of this method.
-    uint32_t ownerIdx;
+    struct {
+        // The owner of this method.
+        uint32_t idx : 31;
+        // Whether the method was defined as an instance method or a singleton class method
+        bool useSingletonClass : 1;
+    } owner;
 
     // Hash of this method's name
     const FullNameHash nameHash;
@@ -103,11 +104,8 @@ struct FoundMethodHash {
     // A hash of the method's arity
     ArityHash arityHash;
 
-    // Whether the method was defined as an instance method or a singleton class method
-    bool isSelfMethod;
-
-    FoundMethodHash(uint32_t ownerIdx, FullNameHash nameHash, ArityHash arityHash, bool isSelfMethod)
-        : ownerIdx(ownerIdx), nameHash(nameHash), arityHash(arityHash), isSelfMethod(isSelfMethod) {
+    FoundMethodHash(uint32_t ownerIdx, bool useSingletonClass, FullNameHash nameHash, ArityHash arityHash)
+        : owner({ownerIdx, useSingletonClass}), nameHash(nameHash), arityHash(arityHash) {
         sanityCheck();
     };
 
@@ -116,7 +114,7 @@ struct FoundMethodHash {
     // Debug string
     std::string toString() const;
 };
-CheckSize(FoundMethodHash, 16, 4);
+CheckSize(FoundMethodHash, 12, 4);
 
 using FoundMethodHashes = std::vector<FoundMethodHash>;
 
