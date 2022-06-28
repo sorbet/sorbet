@@ -168,6 +168,8 @@ public:
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     void mangleRenameForOverload(SymbolRef what, NameRef origName);
+    // NOTE: You likely want to use mangleRenameSymbol not deleteMethodSymbol, unless you know what you're doing.
+    // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
     spdlog::logger &tracer() const;
     unsigned int namesUsedTotal() const;
