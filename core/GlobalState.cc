@@ -2260,8 +2260,6 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = methodHashesMap[ShortNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
-            // TODO(jez) Have to figure out whether all the flags do the right thing (maybe just
-            // reset them in namer?)
             if (sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
                 sym.name == Names::requiredAncestorsLin()) {
                 uint32_t symhash = sym.methodShapeHash(*this);

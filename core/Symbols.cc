@@ -2283,10 +2283,8 @@ uint32_t TypeParameter::hash(const GlobalState &gs) const {
 
 uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
-    // TODO(jez) Some flags we can put into the shape, some flags we can't
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
-    // TODO(jez) I think we can probably drop rebind even without Namer::runIncremental?
     result = mix(result, this->rebind.id());
     result = mix(result, this->hasSig());
     result = mix(result, this->methodArityHash(gs)._hashValue);
