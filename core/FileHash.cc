@@ -59,8 +59,9 @@ void FoundMethodHash::sanityCheck() const {
 }
 
 string FoundMethodHash::toString() const {
-    return fmt::format("FoundMethodHash {{ ownerIdx = {}, nameHash = {}, arityHash = {}, isSelfMethod = {} }}",
-                       nameHash._hashValue, arityHash._hashValue, isSelfMethod);
+    return fmt::format("FoundMethodHash {{ owner.idx = {}, owner.useSingletonClass = {}, nameHash = {}, "
+                       "arityHash = {}, isSelfMethod = {} }}",
+                       owner.idx, owner.useSingletonClass, nameHash._hashValue, arityHash._hashValue);
 }
 
 FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages,
