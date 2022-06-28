@@ -263,11 +263,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
                 const auto &newMethodHashes = newSymbolHashes.methodHashes;
 
-                // TODO(jez) is this critical for the set_difference to work, or just a sanity check?
-                // Both oldHash and newHash should have the same methods, since this is the fast path!
-                ENFORCE(true || validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
-                        "definitionHash should have failed");
-
                 // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
                 // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
                 // deduped later.

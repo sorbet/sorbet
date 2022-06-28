@@ -1736,10 +1736,6 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
     ownerMembers.erase(fnd);
-    // TODO(jez) In the future, we could even store a "fake" core::Method that essentially tracks a
-    // free list of slots in `this->methods` that can be overridden to save space / prevent memory bloat
-    // TODO(jez) There are some places where we ask for the number of method symbols.
-    // We probably want specialized helpers depending on the context of what's being counted.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 
