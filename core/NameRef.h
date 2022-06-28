@@ -186,6 +186,13 @@ public:
 
     bool isValidConstantName(const GlobalState &gs) const;
 
+    // All the names that Environment::updateKnowledge treats as special for the purposes of
+    // updating control flow-sensitive type knowledge.
+    //
+    // (This is a small hack, because Sorbet should really use Symbols not names for that purpose:
+    // https://github.com/sorbet/sorbet/issues/1747)
+    bool isUpdateKnowledgeName() const;
+
     std::string_view shortName(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;

@@ -30,8 +30,8 @@ bool LocalRef::isAliasForGlobal(const core::GlobalState &gs, const CFG &cfg) con
     return this->data(cfg).isAliasForGlobal(gs);
 }
 
-bool LocalRef::isSyntheticTemporary(const core::GlobalState &gs, const CFG &cfg) const {
-    return this->data(cfg).isSyntheticTemporary(gs);
+bool LocalRef::isSyntheticTemporary(const CFG &cfg) const {
+    return this->data(cfg).isSyntheticTemporary();
 }
 
 string LocalRef::toString(const core::GlobalState &gs, const CFG &cfg) const {

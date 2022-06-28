@@ -239,6 +239,26 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
     }
 }
 
+bool NameRef::isUpdateKnowledgeName() const {
+    switch (this->rawId()) {
+        case Names::bang().rawId():
+        case Names::blank_p().rawId():
+        case Names::eqeq().rawId():
+        case Names::equal_p().rawId():
+        case Names::isA_p().rawId():
+        case Names::kindOf_p().rawId():
+        case Names::leq().rawId():
+        case Names::lessThan().rawId():
+        case Names::neq().rawId():
+        case Names::nil_p().rawId():
+        case Names::present_p().rawId():
+        case Names::tripleEq().rawId():
+            return true;
+        default:
+            return false;
+    }
+}
+
 NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t index) {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor

@@ -10,7 +10,7 @@ bool LocalVariable::exists() const {
     return _name.exists();
 }
 
-bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
+bool LocalVariable::isSyntheticTemporary() const {
     if (_name.kind() == NameKind::UNIQUE) {
         return true;
     }

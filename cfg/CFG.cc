@@ -292,6 +292,64 @@ string CFG::showRaw(core::Context ctx) const {
     return to_string(buf);
 }
 
+namespace {
+const cfg::Send *looksLikeUpdateKnowledgeSend(const cfg::CFG &inWhat, const cfg::Binding &bind, LocalRef expectedRecv) {
+    if (bind.bind.variable != expectedRecv) {
+        return nullptr;
+    }
+
+    auto send = cfg::cast_instruction<cfg::Send>(bind.value);
+    if (send == nullptr) {
+        return nullptr;
+    }
+
+    if (!send->recv.variable.isSyntheticTemporary(inWhat)) {
+        // Conservative heuristic. If the receiver is not synthetic, then the update knowledge
+        // method was not computed by some sub expression but instead called directly on a
+        // Ruby-level variable. Therefore it wouldn't be useful to report a "maybe factor this to a
+        // variable" error for this call site.
+        return nullptr;
+    }
+
+    if (!send->fun.isUpdateKnowledgeName()) {
+        return nullptr;
+    }
+
+    return send;
+}
+
+} // namespace
+
+optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeReceiver(const cfg::CFG &inWhat) const {
+    if (this->exprs.empty()) {
+        return nullopt;
+    }
+
+    // Conservative heuristic, maybe we can make this smarter
+    // (Currently, only detect cases where the branch condition was the last thing computed)
+    auto &lastBinding = this->exprs.back();
+    auto send = looksLikeUpdateKnowledgeSend(inWhat, lastBinding, this->bexit.cond.variable);
+    if (send == nullptr) {
+        return nullopt;
+    }
+
+    if (send->fun == core::Names::bang() && this->exprs.size() >= 2) {
+        // Heuristic, because it's overwhelmingly common to see `!x.foo.nil?`, in which case the
+        // relevent receiver is the second-last, not the last, send binding.
+        auto bangRecv = send->recv.variable;
+        auto &secondLastBinding = this->exprs[this->exprs.size() - 2];
+        auto secondLastSend = looksLikeUpdateKnowledgeSend(inWhat, secondLastBinding, bangRecv);
+
+        if (secondLastSend != nullptr) {
+            send = secondLastSend;
+        }
+    }
+
+    // VariableUseSite copy constructor is deleted, have to manually make a shallow copy
+    auto recv = VariableUseSite{send->recv.variable, send->recv.type};
+    return make_optional<BlockExitCondInfo>(move(recv), send->receiverLoc, send->fun);
+}
+
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}, rubyRegionId={}]({})\n", this->id, this->rubyRegionId,
