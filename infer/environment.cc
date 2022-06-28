@@ -170,7 +170,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
             // would be otherwise; Many of the performance optimizations in this
             // file effectively exist to support this feature.
 
-            auto type = state.typeAndOrigins.type;
+            auto &type = state.typeAndOrigins.type;
             if (isNeeded && !type.isUntyped() && !core::isa_type<core::MetaType>(type)) {
                 // Direct mutation of `yesTypeTests` rather than going through `addYesTypeTest`.
                 // This is fine since `copy` is unmoored from a particular environment.
@@ -756,7 +756,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         auto glbbed = core::Types::all(ctx, tp.type, typeTested.second);
         if (tp.type != glbbed) {
             tp.origins.emplace_back(loc);
-            tp.type = glbbed;
+            tp.type = std::move(glbbed);
         }
         setTypeAndOrigin(typeTested.first, tp);
         if (tp.type.isBottom()) {
