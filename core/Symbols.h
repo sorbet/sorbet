@@ -40,18 +40,18 @@ enum class Visibility : uint8_t {
 };
 
 class Method final {
-public:
     friend class ClassOrModule;
+    friend class GlobalState;
     friend class serialize::SerializerImpl;
 
+    // This is to allow updating `GlobalState::methods` in place with a new method, over top of an existing method
+    Method &operator=(Method &&) = default;
+
+public:
     Method(const Method &) = delete;
     Method &operator=(Method &) = delete;
     Method() = default;
     Method(Method &&) noexcept = default;
-    // TODO(jez) Pretty sure we only want GlobalState to be able to call this.
-    // Maybe we make this method private, but give a fancy name to it so you can't accidentally do
-    // it with just a simple `=` sign?
-    Method &operator=(Method &&) noexcept = default;
     class Flags {
     public:
         // Synthesized by C++ code in a Rewriter pass

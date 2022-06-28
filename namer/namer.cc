@@ -1191,23 +1191,22 @@ class SymbolDefiner {
         }
     }
 
-    // TODO(jez) This is a lot of GlobalState-looking code. Should we move it there?
-    // TODO(jez) This no longer uses NameHash. Pick a different name?
-    // TODO(jez) This only needs to run once per unique owner, but we run it once per found definition
     void deleteViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.ownerIdx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
-
-        // TODO(jez) I don't think we really need the arityHash anymore now that we're only looking
-        // at the owner. Worth removing that? Or keep it in, on the chance we might need it later?
-        // Honestly, we don't even need the nameHash at this rate, just the ownerIdx
 
         // Because a change to classes would have take the slow path, should be safe
         // to look up old owner in current foundDefs.
         auto ownerSymbol = getOwnerSymbol(ownerRef);
         ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.isSelfMethod);
+
+        // We have to accumulate a list of methods to delete, instead of deleting them in the loop
+        // below, because deleteing a method invalidates the members() iterator.
         vector<core::MethodRef> toDelete;
+
+        // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per method
+        // previously defined in this file, then in each call look at each of that method's class's members
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
             if (!memberSym.isMethod()) {
                 continue;
@@ -1232,12 +1231,6 @@ class SymbolDefiner {
             toDelete.emplace_back(memberMethod);
         }
 
-        // TODO(jez) Find somewhere appropriate for this comment
-        // Only delete if the thing we found had the hash we expected to find.
-        // If we found something else, it likely means that even though there was previously a FoundMethod
-        // that would have caused a method with this name to be defined, it was delete and a
-        // different method with the same name took its place (that other method might not have been deleted,
-        // but if it was, we'll get to delete it on some future iteration.)
         for (auto oldMethod : toDelete) {
             oldMethod.data(ctx)->removeLocsForFile(ctx.file);
             if (oldMethod.data(ctx)->locs().empty()) {
