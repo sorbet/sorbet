@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "core/FileHash.h"
 #include "main/options/options.h"
 
 namespace sorbet::core::lsp {
@@ -25,17 +26,28 @@ std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::Par
                                      const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers);
+                                    const options::Options &opts, WorkerPool &workers,
+                                    core::FoundMethodHashes *foundMethodHashes);
 
-std::vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                                const options::Options &opts);
+// If `foundMethodHashesForFiles` is non-nullopt, incrementalResolve invokes Namer in runIncremental mode.
+//
+// This is most useful when running incrementalResolve for the purpose of a file update.
+//
+// It's not required when running incrementalResolve just to turn an AST into a resolved AST, if
+// that AST has already been resolved once before on the fast path
+std::vector<ast::ParsedFile>
+incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                   std::optional<UnorderedMap<core::FileRef, core::FoundMethodHashes>> &&foundMethodHashesForFiles,
+                   const options::Options &opts);
 
+// This function only calls Namer::symbolizeTreesBestEffort, not Namer::defineSymbols, which means
+// there's no point in taking any FoundMethodHashes.
 std::vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs,
                                                           std::vector<ast::ParsedFile> what,
                                                           const options::Options &opts);
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers);
+                                 WorkerPool &workers, core::FoundMethodHashes *foundMethodHashes);
 
 ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 WorkerPool &workers);

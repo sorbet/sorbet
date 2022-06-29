@@ -23,7 +23,13 @@ void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     unique_ptr<const OwnedKeyValueStore> kvstore;
     auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
     auto indexed = realmain::pipeline::index(*gs, payloadFiles, emptyOpts, *workers, kvstore);
-    realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers); // result is thrown away
+    // While we want the FoundMethodHashes to end up in the payload, these hashes (including
+    // LocalGlobalStateHashes and UsageHash) are not computed until `computeFileHashes` is called in
+    // realmain when the `storeState` flag is passed. This means that e.g. sorbet-orig -e
+    // '[0].to_set' will typecheck (using text-based payload) but never calculate hashes for the
+    // payload files (because neither `--lsp` nor `--store-state` was passed).
+    auto foundMethodHashes = nullptr;
+    realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers, foundMethodHashes); // result is thrown away
     gs->ensureCleanStrings = false;
 }
 

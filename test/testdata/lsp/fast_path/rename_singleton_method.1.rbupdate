@@ -1,0 +1,10 @@
+# typed: true
+# assert-fast-path: rename_singleton_method.rb
+
+class A
+  def self.bar
+  end
+end
+
+A.foo # error: Method `foo` does not exist on `T.class_of(A)`
+A.bar

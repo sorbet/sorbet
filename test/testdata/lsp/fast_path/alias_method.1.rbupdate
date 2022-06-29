@@ -1,0 +1,8 @@
+# typed: true
+# assert-fast-path: alias_method.rb
+
+class A
+  def pai; end
+
+  alias_method :paid?, :paid # error: Can't make method alias from `paid?` to non existing method `paid`
+end

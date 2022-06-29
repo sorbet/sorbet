@@ -1,0 +1,11 @@
+# typed: true
+# assert-fast-path: alias_to_nothing__2.rb,alias_to_nothing__3.rb
+# exclude-from-file-update: true
+
+class A
+  extend T::Sig
+  sig {returns(String)}
+  def to_method_new
+    ''
+  end
+end
