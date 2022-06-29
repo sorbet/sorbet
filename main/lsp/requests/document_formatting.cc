@@ -91,9 +91,9 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
                 response->result = move(result);
                 break;
             case RubyfmtStatus::SYNTAX_ERROR:
-                displayError(fmt::format("`rubyfmt` could not format {} because it contains syntax errors.",
-                                         index.getFile(fref).path()),
-                             response);
+                response->error = make_unique<ResponseError>(
+                    (int)LSPErrorCodes::RequestFailed,
+                    fmt::format("`rubyfmt` could not format {} because it contains syntax errors."));
                 break;
             case RubyfmtStatus::RIPPER_PARSE_FAILURE:
                 displayError(fmt::format("`rubyfmt` failed to deserialize the parse tree from Ripper for {}.\n"
