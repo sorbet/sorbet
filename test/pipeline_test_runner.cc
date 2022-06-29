@@ -236,7 +236,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     gs->censorForSnapshotTests = true;
-    gs->lspExperimentalFastPathEnabled = true;
     auto workers = WorkerPool::create(0, gs->tracer());
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
