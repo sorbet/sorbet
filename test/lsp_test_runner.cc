@@ -37,10 +37,13 @@ void updateDiagnostics(const LSPConfiguration &config, UnorderedMap<string, stri
         auto maybeDiagnosticParams = getPublishDiagnosticParams(response->asNotification());
         REQUIRE(maybeDiagnosticParams.has_value());
         auto &diagnosticParams = *maybeDiagnosticParams;
-        auto filename = uriToFilePath(config, diagnosticParams->uri);
-        {
+        string filename;
+        if (!absl::StartsWith(diagnosticParams->uri, core::File::URL_PREFIX)) {
+            filename = uriToFilePath(config, diagnosticParams->uri);
             INFO(fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri));
             CHECK_NE(testFileUris.end(), testFileUris.find(filename));
+        } else {
+            filename = diagnosticParams->uri;
         }
 
         // Will explicitly overwrite older diagnostics that are irrelevant.

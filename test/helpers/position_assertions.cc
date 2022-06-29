@@ -847,6 +847,10 @@ void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic,
 
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
                      int line) {
+    if (absl::StartsWith(filename, core::File::URL_PREFIX)) {
+        return "";
+    }
+
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
         FAIL_CHECK(fmt::format("Unable to find referenced source file `{}`", filename));
@@ -1091,8 +1095,13 @@ void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, 
     if (expectedFiles.has_value()) {
         vector<string> expectedFilePaths;
         for (auto &f : *expectedFiles) {
-            expectedFilePaths.push_back(absl::StrCat(folder, f));
+            if (absl::StartsWith(f, core::File::URL_PREFIX)) {
+                expectedFilePaths.push_back(f);
+            } else {
+                expectedFilePaths.push_back(absl::StrCat(folder, f));
+            }
         }
+        fast_sort(expectedFilePaths);
         fast_sort(info.filesTypechecked);
         vector<string> unTypecheckedFiles;
         absl::c_set_difference(expectedFilePaths, info.filesTypechecked, back_inserter(unTypecheckedFiles));
