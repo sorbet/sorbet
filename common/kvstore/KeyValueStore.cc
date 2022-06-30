@@ -1,7 +1,9 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "common/EarlyReturnWithCode.h"
 #include "common/Timer.h"
+#include "common/formatting.h"
 #include "lmdb.h"
+#include "spdlog/spdlog.h"
 
 #include <utility>
 
@@ -265,12 +267,15 @@ void OwnedKeyValueStore::clear() {
         MDB_val dv;
         rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
         while (rc != MDB_NOTFOUND) {
+            fmt::print("cursor get\n");
             flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
             rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
         }
         if (rc != 0) {
             goto fail;
         }
+
+        fmt::print("{}\n", fmt::map_join(flavors, ", ", [](const auto &s) -> string_view { return s; }));
 
         for (const auto &flavor : flavors) {
             rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
@@ -279,6 +284,7 @@ void OwnedKeyValueStore::clear() {
             }
 
             rc = mdb_drop(txnState->txn, txnState->dbi, 0);
+            fmt::print("drop\n");
             if (rc != 0) {
                 goto fail;
             }
