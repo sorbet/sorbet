@@ -844,6 +844,23 @@ class A::B < PackageSpec
 end
 ```
 
+## 3723
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The `--stripe-packages` mdoe allows packages to explicitly enumerate which other
+packages are allowed to import them by using the `visible_to` directive. If a
+package uses one or more `visible_to` lines, and is imported by a package _not_
+referenced by a `visible_to` line, then Sorbet will raise an error pointing to
+that import.
+
+Often, if you're running across this error, it means that you're trying to rely
+on an implementation detail that was deliberately made private. However, if
+you're sure that it should be okay to import this package, then you can add an
+additional `visible_to` directive in order to allow the import you're trying to
+add.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
