@@ -131,11 +131,14 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     refreshMainTransaction();
     {
         if (read(OLD_VERSION_KEY).data != nullptr) { // remove databases that use old(non-string) versioning scheme.
-            clear();
+            clearAll();
         }
         auto dbVersion = readString(VERSION_KEY);
-        if (dbVersion.has_value() && dbVersion != this->kvstore->version) {
-            clear();
+        if (!dbVersion.has_value()) {
+            // Probably new
+            writeString(VERSION_KEY, this->kvstore->version);
+        } else if (dbVersion != this->kvstore->version) {
+            clearAll();
             writeString(VERSION_KEY, this->kvstore->version);
         }
         return;
@@ -244,7 +247,7 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
-void OwnedKeyValueStore::clear() {
+void OwnedKeyValueStore::clearAll() {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
