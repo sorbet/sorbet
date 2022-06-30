@@ -308,7 +308,8 @@ void OwnedKeyValueStore::clearAll() {
                 goto fail;
             }
 
-            rc = mdb_drop(txnState->txn, txnState->dbi, 0);
+            int del = 1;
+            rc = mdb_drop(txnState->txn, txnState->dbi, del);
             fmt::print("drop\n");
             if (rc != 0) {
                 goto fail;
