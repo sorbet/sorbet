@@ -12,7 +12,7 @@ namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 // This configured both maximum filesystem db size and max virtual memory usage
-// Needs to be a multiple of getpagesize(2) which is 4906 by default on macOS and Linux
+// Needs to be a multiple of getpagesize(2) which is 4096 by default on macOS and Linux
 constexpr size_t MAX_DB_SIZE_BYTES = 4L * 1024 * 1024 * 1024; // 4 GiB
 struct KeyValueStore::DBState {
     MDB_env *env;
