@@ -44,7 +44,7 @@ TEST_CASE("kvstore") {
         {
             auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
-            CHECK_EQ(owned->readString("hello"), "");
+            CHECK_EQ(owned->readString("hello"), nullopt);
         }
     }
 
@@ -65,7 +65,7 @@ TEST_CASE("kvstore") {
         CHECK_EQ(owned->readString("hello"), "testing");
         kvstore = OwnedKeyValueStore::abort(move(owned));
         owned = make_unique<OwnedKeyValueStore>(move(kvstore));
-        CHECK_EQ(owned->readString("hello"), "");
+        CHECK_EQ(owned->readString("hello"), nullopt);
     }
 
     SUBCASE("ClearsChangesOnVersionChange") {
@@ -79,7 +79,7 @@ TEST_CASE("kvstore") {
         {
             auto kvstore = make_unique<KeyValueStore>("2", directory, "vanilla");
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
-            CHECK_EQ(owned->readString("hello"), "");
+            CHECK_EQ(owned->readString("hello"), nullopt);
         }
     }
 
@@ -94,7 +94,7 @@ TEST_CASE("kvstore") {
         {
             auto kvstore = make_unique<KeyValueStore>("1", directory, "coldbrewcoffeewithchocolateflakes");
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
-            CHECK_EQ(owned->readString("hello"), "");
+            CHECK_EQ(owned->readString("hello"), nullopt);
         }
     }
 

@@ -1,7 +1,9 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "common/EarlyReturnWithCode.h"
 #include "common/Timer.h"
+#include "common/formatting.h"
 #include "lmdb.h"
+#include "spdlog/spdlog.h"
 
 #include <utility>
 
@@ -9,8 +11,9 @@ using namespace std;
 namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
-constexpr size_t MAX_DB_SIZE_BYTES =
-    4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
+// This configured both maximum filesystem db size and max virtual memory usage
+// Needs to be a multiple of getpagesize(2) which is 4096 by default on macOS and Linux
+constexpr size_t MAX_DB_SIZE_BYTES = 4L * 1024 * 1024 * 1024; // 4 GiB
 struct KeyValueStore::DBState {
     MDB_env *env;
 };
@@ -128,11 +131,11 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     refreshMainTransaction();
     {
         if (read(OLD_VERSION_KEY).data != nullptr) { // remove databases that use old(non-string) versioning scheme.
-            clear();
+            clearAll();
         }
         auto dbVersion = readString(VERSION_KEY);
-        if (dbVersion != this->kvstore->version) {
-            clear();
+        if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
+            clearAll();
             writeString(VERSION_KEY, this->kvstore->version);
         }
         return;
@@ -241,29 +244,79 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
-void OwnedKeyValueStore::clear() {
+void OwnedKeyValueStore::clearAll() {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
 
+    // -- Clear the open database --
     int rc = mdb_drop(txnState->txn, txnState->dbi, 0);
     if (rc != 0) {
         goto fail;
     }
+
     rc = commit();
     if (rc != 0) {
         goto fail;
     }
+    refreshMainTransaction();
+
+    {
+        // Open the unnamed database, which lists the names of all the other databases
+        rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
+        if (rc != 0) {
+            goto fail;
+        }
+
+        vector<string> flavors;
+        MDB_cursor *cursor;
+        rc = mdb_cursor_open(txnState->txn, txnState->dbi, &cursor);
+        if (rc != 0) {
+            goto fail;
+        }
+
+        MDB_val kv;
+        MDB_val dv;
+        rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
+        while (rc != MDB_NOTFOUND) {
+            flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
+            rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
+        }
+        if (rc != 0 && rc != MDB_NOTFOUND) {
+            goto fail;
+        }
+
+        mdb_cursor_close(cursor);
+
+        for (const auto &flavor : flavors) {
+            rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
+            if (rc != 0) {
+                goto fail;
+            }
+
+            int del = 1;
+            rc = mdb_drop(txnState->txn, txnState->dbi, del);
+            if (rc != 0) {
+                goto fail;
+            }
+        }
+
+        rc = commit();
+        if (rc != 0) {
+            goto fail;
+        }
+    }
+
     refreshMainTransaction();
     return;
 fail:
     throw_mdb_error("failed to clear the database"sv, rc);
 }
 
-string_view OwnedKeyValueStore::readString(string_view key) const {
+optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
     auto rawData = read(key);
     if (rawData.data == nullptr) {
-        return string_view();
+        return nullopt;
     }
     string_view result((const char *)rawData.data, rawData.len);
     return result;
