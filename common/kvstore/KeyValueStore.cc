@@ -136,11 +136,11 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
         auto dbVersion = readString(VERSION_KEY);
         if (!dbVersion.has_value()) {
             // Probably new
-            fmt::format("writing version, not has value");
+            fmt::print("writing version, not has value\n");
             writeString(VERSION_KEY, this->kvstore->version);
         } else if (dbVersion != this->kvstore->version) {
             clearAll();
-            fmt::format("writing version, has value but not right version");
+            fmt::print("writing version, has value but not right version\n");
             writeString(VERSION_KEY, this->kvstore->version);
         }
         return;
