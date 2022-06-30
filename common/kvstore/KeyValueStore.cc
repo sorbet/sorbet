@@ -253,15 +253,36 @@ void OwnedKeyValueStore::clear() {
         goto fail;
     }
 
-    // -- Clear the unnamed database, clearing everything --
-    rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
-    if (rc != 0) {
-        goto fail;
-    }
+    {
+        vector<string> flavors;
+        MDB_cursor *cursor;
+        rc = mdb_cursor_open(txnState->txn, txnState->dbi, &cursor);
+        if (rc != 0) {
+            goto fail;
+        }
 
-    rc = mdb_drop(txnState->txn, txnState->dbi, 0);
-    if (rc != 0) {
-        goto fail;
+        MDB_val kv;
+        MDB_val dv;
+        rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
+        while (rc != MDB_NOTFOUND) {
+            flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
+            rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
+        }
+        if (rc != 0) {
+            goto fail;
+        }
+
+        for (const auto &flavor : flavors) {
+            rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
+            if (rc != 0) {
+                goto fail;
+            }
+
+            rc = mdb_drop(txnState->txn, txnState->dbi, 0);
+            if (rc != 0) {
+                goto fail;
+            }
+        }
     }
 
     rc = commit();
