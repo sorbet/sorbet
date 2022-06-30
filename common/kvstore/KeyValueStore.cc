@@ -135,7 +135,6 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
         }
         auto dbVersion = readString(VERSION_KEY);
         if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
-            fmt::print("clearing all databases and writing version\n");
             clearAll();
             writeString(VERSION_KEY, this->kvstore->version);
             commit();
@@ -252,8 +251,6 @@ void OwnedKeyValueStore::clearAll() {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
 
-    fmt::print("clearing all\n");
-
     // -- Clear the open database --
     int rc = mdb_drop(txnState->txn, txnState->dbi, 0);
     if (rc != 0) {
@@ -267,12 +264,6 @@ void OwnedKeyValueStore::clearAll() {
     refreshMainTransaction();
 
     {
-        // auto &dbState = *kvstore->dbState;
-        // auto rc = mdb_txn_begin(dbState.env, nullptr, 0, &txnState->txn);
-        // if (rc != 0) {
-        //     goto fail;
-        // }
-
         // Open the unnamed database, which lists the names of all the other databases
         rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
         if (rc != 0) {
@@ -290,7 +281,6 @@ void OwnedKeyValueStore::clearAll() {
         MDB_val dv;
         rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
         while (rc != MDB_NOTFOUND) {
-            fmt::print("cursor get\n");
             flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
             rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
         }
@@ -300,8 +290,6 @@ void OwnedKeyValueStore::clearAll() {
 
         mdb_cursor_close(cursor);
 
-        fmt::print("{}\n", fmt::map_join(flavors, ", ", [](const auto &s) -> string_view { return s; }));
-
         for (const auto &flavor : flavors) {
             rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
             if (rc != 0) {
@@ -310,7 +298,6 @@ void OwnedKeyValueStore::clearAll() {
 
             int del = 1;
             rc = mdb_drop(txnState->txn, txnState->dbi, del);
-            fmt::print("drop\n");
             if (rc != 0) {
                 goto fail;
             }
@@ -320,11 +307,6 @@ void OwnedKeyValueStore::clearAll() {
         if (rc != 0) {
             goto fail;
         }
-
-        // rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
-        // if (rc != 0) {
-        //     goto fail;
-        // }
     }
 
     refreshMainTransaction();
