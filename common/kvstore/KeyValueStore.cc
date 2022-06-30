@@ -136,9 +136,11 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
         auto dbVersion = readString(VERSION_KEY);
         if (!dbVersion.has_value()) {
             // Probably new
+            fmt::format("writing version, not has value");
             writeString(VERSION_KEY, this->kvstore->version);
         } else if (dbVersion != this->kvstore->version) {
             clearAll();
+            fmt::format("writing version, has value but not right version");
             writeString(VERSION_KEY, this->kvstore->version);
         }
         return;
@@ -251,6 +253,8 @@ void OwnedKeyValueStore::clearAll() {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
+
+    fmt::print("clearing all\n");
 
     // -- Clear the open database --
     int rc = mdb_drop(txnState->txn, txnState->dbi, 0);
