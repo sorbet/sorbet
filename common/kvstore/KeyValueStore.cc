@@ -264,7 +264,24 @@ void OwnedKeyValueStore::clearAll() {
         goto fail;
     }
 
+    rc = commit();
+    if (rc != 0) {
+        goto fail;
+    }
+
     {
+        auto &dbState = *kvstore->dbState;
+        auto rc = mdb_txn_begin(dbState.env, nullptr, 0, &txnState->txn);
+        if (rc != 0) {
+            goto fail;
+        }
+
+        // Open the unnamed database, which lists the names of all the other databases
+        rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
+        if (rc != 0) {
+            goto fail;
+        }
+
         vector<string> flavors;
         MDB_cursor *cursor;
         rc = mdb_cursor_open(txnState->txn, txnState->dbi, &cursor);
@@ -280,9 +297,11 @@ void OwnedKeyValueStore::clearAll() {
             flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
             rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
         }
-        if (rc != 0) {
+        if (rc != 0 && rc != MDB_NOTFOUND) {
             goto fail;
         }
+
+        mdb_cursor_close(cursor);
 
         fmt::print("{}\n", fmt::map_join(flavors, ", ", [](const auto &s) -> string_view { return s; }));
 
@@ -298,11 +317,11 @@ void OwnedKeyValueStore::clearAll() {
                 goto fail;
             }
         }
-    }
 
-    rc = commit();
-    if (rc != 0) {
-        goto fail;
+        rc = commit();
+        if (rc != 0) {
+            goto fail;
+        }
     }
 
     refreshMainTransaction();
