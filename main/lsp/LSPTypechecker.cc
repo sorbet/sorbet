@@ -240,7 +240,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        Timer timeit(config->logger, "fast_path_hash_usage");
+        Timer timeit(config->logger, "compute_fast_path_file_set");
         {
             vector<core::SymbolHash> changedMethodSymbolHashes;
             vector<core::SymbolHash> changedFieldSymbolHashes;
