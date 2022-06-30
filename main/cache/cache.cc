@@ -12,10 +12,8 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &
     if (opts.cacheDir.empty()) {
         return nullptr;
     }
-    auto flavor = fmt::format("{}-{}", opts.skipRewriterPasses ? "nodsl" : "dsl",
-                              opts.lspExperimentalFastPathEnabled ? "experimentalfastpath" : "normalfastpath");
-    return make_unique<OwnedKeyValueStore>(
-        make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir, move(flavor)));
+    return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
+                                                                      opts.skipRewriterPasses ? "nodsl" : "default"));
 }
 
 unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {

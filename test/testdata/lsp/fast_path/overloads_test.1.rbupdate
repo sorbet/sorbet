@@ -1,5 +1,4 @@
 # typed: true
-# assert-fast-path: overloads_test.rb
 
 class A
   extend T::Sig
