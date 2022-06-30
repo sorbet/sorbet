@@ -137,8 +137,6 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
         if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
             clearAll();
             writeString(VERSION_KEY, this->kvstore->version);
-            // commit();
-            // refreshMainTransaction();
         }
         return;
     }
