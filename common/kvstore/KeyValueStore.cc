@@ -134,13 +134,9 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
             clearAll();
         }
         auto dbVersion = readString(VERSION_KEY);
-        if (dbVersion.has_value() && dbVersion != this->kvstore->version) {
-            fmt::print("clearing all databases\n");
-            clearAll();
-        }
-
         if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
-            fmt::print("writing version\n");
+            fmt::print("clearing all databases and writing version\n");
+            clearAll();
             writeString(VERSION_KEY, this->kvstore->version);
             commit();
             refreshMainTransaction();
@@ -268,13 +264,14 @@ void OwnedKeyValueStore::clearAll() {
     if (rc != 0) {
         goto fail;
     }
+    refreshMainTransaction();
 
     {
-        auto &dbState = *kvstore->dbState;
-        auto rc = mdb_txn_begin(dbState.env, nullptr, 0, &txnState->txn);
-        if (rc != 0) {
-            goto fail;
-        }
+        // auto &dbState = *kvstore->dbState;
+        // auto rc = mdb_txn_begin(dbState.env, nullptr, 0, &txnState->txn);
+        // if (rc != 0) {
+        //     goto fail;
+        // }
 
         // Open the unnamed database, which lists the names of all the other databases
         rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
@@ -322,6 +319,11 @@ void OwnedKeyValueStore::clearAll() {
         if (rc != 0) {
             goto fail;
         }
+
+        // rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
+        // if (rc != 0) {
+        //     goto fail;
+        // }
     }
 
     refreshMainTransaction();
