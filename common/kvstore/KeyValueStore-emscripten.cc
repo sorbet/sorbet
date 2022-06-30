@@ -52,7 +52,7 @@ void OwnedKeyValueStore::clear() {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
-string_view OwnedKeyValueStore::readString(string_view key) const {
+optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 

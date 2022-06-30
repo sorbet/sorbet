@@ -79,7 +79,7 @@ public:
     KeyValueStoreValue read(std::string_view key) const;
     /** Reads a string from the key value store. Lifetime of string is tied to the lifetime of the database. Returns an
      * empty string_view if the key does not exist. */
-    std::string_view readString(std::string_view key) const;
+    std::optional<std::string_view> readString(std::string_view key) const;
     void writeString(std::string_view key, std::string_view value);
     /** can only be called from owning thread */
     void write(std::string_view key, const std::vector<uint8_t> &value);

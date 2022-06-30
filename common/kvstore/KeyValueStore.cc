@@ -132,7 +132,7 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
             clear();
         }
         auto dbVersion = readString(VERSION_KEY);
-        if (dbVersion != this->kvstore->version) {
+        if (dbVersion.has_value() && dbVersion != this->kvstore->version) {
             clear();
             writeString(VERSION_KEY, this->kvstore->version);
         }
@@ -252,32 +252,21 @@ void OwnedKeyValueStore::clear() {
     if (rc != 0) {
         goto fail;
     }
-    rc = commit();
+
+    // -- Clear the unnamed database, clearing everything --
+    rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
     if (rc != 0) {
         goto fail;
     }
 
-    // -- Open the unnamed database, where the list of all databases is, and drop anything else --
-    {
-        auto &dbState = *kvstore->dbState;
-        rc = mdb_txn_begin(dbState.env, nullptr, 0, &txnState->txn);
-        if (rc != 0) {
-            goto fail;
-        }
+    rc = mdb_drop(txnState->txn, txnState->dbi, 0);
+    if (rc != 0) {
+        goto fail;
+    }
 
-        rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
-        if (rc != 0) {
-            goto fail;
-        }
-
-        rc = mdb_drop(txnState->txn, txnState->dbi, 0);
-        if (rc != 0) {
-            goto fail;
-        }
-        rc = commit();
-        if (rc != 0) {
-            goto fail;
-        }
+    rc = commit();
+    if (rc != 0) {
+        goto fail;
     }
 
     refreshMainTransaction();
@@ -286,10 +275,10 @@ fail:
     throw_mdb_error("failed to clear the database"sv, rc);
 }
 
-string_view OwnedKeyValueStore::readString(string_view key) const {
+optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
     auto rawData = read(key);
     if (rawData.data == nullptr) {
-        return string_view();
+        return nullopt;
     }
     string_view result((const char *)rawData.data, rawData.len);
     return result;
