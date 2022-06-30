@@ -428,6 +428,14 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
         auto &msg = responses.at(0);
         REQUIRE(msg->isResponse());
         auto &response = msg->asResponse();
+        if (response.error) {
+            // If we're here, this is a syntax error response, which is an error
+            // but doesn't create a notification response like other error types
+            auto &receivedErrorResponse = *response.error;
+            auto expectedOutput = FileOps::read(test.folder + expectationFileName);
+            REQUIRE_EQ(expectedOutput, receivedErrorResponse->message);
+            return;
+        }
         REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
         auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
         if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
