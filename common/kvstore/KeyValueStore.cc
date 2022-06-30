@@ -9,8 +9,9 @@ using namespace std;
 namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
-constexpr size_t MAX_DB_SIZE_BYTES =
-    4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
+// This configured both maximum filesystem db size and max virtual memory usage
+// Needs to be a multiple of getpagesize(2) which is 4906 by default on macOS and Linux
+constexpr size_t MAX_DB_SIZE_BYTES = 4L * 1024 * 1024 * 1024; // 4 GiB
 struct KeyValueStore::DBState {
     MDB_env *env;
 };
@@ -246,6 +247,7 @@ void OwnedKeyValueStore::clear() {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
 
+    // -- Clear the open database --
     int rc = mdb_drop(txnState->txn, txnState->dbi, 0);
     if (rc != 0) {
         goto fail;
@@ -254,6 +256,30 @@ void OwnedKeyValueStore::clear() {
     if (rc != 0) {
         goto fail;
     }
+
+    // -- Open the unnamed database, where the list of all databases is, and drop anything else --
+    {
+        auto &dbState = *kvstore->dbState;
+        rc = mdb_txn_begin(dbState.env, nullptr, 0, &txnState->txn);
+        if (rc != 0) {
+            goto fail;
+        }
+
+        rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
+        if (rc != 0) {
+            goto fail;
+        }
+
+        rc = mdb_drop(txnState->txn, txnState->dbi, 0);
+        if (rc != 0) {
+            goto fail;
+        }
+        rc = commit();
+        if (rc != 0) {
+            goto fail;
+        }
+    }
+
     refreshMainTransaction();
     return;
 fail:
