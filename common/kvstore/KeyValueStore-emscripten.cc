@@ -48,7 +48,7 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
-void OwnedKeyValueStore::clear() {
+void OwnedKeyValueStore::clearAll() {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
 
