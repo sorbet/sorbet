@@ -14,11 +14,13 @@ public:
 
     Phase finalPhase() const override;
 
-    void index(LSPIndexer &index) override;
+    void preprocess(LSPPreprocessor &preprocessor) override;
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
 
 private:
+    std::string_view readFile(LSPPreprocessor &preprocessor, std::string_view uri);
+
     void displayError(std::string errorMessage, std::unique_ptr<ResponseMessage> &response);
 };
 

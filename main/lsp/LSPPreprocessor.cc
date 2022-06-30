@@ -80,10 +80,10 @@ LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr
     : config(move(config)), taskQueue(std::move(taskQueue)), owner(this_thread::get_id()),
       nextVersion(initialVersion + 1) {}
 
-string_view LSPPreprocessor::getFileContents(string_view path) const {
+string_view LSPPreprocessor::getFileContents(string_view path, bool enforceFileExists) const {
     auto it = openFiles.find(path);
     if (it == openFiles.end()) {
-        ENFORCE(false, "Editor sent a change request without a matching open request.");
+        ENFORCE(!enforceFileExists, "Editor sent a change request without a matching open request.");
         return string_view();
     }
     return it->second->source();
@@ -360,7 +360,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
-            string fileContents = changeParams->getSource(getFileContents(localPath));
+            string fileContents = changeParams->getSource(getFileContents(localPath, true));
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
