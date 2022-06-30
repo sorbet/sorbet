@@ -127,6 +127,17 @@ struct AutogenConstCacheConfig {
     std::vector<std::string> changedFiles;
 };
 
+namespace {
+
+#if !defined(EMSCRIPTEN)
+constexpr size_t MAX_CACHE_SIZE_BYTES = 4L * 1024 * 1024 * 1024; // 4 GiB
+#else
+// Cache is unused in emscripten, so this value doesn't matter, but sizeof(size_t) on emscripten is 4 bytes
+constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
+#endif
+
+} // namespace
+
 struct Options {
     Printers print;
     AutoloaderConfig autoloaderConfig;
@@ -170,6 +181,9 @@ struct Options {
     std::vector<std::string> secondaryTestPackageNamespaces;
     std::string typedSource = "";
     std::string cacheDir = "";
+    // This configured both maximum filesystem db size and max virtual memory usage
+    // Needs to be a multiple of getpagesize(2) which is 4096 by default on macOS and Linux
+    size_t maxCacheSizeBytes = MAX_CACHE_SIZE_BYTES;
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
     std::string storeState = "";
     bool enableCounters = false;

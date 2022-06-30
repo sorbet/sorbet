@@ -11,9 +11,6 @@ using namespace std;
 namespace sorbet {
 constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
-// This configured both maximum filesystem db size and max virtual memory usage
-// Needs to be a multiple of getpagesize(2) which is 4096 by default on macOS and Linux
-constexpr size_t MAX_DB_SIZE_BYTES = 4L * 1024 * 1024 * 1024; // 4 GiB
 struct KeyValueStore::DBState {
     MDB_env *env;
 };
@@ -72,7 +69,7 @@ bool hasNoOutstandingReaders(MDB_env *env) {
 }
 } // namespace
 
-KeyValueStore::KeyValueStore(string version, string path, string flavor)
+KeyValueStore::KeyValueStore(string version, string path, string flavor, size_t maxSize)
     : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()) {
     ENFORCE(!this->version.empty());
     bool expected = false;
@@ -84,7 +81,7 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor)
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_env_set_mapsize(dbState->env, MAX_DB_SIZE_BYTES);
+    rc = mdb_env_set_mapsize(dbState->env, maxSize);
     if (rc != 0) {
         goto fail;
     }

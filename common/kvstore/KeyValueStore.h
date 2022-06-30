@@ -41,7 +41,7 @@ public:
      * `KeyValueStore`s opened with different `flavor`s will not share
      * any entries, but each will see their own set of values.
      */
-    KeyValueStore(std::string version, std::string path, std::string flavor);
+    KeyValueStore(std::string version, std::string path, std::string flavor, size_t maxSize);
     ~KeyValueStore() noexcept(false);
 
     // Used in tests to assert that OwnedKeyValueStore cleans up reader transactions.

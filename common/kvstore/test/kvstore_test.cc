@@ -18,17 +18,18 @@ TEST_CASE("kvstore") {
     const string directory(absl::StripAsciiWhitespace(exec("mktemp -d")));
     const auto sink = make_shared<spdlog::sinks::null_sink_mt>();
     const auto logger = make_shared<spdlog::logger>("null", sink);
+    auto maxSize = 4096 * 10;
 
     SUBCASE("CommitsChangesToDisk") {
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             owned->writeString("hello", "testing");
             CHECK_EQ(owned->readString("hello"), "testing");
             OwnedKeyValueStore::bestEffortCommit(*logger, move(owned));
         }
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             CHECK_EQ(owned->readString("hello"), "testing");
         }
@@ -36,20 +37,20 @@ TEST_CASE("kvstore") {
 
     SUBCASE("AbortsChangesByDefault") {
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             owned->writeString("hello", "testing");
             CHECK_EQ(owned->readString("hello"), "testing");
         }
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             CHECK_EQ(owned->readString("hello"), nullopt);
         }
     }
 
     SUBCASE("CanBeReowned") {
-        auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+        auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
         auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
         owned->writeString("hello", "testing");
         CHECK_EQ(owned->readString("hello"), "testing");
@@ -59,7 +60,7 @@ TEST_CASE("kvstore") {
     }
 
     SUBCASE("AbortsChangesWhenAborted") {
-        auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+        auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
         auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
         owned->writeString("hello", "testing");
         CHECK_EQ(owned->readString("hello"), "testing");
@@ -70,14 +71,14 @@ TEST_CASE("kvstore") {
 
     SUBCASE("ClearsChangesOnVersionChange") {
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             owned->writeString("hello", "testing");
             CHECK_EQ(owned->readString("hello"), "testing");
             OwnedKeyValueStore::bestEffortCommit(*logger, move(owned));
         }
         {
-            auto kvstore = make_unique<KeyValueStore>("2", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("2", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             CHECK_EQ(owned->readString("hello"), nullopt);
         }
@@ -85,26 +86,26 @@ TEST_CASE("kvstore") {
 
     SUBCASE("FlavorsHaveDifferentContents") {
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             owned->writeString("hello", "testing");
             CHECK_EQ(owned->readString("hello"), "testing");
             OwnedKeyValueStore::bestEffortCommit(*logger, move(owned));
         }
         {
-            auto kvstore = make_unique<KeyValueStore>("1", directory, "coldbrewcoffeewithchocolateflakes");
+            auto kvstore = make_unique<KeyValueStore>("1", directory, "coldbrewcoffeewithchocolateflakes", maxSize);
             auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
             CHECK_EQ(owned->readString("hello"), nullopt);
         }
     }
 
     SUBCASE("CannotCreateTwoKvstores") {
-        auto kvstore1 = make_unique<KeyValueStore>("1", directory, "vanilla");
-        CHECK_THROWS_AS(make_unique<KeyValueStore>("1", directory, "vanilla"), std::invalid_argument);
+        auto kvstore1 = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
+        CHECK_THROWS_AS(make_unique<KeyValueStore>("1", directory, "vanilla", maxSize), std::invalid_argument);
     }
 
     SUBCASE("LeavesNoStaleTransactions") {
-        auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla");
+        auto kvstore = make_unique<KeyValueStore>("1", directory, "vanilla", maxSize);
         auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
         absl::Notification readFinished;
         absl::Notification testFinished;
