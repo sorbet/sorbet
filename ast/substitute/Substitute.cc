@@ -40,21 +40,6 @@ private:
         }
     }
 
-    core::NameRef unwrapLiteralToName(ExpressionPtr &arg) {
-        auto *literal = cast_tree<Literal>(arg);
-        if (literal == nullptr) {
-            return core::NameRef::noName();
-        }
-
-        if (literal->isString()) {
-            return literal->asString();
-        } else if (literal->isSymbol()) {
-            return literal->asSymbol();
-        } else {
-            return core::NameRef::noName();
-        }
-    }
-
 public:
     SubstWalk(T &subst) : subst(subst) {}
 
@@ -96,49 +81,26 @@ public:
     }
 
     void preTransformSend(core::MutableContext ctx, ExpressionPtr &original) {
-        auto &send = cast_tree_nonnull<Send>(original);
-        if (send.fun == core::Names::aliasMethod()) {
-            // This is basically a MethodDef in disguise, so we have to do similar logic to record
-            // the names that the MethodDef case would.
-
-            // Discards the new name. We only care to do this for the side effect of recording the entry in
-            // acc.symbols in the NameSubstitution. When the tree traversal actually visits the arg
-            // nodes, they will get substituted like normal.
-            if (send.numPosArgs() > 0) {
-                auto name = unwrapLiteralToName(send.getPosArg(0));
-                if (name.exists()) {
-                    [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
-                }
-            }
-            if (send.numPosArgs() > 1) {
-                auto name = unwrapLiteralToName(send.getPosArg(1));
-                if (name.exists()) {
-                    [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
-                }
-            }
-        }
-
-        send.fun = subst.substituteSymbolName(send.fun);
+        cast_tree_nonnull<Send>(original).fun = subst.substituteSymbolName(cast_tree_nonnull<Send>(original).fun);
     }
 
     void postTransformLiteral(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<Literal>(tree);
-        auto nameRef = unwrapLiteralToName(tree);
-        if (!nameRef.exists()) {
-            return;
-        }
-        auto newName = subst.substitute(nameRef);
-
-        if (newName == nameRef) {
-            return;
-        }
-
         if (original.isString()) {
-            original.value = core::make_type<core::NamedLiteralType>(core::Symbols::String(), newName);
-        } else if (original.isSymbol()) {
-            original.value = core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), newName);
-        } else {
-            ENFORCE(false, "Should be guaranteed by unwrapLiteralToName");
+            auto nameRef = original.asString();
+            auto newName = subst.substitute(nameRef);
+            if (nameRef != newName) {
+                original.value = core::make_type<core::NamedLiteralType>(core::Symbols::String(), newName);
+            }
+            return;
+        }
+        if (original.isSymbol()) {
+            auto nameRef = original.asSymbol();
+            auto newName = subst.substitute(nameRef);
+            if (newName != nameRef) {
+                original.value = core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), newName);
+            }
+            return;
         }
     }
 

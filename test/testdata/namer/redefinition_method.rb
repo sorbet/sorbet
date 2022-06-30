@@ -7,9 +7,9 @@ class Main
         a
     end
 
-    def foo(a, b) # error: Method `Main#foo` redefined without matching argument count. Expected: `1`, got: `2`
+    def foo(a, b) # error: redefined
     end
 
-    def foo(a, b, c) # error: Method `Main#foo` redefined without matching argument count. Expected: `2`, got: `3`
+    def foo(a, b, c) # error: redefined
     end
 end
