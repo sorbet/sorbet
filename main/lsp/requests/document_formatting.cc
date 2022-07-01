@@ -102,9 +102,8 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
                 response->result = move(result);
                 break;
             case RubyfmtStatus::SYNTAX_ERROR:
-                response->error = make_unique<ResponseError>(
-                    (int)LSPErrorCodes::RequestFailed,
-                    fmt::format("`rubyfmt` could not format {} because it contains syntax errors.", path));
+                // result is already JSONNullObject, so return null
+                response->result = move(result);
                 break;
             case RubyfmtStatus::RIPPER_PARSE_FAILURE:
                 displayError(fmt::format("`rubyfmt` failed to deserialize the parse tree from Ripper for {}.\n"
