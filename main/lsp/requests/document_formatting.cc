@@ -69,7 +69,16 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
     vector<unique_ptr<TextEdit>> edits;
 
     auto path = config.remoteName2Local(params->textDocument->uri);
-    auto sourceView = readFile(preprocessor, path);
+
+    auto maybeFileContents = preprocessor.maybeGetFileContents(path);
+    string_view sourceView;
+    if (maybeFileContents.has_value()) {
+        sourceView = maybeFileContents.value();
+    } else {
+        // In this case, the request is for a file that's
+        // not open in the IDE, so we read it from disk instead
+        sourceView = sorbet::FileOps::read(path);
+    }
 
     if (!sourceView.empty()) {
         auto originalLineCount = findLineBreaks(sourceView).size() - 1;
@@ -131,17 +140,6 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
 
     config.output->write(move(response));
     return;
-}
-
-string_view DocumentFormattingTask::readFile(LSPPreprocessor &preprocessor, string_view uri) {
-    auto contents = preprocessor.getFileContents(uri, false);
-    // `getFileContents` uses `openFiles` from the preprocessor, but technically
-    // the LSP can send formatting requests for unopened files, so in that case
-    // we read from disk
-    if (contents.empty()) {
-        return std::move(sorbet::FileOps::read(uri));
-    }
-    return contents;
 }
 
 // Since finalPhase is `preprocess`, this method should never be called.

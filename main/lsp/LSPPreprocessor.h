@@ -105,6 +105,12 @@ class LSPPreprocessor final {
     std::unique_ptr<SorbetWorkspaceEditParams>
     canonicalizeEdits(uint32_t v, std::unique_ptr<WatchmanQueryResponse> queryResponse) const;
 
+    /**
+     * Get the current contents of the file at the given path. Returns "" (empty string view) if file does not yet
+     * exist.
+     */
+    std::string_view getFileContents(std::string_view path) const;
+
     bool ensureInitialized(const LSPMethod forMethod, const LSPMessage &msg) const;
 
     std::unique_ptr<LSPTask> getTaskForMessage(LSPMessage &msg);
@@ -150,10 +156,9 @@ public:
     void exit(int exitCode);
 
     /**
-     * Get the current contents of the file at the given path. Returns "" (empty string view) if file does not yet
-     * exist.
+     * Get the current contents of the file at the given path if it is in `openFiles`.
      */
-    std::string_view getFileContents(std::string_view path, bool enforceFileExists) const;
+    std::optional<std::string_view> maybeGetFileContents(std::string_view path) const;
 
     std::unique_ptr<Joinable> runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex);
 };

@@ -80,13 +80,23 @@ LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr
     : config(move(config)), taskQueue(std::move(taskQueue)), owner(this_thread::get_id()),
       nextVersion(initialVersion + 1) {}
 
-string_view LSPPreprocessor::getFileContents(string_view path, bool enforceFileExists) const {
-    auto it = openFiles.find(path);
-    if (it == openFiles.end()) {
-        ENFORCE(!enforceFileExists, "Editor sent a change request without a matching open request.");
+string_view LSPPreprocessor::getFileContents(string_view path) const {
+    auto maybeFileContents = maybeGetFileContents(path);
+    if (!maybeFileContents.has_value()) {
+        ENFORCE(false, "Editor sent a change request without a matching open request.");
         return string_view();
     }
-    return it->second->source();
+    return maybeFileContents.value();
+}
+
+optional<string_view> LSPPreprocessor::maybeGetFileContents(string_view path) const {
+    auto it = openFiles.find(path);
+    optional<string_view> result;
+    if (it == openFiles.end()) {
+        return result;
+    }
+    result = it->second->source();
+    return result;
 }
 
 void LSPPreprocessor::mergeFileChanges() {
@@ -360,7 +370,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidChangeTextDocumentP
     if (config->isUriInWorkspace(uri)) {
         string localPath = config->remoteName2Local(uri);
         if (!config->isFileIgnored(localPath)) {
-            string fileContents = changeParams->getSource(getFileContents(localPath, true));
+            string fileContents = changeParams->getSource(getFileContents(localPath));
             auto fileType = core::File::Type::Normal;
             auto &slot = openFiles[localPath];
             auto file = make_shared<core::File>(move(localPath), move(fileContents), fileType, v);
