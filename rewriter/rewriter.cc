@@ -29,6 +29,7 @@
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TestCase.h"
+#include "rewriter/TypeAssertion.h"
 #include "rewriter/TypeMembers.h"
 
 using namespace std;
@@ -184,6 +185,10 @@ public:
         if (auto expr = SelfNew::run(ctx, send)) {
             tree = std::move(expr);
             return;
+        }
+
+        if (auto expr = TypeAssertion::run(ctx, send)) {
+            tree = std::move(expr);
         }
 
         if (SigRewriter::run(ctx, send)) {
