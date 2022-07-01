@@ -1,4 +1,6 @@
 #include "main/lsp/requests/document_formatting.h"
+#include "common/FileOps.h"
+#include "common/common.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
@@ -11,9 +13,9 @@ DocumentFormattingTask::DocumentFormattingTask(const LSPConfiguration &config, M
                                                std::unique_ptr<DocumentFormattingParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentFormatting), params(move(params)) {}
 
-// Processed on the index thread so it doesn't wait for typechecking.
+// Processed on the preprocess thread so it doesn't wait for typechecking.
 LSPTask::Phase DocumentFormattingTask::finalPhase() const {
-    return Phase::INDEX;
+    return Phase::PREPROCESS;
 }
 
 enum RubyfmtStatus {
@@ -53,7 +55,7 @@ void DocumentFormattingTask::displayError(string errorMessage, unique_ptr<Respon
         "2.0", LSPMethod::WindowShowMessage, make_unique<ShowMessageParams>(MessageType::Error, errorMessage)));
 }
 
-void DocumentFormattingTask::index(LSPIndexer &index) {
+void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentFormatting);
     if (!config.opts.lspDocumentFormatRubyfmtEnabled) {
         response->error = make_unique<ResponseError>(
@@ -64,12 +66,22 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
     }
 
     variant<JSONNullObject, vector<unique_ptr<TextEdit>>> result = JSONNullObject();
+    vector<unique_ptr<TextEdit>> edits;
 
-    auto fref = index.uri2FileRef(params->textDocument->uri);
-    if (fref.exists()) {
-        vector<unique_ptr<TextEdit>> edits;
+    auto path = config.remoteName2Local(params->textDocument->uri);
 
-        auto sourceView = index.getFile(fref).source();
+    auto maybeFileContents = preprocessor.maybeGetFileContents(path);
+    string_view sourceView;
+    if (maybeFileContents.has_value()) {
+        sourceView = maybeFileContents.value();
+    } else {
+        // In this case, the request is for a file that's
+        // not open in the IDE, so we read it from disk instead
+        sourceView = sorbet::FileOps::read(path);
+    }
+
+    if (!sourceView.empty()) {
+        auto originalLineCount = findLineBreaks(sourceView).size() - 1;
         auto process = subprocess::Popen({config.opts.rubyfmtPath}, subprocess::output{subprocess::PIPE},
                                          subprocess::input{subprocess::PIPE});
         auto processResponse = process.communicate(vector<char>(sourceView.begin(), sourceView.end()));
@@ -83,34 +95,32 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
                 // Construct text edit to replace entire document.
                 // Note: VS Code uses 0-indexed lines, so the lineCount will be one more line than the size of the
                 // doc.
-                edits.emplace_back(
-                    make_unique<TextEdit>(make_unique<Range>(make_unique<Position>(0, 0),
-                                                             make_unique<Position>(index.getFile(fref).lineCount(), 0)),
-                                          formattedContents));
+                edits.emplace_back(make_unique<TextEdit>(
+                    make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(originalLineCount, 0)),
+                    formattedContents));
                 result = move(edits);
                 response->result = move(result);
                 break;
             case RubyfmtStatus::SYNTAX_ERROR:
-                displayError(fmt::format("`rubyfmt` could not format {} because it contains syntax errors.",
-                                         index.getFile(fref).path()),
-                             response);
+                // result is already JSONNullObject, so return null
+                response->result = move(result);
                 break;
             case RubyfmtStatus::RIPPER_PARSE_FAILURE:
                 displayError(fmt::format("`rubyfmt` failed to deserialize the parse tree from Ripper for {}.\n"
                                          "This is valid Ruby but represents a bug in `rubyfmt`.",
-                                         index.getFile(fref).path()),
+                                         path),
                              response);
                 break;
             case RubyfmtStatus::IO_ERROR:
                 displayError(fmt::format("`rubyfmt` encountered an IO error while writing {}.\n"
                                          "This is likely a bug in `rubyfmt`.",
-                                         index.getFile(fref).path()),
+                                         path),
                              response);
                 break;
             case RubyfmtStatus::OTHER_RUBY_ERROR:
                 displayError(fmt::format("`rubyfmt` encountered a ruby error while writing {}.\n"
                                          "This is likely a bug in `rubyfmt`.",
-                                         index.getFile(fref).path()),
+                                         path),
                              response);
                 break;
             case RubyfmtStatus::INITIALIZE_ERROR:
@@ -126,6 +136,7 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
                 break;
         }
     }
+
     config.output->write(move(response));
     return;
 }

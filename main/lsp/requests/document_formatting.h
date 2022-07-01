@@ -14,7 +14,7 @@ public:
 
     Phase finalPhase() const override;
 
-    void index(LSPIndexer &index) override;
+    void preprocess(LSPPreprocessor &preprocessor) override;
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
 

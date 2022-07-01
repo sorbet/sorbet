@@ -81,12 +81,22 @@ LSPPreprocessor::LSPPreprocessor(shared_ptr<LSPConfiguration> config, shared_ptr
       nextVersion(initialVersion + 1) {}
 
 string_view LSPPreprocessor::getFileContents(string_view path) const {
-    auto it = openFiles.find(path);
-    if (it == openFiles.end()) {
+    auto maybeFileContents = maybeGetFileContents(path);
+    if (!maybeFileContents.has_value()) {
         ENFORCE(false, "Editor sent a change request without a matching open request.");
         return string_view();
     }
-    return it->second->source();
+    return maybeFileContents.value();
+}
+
+optional<string_view> LSPPreprocessor::maybeGetFileContents(string_view path) const {
+    auto it = openFiles.find(path);
+    optional<string_view> result;
+    if (it == openFiles.end()) {
+        return result;
+    }
+    result = it->second->source();
+    return result;
 }
 
 void LSPPreprocessor::mergeFileChanges() {

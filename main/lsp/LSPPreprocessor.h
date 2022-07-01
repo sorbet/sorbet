@@ -155,6 +155,11 @@ public:
      */
     void exit(int exitCode);
 
+    /**
+     * Get the current contents of the file at the given path if it is in `openFiles`.
+     */
+    std::optional<std::string_view> maybeGetFileContents(std::string_view path) const;
+
     std::unique_ptr<Joinable> runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex);
 };
 
