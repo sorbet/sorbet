@@ -2002,11 +2002,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
         if (prior.exists() && prior.isFieldOrStaticField()) {
             auto priorField = prior.asFieldRef();
-            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, cast->type)) {
-                // We already have a symbol for this field, and it matches what we already saw, so we can short
-                // circuit.
-                return;
-            } else {
+            {
                 // We do some normalization here to ensure that the file / line we report the error on doesn't
                 // depend on the order that we traverse files nor the order we traverse within a file.
                 auto priorLoc = priorField.data(ctx)->loc();
