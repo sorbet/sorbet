@@ -18,6 +18,7 @@ struct FoundClass;
 struct FoundStaticField;
 struct FoundTypeMember;
 struct FoundMethod;
+struct FoundField;
 
 class FoundDefinitionRef final {
 public:
@@ -29,6 +30,7 @@ public:
         StaticField = 4,
         TypeMember = 5,
         Symbol = 6,
+        Field = 7,
     };
     CheckSize(Kind, 1, 1);
 
@@ -76,6 +78,9 @@ public:
 
     FoundTypeMember &typeMember(FoundDefinitions &foundDefs);
     const FoundTypeMember &typeMember(const FoundDefinitions &foundDefs) const;
+
+    FoundField &field(FoundDefinitions &foundDefs);
+    const FoundField &field(const FoundDefinitions &foundDefs) const;
 
     core::SymbolRef symbol() const;
 
@@ -184,6 +189,20 @@ struct FoundModifier {
 };
 CheckSize(FoundModifier, 24, 4);
 
+struct FoundField {
+    enum class Kind : uint8_t {
+        Class,
+        Instance,
+    };
+    Kind kind;
+    FoundDefinitionRef owner;
+    core::LocOffsets loc;
+    core::NameRef name;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
+};
+CheckSize(FoundField, 20, 4);
+
 class FoundDefinitions final {
     // Contains references to items in _klasses, _staticFields, and _typeMembers.
     // Used to determine the order in which symbols are defined in SymbolDefiner.
@@ -202,12 +221,15 @@ class FoundDefinitions final {
     std::vector<FoundTypeMember> _typeMembers;
     // Contains all method and class modifiers (e.g. private/public/protected).
     std::vector<FoundModifier> _modifiers;
+    // Contains all class and instance variables defined in the file.
+    std::vector<FoundField> _fields;
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
             case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::StaticField:
             case FoundDefinitionRef::Kind::TypeMember:
+            case FoundDefinitionRef::Kind::Field:
                 break;
             case FoundDefinitionRef::Kind::Method:
             case FoundDefinitionRef::Kind::ClassRef:
@@ -253,6 +275,12 @@ public:
         return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::TypeMember, idx));
     }
 
+    FoundDefinitionRef addField(FoundField &&field) {
+        const uint32_t idx = _fields.size();
+        _fields.emplace_back(std::move(field));
+        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Field, idx));
+    }
+
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
         return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.rawId());
     }
@@ -279,6 +307,11 @@ public:
     // See documentation on _modifiers
     const std::vector<FoundModifier> &modifiers() const {
         return _modifiers;
+    }
+
+    // See documentation on _fields
+    const std::vector<FoundField> &fields() const {
+        return _fields;
     }
 
     friend FoundDefinitionRef;
