@@ -531,6 +531,7 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::Method:
             case core::FoundDefinitionRef::Kind::StaticField:
             case core::FoundDefinitionRef::Kind::TypeMember:
+            case core::FoundDefinitionRef::Kind::Field:
                 Exception::raise("Invalid name reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
         }
     }
@@ -550,6 +551,7 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::StaticField:
             case core::FoundDefinitionRef::Kind::TypeMember:
+            case core::FoundDefinitionRef::Kind::Field:
                 Exception::raise("Invalid owner reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
         }
     }
@@ -1241,6 +1243,7 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::Method:
             case core::FoundDefinitionRef::Kind::Symbol:
+            case core::FoundDefinitionRef::Kind::Field:
                 ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
                 break;
         }
