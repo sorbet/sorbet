@@ -488,6 +488,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<string>()->default_value(empty.storeState), "file");
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(empty.cacheDir), "dir");
+    options.add_options("dev")("max-cache-size-bytes",
+                               "Must be a multiple of OS page size. Subject to restrictions on mdb_env_set_mapsize "
+                               "function in LMDB API docs.",
+                               cxxopts::value<size_t>()->default_value(to_string(empty.maxCacheSizeBytes)), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
 
     int defaultThreads = thread::hardware_concurrency();
@@ -782,6 +786,7 @@ void readOptions(Options &opts,
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
 
         opts.cacheDir = raw["cache-dir"].as<string>();
+        opts.maxCacheSizeBytes = raw["max-cache-size-bytes"].as<size_t>();
         if (!extractPrinters(raw, opts, logger)) {
             throw EarlyReturnWithCode(1);
         }

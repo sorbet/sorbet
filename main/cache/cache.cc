@@ -13,7 +13,8 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &
         return nullptr;
     }
     return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
-                                                                      opts.skipRewriterPasses ? "nodsl" : "default"));
+                                                                      opts.skipRewriterPasses ? "nodsl" : "default",
+                                                                      opts.maxCacheSizeBytes));
 }
 
 unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {

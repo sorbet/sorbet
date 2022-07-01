@@ -12,7 +12,7 @@ struct OwnedKeyValueStore::TxnState {};
     throw invalid_argument(string(what));
 }
 
-KeyValueStore::KeyValueStore(string version, string path, string flavor)
+KeyValueStore::KeyValueStore(string version, string path, string flavor, size_t maxSize)
     : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()) {
     throw_mdb_error("creating databases isn't supported on emscripten"sv, 0);
 }
