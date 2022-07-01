@@ -2061,7 +2061,9 @@ class ResolveTypeMembersAndFieldsWalk {
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
         if (prior.exists() && prior.isFieldOrStaticField()) {
             auto priorField = prior.asFieldRef();
-            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
+            if (priorField.data(ctx)->resultType == core::Types::todo()) {
+                // This was previously entered by namer and we are now resolving the type.
+            } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
                 // We already have a symbol for this field, and it matches what we already saw, so we can short
                 // circuit.
                 return;
