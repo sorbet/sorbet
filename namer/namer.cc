@@ -196,23 +196,26 @@ public:
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         core::FoundMethod foundMethod;
-        foundMethod.owner = getOwner();
+        core::FoundDefinitionRef owner = getOwner();
+        foundMethod.owner = owner;
         foundMethod.name = method.name;
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
-        foundDefs->addMethod(move(foundMethod));
+        auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
         // visibility modifiers.
+        ownerStack.emplace_back(def);
         methodVisiStack.emplace_back(nullopt);
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         methodVisiStack.pop_back();
+        ownerStack.pop_back();
     }
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1127,9 +1130,6 @@ class SymbolDefiner {
     }
 
     core::FieldRef insertField(core::MutableContext ctx, const core::FoundField &field) {
-        // TODO(froydnj): resolver handles this as an error, so maybe we can't enforce this?
-        ENFORCE(ctx.owner.isClassOrModule());
-
         core::ClassOrModuleRef scope;
 
         // resolver checks a whole bunch of various error conditions here; we just want to
@@ -1387,7 +1387,11 @@ public:
         definedMethods.reserve(foundDefs.methods().size());
 
         for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            defineNonDeletableSingle(ctx, ref);
+            // We say that the "owner" of fields declared in methods is the method itself.
+            // This is consistent with how we define the owner of contexts during treewalks.
+            if (ref.kind() != core::FoundDefinitionRef::Kind::Field) {
+                defineNonDeletableSingle(ctx, ref);
+            }
         }
 
         // This currently interleaves deleting and defining across files.
@@ -1412,6 +1416,12 @@ public:
                 continue;
             }
             definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+        }
+
+        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+            if (ref.kind() == core::FoundDefinitionRef::Kind::Field) {
+                defineNonDeletableSingle(ctx, ref);
+            }
         }
 
         for (const auto &modifier : foundDefs.modifiers()) {

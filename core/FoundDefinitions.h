@@ -259,8 +259,10 @@ public:
         return FoundDefinitionRef(FoundDefinitionRef::Kind::ClassRef, idx);
     }
 
-    void addMethod(FoundMethod &&method) {
+    FoundDefinitionRef addMethod(FoundMethod &&method) {
+        const uint32_t idx = _methods.size();
         _methods.emplace_back(std::move(method));
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Method, idx);
     }
 
     FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
