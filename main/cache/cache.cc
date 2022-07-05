@@ -8,11 +8,12 @@
 using namespace std;
 
 namespace sorbet::realmain::cache {
-unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &opts) {
+unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::logger> logger,
+                                                        const options::Options &opts) {
     if (opts.cacheDir.empty()) {
         return nullptr;
     }
-    return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(sorbet_full_version_string, opts.cacheDir,
+    return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(logger, sorbet_full_version_string, opts.cacheDir,
                                                                       opts.skipRewriterPasses ? "nodsl" : "default",
                                                                       opts.maxCacheSizeBytes));
 }

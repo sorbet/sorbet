@@ -22,6 +22,7 @@ class KeyValueStore final {
     const std::string flavor;
     struct DBState;
     const std::unique_ptr<DBState> dbState;
+    const std::shared_ptr<spdlog::logger> logger;
 
 public:
     /**
@@ -41,7 +42,8 @@ public:
      * `KeyValueStore`s opened with different `flavor`s will not share
      * any entries, but each will see their own set of values.
      */
-    KeyValueStore(std::string version, std::string path, std::string flavor, size_t maxSize);
+    KeyValueStore(std::shared_ptr<spdlog::logger> logger, std::string version, std::string path, std::string flavor,
+                  size_t maxSize);
     ~KeyValueStore() noexcept(false);
 
     // Used in tests to assert that OwnedKeyValueStore cleans up reader transactions.
