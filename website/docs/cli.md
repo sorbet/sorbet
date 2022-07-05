@@ -16,12 +16,11 @@ line:
 ```
 
 In this doc, we'll cover **only** the command line interface to the `srb tc`
-subcommand. For information about `srb init` and `srb rbi`, see
-[RBI files](rbi.md).
+subcommand. For information about `tapioca` and `srb`, see [RBI files](rbi.md).
 
 ## Config file
 
-The first time `srb init` runs, it creates a config file that `srb tc` will
+The first time `tapioca init` runs, it creates a config file that `srb tc` will
 read, located at `sorbet/config`. The config file is actually just a
 newline-separated list of arguments to pass to `srb tc`, the same as if they'd
 been passed at the command line.
