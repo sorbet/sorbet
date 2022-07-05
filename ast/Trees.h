@@ -70,6 +70,7 @@ enum class Tag {
 template <typename T> struct ExpressionToTag;
 
 class EmptyTree;
+class TreeCopier;
 
 class ExpressionPtr {
 public:
@@ -91,6 +92,7 @@ private:
     tagged_storage ptr;
 
     template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
+    friend class TreeCopier;
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
         ENFORCE(static_cast<size_t>(tag) != 0);
@@ -377,6 +379,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+ private:
+    friend TreeCopier;
+    ClassDef(const void *avoid, const ClassDef *from);
 };
 CheckSize(ClassDef, 120, 8);
 
@@ -406,6 +411,10 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+
+ private:
+    friend TreeCopier;
+    MethodDef(const void *avoid, const MethodDef *exp);
 };
 CheckSize(MethodDef, 64, 8);
 
@@ -426,6 +435,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+ private:
+    friend TreeCopier;
+    If(const void *avoid, const If *exp);
 };
 CheckSize(If, 32, 8);
 
@@ -445,6 +457,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    While(const void *avoid, const While *exp);
 };
 CheckSize(While, 24, 8);
 
@@ -463,6 +478,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Break(const void *avoid, const Break *exp);
 };
 CheckSize(Break, 16, 8);
 
@@ -479,6 +497,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Retry(const void *avoid, const Retry *exp);
 };
 CheckSize(Retry, 8, 8);
 
@@ -497,6 +518,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Next(const void *avoid, const Next *exp);
 };
 CheckSize(Next, 16, 8);
 
@@ -515,6 +539,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Return(const void *avoid, const Return *exp);
 };
 CheckSize(Return, 16, 8);
 
@@ -541,6 +568,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    RescueCase(const void *avoid, const RescueCase *exp);
 };
 CheckSize(RescueCase, 48, 8);
 
@@ -566,6 +596,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Rescue(const void *avoid, const Rescue *exp);
 };
 CheckSize(Rescue, 56, 8);
 
@@ -584,6 +617,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Local(const void *avoid, const Local *exp);
 };
 CheckSize(Local, 16, 8);
 
@@ -609,6 +645,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    UnresolvedIdent(const void *avoid, const UnresolvedIdent *exp);
 };
 CheckSize(UnresolvedIdent, 16, 8);
 
@@ -627,6 +666,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    RestArg(const void *avoid, const RestArg *exp);
 };
 CheckSize(RestArg, 16, 8);
 
@@ -645,6 +687,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    KeywordArg(const void *avoid, const KeywordArg *exp);
 };
 CheckSize(KeywordArg, 16, 8);
 
@@ -664,6 +709,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    OptionalArg(const void *avoid, const OptionalArg *exp);
 };
 CheckSize(OptionalArg, 24, 8);
 
@@ -682,6 +730,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    BlockArg(const void *avoid, const BlockArg *exp);
 };
 CheckSize(BlockArg, 16, 8);
 
@@ -700,6 +751,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    ShadowArg(const void *avoid, const ShadowArg *exp);
 };
 CheckSize(ShadowArg, 16, 8);
 
@@ -719,6 +773,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Assign(const void *avoid, const Assign *exp);
 };
 CheckSize(Assign, 24, 8);
 
@@ -941,6 +998,9 @@ public:
     ExpressionPtr withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun);
 
     void _sanityCheck();
+ private:
+    friend TreeCopier;
+    Send(const void *avoid, const Send *exp);
 };
 CheckSize(Send, 56, 8);
 
@@ -963,6 +1023,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Cast(const void *avoid, const Cast *exp);
 };
 CheckSize(Cast, 32, 8);
 
@@ -985,6 +1048,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Hash(const void *avoid, const Hash *exp);
 };
 CheckSize(Hash, 56, 8);
 
@@ -1006,6 +1072,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Array(const void *avoid, const Array *exp);
 };
 CheckSize(Array, 48, 8);
 
@@ -1031,6 +1100,9 @@ public:
     bool isFalse(const core::GlobalState &gs) const;
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Literal(const void *avoid, const Literal *exp);
 };
 CheckSize(Literal, 16, 8);
 
@@ -1050,6 +1122,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    UnresolvedConstantLit(const void *avoid, const UnresolvedConstantLit *exp);
 };
 CheckSize(UnresolvedConstantLit, 24, 8);
 
@@ -1076,6 +1151,9 @@ public:
         const core::GlobalState &gs) const;
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    ConstantLit(const void *avoid, const ConstantLit *exp);
 };
 CheckSize(ConstantLit, 32, 8);
 
@@ -1093,6 +1171,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    ZSuperArgs(const void *avoid, const ZSuperArgs *exp);
 };
 CheckSize(ZSuperArgs, 8, 8);
 
@@ -1111,6 +1192,9 @@ public:
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    Block(const void *avoid, const Block *exp);
 };
 CheckSize(Block, 40, 8);
 
@@ -1135,6 +1219,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    InsSeq(const void *avoid, const InsSeq *exp);
 };
 CheckSize(InsSeq, 56, 8);
 
@@ -1155,6 +1242,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    RuntimeMethodDefinition(const void *avoid, const RuntimeMethodDefinition *exp);
 };
 CheckSize(RuntimeMethodDefinition, 16, 8);
 
@@ -1171,6 +1261,9 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
+private:
+    friend TreeCopier;
+    EmptyTree(const void *avoid, const EmptyTree *exp);
 };
 CheckSize(EmptyTree, 8, 8);
 
