@@ -9,7 +9,6 @@
 
 using namespace std;
 namespace sorbet {
-constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 struct KeyValueStore::DBState {
     MDB_env *env;
@@ -131,9 +130,6 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     // Writer thread may have changed; reset the primary transaction.
     refreshMainTransaction();
     {
-        if (read(OLD_VERSION_KEY).data != nullptr) { // remove databases that use old(non-string) versioning scheme.
-            clearAll();
-        }
         auto dbVersion = readString(VERSION_KEY);
         if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
             clearAll();
