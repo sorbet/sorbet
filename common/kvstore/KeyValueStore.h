@@ -71,6 +71,8 @@ class OwnedKeyValueStore final {
     int commit();
     void abort() const;
 
+    std::string_view kvstorePath() const;
+
 public:
     OwnedKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
     ~OwnedKeyValueStore();

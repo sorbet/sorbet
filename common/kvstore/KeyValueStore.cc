@@ -22,8 +22,10 @@ struct OwnedKeyValueStore::TxnState {
 };
 
 namespace {
-static void throw_mdb_error(string_view what, int err) {
-    fmt::print(stderr, "mdb error: {}: {}\n", what, mdb_strerror(err));
+
+[[noreturn]] void throw_mdb_error(string_view what, int err, string_view path) {
+    fmt::print(stderr, "sorbet mdb error: what=\"{}\" mdb_error=\"{}\" cache_path=\"{}\"", what, mdb_strerror(err),
+               path);
     throw invalid_argument(string(what));
 }
 
@@ -46,7 +48,7 @@ int mdbReaderListCallback(const char *msg, void *ctx) {
     return 0;
 }
 
-bool hasNoOutstandingReaders(MDB_env *env) {
+bool hasNoOutstandingReaders(MDB_env *env, string_view path) {
     string ctxString;
     /*
      * LMDB only has two APIs to grok the reader list
@@ -63,7 +65,7 @@ bool hasNoOutstandingReaders(MDB_env *env) {
      */
     const int err = mdb_reader_list(env, mdbReaderListCallback, &ctxString);
     if (err < 0) {
-        throw_mdb_error("Failure checking for stale readers", err);
+        throw_mdb_error("Failure checking for stale readers", err, path);
     }
     return ctxString.find("(no active readers)") != string::npos;
 }
@@ -74,7 +76,7 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor, size_t 
     ENFORCE(!this->version.empty());
     bool expected = false;
     if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
-        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);
     }
 
     int rc = mdb_env_create(&dbState->env);
@@ -108,18 +110,18 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor, size_t 
     }
     return;
 fail:
-    throw_mdb_error("failed to create database"sv, rc);
+    throw_mdb_error("failed to create database"sv, rc, path);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
     mdb_env_close(dbState->env);
     bool expected = true;
     if (!kvstoreInUse.compare_exchange_strong(expected, false)) {
-        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0);
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);
     }
 }
 
 void KeyValueStore::enforceNoOutstandingReaders() const {
-    ENFORCE(hasNoOutstandingReaders(dbState->env));
+    ENFORCE(hasNoOutstandingReaders(dbState->env, path));
 }
 
 OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
@@ -146,7 +148,7 @@ void OwnedKeyValueStore::abort() const {
     }
 
     if (writerId != this_thread::get_id()) {
-        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
     for (auto &txn : txnState->readers) {
@@ -165,7 +167,7 @@ int OwnedKeyValueStore::commit() {
     }
 
     if (writerId != this_thread::get_id()) {
-        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
     int rc = 0;
@@ -179,13 +181,23 @@ int OwnedKeyValueStore::commit() {
     return rc;
 }
 
+std::string_view OwnedKeyValueStore::kvstorePath() const {
+    ENFORCE(kvstore != nullptr);
+    // This is used in error handling code, so we want to degrade gracefully if the ENFORCE is broken.
+    if (kvstore == nullptr) {
+        return "";
+    } else {
+        return kvstore->path;
+    }
+}
+
 OwnedKeyValueStore::~OwnedKeyValueStore() {
     abort();
 }
 
 void OwnedKeyValueStore::writeInternal(std::string_view key, void *value, size_t len) {
     if (writerId != this_thread::get_id()) {
-        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
     MDB_val kv;
@@ -197,7 +209,7 @@ void OwnedKeyValueStore::writeInternal(std::string_view key, void *value, size_t
 
     int rc = mdb_put(txnState->txn, txnState->dbi, &kv, &dv, 0);
     if (rc != 0) {
-        throw_mdb_error("failed write into database"sv, rc);
+        throw_mdb_error("failed write into database"sv, rc, kvstorePath());
     }
 }
 
@@ -224,7 +236,7 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
         txn = txn_store;
     }
     if (rc != 0) {
-        throw_mdb_error("failed to create read transaction"sv, rc);
+        throw_mdb_error("failed to create read transaction"sv, rc, kvstorePath());
     }
 
     MDB_val kv;
@@ -236,14 +248,14 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
         if (rc == MDB_NOTFOUND) {
             return {nullptr, 0};
         }
-        throw_mdb_error("failed read from the database"sv, rc);
+        throw_mdb_error("failed read from the database"sv, rc, kvstorePath());
     }
     return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
 void OwnedKeyValueStore::clearAll() {
     if (writerId != this_thread::get_id()) {
-        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
     // -- Clear the open database --
@@ -307,7 +319,7 @@ void OwnedKeyValueStore::clearAll() {
     refreshMainTransaction();
     return;
 fail:
-    throw_mdb_error("failed to clear the database"sv, rc);
+    throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
 }
 
 optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
@@ -325,7 +337,7 @@ void OwnedKeyValueStore::writeString(string_view key, string_view value) {
 
 void OwnedKeyValueStore::refreshMainTransaction() {
     if (writerId != this_thread::get_id()) {
-        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
+        throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
     auto &dbState = *kvstore->dbState;
@@ -364,7 +376,7 @@ void OwnedKeyValueStore::refreshMainTransaction() {
     }
     return;
 fail:
-    throw_mdb_error("failed to create transaction"sv, rc);
+    throw_mdb_error("failed to create transaction"sv, rc, kvstorePath());
 }
 
 unique_ptr<KeyValueStore> OwnedKeyValueStore::abort(unique_ptr<const OwnedKeyValueStore> ownedKvstore) {
