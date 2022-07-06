@@ -4,4 +4,5 @@
 
 class Project::Foo < PackageSpec
   export Project::Foo::B
+  export Project::Foo::D
 end

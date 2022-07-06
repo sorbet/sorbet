@@ -14,7 +14,7 @@ echo "-- sanity-checking package with --stripe-packages"
   --stripe-packages \
   --max-threads=0 \
   --dump-package-info="$rbis/package-info.json" \
-  --extra-package-files-directory-prefix="${test_path}/other/" \
+  --extra-package-files-directory-prefix-underscore="${test_path}/other/" \
   "$test_path" 2>&1 || true
 
 show_output() {
@@ -38,7 +38,7 @@ find . -name __package.rb | sort | while read -r package; do
     --ignore=__package.rb \
     --package-rbi-generation \
     --package-rbi-dir="$rbis" \
-    --extra-package-files-directory-prefix="${test_path}/other/" \
+    --extra-package-files-directory-prefix-underscore="${test_path}/other/" \
     --single-package="$name" "$test_path" 2>&1 || true
 
   show_output "$name" "RBI"                   "package.rbi"

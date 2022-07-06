@@ -377,8 +377,14 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("stripe-packages-hint-message",
                                     "Optional hint message to add to packaging related errors",
                                     cxxopts::value<string>()->default_value(""));
-    options.add_options("dev")("extra-package-files-directory-prefix",
-                               "Extra parent directories which contain package files. "
+    options.add_options("dev")("extra-package-files-directory-prefix-underscore",
+                               "Extra parent directories which contain package files. These paths use an underscore "
+                               "package-munging convention, i.e. 'Project_Foo'."
+                               "This option must be used in conjunction with --stripe-packages",
+                               cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("extra-package-files-directory-prefix-slash",
+                               "Extra parent directories which contain package files. These paths use an underscore "
+                               "package-munging convention, i.e. 'project/foo'."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")(
@@ -930,16 +936,29 @@ void readOptions(Options &opts,
         }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
-        if (raw.count("extra-package-files-directory-prefix")) {
-            for (const string &dirName : raw["extra-package-files-directory-prefix"].as<vector<string>>()) {
+
+        if (raw.count("extra-package-files-directory-prefix-underscore")) {
+            for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
-                    logger->error(
-                        "--extra-package-files-directory-prefix directory path must have slash (/) at the end");
+                    logger->error("--extra-package-files-directory-prefix-underscore directory path must have slash "
+                                  "(/) at the end");
                     throw EarlyReturnWithCode(1);
                 }
-                opts.extraPackageFilesDirectoryPrefixes.emplace_back(dirName);
+                opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(dirName);
             }
         }
+
+        if (raw.count("extra-package-files-directory-prefix-slash")) {
+            for (const string &dirName : raw["extra-package-files-directory-prefix-slash"].as<vector<string>>()) {
+                if (dirName.back() != '/') {
+                    logger->error("--extra-package-files-directory-prefix-slash directory path must have slash "
+                                  "(/) at the end");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.extraPackageFilesDirectorySlashPrefixes.emplace_back(dirName);
+            }
+        }
+
         if (raw.count("secondary-test-package-namespaces")) {
             if (!opts.stripePackages) {
                 logger->error("--secondary-test-package-namespaces can only be specified in --stripe-packages mode");

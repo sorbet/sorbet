@@ -128,13 +128,24 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args=("--minimize-to-rbi=$basename.minimize.rbi")
       elif [ "$pass" = "package-tree" ]; then
         args=("--stripe-packages")
-        extra_prefixes=()
+
+        extra_underscore_prefixes=()
         while IFS='' read -r prefix; do
-          extra_prefixes+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_prefixes[@]}" -gt 0 ]; then
-          for prefix in "${extra_prefixes[@]}"; do
-            args+=("--extra-package-files-directory-prefix" "${prefix}")
+          extra_underscore_prefixes+=("$prefix")
+        done < <(grep '# extra-package-files-directory-prefix-underscore: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+        if [ "${#extra_underscore_prefixes[@]}" -gt 0 ]; then
+          for prefix in "${extra_underscore_prefixes[@]}"; do
+            args+=("--extra-package-files-directory-prefix-underscore" "${prefix}")
+          done
+        fi
+
+        extra_slash_prefixes=()
+        while IFS='' read -r prefix; do
+          extra_slash_prefixes+=("$prefix")
+        done < <(grep '# extra-package-files-directory-prefix-slash: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+        if [ "${#extra_slash_prefixes[@]}" -gt 0 ]; then
+          for prefix in "${extra_slash_prefixes[@]}"; do
+            args+=("--extra-package-files-directory-prefix-slash" "${prefix}")
           done
         fi
       fi

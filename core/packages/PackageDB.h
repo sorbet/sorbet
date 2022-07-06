@@ -54,14 +54,16 @@ public:
     PackageDB &operator=(PackageDB &&) = default;
 
     const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
-    const std::vector<std::string> &extraPackageFilesDirectoryPrefixes() const;
+    const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
+    const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
 
     const std::string_view errorHint() const;
 
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
-    std::vector<std::string> extraPackageFilesDirectoryPrefixes_;
+    std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
+    std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
 

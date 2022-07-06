@@ -409,20 +409,28 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (enablePackager) {
-        vector<std::string> extraPackageFilesDirectoryPrefixes;
+        vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+        vector<std::string> extraPackageFilesDirectorySlashPrefixes;
         vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
         vector<std::string> skipRBIExportEnforcementDirs;
 
-        auto extraDir = StringPropertyAssertion::getValue("extra-package-files-directory-prefix", assertions);
-        if (extraDir.has_value()) {
-            extraPackageFilesDirectoryPrefixes.emplace_back(extraDir.value());
+        auto extraDirUnderscore =
+            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
+        if (extraDirUnderscore.has_value()) {
+            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+        }
+
+        auto extraDirSlash =
+            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+        if (extraDirSlash.has_value()) {
+            extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
         }
 
         {
             core::UnfreezeNameTable packageNS(*gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryPrefixes,
-                                   skipRBIExportEnforcementDirs, "PACKAGE_ERROR_HINT");
+            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, {}, "PACKAGE_ERROR_HINT");
         }
 
         // Packager runs over all trees.
