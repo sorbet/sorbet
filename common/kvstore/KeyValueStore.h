@@ -68,7 +68,7 @@ class OwnedKeyValueStore final {
     mutable absl::Mutex readers_mtx;
 
     void writeInternal(std::string_view key, void *value, size_t len);
-    void clearAll();
+    void checkVersions();
     void refreshMainTransaction();
     int commit();
     void abort() const;
