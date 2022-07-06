@@ -339,6 +339,11 @@ size_t allUsedBytes(MDB_stat &stat) {
 
 } // namespace
 
+// I got the inspiration for this implementation from this answer:
+//
+//     https://stackoverflow.com/a/40527056
+//
+// Unfortunately it seems that there is not a convenient helper function for this built into the LMDB API.
 size_t OwnedKeyValueStore::cacheSize() const {
     if (writerId != this_thread::get_id()) {
         // This is mostly for simplicity. This is technically a read-only transaction, and so we
