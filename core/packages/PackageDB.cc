@@ -224,6 +224,10 @@ const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscoreP
     return extraPackageFilesDirectoryUnderscorePrefixes_;
 }
 
+const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
+    return extraPackageFilesDirectorySlashPrefixes_;
+}
+
 const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
@@ -237,6 +241,7 @@ PackageDB PackageDB::deepCopy() const {
     }
     result.secondaryTestPackageNamespaceRefs_ = this->secondaryTestPackageNamespaceRefs_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
+    result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;
     result.errorHint_ = this->errorHint_;

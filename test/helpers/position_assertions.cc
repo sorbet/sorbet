@@ -53,6 +53,7 @@ const UnorderedMap<
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
         {"extra-package-files-directory-prefix-underscore", StringPropertyAssertion::make},
+        {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"implementation", ImplementationAssertion::make},
         {"find-implementation", FindImplementationAssertion::make},
         {"show-symbol", ShowSymbolAssertion::make},
