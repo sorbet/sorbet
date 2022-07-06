@@ -9,6 +9,7 @@
 
 using namespace std;
 namespace sorbet {
+constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 struct KeyValueStore::DBState {
     MDB_env *env;
@@ -23,7 +24,7 @@ struct OwnedKeyValueStore::TxnState {
 namespace {
 
 [[noreturn]] void throw_mdb_error(string_view what, int err, string_view path) {
-    fmt::print(stderr, "sorbet mdb error: what=\"{}\" mdb_error=\"{}\" cache_path=\"{}\"\n", what, mdb_strerror(err),
+    fmt::print(stderr, "sorbet mdb error: what=\"{}\" mdb_error=\"{}\" cache_path=\"{}\"", what, mdb_strerror(err),
                path);
     throw invalid_argument(string(what));
 }
@@ -129,14 +130,16 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     : writerId(this_thread::get_id()), kvstore(move(kvstore)), txnState(make_unique<TxnState>()) {
     // Writer thread may have changed; reset the primary transaction.
     refreshMainTransaction();
-    checkVersions();
-
-    auto dbVersion = readString(VERSION_KEY);
-    if (!dbVersion.has_value()) {
-        this->kvstore->logger->trace("Writing version into cache: {}", this->kvstore->version);
-        writeString(VERSION_KEY, this->kvstore->version);
-    } else {
-        ENFORCE(dbVersion == this->kvstore->version, "checkVersions should have guaranteed this");
+    {
+        if (read(OLD_VERSION_KEY).data != nullptr) { // remove databases that use old(non-string) versioning scheme.
+            clearAll();
+        }
+        auto dbVersion = readString(VERSION_KEY);
+        if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
+            clearAll();
+            writeString(VERSION_KEY, this->kvstore->version);
+        }
+        return;
     }
 }
 
@@ -165,19 +168,13 @@ int OwnedKeyValueStore::commit() {
         return 0;
     }
 
-    kvstore->logger->trace("OwnedKeyValueStore::commit");
-
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
     int rc = 0;
     for (auto &txn : txnState->readers) {
-        auto rci = mdb_txn_commit(txn.second);
-        if (rc != 0) {
-            // Take the first non-zero rc
-            rc = rci;
-        }
+        rc = mdb_txn_commit(txn.second) || rc;
     }
     txnState->readers.clear();
     txnState->txn = nullptr;
@@ -258,25 +255,35 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
-void OwnedKeyValueStore::checkVersions() {
+void OwnedKeyValueStore::clearAll() {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
 
-    kvstore->logger->trace("OwnedKeyValueStore::checkVersions");
+    // -- Clear the open database --
+    int rc = mdb_drop(txnState->txn, txnState->dbi, 0);
+    if (rc != 0) {
+        goto fail;
+    }
+
+    rc = commit();
+    if (rc != 0) {
+        goto fail;
+    }
+    refreshMainTransaction();
 
     {
         // Open the unnamed database, which lists the names of all the other databases
-        int rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
+        rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
         if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
+            goto fail;
         }
 
         vector<string> flavors;
         MDB_cursor *cursor;
         rc = mdb_cursor_open(txnState->txn, txnState->dbi, &cursor);
         if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
+            goto fail;
         }
 
         MDB_val kv;
@@ -284,11 +291,10 @@ void OwnedKeyValueStore::checkVersions() {
         rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
         while (rc != MDB_NOTFOUND) {
             flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
-            kvstore->logger->trace("OwnedKeyValueStore::checkVersions found flavor: {}", flavors.back());
             rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
         }
         if (rc != 0 && rc != MDB_NOTFOUND) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
+            goto fail;
         }
 
         mdb_cursor_close(cursor);
@@ -296,28 +302,26 @@ void OwnedKeyValueStore::checkVersions() {
         for (const auto &flavor : flavors) {
             rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
             if (rc != 0) {
-                throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
+                goto fail;
             }
 
-            auto dbVersion = readString(VERSION_KEY);
-            if (!dbVersion.has_value() || dbVersion != this->kvstore->version) {
-                int del = 1;
-                kvstore->logger->trace("OwnedKeyValueStore::checkVersions dropping flavor '{}' because {} != {}",
-                                       flavor, dbVersion.value_or("nullopt"), this->kvstore->version);
-                rc = mdb_drop(txnState->txn, txnState->dbi, del);
-                if (rc != 0) {
-                    throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-                }
+            int del = 1;
+            rc = mdb_drop(txnState->txn, txnState->dbi, del);
+            if (rc != 0) {
+                goto fail;
             }
         }
 
         rc = commit();
         if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
+            goto fail;
         }
     }
 
     refreshMainTransaction();
+    return;
+fail:
+    throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
 }
 
 optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
@@ -334,8 +338,6 @@ void OwnedKeyValueStore::writeString(string_view key, string_view value) {
 }
 
 void OwnedKeyValueStore::refreshMainTransaction() {
-    kvstore->logger->trace("OwnedKeyValueStore::refreshMainTransaction");
-
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
     }
