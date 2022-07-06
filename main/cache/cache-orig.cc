@@ -3,7 +3,8 @@
 using namespace std;
 
 namespace sorbet::realmain::cache {
-unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &opts) {
+unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::logger> logger,
+                                                        const options::Options &opts) {
     return nullptr;
 }
 

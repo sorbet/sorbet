@@ -81,14 +81,14 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // Release cache lock.
         lspWrapper = nullptr;
 
-        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
+        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = std::make_shared<spdlog::logger>("null", sink);
+        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
         CHECK_EQ(kvstore->read(updatedKey).data, nullptr);
 
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
 
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
@@ -138,12 +138,12 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
 
         // Release cache lock.
         lspWrapper = nullptr;
-        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
+        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = std::make_shared<spdlog::logger>("null", sink);
+        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
         auto updatedFileData = kvstore->read(updatedKey);
         REQUIRE_NE(updatedFileData.data, nullptr);
 
-        auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null", sink);
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
@@ -187,7 +187,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         // Release cache lock.
         lspWrapper = nullptr;
 
-        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
+        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(nullLogger, *opts);
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
 
