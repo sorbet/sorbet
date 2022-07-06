@@ -1,13 +1,13 @@
 #include "doctest.h"
 // has to go first as it violates our requirements
 #include "spdlog/spdlog.h"
-// has to go above null_sink.h; this comment prevents reordering.
+// has to go above stdout_sinks.h; this comment prevents reordering.
 #include "absl/strings/str_split.h" // For StripAsciiWhitespace
 #include "absl/synchronization/notification.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/kvstore/KeyValueStore.h"
-#include "spdlog/sinks/null_sink.h"
+#include "spdlog/sinks/stdout_sinks.h"
 
 using namespace std;
 using namespace sorbet;
@@ -16,9 +16,11 @@ string exec(string cmd);
 
 TEST_CASE("kvstore") {
     const string directory(absl::StripAsciiWhitespace(exec("mktemp -d")));
-    const auto sink = make_shared<spdlog::sinks::null_sink_mt>();
-    const auto logger = make_shared<spdlog::logger>("null", sink);
-    auto maxSize = 4096 * 10;
+    const auto sink = make_shared<spdlog::sinks::stderr_sink_mt>();
+    const auto logger = make_shared<spdlog::logger>("test", sink);
+    // Uncomment this for debugging (or copy it into the test case you care about)
+    // logger->set_level(spdlog::level::trace);
+    auto maxSize = 4096 * 20;
 
     SUBCASE("CommitsChangesToDisk") {
         {
