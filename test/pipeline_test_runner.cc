@@ -429,8 +429,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         {
             core::UnfreezeNameTable packageNS(*gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashPrefixes, {},
-                                   "PACKAGE_ERROR_HINT");
+            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, {}, "PACKAGE_ERROR_HINT");
         }
 
         // Packager runs over all trees.

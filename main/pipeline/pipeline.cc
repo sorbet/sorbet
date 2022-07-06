@@ -731,7 +731,8 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-            gs.setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+            gs.setPackagerOptions(opts.secondaryTestPackageNamespaces,
+                                  opts.extraPackageFilesDirectoryUnderscorePrefixes,
                                   opts.extraPackageFilesDirectorySlashPrefixes,
                                   opts.packageSkipRBIExportEnforcementDirs, opts.stripePackagesHint);
         }
