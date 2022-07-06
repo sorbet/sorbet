@@ -258,6 +258,42 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
+namespace {
+
+vector<string> listFlavors(spdlog::logger &logger, MDB_txn *txn, string_view path) {
+    // Open the unnamed database, which lists the names of all the other databases
+    MDB_dbi unnamedDBI;
+    int rc = mdb_dbi_open(txn, nullptr, 0, &unnamedDBI);
+    if (rc != 0) {
+        throw_mdb_error("failed to clear the database"sv, rc, path);
+    }
+
+    vector<string> flavors;
+    MDB_cursor *cursor;
+    rc = mdb_cursor_open(txn, unnamedDBI, &cursor);
+    if (rc != 0) {
+        throw_mdb_error("failed to clear the database"sv, rc, path);
+    }
+
+    MDB_val kv;
+    MDB_val dv;
+    rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
+    while (rc != MDB_NOTFOUND) {
+        flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
+        logger.trace("OwnedKeyValueStore::checkVersions found flavor: {}", flavors.back());
+        rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
+    }
+    if (rc != 0 && rc != MDB_NOTFOUND) {
+        throw_mdb_error("failed to clear the database"sv, rc, path);
+    }
+
+    mdb_cursor_close(cursor);
+
+    return flavors;
+}
+
+} // namespace
+
 void OwnedKeyValueStore::checkVersions() {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
@@ -265,33 +301,9 @@ void OwnedKeyValueStore::checkVersions() {
 
     kvstore->logger->trace("OwnedKeyValueStore::checkVersions");
 
+    int rc;
     {
-        // Open the unnamed database, which lists the names of all the other databases
-        int rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
-        if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-        }
-
-        vector<string> flavors;
-        MDB_cursor *cursor;
-        rc = mdb_cursor_open(txnState->txn, txnState->dbi, &cursor);
-        if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-        }
-
-        MDB_val kv;
-        MDB_val dv;
-        rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
-        while (rc != MDB_NOTFOUND) {
-            flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
-            kvstore->logger->trace("OwnedKeyValueStore::checkVersions found flavor: {}", flavors.back());
-            rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
-        }
-        if (rc != 0 && rc != MDB_NOTFOUND) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-        }
-
-        mdb_cursor_close(cursor);
+        auto flavors = listFlavors(*kvstore->logger, txnState->txn, kvstorePath());
 
         for (const auto &flavor : flavors) {
             rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
