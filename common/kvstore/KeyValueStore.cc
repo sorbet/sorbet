@@ -170,7 +170,11 @@ int OwnedKeyValueStore::commit() {
 
     int rc = 0;
     for (auto &txn : txnState->readers) {
-        rc = mdb_txn_commit(txn.second) || rc;
+        auto rci = mdb_txn_commit(txn.second);
+        if (rc != 0) {
+            // Take the first non-zero rc
+            rc = rci;
+        }
     }
     txnState->readers.clear();
     txnState->txn = nullptr;
