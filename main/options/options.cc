@@ -936,6 +936,7 @@ void readOptions(Options &opts,
         }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
+
         if (raw.count("extra-package-files-directory-prefix-underscore")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
@@ -946,6 +947,7 @@ void readOptions(Options &opts,
                 opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(dirName);
             }
         }
+
         if (raw.count("extra-package-files-directory-prefix-slash")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix-slash"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
@@ -956,6 +958,7 @@ void readOptions(Options &opts,
                 opts.extraPackageFilesDirectorySlashPrefixes.emplace_back(dirName);
             }
         }
+
         if (raw.count("secondary-test-package-namespaces")) {
             if (!opts.stripePackages) {
                 logger->error("--secondary-test-package-namespaces can only be specified in --stripe-packages mode");
