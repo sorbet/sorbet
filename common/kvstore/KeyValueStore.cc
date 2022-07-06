@@ -332,6 +332,57 @@ void OwnedKeyValueStore::checkVersions() {
     refreshMainTransaction();
 }
 
+namespace {
+size_t allUsedPages(MDB_stat &stat) {
+    return stat.ms_branch_pages + stat.ms_leaf_pages + stat.ms_overflow_pages;
+}
+
+} // namespace
+
+size_t OwnedKeyValueStore::cacheSize() const {
+    if (writerId != this_thread::get_id()) {
+        // This is mostly for simplicity. This is technically a read-only transaction, and so we
+        // could support doing it with txnState->readers[this_thread::get_id()] but that seems like
+        // overkill given that we don't need to do so at the moment.
+        throw_mdb_error("Can only call cacheSize from main thread"sv, 0, kvstorePath());
+    }
+
+    kvstore->logger->trace("OwnedKeyValueStore::cacheSize");
+    int rc;
+    MDB_stat stat;
+
+    size_t totalPages = 0;
+
+    rc = mdb_env_stat(kvstore->dbState->env, &stat);
+    if (rc != 0) {
+        throw_mdb_error("failed to stat the main environment", rc, kvstorePath());
+    }
+
+    totalPages += allUsedPages(stat);
+
+    // Open the unnamed databse, which lists the names of all the other databases
+    auto flavors = listFlavors(*kvstore->logger, txnState->txn, kvstorePath());
+
+    for (const auto &flavor : flavors) {
+        MDB_dbi flavorDBI;
+        rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &flavorDBI);
+        if (rc != 0) {
+            auto msg = fmt::format("failed to open cache flavor {}", flavor);
+            throw_mdb_error(msg, rc, kvstorePath());
+        }
+
+        rc = mdb_stat(txnState->txn, flavorDBI, &stat);
+        if (rc != 0) {
+            auto msg = fmt::format("failed to stat the cache flavor {}", flavor);
+            throw_mdb_error(msg, rc, kvstorePath());
+        }
+
+        totalPages += allUsedPages(stat);
+    }
+
+    return totalPages * 4096;
+}
+
 optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
     auto rawData = read(key);
     if (rawData.data == nullptr) {
