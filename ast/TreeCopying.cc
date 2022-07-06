@@ -18,6 +18,101 @@ template <class T> T deepCopyVec(const void *avoid, const T &origin) {
     return copy;
 }
 
+}
+
+Send::Send(const void *avoid, const Send *exp)
+    : loc(exp->loc), fun(exp->fun), funLoc(exp->funLoc), flags(exp->flags),
+      numPosArgs_(exp->numPosArgs_), recv(ast::deepCopy(avoid, exp->recv)),
+      args(deepCopyVec(avoid, exp->args)) {
+}
+
+ClassDef::ClassDef(const void *avoid, const ClassDef *exp)
+    : loc(exp->loc), declLoc(exp->declLoc), symbol(exp->symbol),
+      kind(exp->kind), rhs(deepCopyVec(avoid, exp->rhs)), name(ast::deepCopy(avoid, exp->name)), ancestors(deepCopyVec(avoid, exp->ancestors)) {
+}
+
+MethodDef::MethodDef(const void *avoid, const MethodDef *exp)
+    : loc(exp->loc), declLoc(exp->declLoc), symbol(exp->symbol),
+      rhs(ast::deepCopy(avoid, exp->rhs)), args(deepCopyVec(avoid, exp->args)),
+      name(exp->name), flags(exp->flags) {
+}
+
+If::If(const void *avoid, const If *exp)
+    : loc(exp->loc), cond(ast::deepCopy(avoid, exp->cond)), thenp(ast::deepCopy(avoid, exp->thenp)),
+        elsep(ast::deepCopy(avoid, exp->elsep)) {
+}
+
+While::While(const void *avoid, const While *exp)
+    : loc(exp->loc), cond(ast::deepCopy(avoid, exp->cond)), body(ast::deepCopy(avoid, exp->body)) {
+}
+
+Break::Break(const void *avoid, const Break *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+Retry::Retry(const void *avoid, const Retry *exp)
+    : loc(exp->loc) {
+}
+
+Next::Next(const void *avoid, const Next *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+Return::Return(const void *avoid, const Return *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+RescueCase::RescueCase(const void *avoid, const RescueCase *exp)
+    : loc(exp->loc), exceptions(deepCopyVec(avoid, exp->exceptions)), var(ast::deepCopy(avoid, exp->var)), body(ast::deepCopy(avoid, exp->body)) {
+}
+
+Rescue::Rescue(const void *avoid, const Rescue *exp)
+    : loc(exp->loc), body(ast::deepCopy(avoid, exp->body)), rescueCases(deepCopyVec<Rescue::RESCUE_CASE_store>(avoid, exp->rescueCases)),
+      else_(ast::deepCopy(avoid, exp->else_)), ensure(ast::deepCopy(avoid, exp->ensure)) {
+}
+
+Local::Local(const void *avoid, const Local *exp)
+    : loc(exp->loc) localVariable(exp->localVariable) {
+}
+
+UnresolvedIdent::UnresolvedIdent(const void *avoid, const UnresolvedIdent *exp)
+    : loc(exp->loc), kind(exp->kind), name(exp->name) {
+}
+
+RestArg::RestArg(const void *avoid, const RestArg *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+KeywordArg::KeywordArg(const void *avoid, const KeywordArg *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+OptionalArg::OptionalArg(const void *avoid, const OptionalArg *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)), default_(ast::deepCopy(avoid, exp->default_)) {
+}
+
+BlockArg::BlockArg(const void *avoid, const BlockArg *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+ShadowArg::ShadowArg(const void *avoid, const ShadowArg *exp)
+    : loc(exp->loc), expr(ast::deepCopy(avoid, exp->expr)) {
+}
+
+Assign::Assign(const void *avoid, const Assign *exp)
+    : loc(exp->loc), lhs(ast::deepCopy(avoid, exp->lhs)), rhs(ast::deepCopy(avoid, exp->rhs)) {
+}
+
+class TreeCopier {
+public:
+    template <class E>
+    static ExpressionPtr copy(const void *avoid, const E *exp) {
+        return ExpressionPtr(ExpressionToTag<E>::value, new E(avoid, exp));
+    }
+};
+
+namespace {
+
 class DeepCopyError {};
 
 ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool root) {
@@ -31,27 +126,22 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::Send: {
             auto *exp = reinterpret_cast<const Send *>(tree);
-            return make_expression<Send>(exp->loc, deepCopy(avoid, exp->recv), exp->fun, exp->funLoc, exp->numPosArgs(),
-                                         deepCopyVec(avoid, exp->rawArgsDoNotUse()), exp->flags);
+            return TreeCopier::copy(avoid, exp);
         }
 
         case Tag::ClassDef: {
             auto *exp = reinterpret_cast<const ClassDef *>(tree);
-            return make_expression<ClassDef>(exp->loc, exp->declLoc, exp->symbol, deepCopy(avoid, exp->name),
-                                             deepCopyVec(avoid, exp->ancestors), deepCopyVec(avoid, exp->rhs),
-                                             exp->kind);
+            return TreeCopier::copy(avoid, exp);
         }
 
         case Tag::MethodDef: {
             auto *exp = reinterpret_cast<const MethodDef *>(tree);
-            return make_expression<MethodDef>(exp->loc, exp->declLoc, exp->symbol, exp->name,
-                                              deepCopyVec(avoid, exp->args), deepCopy(avoid, exp->rhs), exp->flags);
+            return TreeCopier::copy(avoid, exp);
         }
 
         case Tag::If: {
             auto *exp = reinterpret_cast<const If *>(tree);
-            return make_expression<If>(exp->loc, deepCopy(avoid, exp->cond), deepCopy(avoid, exp->thenp),
-                                       deepCopy(avoid, exp->elsep));
+            return TreeCopier::copy(avoid, exp);
         }
 
         case Tag::While: {
