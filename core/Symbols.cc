@@ -2207,7 +2207,8 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
-            if (e.second.isMethod() && e.second.asMethodRef().data(gs)->ignoreInHashing(gs)) {
+            if (e.second.isMethod() &&
+                (gs.lspExperimentalFastPathEnabled || e.second.asMethodRef().data(gs)->ignoreInHashing(gs))) {
                 continue;
             }
 
@@ -2416,6 +2417,11 @@ void Method::addLoc(const core::GlobalState &gs, core::Loc loc) {
     }
 
     addLocInternal(gs, loc, this->loc(), locs_);
+}
+
+void Method::removeLocsForFile(core::FileRef file) {
+    auto it = remove_if(locs_.begin(), locs_.end(), [&](const auto loc) { return loc.file() == file; });
+    locs_.erase(it, locs_.end());
 }
 
 void Field::addLoc(const core::GlobalState &gs, core::Loc loc) {

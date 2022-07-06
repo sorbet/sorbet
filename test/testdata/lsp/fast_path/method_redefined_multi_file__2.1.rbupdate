@@ -1,0 +1,9 @@
+# typed: true
+# exclude-from-file-update: true
+
+# -- imagine that this file were an RBI --
+
+class A
+  def foo # error: Method `A#foo` redefined without matching argument count. Expected: `1`, got: `0`
+  end
+end

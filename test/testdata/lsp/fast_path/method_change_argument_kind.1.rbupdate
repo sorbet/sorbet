@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: method_change_argument_kind.rb
 
 class A extend T::Sig
   sig {params(x: Integer).returns(String)}

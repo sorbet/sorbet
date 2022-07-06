@@ -540,6 +540,7 @@ TEST_CASE("LSPTest") {
         }
         opts->disableWatchman = true;
         opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
+        opts->lspExperimentalFastPathEnabled = true;
 
         if (haveStaleUpdates) {
             opts->lspStaleStateEnabled = true;

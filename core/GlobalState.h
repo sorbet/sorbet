@@ -169,6 +169,9 @@ public:
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     void mangleRenameForOverload(SymbolRef what, NameRef origName);
+    // NOTE: You likely want to use mangleRenameSymbol not deleteMethodSymbol, unless you know what you're doing.
+    // See the comment on the implementation for more.
+    void deleteMethodSymbol(MethodRef what);
     spdlog::logger &tracer() const;
     unsigned int namesUsedTotal() const;
     unsigned int utf8NamesUsed() const;
@@ -283,6 +286,9 @@ public:
 
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
+
+    // If 'true', enable the experimental, symbol-deletion-based fast path mode
+    bool lspExperimentalFastPathEnabled = false;
 
     // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
     // the packages that are imported by the one whose interface is being generated.

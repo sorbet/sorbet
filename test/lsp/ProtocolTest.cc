@@ -34,6 +34,7 @@ void ProtocolTest::resetState(std::shared_ptr<realmain::options::Options> opts) 
         }
         opts->cacheDir = cacheDir;
     }
+    opts->lspExperimentalFastPathEnabled = true;
 
     if (useMultithreading) {
         lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);

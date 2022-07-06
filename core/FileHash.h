@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_FILE_HASH_H
 #define RUBY_TYPER_FILE_HASH_H
 #include "common/common.h"
+#include "core/ArityHash.h"
 namespace sorbet::core {
 class NameRef;
 class GlobalState;
@@ -36,6 +37,38 @@ template <typename H> H AbslHashValue(H h, const ShortNameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
+class FullNameHash {
+public:
+    /** Sorts an array of ShortNameHashes and removes duplicates. */
+    static void sortAndDedupe(std::vector<core::FullNameHash> &hashes);
+
+    FullNameHash(const GlobalState &gs, NameRef nm);
+    inline bool isDefined() const {
+        return _hashValue != 0;
+    }
+    FullNameHash(const FullNameHash &nm) noexcept = default;
+    FullNameHash() noexcept : _hashValue(0){};
+    inline bool operator==(const FullNameHash &rhs) const noexcept {
+        ENFORCE(isDefined());
+        ENFORCE(rhs.isDefined());
+        return _hashValue == rhs._hashValue;
+    }
+
+    inline bool operator!=(const FullNameHash &rhs) const noexcept {
+        return !(rhs == *this);
+    }
+
+    inline bool operator<(const FullNameHash &rhs) const noexcept {
+        return this->_hashValue < rhs._hashValue;
+    }
+
+    uint32_t _hashValue;
+};
+
+template <typename H> H AbslHashValue(H h, const FullNameHash &m) {
+    return H::combine(std::move(h), m._hashValue);
+}
+
 struct SymbolHash {
     // The hash of the symbol's name. Note that symbols with the same name owned by different
     // symbols map to the same ShortNameHash. This is fine, because our strategy for deciding which
@@ -54,6 +87,36 @@ struct SymbolHash {
         return this->nameHash < h.nameHash || (!(h.nameHash < this->nameHash) && this->symbolHash < h.symbolHash);
     }
 };
+
+// A fingerprint of a FoundDefinition suitable for storing on a File.
+// Allows a current Namer run to reference information about a previous Namer run.
+struct FoundMethodHash {
+    struct {
+        // The owner of this method.
+        uint32_t idx : 31;
+        // Whether the method was defined as an instance method or a singleton class method
+        bool useSingletonClass : 1;
+    } owner;
+
+    // Hash of this method's name
+    const FullNameHash nameHash;
+
+    // A hash of the method's arity
+    ArityHash arityHash;
+
+    FoundMethodHash(uint32_t ownerIdx, bool useSingletonClass, FullNameHash nameHash, ArityHash arityHash)
+        : owner({ownerIdx, useSingletonClass}), nameHash(nameHash), arityHash(arityHash) {
+        sanityCheck();
+    };
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundMethodHash, 12, 4);
+
+using FoundMethodHashes = std::vector<FoundMethodHash>;
 
 // When a file is edited, we run index and resolve it using an local (empty) GlobalState.
 // We then hash the symbols defined in that local GlobalState, and use the result to quickly decide
@@ -176,9 +239,11 @@ struct UsageHash {
 struct FileHash {
     LocalSymbolTableHashes localSymbolTableHashes;
     UsageHash usages;
+    FoundMethodHashes foundMethodHashes;
 
     FileHash() = default;
-    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages);
+    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages,
+             FoundMethodHashes &&foundMethodHashes);
 };
 
 }; // namespace sorbet::core

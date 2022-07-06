@@ -237,6 +237,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     vector<core::FileRef> subset;
     vector<core::ShortNameHash> changedSymbolNameHashes;
+    UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
@@ -262,14 +263,28 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
                 const auto &newMethodHashes = newSymbolHashes.methodHashes;
 
-                // Both oldHash and newHash should have the same methods, since this is the fast path!
-                ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
-                        "definitionHash should have failed");
+                if (config->opts.lspExperimentalFastPathEnabled) {
+                    // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
+                    // This will insert two entries into `changedMethodHashes` for each changed method, but they will
+                    // get deduped later.
+                    absl::c_set_symmetric_difference(oldMethodHashes, newMethodHashes,
+                                                     std::back_inserter(changedMethodSymbolHashes));
 
-                // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
-                // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
-                // deduped later.
-                absl::c_set_difference(oldMethodHashes, newMethodHashes, std::back_inserter(changedMethodSymbolHashes));
+                    // Okay to `move` here (steals component of getFileHash) because we're about to use
+                    // replaceFile to clobber fref.data(*gs) anyways.
+                    oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundMethodHashes));
+
+                } else {
+                    // Both oldHash and newHash should have the same methods, since this is the fast path!
+                    ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
+                            "definitionHash should have failed");
+
+                    // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
+                    // This will insert two entries into `changedMethodHashes` for each changed method, but they will
+                    // get deduped later.
+                    absl::c_set_difference(oldMethodHashes, newMethodHashes,
+                                           std::back_inserter(changedMethodSymbolHashes));
+                }
 
                 const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
                 const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
@@ -331,10 +346,22 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         auto t = pipeline::indexOne(config->opts, *gs, f);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
+
+        if (config->opts.lspExperimentalFastPathEnabled &&
+            oldFoundMethodHashesForFiles.find(f) == oldFoundMethodHashesForFiles.end()) {
+            // This is an extra file that we need to typecheck which was not part of the original
+            // edited files, so whatever it happens to have in foundMethodHashes is still "old"
+            // (but we can't use `move` to steal it like before, because we're not replacing the
+            // whole file).
+            oldFoundMethodHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundMethodHashes);
+        }
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
+    auto resolved = config->opts.lspExperimentalFastPathEnabled
+                        ? pipeline::incrementalResolve(*gs, move(updatedIndexed),
+                                                       std::move(oldFoundMethodHashesForFiles), config->opts)
+                        : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
@@ -479,7 +506,9 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 }
             }
         }
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
+        // Only need to compute FoundMethodHashes when running to compute a FileHash
+        auto foundMethodHashes = nullptr;
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundMethodHashes);
         if (!maybeResolved.hasResult()) {
             return;
         }
@@ -697,7 +726,13 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
             updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
         }
     }
-    return pipeline::incrementalResolve(*gs, move(updatedIndexed), config->opts);
+
+    // There are two incrementalResolve modes: one when running for the purpose of processing a file update,
+    // and one for running an LSP query on an already-resolved file.
+    // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
+    auto foundMethodHashesForFiles = nullopt;
+
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundMethodHashesForFiles), config->opts);
 }
 
 const core::GlobalState &LSPTypechecker::state() const {

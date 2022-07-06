@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: more_arguments.rb
 
 class Foo
   extend T::Sig

@@ -1711,6 +1711,34 @@ void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
+// This method should be used sparingly, because using it correctly is tricky.
+// Consider using mangleRenameSymbol instead, unless you absolutely know that you must use this method.
+//
+// This method's existence can introduce use-after-free style problems, but with Symbol IDs instead of
+// pointers. Importantly, callers of this method assume the burden of ensuring that the deleted
+// symbol's ID is not referenced by any other symbols or by any ASTs.
+//
+// (In our case, we're lucky that core::Method objects do not generally store sensitive information
+// that an attacker would be trying to exfiltrate, so the downside is not quite as severe as
+// arbitrary malloc/free use-after-free bugs. But it does mean that this could be the source of
+// particularly confusing user-visible errors or even crashes.)
+//
+// In particular, this method should basically be considered a private namer/namer.cc helper
+// function. The only reason why it's a method on GlobalState and not an anonymous helper in Namer
+// is because it requires direct (private) access to `this->methods` (and also because it looks very
+// similar to mangleRenameSymbol, so it's nice to have the implementation in the same file). But in
+// spirit, this is a private Namer helper function.
+void GlobalState::deleteMethodSymbol(MethodRef what) {
+    const auto &whatData = what.data(*this);
+    auto owner = whatData->owner;
+    auto &ownerMembers = owner.data(*this)->members();
+    auto fnd = ownerMembers.find(whatData->name);
+    ENFORCE(fnd != ownerMembers.end());
+    ENFORCE(fnd->second == what);
+    ownerMembers.erase(fnd);
+    this->methods[what.id()] = this->methods[0].deepCopy(*this);
+}
+
 unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
 }
@@ -1887,6 +1915,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
+    result->lspExperimentalFastPathEnabled = this->lspExperimentalFastPathEnabled;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -1979,6 +2008,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
+    result->lspExperimentalFastPathEnabled = this->lspExperimentalFastPathEnabled;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->kvstoreUuid = this->kvstoreUuid;
@@ -2234,10 +2264,17 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         if (!sym.ignoreInHashing(*this)) {
             auto &target = methodHashesMap[ShortNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
+            auto needMethodShapeHash =
+                this->lspExperimentalFastPathEnabled
+                    ? (sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
+                       sym.name == Names::requiredAncestorsLin())
+                    : true;
+            if (needMethodShapeHash) {
+                uint32_t symhash = sym.methodShapeHash(*this);
+                hierarchyHash = mix(hierarchyHash, symhash);
+                methodHash = mix(methodHash, symhash);
+            }
 
-            uint32_t symhash = sym.methodShapeHash(*this);
-            hierarchyHash = mix(hierarchyHash, symhash);
-            methodHash = mix(methodHash, symhash);
             counter++;
             if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
                 errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));

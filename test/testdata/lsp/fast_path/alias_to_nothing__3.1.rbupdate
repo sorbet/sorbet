@@ -1,0 +1,9 @@
+# typed: true
+# exclude-from-file-update: true
+
+A.new.from_method
+A.new.from_method_new # error: Method `from_method_new` does not exist on `A`
+A.new.to_method # error: Method `to_method` does not exist on `A`
+A.new.to_method_new
+
+T.reveal_type(A.new.from_method) # error: `T.untyped`

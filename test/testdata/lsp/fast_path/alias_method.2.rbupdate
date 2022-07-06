@@ -1,0 +1,8 @@
+# typed: true
+# assert-fast-path: alias_method.rb
+
+class A
+  def paid; end
+
+  alias_method :paid?, :paid
+end
