@@ -3,10 +3,6 @@
 
 #include <memory>
 
-namespace spdlog {
-class logger;
-}
-
 namespace sorbet {
 class KeyValueStore;
 class OwnedKeyValueStore;
@@ -24,8 +20,7 @@ struct Options;
 
 namespace sorbet::realmain::cache {
 // If cacheDir is specified, creates a KeyValueStore. Otherwise, returns nullptr.
-std::unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(std::shared_ptr<::spdlog::logger> logger,
-                                                             const options::Options &opts);
+std::unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Options &opts);
 
 // Returns an owned key value store if kvstore is unchanged since gs was created, or false otherwise.
 std::unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, std::unique_ptr<KeyValueStore> kvstore);

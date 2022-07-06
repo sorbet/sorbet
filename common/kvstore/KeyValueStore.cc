@@ -71,10 +71,8 @@ bool hasNoOutstandingReaders(MDB_env *env, string_view path) {
 }
 } // namespace
 
-KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, string path, string flavor,
-                             size_t maxSize)
-    : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()),
-      logger(move(logger)) {
+KeyValueStore::KeyValueStore(string version, string path, string flavor, size_t maxSize)
+    : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()) {
     ENFORCE(!this->version.empty());
     bool expected = false;
     if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
