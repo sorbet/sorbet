@@ -520,9 +520,10 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
         if (opts->stripePackages) {
-            auto extraDir = StringPropertyAssertion::getValue("extra-package-files-directory-prefix", assertions);
+            auto extraDir =
+                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
             if (extraDir.has_value()) {
-                opts->extraPackageFilesDirectoryPrefixes.emplace_back(extraDir.value());
+                opts->extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDir.value());
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }

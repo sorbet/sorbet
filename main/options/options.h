@@ -166,7 +166,7 @@ struct Options {
     bool stripeMode = false;
     bool stripePackages = false;
     std::string stripePackagesHint = "";
-    std::vector<std::string> extraPackageFilesDirectoryPrefixes;
+    std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> secondaryTestPackageNamespaces;
     std::string typedSource = "";
     std::string cacheDir = "";
