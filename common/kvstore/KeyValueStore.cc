@@ -23,7 +23,7 @@ struct OwnedKeyValueStore::TxnState {
 namespace {
 
 [[noreturn]] void throw_mdb_error(string_view what, int err, string_view path) {
-    fmt::print(stderr, "sorbet mdb error: what=\"{}\" mdb_error=\"{}\" cache_path=\"{}\"", what, mdb_strerror(err),
+    fmt::print(stderr, "sorbet mdb error: what=\"{}\" mdb_error=\"{}\" cache_path=\"{}\"\n", what, mdb_strerror(err),
                path);
     throw invalid_argument(string(what));
 }
