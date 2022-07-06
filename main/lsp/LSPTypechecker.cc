@@ -240,94 +240,89 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
-        Timer timeit(config->logger, "compute_fast_path_file_set");
-        {
-            vector<core::SymbolHash> changedMethodSymbolHashes;
-            vector<core::SymbolHash> changedFieldSymbolHashes;
-            for (auto &updatedFile : updates.updatedFiles) {
-                auto fref = gs->findFileByPath(updatedFile->path());
-                // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
-                // path logic in LSPPreprocessor.
-                ENFORCE(fref.exists());
-                ENFORCE(updatedFile->getFileHash() != nullptr);
-                if (this->config->opts.stripePackages && updatedFile->isPackage()) {
-                    // Only relevant in --stripe-packages mode. Package declarations do not have method
-                    // hashes. Instead we rely on recomputing packages if any __package.rb source
-                    // changes.
-                    continue;
-                }
-                if (fref.exists()) {
-                    // Update to existing file on fast path
-                    ENFORCE(fref.data(*gs).getFileHash() != nullptr);
-                    const auto &oldSymbolHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes;
-                    const auto &newSymbolHashes = updatedFile->getFileHash()->localSymbolTableHashes;
-                    const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
-                    const auto &newMethodHashes = newSymbolHashes.methodHashes;
-
-                    // Both oldHash and newHash should have the same methods, since this is the fast path!
-                    ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
-                            "definitionHash should have failed");
-
-                    // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
-                    // This will insert two entries into `changedMethodHashes` for each changed method, but they will
-                    // get deduped later.
-                    absl::c_set_difference(oldMethodHashes, newMethodHashes,
-                                           std::back_inserter(changedMethodSymbolHashes));
-
-                    const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
-                    const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
-
-                    ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes),
-                            "definitionHash should have failed");
-
-                    absl::c_set_difference(oldFieldHashes, newFieldHashes,
-                                           std::back_inserter(changedFieldSymbolHashes));
-
-                    gs->replaceFile(fref, updatedFile);
-                    // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
-                    fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
-                    subset.emplace_back(fref);
-                }
-            }
-
-            changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedFieldSymbolHashes.size());
-            absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedSymbolNameHashes),
-                              [](const auto &symhash) { return symhash.nameHash; });
-            absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedSymbolNameHashes),
-                              [](const auto &symhash) { return symhash.nameHash; });
-            core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
-        }
-
-        int i = -1;
-        // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe `subset`.
-        for (auto &oldFile : gs->getFiles()) {
-            i++;
-            if (oldFile == nullptr) {
+        vector<core::SymbolHash> changedMethodSymbolHashes;
+        vector<core::SymbolHash> changedFieldSymbolHashes;
+        for (auto &updatedFile : updates.updatedFiles) {
+            auto fref = gs->findFileByPath(updatedFile->path());
+            // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
+            // path logic in LSPPreprocessor.
+            ENFORCE(fref.exists());
+            ENFORCE(updatedFile->getFileHash() != nullptr);
+            if (this->config->opts.stripePackages && updatedFile->isPackage()) {
+                // Only relevant in --stripe-packages mode. Package declarations do not have method
+                // hashes. Instead we rely on recomputing packages if any __package.rb source
+                // changes.
                 continue;
             }
+            if (fref.exists()) {
+                // Update to existing file on fast path
+                ENFORCE(fref.data(*gs).getFileHash() != nullptr);
+                const auto &oldSymbolHashes = fref.data(*gs).getFileHash()->localSymbolTableHashes;
+                const auto &newSymbolHashes = updatedFile->getFileHash()->localSymbolTableHashes;
+                const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
+                const auto &newMethodHashes = newSymbolHashes.methodHashes;
 
-            if (this->config->opts.stripePackages && oldFile->isPackage()) {
-                continue; // See note above about --stripe-packages.
+                // Both oldHash and newHash should have the same methods, since this is the fast path!
+                ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
+                        "definitionHash should have failed");
+
+                // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
+                // This will insert two entries into `changedMethodHashes` for each changed method, but they will get
+                // deduped later.
+                absl::c_set_difference(oldMethodHashes, newMethodHashes, std::back_inserter(changedMethodSymbolHashes));
+
+                const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
+                const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
+
+                ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes),
+                        "definitionHash should have failed");
+
+                absl::c_set_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
+
+                gs->replaceFile(fref, updatedFile);
+                // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
+                fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
+                subset.emplace_back(fref);
             }
-
-            ENFORCE(oldFile->getFileHash() != nullptr);
-            const auto &oldHash = *oldFile->getFileHash();
-            vector<core::ShortNameHash> intersection;
-            absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes,
-                                     std::back_inserter(intersection));
-            if (intersection.empty()) {
-                continue;
-            }
-
-            auto ref = core::FileRef(i);
-            config->logger->debug("Added {} to update set as used a changed symbol",
-                                  !ref.exists() ? "" : ref.data(*gs).path());
-            subset.emplace_back(ref);
         }
-        // Remove any duplicate files.
-        fast_sort(subset);
-        subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
+
+        changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedFieldSymbolHashes.size());
+        absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedSymbolNameHashes),
+                          [](const auto &symhash) { return symhash.nameHash; });
+        absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedSymbolNameHashes),
+                          [](const auto &symhash) { return symhash.nameHash; });
+        core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
     }
+
+    int i = -1;
+    // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe `subset`.
+    for (auto &oldFile : gs->getFiles()) {
+        i++;
+        if (oldFile == nullptr) {
+            continue;
+        }
+
+        if (this->config->opts.stripePackages && oldFile->isPackage()) {
+            continue; // See note above about --stripe-packages.
+        }
+
+        ENFORCE(oldFile->getFileHash() != nullptr);
+        const auto &oldHash = *oldFile->getFileHash();
+        vector<core::ShortNameHash> intersection;
+        absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes, std::back_inserter(intersection));
+        if (intersection.empty()) {
+            continue;
+        }
+
+        auto ref = core::FileRef(i);
+        config->logger->debug("Added {} to update set as used a changed symbol",
+                              !ref.exists() ? "" : ref.data(*gs).path());
+        subset.emplace_back(ref);
+    }
+    // Remove any duplicate files.
+    fast_sort(subset);
+    subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
+
     config->logger->debug("Running fast path over num_files={}", subset.size());
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
