@@ -131,10 +131,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
         extra_prefixes=()
         while IFS='' read -r prefix; do
           extra_prefixes+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+        done < <(grep '# extra-package-files-directory-prefix-underscore: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
         if [ "${#extra_prefixes[@]}" -gt 0 ]; then
           for prefix in "${extra_prefixes[@]}"; do
-            args+=("--extra-package-files-directory-prefix" "${prefix}")
+            args+=("--extra-package-files-directory-prefix-underscore" "${prefix}")
           done
         fi
       fi

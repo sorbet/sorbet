@@ -220,8 +220,8 @@ const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const 
     return skipRBIExportEnforcementDirs_;
 }
 
-const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryPrefixes() const {
-    return extraPackageFilesDirectoryPrefixes_;
+const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
+    return extraPackageFilesDirectoryUnderscorePrefixes_;
 }
 
 const std::string_view PackageDB::errorHint() const {
@@ -236,7 +236,7 @@ PackageDB PackageDB::deepCopy() const {
         result.packages_[nr] = pkgInfo->deepCopy();
     }
     result.secondaryTestPackageNamespaceRefs_ = this->secondaryTestPackageNamespaceRefs_;
-    result.extraPackageFilesDirectoryPrefixes_ = this->extraPackageFilesDirectoryPrefixes_;
+    result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;
     result.errorHint_ = this->errorHint_;
