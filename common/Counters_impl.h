@@ -25,6 +25,7 @@ struct CounterImpl {
 
     void counterAdd(const char *counter, unsigned long value);
     void prodCounterAdd(const char *counter, unsigned long value);
+    void prodCounterSet(const char *counter, unsigned long value);
 
     // std::string_view isn't hashable, so we use an unordered map. We could
     // implement hash ourselves, but this is the slowpath anyways.

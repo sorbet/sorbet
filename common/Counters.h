@@ -81,6 +81,7 @@ void counterConsume(CounterState cs);
 
 void prodCounterInc(ConstExprStr counter);
 void prodCounterAdd(ConstExprStr counter, unsigned long value);
+void prodCounterSet(ConstExprStr counter, unsigned long value);
 void counterInc(ConstExprStr counter);
 void counterAdd(ConstExprStr counter, unsigned long value);
 void categoryCounterInc(ConstExprStr category, ConstExprStr counter);
