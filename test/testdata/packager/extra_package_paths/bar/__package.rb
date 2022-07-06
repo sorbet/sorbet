@@ -8,4 +8,5 @@
 class Project::Bar < PackageSpec
   import Project::Foo
   import Project::Baz::Package
+  import Project::FooBar
 end

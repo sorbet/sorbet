@@ -14,6 +14,7 @@
 #include "core/errors/packager.h"
 #include "core/packages/PackageInfo.h"
 #include <cctype>
+#include <sstream>
 #include <sys/stat.h>
 
 using namespace std;
@@ -1233,17 +1234,30 @@ runPackageInfoFinder(ContextType ctx, ast::ParsedFile &package,
         const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
-            // Project_Foo
+            // Project_FooBar -- munge with underscore
             string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
             finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
 
         for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
-            // project/foo
-            auto slashMungedDirName = absl::StrReplaceAll(dirNameFromShortName, {{"_", "/"}});
-            std::transform(slashMungedDirName.begin(), slashMungedDirName.end(), slashMungedDirName.begin(),
-                           [](unsigned char c) { return std::tolower(c); });
-            string additionalDirPath = absl::StrCat(prefix, std::move(slashMungedDirName), "/");
+            // project/foo_bar -- convert camel-case to snake-case and munge with slash
+            std::stringstream ss;
+            ss << prefix;
+            for (int i = 0; i < dirNameFromShortName.length(); i++) {
+                if (dirNameFromShortName[i] == '_') {
+                    ss << '/';
+                } else {
+                    if (isupper(dirNameFromShortName[i]) && i > 0 && dirNameFromShortName[i - 1] != '_') {
+                        ss << '_'; // snake-case munging
+                    }
+
+                    char lower = std::tolower(dirNameFromShortName[i]);
+                    ss << std::move(lower);
+                }
+            }
+            ss << '/';
+
+            std::string additionalDirPath(ss.str());
             finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
     }

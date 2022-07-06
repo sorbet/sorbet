@@ -4,6 +4,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo>)
 
     <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Baz>::<C Package>)
+
+    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C FooBar>)
   end
 end
 # -- test/testdata/packager/extra_package_paths/bar/bar.rb --
@@ -17,6 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <emptyTree>::<C Project>::<C Foo>::<C B>.b()
         <emptyTree>::<C Project>::<C Foo>::<C D>.d()
+        <emptyTree>::<C Project>::<C FooBar>::<C Z>.z()
       end
     end
 
@@ -114,11 +117,33 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.d>
   end
 end
+# -- test/testdata/packager/extra_package_paths/extra_slash/project/foo_bar/z.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C FooBar>::<C Z><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def self.z<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.z>
+  end
+end
 # -- test/testdata/packager/extra_package_paths/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(::<root>::<C Project>::<C Foo>::<C B>)
 
     <self>.export(::<root>::<C Project>::<C Foo>::<C D>)
+  end
+end
+# -- test/testdata/packager/extra_package_paths/foo_bar/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C FooBar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C FooBar>::<C Z>)
   end
 end
