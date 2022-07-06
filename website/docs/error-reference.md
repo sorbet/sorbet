@@ -2819,14 +2819,15 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
     end
     ```
     
-    An alternative solution is to use the expirimental `requires_ancestor` from
-    `T::Helpers` to ensure `Kernel` is an ancestor of the class being mixed
+    An alternative solution is to use the experimental
+    [requires_ancestor](https://sorbet.org/docs/requires-ancestor#requiring-ancestors)
+    from `T::Helpers` to ensure `Kernel` is an ancestor of the class being mixed
     into at runtime.
     
     ```ruby
     module MyModule
       include T::Helpers
-      requires_ancestor Kernel
+      requires_ancestor { Kernel }
     end
     ```
 
