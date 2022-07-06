@@ -2811,11 +2811,22 @@ This error indicates a call to a method we believe does not exist (a la Ruby's
     `Object` (which classes default to inheriting from), but not on
     `BasicObject` (which classes can optionally inherit from).
 
-    The solution is to `include Kernel` in our module:
+    One solution is to `include Kernel` in our module:
 
     ```ruby
     module MyModule
       include Kernel
+    end
+    ```
+    
+    An alternative solution is to use the expirimental `requires_ancestor` from
+    `T::Helpers` to ensure `Kernel` is an ancestor of the class being mixed
+    into at runtime.
+    
+    ```ruby
+    module MyModule
+      include T::Helpers
+      requires_ancestor Kernel
     end
     ```
 
