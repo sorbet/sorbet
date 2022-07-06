@@ -379,7 +379,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(""));
     options.add_options("dev")("extra-package-files-directory-prefix-underscore",
                                "Extra parent directories which contain package files. These paths use an underscore "
-                               "package-munging convention, i.e. 'Opus_Foo'."
+                               "package-munging convention, i.e. 'Project_Foo'."
+                               "This option must be used in conjunction with --stripe-packages",
+                               cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("extra-package-files-directory-prefix-slash",
+                               "Extra parent directories which contain package files. These paths use an underscore "
+                               "package-munging convention, i.e. 'project/foo'."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")(
@@ -929,6 +934,16 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(dirName);
+            }
+        }
+        if (raw.count("extra-package-files-directory-prefix-slash")) {
+            for (const string &dirName : raw["extra-package-files-directory-prefix-slash"].as<vector<string>>()) {
+                if (dirName.back() != '/') {
+                    logger->error("--extra-package-files-directory-prefix-slash directory path must have slash "
+                                  "(/) at the end");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.extraPackageFilesDirectorySlashPrefixes.emplace_back(dirName);
             }
         }
         if (raw.count("secondary-test-package-namespaces")) {

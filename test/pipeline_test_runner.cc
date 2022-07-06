@@ -411,19 +411,26 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (enablePackager) {
         vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+        vector<std::string> extraPackageFilesDirectorySlashPrefixes;
         vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
 
-        auto extraDir =
+        auto extraDirUnderscore =
             StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-        if (extraDir.has_value()) {
-            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDir.value());
+        if (extraDirUnderscore.has_value()) {
+            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+        }
+
+        auto extraDirSlash =
+            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+        if (extraDirSlash.has_value()) {
+            extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
         }
 
         {
             core::UnfreezeNameTable packageNS(*gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
             gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   "PACKAGE_ERROR_HINT");
+                                   extraPackageFilesDirectorySlashPrefixes, "PACKAGE_ERROR_HINT");
         }
 
         // Packager runs over all trees.

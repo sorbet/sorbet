@@ -13,6 +13,7 @@
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
 #include "core/packages/PackageInfo.h"
+#include <cctype>
 #include <sys/stat.h>
 
 using namespace std;
@@ -1235,7 +1236,8 @@ struct PackageInfoFinder {
 template <typename ContextType>
 unique_ptr<PackageInfoImpl>
 runPackageInfoFinder(ContextType ctx, ast::ParsedFile &package,
-                     const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes) {
+                     const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                     const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
     static_assert(is_same_v<ContextType, core::Context> || is_same_v<ContextType, core::MutableContext>);
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).isPackage());
@@ -1250,14 +1252,25 @@ runPackageInfoFinder(ContextType ctx, ast::ParsedFile &package,
     package.tree = ast::TreeMap::apply(ctx, finder, move(package.tree));
     finder.finalize(ctx);
     if (finder.info) {
-        const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() + 1;
+        const auto numPrefixes =
+            extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
         finder.info->packagePathPrefixes.reserve(numPrefixes);
         finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
         const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
         const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
+            // Project_Foo
             string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
+            finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+        }
+
+        for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+            // project/foo
+            auto slashMungedDirName = absl::StrReplaceAll(dirNameFromShortName, {{"_", "/"}});
+            std::transform(slashMungedDirName.begin(), slashMungedDirName.end(), slashMungedDirName.begin(),
+                           [](unsigned char c) { return std::tolower(c); });
+            string additionalDirPath = absl::StrCat(prefix, std::move(slashMungedDirName), "/");
             finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
     }
@@ -1321,7 +1334,8 @@ template <typename StateType> vector<ast::ParsedFile> rewriteFilesFast(StateType
             {
                 if constexpr (isMutableStateType) {
                     core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                    runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes());
+                    runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
+                                         gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
                 } else {
                     if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
                         // When we're running with an immutable GlobalState, we can't setIsPackage(false)
@@ -1329,7 +1343,8 @@ template <typename StateType> vector<ast::ParsedFile> rewriteFilesFast(StateType
                         continue;
                     }
                     core::Context ctx(gs, core::Symbols::root(), file.file);
-                    runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes());
+                    runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
+                                         gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
                 }
             }
             // Re-write imports and exports:
@@ -1372,7 +1387,8 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
             }
 
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes());
+            auto pkg = runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
+                                            gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.

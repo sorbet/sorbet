@@ -163,6 +163,7 @@ public:
     const packages::PackageDB &packageDB() const;
     void setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
                             const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                            const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
