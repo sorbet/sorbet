@@ -333,8 +333,8 @@ void OwnedKeyValueStore::checkVersions() {
 }
 
 namespace {
-size_t allUsedPages(MDB_stat &stat) {
-    return stat.ms_branch_pages + stat.ms_leaf_pages + stat.ms_overflow_pages;
+size_t allUsedBytes(MDB_stat &stat) {
+    return stat.ms_psize * (stat.ms_branch_pages + stat.ms_leaf_pages + stat.ms_overflow_pages);
 }
 
 } // namespace
@@ -351,14 +351,14 @@ size_t OwnedKeyValueStore::cacheSize() const {
     int rc;
     MDB_stat stat;
 
-    size_t totalPages = 0;
+    size_t totalBytes = 0;
 
     rc = mdb_env_stat(kvstore->dbState->env, &stat);
     if (rc != 0) {
         throw_mdb_error("failed to stat the main environment", rc, kvstorePath());
     }
 
-    totalPages += allUsedPages(stat);
+    totalBytes += allUsedBytes(stat);
 
     // Open the unnamed databse, which lists the names of all the other databases
     auto flavors = listFlavors(*kvstore->logger, txnState->txn, kvstorePath());
@@ -377,10 +377,10 @@ size_t OwnedKeyValueStore::cacheSize() const {
             throw_mdb_error(msg, rc, kvstorePath());
         }
 
-        totalPages += allUsedPages(stat);
+        totalBytes += allUsedBytes(stat);
     }
 
-    return totalPages * 4096;
+    return totalBytes;
 }
 
 optional<string_view> OwnedKeyValueStore::readString(string_view key) const {
