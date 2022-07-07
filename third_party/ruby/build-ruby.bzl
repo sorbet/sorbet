@@ -111,15 +111,6 @@ run_cmd make V=1 install
 
 ruby_version=$(./miniruby -r ./rbconfig.rb -e 'puts "#{{RbConfig::CONFIG["MAJOR"]}}.#{{RbConfig::CONFIG["MINOR"]}}"')
 
-static_libs="$base/{static_libs}"
-mkdir -p "$static_libs"
-
-cp libruby*-static.a "$static_libs/libruby-static.a"
-
-# from https://github.com/penelopezone/rubyfmt/blob/3051835cc28db04e9d9caf0c8430407ca0347e83/librubyfmt/build.rs#L34
-ar crs "libripper-static.a" ext/ripper/ripper.o
-cp "libripper-static.a" "$static_libs"
-
 internal_incdir="$base/{internal_incdir}"
 
 mkdir -p "$internal_incdir"
@@ -254,11 +245,8 @@ def _build_ruby_impl(ctx):
     sharedir = ctx.actions.declare_directory("toolchain/share")
 
     internal_incdir = ctx.actions.declare_directory("toolchain/internal_include")
-    static_libs = ctx.actions.declare_file("toolchain/static_libs")
-    static_lib_ruby = ctx.actions.declare_file("toolchain/static_libs/libruby-static.a")
-    static_lib_ripper = ctx.actions.declare_file("toolchain/static_libs/libripper-static.a")
 
-    outputs = binaries + [libdir, incdir, sharedir, internal_incdir, static_libs, static_lib_ruby, static_lib_ripper]
+    outputs = binaries + [libdir, incdir, sharedir, internal_incdir]
 
     install_extra_srcs = []
     extra_srcs_object_files = []
@@ -302,9 +290,6 @@ def _build_ruby_impl(ctx):
             toolchain = libdir.dirname,
             src_dir = src_dir,
             internal_incdir = internal_incdir.path,
-            static_libs = static_libs.path,
-            static_lib_ruby = static_lib_ruby.path,
-            static_lib_ripper = static_lib_ripper.path,
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
@@ -326,9 +311,6 @@ def _build_ruby_impl(ctx):
             internal_includes = internal_incdir,
             lib = libdir,
             share = sharedir,
-            static_libs = static_libs,
-            static_lib_ruby = static_lib_ruby,
-            static_lib_ripper = static_lib_ripper,
         ),
         DefaultInfo(
             files = depset(outputs),
