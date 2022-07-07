@@ -422,7 +422,7 @@ public:
         found.name = typeName->cnst;
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
         found.varianceName = core::NameRef();
-        found.isTypeTemplete = send->fun == core::Names::typeTemplate();
+        found.isTypeTemplate = send->fun == core::Names::typeTemplate();
 
         if (send->numPosArgs() > 1) {
             // Too many arguments. Define a static field that we'll use for this type åmember later.
@@ -1085,7 +1085,7 @@ class SymbolDefiner {
         }
 
         core::Variance variance = core::Variance::Invariant;
-        const bool isTypeTemplate = typeMember.isTypeTemplete;
+        const bool isTypeTemplate = typeMember.isTypeTemplate;
 
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();

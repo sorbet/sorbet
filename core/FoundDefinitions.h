@@ -131,7 +131,7 @@ struct FoundTypeMember final {
     core::LocOffsets litLoc;
     core::NameRef varianceName;
     bool isFixed = false;
-    bool isTypeTemplete = false;
+    bool isTypeTemplate = false;
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
