@@ -9,6 +9,7 @@ class Project::Bar::Bar
   def bar1
     Project::Foo::B.b
     Project::Foo::D.d
+    Project::FooBar::Z.z
   end
 
   sig { void }
