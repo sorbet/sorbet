@@ -365,7 +365,7 @@ size_t OwnedKeyValueStore::cacheSize() const {
 
     totalBytes += allUsedBytes(stat);
 
-    // Open the unnamed databse, which lists the names of all the other databases
+    // Open the unnamed database, which lists the names of all the other databases
     auto flavors = listFlavors(*kvstore->logger, txnState->txn, kvstorePath());
 
     for (const auto &flavor : flavors) {
