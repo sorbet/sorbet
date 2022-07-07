@@ -258,6 +258,42 @@ KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     return {static_cast<uint8_t *>(data.mv_data), data.mv_size};
 }
 
+namespace {
+
+vector<string> listFlavors(spdlog::logger &logger, MDB_txn *txn, string_view path) {
+    // Open the unnamed database, which lists the names of all the other databases
+    MDB_dbi unnamedDBI;
+    int rc = mdb_dbi_open(txn, nullptr, 0, &unnamedDBI);
+    if (rc != 0) {
+        throw_mdb_error("failed to clear the database"sv, rc, path);
+    }
+
+    vector<string> flavors;
+    MDB_cursor *cursor;
+    rc = mdb_cursor_open(txn, unnamedDBI, &cursor);
+    if (rc != 0) {
+        throw_mdb_error("failed to clear the database"sv, rc, path);
+    }
+
+    MDB_val kv;
+    MDB_val dv;
+    rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
+    while (rc != MDB_NOTFOUND) {
+        flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
+        logger.trace("OwnedKeyValueStore::checkVersions found flavor: {}", flavors.back());
+        rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
+    }
+    if (rc != 0 && rc != MDB_NOTFOUND) {
+        throw_mdb_error("failed to clear the database"sv, rc, path);
+    }
+
+    mdb_cursor_close(cursor);
+
+    return flavors;
+}
+
+} // namespace
+
 void OwnedKeyValueStore::checkVersions() {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0, kvstorePath());
@@ -265,33 +301,9 @@ void OwnedKeyValueStore::checkVersions() {
 
     kvstore->logger->trace("OwnedKeyValueStore::checkVersions");
 
+    int rc;
     {
-        // Open the unnamed database, which lists the names of all the other databases
-        int rc = mdb_dbi_open(txnState->txn, nullptr, 0, &txnState->dbi);
-        if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-        }
-
-        vector<string> flavors;
-        MDB_cursor *cursor;
-        rc = mdb_cursor_open(txnState->txn, txnState->dbi, &cursor);
-        if (rc != 0) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-        }
-
-        MDB_val kv;
-        MDB_val dv;
-        rc = mdb_cursor_get(cursor, &kv, &dv, MDB_FIRST);
-        while (rc != MDB_NOTFOUND) {
-            flavors.emplace_back(string((char *)kv.mv_data, kv.mv_size));
-            kvstore->logger->trace("OwnedKeyValueStore::checkVersions found flavor: {}", flavors.back());
-            rc = mdb_cursor_get(cursor, &kv, &dv, MDB_NEXT);
-        }
-        if (rc != 0 && rc != MDB_NOTFOUND) {
-            throw_mdb_error("failed to clear the database"sv, rc, kvstorePath());
-        }
-
-        mdb_cursor_close(cursor);
+        auto flavors = listFlavors(*kvstore->logger, txnState->txn, kvstorePath());
 
         for (const auto &flavor : flavors) {
             rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &txnState->dbi);
@@ -318,6 +330,62 @@ void OwnedKeyValueStore::checkVersions() {
     }
 
     refreshMainTransaction();
+}
+
+namespace {
+size_t allUsedBytes(MDB_stat &stat) {
+    return stat.ms_psize * (stat.ms_branch_pages + stat.ms_leaf_pages + stat.ms_overflow_pages);
+}
+
+} // namespace
+
+// I got the inspiration for this implementation from this answer:
+//
+//     https://stackoverflow.com/a/40527056
+//
+// Unfortunately it seems that there is not a convenient helper function for this built into the LMDB API.
+size_t OwnedKeyValueStore::cacheSize() const {
+    if (writerId != this_thread::get_id()) {
+        // This is mostly for simplicity. This is technically a read-only transaction, and so we
+        // could support doing it with txnState->readers[this_thread::get_id()] but that seems like
+        // overkill given that we don't need to do so at the moment.
+        throw_mdb_error("Can only call cacheSize from main thread"sv, 0, kvstorePath());
+    }
+
+    kvstore->logger->trace("OwnedKeyValueStore::cacheSize");
+    int rc;
+    MDB_stat stat;
+
+    size_t totalBytes = 0;
+
+    rc = mdb_env_stat(kvstore->dbState->env, &stat);
+    if (rc != 0) {
+        throw_mdb_error("failed to stat the main environment", rc, kvstorePath());
+    }
+
+    totalBytes += allUsedBytes(stat);
+
+    // Open the unnamed database, which lists the names of all the other databases
+    auto flavors = listFlavors(*kvstore->logger, txnState->txn, kvstorePath());
+
+    for (const auto &flavor : flavors) {
+        MDB_dbi flavorDBI;
+        rc = mdb_dbi_open(txnState->txn, flavor.c_str(), 0, &flavorDBI);
+        if (rc != 0) {
+            auto msg = fmt::format("failed to open cache flavor {}", flavor);
+            throw_mdb_error(msg, rc, kvstorePath());
+        }
+
+        rc = mdb_stat(txnState->txn, flavorDBI, &stat);
+        if (rc != 0) {
+            auto msg = fmt::format("failed to stat the cache flavor {}", flavor);
+            throw_mdb_error(msg, rc, kvstorePath());
+        }
+
+        totalBytes += allUsedBytes(stat);
+    }
+
+    return totalBytes;
 }
 
 optional<string_view> OwnedKeyValueStore::readString(string_view key) const {

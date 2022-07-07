@@ -97,6 +97,14 @@ public:
      * be re-owned if more writes are desired.  Must be called by the owning thread. */
     static std::unique_ptr<KeyValueStore> bestEffortCommit(spdlog::logger &logger,
                                                            std::unique_ptr<OwnedKeyValueStore> ownedKvstore);
+
+    /**
+     * Computes how full the cache is, in bytes.
+     *
+     * Computes size by summing all used pages (not free pages) across all named databases and the unnamed database,
+     * and then multiplying by the page size.
+     */
+    size_t cacheSize() const;
 };
 
 } // namespace sorbet

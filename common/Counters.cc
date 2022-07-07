@@ -84,6 +84,13 @@ void CounterImpl::prodCounterAdd(const char *counter, unsigned long value) {
     this->counters[counter] += value;
 }
 
+void CounterImpl::prodCounterSet(const char *counter, unsigned long value) {
+    if (fuzz_mode) {
+        return;
+    }
+    this->counters[counter] = value;
+}
+
 void CounterImpl::timingAdd(CounterImpl::Timing timing) {
     if (fuzz_mode) {
         return;
@@ -155,6 +162,10 @@ void counterInc(ConstExprStr counter) {
 
 void prodCounterAdd(ConstExprStr counter, unsigned long value) {
     counterState.prodCounterAdd(counter.str, value);
+}
+
+void prodCounterSet(ConstExprStr counter, unsigned long value) {
+    counterState.prodCounterSet(counter.str, value);
 }
 
 void prodCounterInc(ConstExprStr counter) {

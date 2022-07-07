@@ -59,6 +59,19 @@ python -mlmdb --env bad-jenkins-cache drop dsl-normalfastpath
 
 # Copies and compacts what's stored in `./bad-jenkins-cache/data.mdb`.
 python -mlmdb copy --compact --env bad-jenkins-cache compacted
+
+# Opens a shell so you can use the Python API to interact with the database
+python -mlmdb --env example-cache shell
+# Python 3.9.12 (main, Mar 23 2022, 21:36:19)
+# [GCC 5.4.0 20160609] on linux
+# Type "help", "copyright", "credits" or "license" for more information.
+# (InteractiveConsole)
+# >>> subdb = ENV.open_db(b'default')
+# >>> with ENV.begin() as txn:
+# ...     txn.stat(subdb)
+# ...
+# {'psize': 4096, 'depth': 2, 'branch_pages': 1, 'leaf_pages': 20, 'overflow_pages': 699, 'entries': 90}
+
 ```
 
 
