@@ -1261,9 +1261,6 @@ public:
     std::string nodeName();
 
     void _sanityCheck();
-private:
-    friend TreeCopier;
-    EmptyTree(const void *avoid, const EmptyTree *exp);
 };
 CheckSize(EmptyTree, 8, 8);
 
