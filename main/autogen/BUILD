@@ -8,6 +8,7 @@ cc_library(
         "crc_builder.cc",
         "token_prop_analysis.cc",
         "subclasses.cc",
+        "token_prop_analysis.cc",
     ],
     hdrs = [
         "autogen.h",
@@ -17,6 +18,7 @@ cc_library(
         "crc_builder.h",
         "token_prop_analysis.h",
         "subclasses.h",
+        "token_prop_analysis.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
