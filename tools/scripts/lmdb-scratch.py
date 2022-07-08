@@ -9,7 +9,7 @@ import csv
 # into LMDB cache sizes in the past.
 #
 # It's not tested, and is mostly useful for invoking by-hand on a Sorbet cache,
-# but it should at lest serve as a way to document gotchas and things to look
+# but it should at least serve as a way to document gotchas and things to look
 # for when attempting to debug Sorbet cache sizes.
 #
 #
