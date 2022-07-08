@@ -200,6 +200,8 @@ NameDef names[] = {
     {"prop"},
     {"tokenProp", "token_prop"},
     {"timestampedTokenProp", "timestamped_token_prop"},
+    {"registerPrefix", "register_prefix"},
+    {"setArchiveTokenPrefix", "set_archive_token_prefix"},
     {"createdProp", "created_prop"},
     {"updatedProp", "updated_prop"},
     {"merchantProp", "merchant_prop"},
@@ -283,6 +285,8 @@ NameDef names[] = {
 
     {"keywordInit", "keyword_init"},
 
+    {"configureArchival", "configure_archival"},
+    {"originalClass", "original_class"},
     {"DB", "DB", true},
     {"Model", "Model", true},
     {"Mixins", "Mixins", true},
@@ -290,6 +294,12 @@ NameDef names[] = {
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
     {"Enum", "Enum", true},
+    {"Event", "Event", true},
+    {"DeprecatedFramework", "DeprecatedFramework", true},
+    {"Risk", "Risk", true},
+    {"Denylists", "Denylists", true},
+    {"AbstractBlacklistRecord", "AbstractBlacklistRecord", true},
+    {"AbstractEvent", "AbstractEvent", true},
 
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
@@ -566,6 +576,8 @@ NameDef names[] = {
 
     // used by the compiler
     {"returnValue", "<returnValue>"},
+    // Model DSL
+    {"modelDsl", "model"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
