@@ -25,6 +25,27 @@ In the C API, you read the unnamed database by calling `mdb_dbi_open` with a
 `nullptr` name argument. In the Python wrapper, you get the unnamed database by
 omitting the `<dbname>=<file>` argument to `dump` (and other subcommands).
 
+## Note on using `ls -lh`
+
+The sizes reported using `ls -l` can be misleading.
+
+- If you use `mdb_drop(..., 1)` to delete a database, that just removes the
+  entry from the unnamed list. It doesn't actually remove the pages from the
+  on-disk file, but it does mean that the space will be available.
+- You can request that the database be compacted (using
+  `mdb_env_copy2(..., MDB_CP_COMPACT)`). This is never done internally because
+  LMDB is trying to optimize for read/write latency not disk usage.
+- Even just normal Sorbet write patterns can fragment the database. I have seen
+  at least one example where a database was sitting at 4.0 GiB on disk which
+  dropped to 2.4 GiB after merely being compacted (not dropping anything).
+- The `MDB_MAP_FULL` error is not a function of how many bytes are in the
+  database, even though the size is configured in bytes. If you look in the
+  code, you see that it's reported when LMDB requests a free page but getting
+  one would push the size of the DB over the cap. So things like fragmentation
+  and overflow page utilization can mean that there's technically parts of the
+  database that are empty, but there's no room (this is similar to the failure
+  mode when malloc doesn't have space available in the heap).
+
 ## Note on cdbmake
 
 The `dump` subcommand from the `lmdb` Python package references a cdbmake
