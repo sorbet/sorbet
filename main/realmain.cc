@@ -12,6 +12,7 @@
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
 #include "main/autogen/subclasses.h"
+#include "main/autogen/token_prop_analysis.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
@@ -194,6 +195,7 @@ struct AutogenResult {
         string strval;
         string msgpack;
         optional<autogen::Subclasses::Map> subclasses;
+        optional<UnorderedMap<vector<core::NameRef>, autogen::TokenProps>> tokenPropsByClass;
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
@@ -240,6 +242,12 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     if (opts.print.Autogen.enabled) {
                         Timer timeit(logger, "autogenToString");
                         serialized.strval = pf.toString(ctx, autogenVersion);
+                    }
+                    if (opts.print.TokenPropAnalysis.enabled) {
+                        auto &tree2 = indexed[idx];
+                        Timer timeit(logger, "tokenPropAnalysisToString");
+                        auto tpaf = autogen::TokenPropAnalysis::generate(ctx, move(tree2), *crcBuilder);
+                        serialized.tokenPropsByClass = std::move(tpaf.tokenPropsByClass);
                     }
                     if (opts.print.AutogenMsgPack.enabled) {
                         Timer timeit(logger, "autogenToMsgpack");
@@ -338,6 +346,40 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
+    }
+
+    if (opts.print.TokenPropAnalysis.enabled) {
+        Timer timeit(logger, "autogenTokenPropAnalysisPrint");
+
+        UnorderedMap<std::vector<core::NameRef>, autogen::TokenProps> allTokenProps;
+
+        for (const auto &el : merged) {
+            if (el.tokenPropsByClass) {
+                for (auto &it : std::move(*el.tokenPropsByClass)) {
+                    const auto existingTokenPropsIt = allTokenProps.find(it.first);
+                    if (existingTokenPropsIt != allTokenProps.end()) {
+                        autogen::TokenProps &existingInfo = existingTokenPropsIt->second;
+                        existingInfo.props.insert(existingInfo.props.end(), it.second.props.begin(),
+                                                  it.second.props.end());
+                        continue;
+                    }
+
+                    allTokenProps.emplace(it.first, it.second);
+                }
+            }
+        }
+
+        const auto &processedAllTokenProps = autogen::mergeAndFilterAllTokenProps(gs, std::move(allTokenProps));
+        fmt::memory_buffer out;
+
+        for (const auto &it : processedAllTokenProps) {
+            autogen::printName(out, it.first, gs);
+            fmt::format_to(std::back_inserter(out), "{}\n", ":");
+            it.second.formatString(out, it.first, gs);
+        }
+
+        auto f = to_string(out);
+        opts.print.TokenPropAnalysis.fmt("{}", f);
     }
 }
 
