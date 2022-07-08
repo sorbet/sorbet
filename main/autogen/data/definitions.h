@@ -176,6 +176,45 @@ struct ParsedFile {
     std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
+struct LocInfo {
+    core::FileRef file;
+    core::LocOffsets loc;
+};
+
+struct PropInfo {
+    core::NameRef name;
+    bool isTimestamped;
+
+    std::string toString(const std::vector<core::NameRef> &klass, const core::GlobalState &gs) const;
+};
+
+struct TokenProps {
+    std::vector<PropInfo> props;
+    std::vector<std::vector<core::NameRef>> ancestors;
+
+    // file
+    core::FileRef file;
+
+    void formatString(fmt::memory_buffer &out, const std::vector<core::NameRef> &klass,
+                      const core::GlobalState &gs) const;
+};
+
+void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs);
+UnorderedMap<std::vector<core::NameRef>, TokenProps>
+mergeAndFilterAllTokenProps(const core::GlobalState &gs,
+                            UnorderedMap<std::vector<core::NameRef>, TokenProps> allTokenProps);
+
+struct TokenPropAnalysisFile {
+    // the checksum of this file
+    uint32_t cksum;
+
+    // map of class -> TokenProps
+    UnorderedMap<std::vector<core::NameRef>, TokenProps> tokenPropsByClass;
+
+    // file
+    core::FileRef file;
+};
+
 // A `Package` represents Autogen's view of a package file
 struct Package {
     // the original file AST from Sorbet

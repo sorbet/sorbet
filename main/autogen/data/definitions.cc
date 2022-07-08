@@ -1,9 +1,12 @@
 #include "main/autogen/data/definitions.h"
+#include "absl/strings/ascii.h"
+#include "absl/strings/str_join.h"
 #include "ast/ast.h"
 #include "common/formatting.h"
 #include "core/Files.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/msgpack.h"
+#include <regex>
 
 using namespace std;
 
@@ -149,6 +152,115 @@ string ParsedFile::toString(const core::GlobalState &gs, int version) const {
         }
     }
     return to_string(out);
+}
+
+std::string PropInfo::toString(const std::vector<core::NameRef> &klass, const core::GlobalState &gs) const {
+    if (name == core::NameRef::noName()) {
+        if (isTimestamped) {
+            vector<std::string> prefixParts;
+            std::regex caps("[^A-Z]");
+            std::transform(klass.begin(), klass.end(), std::back_inserter(prefixParts),
+                           [&gs, &caps](const auto &nr) -> std::string {
+                               return absl::AsciiStrToLower(std::regex_replace(nr.show(gs), caps, ""));
+                           });
+
+            return absl::StrJoin(prefixParts, "");
+        } else {
+            return absl::AsciiStrToLower(klass.back().show(gs).substr(0, 3));
+        }
+    }
+
+    return name.show(gs);
+}
+
+// Pretty-print a `TokenProps object`
+void TokenProps::formatString(fmt::memory_buffer &out, const std::vector<core::NameRef> &klass,
+                              const core::GlobalState &gs) const {
+    if (props.empty()) {
+        fmt::format_to(std::back_inserter(out), "  props: {}\n", "[]");
+    } else {
+        fmt::format_to(std::back_inserter(out), "  props:{}", "\n");
+        for (const auto &prop : props) {
+            fmt::format_to(std::back_inserter(out), "  - {}\n", prop.toString(klass, gs));
+        }
+    }
+
+    fmt::format_to(std::back_inserter(out), "{}", "\n");
+}
+
+void printName(fmt::memory_buffer &out, const std::vector<core::NameRef> &parts, const core::GlobalState &gs) {
+    for (int i = 0; i < parts.size(); i++) {
+        if (i == parts.size() - 1) {
+            fmt::format_to(std::back_inserter(out), "{}", parts[i].show(gs));
+        } else {
+            fmt::format_to(std::back_inserter(out), "{}::", parts[i].show(gs));
+        }
+    }
+}
+
+UnorderedMap<std::vector<core::NameRef>, TokenProps>
+mergeAndFilterAllTokenProps(const core::GlobalState &gs,
+                            UnorderedMap<std::vector<core::NameRef>, TokenProps> allTokenProps) {
+    const std::vector<core::NameRef> CHALK_ODM_MODEL = {core::Names::Constants::Chalk(), core::Names::Constants::ODM(),
+                                                        core::Names::Constants::Model()};
+    const std::vector<core::NameRef> OPUS_EVENT_DEPRECATEDFRAMEWORK_ABSTRACTEVENT = {
+        core::Names::Constants::Opus(), core::Names::Constants::Event(), core::Names::Constants::DeprecatedFramework(),
+        core::Names::Constants::AbstractEvent()};
+    const std::vector<core::NameRef> OPUS_RISK_DENYLISTS_MODEL_ABSTRACT_BLACKLIST_RECORD = {
+        core::Names::Constants::Opus(),
+        core::Names::Constants::Risk(),
+        core::Names::Constants::Denylists(),
+        core::Names::Constants::Model(),
+        core::Names::Constants::AbstractBlacklistRecord(),
+    };
+
+    UnorderedMap<std::vector<core::NameRef>, TokenProps> result;
+
+    for (auto &it : allTokenProps) {
+        const std::vector<core::NameRef> &klass = it.first;
+        if (klass == OPUS_EVENT_DEPRECATEDFRAMEWORK_ABSTRACTEVENT) {
+            continue;
+        }
+
+        TokenProps info = it.second;
+        UnorderedSet<std::vector<core::NameRef>> allAncestors;
+        std::deque<std::vector<core::NameRef>> queue;
+
+        queue.insert(queue.end(), info.ancestors.begin(), info.ancestors.end());
+        while (!queue.empty()) {
+            std::vector<core::NameRef> curAncst = queue.at(0);
+            queue.pop_front();
+            allAncestors.insert(curAncst);
+
+            auto curAncstInfo = allTokenProps.find(curAncst);
+            if (curAncstInfo == allTokenProps.end()) {
+                continue;
+            }
+
+            queue.insert(queue.end(), curAncstInfo->second.ancestors.begin(), curAncstInfo->second.ancestors.end());
+        }
+
+        if (allAncestors.find(CHALK_ODM_MODEL) != allAncestors.end()) {
+            // Models
+            for (const std::vector<core::NameRef> &ancst : allAncestors) {
+                auto ancstInfoIt = allTokenProps.find(ancst);
+                if (ancstInfoIt == allTokenProps.end()) {
+                    continue;
+                }
+                TokenProps &ancstInfo = ancstInfoIt->second;
+
+                // Known ancestors in Stripe codebase which allow token props to be inherited
+                if (ancst == OPUS_EVENT_DEPRECATEDFRAMEWORK_ABSTRACTEVENT &&
+                    ancst == OPUS_RISK_DENYLISTS_MODEL_ABSTRACT_BLACKLIST_RECORD) {
+                    info.props.insert(info.props.end(), ancstInfo.props.begin(), ancstInfo.props.end());
+                }
+            }
+
+            result.emplace(klass, std::move(info));
+        }
+    }
+
+    return result;
 }
 
 // List every class name defined in this `ParsedFile`.
