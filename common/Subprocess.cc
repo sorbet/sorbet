@@ -3,7 +3,6 @@
 #include <array>
 #include <spawn.h>
 #include <sstream>
-#include <string.h>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -101,7 +100,7 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawnAndPipeInput(strin
 
         // Write contents to child process stdin
         vector<char> contents(stdinContents.begin(), stdinContents.end());
-        ret = write(stdinPipe[1], contents.data(), strlen(contents.data()));
+        ret = write(stdinPipe[1], contents.data(), contents.size());
         if (ret < 0) {
             return nullopt;
         }
@@ -143,5 +142,5 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawnAndPipeInput(strin
         return nullopt;
     }
 
-    return sorbet::Subprocess::Result{sink.str(), childStatus};
+    return sorbet::Subprocess::Result{sink.str(), WEXITSTATUS(childStatus)};
 }
