@@ -9,7 +9,12 @@ class Subprocess {
     Subprocess() = delete;
 
 public:
-    static std::optional<std::string> spawn(std::string executable, std::vector<std::string> arguments);
+    typedef struct {
+        std::string output;
+        int status;
+    } Result;
+
+    static std::optional<Subprocess::Result> spawnAndPipeInput(std::string executable, std::string stdinContents);
 };
 
 } // namespace sorbet

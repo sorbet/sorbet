@@ -3,6 +3,7 @@
 #include <array>
 #include <spawn.h>
 #include <sstream>
+#include <string.h>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -53,46 +54,65 @@ private:
 };
 } // namespace
 
-// can't take string_views because we need char * not const char *
-optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arguments) {
+// Spawns a new child process, pipes `stdinContents` into the new processes's stdin,
+// and returns the child's stdout and status code
+optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawnAndPipeInput(string executable, string stdinContents) {
     if (emscripten_build) {
         return nullopt;
     }
-    int readWrite[2];
+    int stdinPipe[2];
+    int stdoutPipe[2];
     int ret;
+
     pid_t childPid;
 
-    ret = pipe(readWrite);
+    // setup pipes
+    ret = pipe(stdoutPipe);
     if (ret) {
         return nullopt;
     }
-    FileCloser closeRead(readWrite[0]);
+    ret = pipe(stdinPipe);
+    if (ret) {
+        return nullopt;
+    }
+
+    FileCloser closeStdoutRead(stdoutPipe[0]);
+    FileCloser closeStdinRead(stdinPipe[0]);
     {
-        FileCloser closeWrite(readWrite[1]);
+        FileCloser closeStdoutWrite(stdoutPipe[1]);
+        FileCloser closeStdinWrite(stdinPipe[1]);
 
         FileActions fileActions;
         if (!fileActions.initialized()) {
             return nullopt;
         }
 
-        // put the write end as stdout
-        ret = posix_spawn_file_actions_adddup2(fileActions, readWrite[1], 1);
-        if (ret) {
-            return nullopt;
-        }
-        // close the read end of the pipe
-        ret = posix_spawn_file_actions_addclose(fileActions, readWrite[0]);
+        // Put the child's write end as stdout
+        ret = posix_spawn_file_actions_adddup2(fileActions, stdoutPipe[1], 1);
         if (ret) {
             return nullopt;
         }
 
-        vector<char *> argv;
-        argv.reserve(arguments.size() + 2);
-        argv.push_back(executable.data());
-        for (auto &arg : arguments) {
-            argv.push_back(arg.data());
+        // Put the child's read end as stdin
+        ret = posix_spawn_file_actions_adddup2(fileActions, stdinPipe[0], 0);
+        if (ret) {
+            return nullopt;
         }
-        argv.push_back(nullptr);
+
+        // Write contents to child process stdin
+        vector<char> contents(stdinContents.begin(), stdinContents.end());
+        ret = write(stdinPipe[1], contents.data(), strlen(contents.data()));
+        if (ret < 0) {
+            return nullopt;
+        }
+
+        // Close child process's stdin
+        ret = posix_spawn_file_actions_addclose(fileActions, stdinPipe[1]);
+        if (ret) {
+            return nullopt;
+        }
+
+        vector<char *> argv{executable.data(), nullptr};
 
         ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
         if (ret) {
@@ -103,7 +123,7 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
     stringstream sink;
     array<char, 512> chunk;
     while (true) {
-        const ssize_t bytesRead = read(readWrite[0], chunk.data(), chunk.size());
+        const ssize_t bytesRead = read(stdoutPipe[0], chunk.data(), chunk.size());
         if (bytesRead > 0) {
             sink << string_view(chunk.data(), bytesRead);
         } else if (bytesRead == 0) {
@@ -122,9 +142,6 @@ optional<string> sorbet::Subprocess::spawn(string executable, vector<string> arg
     if (childPid != waitResult) {
         return nullopt;
     }
-    if (childStatus != 0) {
-        return nullopt;
-    }
 
-    return sink.str();
+    return sorbet::Subprocess::Result{sink.str(), childStatus};
 }
