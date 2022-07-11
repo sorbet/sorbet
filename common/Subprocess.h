@@ -14,7 +14,8 @@ public:
         int status;
     } Result;
 
-    static std::optional<Subprocess::Result> spawnAndPipeInput(std::string executable, std::string stdinContents);
+    static std::optional<Subprocess::Result> spawn(std::string executable, std::vector<std::string> arguments,
+                                                   std::optional<std::string> stdinContents);
 };
 
 } // namespace sorbet

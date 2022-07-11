@@ -55,7 +55,8 @@ private:
 
 // Spawns a new child process, pipes `stdinContents` into the new processes's stdin,
 // and returns the child's stdout and status code
-optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawnAndPipeInput(string executable, string stdinContents) {
+optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable, vector<string> arguments,
+                                                               optional<string> stdinContents) {
     if (emscripten_build) {
         return nullopt;
     }
@@ -99,10 +100,12 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawnAndPipeInput(strin
         }
 
         // Write contents to child process stdin
-        vector<char> contents(stdinContents.begin(), stdinContents.end());
-        ret = write(stdinPipe[1], contents.data(), contents.size());
-        if (ret < 0) {
-            return nullopt;
+        if (stdinContents.has_value()) {
+            vector<char> contents(stdinContents->begin(), stdinContents->end());
+            ret = write(stdinPipe[1], contents.data(), contents.size());
+            if (ret < 0) {
+                return nullopt;
+            }
         }
 
         // Close child process's stdin
@@ -111,7 +114,13 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawnAndPipeInput(strin
             return nullopt;
         }
 
-        vector<char *> argv{executable.data(), nullptr};
+        vector<char *> argv;
+        argv.reserve(arguments.size() + 2);
+        argv.push_back(executable.data());
+        for (auto &arg : arguments) {
+            argv.push_back(arg.data());
+        }
+        argv.push_back(nullptr);
 
         ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
         if (ret) {
