@@ -801,6 +801,18 @@ public:
         // NOTE: We're skipping variance checks on the stdlib right now, as
         // Array and Hash are defined with their parameters as covariant, and as
         // a result most of their methods would fail this check.
+        if (methodData->loc().empty()) {
+            Exception::raise("No loc! method=\"{}\" treeLoc=\"{}\"", methodDef.symbol.show(ctx),
+                             tree.loc().showRaw(ctx));
+        }
+        if (!methodData->loc().exists()) {
+            Exception::raise("First loc does not exist! method=\"{}\" treeLoc=\"{}\"", methodDef.symbol.show(ctx),
+                             tree.loc().showRaw(ctx));
+        }
+        if (!methodData->loc().file().exists()) {
+            Exception::raise("File of first loc does not exist! method=\"{}\" treeLoc=\"{}\"",
+                             methodDef.symbol.show(ctx), tree.loc().showRaw(ctx));
+        }
         if (!methodData->loc().file().data(ctx).isStdlib() && !ownerData->typeMembers().empty()) {
             variance::validateMethodVariance(ctx, methodDef.symbol);
         }
