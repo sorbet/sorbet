@@ -333,6 +333,78 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1, /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction") {
+    // Note:
+    //
+    // VS Code sends a code action request after almost every edit, trying to figure out which
+    // actions are available at the new cursor position, so this case is actually abundantly common.
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Create a new file.
+    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+
+    // clear counters
+    getCounters();
+
+    // Add something to the empty file to trigger a slow path
+    auto preemptionsExpected = 1;
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class A\n"
+                          "  def example; end\n"
+                          "  \n"
+                          "end\n",
+                          2, false, preemptionsExpected));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // Send a codeAction request at the cursor position
+    sendAsync(*codeAction("foo.rb", 3, 2));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+
+    // First response should be codeAction.
+    {
+        auto response = readAsync();
+        REQUIRE(response->isResponse());
+        auto &codeActions = get<vector<unique_ptr<CodeAction>>>(
+            get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(*response->asResponse().result));
+        CHECK_EQ(codeActions.size(), 0);
+    }
+
+    // Second should be typecheck run signaling that typechecking completed.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "textDocument.codeAction"), 1);
+
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "query"), 1);
+    // 1 per edit
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1, /* assertUniqueStartTimes */ false);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndReturnsErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;

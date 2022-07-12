@@ -1142,13 +1142,13 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                                     core::Context ctx(gs, core::Symbols::root(), file);
                                     auto file = job.file;
                                     typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
-                                    processedFiles.emplace_back(file);
                                 } catch (SorbetException &) {
                                     Exception::failInFuzzer();
                                     gs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                       file.data(gs).path());
                                 }
                                 // Stream out errors
+                                processedFiles.emplace_back(file);
                                 outputq->push(move(processedFiles), processedByThread);
                                 processedByThread = 0;
                             }
