@@ -44,4 +44,36 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  describe "immutable structs" do
+    it "errors when using prop" do
+      assert_raises(RuntimeError) do
+        Class.new(T::ImmutableStruct) do
+          prop :foo, Integer
+        end
+      end
+    end
+
+    it "errors when using with" do
+      klass = Class.new(T::ImmutableStruct) do
+        const :foo, Integer
+      end
+
+      assert_raises(RuntimeError) do
+        klass.new(foo: 1).with({foo: 5})
+      end
+    end
+
+    it "produces frozen objects" do
+      klass = Class.new(T::ImmutableStruct) do
+        const :foo, Integer
+      end
+
+      object = klass.new(foo: 5)
+
+      assert_raises(FrozenError) do
+        object.instance_variable_set(:@foo, 3)
+      end
+    end
+  end
 end
