@@ -12,6 +12,9 @@ end
 class T::Struct < T::InexactStruct
 end
 
+class T::ImmutableStruct < T::InexactStruct
+end
+
 module T::Props
   extend T::Helpers
   mixes_in_class_methods(T::Props::ClassMethods)
