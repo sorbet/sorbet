@@ -272,11 +272,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                         absl::c_set_symmetric_difference(oldMethodHashes, newMethodHashes,
                                                          std::back_inserter(changedMethodSymbolHashes));
 
-                        // Okay to `move` here (steals component of getFileHash) because we're about to use
-                        // replaceFile to clobber fref.data(*gs) anyways.
-                        oldFoundMethodHashesForFiles.emplace(fref,
-                                                             move(fref.data(*gs).getFileHash()->foundMethodHashes));
-
+                        // Only set oldFoundMethodHashesForFiles if symbols actually changed
+                        // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
+                        // methods only to redefine them with different IDs.
+                        if (!changedMethodSymbolHashes.empty()) {
+                            // Okay to `move` here (steals component of getFileHash) because we're about to use
+                            // replaceFile to clobber fref.data(*gs) anyways.
+                            oldFoundMethodHashesForFiles.emplace(fref,
+                                                                 move(fref.data(*gs).getFileHash()->foundMethodHashes));
+                        }
                     } else {
                         // Both oldHash and newHash should have the same methods, since this is the fast path!
                         ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
@@ -352,7 +356,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
-        if (config->opts.lspExperimentalFastPathEnabled &&
+        // See earlier in the method for an explanation of the .empty() check here.
+        if (config->opts.lspExperimentalFastPathEnabled && !changedSymbolNameHashes.empty() &&
             oldFoundMethodHashesForFiles.find(f) == oldFoundMethodHashesForFiles.end()) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"

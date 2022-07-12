@@ -857,17 +857,17 @@ class SymbolDefiner {
 
     core::MethodRef insertMethod(core::MutableContext ctx, const core::FoundMethod &method) {
         auto symbol = defineMethod(ctx, method);
-        if (!ctx.state.lspExperimentalFastPathEnabled) {
-            auto name = symbol.data(ctx)->name;
-            if (name.kind() == core::NameKind::UNIQUE &&
-                name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload) {
-                // These name kinds are only created in resolver, which means that we must be running on
-                // the fast path with an existing GlobalState.
-                // When modifyMethod is called later, it won't be able to find the correct method entry.
-                // Let's leave the method visibility what it was.
-                // TODO(jez) After #5808 lands, can we delete this check?
-                return symbol;
-            }
+        auto name = symbol.data(ctx)->name;
+        if (name.kind() == core::NameKind::UNIQUE &&
+            name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload) {
+            // These name kinds are only created in resolver, which means that we must be running on
+            // the fast path with an existing GlobalState.
+            // When modifyMethod is called later, it won't be able to find the correct method entry.
+            // Let's leave the method visibility what it was.
+            // TODO(jez) After #5808 lands, can we delete this check?
+            // TODO(jez) The change to only populate oldFoundMethodHashesForFiles means that no, we
+            // actually can't remove this quite yet.
+            return symbol;
         }
 
         auto implicitlyPrivate = ctx.owner.enclosingClass(ctx) == core::Symbols::root();

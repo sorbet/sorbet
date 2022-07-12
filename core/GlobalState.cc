@@ -1012,7 +1012,22 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
 
     if (name.kind() == NameKind::UNIQUE) {
         auto uniqueData = name.dataUnique(*this);
-        if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
+        if (uniqueData->uniqueNameKind == UniqueNameKind::MangleRenameOverload) {
+            auto it = ownerScope->members().find(uniqueData->original);
+            ENFORCE(it != ownerScope->members().end());
+            // return it->second;
+            auto res = findRenamedSymbol(owner, it->second);
+            if (res.exists() && res.isMethod()) {
+                const auto &resData = res.asMethodRef().data(*this);
+                if (resData->flags.isOverloaded) {
+                    auto overloadedName = lookupNameUnique(UniqueNameKind::MangleRenameOverload, resData->name, 1);
+                    auto it = ownerScope->members().find(overloadedName);
+                    ENFORCE(it != ownerScope->members().end());
+                    res = it->second;
+                }
+            }
+            return res;
+        } else if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
             return Symbols::noSymbol();
         }
         if (uniqueData->num == 1) {
