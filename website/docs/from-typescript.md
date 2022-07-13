@@ -278,6 +278,19 @@ end</code></pre>
     </tr>
     <tr>
       <td>
+        <code>x?.foo</code>
+      </td>
+      <td>
+        <code>x&.foo</code>
+      </td>
+      <td>
+        This is built into Ruby (Sorbet is not required to use it). The feature
+        is called "optional chaining" in TypeScript or "the safe navigation
+        operator" in Ruby.
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>x!.foo</code>
       </td>
       <td>
@@ -285,6 +298,26 @@ end</code></pre>
       </td>
       <td>
         See <a href="/docs/type-assertions">Type Assertions</a> for more.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>x ?? y</code>
+      </td>
+      <td>
+        <code>x.nil? ? y : x</code>
+      </td>
+      <td>
+        TypeScript calls this feature "nullish coalescing". A close
+        approximation in Ruby is <code>x || y</code>. Only <code>nil</code> and
+        <code>false</code> are falsy in Ruby (meanwhile <code>0</code>,
+        <code>''</code>, <code>NaN</code>, etc. are falsy in TypeScript). Thus,
+        <code>x || y</code> in Ruby behaves exactly like <code>x ?? y</code> in
+        TypeScript <strong>unless</strong> <code>x</code> can be
+        <code>false</code>. If <code>x</code> is false, <code>x || y</code>
+        evaluates to <code>false</code>, while <code>x ?? y</code> evaluates to
+        <code>y</code>. Thus the closest approximation is to use a ternary
+        operator.
       </td>
     </tr>
     <tr>
