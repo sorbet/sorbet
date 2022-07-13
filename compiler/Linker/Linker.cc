@@ -34,7 +34,7 @@ bool Linker::run(spdlog::logger &log, vector<string> objectFiles, string outputF
     for (auto &of : objectFiles) {
         commandLineArgs.emplace_back(move(of));
     }
-    auto ldOutput = Subprocess::spawn(executable, commandLineArgs);
+    auto ldOutput = Subprocess::spawn(executable, commandLineArgs, nullopt);
     return ldOutput != nullopt;
 };
 

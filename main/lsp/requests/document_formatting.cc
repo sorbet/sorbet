@@ -1,10 +1,10 @@
 #include "main/lsp/requests/document_formatting.h"
 #include "common/FileOps.h"
+#include "common/Subprocess.h"
 #include "common/common.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include "subprocess.hpp"
 
 using namespace std;
 
@@ -82,13 +82,11 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
 
     if (!sourceView.empty()) {
         auto originalLineCount = findLineBreaks(sourceView).size() - 1;
-        auto process = subprocess::Popen({config.opts.rubyfmtPath}, subprocess::output{subprocess::PIPE},
-                                         subprocess::input{subprocess::PIPE});
-        auto processResponse = process.communicate(vector<char>(sourceView.begin(), sourceView.end()));
-        process.wait();
-        auto returnCode = process.retcode();
+        auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(),
+                                                         string(sourceView.begin(), sourceView.end()));
 
-        std::string formattedContents(processResponse.first.buf.begin(), processResponse.first.buf.end());
+        auto returnCode = processResponse->status;
+        auto formattedContents = processResponse->output;
 
         switch (returnCode) {
             case RubyfmtStatus::OK:
