@@ -7,6 +7,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
+#include <fcntl.h>
+#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -99,6 +101,22 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable
             return nullopt;
         }
 
+        vector<char *> argv;
+        argv.reserve(arguments.size() + 2);
+        argv.push_back(executable.data());
+        for (auto &arg : arguments) {
+            argv.push_back(arg.data());
+        }
+        argv.push_back(nullptr);
+
+        // Close child copy of the file descriptor on exec
+        fcntl(stdinPipe[1], F_SETFD, FD_CLOEXEC);
+
+        ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
+        if (ret) {
+            return nullopt;
+        }
+
         // Write contents to child process stdin
         if (stdinContents.has_value()) {
             vector<char> contents(stdinContents->begin(), stdinContents->end());
@@ -110,19 +128,6 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable
 
         // Close child process's stdin
         ret = posix_spawn_file_actions_addclose(fileActions, stdinPipe[1]);
-        if (ret) {
-            return nullopt;
-        }
-
-        vector<char *> argv;
-        argv.reserve(arguments.size() + 2);
-        argv.push_back(executable.data());
-        for (auto &arg : arguments) {
-            argv.push_back(arg.data());
-        }
-        argv.push_back(nullptr);
-
-        ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
         if (ret) {
             return nullopt;
         }
