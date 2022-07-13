@@ -336,15 +336,6 @@ class Logger
   sig { params(datetime_format: T.nilable(String)).void }
   def datetime_format=(datetime_format); end
 
-  FormatterProcType = T.type_alias do
-    T.proc.params(
-      severity: Integer,
-      time: Time,
-      progname: T.nilable(String),
-      msg: T.untyped
-    ).returns(T.untyped)
-  end
-
   # Logging formatter, as a `Proc` that will take four arguments and return the
   # formatted message. The arguments are:
   #
@@ -366,7 +357,7 @@ class Logger
   # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) that can be
   # written to the logging device via `write`. The default formatter is used
   # when no formatter is set.
-  sig { returns(T.nilable(FormatterProcType)) }
+  sig { returns(T.untyped) }
   def formatter; end
 
   # Logging formatter, as a `Proc` that will take four arguments and return the
@@ -390,7 +381,7 @@ class Logger
   # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) that can be
   # written to the logging device via `write`. The default formatter is used
   # when no formatter is set.
-  sig { params(formatter: T.nilable(FormatterProcType)).void }
+  sig { params(formatter: T.untyped).void }
   def formatter=(formatter); end
 
   # Logging severity threshold (e.g. `Logger::INFO`).
@@ -434,7 +425,7 @@ class Logger
       shift_size: Integer,
       level: Integer,
       progname: T.nilable(String),
-      formatter: T.nilable(FormatterProcType),
+      formatter: T.untyped,
       datetime_format: T.nilable(String),
       shift_period_suffix: T.nilable(String),
       binmode: T.untyped,
@@ -448,7 +439,7 @@ class Logger
     @level = T.let(T.unsafe(nil), T.nilable(Integer))
     @progname = T.let(T.unsafe(nil), T.nilable(String))
     @datetime_format = T.let(T.unsafe(nil), T.nilable(String))
-    @formatter = T.let(T.unsafe(nil), T.nilable(FormatterProcType))
+    @formatter = T.let(T.unsafe(nil), T.untyped)
   end
 
   # ### Args
