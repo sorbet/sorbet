@@ -315,8 +315,8 @@ end</code></pre>
         <code>x || y</code> in Ruby behaves exactly like <code>x ?? y</code> in
         TypeScript <strong>unless</strong> <code>x</code> can be
         <code>false</code>. If <code>x</code> is false, <code>x || y</code>
-        evaluates to <code>false</code>, while <code>x ?? y</code> evaluates to
-        <code>y</code>. Thus the closest approximation is to use a ternary
+        evaluates to <code>y</code>, while <code>x ?? y</code> evaluates to
+        <code>false</code>. The closest approximation is to use a ternary
         operator.
       </td>
     </tr>
