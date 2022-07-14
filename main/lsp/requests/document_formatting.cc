@@ -82,8 +82,7 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
 
     if (!sourceView.empty()) {
         auto originalLineCount = findLineBreaks(sourceView).size() - 1;
-        auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(),
-                                                         string(sourceView.begin(), sourceView.end()));
+        auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(), sourceView);
 
         auto returnCode = processResponse->status;
         auto formattedContents = processResponse->output;

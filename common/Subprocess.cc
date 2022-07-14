@@ -1,6 +1,7 @@
 #include "common/Subprocess.h"
 #include "common/common.h"
 #include <array>
+#include <fcntl.h>
 #include <spawn.h>
 #include <sstream>
 #include <string>
@@ -56,7 +57,7 @@ private:
 // Spawns a new child process, pipes `stdinContents` into the new processes's stdin,
 // and returns the child's stdout and status code
 optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable, vector<string> arguments,
-                                                               optional<string> stdinContents) {
+                                                               optional<string_view> stdinContents) {
     if (emscripten_build) {
         return nullopt;
     }
@@ -99,21 +100,6 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable
             return nullopt;
         }
 
-        // Write contents to child process stdin
-        if (stdinContents.has_value()) {
-            vector<char> contents(stdinContents->begin(), stdinContents->end());
-            ret = write(stdinPipe[1], contents.data(), contents.size());
-            if (ret < 0) {
-                return nullopt;
-            }
-        }
-
-        // Close child process's stdin
-        ret = posix_spawn_file_actions_addclose(fileActions, stdinPipe[1]);
-        if (ret) {
-            return nullopt;
-        }
-
         vector<char *> argv;
         argv.reserve(arguments.size() + 2);
         argv.push_back(executable.data());
@@ -122,7 +108,24 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable
         }
         argv.push_back(nullptr);
 
+        // Close child copy of the file descriptor on exec
+        fcntl(stdinPipe[1], F_SETFD, FD_CLOEXEC);
+
         ret = posix_spawnp(&childPid, executable.data(), fileActions, nullptr, argv.data(), nullptr);
+        if (ret) {
+            return nullopt;
+        }
+
+        // Write contents to child process stdin
+        if (stdinContents.has_value()) {
+            ret = write(stdinPipe[1], stdinContents->data(), stdinContents->size());
+            if (ret < 0) {
+                return nullopt;
+            }
+        }
+
+        // Close child process's stdin
+        ret = posix_spawn_file_actions_addclose(fileActions, stdinPipe[1]);
         if (ret) {
             return nullopt;
         }

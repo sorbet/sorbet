@@ -15,7 +15,7 @@ public:
     } Result;
 
     static std::optional<Subprocess::Result> spawn(std::string executable, std::vector<std::string> arguments,
-                                                   std::optional<std::string> stdinContents);
+                                                   std::optional<std::string_view> stdinContents);
 };
 
 } // namespace sorbet
