@@ -208,39 +208,43 @@ sorbet::FileOps::ReadLineOutput sorbet::FileOps::readLineFromFd(int fd, string &
     }
 }
 
-// Verifies that a matching pattern occurs at the end of the matched path
-bool sorbet::FileOps::isFile(string_view path, string_view ignorePattern, const int pos) {
+inline bool isFilePath(string_view path, string_view ignorePattern, const int pos) {
     const int endPos = pos + ignorePattern.length();
     return endPos == path.length();
 }
 
-// Verifies that a matching pattern is followed by a "/" in the matched path
-bool sorbet::FileOps::isFolder(string_view path, string_view ignorePattern, const int pos) {
+inline bool isFolderPath(string_view path, string_view ignorePattern, const int pos) {
     const int endPos = pos + ignorePattern.length();
     return path.at(endPos) == '/';
 }
 
-// Simple, naive implementation of regexp-free ignore rules.
-bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
-                                    const vector<string> &absoluteIgnorePatterns,
-                                    const vector<string> &relativeIgnorePatterns) {
-    ENFORCE(filePath.substr(0, basePath.length()) == basePath);
-    // Note: relative_path always includes a leading /
-    string_view relative_path = filePath.substr(basePath.length());
-    for (auto &p : absoluteIgnorePatterns) {
-        if (relative_path.substr(0, p.length()) == p &&
-            (isFile(relative_path, p, 0) || isFolder(relative_path, p, 0))) {
+// Verifies that a matching pattern occurs at the end of the matched path
+bool sorbet::FileOps::isFile(string_view path, string_view ignorePattern, const int pos) {
+    return isFilePath(path, ignorePattern, pos);
+}
+
+// Verifies that a matching pattern is followed by a "/" in the matched path
+bool sorbet::FileOps::isFolder(string_view path, string_view ignorePattern, const int pos) {
+    return isFolderPath(path, ignorePattern, pos);
+};
+
+bool pathMatchesAnyAbsolutePattern(string_view path, const vector<string> &patterns) {
+    for (auto &p : patterns) {
+        if (path.substr(0, p.length()) == p && (isFilePath(path, p, 0) || isFolderPath(path, p, 0))) {
             return true;
         }
     }
-    for (auto &p : relativeIgnorePatterns) {
-        // See if /pattern is in string, and that it matches a whole folder or file name.
+    return false;
+}
+
+bool pathMatchesAnyRelativePattern(string_view path, const vector<string> &patterns) {
+    for (auto &p : patterns) {
         int pos = 0;
         while (true) {
-            pos = relative_path.find(p, pos);
+            pos = path.find(p, pos);
             if (pos == string_view::npos) {
                 break;
-            } else if (isFile(relative_path, p, pos) || isFolder(relative_path, p, pos)) {
+            } else if (isFilePath(path, p, pos) || isFolderPath(path, p, pos)) {
                 return true;
             }
             pos += p.length();
@@ -249,9 +253,32 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
     return false;
 }
 
+// Simple, naive implementation of regexp-free ignore rules.
+bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
+                                    const vector<string> &absoluteIgnorePatterns,
+                                    const vector<string> &relativeIgnorePatterns,
+                                    const vector<string> &absoluteUnignorePatterns,
+                                    const vector<string> &relativeUnignorePatterns) {
+    ENFORCE(filePath.substr(0, basePath.length()) == basePath);
+    // Note: relative_path always includes a leading /
+    string_view relative_path = filePath.substr(basePath.length());
+    if (!pathMatchesAnyAbsolutePattern(relative_path, absoluteIgnorePatterns) &&
+        !pathMatchesAnyRelativePattern(relative_path, relativeIgnorePatterns)) {
+        return false;
+    }
+    // The relative_path was ignored, but check if it should be unignored
+    if (pathMatchesAnyAbsolutePattern(relative_path, absoluteUnignorePatterns) ||
+        pathMatchesAnyRelativePattern(relative_path, relativeUnignorePatterns)) {
+        return false;
+    }
+    return true;
+}
+
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       bool recursive, vector<string> &result, const std::vector<std::string> &absoluteIgnorePatterns,
-                      const std::vector<std::string> &relativeIgnorePatterns) {
+                      const std::vector<std::string> &relativeIgnorePatterns,
+                      const std::vector<std::string> &absoluteUnignorePatterns,
+                      const std::vector<std::string> &relativeUnignorePatterns) {
     DIR *dir;
     struct dirent *entry;
 
@@ -267,14 +294,15 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
 
     while ((entry = readdir(dir)) != nullptr) {
         auto fullPath = fmt::format("{}/{}", path, entry->d_name);
-        if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
+        if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns, relativeIgnorePatterns,
+                                           absoluteUnignorePatterns, relativeUnignorePatterns)) {
             continue;
         } else if (entry->d_type == DT_DIR) {
             if (!recursive || strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
             }
             appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
-                             relativeIgnorePatterns);
+                             relativeIgnorePatterns, absoluteUnignorePatterns, relativeUnignorePatterns);
         } else {
             auto dotLocation = fullPath.rfind('.');
             if (dotLocation != string::npos) {
@@ -290,12 +318,15 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
 
 vector<string> sorbet::FileOps::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
                                                const std::vector<std::string> &absoluteIgnorePatterns,
-                                               const std::vector<std::string> &relativeIgnorePatterns) {
+                                               const std::vector<std::string> &relativeIgnorePatterns,
+                                               const std::vector<std::string> &absoluteUnignorePatterns,
+                                               const std::vector<std::string> &relativeUnignorePatterns) {
     vector<string> result;
     // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
     // copying.
     string pathStr(path);
-    appendFilesInDir(path, pathStr, extensions, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns);
+    appendFilesInDir(path, pathStr, extensions, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns,
+                     absoluteUnignorePatterns, relativeUnignorePatterns);
     fast_sort(result);
     return result;
 }

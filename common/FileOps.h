@@ -45,14 +45,18 @@ public:
     static std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                                    bool recursive,
                                                    const std::vector<std::string> &absoluteIgnorePatterns,
-                                                   const std::vector<std::string> &relativeIgnorePatterns);
+                                                   const std::vector<std::string> &relativeIgnorePatterns,
+                                                   const std::vector<std::string> &absoluteUnignorePatterns,
+                                                   const std::vector<std::string> &relativeUnignorePatterns);
     /**
      * Returns 'true' if the file at the given path is ignored.
      * See sorbet::options for information on absolute and relative ignore patterns.
      */
     static bool isFileIgnored(std::string_view basePath, std::string_view filePath,
                               const std::vector<std::string> &absoluteIgnorePatterns,
-                              const std::vector<std::string> &relativeIgnorePatterns);
+                              const std::vector<std::string> &relativeIgnorePatterns,
+                              const std::vector<std::string> &absoluteUnignorePatterns,
+                              const std::vector<std::string> &relativeUnignorePatterns);
     static std::string_view getFileName(std::string_view path);
     static std::string_view getExtension(std::string_view path);
     /**

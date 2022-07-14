@@ -118,6 +118,8 @@ struct AutoloaderConfig {
 
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
+    std::vector<std::string> absoluteUnignorePatterns;
+    std::vector<std::string> relativeUnignorePatterns;
 };
 
 struct AutogenConstCacheConfig {
@@ -239,6 +241,10 @@ struct Options {
     std::vector<std::string> absoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> relativeIgnorePatterns;
+    // Ignore patterns beginning from the root of an input folder.
+    std::vector<std::string> absoluteUnignorePatterns;
+    // Ignore patterns that can occur anywhere in a file's path from an input folder.
+    std::vector<std::string> relativeUnignorePatterns;
     // Contains the expanded list of all Ruby file inputs (rawInputFileNames + all Ruby files in rawInputDirNames)
     std::vector<std::string> inputFileNames;
     // A list of parent classes to be used in `-p autogen-subclasses`

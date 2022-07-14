@@ -39,6 +39,8 @@ struct AutoloaderConfig {
     UnorderedSet<std::vector<core::NameRef>> nonCollapsableModuleNames;
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
+    std::vector<std::string> absoluteUnignorePatterns;
+    std::vector<std::string> relativeUnignorePatterns;
     std::vector<std::string> stripPrefixes;
 
     AutoloaderConfig() = default;

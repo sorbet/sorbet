@@ -33,7 +33,9 @@ public:
     virtual std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                                     bool recursive,
                                                     const std::vector<std::string> &absoluteIgnorePatterns,
-                                                    const std::vector<std::string> &relativeIgnorePatterns) const = 0;
+                                                    const std::vector<std::string> &relativeIgnorePatterns,
+                                                    const std::vector<std::string> &absoluteUnignorePatterns,
+                                                    const std::vector<std::string> &relativeUnignorePatterns) const = 0;
 };
 
 /**
@@ -47,7 +49,9 @@ public:
     void writeFile(std::string_view filename, std::string_view text) override;
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                             bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
-                                            const std::vector<std::string> &relativeIgnorePatterns) const override;
+                                            const std::vector<std::string> &relativeIgnorePatterns,
+                                            const std::vector<std::string> &absoluteUnignorePatterns,
+                                            const std::vector<std::string> &relativeUnignorePatterns) const override;
 };
 
 } // namespace sorbet

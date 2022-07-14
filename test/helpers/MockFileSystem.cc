@@ -43,7 +43,9 @@ void MockFileSystem::deleteFile(string_view filename) {
 
 vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
                                               const vector<string> &absoluteIgnorePatterns,
-                                              const vector<string> &relativeIgnorePatterns) const {
+                                              const vector<string> &relativeIgnorePatterns,
+                                              const vector<string> &absoluteUnignorePatterns,
+                                              const vector<string> &relativeUnignorePatterns) const {
     Exception::raise("Not implemented.");
 }
 } // namespace sorbet::test

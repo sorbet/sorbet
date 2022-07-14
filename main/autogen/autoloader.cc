@@ -26,8 +26,8 @@ bool AutoloaderConfig::include(const NamedDefinition &nd) const {
 
 bool AutoloaderConfig::includePath(string_view path) const {
     return absl::EndsWith(path, ".rb") &&
-           !sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absoluteIgnorePatterns,
-                                           relativeIgnorePatterns);
+           !sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absoluteIgnorePatterns, relativeIgnorePatterns,
+                                           absoluteUnignorePatterns, relativeUnignorePatterns);
 }
 
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
@@ -69,6 +69,8 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     }
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
+    out.absoluteUnignorePatterns = cfg.absoluteUnignorePatterns;
+    out.relativeUnignorePatterns = cfg.relativeUnignorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
     return out;
 }
@@ -460,7 +462,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
 
     if (FileOps::exists(path)) {
         // Clear out files that we do not plan to write.
-        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
+        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {}, {}, {});
         UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
                                               make_move_iterator(existingFiles.end()));
         for (auto &task : tasks) {

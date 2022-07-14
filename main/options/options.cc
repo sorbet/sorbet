@@ -365,6 +365,13 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")(
+        "unignore",
+        "This is similar to the --ignore flag, except it ensures input files that contain the given string in their "
+        "paths are never ignored, even if it is ignored using the --ignore flag. The rules for the string matching are"
+        "the same as those in the --ignore flag. For example, `--ignore foo/` and `--ignore foo/special.txt` would mean"
+        "everything in the foo/ directory is ignored, except for the foo/special.txt file.",
+        cxxopts::value<vector<string>>(), "string");
+    options.add_options("advanced")(
         "lsp-directories-missing-from-client",
         "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
         "as sorbet: URIs to clients that understand them.",
@@ -681,7 +688,8 @@ void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> 
     vector<string> containedFiles;
     try {
         containedFiles = opts.fs->listFilesInDir(fileNormalized, opts.allowedExtensions, true,
-                                                 opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+                                                 opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns,
+                                                 opts.absoluteUnignorePatterns, opts.relativeUnignorePatterns);
     } catch (sorbet::FileNotFoundException) {
         logger->error("Directory `{}` not found", dir);
         throw EarlyReturnWithCode(1);
@@ -718,6 +726,11 @@ void readOptions(Options &opts,
         if (raw.count("ignore") > 0) {
             auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
             parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+
+            if (raw.count("unignore") > 0) {
+                auto rawUnignorePatterns = raw["unignore"].as<vector<string>>();
+                parseIgnorePatterns(rawUnignorePatterns, opts.absoluteUnignorePatterns, opts.relativeUnignorePatterns);
+            }
         }
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();

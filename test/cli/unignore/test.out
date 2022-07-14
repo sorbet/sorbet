@@ -1,0 +1,24 @@
+subfolder/usually_ignored/dont_ignore.rb:4: Expected `Integer` but found `String("subfolder/usually_ignored/dont_ignore.rb")` for argument `arg0` https://srb.help/7002
+     4 |1 + "subfolder/usually_ignored/dont_ignore.rb"
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String("subfolder/usually_ignored/dont_ignore.rb")` originating from:
+    subfolder/usually_ignored/dont_ignore.rb:4:
+     4 |1 + "subfolder/usually_ignored/dont_ignore.rb"
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+foo.rb:4: Expected `Integer` but found `String("foo.rb")` for argument `arg0` https://srb.help/7002
+     4 |1 + "foo.rb"
+            ^^^^^^^^
+  Expected `Integer` for argument `arg0` of method `Integer#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+     148 |        arg0: Integer,
+                  ^^^^
+  Got `String("foo.rb")` originating from:
+    foo.rb:4:
+     4 |1 + "foo.rb"
+            ^^^^^^^^
+Errors: 2

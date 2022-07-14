@@ -68,6 +68,8 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.rawInputDirNames.size(), opts.rawInputDirNames.size());
     CHECK_EQ(empty.absoluteIgnorePatterns.size(), opts.absoluteIgnorePatterns.size());
     CHECK_EQ(empty.relativeIgnorePatterns.size(), opts.relativeIgnorePatterns.size());
+    CHECK_EQ(empty.absoluteUnignorePatterns.size(), opts.absoluteUnignorePatterns.size());
+    CHECK_EQ(empty.relativeUnignorePatterns.size(), opts.relativeUnignorePatterns.size());
     CHECK_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
     CHECK_EQ(empty.lspDocumentSymbolEnabled, opts.lspDocumentSymbolEnabled);
     CHECK_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
