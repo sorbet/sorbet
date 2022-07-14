@@ -1,14 +1,13 @@
 #include "common/Subprocess.h"
 #include "common/common.h"
 #include <array>
+#include <fcntl.h>
 #include <spawn.h>
 #include <sstream>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
-#include <fcntl.h>
-#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -58,7 +57,7 @@ private:
 // Spawns a new child process, pipes `stdinContents` into the new processes's stdin,
 // and returns the child's stdout and status code
 optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable, vector<string> arguments,
-                                                               optional<string> stdinContents) {
+                                                               optional<string_view> stdinContents) {
     if (emscripten_build) {
         return nullopt;
     }
@@ -119,8 +118,7 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable
 
         // Write contents to child process stdin
         if (stdinContents.has_value()) {
-            vector<char> contents(stdinContents->begin(), stdinContents->end());
-            ret = write(stdinPipe[1], contents.data(), contents.size());
+            ret = write(stdinPipe[1], stdinContents->data(), stdinContents->size());
             if (ret < 0) {
                 return nullopt;
             }
