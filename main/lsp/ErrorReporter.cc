@@ -1,5 +1,6 @@
 #include "main/lsp/ErrorReporter.h"
 #include "core/errors/infer.h"
+#include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
@@ -55,12 +56,34 @@ void ErrorReporter::endEpoch(uint32_t epoch, bool committed) {
     epochTimers.erase(it);
 }
 
+namespace {
+
+void assertNoCritical(const vector<unique_ptr<core::Error>> &errors) {
+    if constexpr (!debug_mode) {
+        return;
+    }
+
+    for (const auto &error : errors) {
+        if (error->isCritical()) {
+            // Fail fast.
+            // Exception::raise will have already printed a backtrace, we just need to crash the process.
+            __builtin_trap();
+        }
+    }
+}
+
+} // namespace
+
 void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const vector<unique_ptr<core::Error>> &errors,
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
 
     ErrorStatus &fileErrorStatus = getFileErrorStatus(file);
     if (fileErrorStatus.lastReportedEpoch > epoch) {
+        // Internal errors should always crash Sorbet in tests. Most of the time though, ENFORCE
+        // failures and Exception::raise translate into user-visible errors with `beginError`.
+        // Regardless of epoch, we want internal errors to crash the process.
+        assertNoCritical(errors);
         return;
     }
 
