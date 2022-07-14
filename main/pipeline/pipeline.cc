@@ -1124,7 +1124,9 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                             unique_ptr<absl::ReaderMutexLock> lock;
                             if (preemptionManager) {
                                 // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
-                                // the loop.
+                                // the loop. Does not starve writers (tryRunScheduledPreemptionTask)
+                                // because this call can block once tryRunScheduledPreemptionTask tries to acquire
+                                // a (writer) lock.
                                 lock = (*preemptionManager)->lockPreemption();
                             }
                             processedByThread++;
