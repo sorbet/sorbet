@@ -2433,6 +2433,23 @@ class IO < Object
   end
   def set_encoding(ext_or_ext_int_enc=T.unsafe(nil), int_enc=T.unsafe(nil)); end
 
+  # Checks if `ios` starts with a BOM, and then consumes it and sets the
+  # external encoding. Returns the result encoding if found, or nil. If `ios` is
+  # not binmode or its encoding has been set already, an exception will be
+  # raised.
+  #
+  # ```ruby
+  # File.write("bom.txt", "\u{FEFF}abc")
+  # ios = File.open("bom.txt", "rb")
+  # ios.set_encoding_by_bom    #=>  #<Encoding:UTF-8>
+  #
+  # File.write("nobom.txt", "abc")
+  # ios = File.open("nobom.txt", "rb")
+  # ios.set_encoding_by_bom    #=>  nil
+  # ```
+  sig { returns(T.nilable(Encoding)) }
+  def set_encoding_by_bom; end
+
   # Returns status information for *ios* as an object of type
   # [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html).
   #
