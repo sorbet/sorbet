@@ -63,6 +63,14 @@
 # puts e.next   # raises StopIteration
 # ```
 #
+# Note that enumeration sequence by `next`, `next_values`, `peek` and
+# `peek_values` do not affect other non-external enumeration methods, unless the
+# underlying iteration method itself has side-effect, e.g.
+# [`IO#each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line).
+#
+# Moreover, implementation typically uses fibers so performance could be slower
+# and exception stacktraces different than expected.
+#
 # You can use this to implement an internal iterator as follows:
 #
 # ```ruby
@@ -220,10 +228,7 @@ class Enumerator < Object
   # p e.next   #raises StopIteration
   # ```
   #
-  # Note that enumeration sequence by `next` does not affect other non-external
-  # enumeration methods, unless the underlying iteration methods itself has
-  # side-effect, e.g.
-  # [`IO#each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line).
+  # See class-level notes about external iterators.
   sig { returns(Elem) }
   def next(); end
 
@@ -231,6 +236,8 @@ class Enumerator < Object
   # position forward. When the position reached at the end,
   # [`StopIteration`](https://docs.ruby-lang.org/en/2.7.0/StopIteration.html) is
   # raised.
+  #
+  # See class-level notes about external iterators.
   #
   # This method can be used to distinguish `yield` and `yield nil`.
   #
@@ -265,10 +272,6 @@ class Enumerator < Object
   # #  yield nil        [nil]            nil
   # #  yield [1, 2]     [[1, 2]]         [1, 2]
   # ```
-  #
-  # Note that `next_values` does not affect other non-external enumeration
-  # methods unless underlying iteration method itself has side-effect, e.g.
-  # [`IO#each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line).
   sig { returns(T::Array[Elem]) }
   def next_values(); end
 
@@ -276,6 +279,8 @@ class Enumerator < Object
   # position forward. If the position is already at the end,
   # [`StopIteration`](https://docs.ruby-lang.org/en/2.7.0/StopIteration.html) is
   # raised.
+  #
+  # See class-level notes about external iterators.
   #
   # ### Example
   #
@@ -299,6 +304,8 @@ class Enumerator < Object
   # at the end,
   # [`StopIteration`](https://docs.ruby-lang.org/en/2.7.0/StopIteration.html) is
   # raised.
+  #
+  # See class-level notes about external iterators.
   #
   # ### Example
   #
@@ -381,10 +388,14 @@ class Enumerator < Object
   #   puts "#{string}: #{x}"
   # end
   #
-  # # => foo:0
-  # # => foo:1
-  # # => foo:2
+  # # => foo: 0
+  # # => foo: 1
+  # # => foo: 2
   # ```
+  #
+  #
+  # Alias for:
+  # [`each_with_object`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html#method-i-each_with_object)
   sig do
     type_parameters(:U).params(
       arg0: T.type_parameter(:U),
@@ -467,13 +478,13 @@ end
 #
 # # This will fetch all URLs before selecting
 # # necessary data
-# URLS.map { |u| JSON.parse(open(u).read) }
+# URLS.map { |u| JSON.parse(URI.open(u).read) }
 #   .select { |data| data.key?('stats') }
 #   .first(5)
 #
 # # This will fetch URLs one-by-one, only till
 # # there is enough data to satisfy the condition
-# URLS.lazy.map { |u| JSON.parse(open(u).read) }
+# URLS.lazy.map { |u| JSON.parse(URI.open(u).read) }
 #   .select { |data| data.key?('stats') }
 #   .first(5)
 # ```
@@ -526,11 +537,20 @@ class Enumerator::Lazy < Enumerator
   # Like
   # [`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk),
   # but chains operation to be lazy-evaluated.
+  #
+  # Also aliased as:
+  # [`slice_before`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-slice_before),
+  # [`slice_after`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-slice_after),
+  # [`slice_when`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-slice_when),
+  # [`chunk_while`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-chunk_while)
   def chunk(*_); end
 
   # Like
   # [`Enumerable#chunk_while`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk_while),
   # but chains operation to be lazy-evaluated.
+  #
+  # Alias for:
+  # [`chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-chunk)
   def chunk_while(*_); end
 
   # Like
@@ -547,6 +567,9 @@ class Enumerator::Lazy < Enumerator
   #
   # Also aliased as:
   # [`_enumerable_collect`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_collect)
+  #
+  # Alias for:
+  # [`map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-map)
   sig do
     type_parameters(:U).params(
       blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U))
@@ -582,6 +605,9 @@ class Enumerator::Lazy < Enumerator
   #
   # Also aliased as:
   # [`_enumerable_collect_concat`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_collect_concat)
+  #
+  # Alias for:
+  # [`flat_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-flat_map)
   sig do
     type_parameters(:U).params(
       blk: T.proc.params(arg0: Elem).returns(T::Enumerator[T.type_parameter(:U)])
@@ -638,8 +664,15 @@ class Enumerator::Lazy < Enumerator
   # r.lazy.repeat(2).class # => Enumerator::Lazy
   # r.lazy.repeat(2).map{|n| n ** 2}.first(5) # => [1, 1, 4, 4, 9]
   # ```
+  #
+  #
+  # Alias for:
+  # [`to_enum`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-to_enum)
   def enum_for(*_); end
 
+  # Expands `lazy` enumerator to an array. See
+  # [`Enumerable#to_a`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-to_a).
+  #
   # Alias for:
   # [`to_a`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-to_a)
   def force(*_); end
@@ -650,6 +683,9 @@ class Enumerator::Lazy < Enumerator
   #
   # Also aliased as:
   # [`_enumerable_find_all`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_find_all)
+  #
+  # Alias for:
+  # [`select`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-select)
   sig do
     params(
       blk: T.proc.params(arg0: Elem).returns(BasicObject)
@@ -686,6 +722,7 @@ class Enumerator::Lazy < Enumerator
   #
   #
   # Also aliased as:
+  # [`collect_concat`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-collect_concat),
   # [`_enumerable_flat_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_flat_map)
   sig do
     type_parameters(:U).params(
@@ -742,6 +779,7 @@ class Enumerator::Lazy < Enumerator
   #
   #
   # Also aliased as:
+  # [`collect`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-collect),
   # [`_enumerable_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_map)
   sig do
     type_parameters(:U).params(
@@ -772,6 +810,8 @@ class Enumerator::Lazy < Enumerator
   # but chains operation to be lazy-evaluated.
   #
   # Also aliased as:
+  # [`find_all`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-find_all),
+  # [`filter`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-filter),
   # [`_enumerable_select`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_select)
   sig do
     params(
@@ -782,16 +822,18 @@ class Enumerator::Lazy < Enumerator
   sig { returns(T::Enumerator::Lazy[Elem]) }
   def select(&blk); end
 
-  # Returns a new lazy enumerator containing the truthy results (everything except `false`
-  # or `nil`) of running the `block` for every element in `enum`.
-  #
-  # If no block is given, a
-  # [`Lazy`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html) is
-  # returned instead.
+  # Like
+  # [`Enumerable#filter_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-filter_map),
+  # but chains operation to be lazy-evaluated.
   #
   # ```ruby
-  # (1..10).lazy.filter_map { |i| i * 2 if i.even? } #=> #<Enumerator::Lazy: #<Enumerator::Lazy: 1..10>:filter_map>
+  # (1..).lazy.filter_map { |i| i * 2 if i.even? }.first(5)
+  # #=> [4, 8, 12, 16, 20]
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`_enumerable_filter_map`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_filter_map)
   sig do
     type_parameters(:T)
       .params(blk: T.proc.params(arg0: Elem).returns(T.any(NilClass, FalseClass, T.type_parameter(:T))))
@@ -803,16 +845,25 @@ class Enumerator::Lazy < Enumerator
   # Like
   # [`Enumerable#slice_after`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_after),
   # but chains operation to be lazy-evaluated.
+  #
+  # Alias for:
+  # [`chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-chunk)
   def slice_after(*_); end
 
   # Like
   # [`Enumerable#slice_before`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_before),
   # but chains operation to be lazy-evaluated.
+  #
+  # Alias for:
+  # [`chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-chunk)
   def slice_before(*_); end
 
   # Like
   # [`Enumerable#slice_when`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_when),
   # but chains operation to be lazy-evaluated.
+  #
+  # Alias for:
+  # [`chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-chunk)
   def slice_when(*_); end
 
   # Like
@@ -863,6 +914,10 @@ class Enumerator::Lazy < Enumerator
   # r.lazy.repeat(2).class # => Enumerator::Lazy
   # r.lazy.repeat(2).map{|n| n ** 2}.first(5) # => [1, 1, 4, 4, 9]
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`enum_for`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-enum_for)
   def to_enum(*_); end
 
   # Like
