@@ -1,0 +1,130 @@
+test/cli/invariant_type_parameter/test.rb:58: Expected `Box[T.type_parameter(:U)]` but found `Box[Integer]` for argument `box` https://srb.help/7002
+    58 |box_example(Box[Integer].new, takes_box_string) do |box|
+                    ^^^^^^^^^^^^^^^^
+  Expected `Box[T.type_parameter(:U)]` for argument `box` of method `Object#box_example`:
+    test/cli/invariant_type_parameter/test.rb:21:
+    21 |      box: Box[T.type_parameter(:U)],
+              ^^^
+  Got `Box[Integer]` originating from:
+    test/cli/invariant_type_parameter/test.rb:58:
+    58 |box_example(Box[Integer].new, takes_box_string) do |box|
+                    ^^^^^^^^^^^^^^^^
+
+test/cli/invariant_type_parameter/test.rb:58: Expected `T.proc.params(arg0: Box[T.type_parameter(:U)]).void` but found `T.proc.params(arg0: Box[String]).void` for argument `f` https://srb.help/7002
+    58 |box_example(Box[Integer].new, takes_box_string) do |box|
+                                      ^^^^^^^^^^^^^^^^
+  Expected `T.proc.params(arg0: Box[T.type_parameter(:U)]).void` for argument `f` of method `Object#box_example`:
+    test/cli/invariant_type_parameter/test.rb:22:
+    22 |      f: T.proc.params(box: Box[T.type_parameter(:U)]).void,
+              ^
+  Got `T.proc.params(arg0: Box[String]).void` originating from:
+    test/cli/invariant_type_parameter/test.rb:44:
+    44 |takes_box_string = T.let(->(box) {}, T.proc.params(box: Box[String]).void)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/invariant_type_parameter/test.rb:60: Revealed type: `Box[<top>]` https://srb.help/7014
+    60 |  T.reveal_type(box)
+          ^^^^^^^^^^^^^^^^^^
+  Got `Box[<top>]` originating from:
+    test/cli/invariant_type_parameter/test.rb:58:
+    58 |box_example(Box[Integer].new, takes_box_string) do |box|
+                                                            ^^^
+
+test/cli/invariant_type_parameter/test.rb:68: Expected `Box[T.type_parameter(:U)]` but found `Box[M]` for argument `box` https://srb.help/7002
+    68 |box_example(Box[M].new, takes_box_n) do |box|
+                    ^^^^^^^^^^
+  Expected `Box[T.type_parameter(:U)]` for argument `box` of method `Object#box_example`:
+    test/cli/invariant_type_parameter/test.rb:21:
+    21 |      box: Box[T.type_parameter(:U)],
+              ^^^
+  Got `Box[M]` originating from:
+    test/cli/invariant_type_parameter/test.rb:68:
+    68 |box_example(Box[M].new, takes_box_n) do |box|
+                    ^^^^^^^^^^
+
+test/cli/invariant_type_parameter/test.rb:68: Expected `T.proc.params(arg0: Box[T.type_parameter(:U)]).void` but found `T.proc.params(arg0: Box[N]).void` for argument `f` https://srb.help/7002
+    68 |box_example(Box[M].new, takes_box_n) do |box|
+                                ^^^^^^^^^^^
+  Expected `T.proc.params(arg0: Box[T.type_parameter(:U)]).void` for argument `f` of method `Object#box_example`:
+    test/cli/invariant_type_parameter/test.rb:22:
+    22 |      f: T.proc.params(box: Box[T.type_parameter(:U)]).void,
+              ^
+  Got `T.proc.params(arg0: Box[N]).void` originating from:
+    test/cli/invariant_type_parameter/test.rb:45:
+    45 |takes_box_n = T.let(->(box) {}, T.proc.params(box: Box[N]).void)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/invariant_type_parameter/test.rb:75: Expected `Box[T.type_parameter(:U)]` but found `IBox[M]` for argument `box` https://srb.help/7002
+    75 |box_example(ibox_m, takes_ibox_n) do |box|
+                    ^^^^^^
+  Expected `Box[T.type_parameter(:U)]` for argument `box` of method `Object#box_example`:
+    test/cli/invariant_type_parameter/test.rb:21:
+    21 |      box: Box[T.type_parameter(:U)],
+              ^^^
+  Got `IBox[M]` originating from:
+    test/cli/invariant_type_parameter/test.rb:71:
+    71 |ibox_m = T.let(Box[M].new, IBox[M])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/invariant_type_parameter/test.rb:76: Revealed type: `Box[N]` https://srb.help/7014
+    76 |  T.reveal_type(box)
+          ^^^^^^^^^^^^^^^^^^
+  Got `Box[N]` originating from:
+    test/cli/invariant_type_parameter/test.rb:75:
+    75 |box_example(ibox_m, takes_ibox_n) do |box|
+                                              ^^^
+
+test/cli/invariant_type_parameter/test.rb:82: Revealed type: `IBox[N]` https://srb.help/7014
+    82 |  T.reveal_type(box)
+          ^^^^^^^^^^^^^^^^^^
+  Got `IBox[N]` originating from:
+    test/cli/invariant_type_parameter/test.rb:81:
+    81 |ibox_example(Box[String].new, takes_ibox_n) do |box|
+                                                        ^^^
+
+test/cli/invariant_type_parameter/test.rb:81: Could not find valid instantiation of type parameters for `Object#ibox_example` https://srb.help/7020
+    81 |ibox_example(Box[String].new, takes_ibox_n) do |box|
+    82 |  T.reveal_type(box)
+    83 |end
+    test/cli/invariant_type_parameter/test.rb:40: `Object#ibox_example` defined here
+    40 |def ibox_example(box, f, &blk)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Found no solution for these constraints:
+    `String` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `N`
+
+test/cli/invariant_type_parameter/test.rb:85: Revealed type: `IBox[N]` https://srb.help/7014
+    85 |  T.reveal_type(box)
+          ^^^^^^^^^^^^^^^^^^
+  Got `IBox[N]` originating from:
+    test/cli/invariant_type_parameter/test.rb:84:
+    84 |ibox_example(ibox_m, takes_ibox_n) do |box|
+                                               ^^^
+
+test/cli/invariant_type_parameter/test.rb:84: Could not find valid instantiation of type parameters for `Object#ibox_example` https://srb.help/7020
+    84 |ibox_example(ibox_m, takes_ibox_n) do |box|
+    85 |  T.reveal_type(box)
+    86 |end
+    test/cli/invariant_type_parameter/test.rb:40: `Object#ibox_example` defined here
+    40 |def ibox_example(box, f, &blk)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Found no solution for these constraints:
+    `M` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `N`
+
+test/cli/invariant_type_parameter/test.rb:88: Revealed type: `IBox[N]` https://srb.help/7014
+    88 |  T.reveal_type(box)
+          ^^^^^^^^^^^^^^^^^^
+  Got `IBox[N]` originating from:
+    test/cli/invariant_type_parameter/test.rb:87:
+    87 |ibox_example(ibox_integer, takes_ibox_string) do |box|
+                                                          ^^^
+
+test/cli/invariant_type_parameter/test.rb:87: Could not find valid instantiation of type parameters for `Object#ibox_example` https://srb.help/7020
+    87 |ibox_example(ibox_integer, takes_ibox_string) do |box|
+    88 |  T.reveal_type(box)
+    89 |end
+    test/cli/invariant_type_parameter/test.rb:40: `Object#ibox_example` defined here
+    40 |def ibox_example(box, f, &blk)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Found no solution for these constraints:
+    `Integer` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `N`
+Errors: 13
