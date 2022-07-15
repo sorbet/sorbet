@@ -635,8 +635,29 @@ module Kernel
   end
   def =~(other); end
 
-  sig {returns(T.self_type)}
-  def clone(); end
+  # Produces a shallow copy of *obj*---the instance variables of *obj* are
+  # copied, but not the objects they reference.
+  # [`clone`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-clone)
+  # copies the frozen value state of *obj*, unless the `:freeze` keyword
+  # argument is given with a false or true value. See also the discussion under
+  # [`Object#dup`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-dup).
+  #
+  # ```ruby
+  # class Klass
+  #    attr_accessor :str
+  # end
+  # s1 = Klass.new      #=> #<Klass:0x401b3a38>
+  # s1.str = "Hello"    #=> "Hello"
+  # s2 = s1.clone       #=> #<Klass:0x401b3998 @str="Hello">
+  # s2.str[1,4] = "i"   #=> "i"
+  # s1.inspect          #=> "#<Klass:0x401b3a38 @str=\"Hi\">"
+  # s2.inspect          #=> "#<Klass:0x401b3998 @str=\"Hi\">"
+  # ```
+  #
+  # This method may have class-specific behavior. If so, that behavior will be
+  # documented under the #`initialize_copy` method of the class.
+  sig { params(freeze: T.nilable(T::Boolean)).returns(T.self_type) }
+  def clone(freeze: nil); end
 
   sig do
     params(
