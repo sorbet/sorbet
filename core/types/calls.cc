@@ -2691,9 +2691,9 @@ public:
                 // In that case we don't have an RHS we can easily wrap in something, so skip the autocorrect.
                 auto title = fmt::format("Initialize as `{}`", suggestType.show(gs));
 
-                // Detect `||= expr`
-                auto lookBefore = replaceLoc.adjustLen(gs, -4, 3);
-                if (lookBefore.source(gs) == "||=") {
+                auto lookForOrEq = replaceLoc.adjustLen(gs, -4, 3); // Detect `||= expr`
+                auto lookForEq = replaceLoc.adjustLen(gs, -2, 1);   // Detect `= ...`
+                if (lookForOrEq.source(gs) == "||=") {
                     auto insertLoc = args.callLoc().copyWithZeroLength(); // right before the assign's LHS
                     auto [_, indentLen] = insertLoc.findStartOfLine(gs);
                     auto indentPrefix = string(indentLen, ' ');
@@ -2702,7 +2702,9 @@ public:
                                    fieldKind, "||=");
                     e.replaceWith(title, insertLoc, "{} = T.let({}, {})\n{}", fieldName, fieldName,
                                   suggestType.show(gs), indentPrefix);
-                } else {
+                } else if (lookForEq.source(gs) == "=") {
+                    // Defensive; might be an ivar assignment from `attr_accessor` or `prop`, which
+                    // we don't want an autocorrect for.
                     e.replaceWith(title, replaceLoc, "T.let({}, {})", replaceLoc.source(gs).value(),
                                   suggestType.show(gs));
                 }
