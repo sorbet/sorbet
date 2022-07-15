@@ -86,10 +86,14 @@ public:
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                     const TypePtr &t2);
 
     /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
     static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    static bool equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                              const TypePtr &t2);
 
     static TypePtr top();
     static TypePtr bottom();

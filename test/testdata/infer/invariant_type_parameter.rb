@@ -10,7 +10,7 @@ sig {type_parameters(:U).params(box: Box[T.type_parameter(:U)]).void}
 def example(box)
 end
 
-example(Box[Integer].new) # error: Expected `Box[T.type_parameter(:U)]` but found `Box[Integer]` for argument `box`
+example(Box[Integer].new)
 
 sig do
   type_parameters(:U)
@@ -25,4 +25,4 @@ def example_complicated(x, f, box)
 end
 
 takes_int = T.let(->(x){}, T.proc.params(y: Integer).void)
-example_complicated(0, takes_int, Box[String].new) # error: Expected `Box[T.type_parameter(:U)]` but found `Box[String]` for argument `box`
+example_complicated(0, takes_int, Box[String].new) # error: Could not find valid instantiation of type parameters for `Object#example_complicated`
