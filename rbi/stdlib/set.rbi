@@ -1037,6 +1037,12 @@ class Set < Object
     .returns(T::Set[Elem])
   end
   def union(enum); end
+
+  private
+
+  # Clone internal hash.
+  sig { params(orig: T::Set[Elem], options: T.untyped).returns(T::Set[Elem]) }
+  def initialize_clone(orig, **options); end
 end
 
 # [`SortedSet`](https://docs.ruby-lang.org/en/2.7.0/SortedSet.html) implements a
