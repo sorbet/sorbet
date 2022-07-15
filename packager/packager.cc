@@ -1240,14 +1240,19 @@ runPackageInfoFinder(ContextType ctx, ast::ParsedFile &package,
         }
 
         for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
-            // project/foo_bar -- convert camel-case to snake-case and munge with slash
+            // project/Foo_bar -- convert camel-case to snake-case and munge with slash
             std::stringstream ss;
             ss << prefix;
             for (int i = 0; i < dirNameFromShortName.length(); i++) {
                 if (dirNameFromShortName[i] == '_') {
                     ss << '/';
+                } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
+                    // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
+                    // which tend to be all lower case
+                    char upper = std::toupper(dirNameFromShortName[i]);
+                    ss << std::move(upper);
                 } else {
-                    if (isupper(dirNameFromShortName[i]) && i > 0 && dirNameFromShortName[i - 1] != '_') {
+                    if (isupper(dirNameFromShortName[i])) {
                         ss << '_'; // snake-case munging
                     }
 
