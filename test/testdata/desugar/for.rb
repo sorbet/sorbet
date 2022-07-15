@@ -40,8 +40,8 @@ class Main
         puts "main"
         # You can put all sorts of things on the left
         for @a,@@b,$c,d,E.e in A do
-          # ^^ error: Use of undeclared variable `@a`
-             # ^^^ error: Use of undeclared variable `@@b`
+          # ^^ error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
+          #    ^^^ error: The class variable `@@b` must be declared using `T.let` when specifying `# typed: strict`
             puts @a.inspect
             puts @@b.inspect
             puts $c.inspect
@@ -50,6 +50,8 @@ class Main
         end
         A.each do |*forTemp|
             @a,@@b,$c,d,E.e = *forTemp
+          # ^^ error: The instance variable `@a` must be declared using `T.let` when specifying `# typed: strict`
+          #    ^^^ error: The class variable `@@b` must be declared using `T.let` when specifying `# typed: strict`
             puts @a.inspect
             puts @@b.inspect
             puts $c.inspect

@@ -4,7 +4,9 @@ class Test
   extend T::Sig
 
   sig {returns(String)}
-  attr_accessor :non_nil_accessor # error-with-dupes: Use of undeclared variable `@non_nil_accessor`
+  attr_accessor :non_nil_accessor
+  #              ^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@non_nil_accessor`
+  #              ^^^^^^^^^^^^^^^^ error: The instance variable `@non_nil_accessor` must be declared using `T.let` when specifying `# typed: strict`
   sig {returns(T.nilable(String))}
   attr_accessor :nilable_accessor
   sig {returns(T.untyped)}
@@ -18,7 +20,7 @@ class Test
   attr_reader :untyped_reader # error: Use of undeclared variable `@untyped_reader`
 
   sig {params(non_nil_writer: String).returns(String)}
-  attr_writer :non_nil_writer # error: Use of undeclared variable `@non_nil_writer`
+  attr_writer :non_nil_writer # error: The instance variable `@non_nil_writer` must be declared using `T.let` when specifying `# typed: strict`
   sig {params(nilable_writer: String).returns(T.nilable(String))}
   attr_writer :nilable_writer
   sig {params(untyped_writer: T.untyped).returns(T.untyped)}
