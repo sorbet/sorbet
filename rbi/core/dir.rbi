@@ -436,7 +436,8 @@ class Dir < Object
     params(
         pattern: T.any(String, T::Array[String]),
         flags: T.nilable(Integer),
-        opts: T.nilable(T::Hash[Symbol, String]),
+        base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean
     )
     .returns(T::Array[String])
   end
@@ -444,27 +445,30 @@ class Dir < Object
     params(
         pattern: T.any(String, T::Array[String]),
         flags: T.nilable(Integer),
-        opts: T.nilable(T::Hash[Symbol, String]),
-        blk: T.proc.params(arg0: String).returns(BasicObject),
+        base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean,
+        blk: T.proc.params(arg0: String).returns(BasicObject)
     )
     .returns(NilClass)
   end
   sig do
     params(
         pattern: T.any(String, T::Array[String]),
-        opts: T.nilable(T::Hash[Symbol, String]),
-        blk: T.proc.params(arg0: String).returns(BasicObject),
+        base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean,
+        blk: T.proc.params(arg0: String).returns(BasicObject)
     )
     .returns(NilClass)
   end
   sig do
     params(
         pattern: T.any(String, T::Array[String]),
-        opts: T.nilable(T::Hash[Symbol, String]),
+        base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean
     )
     .returns(T::Array[String])
   end
-  def self.glob(pattern, flags=T.unsafe(nil), opts=T.unsafe(nil), &blk); end
+  def self.glob(pattern, flags=T.unsafe(nil), base: path, sort: true, &blk); end
 
   # Returns the home directory of the current user or the named user if given.
   sig do
