@@ -9,19 +9,18 @@ module Sorbet::Private::Static
   end
 end
 
-module T
-  def self.reveal_type(expr)
-  end
-end
-
 class A
   def self.extend(*mod)
   end
+
+  sig {params(x: T.noreturn).void}
+  #    ^^^^^^ error: `params` does not exist
+  def takes_nothing(x); end
 
   extend T::Sig
   sig {params(x: Integer).void}
   #    ^^^^^^ error: `params` does not exist
   def initialize(x)
-    T.reveal_type(x) # error: `Integer`
+    takes_nothing(x) # error: but found `Integer`
   end
 end
