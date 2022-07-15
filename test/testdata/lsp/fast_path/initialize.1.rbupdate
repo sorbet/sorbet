@@ -1,0 +1,28 @@
+# typed: true
+# no-stdlib: true
+# ^ this is a hack so that we can test whether this takes the fast/slow path
+#   without having to hard code the list of every payload file that mentions
+#   `initialize`
+# assert-fast-path: initialize.rb
+
+module Sorbet::Private::Static
+  def self.keep_for_ide(expr)
+  end
+end
+
+module T
+  def self.reveal_type(expr)
+  end
+end
+
+class A
+  def self.extend(*mod)
+  end
+
+  extend T::Sig
+  sig {params(x: String).void}
+  #    ^^^^^^ error: `params` does not exist
+  def initialize(x)
+    T.reveal_type(x) # error: `String`
+  end
+end
