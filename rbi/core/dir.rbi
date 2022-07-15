@@ -8,6 +8,148 @@
 # The directory used in these examples contains the two regular files
 # (`config.h` and `main.rb`), the parent directory (`..`), and the directory
 # itself (`.`).
+#
+# ## What's Here
+#
+# First, what's elsewhere.
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) Dir:
+#
+# *   Inherits from [class
+#     Object](Object.html#class-Object-label-What-27s+Here).
+# *   Includes [module
+#     Enumerable](Enumerable.html#module-Enumerable-label-What-27s+Here), which
+#     provides dozens of additional methods.
+#
+#
+# Here, class [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) provides
+# methods that are useful for:
+#
+# *   [Reading](#class-Dir-label-Reading)
+# *   [Setting](#class-Dir-label-Setting)
+# *   [Querying](#class-Dir-label-Querying)
+# *   [Iterating](#class-Dir-label-Iterating)
+# *   [Other](#class-Dir-label-Other)
+#
+#
+# ### Reading
+#
+#     [`close`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-close)
+# :       Closes the directory stream for `self`.
+#
+#     [`pos=`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-pos-3D)
+# :       Sets the position in the directory stream for `self`.
+#
+#     [`read`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-read)
+# :       Reads and returns the next entry in the directory stream for `self`.
+#
+#     [`rewind`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-rewind)
+# :       Sets the position in the directory stream for `self` to the first
+#         entry.
+#
+#     [`seek`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-seek)
+# :       Sets the position in the directory stream for `self` the entry at the
+#         given offset.
+#
+#
+#
+# ### Setting
+#
+#     [`::chdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-chdir)
+# :       Changes the working directory of the current process to the given
+#         directory.
+#
+#     [`::chroot`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-chroot)
+# :       Changes the file-system root for the current process to the given
+#         directory.
+#
+#
+#
+# ### Querying
+#
+#     [`::[]`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-5B-5D)
+# :       Same as
+#         [`::glob`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-glob)
+#         without the ability to pass flags.
+#
+#     [`::children`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-children)
+# :       Returns an array of names of the children (both files and directories)
+#         of the given directory, but not including `.` or `..`.
+#
+#     [`::empty?`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-empty-3F)
+# :       Returns whether the given path is an empty directory.
+#
+#     [`::entries`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-entries)
+# :       Returns an array of names of the children (both files and directories)
+#         of the given directory, including `.` and `..`.
+#
+#     [`::exist?`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-exist-3F)
+# :       Returns whether the given path is a directory.
+#
+#     [`::getwd`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-getwd) (aliased as pwd)
+# :       Returns the path to the current working directory.
+#
+#     [`::glob`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-glob)
+# :       Returns an array of file paths matching the given pattern and flags.
+#
+#     [`::home`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-home)
+# :       Returns the home directory path for a given user or the current user.
+#
+#     [`children`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-children)
+# :       Returns an array of names of the children (both files and directories)
+#         of `self`, but not including `.` or `..`.
+#
+#     [`fileno`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-fileno)
+# :       Returns the integer file descriptor for `self`.
+#
+#     [`path`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-path) (aliased as [`to_path`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-to_path))
+# :       Returns the path used to create `self`.
+#
+#     [`tell`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-tell) (aliased as [`pos`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-pos))
+# :       Returns the integer position in the directory stream for `self`.
+#
+#
+#
+# ### Iterating
+#
+#     [`::each_child`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-each_child)
+# :       Calls the given block with each entry in the given directory, but not
+#         including `.` or `..`.
+#
+#     [`::foreach`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-foreach)
+# :       Calls the given block with each entryin the given directory, including
+#         `.` and `..`.
+#
+#     [`each`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-each)
+# :       Calls the given block with each entry in `self`, including `.` and
+#         `..`.
+#
+#     [`each_child`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-each_child)
+# :       Calls the given block with each entry in `self`, but not including `.`
+#         or `..`.
+#
+#
+#
+# ### Other
+#
+#     [`::mkdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-mkdir)
+# :       Creates a directory at the given path, with optional permissions.
+#
+#     [`::new`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-new)
+# :       Returns a new [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html)
+#         for the given path, with optional encoding.
+#
+#     [`::open`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-open)
+# :       Same as
+#         [`::new`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-new),
+#         but if a block is given, yields the
+#         [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) to the block,
+#         closing it upon block exit.
+#
+#     [`::unlink`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-unlink) (aliased as [`::delete`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-delete) and [`::rmdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-rmdir))
+# :       Removes the given directory.
+#
+#     [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-inspect)
+# :       Returns a string description of `self`.
 class Dir < Object
   include Enumerable
 
@@ -25,7 +167,9 @@ class Dir < Object
   # working directory is restored when the block exits. The return value of
   # `chdir` is the value of the block. `chdir` blocks can be nested, but in a
   # multi-threaded program an error will be raised if a thread attempts to open
-  # a `chdir` block while another thread has one open.
+  # a `chdir` block while another thread has one open or a call to `chdir`
+  # without a block occurs inside a block passed to `chdir` (even in the same
+  # thread).
   #
   # ```ruby
   # Dir.chdir("/var/spool/mail")
@@ -205,15 +349,20 @@ class Dir < Object
   # the results are not prefixed with the base directory name in this case, you
   # will need to prepend the base directory name if you want real paths.
   #
+  # The results which matched single wildcard or character set are sorted in
+  # binary ascending order, unless `false` is given as the optional `sort`
+  # keyword argument. The order of an
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of pattern strings
+  # and braces are preserved.
+  #
   # Note that the pattern is not a regexp, it's closer to a shell glob. See
   # [`File::fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
   # for the meaning of the `flags` parameter. Case sensitivity depends on your
-  # system (File::FNM\_CASEFOLD is ignored), as does the order in which the
-  # results are returned.
+  # system (`File::FNM_CASEFOLD` is ignored).
   #
   # `*`
   # :   Matches any file. Can be restricted by other values in the glob.
-  #     Equivalent to `/ .* /mx` in regexp.
+  #     Equivalent to `/.*/mx` in regexp.
   #
   #     `*`
   # :       Matches all files
@@ -231,7 +380,8 @@ class Dir < Object
   #     flag or something like `"{*,.*}"`.
   #
   # `**`
-  # :   Matches directories recursively.
+  # :   Matches directories recursively if followed by `/`. If this path segment
+  #     contains any other characters, it is the same as the usual `*`.
   #
   # `?`
   # :   Matches any one character. Equivalent to `/.{1}/` in regexp.
@@ -248,7 +398,7 @@ class Dir < Object
   #     Matching literals may be more than one character in length. More than
   #     two literals may be specified.
   #
-  # ` \\ `
+  # `\`
   # :   Escapes the next metacharacter.
   #
   #     Note that this means you cannot use backslash on windows as part of a
@@ -265,26 +415,22 @@ class Dir < Object
   # Dir.glob("*.[^r]*")                 #=> ["config.h"]
   # Dir.glob("*.{rb,h}")                #=> ["main.rb", "config.h"]
   # Dir.glob("*")                       #=> ["config.h", "main.rb"]
-  # Dir.glob("*", File::FNM_DOTMATCH)   #=> [".", "..", "config.h", "main.rb"]
+  # Dir.glob("*", File::FNM_DOTMATCH)   #=> [".", "config.h", "main.rb"]
   # Dir.glob(["*.rb", "*.h"])           #=> ["main.rb", "config.h"]
   #
-  # rbfiles = File.join("**", "*.rb")
-  # Dir.glob(rbfiles)                   #=> ["main.rb",
+  # Dir.glob("**/*.rb")                 #=> ["main.rb",
   #                                     #    "lib/song.rb",
   #                                     #    "lib/song/karaoke.rb"]
   #
-  # Dir.glob(rbfiles, base: "lib")      #=> ["song.rb",
+  # Dir.glob("**/*.rb", base: "lib")    #=> ["song.rb",
   #                                     #    "song/karaoke.rb"]
   #
-  # libdirs = File.join("**", "lib")
-  # Dir.glob(libdirs)                   #=> ["lib"]
+  # Dir.glob("**/lib")                  #=> ["lib"]
   #
-  # librbfiles = File.join("**", "lib", "**", "*.rb")
-  # Dir.glob(librbfiles)                #=> ["lib/song.rb",
+  # Dir.glob("**/lib/**/*.rb")          #=> ["lib/song.rb",
   #                                     #    "lib/song/karaoke.rb"]
   #
-  # librbfiles = File.join("**", "lib", "*.rb")
-  # Dir.glob(librbfiles)                #=> ["lib/song.rb"]
+  # Dir.glob("**/lib/*.rb")             #=> ["lib/song.rb"]
   # ```
   sig do
     params(
@@ -485,6 +631,10 @@ class Dir < Object
   # d = Dir.new("..")
   # d.path   #=> ".."
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`to_path`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-to_path)
   sig {returns(T.nilable(String))}
   def path(); end
 
@@ -497,6 +647,10 @@ class Dir < Object
   # d.read   #=> "."
   # d.tell   #=> 12
   # ```
+  #
+  #
+  # Alias for:
+  # [`tell`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-tell)
   sig {returns(Integer)}
   def pos(); end
 
@@ -571,6 +725,10 @@ class Dir < Object
   # d.read   #=> "."
   # d.tell   #=> 12
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`pos`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-pos)
   sig {returns(Integer)}
   def tell(); end
 
@@ -580,10 +738,14 @@ class Dir < Object
   # d = Dir.new("..")
   # d.path   #=> ".."
   # ```
+  #
+  #
+  # Alias for:
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-i-path)
   sig {returns(T.nilable(String))}
   def to_path(); end
 
-  # Equivalent to calling `Dir.glob([string,...], 0)`.
+  # Equivalent to calling `Dir.glob([`*string,...*`], 0)`.
   sig do
     params(
         pattern: T.any(String, Pathname),
