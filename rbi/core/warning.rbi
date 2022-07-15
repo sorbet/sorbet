@@ -70,7 +70,11 @@ module Warning
   def self.[]=(category, setting); end
 
   # Writes warning message `msg` to $stderr. This method is called by Ruby for
-  # all emitted warnings.
-  sig {params(msg: Object).returns(NilClass)}
-  def warn(msg); end
+  # all emitted warnings. A `category` may be included with the warning.
+  #
+  # See the documentation of the
+  # [`Warning`](https://docs.ruby-lang.org/en/2.7.0/Warning.html) module for how
+  # to customize this.
+  sig {params(msg: Object, category: T.nilable(T.any(String, Symbol))).returns(NilClass)}
+  def warn(msg, category: nil); end
 end
