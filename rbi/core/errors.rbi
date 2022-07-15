@@ -29,11 +29,10 @@
 class ArgumentError < StandardError
 end
 
-# The exception class which will be raised when pushing into a closed
-# [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html). See
-# [`Queue#close`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-close)
+# The exception class which will be raised when pushing into a closed Queue. See
+# [`Thread::Queue#close`](https://docs.ruby-lang.org/en/2.7.0/Thread/Queue.html#method-i-close)
 # and
-# [`SizedQueue#close`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-close).
+# [`Thread::SizedQueue#close`](https://docs.ruby-lang.org/en/2.7.0/Thread/SizedQueue.html#method-i-close).
 class ClosedQueueError < StopIteration
 end
 
