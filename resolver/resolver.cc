@@ -1913,13 +1913,8 @@ class ResolveTypeMembersAndFieldsWalk {
 
     void extendClassOfDepth(ast::Send &send) {
         if (trackDependencies_) {
-            classOfDepth_.emplace_back(isT(send.recv) && send.fun == core::Names::classOf());
+            classOfDepth_.emplace_back(ast::MK::isT(send.recv) && send.fun == core::Names::classOf());
         }
-    }
-
-    static bool isT(const ast::ExpressionPtr &expr) {
-        auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
-        return tMod && tMod->symbol == core::Symbols::T();
     }
 
     static bool isTodo(const core::TypePtr &type) {
@@ -2742,7 +2737,7 @@ public:
 
         if (send.fun == core::Names::typeAlias()) {
             // don't track dependencies if this is some other method named `type_alias`
-            if (!isT(send.recv)) {
+            if (!ast::MK::isT(send.recv)) {
                 extendClassOfDepth(send);
                 return;
             }
