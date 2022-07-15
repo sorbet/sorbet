@@ -275,6 +275,9 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
             }
             appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
                              relativeIgnorePatterns);
+        } else if (recursive && entry->d_type == DT_LNK && sorbet::FileOps::dirExists(fullPath)) {
+            appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
+                             relativeIgnorePatterns);
         } else {
             auto dotLocation = fullPath.rfind('.');
             if (dotLocation != string::npos) {
