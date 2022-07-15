@@ -197,7 +197,7 @@ bb5[rubyRegionId=1, firstDead=12](<self>: T.class_of(NotAnEnum), <block-pre-call
     <cfgAlias>$11: T.class_of(<Magic>) = alias <C <Magic>>
     <cfgAlias>$14: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$12: T.attached_class (of NotAnEnum) = <cfgAlias>$14: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
-    <C X>$9: T.attached_class (of NotAnEnum) = <cfgAlias>$11: T.class_of(<Magic>).<suggest-type>(<statTemp>$12: T.attached_class (of NotAnEnum))
+    <C X>$9: T.attached_class (of NotAnEnum) = <cfgAlias>$11: T.class_of(<Magic>).<suggest-constant-type>(<statTemp>$12: T.attached_class (of NotAnEnum))
     <cfgAlias>$19: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <statTemp>$17: Sorbet::Private::Static::Void = <cfgAlias>$19: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<self>: T.class_of(NotAnEnum))
     <cfgAlias>$23: T.class_of(<Magic>) = alias <C <Magic>>

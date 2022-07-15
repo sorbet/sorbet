@@ -10,7 +10,7 @@ end
 
 class E
     def self.e=(e) # error: does not have a `sig`
-        @e = e; # error: Use of undeclared variable `@e`
+        @e = e; # error: The instance variable `@e` must be declared using `T.let` when specifying `# typed: strict`
     end
     def self.e # error: does not have a `sig`
         @e # error: Use of undeclared variable `@e`
