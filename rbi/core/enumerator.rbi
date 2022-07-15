@@ -998,6 +998,23 @@ class Enumerator::Yielder < Object
   end
   def <<(*arg0); end
 
+  # Returns a [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) object
+  # that takes arguments and yields them.
+  #
+  # This method is implemented so that a
+  # [`Yielder`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Yielder.html)
+  # object can be directly passed to another method as a block argument.
+  #
+  # ```ruby
+  # enum = Enumerator.new { |y|
+  #   Dir.glob("*.rb") { |file|
+  #     File.open(file) { |f| f.each_line(&y) }
+  #   }
+  # }
+  # ```
+  sig { returns(T.proc.params(args: T.untyped).returns(T.untyped)) }
+  def to_proc; end
+
   sig do
     params(
       arg0: BasicObject
