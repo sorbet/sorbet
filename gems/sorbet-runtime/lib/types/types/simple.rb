@@ -57,10 +57,8 @@ module T::Types
 
     module Private
       module Pool
-        @cache = ObjectSpace::WeakMap.new
-
         def self.type_for_module(mod)
-          cached = @cache[mod]
+          cached = mod.instance_variable_get(:@__as_sorbet_type)
           return cached if cached
 
           type = if mod == ::Array
@@ -79,13 +77,7 @@ module T::Types
             Simple.new(mod)
           end
 
-          # Unfortunately, we still need to check if the module is frozen,
-          # since WeakMap adds a finalizer to the key that is added
-          # to the map, so that it can clear the map entry when the key is
-          # garbage collected.
-          # For a frozen object, though, adding a finalizer is not a valid
-          # operation, so this still raises if `mod` is frozen.
-          @cache[mod] = type unless mod.frozen?
+          mod.instance_variable_set(:@__as_sorbet_type, type) unless mod.frozen?
           type
         end
       end
