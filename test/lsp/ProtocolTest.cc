@@ -111,6 +111,10 @@ unique_ptr<LSPMessage> ProtocolTest::hover(string_view path, int line, int chara
     return makeHover(nextId++, getUri(path), line, character);
 }
 
+unique_ptr<LSPMessage> ProtocolTest::codeAction(string_view path, int line, int character) {
+    return makeCodeAction(nextId++, getUri(path), line, character);
+}
+
 unique_ptr<LSPMessage> ProtocolTest::completion(string_view path, int line, int character) {
     return makeCompletion(nextId++, getUri(path), line, character);
 }
