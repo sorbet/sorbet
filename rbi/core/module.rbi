@@ -95,12 +95,14 @@ class Module < Object
   def <=>(other); end
 
   # Equality --- At the
-  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) level, #==
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) level,
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-3D-3D)
   # returns `true` only if `obj` and `other` are the same object. Typically,
   # this method is overridden in descendant classes to provide class-specific
   # meaning.
   #
-  # Unlike #==, the
+  # Unlike
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-3D-3D), the
   # [`equal?`](https://docs.ruby-lang.org/en/2.7.0/BasicObject.html#method-i-equal-3F)
   # method should never be overridden by subclasses as it is used to determine
   # object identity (that is, `a.equal?(b)` if and only if `a` is the same
@@ -132,12 +134,17 @@ class Module < Object
   # For objects of class
   # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html),
   # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-eql-3F)
-  # is synonymous with #==. Subclasses normally continue this tradition by
-  # aliasing
+  # is synonymous with
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-3D-3D).
+  # Subclasses normally continue this tradition by aliasing
   # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-eql-3F) to
-  # their overridden #== method, but there are exceptions.
+  # their overridden
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-3D-3D)
+  # method, but there are exceptions.
   # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) types, for
-  # example, perform type conversion across #==, but not across
+  # example, perform type conversion across
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-3D-3D), but
+  # not across
   # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-eql-3F),
   # so:
   #
@@ -193,7 +200,7 @@ class Module < Object
   #
   # ```ruby
   # module Mod
-  #   alias_method :orig_exit, :exit
+  #   alias_method :orig_exit, :exit #=> :orig_exit
   #   def exit(code=0)
   #     puts "Exiting with code #{code}"
   #     orig_exit(code)
@@ -254,11 +261,11 @@ class Module < Object
   # corresponding access method to read it. Also creates a method called `name=`
   # to set the attribute.
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
+  # converted to symbols. Returns an array of defined method names as symbols.
   #
   # ```ruby
   # module Mod
-  #   attr_accessor(:one, :two)
+  #   attr_accessor(:one, :two) #=> [:one, :one=, :two, :two=]
   # end
   # Mod.instance_methods.sort   #=> [:one, :one=, :two, :two=]
   # ```
@@ -273,7 +280,8 @@ class Module < Object
   # Creates instance variables and corresponding methods that return the value
   # of each instance variable. Equivalent to calling "`attr`*:name*" on each
   # name in turn. [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
-  # arguments are converted to symbols.
+  # arguments are converted to symbols. Returns an array of defined method names
+  # as symbols.
   sig do
     params(
         arg0: T.any(Symbol, String),
@@ -285,7 +293,7 @@ class Module < Object
   # Creates an accessor method to allow assignment to the attribute
   # *symbol*`.id2name`.
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
+  # converted to symbols. Returns an array of defined method names as symbols.
   sig do
     params(
         arg0: T.any(Symbol, String),
@@ -367,6 +375,10 @@ class Module < Object
   # dummy:123:in `module_eval': undefined local variable
   #     or method `code' for Thing:Class
   # ```
+  #
+  #
+  # Alias for:
+  # [`module_eval`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-module_eval)
   sig do
     params(
         arg0: String,
@@ -405,6 +417,10 @@ class Module < Object
   # ```ruby
   # Hello there!
   # ```
+  #
+  #
+  # Alias for:
+  # [`module_exec`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-module_exec)
   sig do
     params(
         args: BasicObject,
@@ -663,8 +679,8 @@ class Module < Object
   end
   def const_set(arg0, arg1); end
 
-  # Returns the Ruby source filename and line number containing first definition
-  # of constant specified. If the named constant is not found, `nil` is
+  # Returns the Ruby source filename and line number containing the definition
+  # of the constant specified. If the named constant is not found, `nil` is
   # returned. If the constant is found, but its source location can not be
   # extracted (constant is defined in C code), empty array is returned.
   #
@@ -673,30 +689,34 @@ class Module < Object
   #
   # ```ruby
   # # test.rb:
-  # class A
+  # class A         # line 1
   #   C1 = 1
-  # end
-  #
-  # module M
   #   C2 = 2
   # end
   #
-  # class B < A
-  #   include M
+  # module M        # line 6
   #   C3 = 3
   # end
   #
-  # class A # continuation of A definition
+  # class B < A     # line 10
+  #   include M
+  #   C4 = 4
   # end
   #
-  # p B.const_source_location('C3')           # => ["test.rb", 11]
-  # p B.const_source_location('C2')           # => ["test.rb", 6]
+  # class A # continuation of A definition
+  #   C2 = 8 # constant redefinition; warned yet allowed
+  # end
+  #
+  # p B.const_source_location('C4')           # => ["test.rb", 12]
+  # p B.const_source_location('C3')           # => ["test.rb", 7]
   # p B.const_source_location('C1')           # => ["test.rb", 2]
   #
-  # p B.const_source_location('C2', false)    # => nil  -- don't lookup in ancestors
+  # p B.const_source_location('C3', false)    # => nil  -- don't lookup in ancestors
   #
-  # p Object.const_source_location('B')       # => ["test.rb", 9]
-  # p Object.const_source_location('A')       # => ["test.rb", 1]  -- note it is first entry, not "continuation"
+  # p A.const_source_location('C2')           # => ["test.rb", 16] -- actual (last) definition place
+  #
+  # p Object.const_source_location('B')       # => ["test.rb", 10] -- top-level constant could be looked through Object
+  # p Object.const_source_location('A')       # => ["test.rb", 1] -- class reopening is NOT considered new definition
   #
   # p B.const_source_location('A')            # => ["test.rb", 1]  -- because Object is in ancestors
   # p M.const_source_location('A')            # => ["test.rb", 1]  -- Object is not ancestor, but additionally checked for modules
@@ -890,7 +910,8 @@ class Module < Object
   end
   def include(*arg0); end
 
-  # Returns `true` if *module* is included in *mod* or one of *mod*'s ancestors.
+  # Returns `true` if *module* is included or prepended in *mod* or one of
+  # *mod*'s ancestors.
   #
   # ```ruby
   # module A
@@ -935,18 +956,23 @@ class Module < Object
   end
   def included(othermod); end
 
-  # Returns the list of modules included in *mod*.
+  # Returns the list of modules included or prepended in *mod* or one of *mod*'s
+  # ancestors.
   #
   # ```ruby
+  # module Sub
+  # end
+  #
   # module Mixin
+  #   prepend Sub
   # end
   #
   # module Outer
   #   include Mixin
   # end
   #
-  # Mixin.included_modules   #=> []
-  # Outer.included_modules   #=> [Mixin]
+  # Mixin.included_modules   #=> [Sub]
+  # Outer.included_modules   #=> [Sub, Mixin]
   # ```
   sig {returns(T::Array[Module])}
   def included_modules(); end
@@ -1145,6 +1171,10 @@ class Module < Object
   # dummy:123:in `module_eval': undefined local variable
   #     or method `code' for Thing:Class
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`class_eval`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-class_eval)
   sig do
     params(
         arg0: String,
@@ -1183,6 +1213,10 @@ class Module < Object
   # ```ruby
   # Hello there!
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`class_exec`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-class_exec)
   sig do
     params(
         args: BasicObject,
@@ -1200,7 +1234,9 @@ class Module < Object
   # instance-method versions are made private. If used with no arguments,
   # subsequently defined methods become module functions.
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
+  # converted to symbols. If a single argument is passed, it is returned. If no
+  # argument is passed, nil is returned. If multiple arguments are passed, the
+  # arguments are returned as an array.
   #
   # ```ruby
   # module Mod
@@ -1288,7 +1324,11 @@ class Module < Object
   # With no arguments, sets the default visibility for subsequently defined
   # methods to private. With arguments, sets the named methods to have private
   # visibility. [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
-  # arguments are converted to symbols.
+  # arguments are converted to symbols. An
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Symbols and/or
+  # Strings is also accepted. If a single argument is passed, it is returned. If
+  # no argument is passed, nil is returned. If multiple arguments are passed,
+  # the arguments are returned as an array.
   #
   # ```ruby
   # module Mod
@@ -1315,7 +1355,9 @@ class Module < Object
   # constructor `new`.
   #
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
+  # converted to symbols. An
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Symbols and/or
+  # Strings is also accepted.
   #
   # ```ruby
   # class SimpleSingleton  # Not thread safe
@@ -1401,7 +1443,11 @@ class Module < Object
   # methods to protected. With arguments, sets the named methods to have
   # protected visibility.
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
+  # converted to symbols. An
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Symbols and/or
+  # Strings is also accepted. If a single argument is passed, it is returned. If
+  # no argument is passed, nil is returned. If multiple arguments are passed,
+  # the arguments are returned as an array.
   #
   # If a method has protected visibility, it is callable only where `self` of
   # the context is the same as the method. (method definition or
@@ -1468,7 +1514,11 @@ class Module < Object
   # With no arguments, sets the default visibility for subsequently defined
   # methods to public. With arguments, sets the named methods to have public
   # visibility. [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
-  # arguments are converted to symbols.
+  # arguments are converted to symbols. An
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Symbols and/or
+  # Strings is also accepted. If a single argument is passed, it is returned. If
+  # no argument is passed, nil is returned. If multiple arguments are passed,
+  # the arguments are returned as an array.
   sig do
     params(
         arg0: T.any(Symbol, String),
@@ -1480,7 +1530,9 @@ class Module < Object
   # Makes a list of existing class methods public.
   #
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) arguments are
-  # converted to symbols.
+  # converted to symbols. An
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Symbols and/or
+  # Strings is also accepted.
   sig do
     params(
         arg0: T.any(Symbol, String),
@@ -1563,13 +1615,13 @@ class Module < Object
   end
   def refine(arg0, &blk); end
 
-  # Removes the definition of the *sym*, returning that constant's value.
+  # Removes the named class variable from the receiver, returning that
+  # variable's value.
   #
   # ```ruby
-  # class Dummy
+  # class Example
   #   @@var = 99
-  #   puts @@var
-  #   remove_class_variable(:@@var)
+  #   puts remove_class_variable(:@@var)
   #   p(defined? @@var)
   # end
   # ```
@@ -1623,13 +1675,14 @@ class Module < Object
   # through the method to other methods.
   #
   # This should only be used for methods that delegate keywords to another
-  # method, and only for backwards compatibility with Ruby versions before 2.7.
+  # method, and only for backwards compatibility with Ruby versions before 3.0.
+  # See
+  # https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyword-arguments-in-ruby-3-0/
+  # for details on why `ruby2_keywords` exists and when and how to use it.
   #
   # This method will probably be removed at some point, as it exists only for
   # backwards compatibility. As it does not exist in Ruby versions before 2.7,
-  # check that the module responds to this method before calling it. Also, be
-  # aware that if this method is removed, the behavior of the method will change
-  # so that it does not pass through keywords.
+  # check that the module responds to this method before calling it:
   #
   # ```ruby
   # module Mod
@@ -1639,6 +1692,10 @@ class Module < Object
   #   ruby2_keywords(:foo) if respond_to?(:ruby2_keywords, true)
   # end
   # ```
+  #
+  # However, be aware that if the `ruby2_keywords` method is removed, the
+  # behavior of the `foo` method using the above approach will change so that
+  # the method does not pass through keywords.
   sig { params(method_name: Symbol).returns(T.self_type) }
   def ruby2_keywords(*method_name); end
 
@@ -1721,6 +1778,10 @@ class Module < Object
   end
   def using(arg0); end
 
+  # Returns a string representing this module or class. For basic classes and
+  # modules, this is the name. For singletons, we show information on the thing
+  # we're attached to as well.
+  #
   # Alias for:
   # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-to_s)
   sig {returns(String)}
@@ -1729,7 +1790,8 @@ class Module < Object
   # The first form is equivalent to
   # [`attr_reader`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-attr_reader).
   # The second form is equivalent to `attr_accessor(name)` but deprecated. The
-  # last form is equivalent to `attr_reader(name)` but deprecated.
+  # last form is equivalent to `attr_reader(name)` but deprecated. Returns an
+  # array of defined method names as symbols.
   sig do
     params(
         arg0: T.any(Symbol, String),
