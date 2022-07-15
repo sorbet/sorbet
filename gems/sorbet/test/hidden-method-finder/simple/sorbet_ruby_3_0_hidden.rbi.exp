@@ -2273,10 +2273,6 @@ class Foo
   def baz(); end
 end
 
-class FrozenError
-  def receiver(); end
-end
-
 module GC
   def garbage_collect(full_mark: T.unsafe(nil), immediate_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 end
