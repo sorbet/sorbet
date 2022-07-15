@@ -2097,23 +2097,11 @@ class Enumerator::Generator
   def initialize(*arg); end
 end
 
-class Enumerator::Lazy
-  def eager(); end
-end
-
 class Enumerator::Producer
   def each(&blk); end
 end
 
 class Enumerator::Producer
-end
-
-class Enumerator::Yielder
-  def to_proc(); end
-end
-
-class Enumerator
-  def self.produce(*arg); end
 end
 
 Errno::ECAPMODE = Errno::NOERROR
