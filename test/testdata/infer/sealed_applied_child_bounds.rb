@@ -22,13 +22,9 @@ sig {params(x: Parent[String]).void}
 def foo(x)
   case x
   when Child1
-    # TODO(jez)
-    # This is wrong: the revealed type should not be allowed to exists, because
-    # `String` is not a super type of `Integer`, which is a lower bound of `Child1::A`
-    T.reveal_type(x) # error: Revealed type: `Child1[String]`
+    T.reveal_type(x) # error: Revealed type: `Child1[T.untyped]`
   when Child2
-    # TODO(jez) This is also wrong, for the same reason.
-    T.reveal_type(x) # error: Revealed type: `Child2[String]`
+    T.reveal_type(x) # error: Revealed type: `Child2[T.untyped]`
   else T.absurd(x)
   end
 end

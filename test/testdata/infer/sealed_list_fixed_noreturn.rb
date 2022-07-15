@@ -7,6 +7,9 @@ module List
   sealed!
   abstract!
 
+  sig {abstract.returns(Elem)}
+  def head; end
+
   class Cons < T::Struct
     extend T::Sig
     extend T::Generic
@@ -22,6 +25,9 @@ module List
     extend T::Generic
     include List
     Elem = type_member {{fixed: T.noreturn}}
+
+    sig {override.returns(Elem)}
+    def head; raise "head on empty list"; end
   end
 end
 
@@ -40,9 +46,11 @@ def list_integer_to_list_string(xs)
     T.reveal_type(xs) # error: Revealed type: `T.all(List[Integer], List::Nil)`
 
     # Even though the T.all doesn't collapse above, it appears that type can
-    # still be used for any empty list?  Not sure if there's a bug in
-    # Types::glb, or in Types::isSubType, or if there's no bug.
+    # still be used like an empty list.
     _unused = T.let(xs, List[String])
+    0.times do
+      puts(xs.head) # error: This code is unreachable
+    end
     xs
   else
     T.absurd(xs)
