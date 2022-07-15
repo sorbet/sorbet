@@ -81,6 +81,19 @@ end
 # FrozenError: can't modify frozen Array
 # ```
 class FrozenError < RuntimeError
+  # Construct a new
+  # [`FrozenError`](https://docs.ruby-lang.org/en/2.7.0/FrozenError.html)
+  # exception. If given the *receiver* parameter may subsequently be examined
+  # using the
+  # [`FrozenError#receiver`](https://docs.ruby-lang.org/en/2.7.0/FrozenError.html#method-i-receiver)
+  # method.
+  #
+  # ```ruby
+  # a = [].freeze
+  # raise FrozenError.new("can't modify frozen array", receiver: a)
+  # ```
+  sig { params(msg: T.untyped, receiver: T.untyped).void }
+  def initialize(msg = nil, receiver: nil); end
 end
 
 # Raised when the given index is invalid.
