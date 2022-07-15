@@ -1144,9 +1144,30 @@ private:
         ENFORCE(block->body);
 
         auto blockLoc = core::Loc(todo.file, block->body.loc());
-        auto *id = ast::cast_tree<ast::ConstantLit>(block->body);
+        core::ClassOrModuleRef symbol = core::Symbols::StubModule();
 
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
+        if(auto *constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
+            if(constant != nullptr && constant->symbol.exists() && constant->symbol.isClassOrModule()) {
+                symbol = constant->symbol.asClassOrModuleRef();
+            }
+        } else if(ast::MK::isTClassOf(block->body)) {
+            send = ast::cast_tree<ast::Send>(block->body);
+
+            ENFORCE(send);
+
+            if(send->numPosArgs() == 1) {
+                auto arg = send->getPosArg(0).deepCopy();
+                if(auto *argClass = ast::cast_tree<ast::ConstantLit>(arg)) {
+                    if(argClass != nullptr && argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
+                        if constexpr (isMutableStateType) {
+                            symbol = argClass->symbol.asClassOrModuleRef().data(gs)->singletonClass(gs);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (symbol == core::Symbols::StubModule()) {
             if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
                             send->fun.show(gs));
@@ -1154,7 +1175,7 @@ private:
             return;
         }
 
-        if (id->symbol == owner) {
+        if (symbol == owner) {
             if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
             }
@@ -1162,7 +1183,7 @@ private:
         }
 
         if constexpr (isMutableStateType) {
-            owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), blockLoc);
+            owner.data(gs)->recordRequiredAncestor(gs, symbol, blockLoc);
         }
     }
 
