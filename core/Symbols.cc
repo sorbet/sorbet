@@ -579,6 +579,60 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
     return false;
 }
 
+bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
+    return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
+           *this == Symbols::T_Range() || *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
+           *this == Symbols::T_Enumerator_Lazy();
+}
+
+ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
+    if (*this == Symbols::T_Array()) {
+        return Symbols::Array();
+    } else if (*this == Symbols::T_Hash()) {
+        return Symbols::Hash();
+    } else if (*this == Symbols::T_Enumerable()) {
+        return Symbols::Enumerable();
+    } else if (*this == Symbols::T_Enumerator()) {
+        return Symbols::Enumerator();
+    } else if (*this == Symbols::T_Enumerator_Lazy()) {
+        return Symbols::Enumerator_Lazy();
+    } else if (*this == Symbols::T_Range()) {
+        return Symbols::Range();
+    } else if (*this == Symbols::T_Set()) {
+        return Symbols::Set();
+    } else {
+        return *this;
+    }
+}
+
+ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
+    if (*this == Symbols::Array()) {
+        return Symbols::T_Array();
+    } else if (*this == Symbols::Hash()) {
+        return Symbols::T_Hash();
+    } else if (*this == Symbols::Enumerable()) {
+        return Symbols::T_Enumerable();
+    } else if (*this == Symbols::Enumerator()) {
+        return Symbols::T_Enumerator();
+    } else if (*this == Symbols::Enumerator_Lazy()) {
+        return Symbols::T_Enumerator_Lazy();
+    } else if (*this == Symbols::Range()) {
+        return Symbols::T_Range();
+    } else if (*this == Symbols::Set()) {
+        return Symbols::T_Set();
+    } else {
+        return Symbols::noClassOrModule();
+    }
+}
+
+// See the comment in the header.
+// !! The set of stdlib classes receiving this special behavior should NOT grow over time !!
+bool ClassOrModuleRef::isLegacyStdlibGeneric() const {
+    return *this == Symbols::Hash() || *this == Symbols::Array() || *this == Symbols::Set() ||
+           *this == Symbols::Range() || *this == Symbols::Enumerable() || *this == Symbols::Enumerator() ||
+           *this == Symbols::Enumerator_Lazy();
+}
+
 namespace {
 MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrModuleRef owner, NameRef name,
                                                int maxDepth) {

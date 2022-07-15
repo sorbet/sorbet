@@ -1938,21 +1938,7 @@ public:
             return;
         }
 
-        if (attachedClass == Symbols::T_Array()) {
-            attachedClass = Symbols::Array();
-        } else if (attachedClass == Symbols::T_Hash()) {
-            attachedClass = Symbols::Hash();
-        } else if (attachedClass == Symbols::T_Enumerable()) {
-            attachedClass = Symbols::Enumerable();
-        } else if (attachedClass == Symbols::T_Enumerator()) {
-            attachedClass = Symbols::Enumerator();
-        } else if (attachedClass == Symbols::T_Enumerator_Lazy()) {
-            attachedClass = Symbols::Enumerator_Lazy();
-        } else if (attachedClass == Symbols::T_Range()) {
-            attachedClass = Symbols::Range();
-        } else if (attachedClass == Symbols::T_Set()) {
-            attachedClass = Symbols::Set();
-        }
+        attachedClass = attachedClass.maybeUnwrapBuiltinGenericForwarder();
 
         if (attachedClass.data(gs)->typeMembers().empty()) {
             return;

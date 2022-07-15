@@ -872,18 +872,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 auto klass = sym.asClassOrModuleRef();
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
                 // same way that we check against types like `Array`
-                bool isBuiltinGeneric = klass == core::Symbols::T_Hash() || klass == core::Symbols::T_Array() ||
-                                        klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
-                                        klass == core::Symbols::T_Enumerable() ||
-                                        klass == core::Symbols::T_Enumerator() ||
-                                        klass == core::Symbols::T_Enumerator_Lazy();
-
+                bool isBuiltinGeneric = klass.isBuiltinGenericForwarder();
                 if (isBuiltinGeneric || klass.data(ctx)->typeArity(ctx) > 0) {
-                    // This set **should not** grow over time.
-                    bool isStdlibWhitelisted = klass == core::Symbols::Hash() || klass == core::Symbols::Array() ||
-                                               klass == core::Symbols::Set() || klass == core::Symbols::Range() ||
-                                               klass == core::Symbols::Enumerable() ||
-                                               klass == core::Symbols::Enumerator();
+                    auto isStdlibWhitelisted = klass.isLegacyStdlibGeneric();
                     auto level = isStdlibWhitelisted ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                                      : core::errors::Resolver::GenericClassWithoutTypeArgs;
                     if (auto e = ctx.beginError(i.loc, level)) {
@@ -1127,20 +1118,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
 
             core::SymbolRef corrected;
-            if (recvi->symbol == core::Symbols::Array()) {
-                corrected = core::Symbols::T_Array();
-            } else if (recvi->symbol == core::Symbols::Hash()) {
-                corrected = core::Symbols::T_Hash();
-            } else if (recvi->symbol == core::Symbols::Enumerable()) {
-                corrected = core::Symbols::T_Enumerable();
-            } else if (recvi->symbol == core::Symbols::Enumerator()) {
-                corrected = core::Symbols::T_Enumerator();
-            } else if (recvi->symbol == core::Symbols::Enumerator_Lazy()) {
-                corrected = core::Symbols::T_Enumerator_Lazy();
-            } else if (recvi->symbol == core::Symbols::Range()) {
-                corrected = core::Symbols::T_Range();
-            } else if (recvi->symbol == core::Symbols::Set()) {
-                corrected = core::Symbols::T_Set();
+            if (recvi->symbol.isClassOrModule()) {
+                corrected = recvi->symbol.asClassOrModuleRef().forwarderForBuiltinGeneric();
             }
             if (corrected.exists()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {
