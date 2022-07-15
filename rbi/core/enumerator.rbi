@@ -110,6 +110,50 @@ class Enumerator < Object
   extend T::Generic
   Elem = type_member(:out)
 
+  # Creates an infinite enumerator from any block, just called over and over.
+  # The result of the previous iteration is passed to the next one. If `initial`
+  # is provided, it is passed to the first iteration, and becomes the first
+  # element of the enumerator; if it is not provided, the first iteration
+  # receives `nil`, and its result becomes the first element of the iterator.
+  #
+  # Raising
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.7.0/StopIteration.html)
+  # from the block stops an iteration.
+  #
+  # ```ruby
+  # Enumerator.produce(1, &:succ)   # => enumerator of 1, 2, 3, 4, ....
+  #
+  # Enumerator.produce { rand(10) } # => infinite random number sequence
+  #
+  # ancestors = Enumerator.produce(node) { |prev| node = prev.parent or raise StopIteration }
+  # enclosing_section = ancestors.find { |n| n.type == :section }
+  # ```
+  #
+  # Using
+  # [`::produce`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html#method-c-produce)
+  # together with
+  # [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) methods
+  # like
+  # [`Enumerable#detect`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-detect),
+  # [`Enumerable#slice_after`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_after),
+  # [`Enumerable#take_while`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-take_while)
+  # can provide Enumerator-based alternatives for `while` and `until` cycles:
+  #
+  # ```ruby
+  # # Find next Tuesday
+  # require "date"
+  # Enumerator.produce(Date.today, &:succ).detect(&:tuesday?)
+  #
+  # # Simple lexer:
+  # require "strscan"
+  # scanner = StringScanner.new("7+38/6")
+  # PATTERN = %r{\d+|[-/+*]}
+  # Enumerator.produce { scanner.scan(PATTERN) }.slice_after { scanner.eos? }.first
+  # # => ["7", "+", "38", "/", "6"]
+  # ```
+  sig { params(initial: T.untyped, block: T.proc.params(arg: T.untyped).void).returns(T::Enumerator[T.untyped]) }
+  def self.produce(initial = nil, &block); end
+
   # Iterates over the block according to how this
   # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) was
   # constructed. If no block and no arguments are given, returns self.
