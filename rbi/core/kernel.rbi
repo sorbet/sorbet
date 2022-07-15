@@ -21,7 +21,290 @@
 # sprintf "%.1f", 1.234 #=> "1.2"
 # ```
 #
-# fronzen-string-literal: true
+# ## What's Here
+#
+# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html)
+# [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) provides methods
+# that are useful for:
+#
+# *   [Converting](#module-Kernel-label-Converting)
+# *   [Querying](#module-Kernel-label-Querying)
+# *   [Exiting](#module-Kernel-label-Exiting)
+# *   [Exceptions](#module-Kernel-label-Exceptions)
+# *   [IO](#module-Kernel-label-IO)
+# *   [Procs](#module-Kernel-label-Procs)
+# *   [Tracing](#module-Kernel-label-Tracing)
+# *   [Subprocesses](#module-Kernel-label-Subprocesses)
+# *   [Loading](#module-Kernel-label-Loading)
+# *   [Yielding](#module-Kernel-label-Yielding)
+# *   [Random Values](#module-Kernel-label-Random+Values)
+# *   [Other](#module-Kernel-label-Other)
+#
+#
+# ### Converting
+#
+#     [#Array](#method-i-Array)
+# :       Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
+#         based on the given argument.
+#
+#     [#Complex](#method-i-Complex)
+# :       Returns a
+#         [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html) based on
+#         the given arguments.
+#
+#     [#Float](#method-i-Float)
+# :       Returns a [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
+#         based on the given arguments.
+#
+#     [#Hash](#method-i-Hash)
+# :       Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
+#         based on the given argument.
+#
+#     [#Integer](#method-i-Integer)
+# :       Returns an
+#         [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) based on
+#         the given arguments.
+#
+#     [#Rational](#method-i-Rational)
+# :       Returns a
+#         [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html) based
+#         on the given arguments.
+#
+#     [#String](#method-i-String)
+# :       Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+#         based on the given argument.
+#
+#
+#
+# ### Querying
+#
+#     [#__callee__](#method-i-__callee__)
+# :       Returns the called name of the current method as a symbol.
+#
+#     [#__dir__](#method-i-__dir__)
+# :       Returns the path to the directory from which the current method is
+#         called.
+#
+#     [#__method__](#method-i-__method__)
+# :       Returns the name of the current method as a symbol.
+#
+#     [`autoload?`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-autoload-3F)
+# :       Returns the file to be loaded when the given module is referenced.
+#
+#     [`binding`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-binding)
+# :       Returns a
+#         [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html) for the
+#         context at the point of call.
+#
+#     [`block_given?`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-block_given-3F)
+# :       Returns `true` if a block was passed to the calling method.
+#
+#     [`caller`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-caller)
+# :       Returns the current execution stack as an array of strings.
+#
+#     [`caller_locations`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-caller_locations)
+# :       Returns the current execution stack as an array of
+#         [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html)
+#         objects.
+#
+#     [`class`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-class)
+# :       Returns the class of `self`.
+#
+#     [`frozen?`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-frozen-3F)
+# :       Returns whether `self` is frozen.
+#
+#     [`global_variables`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-global_variables)
+# :       Returns an array of global variables as symbols.
+#
+#     [`local_variables`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-local_variables)
+# :       Returns an array of local variables as symbols.
+#
+#     [`test`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-test)
+# :       Performs specified tests on the given single file or pair of files.
+#
+#
+#
+# ### Exiting
+#
+#     [`abort`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-abort)
+# :       Exits the current process after printing the given arguments.
+#
+#     [`at_exit`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-at_exit)
+# :       Executes the given block when the process exits.
+#
+#     [`exit`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exit)
+# :       Exits the current process after calling any registered `at_exit`
+#         handlers.
+#
+#     [`exit!`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exit-21)
+# :       Exits the current process without calling any registered `at_exit`
+#         handlers.
+#
+#
+#
+# ### Exceptions
+#
+#     [`catch`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-catch)
+# :       Executes the given block, possibly catching a thrown object.
+#
+#     [`raise`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-raise) (aliased as [`fail`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-fail))
+# :       Raises an exception based on the given arguments.
+#
+#     [`throw`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-throw)
+# :       Returns from the active catch block waiting for the given tag.
+#
+#
+#
+# ### [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
+#
+#     [`gets`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gets)
+# :       Returns and assigns to `$_` the next line from the current input.
+#
+#     [`open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open)
+# :       Creates an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object
+#         connected to the given stream, file, or subprocess.
+#
+#     [`p`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-p)
+# :       Prints the given objects' inspect output to the standard output.
+#
+#     [`pp`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-pp)
+# :       Prints the given objects in pretty form.
+#
+#     [`print`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-print)
+# :       Prints the given objects to standard output without a newline.
+#
+#     [`printf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-printf)
+# :       Prints the string resulting from applying the given format string to
+#         any additional arguments.
+#
+#     [`putc`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-putc)
+# :       Equivalent to <tt.$stdout.putc(object)</tt> for the given object.
+#
+#     [`puts`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-puts)
+# :       Equivalent to `$stdout.puts(*objects)` for the given objects.
+#
+#     [`readline`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-readline)
+# :       Similar to
+#         [`gets`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gets),
+#         but raises an exception at the end of file.
+#
+#     [`readlines`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-readlines)
+# :       Returns an array of the remaining lines from the current input.
+#
+#     [`select`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-select)
+# :       Same as
+#         [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select).
+#
+#
+#
+# ### Procs
+#
+#     [`lambda`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-lambda)
+# :       Returns a lambda proc for the given block.
+#
+#     [`proc`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-proc)
+# :       Returns a new [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html);
+#         equivalent to
+#         [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new).
+#
+#
+#
+# ### Tracing
+#
+#     [`set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-set_trace_func)
+# :       Sets the given proc as the handler for tracing, or disables tracing if
+#         given `nil`.
+#
+#     [`trace_var`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-trace_var)
+# :       Starts tracing assignments to the given global variable.
+#
+#     [`untrace_var`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-untrace_var)
+# :       Disables tracing of assignments to the given global variable.
+#
+#
+#
+# ### Subprocesses
+#
+#     #`cmd`
+# :       Returns the standard output of running `cmd` in a subshell.
+#
+#     [`exec`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exec)
+# :       Replaces current process with a new process.
+#
+#     [`fork`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-fork)
+# :       Forks the current process into two processes.
+#
+#     [`spawn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-spawn)
+# :       Executes the given command and returns its pid without waiting for
+#         completion.
+#
+#     [`system`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-system)
+# :       Executes the given command in a subshell.
+#
+#
+#
+# ### Loading
+#
+#     [`autoload`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-autoload)
+# :       Registers the given file to be loaded when the given constant is first
+#         referenced.
+#
+#     [`load`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-load)
+# :       Loads the given Ruby file.
+#
+#     [`require`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require)
+# :       Loads the given Ruby file unless it has already been loaded.
+#
+#     [`require_relative`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require_relative)
+# :       Loads the Ruby file path relative to the calling file, unless it has
+#         already been loaded.
+#
+#
+#
+# ### Yielding
+#
+#     [`tap`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-tap)
+# :       Yields `self` to the given block; returns `self`.
+#
+#     [`then`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-then) (aliased as [`yield_self`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-yield_self))
+# :       Yields `self` to the block and returns the result of the block.
+#
+#
+#
+# ### [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) Values
+#
+#     [`rand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-rand)
+# :       Returns a pseudo-random floating point number strictly between 0.0 and
+#         1.0.
+#
+#     [`srand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-srand)
+# :       Seeds the pseudo-random number generator with the given number.
+#
+#
+#
+# ### Other
+#
+#     [`eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
+# :       Evaluates the given string as Ruby code.
+#
+#     [`loop`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-loop)
+# :       Repeatedly executes the given block.
+#
+#     [`sleep`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sleep)
+# :       Suspends the current thread for the given number of seconds.
+#
+#     [`sprintf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sprintf) (aliased as [`format`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-format))
+# :       Returns the string resulting from applying the given format string to
+#         any additional arguments.
+#
+#     [`syscall`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-syscall)
+# :       Runs an operating system call.
+#
+#     [`trap`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-trap)
+# :       Specifies the handling of system signals.
+#
+#     [`warn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-warn)
+# :       Issue a warning based on the given messages and options.
 module Kernel
   RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
 
@@ -212,6 +495,15 @@ module Kernel
   end
   def catch(tag=Object.new, &blk); end
 
+  # Returns the class of *obj*. This method must always be called with an
+  # explicit receiver, as
+  # [`class`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-class) is
+  # also a reserved word in Ruby.
+  #
+  # ```ruby
+  # 1.class      #=> Integer
+  # self.class   #=> Object
+  # ```
   sig do
     # In a perfect world this should be:
     #
@@ -268,21 +560,7 @@ module Kernel
   end
   def eval(arg0, arg1=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
 
-  # Returns `true` if `yield` would execute a block in the current context. The
-  # `iterator?` form is mildly deprecated.
-  #
-  # ```ruby
-  # def try
-  #   if block_given?
-  #     yield
-  #   else
-  #     "no block"
-  #   end
-  # end
-  # try                  #=> "no block"
-  # try { "hello" }      #=> "hello"
-  # try do "hello" end   #=> "hello"
-  # ```
+  # Deprecated. Use block\_given? instead.
   sig {returns(T::Boolean)}
   def iterator?(); end
 
@@ -298,8 +576,8 @@ module Kernel
   sig {returns(T::Array[Symbol])}
   def local_variables(); end
 
-  # Seeds the system pseudo-random number generator, Random::DEFAULT, with
-  # `number`. The previous seed value is returned.
+  # Seeds the system pseudo-random number generator, with `number`. The previous
+  # seed value is returned.
   #
   # If `number` is omitted, seeds the generator using a source of entropy
   # provided by the operating system, if available (/dev/urandom on Unix systems
@@ -357,8 +635,29 @@ module Kernel
   end
   def =~(other); end
 
-  sig {returns(T.self_type)}
-  def clone(); end
+  # Produces a shallow copy of *obj*---the instance variables of *obj* are
+  # copied, but not the objects they reference.
+  # [`clone`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-clone)
+  # copies the frozen value state of *obj*, unless the `:freeze` keyword
+  # argument is given with a false or true value. See also the discussion under
+  # [`Object#dup`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-dup).
+  #
+  # ```ruby
+  # class Klass
+  #    attr_accessor :str
+  # end
+  # s1 = Klass.new      #=> #<Klass:0x401b3a38>
+  # s1.str = "Hello"    #=> "Hello"
+  # s2 = s1.clone       #=> #<Klass:0x401b3998 @str="Hello">
+  # s2.str[1,4] = "i"   #=> "i"
+  # s1.inspect          #=> "#<Klass:0x401b3a38 @str=\"Hi\">"
+  # s2.inspect          #=> "#<Klass:0x401b3998 @str=\"Hi\">"
+  # ```
+  #
+  # This method may have class-specific behavior. If so, that behavior will be
+  # documented under the #`initialize_copy` method of the class.
+  sig { params(freeze: T.nilable(T::Boolean)).returns(T.self_type) }
+  def clone(freeze: nil); end
 
   sig do
     params(
@@ -436,6 +735,13 @@ module Kernel
   sig {returns(T.self_type)}
   def freeze(); end
 
+  # Returns the freeze status of *obj*.
+  #
+  # ```ruby
+  # a = [ "a", "b", "c" ]
+  # a.freeze    #=> ["a", "b", "c"]
+  # a.frozen?   #=> true
+  # ```
   sig {returns(T::Boolean)}
   def frozen?(); end
 
@@ -620,6 +926,16 @@ module Kernel
   sig {returns(T::Boolean)}
   def tainted?(); end
 
+  # Yields self to the block, and then returns self. The primary purpose of this
+  # method is to "tap into" a method chain, in order to perform operations on
+  # intermediate results within the chain.
+  #
+  # ```ruby
+  # (1..10)                  .tap {|x| puts "original: #{x}" }
+  #   .to_a                  .tap {|x| puts "array:    #{x}" }
+  #   .select {|x| x.even? } .tap {|x| puts "evens:    #{x}" }
+  #   .map {|x| x*x }        .tap {|x| puts "squares:  #{x}" }
+  # ```
   sig do
     params(
       blk: T.proc.params(x: T.untyped).void
@@ -697,59 +1013,61 @@ module Kernel
   end
   def Array(x); end
 
-  # Create a new
-  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html) object.
+  # ```
+  # Returns the \BigDecimal converted from +value+
+  # with a precision of +ndigits+ decimal digits.
   #
-  # initial
-  # :   The initial value, as an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), a
-  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html), a
-  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html), a
-  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html), or
-  #     a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
+  # When +ndigits+ is less than the number of significant digits
+  # in the value, the result is rounded to that number of digits,
+  # according to the current rounding mode; see BigDecimal.mode.
+  # ```
   #
-  #     If it is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
-  #     spaces are ignored and unrecognized characters terminate the value.
+  # Returns `value` converted to a
+  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html),
+  # depending on the type of `value`:
   #
-  # digits
-  # :   The number of significant digits, as an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html). If
-  #     omitted or 0, the number of significant digits is determined from the
-  #     initial value.
-  #
-  #     The actual number of significant digits used in computation is usually
-  #     larger than the specified number.
-  #
-  # exception
-  # :   Whether an exception should be raised on invalid arguments. `true` by
-  #     default, if passed `false`, just returns `nil` for invalid.
-  #
-  #
-  # #### Exceptions
-  #
-  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html)
-  # :   If the `initial` type is neither
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html),
+  # *   [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html),
   #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html),
-  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html), nor
-  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html),
-  #     this exception is raised.
+  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html),
+  #     [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html), or
+  #     BigDecimal: converted directly:
   #
-  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html)
-  # :   If the `digits` is not an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), this
-  #     exception is raised.
+  # ```ruby
+  # # Integer, Complex, or BigDecimal value does not require ndigits; ignored if given.
+  # BigDecimal(2)                     # => 0.2e1
+  # BigDecimal(Complex(2, 0))         # => 0.2e1
+  # BigDecimal(BigDecimal(2))         # => 0.2e1
+  # # Float or Rational value requires ndigits.
+  # BigDecimal(2.0, 0)                # => 0.2e1
+  # BigDecimal(Rational(2, 1), 0)     # => 0.2e1
+  # ```
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
-  # :   If `initial` is a
-  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html), and the
-  #     `digits` is larger than Float::DIG + 1, this exception is raised.
+  # *   String: converted by parsing if it contains an integer or floating-point
+  #     literal; leading and trailing whitespace is ignored:
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
-  # :   If the `initial` is a
-  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) or
-  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html), and the
-  #     `digits` value is omitted, this exception is raised.
+  # ```ruby
+  # # String does not require ndigits; ignored if given.
+  # BigDecimal('2')     # => 0.2e1
+  # BigDecimal('2.0')   # => 0.2e1
+  # BigDecimal('0.2e1') # => 0.2e1
+  # BigDecimal(' 2.0 ') # => 0.2e1
+  # ```
+  #
+  # *   Other type that responds to method `:to_str`: first converted to a
+  #     string, then converted to a
+  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html), as
+  #     above.
+  #
+  # *   Other type:
+  #
+  #     *   Raises an exception if keyword argument `exception` is `true`.
+  #     *   Returns `nil` if keyword argument `exception` is `true`.
+  #
+  #
+  #
+  # Raises an exception if `value` evaluates to a
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) and `digits` is
+  # larger than Float::DIG + 1.
   sig do
     params(
         initial: T.any(Integer, Float, Rational, BigDecimal, String),
@@ -872,8 +1190,10 @@ module Kernel
   # or between 2 and 36) is a base for integer string representation. If *arg*
   # is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), when
   # *base* is omitted or equals zero, radix indicators (`0`, `0b`, and `0x`) are
-  # honored. In any case, strings should be strictly conformed to numeric
-  # representation. This behavior is different from that of
+  # honored. In any case, strings should consist only of one or more digits,
+  # except for that a sign, one underscore between two digits, and
+  # leading/trailing spaces are optional. This behavior is different from that
+  # of
   # [`String#to_i`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-to_i).
   # Non string values will be converted by first trying `to_int`, then `to_i`.
   #
@@ -891,6 +1211,7 @@ module Kernel
   # Integer(Time.new)   #=> 1204973019
   # Integer("0930", 10) #=> 930
   # Integer("111", 2)   #=> 7
+  # Integer(" +1_0 ")   #=> 10
   # Integer(nil)        #=> TypeError: can't convert nil into Integer
   # Integer("x")        #=> ArgumentError: invalid value for Integer(): "x"
   #
@@ -1201,6 +1522,10 @@ module Kernel
   # raise "Failed to create socket"
   # raise ArgumentError, "No parameters", caller
   # ```
+  #
+  #
+  # Alias for:
+  # [`raise`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-raise)
   sig {returns(T.noreturn)}
   sig do
     params(
@@ -1491,6 +1816,10 @@ module Kernel
   # sprintf("%{foo}f", { :foo => 1 })
   #   # => "1f"
   # ```
+  #
+  #
+  # Alias for:
+  # [`sprintf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sprintf)
   sig do
     params(
         format: String,
@@ -1536,7 +1865,9 @@ module Kernel
   end
   def gets(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
-  # Returns an array of the names of global variables.
+  # Returns an array of the names of global variables. This includes special
+  # regexp global variables such as `$~` and `$+`, but does not include the
+  # numbered regexp global variables (`$1`, `$2`, etc.).
   #
   # ```ruby
   # global_variables.grep /std/   #=> [:$stdin, :$stdout, :$stderr]
@@ -1544,13 +1875,30 @@ module Kernel
   sig {returns(T::Array[Symbol])}
   def global_variables(); end
 
-  # Loads and executes the Ruby program in the file *filename*. If the filename
-  # does not resolve to an absolute path, the file is searched for in the
-  # library directories listed in `$:`. If the optional *wrap* parameter is
-  # `true`, the loaded script will be executed under an anonymous module,
-  # protecting the calling program's global namespace. In no circumstance will
-  # any local variables in the loaded file be propagated to the loading
-  # environment.
+  # Loads and executes the Ruby program in the file *filename*.
+  #
+  # If the filename is an absolute path (e.g. starts with '/'), the file will be
+  # loaded directly using the absolute path.
+  #
+  # If the filename is an explicit relative path (e.g. starts with './' or
+  # '../'), the file will be loaded using the relative path from the current
+  # directory.
+  #
+  # Otherwise, the file will be searched for in the library directories listed
+  # in `$LOAD_PATH` (`$:`). If the file is found in a directory, it will attempt
+  # to load the file relative to that directory. If the file is not found in any
+  # of the directories in `$LOAD_PATH`, the file will be loaded using the
+  # relative path from the current directory.
+  #
+  # If the file doesn't exist when there is an attempt to load it, a
+  # [`LoadError`](https://docs.ruby-lang.org/en/2.7.0/LoadError.html) will be
+  # raised.
+  #
+  # If the optional *wrap* parameter is `true`, the loaded script will be
+  # executed under an anonymous module, protecting the calling program's global
+  # namespace. If the optional *wrap* parameter is a module, the loaded script
+  # will be executed under the given module. In no circumstance will any local
+  # variables in the loaded file be propagated to the loading environment.
   sig do
     params(
         filename: String,
@@ -1626,7 +1974,8 @@ module Kernel
   #
   # If the command following the pipe is a single minus sign (`"|-"`), Ruby
   # forks, and this subprocess is connected to the parent. If the command is not
-  # `"-"`, the subprocess runs the command.
+  # `"-"`, the subprocess runs the command. Note that the command may be
+  # processed by shell if it contains shell metacharacters.
   #
   # When the subprocess is Ruby (opened via `"|-"`), the `open` call returns
   # `nil`. If a block is associated with the open call, that block will run
@@ -1706,11 +2055,6 @@ module Kernel
   # ```
   # Got: in Child
   # ```
-  #
-  #
-  # Also aliased as:
-  # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open_uri_original_open),
-  # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open_uri_original_open)
   sig do
     params(
       path: String,
@@ -2503,6 +2847,10 @@ module Kernel
   # sprintf("%{foo}f", { :foo => 1 })
   #   # => "1f"
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`format`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-format)
   sig do
     params(
         format: String,
@@ -2520,7 +2868,7 @@ module Kernel
   # Arguments for the function can follow *num*. They must be either `String`
   # objects or `Integer` objects. A `String` object is passed as a pointer to
   # the byte sequence. An `Integer` object is passed as an integer whose bit
-  # size is same as a pointer. Up to nine parameters may be passed.
+  # size is the same as a pointer. Up to nine parameters may be passed.
   #
   # The function identified by *num* is system dependent. On some Unix systems,
   # the numbers may be obtained from a header file called `syscall.h`.
@@ -2709,6 +3057,16 @@ module Kernel
   #
   #   baz.rb:6: warning: invalid call to foo
   # ```
+  #
+  # If `category` keyword argument is given, passes the category to
+  # `Warning.warn`. The category given must be be one of the following
+  # categories:
+  #
+  # :deprecated
+  # :   Used for warning for deprecated functionality that may be removed in the
+  #     future.
+  # :experimental
+  # :   Used for experimental features that may change in future releases.
   sig do
     params(
         msg: String,
@@ -2739,6 +3097,10 @@ module Kernel
   # raise "Failed to create socket"
   # raise ArgumentError, "No parameters", caller
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`fail`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-fail)
   sig {returns(T.noreturn)}
   sig do
     params(
@@ -2778,14 +3140,16 @@ module Kernel
   # In the first form, the string is taken as a command line that is subject to
   # shell expansion before being executed.
   #
-  # The standard shell always means `"/bin/sh"` on Unix-like systems, same as
-  # `ENV["RUBYSHELL"]` (or `ENV["COMSPEC"]` on Windows NT series), and similar.
+  # The standard shell always means `"/bin/sh"` on Unix-like systems, otherwise,
+  # `ENV["RUBYSHELL"]` or `ENV["COMSPEC"]` on Windows and similar. The command
+  # is passed as an argument to the `"-c"` switch to the shell, except in the
+  # case of `COMSPEC`.
   #
   # If the string from the first form (`exec("command")`) follows these simple
   # rules:
   #
   # *   no meta characters
-  # *   no shell reserved word and no special built-in
+  # *   not starting with shell reserved word or special built-in
   # *   Ruby invokes the command directly without shell
   #
   #
@@ -2880,7 +3244,7 @@ module Kernel
   # *
   # ```
   #
-  # [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) handling:
+  # Error handling:
   #
   # ```ruby
   # system("cat nonexistent.txt")
@@ -2910,7 +3274,6 @@ module Kernel
   # Yields self to the block and returns the result of the block.
   #
   # ```ruby
-  # 3.next.then {|x| x**x }.to_s             #=> "256"
   # "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
   # ```
   #
@@ -2921,18 +3284,8 @@ module Kernel
   # require 'json'
   #
   # construct_url(arguments).
-  #   then {|url| open(url).read }.
+  #   then {|url| URI(url).read }.
   #   then {|response| JSON.parse(response) }
-  # ```
-  #
-  # When called without block, the method returns `Enumerator`, which can be
-  # used, for example, for conditional circuit-breaking:
-  #
-  # ```ruby
-  # # meets condition, no-op
-  # 1.then.detect(&:odd?)            # => 1
-  # # does not meet condition, drop value
-  # 2.then.detect(&:odd?)            # => nil
   # ```
   sig do
     type_parameters(:X)
@@ -2947,7 +3300,6 @@ module Kernel
   #
   # ```ruby
   # 3.next.then {|x| x**x }.to_s             #=> "256"
-  # "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
   # ```
   #
   # Good usage for `then` is value piping in method chains:
@@ -2957,7 +3309,7 @@ module Kernel
   # require 'json'
   #
   # construct_url(arguments).
-  #   then {|url| open(url).read }.
+  #   then {|url| URI(url).read }.
   #   then {|response| JSON.parse(response) }
   # ```
   #
