@@ -161,6 +161,22 @@ void base_driver::rewind_for_end_token(token_t endToken) {
     }
 }
 
+void base_driver::local_push() {
+    lex.extend_static();
+    lex.cmdarg.push(false);
+    lex.cond.push(false);
+    auto decls = alloc.node_list();
+    bool staticContext = true;
+    numparam_stack.push(decls, staticContext);
+}
+
+void base_driver::local_pop() {
+    lex.unextend();
+    lex.cmdarg.pop();
+    lex.cond.pop();
+    numparam_stack.pop();
+}
+
 typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                      const struct builder &builder, bool traceLexer, bool indentationAware)
     : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}

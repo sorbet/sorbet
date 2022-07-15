@@ -4,7 +4,7 @@ module Opus::Log
   def self.info; end
 end
 
-class A # error: class definition in method body
+class A
   def test_no_args
     1.times { | # error: unmatched "|" in block argument list
     }

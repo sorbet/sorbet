@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <self>.puts("hello")
         end
         1.times() do ||
-          <emptyTree>
+          x = nil
         end
         1.times() do ||
           <emptyTree>::<C Opus>::<C Log>.info()
@@ -29,19 +29,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def test_one_arg<<todo method>>(&<blk>)
       begin
         1.times() do ||
-          <emptyTree>
+          x
         end
         1.times() do ||
-          <self>.puts("hello")
+          begin
+            x
+            <self>.puts("hello")
+          end
         end
         1.times() do ||
-          <self>.puts("hello")
+          begin
+            x
+            <self>.puts("hello")
+          end
         end
         1.times() do ||
-          x = nil
+          begin
+            x
+            x = nil
+          end
         end
         1.times() do ||
-          <emptyTree>::<C Opus>::<C Log>.info()
+          begin
+            x
+            <emptyTree>::<C Opus>::<C Log>.info()
+          end
         end
       end
     end
@@ -52,16 +64,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>
         end
         1.times() do ||
-          <self>.puts("hello")
-        end
-        1.times() do ||
-          <self>.puts("hello")
+          begin
+            <assignTemp>$2 = nil
+            <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
+            x = <assignTemp>$3.[](0)
+            x = <assignTemp>$3.[](1)
+            <assignTemp>$2
+          end
         end
         1.times() do ||
           <emptyTree>
-        end
-        1.times() do ||
-          <emptyTree>::<C Opus>::<C Log>.info()
         end
       end
     end

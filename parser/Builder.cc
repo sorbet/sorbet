@@ -187,34 +187,32 @@ public:
             ENFORCE(id->name.kind() == core::NameKind::UTF8);
             // Because of the above enforce, we can use shortName here instead of show.
             auto name_str = id->name.shortName(gs_);
-            if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
+            if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
-                auto raw_context = driver_->lex.context.stackCopy();
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
 
                 // ignore current block scope
-                raw_context.pop_back();
                 raw_numparam_stack.pop_back();
 
-                for (auto outer_scope : raw_context) {
-                    if (outer_scope == ruby_parser::Context::State::BLOCK ||
-                        outer_scope == ruby_parser::Context::State::LAMBDA) {
-                        auto outer_scope_has_numparams = raw_numparam_stack.back().max > 0;
-                        raw_numparam_stack.pop_back();
+                std::reverse(raw_numparam_stack.begin(), raw_numparam_stack.end());
+                for (auto outer_scope : raw_numparam_stack) {
+                    if (outer_scope.staticContext) {
+                        // Found an outer scope that can't have numparams
+                        // like def, class, etc.
+                        break;
+                    } else {
+                        auto outer_scope_has_numparams = outer_scope.max > 0;
 
                         if (outer_scope_has_numparams) {
                             error(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
                         } else {
                             // for now it's ok, but an outer scope can also be a block
+                            // like proc { _1; proc { proc { proc { _2}}}}
                             // with numparams, so we need to continue
                         }
-                    } else {
-                        // found an outer scope that can't have numparams
-                        // like def/class/etc
-                        break;
                     }
                 }
 
@@ -343,7 +341,7 @@ public:
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
         } else if (auto *c = parser::cast_node<Const>(node.get())) {
-            if (!driver_->lex.context.dynamicConstDefintinionAllowed()) {
+            if (driver_->lex.context.inDef) {
                 error(ruby_parser::dclass::DynamicConst, node->loc);
             }
             return make_unique<ConstLhs>(c->loc, std::move(c->scope), c->name);
@@ -832,11 +830,12 @@ public:
         return make_unique<Class>(loc, declLoc, std::move(name), std::move(superclass), std::move(body));
     }
 
-    unique_ptr<Node> defEndlessMethod(const token *def, const token *tname, unique_ptr<Node> args, const token *equal,
+    unique_ptr<Node> defEndlessMethod(unique_ptr<Node> defHead, unique_ptr<Node> args, const token *equal,
                                       unique_ptr<Node> body) {
-        core::LocOffsets declLoc = tokLoc(def, tname).join(maybe_loc(args));
-        core::LocOffsets loc = tokLoc(def).join(body->loc);
-        std::string name{tname->view()};
+        auto *head = parser::cast_node<DefnHead>(defHead.get());
+        core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
+        core::LocOffsets loc = head->loc.join(body->loc);
+        std::string name = head->name.toString(gs_);
 
         checkEndlessSetter(name, declLoc);
         checkReservedForNumberedParameters(name, declLoc);
@@ -857,20 +856,28 @@ public:
         return make_unique<DefS>(loc, declLoc, std::move(head->definee), head->name, std::move(args), std::move(body));
     }
 
-    unique_ptr<Node> defMethod(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
+    unique_ptr<Node> defMethod(unique_ptr<Node> defHead, unique_ptr<Node> args, unique_ptr<Node> body,
                                const token *end) {
-        core::LocOffsets declLoc = tokLoc(def, name).join(maybe_loc(args));
-        core::LocOffsets loc = tokLoc(def, end);
+        auto *head = parser::cast_node<DefnHead>(defHead.get());
+        core::LocOffsets declLoc = head->loc.join(maybe_loc(args));
+        core::LocOffsets loc = head->loc.join(tokLoc(end));
+        std::string name = head->name.toString(gs_);
 
-        checkReservedForNumberedParameters(name->view(), declLoc);
+        checkReservedForNumberedParameters(name, declLoc);
 
-        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->view()), std::move(args), std::move(body));
+        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name), std::move(args), std::move(body));
     }
 
     unique_ptr<Node> defModule(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
         core::LocOffsets declLoc = tokLoc(module).join(maybe_loc(name));
         core::LocOffsets loc = tokLoc(module, end_);
         return make_unique<Module>(loc, declLoc, std::move(name), std::move(body));
+    }
+
+    unique_ptr<Node> defnHead(const token *def, const token *name) {
+        core::LocOffsets declLoc = tokLoc(def, name);
+
+        return make_unique<DefnHead>(declLoc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
@@ -1803,7 +1810,7 @@ public:
     }
 
     void checkAssignmentToNumberedParameters(std::string_view name, core::LocOffsets loc) {
-        if (driver_->lex.context.inDynamicBlock() && isNumberedParameterName(name) &&
+        if (driver_->lex.context.allowNumparams && isNumberedParameterName(name) &&
             driver_->numparam_stack.seen_numparams()) {
             std::cout << "Assignment error" << std::endl;
             core::Loc location = core::Loc(file_, loc);
@@ -2065,15 +2072,20 @@ ForeignPtr def_class(SelfPtr builder, const token *class_, ForeignPtr name, cons
                                              build->cast_node(body), end_));
 }
 
-ForeignPtr defMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, ForeignPtr body,
-                     const token *end) {
+ForeignPtr defMethod(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->defMethod(def, name, build->cast_node(args), build->cast_node(body), end));
+    return build->toForeign(
+        build->defMethod(build->cast_node(defHead), build->cast_node(args), build->cast_node(body), end));
 }
 
 ForeignPtr defModule(SelfPtr builder, const token *module, ForeignPtr name, ForeignPtr body, const token *end_) {
     auto build = cast_builder(builder);
     return build->toForeign(build->defModule(module, build->cast_node(name), build->cast_node(body), end_));
+}
+
+ForeignPtr defnHead(SelfPtr builder, const token *def, const token *name) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->defnHead(def, name));
 }
 
 ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr, ForeignPtr body,
@@ -2087,10 +2099,10 @@ ForeignPtr defsHead(SelfPtr builder, const token *def, ForeignPtr definee, const
     return build->toForeign(build->defsHead(def, build->cast_node(definee), dot, name));
 }
 
-ForeignPtr defEndlessMethod(SelfPtr builder, const token *def, const token *name, ForeignPtr args, const token *equal,
-                            ForeignPtr body) {
+ForeignPtr defEndlessMethod(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal, ForeignPtr body) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->defEndlessMethod(def, name, build->cast_node(args), equal, build->cast_node(body)));
+    return build->toForeign(
+        build->defEndlessMethod(build->cast_node(defHead), build->cast_node(args), equal, build->cast_node(body)));
 }
 
 ForeignPtr defEndlessSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal,
@@ -2676,6 +2688,7 @@ struct ruby_parser::builder Builder::interface = {
     defEndlessSingleton,
     defMethod,
     defModule,
+    defnHead,
     def_sclass,
     defsHead,
     defSingleton,

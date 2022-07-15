@@ -218,7 +218,6 @@ using namespace std::string_literals;
   command_call
   command_rhs
   cpath
-  defs_head
   dsym
   expr
   expr_value
@@ -236,6 +235,7 @@ using namespace std::string_literals;
   fitem
   for_var
   keyword_variable
+  lambda
   lhs
   literal
   method_call
@@ -353,11 +353,11 @@ using namespace std::string_literals;
   blkarg_mark
   call_op
   cname
-  def_name
   do
   dot_or_colon
   f_arg_asgn
   f_bad_arg
+  f_eq
   f_label
   f_norm_arg
   fcall
@@ -377,15 +377,13 @@ using namespace std::string_literals;
   term
   then
   relop
+  k_def
   k_return
   kend_or_eof
-  lcurly_block_start
-  lbrace_cmd_block_start
   until
   while
 
 %type <delimited_list>
-  defn_head
   opt_paren_args
   paren_args
   stmts
@@ -398,7 +396,6 @@ using namespace std::string_literals;
   compstmt
   do_block
   do_body
-  lambda
   lambda_body
   begin_block
 
@@ -409,6 +406,22 @@ using namespace std::string_literals;
   opt_ensure
   superclass
   expr_value_do
+
+%type <node_with_context>
+  defn_head
+  defs_head
+
+%type <token_with_context>
+  def_name
+  k_class
+  k_module
+  k_do
+  k_do_block
+  k_do_lambda
+  lbrace_cmd_block_start
+  lcurly_block_start
+  t_lambda
+  t_lambeg
 
 %type <case_body>
   case_body
@@ -449,6 +462,8 @@ union parser_value {
   ruby_parser::delimited_node_list *delimited_list;
   ruby_parser::delimited_block *delimited_block;
   ruby_parser::node_with_token *with_token;
+  ruby_parser::node_with_context *node_with_context;
+  ruby_parser::token_with_context *token_with_context;
   ruby_parser::case_body *case_body;
   ruby_parser::ForeignPtr node;
   ruby_parser::node_list *list;
@@ -777,12 +792,10 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     }
                 | defn_head f_opt_paren_args tEQL command
                     {
-                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, $4);
+                      $$ = driver.build.defEndlessMethod(self, $1->node, $2, $3, $4);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                       driver.current_arg_stack.pop();
                     }
                 | defn_head f_opt_paren_args tEQL command kRESCUE_MOD arg
@@ -790,22 +803,18 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
                       auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
 
-                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, method_body);
+                      $$ = driver.build.defEndlessMethod(self, $1->node, $2, $3, method_body);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                       driver.current_arg_stack.pop();
                     }
                 | defs_head f_opt_paren_args tEQL command
                     {
-                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, $4);
+                      $$ = driver.build.defEndlessSingleton(self, $1->node, $2, $3, $4);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                       driver.current_arg_stack.pop();
                     }
                 | defs_head f_opt_paren_args tEQL command kRESCUE_MOD arg
@@ -813,12 +822,10 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
                       auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
 
-                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, method_body);
+                      $$ = driver.build.defEndlessSingleton(self, $1->node, $2, $3, method_body);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                       driver.current_arg_stack.pop();
                     }
                 | backref tOP_ASGN command_rhs
@@ -864,12 +871,12 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
 
-                      $<boolean>$ = driver.lex.in_kwarg;
-                      driver.lex.in_kwarg = true;
+                      $<boolean>$ = driver.lex.context.inKwarg;
+                      driver.lex.context.inKwarg = true;
                     }
                   p_top_expr_body
                     {
-                      driver.lex.in_kwarg = $<boolean>3;
+                      driver.lex.context.inKwarg = $<boolean>3;
                       $$ = driver.build.match_pattern(self, $1, $2, $4);
                     }
                 | arg kIN
@@ -878,12 +885,12 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
 
-                      $<boolean>$ = driver.lex.in_kwarg;
-                      driver.lex.in_kwarg = true;
+                      $<boolean>$ = driver.lex.context.inKwarg;
+                      driver.lex.context.inKwarg = true;
                     }
                   p_top_expr_body
                     {
-                      driver.lex.in_kwarg = $<boolean>3;
+                      driver.lex.context.inKwarg = $<boolean>3;
                       $$ = driver.build.match_pattern_p(self, $1, $2, $4);
                     }
                 | arg %prec tLBRACE_ARG
@@ -912,28 +919,35 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 
         def_name: fname
                     {
-                      driver.lex.extend_static();
-                      driver.lex.cmdarg.push(false);
-                      driver.lex.cond.push(false);
+                      driver.local_push();
                       driver.current_arg_stack.push("");
 
-                      $$ = $1;
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inDef = true;
+                      driver.lex.context.allowNumparams = false;
                     }
 
-        defn_head: kDEF def_name
+        defn_head: k_def def_name
                     {
-                      driver.lex.context.push(Context::State::DEF);
-                      $$ = driver.alloc.delimited_node_list($1, driver.alloc.node_list(), $2);
+                      auto defNameToken = $2->token;
+                      auto defNameContext = $2->context;
+                      auto node = driver.build.defnHead(self, $1, defNameToken);
+
+                      $$ = driver.alloc.node_with_context(node, defNameContext);
                     }
 
-        defs_head: kDEF singleton dot_or_colon
+        defs_head: k_def singleton dot_or_colon
                      {
                        driver.lex.set_state_expr_fname();
+                       driver.lex.context.inArgDef = true;
                      }
                    def_name
                      {
-                       driver.lex.context.push(Context::State::DEFS);
-                       $$ = driver.build.defsHead(self, $1, $2, $3, $5);
+                       auto defNameToken = $5->token;
+                       auto defNameContext = $5->context;
+                       auto node = driver.build.defsHead(self, $1, $2, $3, defNameToken);
+
+                       $$ = driver.alloc.node_with_context(node, defNameContext);
                      }
 
     command_call: command
@@ -946,26 +960,31 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     }
 
 lbrace_cmd_block_start:
-                  tLBRACE_ARG { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+                  tLBRACE_ARG
+                    {
+                      driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                    }
  cmd_brace_block: lbrace_cmd_block_start brace_body tRCURLY
                     {
                       auto &block = $2;
-                      block->begin = $1;
+                      block->begin = $1->token;
                       block->end = $3;
                       $$ = block;
-                      driver.lex.context.pop();
+                      driver.lex.context.inBlock = $1->context.inBlock;
                     }
                   // Error-recovery case for typos like "foo {&:bar}"
                 | lbrace_cmd_block_start tAMPER arg_value tRCURLY
                     {
                       auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
                       auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
-                      block->begin = $1;
+                      block->begin = $1->token;
                       block->end = $4;
                       $$ = block;
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
                           diagnostic::range(@1.beginPos(), @4.endPos()));
-                      driver.lex.context.pop();
+                      driver.lex.context.inBlock = $1->context.inBlock;
                     }
 
            fcall: operation
@@ -1626,9 +1645,14 @@ lbrace_cmd_block_start:
                       driver.rewind_and_reset(@2.endPos());
                       driver.replace_last_diagnostic(dlevel::ERROR, dclass::MissingOperatorArg, $2, driver.token_name($2->type()));
                     }
-                | kDEFINED opt_nl arg
+                | kDEFINED opt_nl
                     {
-                      $$ = driver.build.keywordDefined(self, $1, $3);
+                      driver.lex.context.inDefined = true;
+                    }
+                  arg
+                    {
+                      driver.lex.context.inDefined = false;
+                      $$ = driver.build.keywordDefined(self, $1, $4);
                     }
                 | arg tEH arg opt_nl tCOLON arg
                     {
@@ -1636,49 +1660,41 @@ lbrace_cmd_block_start:
                     }
                 | defn_head f_opt_paren_args tEQL arg
                     {
-                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, $4);
+                      $$ = driver.build.defEndlessMethod(self, $1->node, $2, $3, $4);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
                       driver.current_arg_stack.pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                     }
                 | defn_head f_opt_paren_args tEQL arg kRESCUE_MOD arg
                     {
                       auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
                       auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
 
-                      $$ = driver.build.defEndlessMethod(self, $1->begin, $1->end, $2, $3, method_body);
+                      $$ = driver.build.defEndlessMethod(self, $1->node, $2, $3, method_body);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
                       driver.current_arg_stack.pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                     }
                 | defs_head f_opt_paren_args tEQL arg
                     {
-                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, $4);
+                      $$ = driver.build.defEndlessSingleton(self, $1->node, $2, $3, $4);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
                       driver.current_arg_stack.pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                     }
                 | defs_head f_opt_paren_args tEQL arg kRESCUE_MOD arg
                     {
                       auto rescue_body = driver.build.rescue_body(self, $5, nullptr, nullptr, nullptr, nullptr, $6);
                       auto method_body = driver.build.beginBody(self, $4, driver.alloc.node_list(rescue_body), nullptr, nullptr, nullptr, nullptr);
 
-                      $$ = driver.build.defEndlessSingleton(self, $1, $2, $3, method_body);
+                      $$ = driver.build.defEndlessSingleton(self, $1->node, $2, $3, method_body);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
                       driver.current_arg_stack.pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                     }
                 | primary
 
@@ -2017,10 +2033,16 @@ array_premature_end: eof
                       $$ = driver.build.keywordYield(self, $1, nullptr, nullptr, nullptr);
                       DIAGCHECK();
                     }
-                | kDEFINED opt_nl tLPAREN2 expr rparen
+                | kDEFINED opt_nl tLPAREN2
                     {
-                      $$ = driver.build.keywordDefined(self, $1, $4);
+                      driver.lex.context.inDefined = true;
                     }
+                  expr rparen
+                    {
+                      driver.lex.context.inDefined = false;
+                      $$ = driver.build.keywordDefined(self, $1, $5);
+                    }
+
                 | kNOT tLPAREN2 expr rparen
                     {
                       $$ = driver.build.not_op(self, $1, $2, $3, $4);
@@ -2051,21 +2073,7 @@ array_premature_end: eof
                         delimited_block->end);
                       DIAGCHECK();
                     }
-                | tLAMBDA
-                    {
-                      driver.lex.context.push(Context::State::LAMBDA);
-                    }
-                    lambda
-                    {
-                      auto lambda_call = driver.build.callLambda(self, $1);
-                      auto &lambda = $3;
-                      $$ = driver.build.block(self, lambda_call,
-                        lambda->begin,
-                        lambda->args,
-                        lambda->body,
-                        lambda->end);
-                      DIAGCHECK();
-                    }
+                | lambda
                 | kIF expr_value then compstmt if_tail kend_or_eof
                     {
                       auto &else_ = $5;
@@ -2185,21 +2193,20 @@ array_premature_end: eof
                     {
                       $$ = driver.build.for_(self, $1, $2, $3, $5->nod, $5->tok, $6->body, $7);
                     }
-                | kCLASS cpath superclass
+                | k_class cpath superclass
                     {
-                      driver.lex.extend_static();
-                      driver.lex.cmdarg.push(false);
-                      driver.lex.cond.push(false);
-                      driver.lex.context.push(Context::State::CLASS);
+                      driver.lex.context.inClass = true;
+                      driver.lex.context.allowNumparams = false;
+                      driver.local_push();
                     }
                     bodystmt kend_or_eof
                     {
-                      if (!driver.lex.context.classDefintinionAllowed()) {
-                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ClassInDef, $1);
+                      if (driver.lex.context.inDef) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ClassInDef, $1->token);
                         YYERROR;
                       }
 
-                      auto class_tok = $1;
+                      auto class_tok = $1->token;
                       auto end_tok = $6;
 
                       auto &superclass_ = $3;
@@ -2215,41 +2222,37 @@ array_premature_end: eof
                           self, class_tok, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, end_tok);
                       $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, newBody, end_tok);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inClass = $1->context.inClass;
                     }
-                | kCLASS tLSHFT expr term
+                | k_class tLSHFT expr term
                     {
-                      driver.lex.extend_static();
-                      driver.lex.cmdarg.push(false);
-                      driver.lex.cond.push(false);
-                      driver.lex.context.push(Context::State::SCLASS);
+                      driver.lex.context.inDef = false;
+                      driver.lex.context.inClass = false;
+                      driver.local_push();
                     }
                     bodystmt kEND
                     {
-                      $$ = driver.build.def_sclass(self, $1, $2, $3, $6->body, $7);
+                      $$ = driver.build.def_sclass(self, $1->token, $2, $3, $6->body, $7);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inDef = $1->context.inDef;
+                      driver.lex.context.inClass = $1->context.inClass;
                     }
-                | kMODULE cpath
+                | k_module cpath
                     {
-                      driver.lex.extend_static();
-                      driver.lex.cmdarg.push(false);
-                      driver.lex.context.push(Context::State::MODULE);
+                      driver.lex.context.inClass = true;
+                      driver.lex.context.allowNumparams = false;
+                      driver.local_push();
                     }
                     bodystmt kend_or_eof
                     {
-                      if (!driver.lex.context.moduleDefintinionAllowed()) {
-                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ModuleInDef, $1);
+                      if (driver.lex.context.inDef) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::ModuleInDef, $1->token);
                         YYERROR;
                       }
 
-                      auto *module_tok = $1;
+                      auto *module_tok = $1->token;
                       auto headerEndPos = @2.endPos();
                       auto *body = $4->body;
                       auto *bodyStartToken = @4.begin;
@@ -2260,37 +2263,11 @@ array_premature_end: eof
 
                       $$ = driver.build.defModule(self, module_tok, $2, newBody, end_tok);
 
-                      driver.lex.cmdarg.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
+                      driver.local_pop();
+                      driver.lex.context.inClass = $1->context.inClass;
                     }
                 | defn_head f_arglist bodystmt kend_or_eof
                     {
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
-                      driver.current_arg_stack.pop();
-
-                      auto *defToken = $1->begin;
-                      auto headerEndPos = @2.endPos();
-                      auto *body = $3->body;
-                      auto *bodyStartToken = @3.begin;
-                      auto *lastTokBeforeDedent = $3->end;
-                      auto *endToken = $4;
-                      auto *newBody = driver.rewind_and_munge_body_if_dedented(
-                          self, defToken, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, endToken);
-
-                      $$ = driver.build.defMethod(self, defToken, $1->end, $2, newBody, endToken);
-                    }
-                | defs_head f_arglist bodystmt kend_or_eof
-                    {
-                      driver.lex.cmdarg.pop();
-                      driver.lex.cond.pop();
-                      driver.lex.unextend();
-                      driver.lex.context.pop();
-                      driver.current_arg_stack.pop();
-
                       auto *defToken = @1.begin;
                       auto headerEndPos = @2.endPos();
                       auto *body = $3->body;
@@ -2300,9 +2277,29 @@ array_premature_end: eof
                       auto *newBody = driver.rewind_and_munge_body_if_dedented(
                           self, defToken, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, endToken);
 
-                      $$ = driver.build.defSingleton(self, $1, $2, newBody, $4);
+                      $$ = driver.build.defMethod(self, $1->node, $2, newBody, endToken);
+
+                      driver.local_pop();
+                      driver.current_arg_stack.pop();
+                      driver.lex.context.inDef = $1->context.inDef;
+                    }
+                | defs_head f_arglist bodystmt kend_or_eof
+                    {
+                      auto *defToken = @1.begin;
+                      auto headerEndPos = @2.endPos();
+                      auto *body = $3->body;
+                      auto *bodyStartToken = @3.begin;
+                      auto *lastTokBeforeDedent = $3->end;
+                      auto *endToken = $4;
+                      auto *newBody = driver.rewind_and_munge_body_if_dedented(
+                          self, defToken, headerEndPos, body, bodyStartToken, lastTokBeforeDedent, endToken);
+
+                      $$ = driver.build.defSingleton(self, $1->node, $2, newBody, $4);
                       DIAGCHECK();
 
+                      driver.local_pop();
+                      driver.current_arg_stack.pop();
+                      driver.lex.context.inDef = $1->context.inDef;
                     }
                 | kBREAK
                     {
@@ -2322,10 +2319,25 @@ array_premature_end: eof
                     }
 
    primary_value: primary
+         k_class: kCLASS
+                    {
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                    }
+
+         k_module: kMODULE
+                    {
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                    }
+
+           k_def: kDEF
+                    {
+                      $$ = $1;
+                      driver.lex.context.inArgDef = true;
+                    }
 
         k_return: kRETURN
                     {
-                      if (driver.lex.context.inClass()) {
+                      if (driver.lex.context.inClass && !driver.lex.context.inDef && !(driver.lex.context.inBlock || driver.lex.context.inLambda)) {
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::InvalidReturn, $1);
                         YYERROR;
                       }
@@ -2336,6 +2348,27 @@ array_premature_end: eof
                   // It lets rules expecting a kEND to also effectively match the eof token,
                   // but only in the indentation-aware error recovery parse mode.
                 | tBEFORE_EOF
+
+            k_do: kDO
+                    {
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
+                    }
+
+      k_do_block: kDO_BLOCK
+                    {
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
+                    }
+
+     k_do_lambda: kDO_LAMBDA
+                    {
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inLambda = true;
+                      driver.lex.context.allowNumparams = true;
+                    }
 
             then: term
                 | kTHEN
@@ -2424,6 +2457,14 @@ array_premature_end: eof
                 | tSTAR
                     {
                       $$ = driver.build.restarg(self, $1, nullptr);
+                    }
+
+            f_eq:   {
+                      driver.lex.context.inArgDef = false;
+                    }
+                  tEQL
+                    {
+                      $$ = $2;
                     }
 
  block_args_tail: f_block_kwarg tCOMMA f_kwrest opt_f_block_arg
@@ -2587,13 +2628,15 @@ opt_block_args_tail:
  block_param_def: tPIPE opt_bv_decl tPIPE
                     {
                       driver.numparam_stack.set_ordinary_params();
-                      $$ = driver.build.args(self, $1, $2, $3, true);
                       driver.current_arg_stack.set("");
+                      driver.lex.context.inArgDef = false;
+                      $$ = driver.build.args(self, $1, $2, $3, true);
                       DIAGCHECK();
                     }
                 | tPIPE block_param opt_bv_decl tPIPE
                     {
                       driver.numparam_stack.set_ordinary_params();
+                      driver.lex.context.inArgDef = false;
                       auto &params = $2;
                       params->concat($3);
                       driver.current_arg_stack.set("");
@@ -2645,32 +2688,48 @@ opt_block_args_tail:
                       $$ = nullptr;
                     }
 
-          lambda:   {
-                      driver.lex.extend_dynamic();
-                      driver.numparam_stack.push(driver.alloc.node_list());
-                    }
+          lambda: t_lambda
                   f_larglist
                     {
-                      driver.lex.context.pop();
                       driver.lex.cmdarg.push(false);
                     }
                   lambda_body
                     {
-                      driver.lex.cmdarg.pop();
                       auto &delimited_block = $4;
                       if (driver.numparam_stack.seen_numparams()) {
                         delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->decls);
                       } else {
                         delimited_block->args = $2;
                       }
-                      $$ = delimited_block;
 
                       driver.numparam_stack.pop();
                       driver.lex.unextend();
+                      driver.lex.cmdarg.pop();
+                      driver.lex.context.inLambda = $1->context.inLambda;
+
+                      auto lambda_call = driver.build.callLambda(self, $1->token);
+                      auto &lambda = delimited_block;
+                      $$ = driver.build.block(self, lambda_call,
+                        lambda->begin,
+                        lambda->args,
+                        lambda->body,
+                        lambda->end);
+                      DIAGCHECK();
+                    }
+
+        t_lambda: tLAMBDA
+                    {
+                      driver.lex.extend_dynamic();
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inLambda = true;
+                      driver.lex.context.allowNumparams = true;
                     }
 
      f_larglist: tLPAREN2 f_args opt_bv_decl tRPAREN
                     {
+                      driver.lex.context.inArgDef = false;
                       driver.numparam_stack.set_ordinary_params();
                       auto &args = $2;
                       args->concat($3);
@@ -2679,6 +2738,7 @@ opt_block_args_tail:
                     }
                 | f_args
                     {
+                      driver.lex.context.inArgDef = false;
                       if ($1->size() > 0) {
                         driver.numparam_stack.set_ordinary_params();
                       }
@@ -2686,38 +2746,35 @@ opt_block_args_tail:
                       DIAGCHECK();
                     }
 
-     lambda_body: tLAMBEG
-                    {
-                      driver.lex.context.push(Context::State::LAMBDA);
-                    }
+     lambda_body: t_lambeg
                   compstmt tRCURLY
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $3->body, $4);
-                      driver.lex.context.pop();
+                      driver.lex.context.inLambda = $1->context.inLambda;
+                      $$ = driver.alloc.delimited_block($1->token, nullptr, $2->body, $3);
                     }
-                | kDO_LAMBDA
-                    {
-                      driver.lex.context.push(Context::State::LAMBDA);
-                    }
+                | k_do_lambda
                   bodystmt kend_or_eof
                     {
-                      $$ = driver.alloc.delimited_block($1, nullptr, $3->body, $4);
-                      driver.lex.context.pop();
-                      driver.rewind_if_dedented($1, $4);
+                      driver.lex.context.inLambda = $1->context.inLambda;
+                      $$ = driver.alloc.delimited_block($1->token, nullptr, $2->body, $3);
+                      driver.rewind_if_dedented($1->token, $3);
                     }
 
-        do_block: kDO_BLOCK
+        t_lambeg: tLAMBEG
                     {
-                      driver.lex.context.push(Context::State::BLOCK);
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inLambda = true;
+                      driver.lex.context.allowNumparams = true;
                     }
-                  do_body kend_or_eof
+
+        do_block: k_do_block do_body kend_or_eof
                     {
-                      auto &delimited_block = $3;
-                      delimited_block->begin = $1;
-                      delimited_block->end = $4;
+                      driver.lex.context.inBlock = $1->context.inBlock;
+                      auto &delimited_block = $2;
+                      delimited_block->begin = $1->token;
+                      delimited_block->end = $3;
                       $$ = delimited_block;
-                      driver.lex.context.pop();
-                      driver.rewind_if_dedented($1, $4);
+                      driver.rewind_if_dedented($1->token, $3);
                     }
 
       block_call: command do_block
@@ -2828,44 +2885,45 @@ opt_block_args_tail:
                       $$ = driver.build.index(self, $1, $2, $3, $4);
                     }
 lcurly_block_start:
-                  tLCURLY { driver.lex.context.push(Context::State::BLOCK); $$ = $1; }
+                  tLCURLY
+                    {
+                      $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
+                      driver.lex.context.inBlock = true;
+                      driver.lex.context.allowNumparams = true;
+                    }
      brace_block: lcurly_block_start brace_body tRCURLY
                     {
                       auto &block = $2;
-                      block->begin = $1;
+                      block->begin = $1->token;
                       block->end = $3;
                       $$ = block;
-                      driver.lex.context.pop();
+                      driver.lex.context.inBlock = $1->context.inBlock;
                     }
                   // Error-recovery case for typos like "foo {&:bar}"
                 | lcurly_block_start tAMPER arg_value tRCURLY
                     {
                       auto args = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
                       auto block = driver.alloc.delimited_block(nullptr, args, $3, nullptr);
-                      block->begin = $1;
+                      block->begin = $1->token;
                       block->end = $4;
                       $$ = block;
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::CurlyBracesAroundBlockPass,
                           diagnostic::range(@1.beginPos(), @4.endPos()));
-                      driver.lex.context.pop();
                     }
-                | kDO
+                | k_do do_body kend_or_eof
                     {
-                      driver.lex.context.push(Context::State::BLOCK);
-                    }
-                  do_body kend_or_eof
-                    {
-                      auto &block = $3;
-                      block->begin = $1;
-                      block->end = $4;
+                      auto &block = $2;
+                      block->begin = $1->token;
+                      block->end = $3;
                       $$ = block;
-                      driver.lex.context.pop();
-                      driver.rewind_if_dedented($1, $4);
+                      driver.rewind_if_dedented($1->token, $3);
+                      driver.lex.context.inBlock = $1->context.inBlock;
                     }
 
       brace_body:   {
                       driver.lex.extend_dynamic();
-                      driver.numparam_stack.push(driver.alloc.node_list());
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
                     }
                     opt_block_param bodystmt
                     {
@@ -2881,7 +2939,8 @@ lcurly_block_start:
 
          do_body:   {
                       driver.lex.extend_dynamic();
-                      driver.numparam_stack.push(driver.alloc.node_list());
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
                     }
                     {
                       driver.lex.cmdarg.push(false);
@@ -2919,12 +2978,12 @@ lcurly_block_start:
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
                       driver.pattern_hash_keys.push();
-                      $<boolean>$ = driver.lex.in_kwarg;
-                      driver.lex.in_kwarg = true;
+                      $<boolean>$ = driver.lex.context.inKwarg;
+                      driver.lex.context.inKwarg = true;
                     }
                   p_top_expr then
                     {
-                      driver.lex.in_kwarg = $<boolean>2;
+                      driver.lex.context.inKwarg = $<boolean>2;
                     }
                   compstmt p_cases
                     {
@@ -3071,13 +3130,13 @@ lcurly_block_start:
                 | tLBRACE
                     {
                       driver.pattern_hash_keys.push();
-                      $<boolean>$ = driver.lex.in_kwarg;
-                      driver.lex.in_kwarg = false;
+                      $<boolean>$ = driver.lex.context.inKwarg;
+                      driver.lex.context.inKwarg = false;
                     }
                   p_kwargs rbrace
                     {
                       driver.pattern_hash_keys.pop();
-                      driver.lex.in_kwarg = $<boolean>2;
+                      driver.lex.context.inKwarg = $<boolean>2;
                       $$ = driver.build.hash_pattern(self, $1, $3, $4);
                     }
                 | tLBRACE rbrace
@@ -3288,22 +3347,8 @@ lcurly_block_start:
                     {
                       $$ = driver.build.accessible(self, $1);
                     }
-                | tLAMBDA
-                    {
-                      driver.lex.context.push(Context::State::LAMBDA);
-                    }
-                  lambda
-                    {
-                      auto lambda_call = driver.build.callLambda(self, $1);
-                      auto &lambda = $3;
-                      $$ = driver.build.block(self, lambda_call,
-                        lambda->begin,
-                        lambda->args,
-                        lambda->body,
-                        lambda->end);
-                      DIAGCHECK();
-                    }
-      p_variable: tIDENTIFIER
+                | lambda
+     p_variable: tIDENTIFIER
                     {
                       auto match = driver.build.match_var(self, $1);
                       $$ = driver.build.assignable(self, match);
@@ -3736,6 +3781,7 @@ keyword_variable: kNIL
 f_opt_paren_args: f_paren_args
                 | none
                     {
+                      driver.lex.context.inArgDef = false;
                       $$ = driver.build.args(self, nullptr, driver.alloc.node_list(), nullptr, false);
                     }
 
@@ -3743,17 +3789,18 @@ f_opt_paren_args: f_paren_args
                     {
                       driver.lex.set_state_expr_value();
                       $$ = driver.build.args(self, $1, $2, $3, true);
+                      driver.lex.context.inArgDef = false;
                     }
        f_arglist: f_paren_args
                 |   {
-                      $<boolean>$ = driver.lex.in_kwarg;
-                      driver.lex.in_kwarg = true;
-                      driver.lex.context.push(Context::State::DEF_OPEN_ARGS);
+                      $<boolean>$ = driver.lex.context.inKwarg;
+                      driver.lex.context.inKwarg = true;
+                      driver.lex.context.inArgDef = true;
                     }
                   f_args term
                     {
-                      driver.lex.context.pop();
-                      driver.lex.in_kwarg = $<boolean>1;
+                      driver.lex.context.inKwarg = $<boolean>1;
+                      driver.lex.context.inArgDef = false;
                       $$ = driver.build.args(self, nullptr, $2, nullptr, true);
                       DIAGCHECK();
                     }
@@ -3789,10 +3836,10 @@ f_opt_paren_args: f_paren_args
                     }
                 | args_forward
                     {
-                      if (driver.lex.context.inLambda()) {
+                      if (driver.lex.context.inLambda) {
                         // This is supposed to be caught by the grammar.
                         // However, we don't generate a `ForwardArgs` node in the builder.cc unlike whitequark parser.
-                        // So, we have to manually raise a parse error to forbid `->(...)` usage
+                        // So, we have to manually raise a parse error to forbid `->(...)` usage.
                         // Last argument adds extra double quotes to circumvent an internal check
                         driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $1, "\"...\"");
                       }
@@ -3991,12 +4038,14 @@ f_opt_paren_args: f_paren_args
                       driver.lex.declare(label->view());
                       driver.current_arg_stack.set($1[0].view());
                       driver.numparam_stack.set_ordinary_params();
+                      driver.lex.context.inArgDef = false;
                       $$ = label;
                     }
 
             f_kw: f_label arg_value
                     {
                       driver.current_arg_stack.set("");
+                      driver.lex.context.inArgDef = false;
                       $$ = driver.build.kwoptarg(self, $1, $2);
                     }
                 | f_label
@@ -4007,10 +4056,12 @@ f_opt_paren_args: f_paren_args
 
       f_block_kw: f_label primary_value
                     {
+                      driver.lex.context.inArgDef = false;
                       $$ = driver.build.kwoptarg(self, $1, $2);
                     }
                 | f_label
                     {
+                      driver.lex.context.inArgDef = false;
                       $$ = driver.build.kwarg(self, $1);
                     }
 
@@ -4090,15 +4141,17 @@ f_opt_paren_args: f_paren_args
                       $$ = driver.alloc.node_list(kwrestarg);
                     }
 
-           f_opt: f_arg_asgn tEQL arg_value
+           f_opt: f_arg_asgn f_eq arg_value
                     {
                       driver.current_arg_stack.set("0");
+                      driver.lex.context.inArgDef = true;
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 
-     f_block_opt: f_arg_asgn tEQL primary_value
+     f_block_opt: f_arg_asgn f_eq primary_value
                     {
                       driver.current_arg_stack.set("0");
+                      driver.lex.context.inArgDef = true;
                       $$ = driver.build.optarg(self, $1, $2, $3);
                     }
 

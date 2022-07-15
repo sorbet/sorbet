@@ -145,7 +145,6 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_
   , escape_s(nullptr)
   , herebody_s(nullptr)
   , traceLexer(traceLexer)
-  , in_kwarg(false)
 {
   assert(!source_buffer.empty());
   assert(source_buffer.back() == '\0');
@@ -1771,16 +1770,15 @@ void lexer::set_state_expr_value() {
       => { emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
            fhold; fnext expr_labelarg; fbreak; };
 
-      '...' c_nl
+      '...'
       => {
-        if (version >= ruby_version::RUBY_31) {
+        if (version >= ruby_version::RUBY_31 && context.inArgDef) {
           auto ident = tok_view(ts, te - 2);
-          emit(token_type::tBDOT3, ident, ts, te - 1);
-          emit(token_type::tNL, "", newline_s, newline_s + 1);
+          emit(token_type::tBDOT3, ident);
           fnext expr_end; fbreak;
         } else {
-          p -= 4;
-          fhold; fgoto expr_end;
+          p -= 3;
+          fgoto expr_end;
         }
       };
 
@@ -2517,7 +2515,7 @@ void lexer::set_state_expr_value() {
           } else {
             emit(token_type::tBDOT3, ident, ts, dots_te);
 
-            if (version >= ruby_version::RUBY_31 && followed_by_nl && context.inDefOpenArgs()) {
+            if (version >= ruby_version::RUBY_31 && followed_by_nl && context.inArgDef) {
               emit(token_type::tNL, "", newline_s, newline_s + 1);
               nl_emitted = true;
             }
@@ -2596,7 +2594,7 @@ void lexer::set_state_expr_value() {
 
     w_newline
     => {
-      if (in_kwarg) {
+      if (context.inKwarg) {
         fhold; fgoto expr_end;
       } else {
         fgoto line_begin;
@@ -3046,7 +3044,7 @@ void lexer::rewind_and_reset_to_expr_beg(size_t newPos) {
 
   // reset
   set_state_expr_beg();
-  this->in_kwarg = false;
+  this->context.inKwarg = false;
 }
 
 void lexer::rewind_and_reset_to_expr_end(size_t newPos) {
@@ -3058,7 +3056,7 @@ void lexer::rewind_and_reset_to_expr_end(size_t newPos) {
 
   // reset
   set_state_expr_end();
-  this->in_kwarg = false;
+  this->context.inKwarg = false;
 }
 
 void lexer::extend_static() {

@@ -188,7 +188,6 @@ public:
     state_stack cond;
     state_stack cmdarg;
 
-    bool in_kwarg; // true at the end of "def foo a:"
     Context context;
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
