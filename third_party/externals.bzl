@@ -15,10 +15,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "doctest",
-        urls = _github_public_urls("onqtam/doctest/archive/7d42bd0fab6c44010c8aed9338bd02bea5feba41.zip"),
-        sha256 = "b33c8e954d15a146bb744ca29f4ca204b955530f52b2f8a895746a99cee4f2df",
+        urls = _github_public_urls("doctest/doctest/archive/2.4.1.zip"),
+        sha256 = "d8d304db5a2e6d42e290b23a08a68db05478755e64db57b067cd805738e2c56f",
         build_file = "@com_stripe_ruby_typer//third_party:doctest.BUILD",
-        strip_prefix = "doctest-7d42bd0fab6c44010c8aed9338bd02bea5feba41",
+        strip_prefix = "doctest-2.4.1",
     )
 
     http_archive(
