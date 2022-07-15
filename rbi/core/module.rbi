@@ -348,10 +348,11 @@ class Module < Object
   sig do
     params(
         name: T.any(Symbol, String),
+        inherit: T.nilable(T::Boolean),
     )
     .returns(T.nilable(String))
   end
-  def autoload?(name); end
+  def autoload?(name, inherit = true); end
 
   # Evaluates the string or block in the context of *mod*, except that when a
   # block is given, constant/class variable lookup is not affected. This can be
