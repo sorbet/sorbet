@@ -114,6 +114,21 @@ class Fiber < Object
   # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-to_s)
   def inspect; end
 
+  # Raises an exception in the fiber at the point at which the last
+  # `Fiber.yield` was called. If the fiber has not been started or has already
+  # run to completion, raises `FiberError`. If the fiber is yielding, it is
+  # resumed. If it is transferring, it is transferred into. But if it is
+  # resuming, raises `FiberError`.
+  #
+  # With no arguments, raises a `RuntimeError`. With a single `String` argument,
+  # raises a `RuntimeError` with the string as a message. Otherwise, the first
+  # parameter should be the name of an `Exception` class (or an object that
+  # returns an `Exception` object when sent an `exception` message). The
+  # optional second parameter sets the message associated with the exception,
+  # and the third parameter is an array of callback information. Exceptions are
+  # caught by the `rescue` clause of `begin...end` blocks.
+  def raise(message_or_exception, message = nil, callbacks = []); end
+
   # Resumes the fiber from the point at which the last
   # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
   # was called, or starts running it if it is the first call to
