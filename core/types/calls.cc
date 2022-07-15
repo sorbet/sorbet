@@ -2665,7 +2665,12 @@ class Magic_suggestUntypedFieldType : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 4);
-        auto exprTy = core::Types::widen(gs, args.args[0]->type);
+        res.returnType = core::Types::widen(gs, args.args[0]->type);
+
+        if (args.suppressErrors) {
+            return;
+        }
+
         if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::UntypedFieldSuggestion)) {
             const auto &fieldKindTy = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
             auto fieldKind = fieldKindTy.asName().show(gs);
@@ -2674,9 +2679,9 @@ public:
             const auto &fieldNameTy = cast_type_nonnull<NamedLiteralType>(args.args[3]->type);
             auto fieldName = fieldNameTy.asName().show(gs);
 
-            auto suggestType = exprTy;
+            auto suggestType = res.returnType;
             if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit()) {
-                suggestType = core::Types::any(gs, Types::nilClass(), exprTy);
+                suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
             }
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
                         "T.let", "# typed: strict");
@@ -2703,7 +2708,6 @@ public:
                 }
             }
         }
-        res.returnType = move(exprTy);
     }
 } Magic_suggestUntypedFieldType;
 

@@ -58,7 +58,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     return alias;
 }
 
-LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, bool reportErrors) {
+pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, bool reportErrors) {
     core::ClassOrModuleRef klass;
 
     switch (id.kind) {
@@ -84,10 +84,11 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, 
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
+            auto foundError = id.kind != ast::UnresolvedIdent::Kind::Global &&
+                              id.name != core::Names::ivarNameMissing() && id.name != core::Names::cvarNameMissing();
             // reportErrors is for handling any potential error at the call site (e.g., sometimes want
             // to special-case the error depending on the surrounding assignment)
-            if (reportErrors && id.kind != ast::UnresolvedIdent::Kind::Global &&
-                id.name != core::Names::ivarNameMissing() && id.name != core::Names::cvarNameMissing()) {
+            if (foundError && reportErrors) {
                 if (auto e = cctx.ctx.beginError(id.loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id.name.show(cctx.ctx));
                     e.addErrorNote("Use `{}` to declare this variable.\n"
@@ -97,11 +98,11 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, 
             }
             auto ret = cctx.newTemporary(id.name);
             cctx.discoveredUndeclaredFields[id.name] = ret;
-            return ret;
+            return {ret, foundError};
         }
-        return fnd->second;
+        return {fnd->second, false};
     } else {
-        return global2Local(cctx, sym);
+        return {global2Local(cctx, sym), false};
     }
 }
 
@@ -359,7 +360,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](const ast::UnresolvedIdent &id) {
                 auto reportErrors = true;
-                LocalRef loc = unresolvedIdent2Local(cctx, id, reportErrors);
+                auto [loc, _foundError] = unresolvedIdent2Local(cctx, id, reportErrors);
                 ENFORCE(loc.exists());
                 current->exprs.emplace_back(cctx.target, id.loc, make_insn<Ident>(loc));
 
@@ -407,14 +408,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
                     auto reportErrors = false;
-                    lhs = unresolvedIdent2Local(cctx, *ident, reportErrors);
+                    auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, reportErrors);
+                    lhs = newLhs;
                     // Detect if we would have reported an error
                     // Only do this transformation if we're sure that it would produce an error, so
                     // that we don't pay the performance cost of inflating the CFG needlessly.
-                    auto willReport = cctx.ctx.state.shouldReportErrorOn(cctx.ctx.locAt(a.loc),
-                                                                         core::errors::CFG::UndeclaredVariable);
-                    if (cctx.discoveredUndeclaredFields.find(ident->name) != cctx.discoveredUndeclaredFields.end() &&
-                        willReport) {
+                    auto shouldReportErrorOn = cctx.ctx.state.shouldReportErrorOn(
+                        cctx.ctx.locAt(a.loc), core::errors::CFG::UndeclaredVariable);
+                    if (foundError && shouldReportErrorOn) {
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
                         auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
