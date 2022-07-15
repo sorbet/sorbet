@@ -34,11 +34,10 @@ end
 module Helper5
   extend T::Helpers
 
-  requires_ancestor { "Object" } # error: Expected `Module` but found `String("Object")` for block result type
+  requires_ancestor { "Object" }
   #                   ^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
 
-  requires_ancestor { T.class_of(Object) } # error: Expected `Module` but found `Runtime object representing type: T.class_of(Object)` for block result type
-  #                   ^^^^^^^^^^^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
+  requires_ancestor { T.class_of(Object) }
 end
 
 module Helper6

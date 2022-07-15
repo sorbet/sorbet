@@ -758,7 +758,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Class
             requiredClasses.emplace_back(ancst);
         }
 
-        if (ancst.symbol.data(ctx)->typeArity(ctx) > 0) {
+        if (ancst.symbol.data(ctx)->typeArity(ctx) > 0 && !ancst.symbol.data(ctx)->isSingletonClass(ctx)) {
             if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
                 e.setHeader("`{}` can't require generic ancestor `{}` (unsupported)", sym.show(ctx),
                             ancst.symbol.show(ctx));
