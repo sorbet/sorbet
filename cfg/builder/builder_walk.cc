@@ -58,7 +58,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     return alias;
 }
 
-LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) {
+LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, bool reportErrors) {
     core::ClassOrModuleRef klass;
 
     switch (id.kind) {
@@ -84,10 +84,15 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
     if (!sym.exists()) {
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            if (id.kind != ast::UnresolvedIdent::Kind::Global && id.name != core::Names::ivarNameMissing() &&
-                id.name != core::Names::cvarNameMissing()) {
+            // reportErrors is for handling any potential error at the call site (e.g., sometimes want
+            // to special-case the error depending on the surrounding assignment)
+            if (reportErrors && id.kind != ast::UnresolvedIdent::Kind::Global &&
+                id.name != core::Names::ivarNameMissing() && id.name != core::Names::cvarNameMissing()) {
                 if (auto e = cctx.ctx.beginError(id.loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id.name.show(cctx.ctx));
+                    e.addErrorNote("Use `{}` to declare this variable.\n"
+                                   "    For more information, see https://sorbet.org/docs/type-annotations",
+                                   "T.let");
                 }
             }
             auto ret = cctx.newTemporary(id.name);
@@ -353,7 +358,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](const ast::UnresolvedIdent &id) {
-                LocalRef loc = unresolvedIdent2Local(cctx, id);
+                auto reportErrors = true;
+                LocalRef loc = unresolvedIdent2Local(cctx, id, reportErrors);
                 ENFORCE(loc.exists());
                 current->exprs.emplace_back(cctx.target, id.loc, make_insn<Ident>(loc));
 
@@ -400,7 +406,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
-                    lhs = unresolvedIdent2Local(cctx, *ident);
+                    auto reportErrors = false;
+                    lhs = unresolvedIdent2Local(cctx, *ident, reportErrors);
+                    // Detect if we would have reported an error
+                    if (cctx.discoveredUndeclaredFields.find(ident->name) != cctx.discoveredUndeclaredFields.end()) {
+                        auto zeroLoc = a.loc.copyWithZeroLength();
+                        auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
+                        auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
+                                                                                          : core::Names::instance();
+                        // Mutate a.rhs before walking.
+                        a.rhs =
+                            ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
+                                           move(a.rhs), ast::MK::String(zeroLoc, fieldKind),
+                                           ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name),
+                                           ast::MK::Symbol(zeroLoc, ident->name));
+                    }
                     ENFORCE(lhs.exists());
                 } else {
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());

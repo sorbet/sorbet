@@ -2661,6 +2661,52 @@ public:
     }
 } Magic_suggestUntypedConstantType;
 
+class Magic_suggestUntypedFieldType : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 4);
+        auto exprTy = core::Types::widen(gs, args.args[0]->type);
+        if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::UntypedFieldSuggestion)) {
+            const auto &fieldKindTy = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
+            auto fieldKind = fieldKindTy.asName().show(gs);
+            const auto &definingMethodNameTy = cast_type_nonnull<NamedLiteralType>(args.args[2]->type);
+            auto definingMethodName = definingMethodNameTy.asName();
+            const auto &fieldNameTy = cast_type_nonnull<NamedLiteralType>(args.args[3]->type);
+            auto fieldName = fieldNameTy.asName().show(gs);
+
+            auto suggestType = exprTy;
+            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit()) {
+                suggestType = core::Types::any(gs, Types::nilClass(), exprTy);
+            }
+            e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
+                        "T.let", "# typed: strict");
+            auto replaceLoc = args.argLoc(0);
+            if (replaceLoc.exists()) {
+                // Loc might not exist be because our argument was an EmptyTree (`begin; end`).
+                // In that case we don't have an RHS we can easily wrap in something, so skip the autocorrect.
+                auto title = fmt::format("Initialize as `{}`", suggestType.show(gs));
+
+                // Detect `||= expr`
+                auto lookBefore = replaceLoc.adjustLen(gs, -4, 3);
+                if (lookBefore.source(gs) == "||=") {
+                    auto insertLoc = args.callLoc().copyWithZeroLength(); // right before the assign's LHS
+                    auto [_, indentLen] = insertLoc.findStartOfLine(gs);
+                    auto indentPrefix = string(indentLen, ' ');
+                    e.addErrorNote("Declaring {} variables that are inititalized using `{}` is special; see the "
+                                   "autocorrect for more",
+                                   fieldKind, "||=");
+                    e.replaceWith(title, insertLoc, "{} = T.let({}, {})\n{}", fieldName, fieldName,
+                                  suggestType.show(gs), indentPrefix);
+                } else {
+                    e.replaceWith(title, replaceLoc, "T.let({}, {})", replaceLoc.source(gs).value(),
+                                  suggestType.show(gs));
+                }
+            }
+        }
+        res.returnType = move(exprTy);
+    }
+} Magic_suggestUntypedFieldType;
+
 /**
  * This is a special version of `new` that will return `T.attached_class`
  * instead.
@@ -3911,7 +3957,8 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},

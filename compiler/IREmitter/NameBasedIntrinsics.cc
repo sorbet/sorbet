@@ -124,7 +124,7 @@ public:
         return Payload::varGet(mcctx.cs, mcctx.send->args[0].variable, mcctx.builder, mcctx.irctx, mcctx.rubyRegionId);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::suggestType()};
+        return {core::Names::suggestConstantType(), core::Names::suggestFieldType()};
     }
 } IdentityIntrinsic;
 
