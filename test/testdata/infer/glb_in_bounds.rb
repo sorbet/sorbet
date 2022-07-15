@@ -27,7 +27,7 @@ sig {
   ).void
 }
 def example1(x, y)
-  T.reveal_type(x) # error: `Child1[String]`
+  T.reveal_type(x) # error: `Child1[T.untyped]`
   T.reveal_type(y) # error: `Parent[T.untyped]`
 end
 
@@ -44,6 +44,6 @@ sig {
   ).void
 }
 def example2(x, y)
-  T.reveal_type(x) # error: `Child2[String]`
+  T.reveal_type(x) # error: `Child2[T.untyped]`
   T.reveal_type(y) # error: `Parent[T.untyped]`
 end
