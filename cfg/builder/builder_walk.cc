@@ -58,7 +58,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     return alias;
 }
 
-pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, bool reportErrors) {
+pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, bool isAssign) {
     core::ClassOrModuleRef klass;
 
     switch (id.kind) {
@@ -82,13 +82,13 @@ pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::Unresolve
 
     auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id.name);
     if (!sym.exists()) {
+        auto hasError = id.kind != ast::UnresolvedIdent::Kind::Global && id.name != core::Names::ivarNameMissing() &&
+                        id.name != core::Names::cvarNameMissing();
+
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            auto foundError = id.kind != ast::UnresolvedIdent::Kind::Global &&
-                              id.name != core::Names::ivarNameMissing() && id.name != core::Names::cvarNameMissing();
-            // reportErrors is for handling any potential error at the call site (e.g., sometimes want
-            // to special-case the error depending on the surrounding assignment)
-            if (foundError && reportErrors) {
+            // For reads (not assigns) we only report the problem on the first offense.
+            if (hasError && !isAssign) {
                 if (auto e = cctx.ctx.beginError(id.loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id.name.show(cctx.ctx));
                     e.addErrorNote("Use `{}` to declare this variable.\n"
@@ -98,9 +98,9 @@ pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::Unresolve
             }
             auto ret = cctx.newTemporary(id.name);
             cctx.discoveredUndeclaredFields[id.name] = ret;
-            return {ret, foundError};
+            return {ret, hasError && isAssign};
         }
-        return {fnd->second, false};
+        return {fnd->second, hasError && isAssign};
     } else {
         return {global2Local(cctx, sym), false};
     }
@@ -359,8 +359,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](const ast::UnresolvedIdent &id) {
-                auto reportErrors = true;
-                auto [loc, _foundError] = unresolvedIdent2Local(cctx, id, reportErrors);
+                auto isAssign = false;
+                auto [loc, _foundError] = unresolvedIdent2Local(cctx, id, isAssign);
                 ENFORCE(loc.exists());
                 current->exprs.emplace_back(cctx.target, id.loc, make_insn<Ident>(loc));
 
@@ -407,8 +407,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
-                    auto reportErrors = false;
-                    auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, reportErrors);
+                    auto isAssign = true;
+                    auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
                     lhs = newLhs;
                     // Detect if we would have reported an error
                     // Only do this transformation if we're sure that it would produce an error, so
