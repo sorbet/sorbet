@@ -409,7 +409,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto reportErrors = false;
                     lhs = unresolvedIdent2Local(cctx, *ident, reportErrors);
                     // Detect if we would have reported an error
-                    if (cctx.discoveredUndeclaredFields.find(ident->name) != cctx.discoveredUndeclaredFields.end()) {
+                    // Only do this transformation if we're sure that it would produce an error, so
+                    // that we don't pay the performance cost of inflating the CFG needlessly.
+                    auto willReport = cctx.ctx.state.shouldReportErrorOn(cctx.ctx.locAt(a.loc),
+                                                                         core::errors::CFG::UndeclaredVariable);
+                    if (cctx.discoveredUndeclaredFields.find(ident->name) != cctx.discoveredUndeclaredFields.end() &&
+                        willReport) {
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
                         auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
