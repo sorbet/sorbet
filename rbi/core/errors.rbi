@@ -94,6 +94,12 @@ class FrozenError < RuntimeError
   # ```
   sig { params(msg: T.untyped, receiver: T.untyped).void }
   def initialize(msg = nil, receiver: nil); end
+
+  # Return the receiver associated with this
+  # [`FrozenError`](https://docs.ruby-lang.org/en/2.7.0/FrozenError.html)
+  # exception.
+  sig { returns(T.untyped) }
+  def receiver; end
 end
 
 # Raised when the given index is invalid.
