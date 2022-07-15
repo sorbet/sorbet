@@ -113,6 +113,661 @@
 # rows, columns = $stdout.winsize
 # puts "Your screen is #{columns} wide and #{rows} tall"
 # ```
+#
+# ## Example Files
+#
+# Many examples here use these filenames and their corresponding files:
+#
+# *   `t.txt`: A text-only file that is assumed to exist via:
+#
+# ```ruby
+# text = <<~EOT
+#   This is line one.
+#   This is the second line.
+#   This is the third line.
+# EOT
+# File.write('t.txt', text)
+# ```
+#
+# *   `t.dat`: A data file that is assumed to exist via:
+#
+# ```ruby
+# data = "\u9990\u9991\u9992\u9993\u9994"
+# f = File.open('t.dat', 'wb:UTF-16')
+# f.write(data)
+# f.close
+# ```
+#
+# *   `t.rus`: A Russian-language text file that is assumed to exist via:
+#
+# ```ruby
+# File.write('t.rus', "\u{442 435 441 442}")
+# ```
+#
+# *   `t.tmp`: A file that is assumed *not* to exist.
+#
+#
+# ## Modes
+#
+# A number of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) method calls
+# must or may specify a *mode* for the stream; the mode determines how stream is
+# to be accessible, including:
+#
+# *   Whether the stream is to be read-only, write-only, or read-write.
+# *   Whether the stream is positioned at its beginning or its end.
+# *   Whether the stream treats data as text-only or binary.
+# *   The external and internal encodings.
+#
+#
+# ### Mode Specified as an [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
+#
+# When `mode` is an integer it must be one or more (combined by bitwise OR (`|`)
+# of the modes defined in File::Constants:
+#
+# *   `File::RDONLY`: Open for reading only.
+# *   `File::WRONLY`: Open for writing only.
+# *   `File::RDWR`: Open for reading and writing.
+# *   `File::APPEND`: Open for appending only.
+# *   `File::CREAT`: Create file if it does not exist.
+# *   `File::EXCL`: Raise an exception if `File::CREAT` is given and the file
+#     exists.
+#
+#
+# Examples:
+#
+# ```ruby
+# File.new('t.txt', File::RDONLY)
+# File.new('t.tmp', File::RDWR | File::CREAT | File::EXCL)
+# ```
+#
+# Note: [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html)
+# [`IO#set_encoding`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-set_encoding)
+# does not allow the mode to be specified as an integer.
+#
+# ### Mode Specified As a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+#
+# When `mode` is a string it must begin with one of the following:
+#
+# *   `'r'`: Read-only stream, positioned at the beginning; the stream cannot be
+#     changed to writable.
+# *   `'w'`: Write-only stream, positioned at the beginning; the stream cannot
+#     be changed to readable.
+# *   `'a'`: Write-only stream, positioned at the end; every write appends to
+#     the end; the stream cannot be changed to readable.
+# *   `'r+'`: Read-write stream, positioned at the beginning.
+# *   `'w+'`: Read-write stream, positioned at the end.
+# *   `'a+'`: Read-write stream, positioned at the end.
+#
+#
+# For a writable file stream (that is, any except read-only), the file is
+# truncated to zero if it exists, and is created if it does not exist.
+#
+# Examples:
+#
+# ```ruby
+# File.open('t.txt', 'r')
+# File.open('t.tmp', 'w')
+# ```
+#
+# Either of the following may be suffixed to any of the above:
+#
+# *   `'t'`: Text data; sets the default external encoding to `Encoding::UTF_8`;
+#     on Windows, enables conversion between EOL and CRLF.
+# *   `'b'`: Binary data; sets the default external encoding to
+#     `Encoding::ASCII_8BIT`; on Windows, suppresses conversion between EOL and
+#     CRLF.
+#
+#
+# If neither is given, the stream defaults to text data.
+#
+# Examples:
+#
+# ```ruby
+# File.open('t.txt', 'rt')
+# File.open('t.dat', 'rb')
+# ```
+#
+# The following may be suffixed to any writable mode above:
+#
+# *   `'x'`: Creates the file if it does not exist; raises an exception if the
+#     file exists.
+#
+#
+# Example:
+#
+# ```ruby
+# File.open('t.tmp', 'wx')
+# ```
+#
+# Finally, the mode string may specify encodings -- either external encoding
+# only or both external and internal encodings -- by appending one or both
+# encoding names, separated by colons:
+#
+# ```ruby
+# f = File.new('t.dat', 'rb')
+# f.external_encoding # => #<Encoding:ASCII-8BIT>
+# f.internal_encoding # => nil
+# f = File.new('t.dat', 'rb:UTF-16')
+# f.external_encoding # => #<Encoding:UTF-16 (dummy)>
+# f.internal_encoding # => nil
+# f = File.new('t.dat', 'rb:UTF-16:UTF-16')
+# f.external_encoding # => #<Encoding:UTF-16 (dummy)>
+# f.internal_encoding # => #<Encoding:UTF-16>
+# ```
+#
+# The numerous encoding names are available in array
+# [`Encoding.name_list`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-name_list):
+#
+# ```ruby
+# Encoding.name_list.size    # => 175
+# Encoding.name_list.take(3) # => ["ASCII-8BIT", "UTF-8", "US-ASCII"]
+# ```
+#
+# ## Encodings
+#
+# When the external encoding is set, strings read are tagged by that encoding
+# when reading, and strings written are converted to that encoding when writing.
+#
+# When both external and internal encodings are set, strings read are converted
+# from external to internal encoding, and strings written are converted from
+# internal to external encoding. For further details about transcoding input and
+# output, see [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html).
+#
+# If the external encoding is `'BOM|UTF-8'`, `'BOM|UTF-16LE'` or
+# `'BOM|UTF16-BE'`, Ruby checks for a Unicode BOM in the input document to help
+# determine the encoding. For UTF-16 encodings the file open mode must be
+# binary. If the BOM is found, it is stripped and the external encoding from the
+# BOM is used.
+#
+# Note that the BOM-style encoding option is case insensitive, so 'bom|utf-8' is
+# also valid.)
+#
+# ## Open Options
+#
+# A number of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) methods accept
+# an optional parameter `opts`, which determines how a new stream is to be
+# opened:
+#
+# *   `:mode`: Stream mode.
+# *   `:flags`: [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
+#     file open flags; If `mode` is also given, the two are bitwise-ORed.
+# *   `:external_encoding`: External encoding for the stream.
+# *   `:internal_encoding`: Internal encoding for the stream. `'-'` is a synonym
+#     for the default internal encoding. If the value is `nil` no conversion
+#     occurs.
+# *   `:encoding`: Specifies external and internal encodings as
+#     `'extern:intern'`.
+# *   `:textmode`: If a truthy value, specifies the mode as text-only, binary
+#     otherwise.
+# *   `:binmode`: If a truthy value, specifies the mode as binary, text-only
+#     otherwise.
+# *   `:autoclose`: If a truthy value, specifies that the `fd` will close when
+#     the stream closes; otherwise it remains open.
+#
+#
+# Also available are the options offered in
+# [`String#encode`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-encode),
+# which may control conversion between external internal encoding.
+#
+# ## Getline Options
+#
+# A number of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) methods accept
+# optional keyword arguments that determine how a stream is to be treated:
+#
+# *   `:chomp`: If `true`, line separators are omitted; default is  `false`.
+#
+#
+# ## Position
+#
+# An [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) stream has a
+# *position*, which is the non-negative integer offset (in bytes) in the stream
+# where the next read or write will occur.
+#
+# Note that a text stream may have multi-byte characters, so a text stream whose
+# position is `n` (*bytes*) may not have `n` *characters* preceding the current
+# position -- there may be fewer.
+#
+# A new stream is initially positioned:
+#
+# *   At the beginning (position `0`) if its mode is `'r'`, `'w'`, or `'r+'`.
+# *   At the end (position `self.size`) if its mode is `'a'`, `'w+'`, or `'a+'`.
+#
+#
+# Methods to query the position:
+#
+# *   [`IO#tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell) and
+#     its alias
+#     [`IO#pos`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos)
+#     return the position for an open stream.
+# *   [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
+#     and its alias
+#     [`IO#eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof)
+#     return whether the position is at the end of a readable stream.
+#
+#
+# Reading from a stream usually changes its position:
+#
+# ```ruby
+# f = File.open('t.txt')
+# f.tell     # => 0
+# f.readline # => "This is line one.\n"
+# f.tell     # => 19
+# f.readline # => "This is the second line.\n"
+# f.tell     # => 45
+# f.eof?     # => false
+# f.readline # => "Here's the third line.\n"
+# f.eof?     # => true
+# ```
+#
+# Writing to a stream usually changes its position:
+#
+# ```ruby
+# f = File.open('t.tmp', 'w')
+# f.tell         # => 0
+# f.write('foo') # => 3
+# f.tell         # => 3
+# f.write('bar') # => 3
+# f.tell         # => 6
+# ```
+#
+# Iterating over a stream usually changes its position:
+#
+# ```ruby
+# f = File.open('t.txt')
+# f.each do |line|
+#   p "position=#{f.pos} eof?=#{f.eof?} line=#{line}"
+# end
+# ```
+#
+# Output:
+#
+# ```ruby
+# "position=19 eof?=false line=This is line one.\n"
+# "position=45 eof?=false line=This is the second line.\n"
+# "position=70 eof?=true line=This is the third line.\n"
+# ```
+#
+# The position may also be changed by certain other methods:
+#
+# *   [`IO#pos=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos-3D)
+#     and [`IO#seek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-seek)
+#     change the position to a specified offset.
+# *   [`IO#rewind`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-rewind)
+#     changes the position to the beginning.
+#
+#
+# ## Line Number
+#
+# A readable [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) stream has a
+# *line* *number*, which is the non-negative integer line number in the stream
+# where the next read will occur.
+#
+# A new stream is initially has line number `0`.
+#
+# [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html)
+# [`IO#lineno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno)
+# returns the line number.
+#
+# Reading lines from a stream usually changes its line number:
+#
+# ```ruby
+# f = File.open('t.txt', 'r')
+# f.lineno   # => 0
+# f.readline # => "This is line one.\n"
+# f.lineno   # => 1
+# f.readline # => "This is the second line.\n"
+# f.lineno   # => 2
+# f.readline # => "Here's the third line.\n"
+# f.lineno   # => 3
+# f.eof?     # => true
+# ```
+#
+# Iterating over lines in a stream usually changes its line number:
+#
+# ```ruby
+# f = File.open('t.txt')
+# f.each_line do |line|
+#   p "position=#{f.pos} eof?=#{f.eof?} line=#{line}"
+# end
+# ```
+#
+# Output:
+#
+# ```ruby
+# "position=19 eof?=false line=This is line one.\n"
+# "position=45 eof?=false line=This is the second line.\n"
+# "position=70 eof?=true line=This is the third line.\n"
+# ```
+#
+# ## What's Here
+#
+# First, what's elsewhere.
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) IO:
+#
+# *   Inherits from [class
+#     Object](Object.html#class-Object-label-What-27s+Here).
+# *   Includes [module
+#     Enumerable](Enumerable.html#module-Enumerable-label-What-27s+Here), which
+#     provides dozens of additional methods.
+#
+#
+# Here, class [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) provides
+# methods that are useful for:
+#
+# *   [Creating](#class-IO-label-Creating)
+# *   [Reading](#class-IO-label-Reading)
+# *   [Writing](#class-IO-label-Writing)
+# *   [Positioning](#class-IO-label-Positioning)
+# *   [Iterating](#class-IO-label-Iterating)
+# *   [Settings](#class-IO-label-Settings)
+# *   [Querying](#class-IO-label-Querying)
+# *   [Buffering](#class-IO-label-Buffering)
+# *   [Low-Level Access](#class-IO-label-Low-Level+Access)
+# *   [Other](#class-IO-label-Other)
+#
+#
+# ### Creating
+#
+#     [`::new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new) (aliased as [`::for_fd`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-for_fd))
+# :       Creates and returns a new
+#         [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object for the
+#         given integer file descriptor.
+#
+#     [`::open`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-open)
+# :       Creates a new [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
+#         object.
+#
+#     [`::pipe`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-pipe)
+# :       Creates a connected pair of reader and writer
+#         [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects.
+#
+#     [`::popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen)
+# :       Creates an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object
+#         to interact with a subprocess.
+#
+#     [`::select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+# :       Selects which given
+#         [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) instances are
+#         ready for reading,
+#
+#     writing, or have pending exceptions.
+#
+#
+# ### Reading
+#
+#     [`::binread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-binread)
+# :       Returns a binary string with all or a subset of bytes from the given
+#         file.
+#
+#     [`::read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-read)
+# :       Returns a string with all or a subset of bytes from the given file.
+#
+#     [`::readlines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-readlines)
+# :       Returns an array of strings, which are the lines from the given file.
+#
+#     [`getbyte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getbyte)
+# :       Returns the next 8-bit byte read from `self` as an integer.
+#
+#     [`getc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getc)
+# :       Returns the next character read from `self` as a string.
+#
+#     [`gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets)
+# :       Returns the line read from `self`.
+#
+#     [`pread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pread)
+# :       Returns all or the next *n* bytes read from `self`, not updating the
+#         receiver's offset.
+#
+#     [`read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read)
+# :       Returns all remaining or the next *n* bytes read from `self` for a
+#         given *n*.
+#
+#     [`read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read_nonblock)
+# :       the next *n* bytes read from `self` for a given *n*, in non-block
+#         mode.
+#
+#     [`readbyte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readbyte)
+# :       Returns the next byte read from `self`; same as
+#         [`getbyte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getbyte),
+#         but raises an exception on end-of-file.
+#
+#     [`readchar`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readchar)
+# :       Returns the next character read from `self`; same as
+#         [`getc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getc),
+#         but raises an exception on end-of-file.
+#
+#     [`readline`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readline)
+# :       Returns the next line read from `self`; same as getline, but raises an
+#         exception of end-of-file.
+#
+#     [`readlines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readlines)
+# :       Returns an array of all lines read read from `self`.
+#
+#     [`readpartial`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readpartial)
+# :       Returns up to the given number of bytes from `self`.
+#
+#
+#
+# ### Writing
+#
+#     [`::binwrite`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-binwrite)
+# :       Writes the given string to the file at the given filepath, in binary
+#         mode.
+#
+#     [`::write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-write)
+# :       Writes the given string to `self`.
+#
+#     [:<<](#method-i-3C-3C)
+# :       Appends the given string to `self`.
+#
+#     [`print`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-print)
+# :       Prints last read line or given objects to `self`.
+#
+#     [`printf`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-printf)
+# :       Writes to `self` based on the given format string and objects.
+#
+#     [`putc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-putc)
+# :       Writes a character to `self`.
+#
+#     [`puts`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-puts)
+# :       Writes lines to `self`, making sure line ends with a newline.
+#
+#     [`pwrite`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pwrite)
+# :       Writes the given string at the given offset, not updating the
+#         receiver's offset.
+#
+#     [`write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-write)
+# :       Writes one or more given strings to `self`.
+#
+#     [`write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-write_nonblock)
+# :       Writes one or more given strings to `self` in non-blocking mode.
+#
+#
+#
+# ### Positioning
+#
+#     [`lineno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno)
+# :       Returns the current line number in `self`.
+#
+#     [`lineno=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno-3D)
+# :       Sets the line number is `self`.
+#
+#     [`pos`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos) (aliased as [`tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell))
+# :       Returns the current byte offset in `self`.
+#
+#     [`pos=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos-3D)
+# :       Sets the byte offset in `self`.
+#
+#     [`reopen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-reopen)
+# :       Reassociates `self` with a new or existing
+#         [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) stream.
+#
+#     [`rewind`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-rewind)
+# :       Positions `self` to the beginning of input.
+#
+#     [`seek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-seek)
+# :       Sets the offset for `self` relative to given position.
+#
+#
+#
+# ### Iterating
+#
+#     [`::foreach`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-foreach)
+# :       Yields each line of given file to the block.
+#
+#     [`each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each) (aliased as [`each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line))
+# :       Calls the given block with each successive line in `self`.
+#
+#     [`each_byte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_byte)
+# :       Calls the given block with each successive byte in `self` as an
+#         integer.
+#
+#     [`each_char`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_char)
+# :       Calls the given block with each successive character in `self` as a
+#         string.
+#
+#     [`each_codepoint`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_codepoint)
+# :       Calls the given block with each successive codepoint in `self` as an
+#         integer.
+#
+#
+#
+# ### Settings
+#
+#     [`autoclose=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-autoclose-3D)
+# :       Sets whether `self` auto-closes.
+#
+#     [`binmode`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-binmode)
+# :       Sets `self` to binary mode.
+#
+#     [`close`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-close)
+# :       Closes `self`.
+#
+#     [`close_on_exec=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-close_on_exec-3D)
+# :       Sets the close-on-exec flag.
+#
+#     [`close_read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-close_read)
+# :       Closes `self` for reading.
+#
+#     [`close_write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-close_write)
+# :       Closes `self` for writing.
+#
+#     [`set_encoding`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-set_encoding)
+# :       Sets the encoding for `self`.
+#
+#     [`set_encoding_by_bom`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-set_encoding_by_bom)
+# :       Sets the encoding for `self`, based on its Unicode byte-order-mark.
+#
+#     [`sync=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync-3D)
+# :       Sets the sync-mode to the given value.
+#
+#
+#
+# ### Querying
+#
+#     [`autoclose?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-autoclose-3F)
+# :       Returns whether `self` auto-closes.
+#
+#     [`binmode?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-binmode-3F)
+# :       Returns whether `self` is in binary mode.
+#
+#     [`close_on_exec?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-close_on_exec-3F)
+# :       Returns the close-on-exec flag for `self`.
+#
+#     [`closed?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-closed-3F)
+# :       Returns whether `self` is closed.
+#
+#     [`eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F) (aliased as [`eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof))
+# :       Returns whether `self` is at end-of-file.
+#
+#     [`external_encoding`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-external_encoding)
+# :       Returns the external encoding object for `self`.
+#
+#     [`fileno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fileno) (aliased as [`to_i`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-to_i))
+# :       Returns the integer file descriptor for `self`
+#
+#     [`internal_encoding`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-internal_encoding)
+# :       Returns the internal encoding object for `self`.
+#
+#     [`pid`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pid)
+# :       Returns the process ID of a child process associated with `self`, if
+#         `self` was created by
+#         [`::popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen).
+#
+#     [`stat`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-stat)
+# :       Returns the
+#         [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html)
+#         object containing status information for `self`.
+#
+#     [`sync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync)
+# :       Returns whether `self` is in sync-mode.
+#
+#     tty (aliased as [`isatty`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-isatty))
+# :       Returns whether `self` is a terminal.
+#
+#
+#
+# ### Buffering
+#
+#     [`fdatasync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fdatasync)
+# :       Immediately writes all buffered data in `self` to disk.
+#
+#     [`flush`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-flush)
+# :       Flushes any buffered data within `self` to the underlying operating
+#         system.
+#
+#     [`fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync)
+# :       Immediately writes all buffered data and attributes in `self` to disk.
+#
+#     [`ungetbyte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-ungetbyte)
+# :       Prepends buffer for `self` with given integer byte or string.
+#
+#     [`ungetc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-ungetc)
+# :       Prepends buffer for `self` with given string.
+#
+#
+#
+# ### Low-Level Access
+#
+#     [`::sysopen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-sysopen)
+# :       Opens the file given by its path, returning the integer file
+#         descriptor.
+#
+#     [`advise`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-advise)
+# :       Announces the intention to access data from `self` in a specific way.
+#
+#     [`fcntl`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fcntl)
+# :       Passes a low-level command to the file specified by the given file
+#         descriptor.
+#
+#     [`ioctl`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-ioctl)
+# :       Passes a low-level command to the device specified by the given file
+#         descriptor.
+#
+#     [`sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)
+# :       Returns up to the next *n* bytes read from self using a low-level
+#         read.
+#
+#     [`sysseek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysseek)
+# :       Sets the offset for `self`.
+#
+#     [`syswrite`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-syswrite)
+# :       Writes the given string to `self` using a low-level write.
+#
+#
+#
+# ### Other
+#
+#     [`::copy_stream`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-copy_stream)
+# :       Copies data from a source to a destination, each of which is a
+#         filepath or an IO-like object.
+#
+#     [`::try_convert`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-try_convert)
+# :       Returns a new [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
+#         object resulting from converting the given object.
+#
+#     [`inspect`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-inspect)
+# :       Returns the string representation of `self`.
 class IO < Object
   include File::Constants
   include Enumerable
@@ -166,17 +821,20 @@ class IO < Object
   TRUNC = T.let(T.unsafe(nil), Integer)
   WRONLY = T.let(T.unsafe(nil), Integer)
 
-  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) Output---Writes
-  # *obj* to *ios*. *obj* will be converted to a string using `to_s`.
+  # Writes the given `object` to `self`, which must be opened for writing (see
+  # [Modes](#class-IO-label-Modes)); returns `self`; if `object` is not a
+  # string, it is converted via method `to_s`:
   #
   # ```ruby
-  # $stdout << "Hello " << "world!\n"
+  # $stdout << 'Hello' << ', ' << 'World!' << "\n"
+  # $stdout << 'foo' << :bar << 2 << "\n"
   # ```
   #
-  # *produces:*
+  # Output:
   #
-  # ```ruby
-  # Hello world!
+  # ```
+  # Hello, World!
+  # foobar2
   # ```
   sig do
     params(
@@ -427,6 +1085,9 @@ class IO < Object
   # See
   # [`IO.readlines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-readlines)
   # for details about getline\_args.
+  #
+  # Also aliased as:
+  # [`each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line)
   sig do
     params(
         sep: String,
@@ -502,43 +1163,48 @@ class IO < Object
   sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
 
-  # Returns true if *ios* is at end of file that means there are no more data to
-  # read. The stream must be opened for reading or an
-  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) will be
-  # raised.
+  # Returns `true` if the stream is positioned at its end, `false` otherwise;
+  # see [Position](#class-IO-label-Position):
   #
   # ```ruby
-  # f = File.new("testfile")
-  # dummy = f.readlines
-  # f.eof   #=> true
+  # f = File.open('t.txt')
+  # f.eof           # => false
+  # f.seek(0, :END) # => 0
+  # f.eof           # => true
   # ```
   #
-  # If *ios* is a stream such as pipe or socket,
-  # [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
-  # blocks until the other end sends some data or closes it.
+  # Raises an exception unless the stream is opened for reading; see
+  # [Mode](#class-IO-label-Mode).
+  #
+  # If `self` is a stream such as pipe or socket, this method blocks until the
+  # other end sends some data or closes it:
   #
   # ```ruby
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.close }
-  # r.eof?  #=> true after 1 second blocking
+  # r.eof? # => true # After 1-second wait.
   #
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.puts "a" }
-  # r.eof?  #=> false after 1 second blocking
+  # r.eof?  # => false # After 1-second wait.
   #
   # r, w = IO.pipe
   # r.eof?  # blocks forever
   # ```
   #
-  # Note that
-  # [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
-  # reads data to the input byte buffer. So
+  # Note that this method reads data to the input byte buffer. So
   # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)
   # may not behave as you intend with
   # [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F),
   # unless you call
   # [`IO#rewind`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-rewind)
   # first (which is not available for some streams).
+  #
+  # I#eof? is an alias for
+  # [`IO#eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof).
+  #
+  # Also aliased as:
+  # [`eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
   sig {returns(T::Boolean)}
   def eof(); end
 
@@ -563,54 +1229,55 @@ class IO < Object
   end
   def fcntl(integer_cmd, arg); end
 
-  # Immediately writes all buffered data in *ios* to disk.
-  #
-  # If the underlying operating system does not support *fdatasync(2)*,
-  # [`IO#fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync) is
-  # called instead (which might raise a
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html)).
+  # Immediately writes to disk all data buffered in the stream, via the
+  # operating system's: `fdatasync(2)`, if supported, otherwise via `fsync(2)`,
+  # if supported; otherwise raises an exception.
   sig {returns(T.nilable(Integer))}
   def fdatasync(); end
 
-  # Returns an integer representing the numeric file descriptor for *ios*.
+  # Returns the integer file descriptor for the stream:
   #
   # ```ruby
-  # $stdin.fileno    #=> 0
-  # $stdout.fileno   #=> 1
+  # $stdin.fileno             # => 0
+  # $stdout.fileno            # => 1
+  # $stderr.fileno            # => 2
+  # File.open('t.txt').fileno # => 10
   # ```
   #
+  # [`IO#to_i`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-to_i) is an
+  # alias for
+  # [`IO#fileno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fileno).
   #
   # Also aliased as:
   # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-to_i)
   sig {returns(Integer)}
   def fileno(); end
 
-  # Flushes any buffered data within *ios* to the underlying operating system
-  # (note that this is Ruby internal buffering only; the OS may buffer the data
-  # as well).
+  # Flushes data buffered in `self` to the operating system (but does not
+  # necessarily flush data buffered in the operating system):
   #
   # ```ruby
-  # $stdout.print "no newline"
-  # $stdout.flush
-  # ```
-  #
-  # *produces:*
-  #
-  # ```ruby
-  # no newline
+  # $stdout.print 'no newline' # Not necessarily flushed.
+  # $stdout.flush              # Flushed.
   # ```
   sig {returns(T.self_type)}
   def flush(); end
 
-  # Immediately writes all buffered data in *ios* to disk. Note that
-  # [`fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync)
-  # differs from using
-  # [`IO#sync=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync-3D).
-  # The latter ensures that data is flushed from Ruby's buffers, but does not
-  # guarantee that the underlying operating system actually writes it to disk.
+  # Immediately writes to disk all data buffered in the stream, via the
+  # operating system's `fsync(2)`.
   #
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html)
-  # is raised if the underlying operating system does not support *fsync(2)*.
+  # Note this difference:
+  #
+  # *   [`IO#sync=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync-3D):
+  #     Ensures that data is flushed from the stream's internal buffers, but
+  #     does not guarantee that the operating system actually writes the data to
+  #     disk.
+  # *   [`IO#fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync):
+  #     Ensures both that data is flushed from internal buffers, and that data
+  #     is written to disk.
+  #
+  #
+  # Raises an exception if the operating system does not support `fsync(2)`.
   sig {returns(T.nilable(Integer))}
   def fsync(); end
 
@@ -636,33 +1303,76 @@ class IO < Object
   sig {returns(T.nilable(String))}
   def getc(); end
 
-  # Reads the next "line" from the I/O stream; lines are separated by *sep*. A
-  # separator of `nil` reads the entire contents, and a zero-length separator
-  # reads the input a paragraph at a time (two successive newlines in the input
-  # separate paragraphs). The stream must be opened for reading or an
-  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) will be
-  # raised. The line read in will be returned and also assigned to `$_`. Returns
-  # `nil` if called at end of file. If the first argument is an integer, or
-  # optional second argument is given, the returning string would not be longer
-  # than the given value in bytes.
+  # Reads and returns data from the stream; assigns the return value to `$_`.
+  #
+  # With no arguments given, returns the next line as determined by line
+  # separator `$/`, or `nil` if none:
   #
   # ```ruby
-  # File.new("testfile").gets   #=> "This is line one\n"
-  # $_                          #=> "This is line one\n"
-  #
-  # File.new("testfile").gets(4)#=> "This"
+  # f = File.open('t.txt')
+  # f.gets # => "This is line one.\n"
+  # $_     # => "This is line one.\n"
+  # f.gets # => "This is the second line.\n"
+  # f.gets # => "This is the third line.\n"
+  # f.gets # => nil
   # ```
   #
-  # If [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) contains multibyte
-  # characters byte then `gets(1)` returns character entirely:
+  # With string argument `sep` given, but not argument `limit`, returns the next
+  # line as determined by line separator `sep`, or `nil` if none:
   #
   # ```ruby
-  # # Russian characters take 2 bytes
-  # File.write("testfile", "\u{442 435 441 442}")
-  # File.open("testfile") {|f|f.gets(1)} #=> "\u0442"
-  # File.open("testfile") {|f|f.gets(2)} #=> "\u0442"
-  # File.open("testfile") {|f|f.gets(3)} #=> "\u0442\u0435"
-  # File.open("testfile") {|f|f.gets(4)} #=> "\u0442\u0435"
+  # f = File.open('t.txt')
+  # f.gets(' is') # => "This is"
+  # f.gets(' is') # => " line one.\nThis is"
+  # f.gets(' is') # => " the second line.\nThis is"
+  # f.gets(' is') # => " the third line.\n"
+  # f.gets(' is') # => nil
+  # ```
+  #
+  # Note two special values for `sep`:
+  #
+  # *   `nil`: The entire stream is read and returned.
+  # *   `''` (empty string): The next "paragraph" is read and returned, the
+  #     paragraph separator being two successive line separators.
+  #
+  #
+  # With integer argument `limit` given, returns up to `limit+1` bytes:
+  #
+  # ```ruby
+  # # Text with 1-byte characters.
+  # File.open('t.txt') {|f| f.gets(1) } # => "T"
+  # File.open('t.txt') {|f| f.gets(2) } # => "Th"
+  # File.open('t.txt') {|f| f.gets(3) } # => "Thi"
+  # File.open('t.txt') {|f| f.gets(4) } # => "This"
+  # # No more than one line.
+  # File.open('t.txt') {|f| f.gets(17) } # => "This is line one."
+  # File.open('t.txt') {|f| f.gets(18) } # => "This is line one.\n"
+  # File.open('t.txt') {|f| f.gets(19) } # => "This is line one.\n"
+  #
+  # # Text with 2-byte characters, which will not be split.
+  # File.open('t.rus') {|f| f.gets(1).size } # => 1
+  # File.open('t.rus') {|f| f.gets(2).size } # => 1
+  # File.open('t.rus') {|f| f.gets(3).size } # => 2
+  # File.open('t.rus') {|f| f.gets(4).size } # => 2
+  # ```
+  #
+  # With arguments `sep` and `limit`, combines the two behaviors above:
+  #
+  # *   Returns the next line as determined by line separator `sep`, or `nil` if
+  #     none.
+  # *   But returns no more than `limit+1` bytes.
+  #
+  #
+  # For all forms above, trailing optional keyword arguments may be given; see
+  # [Getline Options](#class-IO-label-Getline+Options):
+  #
+  # ```ruby
+  # f = File.open('t.txt')
+  # # Chomp the lines.
+  # f.gets(chomp: true) # => "This is line one."
+  # f.gets(chomp: true) # => "This is the second line."
+  # f.gets(chomp: true) # => "This is the third line."
+  # f.gets(chomp: true) # => nil
   # ```
   sig do
     params(
@@ -860,8 +1570,12 @@ class IO < Object
   end
   def initialize(fd, mode=T.unsafe(nil), **opt); end
 
-  # Return a string describing this
-  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
+  # Returns a string representation of `self`:
+  #
+  # ```ruby
+  # f = File.open('t.txt')
+  # f.inspect # => "#<File:t.txt>"
+  # ```
   sig {returns(String)}
   def inspect(); end
 
@@ -891,6 +1605,10 @@ class IO < Object
   # File.new("testfile").isatty   #=> false
   # File.new("/dev/tty").isatty   #=> true
   # ```
+  #
+  #
+  # Also aliased as:
+  # [`tty?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tty-3F)
   sig {returns(T::Boolean)}
   def isatty(); end
 
@@ -905,8 +1623,8 @@ class IO < Object
   # called with a separator other than newline.
   #
   # Methods that use `$/` like
-  # [`each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each),
-  # [`lines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lines) and
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each), lines
+  # and
   # [`readline`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readline)
   # will also increment
   # [`lineno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno).
@@ -1025,9 +1743,9 @@ class IO < Object
   end
   def self.open(fd, mode='r', opt=nil, &blk); end
 
-  # Returns the process ID of a child process associated with *ios*. This will
-  # be set by
-  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen).
+  # Returns the process ID of a child process associated with the stream, which
+  # will have been set by IO#popen, or `nil` if the stream was not created by
+  # IO#popen:
   #
   # ```ruby
   # pipe = IO.popen("-")
@@ -1038,7 +1756,7 @@ class IO < Object
   # end
   # ```
   #
-  # *produces:*
+  # Output:
   #
   # ```
   # In child, pid is 26209
@@ -1107,25 +1825,42 @@ class IO < Object
   end
   def self.pipe(ext_enc = nil, int_enc = nil, opt = nil, &blk); end
 
-  # Returns the current offset (in bytes) of *ios*.
+  # Returns the current position (in bytes) in `self` (see
+  # [Position](#class-IO-label-Position)):
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.pos    #=> 0
-  # f.gets   #=> "This is line one\n"
-  # f.pos    #=> 17
+  # f = File.new('t.txt')
+  # f.tell     # => 0
+  # f.readline # => "This is line one.\n"
+  # f.tell     # => 19
   # ```
+  #
+  # Related:
+  # [`IO#pos=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos-3D),
+  # [`IO#seek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-seek).
+  #
+  # [`IO#pos`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos) is an
+  # alias for
+  # [`IO#tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell).
+  #
+  # Alias for:
+  # [`tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell)
   sig {returns(Integer)}
   def pos(); end
 
-  # Seeks to the given position (in bytes) in *ios*. It is not guaranteed that
-  # seeking to the right position when *ios* is textmode.
+  # Seeks to the given `new_position` (in bytes); see
+  # [Position](#class-IO-label-Position):
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.pos = 17
-  # f.gets   #=> "This is line two\n"
+  # f = File.open('t.txt')
+  # f.tell     # => 0
+  # f.pos = 20 # => 20
+  # f.tell     # => 20
   # ```
+  #
+  # Related:
+  # [`IO#seek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-seek),
+  # [`IO#tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell).
   sig do
     params(
         arg0: Integer,
@@ -1229,64 +1964,72 @@ class IO < Object
   end
   def puts(*arg0); end
 
-  # Reads *length* bytes from the I/O stream.
+  # Reads bytes from the stream (in binary mode):
   #
-  # *length* must be a non-negative integer or `nil`.
+  # *   If `maxlen` is `nil`, reads all bytes.
+  # *   Otherwise reads `maxlen` bytes, if available.
+  # *   Otherwise reads all bytes.
   #
-  # If *length* is a positive integer, `read` tries to read *length* bytes
-  # without any conversion (binary mode). It returns `nil` if an EOF is
-  # encountered before anything can be read. Fewer than *length* bytes are
-  # returned if an EOF is encountered during the read. In the case of an integer
-  # *length*, the resulting string is always in ASCII-8BIT encoding.
   #
-  # If *length* is omitted or is `nil`, it reads until EOF and the encoding
-  # conversion is applied, if applicable. A string is returned even if EOF is
-  # encountered before any data is read.
+  # Returns a string (either a new string or the given `out_string`) containing
+  # the bytes read. The encoding of the string depends on both `maxLen` and
+  # `out_string`:
   #
-  # If *length* is zero, it returns an empty string (`""`).
+  # *   `maxlen` is `nil`: uses internal encoding of `self` (regardless of
+  #     whether `out_string` was given).
+  # *   `maxlen` not `nil`:
   #
-  # If the optional *outbuf* argument is present, it must reference a
-  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), which will
-  # receive the data. The *outbuf* will contain only the received data after the
-  # method call even if it is not empty at the beginning.
+  #     *   `out_string` given: encoding of `out_string` not modified.
+  #     *   `out_string` not given: ASCII-8BIT is used.
   #
-  # When this method is called at end of file, it returns `nil` or `""`,
-  # depending on *length*: `read`, `read(nil)`, and `read(0)` return `""`,
-  # `read(positive_integer)` returns `nil`.
+  #
+  #
+  # **Without Argument `out_string`**
+  #
+  # When argument `out_string` is omitted, the returned value is a new string:
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.read(16)   #=> "This is line one"
+  # f = File.new('t.txt')
+  # f.read
+  # # => "This is line one.\nThis is the second line.\nThis is the third line.\n"
+  # f.rewind
+  # f.read(40)      # => "This is line one.\r\nThis is the second li"
+  # f.read(40)      # => "ne.\r\nThis is the third line.\r\n"
+  # f.read(40)      # => nil
+  # ```
   #
-  # # read whole file
-  # open("file") do |f|
-  #   data = f.read   # This returns a string even if the file is empty.
-  #   # ...
-  # end
+  # If `maxlen` is zero, returns an empty string.
   #
-  # # iterate over fixed length records
-  # open("fixed-record-file") do |f|
-  #   while record = f.read(256)
-  #     # ...
-  #   end
-  # end
+  # ** With Argument `out_string`**
   #
-  # # iterate over variable length records,
-  # # each record is prefixed by its 32-bit length
-  # open("variable-record-file") do |f|
-  #   while len = f.read(4)
-  #     len = len.unpack("N")[0]   # 32-bit length
-  #     record = f.read(len)       # This returns a string even if len is 0.
-  #   end
-  # end
+  # When argument `out_string` is given, the returned value is `out_string`,
+  # whose content is replaced:
+  #
+  # ```ruby
+  # f = File.new('t.txt')
+  # s = 'foo'      # => "foo"
+  # f.read(nil, s) # => "This is line one.\nThis is the second line.\nThis is the third line.\n"
+  # s              # => "This is line one.\nThis is the second line.\nThis is the third line.\n"
+  # f.rewind
+  # s = 'bar'
+  # f.read(40, s)  # => "This is line one.\r\nThis is the second li"
+  # s              # => "This is line one.\r\nThis is the second li"
+  # s = 'baz'
+  # f.read(40, s)  # => "ne.\r\nThis is the third line.\r\n"
+  # s              # => "ne.\r\nThis is the third line.\r\n"
+  # s = 'bat'
+  # f.read(40, s)  # => nil
+  # s              # => ""
   # ```
   #
   # Note that this method behaves like the fread() function in C. This means it
   # retries to invoke read(2) system calls to read data with the specified
-  # length (or until EOF). This behavior is preserved even if *ios* is in
-  # non-blocking mode. (This method is non-blocking flag insensitive as other
-  # methods.) If you need the behavior like a single read(2) system call,
-  # consider
+  # maxlen (or until EOF).
+  #
+  # This behavior is preserved even if the stream is in non-blocking mode. (This
+  # method is non-blocking-flag insensitive as other methods.)
+  #
+  # If you need the behavior like a single read(2) system call, consider
   # [`readpartial`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readpartial),
   # [`read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read_nonblock),
   # and
@@ -1451,70 +2194,105 @@ class IO < Object
   end
   def readlines(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
-  # Reads at most *maxlen* bytes from the I/O stream. It blocks only if *ios*
-  # has no data immediately available. It doesn't block if some data available.
+  # Reads up to `maxlen` bytes from the stream; returns a string (either a new
+  # string or the given `out_string`). Its encoding is:
   #
-  # If the optional *outbuf* argument is present, it must reference a
-  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), which will
-  # receive the data. The *outbuf* will contain only the received data after the
-  # method call even if it is not empty at the beginning.
+  # *   The unchanged encoding of `out_string`, if `out_string` is given.
+  # *   ASCII-8BIT, otherwise.
   #
-  # It raises [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html) on
-  # end of file.
-  #
-  # readpartial is designed for streams such as pipe, socket, tty, etc. It
-  # blocks only when no data immediately available. This means that it blocks
-  # only when following all conditions hold.
-  # *   the byte buffer in the
-  #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object is empty.
-  # *   the content of the stream is empty.
-  # *   the stream is not reached to EOF.
+  # *   Contains `maxlen` bytes from the stream, if available.
+  # *   Otherwise contains all available bytes, if any available.
+  # *   Otherwise is an empty string.
   #
   #
-  # When readpartial blocks, it waits data or EOF on the stream. If some data is
-  # reached, readpartial returns with the data. If EOF is reached, readpartial
-  # raises [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html).
-  #
-  # When readpartial doesn't blocks, it returns or raises immediately. If the
-  # byte buffer is not empty, it returns the data in the buffer. Otherwise if
-  # the stream has some content, it returns the data in the stream. Otherwise if
-  # the stream is reached to EOF, it raises
-  # [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html).
+  # With the single non-negative integer argument `maxlen` given, returns a new
+  # string:
   #
   # ```ruby
-  # r, w = IO.pipe           #               buffer          pipe content
-  # w << "abc"               #               ""              "abc".
-  # r.readpartial(4096)      #=> "abc"       ""              ""
-  # r.readpartial(4096)      # blocks because buffer and pipe is empty.
-  #
-  # r, w = IO.pipe           #               buffer          pipe content
-  # w << "abc"               #               ""              "abc"
-  # w.close                  #               ""              "abc" EOF
-  # r.readpartial(4096)      #=> "abc"       ""              EOF
-  # r.readpartial(4096)      # raises EOFError
-  #
-  # r, w = IO.pipe           #               buffer          pipe content
-  # w << "abc\ndef\n"        #               ""              "abc\ndef\n"
-  # r.gets                   #=> "abc\n"     "def\n"         ""
-  # w << "ghi\n"             #               "def\n"         "ghi\n"
-  # r.readpartial(4096)      #=> "def\n"     ""              "ghi\n"
-  # r.readpartial(4096)      #=> "ghi\n"     ""              ""
+  # f = File.new('t.txt')
+  # f.readpartial(30) # => "This is line one.\nThis is the"
+  # f.readpartial(30) # => " second line.\nThis is the thi"
+  # f.readpartial(30) # => "rd line.\n"
+  # f.eof             # => true
+  # f.readpartial(30) # Raises EOFError.
   # ```
   #
-  # Note that readpartial behaves similar to sysread. The differences are:
+  # With both argument `maxlen` and string argument `out_string` given, returns
+  # modified `out_string`:
+  #
+  # ```ruby
+  # f = File.new('t.txt')
+  # s = 'foo'
+  # f.readpartial(30, s) # => "This is line one.\nThis is the"
+  # s = 'bar'
+  # f.readpartial(0, s)  # => ""
+  # ```
+  #
+  # This method is useful for a stream such as a pipe, a socket, or a tty. It
+  # blocks only when no data is immediately available. This means that it blocks
+  # only when *all* of the following are true:
+  #
+  # *   The byte buffer in the stream is empty.
+  # *   The content of the stream is empty.
+  # *   The stream is not at EOF.
+  #
+  #
+  # When blocked, the method waits for either more data or EOF on the stream:
+  #
+  # *   If more data is read, the method returns the data.
+  # *   If EOF is reached, the method raises
+  #     [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html).
+  #
+  #
+  # When not blocked, the method responds immediately:
+  #
+  # *   Returns data from the buffer if there is any.
+  # *   Otherwise returns data from the stream if there is any.
+  # *   Otherwise raises
+  #     [`EOFError`](https://docs.ruby-lang.org/en/2.7.0/EOFError.html) if the
+  #     stream has reached EOF.
+  #
+  #
+  # Note that this method is similar to sysread. The differences are:
+  #
   # *   If the byte buffer is not empty, read from the byte buffer instead of
   #     "sysread for buffered
   #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   #     ([`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html))".
   # *   It doesn't cause Errno::EWOULDBLOCK and Errno::EINTR. When readpartial
-  #     meets EWOULDBLOCK and EINTR by read system call, readpartial retry the
+  #     meets EWOULDBLOCK and EINTR by read system call, readpartial retries the
   #     system call.
   #
   #
-  # The latter means that readpartial is nonblocking-flag insensitive. It blocks
-  # on the situation
+  # The latter means that readpartial is non-blocking-flag insensitive. It
+  # blocks on the situation
   # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)
   # causes Errno::EWOULDBLOCK as if the fd is blocking mode.
+  #
+  # Examples:
+  #
+  # ```ruby
+  # #                        # Returned      Buffer Content    Pipe Content
+  # r, w = IO.pipe           #
+  # w << 'abc'               #               ""                "abc".
+  # r.readpartial(4096)      # => "abc"      ""                ""
+  # r.readpartial(4096)      # (Blocks because buffer and pipe are empty.)
+  #
+  # #                        # Returned      Buffer Content    Pipe Content
+  # r, w = IO.pipe           #
+  # w << 'abc'               #               ""                "abc"
+  # w.close                  #               ""                "abc" EOF
+  # r.readpartial(4096)      # => "abc"      ""                 EOF
+  # r.readpartial(4096)      # raises EOFError
+  #
+  # #                        # Returned      Buffer Content    Pipe Content
+  # r, w = IO.pipe           #
+  # w << "abc\ndef\n"        #               ""                "abc\ndef\n"
+  # r.gets                   # => "abc\n"    "def\n"           ""
+  # w << "ghi\n"             #               "def\n"           "ghi\n"
+  # r.readpartial(4096)      # => "def\n"    ""                "ghi\n"
+  # r.readpartial(4096)      # => "ghi\n"    ""                ""
+  # ```
   sig do
     params(
         maxlen: Integer,
@@ -1557,41 +2335,72 @@ class IO < Object
   end
   def reopen(other_IO_or_path, mode_str=T.unsafe(nil)); end
 
-  # Positions *ios* to the beginning of input, resetting
-  # [`lineno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno) to
-  # zero.
+  # Repositions the stream to its beginning, setting both the position and the
+  # line number to zero; see [Position](#class-IO-label-Position) and [Line
+  # Number](#class-IO-label-Line+Number):
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.readline   #=> "This is line one\n"
-  # f.rewind     #=> 0
-  # f.lineno     #=> 0
-  # f.readline   #=> "This is line one\n"
+  # f = File.open('t.txt')
+  # f.tell     # => 0
+  # f.lineno   # => 0
+  # f.readline # => "This is line one.\n"
+  # f.tell     # => 19
+  # f.lineno   # => 1
+  # f.rewind   # => 0
+  # f.tell     # => 0
+  # f.lineno   # => 0
   # ```
   #
-  # Note that it cannot be used with streams such as pipes, ttys, and sockets.
+  # Note that this method cannot be used with streams such as pipes, ttys, and
+  # sockets.
   sig {returns(Integer)}
   def rewind(); end
 
-  # Seeks to a given offset *anInteger* in the stream according to the value of
-  # *whence*:
+  # Seeks to the position given by integer `offset` (see
+  # [Position](#class-IO-label-Position)) and constant `whence`, which is one
+  # of:
   #
-  # ```
-  # :CUR or IO::SEEK_CUR  | Seeks to _amount_ plus current position
-  # ----------------------+--------------------------------------------------
-  # :END or IO::SEEK_END  | Seeks to _amount_ plus end of stream (you
-  #                       | probably want a negative value for _amount_)
-  # ----------------------+--------------------------------------------------
-  # :SET or IO::SEEK_SET  | Seeks to the absolute location given by _amount_
-  # ```
-  #
-  # Example:
+  # *   `:CUR` or `IO::SEEK_CUR`: Repositions the stream to its current position
+  #     plus the given `offset`:
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.seek(-13, IO::SEEK_END)   #=> 0
-  # f.readline                  #=> "And so on...\n"
+  # f = File.open('t.txt')
+  # f.tell            # => 0
+  # f.seek(20, :CUR)  # => 0
+  # f.tell            # => 20
+  # f.seek(-10, :CUR) # => 0
+  # f.tell            # => 10
   # ```
+  #
+  # *   `:END` or `IO::SEEK_END`: Repositions the stream to its end plus the
+  #     given `offset`:
+  #
+  # ```ruby
+  # f = File.open('t.txt')
+  # f.tell            # => 0
+  # f.seek(0, :END)   # => 0  # Repositions to stream end.
+  # f.tell            # => 70
+  # f.seek(-20, :END) # => 0
+  # f.tell            # => 50
+  # f.seek(-40, :END) # => 0
+  # f.tell            # => 30
+  # ```
+  #
+  # *   `:SET` or `IO:SEEK_SET`: Repositions the stream to the given `offset`:
+  #
+  # ```ruby
+  # f = File.open('t.txt')
+  # f.tell            # => 0
+  # f.seek(20, :SET) # => 0
+  # f.tell           # => 20
+  # f.seek(40, :SET) # => 0
+  # f.tell           # => 40
+  # ```
+  #
+  #
+  # Related:
+  # [`IO#pos=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos-3D),
+  # [`IO#tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell).
   sig do
     params(
         amount: Integer,
@@ -1624,6 +2433,23 @@ class IO < Object
   end
   def set_encoding(ext_or_ext_int_enc=T.unsafe(nil), int_enc=T.unsafe(nil)); end
 
+  # Checks if `ios` starts with a BOM, and then consumes it and sets the
+  # external encoding. Returns the result encoding if found, or nil. If `ios` is
+  # not binmode or its encoding has been set already, an exception will be
+  # raised.
+  #
+  # ```ruby
+  # File.write("bom.txt", "\u{FEFF}abc")
+  # ios = File.open("bom.txt", "rb")
+  # ios.set_encoding_by_bom    #=>  #<Encoding:UTF-8>
+  #
+  # File.write("nobom.txt", "abc")
+  # ios = File.open("nobom.txt", "rb")
+  # ios.set_encoding_by_bom    #=>  nil
+  # ```
+  sig { returns(T.nilable(Encoding)) }
+  def set_encoding_by_bom; end
+
   # Returns status information for *ios* as an object of type
   # [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html).
   #
@@ -1637,27 +2463,41 @@ class IO < Object
   sig {returns(File::Stat)}
   def stat(); end
 
-  # Returns the current "sync mode" of *ios*. When sync mode is true, all output
-  # is immediately flushed to the underlying operating system and is not
+  # Returns the current sync mode of the stream. When sync mode is true, all
+  # output is immediately flushed to the underlying operating system and is not
   # buffered by Ruby internally. See also
-  # [`IO#fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync).
+  # [`fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync).
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.sync   #=> false
+  # f = File.open('t.tmp', 'w')
+  # f.sync # => false
+  # f.sync = true
+  # f.sync # => true
   # ```
   sig {returns(T::Boolean)}
   def sync(); end
 
-  # Sets the "sync mode" to `true` or `false`. When sync mode is true, all
-  # output is immediately flushed to the underlying operating system and is not
-  # buffered internally. Returns the new state. See also
-  # [`IO#fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync).
+  # Sets the *sync* *mode* for the stream to the given value; returns the given
+  # value.
+  #
+  # Values for the sync mode:
+  #
+  # *   `true`: All output is immediately flushed to the underlying operating
+  #     system and is not buffered internally.
+  # *   `false`: Output may be buffered internally.
+  #
+  #
+  # Example;
   #
   # ```ruby
-  # f = File.new("testfile")
+  # f = File.open('t.tmp', 'w')
+  # f.sync # => false
   # f.sync = true
+  # f.sync # => true
   # ```
+  #
+  # Related:
+  # [`IO#fsync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fsync).
   sig do
     params(
         arg0: T::Boolean,
@@ -1729,18 +2569,30 @@ class IO < Object
   end
   def syswrite(arg0); end
 
-  # Returns the current offset (in bytes) of *ios*.
+  # Returns the current position (in bytes) in `self` (see
+  # [Position](#class-IO-label-Position)):
   #
   # ```ruby
-  # f = File.new("testfile")
-  # f.pos    #=> 0
-  # f.gets   #=> "This is line one\n"
-  # f.pos    #=> 17
+  # f = File.new('t.txt')
+  # f.tell     # => 0
+  # f.readline # => "This is line one.\n"
+  # f.tell     # => 19
   # ```
+  #
+  # Related:
+  # [`IO#pos=`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos-3D),
+  # [`IO#seek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-seek).
+  #
+  # [`IO#pos`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos) is an
+  # alias for
+  # [`IO#tell`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-tell).
+  #
+  # Also aliased as:
+  # [`pos`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pos)
   sig {returns(Integer)}
   def tell(); end
 
-  # Returns *ios*.
+  # Returns `self`.
   sig {returns(T.self_type)}
   def to_io(); end
 
@@ -1751,15 +2603,19 @@ class IO < Object
   # File.new("testfile").isatty   #=> false
   # File.new("/dev/tty").isatty   #=> true
   # ```
+  #
+  #
+  # Alias for:
+  # [`isatty`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-isatty)
   sig {returns(T::Boolean)}
   def tty?(); end
 
   # Pushes back bytes (passed as a parameter) onto *ios*, such that a subsequent
-  # buffered read will return it. Only one byte may be pushed back before a
-  # subsequent read operation (that is, you will be able to read only the last
-  # of several bytes that have been pushed back). Has no effect with unbuffered
-  # reads (such as
-  # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)).
+  # buffered read will return it. It is only guaranteed to support a single
+  # byte, and only if ungetbyte or ungetc has not already been called on *ios*
+  # since the previous read of at least a single byte from *ios*. However, it
+  # can support additional bytes if there is space in the internal buffer to
+  # allow for it.
   #
   # ```ruby
   # f = File.new("testfile")   #=> #<File:testfile>
@@ -1767,6 +2623,28 @@ class IO < Object
   # f.ungetbyte(b)             #=> nil
   # f.getbyte                  #=> 0x38
   # ```
+  #
+  # If given an integer, only uses the lower 8 bits of the integer as the byte
+  # to push.
+  #
+  # ```ruby
+  # f = File.new("testfile")   #=> #<File:testfile>
+  # f.ungetbyte(0x102)         #=> nil
+  # f.getbyte                  #=> 0x2
+  # ```
+  #
+  # Calling this method prepends to the existing buffer, even if the method has
+  # already been called previously:
+  #
+  # ```ruby
+  # f = File.new("testfile")   #=> #<File:testfile>
+  # f.ungetbyte("ab")          #=> nil
+  # f.ungetbyte("cd")          #=> nil
+  # f.read(5)                  #=> "cdab8"
+  # ```
+  #
+  # Has no effect with unbuffered reads (such as
+  # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)).
   sig do
     params(
         arg0: T.any(String, Integer),
@@ -1775,12 +2653,12 @@ class IO < Object
   end
   def ungetbyte(arg0); end
 
-  # Pushes back one character (passed as a parameter) onto *ios*, such that a
-  # subsequent buffered character read will return it. Only one character may be
-  # pushed back before a subsequent read operation (that is, you will be able to
-  # read only the last of several characters that have been pushed back). Has no
-  # effect with unbuffered reads (such as
-  # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)).
+  # Pushes back characters (passed as a parameter) onto *ios*, such that a
+  # subsequent buffered read will return it. It is only guaranteed to support a
+  # single byte, and only if ungetbyte or ungetc has not already been called on
+  # *ios* since the previous read of at least a single byte from *ios*. However,
+  # it can support additional bytes if there is space in the internal buffer to
+  # allow for it.
   #
   # ```ruby
   # f = File.new("testfile")   #=> #<File:testfile>
@@ -1788,6 +2666,22 @@ class IO < Object
   # f.ungetc(c)                #=> nil
   # f.getc                     #=> "8"
   # ```
+  #
+  # If given an integer, the integer must represent a valid codepoint in the
+  # external encoding of *ios*.
+  #
+  # Calling this method prepends to the existing buffer, even if the method has
+  # already been called previously:
+  #
+  # ```ruby
+  # f = File.new("testfile")   #=> #<File:testfile>
+  # f.ungetc("ab")             #=> nil
+  # f.ungetc("cd")             #=> nil
+  # f.read(5)                  #=> "cdab8"
+  # ```
+  #
+  # Has no effect with unbuffered reads (such as
+  # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)).
   sig do
     params(
         arg0: String,
@@ -1796,20 +2690,21 @@ class IO < Object
   end
   def ungetc(arg0); end
 
-  # Writes the given strings to *ios*. The stream must be opened for writing.
-  # Arguments that are not a string will be converted to a string using `to_s`.
-  # Returns the number of bytes written in total.
+  # Writes each of the given `objects` to `self`, which must be opened for
+  # writing (see [Modes](#class-IO-label-Modes)); returns the total number bytes
+  # written; each of `objects` that is not a string is converted via method
+  # `to_s`:
   #
   # ```ruby
-  # count = $stdout.write("This is", " a test\n")
-  # puts "That was #{count} bytes of data"
+  # $stdout.write('Hello', ', ', 'World!', "\n") # => 14
+  # $stdout.write('foo', :bar, 2, "\n")          # => 8
   # ```
   #
-  # *produces:*
+  # Output:
   #
   # ```
-  # This is a test
-  # That was 15 bytes of data
+  # Hello, World!
+  # foobar2
   # ```
   sig do
     params(
@@ -1823,11 +2718,24 @@ class IO < Object
   # *length* bytes (defaulting to the rest of the file). binread ensures the
   # file is closed before returning. The open mode would be `"rb:ASCII-8BIT"`.
   #
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) class, a subprocess is
+  # created in the same way as
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open),
+  # and its output is returned. Consider to use
+  # [`File.binread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-binread)
+  # to disable the behavior of subprocess invocation.
+  #
   # ```ruby
-  # IO.binread("testfile")           #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
-  # IO.binread("testfile", 20)       #=> "This is line one\nThi"
-  # IO.binread("testfile", 20, 10)   #=> "ne one\nThis is line "
+  # File.binread("testfile")           #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
+  # File.binread("testfile", 20)       #=> "This is line one\nThi"
+  # File.binread("testfile", 20, 10)   #=> "ne one\nThis is line "
+  # IO.binread("| cat testfile")       #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
   # ```
+  #
+  # See also
+  # [`IO.read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-read) for
+  # details about `name` and open\_args.
   sig do
     params(
         name: String,
@@ -1842,6 +2750,18 @@ class IO < Object
   # [`IO.write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-write)
   # except opening the file in binary mode and ASCII-8BIT encoding
   # (`"wb:ASCII-8BIT"`).
+  #
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) class, a subprocess is
+  # created in the same way as
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open),
+  # and its output is returned. Consider to use
+  # [`File.binwrite`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-binwrite)
+  # to disable the behavior of subprocess invocation.
+  #
+  # See also
+  # [`IO.read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-read) for
+  # details about `name` and open\_args.
   sig do
     params(
         name: T.any(String, Pathname),
@@ -1900,8 +2820,17 @@ class IO < Object
   #
   # If no block is given, an enumerator is returned instead.
   #
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) class, a subprocess is
+  # created in the same way as
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open),
+  # and its output is returned. Consider to use
+  # [`File.foreach`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-foreach)
+  # to disable the behavior of subprocess invocation.
+  #
   # ```ruby
-  # IO.foreach("testfile") {|x| print "GOT ", x }
+  # File.foreach("testfile") {|x| print "GOT ", x }
+  # IO.foreach("| cat testfile") {|x| print "GOT ", x }
   # ```
   #
   # *produces:*
@@ -2033,10 +2962,13 @@ class IO < Object
   # [`read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read) ensures
   # the file is closed before returning.
   #
-  # If `name` starts with a pipe character (`"|"`), a subprocess is created in
-  # the same way as
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) class, a subprocess is
+  # created in the same way as
   # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open),
-  # and its output is returned.
+  # and its output is returned. Consider to use
+  # [`File.read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-read) to
+  # disable the behavior of subprocess invocation.
   #
   # ### Options
   #
@@ -2068,10 +3000,11 @@ class IO < Object
   # Examples:
   #
   # ```ruby
-  # IO.read("testfile")              #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
-  # IO.read("testfile", 20)          #=> "This is line one\nThi"
-  # IO.read("testfile", 20, 10)      #=> "ne one\nThis is line "
-  # IO.read("binfile", mode: "rb")   #=> "\xF7\x00\x00\x0E\x12"
+  # File.read("testfile")            #=> "This is line one\nThis is line two\nThis is line three\nAnd so on...\n"
+  # File.read("testfile", 20)        #=> "This is line one\nThi"
+  # File.read("testfile", 20, 10)    #=> "ne one\nThis is line "
+  # File.read("binfile", mode: "rb") #=> "\xF7\x00\x00\x0E\x12"
+  # IO.read("|ls -a")                #=> ".\n..\n"...
   # ```
   sig do
     params(
@@ -2093,12 +3026,22 @@ class IO < Object
   # Reads the entire file specified by *name* as individual lines, and returns
   # those lines in an array. Lines are separated by *sep*.
   #
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) class, a subprocess is
+  # created in the same way as
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open),
+  # and its output is returned. Consider to use
+  # [`File.readlines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-readlines)
+  # to disable the behavior of subprocess invocation.
+  #
   # ```ruby
-  # a = IO.readlines("testfile")
+  # a = File.readlines("testfile")
   # a[0]   #=> "This is line one\n"
   #
-  # b = IO.readlines("testfile", chomp: true)
+  # b = File.readlines("testfile", chomp: true)
   # b[0]   #=> "This is line one"
+  #
+  # IO.readlines("|ls -a")     #=> [".\n", "..\n", ...]
   # ```
   #
   # If the last argument is a hash, it's the keyword argument to open.
@@ -2114,7 +3057,7 @@ class IO < Object
   #
   # See also
   # [`IO.read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-read) for
-  # details about open\_args.
+  # details about `name` and open\_args.
   sig do
     params(
         name: T.any(String, Tempfile, File, Pathname),
@@ -2366,21 +3309,15 @@ class IO < Object
   end
   def self.sysopen(path, mode=T.unsafe(nil), perm=T.unsafe(nil)); end
 
-  # Try to convert *obj* into an
-  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), using
-  # [`to_io`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-to_io)
-  # method. Returns converted
-  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) or `nil` if *obj* cannot
-  # be converted for any reason.
+  # Attempts to convert `object` into an
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object via method
+  # `to_io`; returns the new [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
+  # object if successful, or `nil` otherwise:
   #
   # ```ruby
-  # IO.try_convert(STDOUT)     #=> STDOUT
-  # IO.try_convert("STDOUT")   #=> nil
-  #
-  # require 'zlib'
-  # f = open("/tmp/zz.gz")       #=> #<File:/tmp/zz.gz>
-  # z = Zlib::GzipReader.open(f) #=> #<Zlib::GzipReader:0x81d8744>
-  # IO.try_convert(z)            #=> #<File:/tmp/zz.gz>
+  # IO.try_convert(STDOUT)   # => #<IO:<STDOUT>>
+  # IO.try_convert(ARGF)     # => #<IO:<STDIN>>
+  # IO.try_convert('STDOUT') # => nil
   # ```
   sig do
     params(
@@ -2396,11 +3333,21 @@ class IO < Object
   # ensures the file is closed before returning. If *offset* is not given in
   # write mode, the file is truncated. Otherwise, it is not truncated.
   #
+  # If `name` starts with a pipe character (`"|"`) and the receiver is the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) class, a subprocess is
+  # created in the same way as
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open),
+  # and its output is returned. Consider to use
+  # [`File.write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-write)
+  # to disable the behavior of subprocess invocation.
+  #
   # ```ruby
-  # IO.write("testfile", "0123456789", 20)  #=> 10
+  # File.write("testfile", "0123456789", 20)  #=> 10
   # # File could contain:  "This is line one\nThi0123456789two\nThis is line three\nAnd so on...\n"
-  # IO.write("testfile", "0123456789")      #=> 10
+  # File.write("testfile", "0123456789")      #=> 10
   # # File would now read: "0123456789"
+  # IO.write("|tr a-z A-Z", "abc")            #=> 3
+  # # Prints "ABC" to the standard output
   # ```
   #
   # If the last argument is a hash, it specifies options for the internal
@@ -2431,6 +3378,11 @@ class IO < Object
   #
   #     Specifies arguments for open() as an array. This key can not be used in
   #     combination with other keys.
+  #
+  #
+  # See also
+  # [`IO.read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-read) for
+  # details about `name` and open\_args.
   sig do
     params(
         name: T.any(String, Tempfile, File, Pathname),
@@ -2518,6 +3470,9 @@ class IO < Object
   # See
   # [`IO.readlines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-readlines)
   # for details about getline\_args.
+  #
+  # Alias for:
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each)
   sig do
     params(
         sep: String,
@@ -2535,43 +3490,47 @@ class IO < Object
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
-  # Returns true if *ios* is at end of file that means there are no more data to
-  # read. The stream must be opened for reading or an
-  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) will be
-  # raised.
+  # Returns `true` if the stream is positioned at its end, `false` otherwise;
+  # see [Position](#class-IO-label-Position):
   #
   # ```ruby
-  # f = File.new("testfile")
-  # dummy = f.readlines
-  # f.eof   #=> true
+  # f = File.open('t.txt')
+  # f.eof           # => false
+  # f.seek(0, :END) # => 0
+  # f.eof           # => true
   # ```
   #
-  # If *ios* is a stream such as pipe or socket,
-  # [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
-  # blocks until the other end sends some data or closes it.
+  # Raises an exception unless the stream is opened for reading; see
+  # [Mode](#class-IO-label-Mode).
+  #
+  # If `self` is a stream such as pipe or socket, this method blocks until the
+  # other end sends some data or closes it:
   #
   # ```ruby
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.close }
-  # r.eof?  #=> true after 1 second blocking
+  # r.eof? # => true # After 1-second wait.
   #
   # r, w = IO.pipe
   # Thread.new { sleep 1; w.puts "a" }
-  # r.eof?  #=> false after 1 second blocking
+  # r.eof?  # => false # After 1-second wait.
   #
   # r, w = IO.pipe
   # r.eof?  # blocks forever
   # ```
   #
-  # Note that
-  # [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
-  # reads data to the input byte buffer. So
+  # Note that this method reads data to the input byte buffer. So
   # [`IO#sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread)
   # may not behave as you intend with
   # [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F),
   # unless you call
   # [`IO#rewind`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-rewind)
   # first (which is not available for some streams).
+  #
+  # I#eof? is an alias for
+  # [`IO#eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof).
+  #
+  # Alias for: [`eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof)
   sig {returns(T::Boolean)}
   def eof?(); end
 
@@ -2594,6 +3553,19 @@ class IO < Object
   end
   def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
+  # Returns the integer file descriptor for the stream:
+  #
+  # ```ruby
+  # $stdin.fileno             # => 0
+  # $stdout.fileno            # => 1
+  # $stderr.fileno            # => 2
+  # File.open('t.txt').fileno # => 10
+  # ```
+  #
+  # [`IO#to_i`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-to_i) is an
+  # alias for
+  # [`IO#fileno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fileno).
+  #
   # Alias for:
   # [`fileno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fileno)
   sig {returns(Integer)}

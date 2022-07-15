@@ -2830,8 +2830,6 @@ class IO
 
   def ready?(); end
 
-  def set_encoding_by_bom(); end
-
   def wait(*arg); end
 
   def wait_priority(*arg); end
