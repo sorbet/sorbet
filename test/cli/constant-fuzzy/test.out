@@ -55,8 +55,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `IO`
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L116: `IO` defined here
-     116 |class IO < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#L771: `IO` defined here
+     771 |class IO < Object
           ^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://srb.help/5002
