@@ -689,6 +689,12 @@ class Enumerator::Lazy < Enumerator
   sig { returns(T::Enumerator::Lazy[Elem]) }
   def drop_while(&blk); end
 
+  # Returns a non-lazy
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html)
+  # converted from the lazy enumerator.
+  sig { returns(T::Enumerator[Elem]) }
+  def eager; end
+
   # Similar to
   # [`Object#to_enum`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-to_enum),
   # except it returns a lazy enumerator. This makes it easy to define
