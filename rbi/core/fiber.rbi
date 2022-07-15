@@ -71,13 +71,42 @@
 # 1000000
 # FiberError: dead fiber called
 # ```
+#
+# ## Non-blocking Fibers
+#
+# The concept of *non-blocking fiber* was introduced in Ruby 3.0. A non-blocking
+# fiber, when reaching a operation that would normally block the fiber (like
+# `sleep`, or wait for another process or I/O) will yield control to other
+# fibers and allow the *scheduler* to handle blocking and waking up (resuming)
+# this fiber when it can proceed.
+#
+# For a [`Fiber`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html) to behave as
+# non-blocking, it need to be created in
+# [`Fiber.new`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-new)
+# with `blocking: false` (which is the default), and
+# [`Fiber.scheduler`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-scheduler)
+# should be set with
+# [`Fiber.set_scheduler`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-set_scheduler).
+# If
+# [`Fiber.scheduler`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-scheduler)
+# is not set in the current thread, blocking and non-blocking fibers' behavior
+# is identical.
+#
+# Ruby doesn't provide a scheduler class: it is expected to be implemented by
+# the user and correspond to
+# [`Fiber::SchedulerInterface`](https://docs.ruby-lang.org/en/2.7.0/Fiber/SchedulerInterface.html).
+#
+# There is also
+# [`Fiber.schedule`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-schedule)
+# method, which is expected to immediately perform the given block in a
+# non-blocking manner. Its actual implementation is up to the scheduler.
 class Fiber < Object
   sig {returns(Fiber)}
   def current; end
 
   # Returns true if the fiber can still be resumed (or transferred to). After
-  # finishing execution of the fiber block this method will always return false.
-  # You need to `require 'fiber'` before using this method.
+  # finishing execution of the fiber block this method will always return
+  # `false`.
   sig {returns(T::Boolean)}
   def alive?; end
 
@@ -103,8 +132,6 @@ class Fiber < Object
   # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
   def resume(*_); end
 
-  # Returns fiber information string.
-  #
   # Also aliased as:
   # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-inspect)
   def to_s; end
