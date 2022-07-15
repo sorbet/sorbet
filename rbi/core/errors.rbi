@@ -29,11 +29,10 @@
 class ArgumentError < StandardError
 end
 
-# The exception class which will be raised when pushing into a closed
-# [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html). See
-# [`Queue#close`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-close)
+# The exception class which will be raised when pushing into a closed Queue. See
+# [`Thread::Queue#close`](https://docs.ruby-lang.org/en/2.7.0/Thread/Queue.html#method-i-close)
 # and
-# [`SizedQueue#close`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-close).
+# [`Thread::SizedQueue#close`](https://docs.ruby-lang.org/en/2.7.0/Thread/SizedQueue.html#method-i-close).
 class ClosedQueueError < StopIteration
 end
 
@@ -82,6 +81,25 @@ end
 # FrozenError: can't modify frozen Array
 # ```
 class FrozenError < RuntimeError
+  # Construct a new
+  # [`FrozenError`](https://docs.ruby-lang.org/en/2.7.0/FrozenError.html)
+  # exception. If given the *receiver* parameter may subsequently be examined
+  # using the
+  # [`FrozenError#receiver`](https://docs.ruby-lang.org/en/2.7.0/FrozenError.html#method-i-receiver)
+  # method.
+  #
+  # ```ruby
+  # a = [].freeze
+  # raise FrozenError.new("can't modify frozen array", receiver: a)
+  # ```
+  sig { params(msg: T.untyped, receiver: T.untyped).void }
+  def initialize(msg = nil, receiver: nil); end
+
+  # Return the receiver associated with this
+  # [`FrozenError`](https://docs.ruby-lang.org/en/2.7.0/FrozenError.html)
+  # exception.
+  sig { returns(T.untyped) }
+  def receiver; end
 end
 
 # Raised when the given index is invalid.
