@@ -5,8 +5,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Enumerator::Yielder`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L887: `Enumerator::Yielder` defined here
-     887 |class Enumerator::Yielder < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#L992: `Enumerator::Yielder` defined here
+     992 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Did you mean `File`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `File`
