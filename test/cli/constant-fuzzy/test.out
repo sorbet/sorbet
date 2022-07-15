@@ -41,9 +41,9 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Set`
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L60: `Set` defined here
-    60 |class Set < Object
-        ^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#L400: `Set` defined here
+     400 |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
   Did you mean `Net`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Net`
      3 |Yieldr.foo(Intege, Int)
