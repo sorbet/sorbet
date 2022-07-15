@@ -83,7 +83,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.b>
   end
 end
-# -- test/testdata/packager/extra_package_paths/extra_slash/project/baz/package/e.rb --
+# -- test/testdata/packager/extra_package_paths/extra_slash/Project/Baz/Package/E.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
     class <emptyTree>::<C E><<C <todo sym>>> < (::<todo sym>)
@@ -101,7 +101,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 end
-# -- test/testdata/packager/extra_package_paths/extra_slash/project/foo/d.rb --
+# -- test/testdata/packager/extra_package_paths/extra_slash/Project/Foo/D.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Foo>::<C D><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -117,7 +117,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.d>
   end
 end
-# -- test/testdata/packager/extra_package_paths/extra_slash/project/foo_bar/z.rb --
+# -- test/testdata/packager/extra_package_paths/extra_slash/Project/Foo_bar/Z.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C FooBar>::<C Z><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||
