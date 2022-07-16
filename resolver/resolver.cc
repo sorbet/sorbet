@@ -1927,7 +1927,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
     // `ResolveCastItem` is not simple.
-    [[nodiscard]] static bool tryResolveSimpleClassCastItem(core::Context ctx, ResolveCastItem &job) {
+    [[nodiscard]] static bool tryResolveSimpleClassCastItem(const core::GlobalState &gs, ResolveCastItem &job) {
         if (!ast::isa_tree<ast::ConstantLit>(*job.typeArg)) {
             return false;
         }
@@ -1937,23 +1937,24 @@ class ResolveTypeMembersAndFieldsWalk {
             return false;
         }
 
-        auto data = lit.symbol.asClassOrModuleRef().data(ctx);
+        auto data = lit.symbol.asClassOrModuleRef().data(gs);
 
         // A class with type members is not simple.
         if (!data->typeMembers().empty()) {
             return false;
         }
 
-        resolveCastItem(ctx, job);
+        resolveCastItem(gs, job);
         return true;
     }
 
     // Resolve a potentially more complex cast (e.g., may reference type member or alias).
-    static void resolveCastItem(core::Context ctx, ResolveCastItem &job) {
+    static void resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job) {
         ParsedSig emptySig;
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
+        auto ctx = core::Context(gs, job.owner.enclosingClass(gs), job.file);
         job.cast->type = TypeSyntax::getResultType(
             ctx, *job.typeArg, emptySig,
             TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
@@ -2749,11 +2750,7 @@ public:
 
                     ResolveCastItem item;
                     item.file = ctx.file;
-
-                    // Compute the containing class when translating the type,
-                    // as there's a very good chance this has been called from a
-                    // method context.
-                    item.owner = ctx.owner.enclosingClass(ctx);
+                    item.owner = ctx.owner;
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.getPosArg(1)));
                     auto expr = std::move(send.getPosArg(0));
@@ -2768,7 +2765,7 @@ public:
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).getPosArg(0);
 
                     // We should be able to resolve simple casts immediately.
-                    if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
+                    if (!tryResolveSimpleClassCastItem(ctx.state, item)) {
                         todoResolveCastItems_.emplace_back(move(item));
                     }
 
@@ -3064,8 +3061,7 @@ public:
         // Resolve the remaining casts and fields.
         for (auto &threadTodos : combinedTodoResolveCastItems) {
             for (auto &job : threadTodos) {
-                core::Context ctx(gs, job.owner, job.file);
-                resolveCastItem(ctx, job);
+                resolveCastItem(gs, job);
             }
         }
         if constexpr (!isConstStateType) {
