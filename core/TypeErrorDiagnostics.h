@@ -21,6 +21,9 @@ public:
 
     static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
                                     const TypePtr &got);
+
+    static void insertUntypedTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
+                                           core::Loc replaceLoc);
 };
 
 } // namespace sorbet::core

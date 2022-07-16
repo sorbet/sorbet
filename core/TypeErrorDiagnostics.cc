@@ -1,4 +1,5 @@
 #include "core/TypeErrorDiagnostics.h"
+#include "absl/strings/str_join.h"
 
 using namespace std;
 
@@ -83,6 +84,31 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
                                                          core::Symbols::T_Types_Base().data(gs)->externalType(),
                                                          expectedType, UntypedMode::AlwaysCompatible)) {
             e.replaceWith("Wrap in `T::Utils.coerce`", loc, "T::Utils.coerce({})", loc.source(gs).value());
+        }
+    }
+}
+
+void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
+                                                      core::Loc replaceLoc) {
+    // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
+    // if we're already looking at `T::Array` instead.
+    auto typePrefixSym = klass.forwarderForBuiltinGeneric();
+    if (!typePrefixSym.exists()) {
+        typePrefixSym = klass;
+    }
+
+    auto loc = replaceLoc;
+    if (loc.exists()) {
+        if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
+            // Hash is special because it has arity 3 but you're only supposed to write the first 2
+            e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
+        } else {
+            auto numTypeArgs = klass.data(gs)->typeArity(gs);
+            vector<string> untypeds;
+            for (int i = 0; i < numTypeArgs; i++) {
+                untypeds.emplace_back("T.untyped");
+            }
+            e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs), absl::StrJoin(untypeds, ", "));
         }
     }
 }

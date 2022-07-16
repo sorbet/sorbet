@@ -21,9 +21,9 @@ end
 
 sig do
   params(
-    a: Box,
+    a: Box[T.untyped],
     #  ^^^ error: Malformed type declaration. Generic class without type arguments `Box`
-    b: IntBox,
+    b: IntBox[T.untyped],
     #  ^^^^^^ error: Malformed type declaration. Generic class without type arguments `IntBox`
     c: IntBox[String],
     d: T::Array[T.untyped],
