@@ -147,6 +147,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
                 // For backwards compatibility, instantiate stdlib generics
                 // with T.untyped.
                 targs.emplace_back(Types::untyped(gs, ref));
+                flags.externalTypeImplicitlyUntyped = true;
             } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
                 // Default fixed or covariant parameters to their upper
                 // bound.
@@ -156,6 +157,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
                 // this will behave a bit like a unification variable with
                 // Types::glb.
                 targs.emplace_back(Types::untyped(gs, ref));
+                flags.externalTypeImplicitlyUntyped = true;
             } else {
                 // The remaining case is a contravariant parameter, which
                 // gets defaulted to its lower bound.

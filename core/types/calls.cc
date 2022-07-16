@@ -1887,6 +1887,20 @@ public:
             }
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
+        if (!args.suppressErrors && attachedClass.data(gs)->flags.externalTypeImplicitlyUntyped) {
+            auto err = attachedClass.isLegacyStdlibGeneric() ? core::errors::Infer::GenericClassWithoutTypeArgsStdlib
+                                                             : core::errors::Infer::GenericClassWithoutTypeArgs;
+            auto recvLoc = args.receiverLoc();
+            auto useRecvLoc = recvLoc.exists() && !recvLoc.empty();
+            auto errLoc = useRecvLoc ? recvLoc : args.callLoc();
+            if (auto e = gs.beginError(errLoc, err)) {
+                e.setHeader("Specify explicit type arguments to create an instance of the generic class `{}`",
+                            attachedClass.show(gs));
+                if (useRecvLoc) {
+                    TypeErrorDiagnostics::insertUntypedTypeArguments(gs, e, attachedClass, recvLoc);
+                }
+            }
+        }
         DispatchArgs innerArgs{Names::initialize(), args.locs,          args.numPosArgs,
                                args.args,           instanceTy,         {instanceTy, args.fullType.origins},
                                instanceTy,          args.block,         args.originForUninitialized,
