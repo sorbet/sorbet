@@ -1646,9 +1646,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     // variable came from some other source (e.g. a function argument)
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    e.replaceWith(fmt::format("Initialize as `{}`", suggest.show(ctx)), cur.origins[0],
-                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(),
-                                                  suggest.show(ctx));
+                                    auto replacement = suggest.show(ctx, core::ShowOptions().withShowForRBI());
+                                    e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0],
+                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(), replacement);
                                 } else {
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));
