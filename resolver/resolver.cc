@@ -3684,7 +3684,7 @@ public:
 };
 
 template <typename StateType>
-ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+vector<ast::ParsedFile> resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     static_assert(std::is_same_v<remove_const_t<StateType>, core::GlobalState>);
     constexpr bool isConstStateType = std::is_const_v<StateType>;
 
@@ -3798,10 +3798,7 @@ ast::ParsedFilesOrCancelled runIncrementalImpl(StateType &gs, vector<ast::Parsed
     verifyLinearizationComputed(gs);
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
+    sanityCheck(gs, result);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();
@@ -3831,10 +3828,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     }
 
     auto result = resolveSigs(gs, std::move(trees), workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
+    sanityCheck(gs, result);
 
     return result;
 }
