@@ -26,11 +26,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 } // namespace
 
 ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, core::SymbolRef blameSymbol) {
-    auto allowSelfType = true;
-    auto allowRebind = false;
-    auto allowTypeMember = true;
-    return TypeSyntax::parseSig(ctx, sigSend, nullptr,
-                                TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, blameSymbol});
+    auto args = TypeSyntaxArgs{
+        /* allowSelfType */ true,
+        /* allowRebind */ false,
+        /* allowTypeMember */ true,
+        /* allowUnspecifiedTypeParameter */ false,
+        blameSymbol,
+    };
+    return TypeSyntax::parseSig(ctx, sigSend, nullptr, args);
 }
 
 ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
@@ -647,10 +650,14 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             }
             auto fnd = sig.findTypeArgByName(arr->asSymbol());
             if (!fnd.type) {
-                if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Unspecified type parameter");
+                if (args.allowUnspecifiedTypeParameter) {
+                    return TypeSyntax::ResultType{core::Types::todo(), core::Symbols::noClassOrModule()};
+                } else {
+                    if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("Unspecified type parameter");
+                    }
+                    return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
                 }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             return TypeSyntax::ResultType{fnd.type, core::Symbols::noClassOrModule()};
         }

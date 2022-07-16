@@ -1496,8 +1496,15 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             },
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
+
                 auto castType = core::Types::instantiate(ctx, c.type, klass.data(ctx)->typeMembers(),
                                                          klass.data(ctx)->selfTypeArgs(ctx));
+                if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
+                    // ^ This mimics the check in LoadArg's call to argumentTypeAsSeenByImplementation
+                    // It instantiates any `T.type_parameter(:U)`'s in the type (which are only
+                    // valid in a method body if the method's signature is generic).
+                    castType = core::Types::instantiate(ctx, castType, constr);
+                }
 
                 tp.type = castType;
                 tp.origins.emplace_back(ctx.locAt(bind.loc));

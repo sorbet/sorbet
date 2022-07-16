@@ -8,6 +8,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
+#include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
@@ -1871,6 +1872,11 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveMethodAliasItem> todoMethodAliasItems;
     };
 
+    struct ResolveTypeMembersAndFieldsResult {
+        vector<ast::ParsedFile> trees;
+        vector<ResolveCastItem> todoResolveCastItems;
+    };
+
     vector<ResolveAssignItem> todoAssigns_;
     vector<ResolveAttachedClassItem> todoAttachedClassItems_;
     vector<core::SymbolRef> todoUntypedResultTypes_;
@@ -1944,20 +1950,35 @@ class ResolveTypeMembersAndFieldsWalk {
             return false;
         }
 
-        resolveCastItem(gs, job);
-        return true;
+        bool lastTry = false;
+        return resolveCastItem(gs, job, lastTry);
     }
 
     // Resolve a potentially more complex cast (e.g., may reference type member or alias).
-    static void resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job) {
+    [[nodiscard]] static bool resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job, bool lastTry) {
         ParsedSig emptySig;
+        // Owner might be a class, because we haven't made the <static-init> methods yet.
+        if (job.owner.isMethod()) {
+            for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
+                const auto &data = typeArg.data(gs);
+                auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
+                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{data->loc(), name, data->resultType});
+            }
+        }
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
+        auto allowUnspecifiedTypeParameter = !lastTry;
         auto ctx = core::Context(gs, job.owner.enclosingClass(gs), job.file);
-        job.cast->type = TypeSyntax::getResultType(
-            ctx, *job.typeArg, emptySig,
-            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
+        auto type = TypeSyntax::getResultType(ctx, *job.typeArg, emptySig,
+                                              TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                             allowUnspecifiedTypeParameter, core::Symbols::noSymbol()});
+        if (type == core::Types::todo()) {
+            return false;
+        }
+
+        job.cast->type = move(type);
+        return true;
     }
 
     // Attempts to resolve the type of the given field. Returns `false` if the cast is not yet resolved.
@@ -2164,8 +2185,11 @@ class ResolveTypeMembersAndFieldsWalk {
                     auto allowSelfType = true;
                     auto allowRebind = false;
                     auto allowTypeMember = false;
-                    core::TypePtr resTy = TypeSyntax::getResultType(
-                        ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+                    auto allowUnspecifiedTypeParameter = false;
+                    core::TypePtr resTy =
+                        TypeSyntax::getResultType(ctx, value, emptySig,
+                                                  TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                                 allowUnspecifiedTypeParameter, lhs});
 
                     switch (key->asSymbol().rawId()) {
                         case core::Names::fixed().rawId():
@@ -2300,9 +2324,10 @@ class ResolveTypeMembersAndFieldsWalk {
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
-        lhs.setResultType(ctx,
-                          TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
-                                                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs}));
+        auto allowUnspecifiedTypeParameter = false;
+        lhs.setResultType(ctx, TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
+                                                         TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                                        allowUnspecifiedTypeParameter, lhs}));
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
@@ -2902,7 +2927,7 @@ public:
     }
 
     template <typename StateType>
-    static vector<ast::ParsedFile> run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    static ResolveTypeMembersAndFieldsResult run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
         static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
         constexpr bool isConstStateType = is_const_v<StateType>;
         Timer timeit(gs.tracer(), "resolver.type_params");
@@ -3059,9 +3084,17 @@ public:
         }
 
         // Resolve the remaining casts and fields.
+        vector<ResolveCastItem> stillPendingTodoResolveCastItems;
         for (auto &threadTodos : combinedTodoResolveCastItems) {
             for (auto &job : threadTodos) {
-                resolveCastItem(gs, job);
+                auto lastTry = false;
+                if (!resolveCastItem(gs, job, lastTry)) {
+                    // Some cast items, like those using `T.type_parameter(:U)` have to resolve
+                    // after resolveSigs.
+                    // We're guaranteed that resolveSigs won't depend on these, because things like
+                    // `T.type_parameter(:U)` are not valid in static fields and type aliases.
+                    stillPendingTodoResolveCastItems.emplace_back(move(job));
+                }
             }
         }
         if constexpr (!isConstStateType) {
@@ -3091,7 +3124,20 @@ public:
             }
         }
 
-        return combinedFiles;
+        return {move(combinedFiles), move(stillPendingTodoResolveCastItems)};
+    }
+
+    static void resolvePendingCastItems(const core::GlobalState &gs, vector<ResolveCastItem> &todoResolveCastItems) {
+        for (auto &job : todoResolveCastItems) {
+            auto lastTry = true;
+            if (!resolveCastItem(gs, job, lastTry)) {
+                auto errLoc = core::Loc(job.file, job.cast->loc);
+                if (auto e = gs.beginError(errLoc, core::errors::Internal::InternalError)) {
+                    e.setHeader("Invariant failed: cast items should always resolve on final try");
+                    e.addErrorNote("Please report a bug to the Sorbet team");
+                }
+            }
+        }
     }
 };
 
@@ -3792,8 +3838,9 @@ ast::ParsedFilesOrCancelled runIncrementalImpl(StateType &gs, vector<ast::Parsed
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(trees), *workers);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
+    auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
+    ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
@@ -3818,12 +3865,13 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+        return ast::ParsedFilesOrCancelled::cancel(move(rtmafResult.trees), workers);
     }
 
-    auto result = resolveSigs(gs, std::move(trees), workers);
+    auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
+    ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
 
     return result;

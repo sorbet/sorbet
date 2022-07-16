@@ -63,22 +63,23 @@ struct TypeSyntaxArgs {
     const bool allowSelfType = false;
     const bool allowRebind = false;
     const bool allowTypeMember = false;
+    const bool allowUnspecifiedTypeParameter = false;
     const core::SymbolRef untypedBlame;
 
     TypeSyntaxArgs withoutRebind() const {
-        return TypeSyntaxArgs{allowSelfType, false, allowTypeMember, untypedBlame};
+        return TypeSyntaxArgs{allowSelfType, false, allowTypeMember, allowUnspecifiedTypeParameter, untypedBlame};
     }
 
     TypeSyntaxArgs withRebind() const {
-        return TypeSyntaxArgs{allowSelfType, true, allowTypeMember, untypedBlame};
+        return TypeSyntaxArgs{allowSelfType, true, allowTypeMember, allowUnspecifiedTypeParameter, untypedBlame};
     }
 
     TypeSyntaxArgs withoutSelfType() const {
-        return TypeSyntaxArgs{false, allowRebind, allowTypeMember, untypedBlame};
+        return TypeSyntaxArgs{false, allowRebind, allowTypeMember, allowUnspecifiedTypeParameter, untypedBlame};
     }
 
     TypeSyntaxArgs withoutTypeMember() const {
-        return TypeSyntaxArgs{allowSelfType, allowRebind, false, untypedBlame};
+        return TypeSyntaxArgs{allowSelfType, allowRebind, false, allowUnspecifiedTypeParameter, untypedBlame};
     }
 };
 
