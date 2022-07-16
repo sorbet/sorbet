@@ -1859,7 +1859,7 @@ class ResolveTypeMembersAndFieldsWalk {
         core::NameRef fromName;
     };
 
-    struct ResolveTypeMembersAndFieldsResult {
+    struct ResolveTypeMembersAndFieldsWorkerResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
         vector<ResolveAttachedClassItem> todoAttachedClassItems;
@@ -2911,7 +2911,7 @@ public:
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsResult>>(trees.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsWorkerResult>>(trees.size());
         for (auto &tree : trees) {
             inputq->push(move(tree), 1);
         }
@@ -2920,7 +2920,7 @@ public:
         workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
             Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
             ResolveTypeMembersAndFieldsWalk walk;
-            ResolveTypeMembersAndFieldsResult output;
+            ResolveTypeMembersAndFieldsWorkerResult output;
             ast::ParsedFile job;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
@@ -2956,7 +2956,7 @@ public:
         vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
 
         {
-            ResolveTypeMembersAndFieldsResult threadResult;
+            ResolveTypeMembersAndFieldsWorkerResult threadResult;
             for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
