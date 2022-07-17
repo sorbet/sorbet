@@ -299,8 +299,8 @@ class LocalNameInserter {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
 
                 // TODO(aprocter): is it necessary to duplicate the hash here?
-                kwArgsHash = ast::MK::Send1(original.loc, ast::MK::Constant(original.loc, core::Symbols::Magic()),
-                                            core::Names::toHashDup(), original.loc.copyWithZeroLength(),
+                kwArgsHash = ast::MK::Send1(original.loc, ast::MK::Magic(original.loc), core::Names::toHashDup(),
+                                            original.loc.copyWithZeroLength(),
                                             ast::make_expression<ast::Local>(original.loc, arg.arg));
                 if (!kwArgKeyEntries.empty()) {
                     // TODO(aprocter): it might make more sense to replace this with an InsSeq that calls
@@ -372,7 +372,7 @@ class LocalNameInserter {
             }
             original.addPosArg(std::move(boxedKwArgs));
 
-            original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
+            original.recv = ast::MK::Magic(original.loc);
 
             if (originalBlock != nullptr) {
                 // <call-with-splat> and "do"
@@ -408,7 +408,7 @@ class LocalNameInserter {
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
 
-            original.recv = ast::MK::Constant(original.loc, core::Symbols::Magic());
+            original.recv = ast::MK::Magic(original.loc);
             original.fun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
