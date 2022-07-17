@@ -1738,16 +1738,11 @@ public:
 class T_attached_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        // We don't currently have a way to get the `self` of the method that we're currently type
-        // checking (we only have things that can be seen directly from this single dispatch: the
-        // receiver and the args' types). This means that currently we can't do better than using
-        // `T.untyped` here.
+        // Most syntactically visible calls to `T.attached_class` should be handled by the
+        // `<Magic>.attached_class` intrisnic.
         //
-        // In the future, we might want to fix this similar to how we did with `<Magic>.<self-new>`,
-        // by e.g. rewriting `T.attached_class` to `<Magic>.<attached-class>(<self>)`, which would
-        // then let us have access to `self` in this intrinsic.
-        //
-        // https://github.com/sorbet/sorbet/issues/4352
+        // This intrinsic remains just on the off chance that people misuse `T.attached_class` as a
+        // value some other way (e.g., t = T; t.attached_class).
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_attached_class;
@@ -2733,6 +2728,32 @@ public:
         res.main.sendTp = returnTy;
     }
 } Magic_selfNew;
+
+class Magic_attachedClass : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            res.returnType = make_type<MetaType>(Types::untypedUntracked());
+            return;
+        }
+
+        // args[0] is `<self>`
+
+        auto selfTy = *args.args[0];
+        auto mustExist = true;
+        auto self = unwrapSymbol(gs, selfTy.type, mustExist);
+
+        if (self.data(gs)->isSingletonClass(gs)) {
+            auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+            ENFORCE(attachedClass.exists());
+            res.returnType = make_type<MetaType>(make_type<SelfTypeParam>(attachedClass));
+        } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
+            if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
+                e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
+            }
+        }
+    }
+} Magic_attachedClass;
 
 class Magic_checkAndAnd : public IntrinsicMethod {
 public:
@@ -3866,6 +3887,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashDup(), &Magic_toHash},

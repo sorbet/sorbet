@@ -355,6 +355,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Send &s) {
                 LocalRef recv;
 
+                // For performance, we do the name check first (single integer comparison in the
+                // common case)
                 if (s.fun == core::Names::absurd() && sendRecvIsT(s)) {
                     if (s.hasKwArgs()) {
                         if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
@@ -396,6 +398,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
                     ret = current;
                     return;
+                } else if (s.fun == core::Names::attachedClass() && sendRecvIsT(s)) {
+                    s.recv = ast::MK::Magic(s.recv.loc());
+                    s.addPosArg(ast::MK::Self(s.recv.loc()));
                 }
 
                 recv = cctx.newTemporary(core::Names::statTemp());

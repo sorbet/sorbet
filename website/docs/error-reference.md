@@ -3744,6 +3744,38 @@ end
 Or if it's imperative to continue using `is_a?`, change the type to
 `T.all(Kernel, Elem)` and/or add an upper bound of `Kernel` to the type member.
 
+## 7040
+
+`T.attached_class` is a type annotation that refers to instances of the current
+singleton class. For example, a method like this makes sense, because it uses
+`T.attached_class` on a singleton class method (the `self.` prefix):
+
+```ruby
+class A
+  sig {returns(T.attached_class)}
+  def self.make
+    x = T.let(new, T.attached_class)
+  end
+end
+```
+
+Meanwhile, this snippet doesn't make sense, because `foo` is already an instance
+method—there is no attached class to speak of for non-singleton classes:
+
+```ruby
+class A
+  sig {returns(T.attached_class)} # error!
+  def foo
+    x = T.let(new, T.attached_class) # error!
+  end
+end
+```
+
+For more information see the [`T.attached_class`](attached-class.md) docs.
+
+It may also be interesting to compare and contrast
+[`T.self_type`](self-type.md).
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
