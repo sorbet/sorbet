@@ -815,16 +815,16 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
     auto ctxOwnerData = ctx.owner.asClassOrModuleRef().data(ctx);
 
     TypeSyntax::ResultType result;
-    typecase(
-        expr,
-        [&](const ast::Array &arr) {
+        if (ast::isa_tree<ast::Array>(expr)) {
+            const auto &arr = ast::cast_tree_nonnull<ast::Array>(expr);
             vector<core::TypePtr> elems;
             for (auto &el : arr.elems) {
                 elems.emplace_back(getResultTypeWithSelfTypeParams(ctx, el, sigBeingParsed, args.withoutSelfType()));
             }
             result.type = core::make_type<core::TupleType>(move(elems));
-        },
-        [&](const ast::Hash &hash) {
+        }
+        else if (ast::isa_tree<ast::Hash>(expr)) {
+            const auto &hash = ast::cast_tree_nonnull<ast::Hash>(expr);
             vector<core::TypePtr> keys;
             vector<core::TypePtr> values;
 
@@ -843,14 +843,15 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                 }
             }
             result.type = core::make_type<core::ShapeType>(move(keys), move(values));
-        },
-        [&](const ast::ConstantLit &i) {
+        }
+        else if (ast::isa_tree<ast::ConstantLit>(expr)) {
+            const auto &i = ast::cast_tree_nonnull<ast::ConstantLit>(expr);
             auto maybeAliased = i.symbol;
             ENFORCE(maybeAliased.exists());
 
             if (maybeAliased.isTypeAlias(ctx)) {
                 result.type = maybeAliased.resultType(ctx);
-                return;
+                return result;
             }
 
             // Only T::Enum singletons are allowed to be in type syntax because there is only one
@@ -866,7 +867,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                 auto resultType = core::cast_type_nonnull<core::ClassType>(maybeAliased.resultType(ctx));
                 if (resultType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
                     result.type = maybeAliased.resultType(ctx);
-                    return;
+                    return result;
                 }
             }
 
@@ -986,8 +987,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                 }
                 result.type = core::Types::untypedUntracked();
             }
-        },
-        [&](const ast::Send &s) {
+        }
+        else if (ast::isa_tree<ast::Send>(expr)) {
+            const auto &s = ast::cast_tree_nonnull<ast::Send>(expr);
             if (isTProc(ctx, &s)) {
                 auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
                 if (sig.bind.exists()) {
@@ -1021,12 +1023,12 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                         e.setHeader("Malformed T.proc: Too many arguments (max `{}`)", core::Symbols::MAX_PROC_ARITY);
                     }
                     result.type = core::Types::untypedUntracked();
-                    return;
+                    return result;
                 }
                 auto sym = core::Symbols::Proc(arity);
 
                 result.type = core::make_type<core::AppliedType>(sym, move(targs));
-                return;
+                return result;
             }
 
             auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv);
@@ -1035,11 +1037,11 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
                 result.type = core::Types::untypedUntracked();
-                return;
+                return result;
             }
             if (recvi->symbol == core::Symbols::T()) {
                 result = interpretTCombinator(ctx, s, sigBeingParsed, args);
-                return;
+                return result;
             }
 
             if (recvi->symbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
@@ -1047,7 +1049,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
-                return;
+                return result;
             }
 
             if (s.fun != core::Names::squareBrackets()) {
@@ -1055,7 +1057,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
                 result.type = core::Types::untypedUntracked();
-                return;
+                return result;
             }
 
             InlinedVector<core::TypeAndOrigins, 2> holders;
@@ -1113,7 +1115,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                                   ctx.locAt(recvi->loc), "{}", corrected.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
-                return;
+                return result;
             } else {
                 corrected = recvi->symbol;
             }
@@ -1124,7 +1126,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                     e.setHeader("Expected a class or module");
                 }
                 result.type = core::Types::untypedUntracked();
-                return;
+                return result;
             }
 
             auto correctedSingleton = corrected.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
@@ -1162,19 +1164,20 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                     targPtrs.push_back(targ->type);
                 }
                 result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
-                return;
+                return result;
             }
             if (auto *mt = core::cast_type<core::MetaType>(out)) {
                 result.type = mt->wrapped;
-                return;
+                return result;
             }
 
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
             }
             result.type = core::Types::untypedUntracked();
-        },
-        [&](const ast::Local &slf) {
+        }
+        else if (ast::isa_tree<ast::Local>(expr)) {
+            const auto &slf = ast::cast_tree_nonnull<ast::Local>(expr);
             if (expr.isSelfReference()) {
                 result.type = ctxOwnerData->selfType(ctx);
             } else {
@@ -1183,8 +1186,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                 }
                 result.type = core::Types::untypedUntracked();
             }
-        },
-        [&](const ast::Literal &lit) {
+        }
+        else if (ast::isa_tree<ast::Literal>(expr)) {
+            const auto &lit = ast::cast_tree_nonnull<ast::Literal>(expr);
             core::TypePtr underlying;
             if (core::isa_type<core::NamedLiteralType>(lit.value)) {
                 underlying = lit.value.underlying(ctx);
@@ -1200,13 +1204,13 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context 
                 e.replaceWith("Replace with underlying type", ctx.locAt(lit.loc), "{}", underlying.show(ctx));
             }
             result.type = underlying;
-        },
-        [&](const ast::ExpressionPtr &e) {
+        }
+        else {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type syntax");
             }
             result.type = core::Types::untypedUntracked();
-        });
+        }
     return result;
 }
 
