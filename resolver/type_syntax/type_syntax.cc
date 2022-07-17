@@ -807,8 +807,9 @@ core::TypePtr getResultTypeWithSelfTypeParams(core::Context ctx, const ast::Expr
     return getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args.withoutRebind()).type;
 }
 
-TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
-                                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParamsImpl(core::Context ctx, const ast::ExpressionPtr &expr,
+                                                                  const ParsedSig &sigBeingParsed,
+                                                                  TypeSyntaxArgs args) {
     // Ensure that we only check types from a class context
     ENFORCE(ctx.owner.isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
     auto ctxOwnerData = ctx.owner.asClassOrModuleRef().data(ctx);
@@ -1206,10 +1207,17 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
             result.type = core::Types::untypedUntracked();
         });
-    ENFORCE(result.type != nullptr);
-    result.type.sanityCheck(ctx);
     return result;
 }
+
+TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx, const ast::ExpressionPtr &expr,
+                                                              const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
+    auto result = getResultTypeAndBindWithSelfTypeParamsImpl(ctx, expr, sigBeingParsed, args);
+    ENFORCE(result.type != nullptr);
+    DEBUG_ONLY(result.type.sanityCheck(ctx));
+    return result;
+}
+
 } // namespace
 
 ParsedSig::TypeArgSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
