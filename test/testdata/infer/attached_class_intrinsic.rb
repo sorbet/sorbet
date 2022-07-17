@@ -6,12 +6,12 @@ class Parent
   def self.make_many
     T.attached_class.to_s # error: Call to method `to_s` on `T.attached_class (of Parent)` mistakes a type for a value
     xs = T::Array[T.attached_class].new
-    T.reveal_type(xs) # error: `T::Array[T.attached_class (of A)]`
+    T.reveal_type(xs) # error: `T::Array[T.attached_class (of Parent)]`
     3.times do
       x = new
-      T.reveal_type(x) # error: `T.attached_class (of A)`
+      T.reveal_type(x) # error: `T.attached_class (of Parent)`
       xs << x
-      xs << 'nope' # error: Expected `T.attached_class (of A)` but found `String("nope")`
+      xs << 'nope' # error: Expected `T.attached_class (of Parent)` but found `String("nope")`
     end
     xs
   end
