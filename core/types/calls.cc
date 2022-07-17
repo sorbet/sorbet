@@ -2733,7 +2733,6 @@ class Magic_attachedClass : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 1) {
-            res.returnType = make_type<MetaType>(Types::untypedUntracked());
             return;
         }
 
@@ -2751,6 +2750,7 @@ public:
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
             }
+            res.returnType = core::Types::untypedUntracked();
         }
     }
 } Magic_attachedClass;
