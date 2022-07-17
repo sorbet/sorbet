@@ -2749,6 +2749,8 @@ public:
         } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
+                e.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
+                e.addErrorNote("`{}` is an instance method, not a singleton class method", self.show(gs));
             }
             res.returnType = core::Types::untypedUntracked();
         }
