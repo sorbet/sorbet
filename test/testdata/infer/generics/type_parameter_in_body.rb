@@ -2,6 +2,16 @@
 extend T::Sig
 
 sig do
+  type_parameters(:ExistsOnOtherMethod)
+    .params(x: T.type_parameter(:ExistsOnOtherMethod))
+    .void
+end
+def example_method_for_coverage(x)
+  # This ensures that there is at least some <T ExistsOnOtherMethod>$1> name in
+  # the symbol table, just on a different method
+end
+
+sig do
   type_parameters(:U)
     .params(x: T.type_parameter(:U))
     .returns(T::Array[T.type_parameter(:U)])
@@ -20,6 +30,8 @@ def example(x)
 
   T.type_parameter(:DoesNotExist)
   #                ^^^^^^^^^^^^^ error: Type parameter `:DoesNotExist` does not exist on `Object#example`
+  T.type_parameter(:ExistsOnOtherMethod)
+  #                ^^^^^^^^^^^^^^^^^^^^ error: Type parameter `:ExistsOnOtherMethod` does not exist on `Object#example`
 
   xs
 end

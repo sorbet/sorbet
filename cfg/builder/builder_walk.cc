@@ -145,7 +145,11 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     }
 
     if (!typeParam.exists()) {
-        // TODO(jez) Report error about no type parameter with that name
+        if (auto e = ctx.beginError(namedLiteral.loc, core::errors::CFG::UnknownTypeParameter)) {
+            e.setHeader("Type parameter `{}` does not exist on `{}`", namedLiteral.toStringWithTabs(ctx, 0),
+                        method.show(ctx));
+            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+        }
         return nullptr;
     }
 
