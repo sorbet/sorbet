@@ -673,7 +673,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             auto fnd = sig.findTypeArgByName(arr->asSymbol());
             if (!fnd.type) {
                 if (args.allowUnspecifiedTypeParameter) {
-                    return TypeSyntax::ResultType{core::Types::todo(), core::Symbols::noClassOrModule()};
+                    // Return nullopt, which will indicate that we couldn't parse the sig at this time.
+                    return nullopt;
                 } else {
                     if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Unspecified type parameter");
