@@ -1221,12 +1221,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                     auto owner = ctx.owner.asMethodRef();
                     auto klass = owner.enclosingClass(ctx);
+                    ENFORCE(symbol.resultType(ctx) != nullptr);
                     auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, symbol.resultType(ctx), klass, klass,
                                                                           klass.data(ctx)->selfTypeArgs(ctx));
-                    if (instantiated == nullptr) {
-                        // TODO(jez) error here?
-                        instantiated = core::Types::untyped(ctx, symbol);
-                    }
                     if (owner.data(ctx)->flags.isGenericMethod) {
                         // instantiate requires a frozen constraint, but the constraint might not be
                         // frozen when we're running in guessTypes mode (and we never guess types if
