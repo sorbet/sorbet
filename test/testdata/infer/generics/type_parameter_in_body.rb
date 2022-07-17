@@ -18,5 +18,8 @@ def example(x)
     #                    ^^^^^^^^^^^^^^ error: Call to method `does_not_exist` on `T.type_parameter(:U) (of Object#example)` mistakes a type for a value
   end
 
+  T.type_parameter(:DoesNotExist)
+  #                ^^^^^^^^^^^^^ error: Type parameter `:DoesNotExist` does not exist on `Object#example`
+
   xs
 end

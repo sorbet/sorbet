@@ -2687,6 +2687,14 @@ To perform type assertions on non-`self` things, use `T.let` or `T.cast`.
 
 See [Type Assertions](type-assertions.md) for more.
 
+## 6006
+
+The program attempted to use `T.type_parameter` in a method body, but there was
+no such `T.type_parameter` in scope.
+
+For more information, see the docs for
+[Generic methods](generics.md#generic-methods).
+
 ## 7001
 
 Sorbet does not allow reassigning a variable to a different type within a loop
