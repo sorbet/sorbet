@@ -825,6 +825,7 @@ void GlobalState::initEmpty() {
         id.data(*this)->singletonClass(*this);
     }
 
+    // TODO(jez) Make fixing these enforces not require a rebuild of the world
     ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().id() + 1,
             "Too many synthetic class symbols? have: {} expected: {}", classAndModules.size(),
             Symbols::last_synthetic_class_sym().id() + 1);

@@ -108,6 +108,46 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
+InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
+    const auto &ctx = cctx.ctx;
+    auto method = cctx.inWhat.symbol;
+    if (!method.data(ctx)->flags.isGenericMethod) {
+        // TODO(jez) Report error for `T.type_parameter` inside non-generic method
+        // (Make exception for `T.type_parameter` within a sig)
+        return nullptr;
+    }
+
+    if (s.numPosArgs() != 1 || !ast::isa_tree<ast::Literal>(s.getPosArg(0))) {
+        // Infer will report normal type error
+        return nullptr;
+    }
+    const auto &namedLiteral = ast::cast_tree_nonnull<ast::Literal>(s.getPosArg(0));
+    if (!namedLiteral.isSymbol()) {
+        // Infer will report normal type error
+        return nullptr;
+    }
+
+    auto typeVarName = ctx.state.lookupNameUnique(core::UniqueNameKind::TypeVarName, namedLiteral.asSymbol(), 1);
+    if (!typeVarName.exists()) {
+        // TODO(jez) Report error about no type parameter with that name
+        return nullptr;
+    }
+
+    core::TypeArgumentRef typeParam;
+    for (const auto &it : method.data(ctx)->typeArguments()) {
+        if (it.data(ctx)->name == typeVarName) {
+            typeParam = it;
+        }
+    }
+
+    if (!typeParam.exists()) {
+        // TODO(jez) Report error about no type parameter with that name
+        return nullptr;
+    }
+
+    return make_insn<Alias>(typeParam);
+}
+
 } // namespace
 
 void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
@@ -401,6 +441,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (s.fun == core::Names::attachedClass() && sendRecvIsT(s)) {
                     s.recv = ast::MK::Magic(s.recv.loc());
                     s.addPosArg(ast::MK::Self(s.recv.loc()));
+                } else if (s.fun == core::Names::typeParameter() && sendRecvIsT(s)) {
+                    if (auto insn = maybeMakeTypeParameterAlias(cctx, s)) {
+                        current->exprs.emplace_back(cctx.target, s.loc, move(insn));
+                        ret = current;
+                        return;
+                    }
                 }
 
                 recv = cctx.newTemporary(core::Names::statTemp());
