@@ -1,9 +1,10 @@
 # typed: true
 
-class A
+class Parent
   extend T::Sig
   sig {returns(T::Array[T.attached_class])}
   def self.make_many
+    T.attached_class.to_s # error: Call to method `to_s` on `T.attached_class (of Parent)` mistakes a type for a value
     xs = T::Array[T.attached_class].new
     T.reveal_type(xs) # error: `T::Array[T.attached_class (of A)]`
     3.times do
@@ -15,6 +16,11 @@ class A
     xs
   end
 end
+
+class Child < Parent; end
+
+T.reveal_type(Parent.make_many) # error: Revealed type: `T::Array[Parent]`
+T.reveal_type(Child.make_many) # error: Revealed type: `T::Array[Child]`
 
 class Example; end
 
