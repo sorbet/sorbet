@@ -108,12 +108,29 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
+bool isAnyStaticInit(const core::GlobalState &gs, core::NameRef name) {
+    if (name == core::Names::staticInit()) {
+        return true;
+    } else if (name.kind() != core::NameKind::UNIQUE) {
+        return false;
+    } else {
+        return name.dataUnique(gs)->original == core::Names::staticInit();
+    }
+}
+
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     const auto &ctx = cctx.ctx;
     auto method = cctx.inWhat.symbol;
     if (!method.data(ctx)->flags.isGenericMethod) {
-        // TODO(jez) Report error for `T.type_parameter` inside non-generic method
-        // (Make exception for `T.type_parameter` within a sig)
+        // Using staticInit as a crude proxy for "is inside a `sig` block"
+        // This means we do not report as many errors as we should (but cheaply guards against false positives)
+        if (!isAnyStaticInit(ctx, method.data(ctx)->name)) {
+            if (auto e = ctx.beginError(s.loc, core::errors::CFG::UnknownTypeParameter)) {
+                e.setHeader("Method `{}` does not declare any type parameters", method.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+            }
+        }
+
         return nullptr;
     }
 

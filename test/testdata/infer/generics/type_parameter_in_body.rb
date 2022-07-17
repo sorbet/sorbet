@@ -35,3 +35,16 @@ def example(x)
 
   xs
 end
+
+sig {void}
+def not_generic
+  T.type_parameter(:U) # error: Method `Object#not_generic` does not declare any type parameters
+end
+
+# Current heuristic for reporting this error is not as precise as it could be.
+# We may want to restrict this in the future, but this is such an uncommon case
+# that it seems maybe not worthwhile.
+T.type_parameter(:U)
+class ClassTopLevel
+  T.type_parameter(:U)
+end
