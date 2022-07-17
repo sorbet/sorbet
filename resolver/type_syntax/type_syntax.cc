@@ -765,7 +765,7 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
             }
             return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
         case core::Names::experimentalAttachedClass().rawId():
-        case core::Names::attachedClass().rawId():
+        case core::Names::attachedClass().rawId(): {
             if (send.fun == core::Names::experimentalAttachedClass()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::ExperimentalAttachedClass)) {
                     e.setHeader("`{}` has been stabilized and is no longer experimental",
@@ -774,20 +774,22 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 }
             }
 
-            if (!ctx.owner.isClassOrModule() || !ctx.owner.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx)) {
+            ENFORCE(ctx.owner.isClassOrModule());
+            auto owner = ctx.owner.asClassOrModuleRef();
+            if (!owner.data(ctx)->isSingletonClass(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
+                    e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
+                                   owner.show(ctx));
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             } else {
-                // All singletons have an AttachedClass type member, created by
-                // `singletonClass`
-                auto attachedClass = ctx.owner.asClassOrModuleRef()
-                                         .data(ctx)
-                                         ->findMember(ctx, core::Names::Constants::AttachedClass())
-                                         .asTypeMemberRef();
+                // All singletons have an AttachedClass type member, created by `singletonClass`
+                auto attachedClass =
+                    owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass()).asTypeMemberRef();
                 return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::Symbols::noClassOrModule()};
             }
+        }
         case core::Names::noreturn().rawId():
             return TypeSyntax::ResultType{core::Types::bottom(), core::Symbols::noClassOrModule()};
 

@@ -2750,7 +2750,14 @@ public:
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
                 e.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
-                e.addErrorNote("`{}` is an instance method, not a singleton class method", self.show(gs));
+                auto singletonClass = self.data(gs)->lookupSingletonClass(gs);
+                if (singletonClass.exists()) {
+                    e.addErrorNote(
+                        "`{}` represents instances of a class; `{}` represents the corresponding singleton class",
+                        self.show(gs), singletonClass.show(gs));
+                } else {
+                    e.addErrorNote("`{}` represents instances of a class", self.show(gs));
+                }
             }
             res.returnType = core::Types::untypedUntracked();
         }
