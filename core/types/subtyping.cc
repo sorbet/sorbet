@@ -319,6 +319,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
+                // We don't need to check the idxTypeMember upper/lower bounds like the corresponding case in glb
+                // because it's a2->targs[j] is already within the bounds of idxTypeMember (or an error was reported
+                // already), and a1->targs[i] is untyped so it trivially matches all bounds.
                 if (a1->targs[i].isUntyped()) {
                     newTargs.emplace_back(a1->targs[i]);
                 } else {
@@ -969,7 +972,9 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     if (!Types::equiv(gs, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
-                    if (a1->targs[j].isUntyped()) {
+                    const auto &lambdaParam = cast_type<LambdaParam>(idxTypeMember.data(gs)->resultType);
+                    if (a1->targs[j].isUntyped() && Types::isSubType(gs, lambdaParam->lowerBound, a2->targs[i]) &&
+                        Types::isSubType(gs, a2->targs[i], lambdaParam->upperBound)) {
                         newTargs.emplace_back(a2->targs[i]);
                     } else {
                         newTargs.emplace_back(a1->targs[j]);
