@@ -228,13 +228,13 @@ class LocalNameInserter {
             return tree;
         }
 
-        size_t i = scopeStack.size() - 1;
-        for (; i >= 0; i--) {
-            if (!scopeStack[i].insideBlock) {
+        auto rit = scopeStack.rbegin();
+        for (; rit != scopeStack.rend(); rit++) {
+            if (!rit->insideBlock) {
                 break;
             }
         }
-        auto &enclosingMethodScopeStack = scopeStack[i];
+        auto &enclosingMethodScopeStack = *rit;
 
         // In the context of a method with a signature like this:
         //
