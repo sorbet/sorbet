@@ -115,3 +115,27 @@ T.reveal_type(x) # error: `Integer`
 
 x = refute_nil_opposite_order(untyped)
 T.reveal_type(x) # error: `T.untyped`
+
+# -----------------------------------------------------------------------------
+# This is the thing, but flipped.
+# So it's T.all(...) <: T.untyped instead of T.untyped <: T.any(...)
+
+module IFoo
+end
+class Foo; include IFoo; end
+
+sig do
+  type_parameters(:U)
+    .params(
+      f: T.proc.params(x: T.all(IFoo, T.type_parameter(:U))).void,
+    )
+    .returns(T.proc.params(x: T.all(IFoo, T.type_parameter(:U))).void)
+end
+def example(f)
+  f
+end
+
+f = T.cast(nil, T.proc.params(x: T.untyped).void)
+res = example(f)
+T.reveal_type(res) # error: `T.proc.params(arg0: IFoo).void`
+res.call(Foo.new)

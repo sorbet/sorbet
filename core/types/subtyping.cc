@@ -1451,12 +1451,15 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (isa_type<TypeVar>(t2) && !constr.isSolved()) {
             return constr.rememberIsSubtype(gs, t1, t2);
         }
-        // TODO(jez) Probably same bug is here, write test case that will fail until we fix this.
-        // Actually it's possible that running isSubTypeUnderConstraint twice to collect constraints
-        // makes it seem like an or constraint on the type variable? I have no clue what I'm saying.
-        // It's possible that this case is not actually as symmetric as my intuition says it should be.
-        return Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode) ||
-               Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
+        // See explanation in "// 3"
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode);
+        auto stillNeedToCheckRight = t2.isUntyped() && a1->left.isFullyDefined() && !a1->right.isFullyDefined();
+        if (leftIsSubType && !stillNeedToCheckRight) {
+            // Short circuit to save time
+            return true;
+        } else {
+            return Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
+        }
     }
 
     return isSubTypeUnderConstraintSingle(gs, constr, mode, t1, t2); // 1
