@@ -1207,9 +1207,13 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     auto &a = a1->targs[i];
                     auto &b = a2->targs[j];
                     if (mode == UntypedMode::AlwaysCompatible) {
-                        result = Types::equiv(gs, a, b);
+                        result = Types::equivUnderConstraint(gs, constr, a, b);
                     } else {
-                        result = Types::equivNoUntyped(gs, a, b);
+                        // At the time of writing, we never set mode == UntypedMode::AlwaysIncompatible
+                        // except when `constr` is EmptyFrozenConstraint, so there's no observable
+                        // difference whether we use equivNoUntyped or equivNoUntypedUnderConstraint here.
+                        // May as well do it for symmetry though.
+                        result = Types::equivNoUntypedUnderConstraint(gs, constr, a, b);
                     }
                 } else if (idxTypeMember.data(gs)->flags.isContravariant) {
                     result = Types::isSubTypeUnderConstraint(gs, constr, a2->targs[j], a1->targs[i], mode);
@@ -1444,8 +1448,19 @@ bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isSubType(gs, t1, t2) && isSubType(gs, t2, t1);
 }
 
+bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2) {
+    auto mode = UntypedMode::AlwaysCompatible;
+    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode) && isSubTypeUnderConstraint(gs, constr, t2, t1, mode);
+}
+
 bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
+}
+
+bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                          const TypePtr &t2) {
+    auto mode = UntypedMode::AlwaysIncompatible;
+    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode) && isSubTypeUnderConstraint(gs, constr, t2, t1, mode);
 }
 
 } // namespace sorbet::core
