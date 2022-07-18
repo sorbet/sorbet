@@ -92,6 +92,7 @@ void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, Err
                                                       core::Loc replaceLoc) {
     // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
     // if we're already looking at `T::Array` instead.
+    klass = klass.maybeUnwrapBuiltinGenericForwarder();
     auto typePrefixSym = klass.forwarderForBuiltinGeneric();
     if (!typePrefixSym.exists()) {
         typePrefixSym = klass;
