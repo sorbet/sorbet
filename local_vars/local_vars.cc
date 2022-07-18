@@ -228,7 +228,7 @@ class LocalNameInserter {
             return tree;
         }
 
-        int i = scopeStack.size() - 1;
+        size_t i = scopeStack.size() - 1;
         for (; i >= 0; i--) {
             if (!scopeStack[i].insideBlock) {
                 break;
