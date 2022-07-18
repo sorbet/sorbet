@@ -1634,24 +1634,72 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
         case Names::errorMessageForObj().rawId():
         case Names::errorMessageForObjRecursive().rawId():
         case Names::validate_bang().rawId(): {
+            // TODO(jez) It's weird, conceivably you could have a generic class that has a
+            // `self.valid?` call or something, and we would do the wrong thing...
+            //
+            // Interestingly enough, the sorbet-runtime implementation of `T::Generic#[]` just
+            // returns `self`, and it's not actually `T.coerce`'d until the internals.
+            //
+            // So maybe what we want to do is to hoist the `appliedType == nullptr || isSingletonClass`
+            // check below out, and only report the "mistakes a type for a value" on non-applied
+            // type things, and allow any call on applied types?
+            //
+            // The other nice thing about the existing runtime implementation is that it requires no
+            // runtime support (and no method_missing).
+
             // These are methods on `T::Types::Base`. Don't report an error, but also for the time
             // being don't even attempt to type the result properly. We can break these out and
             // handle them better in the future if we want to.
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         }
-        default:
-            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
-                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
-                            this->wrapped.show(gs));
-                if (args.name == core::Names::tripleEq()) {
-                    if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
-                        e.addErrorNote("It looks like you're trying to pattern match on a generic, "
-                                       "which doesn't work at runtime");
-                        e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
+        default: {
+            auto *appliedType = cast_type<AppliedType>(wrapped);
+
+            if (appliedType == nullptr || appliedType->klass.data(gs)->isSingletonClass(gs)) {
+                if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
+                    e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
+                                this->wrapped.show(gs));
+                    if (args.name == core::Names::tripleEq()) {
+                        if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
+                            e.addErrorNote("It looks like you're trying to pattern match on a generic, "
+                                           "which doesn't work at runtime");
+                            e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
+                        }
                     }
                 }
+                return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             }
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+
+            auto appliedSingleton = appliedType->klass.data(gs)->lookupSingletonClass(gs);
+            auto wrappedSingleton = appliedSingleton.data(gs)->externalType();
+            auto innerArgs = DispatchArgs{
+                args.name,        args.locs,           args.numPosArgs,
+                args.args,        wrappedSingleton,    {wrappedSingleton, args.fullType.origins},
+                wrappedSingleton, args.block,          args.originForUninitialized,
+                args.isPrivateOk, args.suppressErrors,
+            };
+            auto original = wrappedSingleton.dispatchCall(gs, innerArgs);
+            ENFORCE(original.secondary == nullptr);
+            if (!original.main.method.exists()) {
+                return original;
+            }
+
+            const auto &dispatchedTo = original.main.method.data(gs);
+            auto expected = dispatchedTo->owner.data(gs)
+                                ->findMember(gs, core::Names::Constants::AttachedClass())
+                                .asTypeMemberRef()
+                                .data(gs)
+                                ->resultType;
+            // Pointer equality as an optimization. This might not always work? Maybe we have to do
+            // something more robust like call `equiv && !isUntyped` or manually unwrap the two
+            // types down to the underlying `TypeMemberRef`'s and compare those for equality
+            if (dispatchedTo->resultType == expected) {
+                original.returnType = wrapped;
+                original.main.sendTp = wrapped;
+            }
+
+            return original;
+        }
     }
 }
 
