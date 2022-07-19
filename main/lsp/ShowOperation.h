@@ -21,6 +21,7 @@ public:
         Indexing = 1,
         SlowPathBlocking,
         SlowPathNonBlocking,
+        FastPath,
         References,
         SymbolSearch,
         Rename,

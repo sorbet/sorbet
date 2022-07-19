@@ -24,6 +24,8 @@ string_view kindToOperationName(ShowOperation::Kind kind) {
             return "SlowPathBlocking";
         case ShowOperation::Kind::SlowPathNonBlocking:
             return "SlowPathNonBlocking";
+        case ShowOperation::Kind::FastPath:
+            return "FastPath";
         case ShowOperation::Kind::References:
             return "References";
         case ShowOperation::Kind::SymbolSearch:
@@ -43,6 +45,8 @@ string_view kindToDescription(ShowOperation::Kind kind) {
             return "Typechecking...";
         case ShowOperation::Kind::SlowPathNonBlocking:
             return "Typechecking in background";
+        case ShowOperation::Kind::FastPath:
+            return "Typechecking in foreground...";
         case ShowOperation::Kind::References:
             return "Finding all references...";
         case ShowOperation::Kind::SymbolSearch:
