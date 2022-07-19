@@ -225,6 +225,15 @@ ClassDef{
           }
         }
 
+        MethodDef{
+          flags = {}
+          name = <U zsuper_inside_block><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
         <runtime method definition of takes_positional>
 
         <runtime method definition of takes_keyword>
@@ -238,6 +247,8 @@ ClassDef{
         <runtime method definition of takes_keyword_rest>
 
         <runtime method definition of takes_block>
+
+        <runtime method definition of zsuper_inside_block>
       ]
     }
 
@@ -523,6 +534,48 @@ ClassDef{
           }
         }
 
+        MethodDef{
+          flags = {}
+          name = <U zsuper_inside_block><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {}
+            recv = Literal{ value = 1 }
+            fun = <U times>
+            block = Block {
+              args = [
+                Local{
+                  localVariable = <U i>$1
+                }
+              ]
+              body = Send{
+                flags = {privateOk}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <call-with-block>>
+                block = nullptr
+                pos_args = 3
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :<super> }
+                  Local{
+                    localVariable = <U <blk>>
+                  }
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
         <runtime method definition of takes_positional>
 
         <runtime method definition of takes_keyword>
@@ -536,6 +589,8 @@ ClassDef{
         <runtime method definition of takes_keyword_rest>
 
         <runtime method definition of takes_block>
+
+        <runtime method definition of zsuper_inside_block>
       ]
     }
   ]

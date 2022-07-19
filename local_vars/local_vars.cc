@@ -228,6 +228,14 @@ class LocalNameInserter {
             return tree;
         }
 
+        auto rit = scopeStack.rbegin();
+        for (; rit != scopeStack.rend(); rit++) {
+            if (!rit->insideBlock) {
+                break;
+            }
+        }
+        auto &enclosingMethodScopeStack = *rit;
+
         // In the context of a method with a signature like this:
         //
         //    def f(<posargs>,<kwargs>,&<blkvar>)
@@ -269,7 +277,7 @@ class LocalNameInserter {
         // We'll also look for the block arg, which should always be present at the end of the args.
         ast::ExpressionPtr blockArg;
 
-        for (auto arg : scopeStack.back().args) {
+        for (const auto &arg : enclosingMethodScopeStack.args) {
             ENFORCE(blockArg == nullptr, "Block arg was not in final position");
 
             if (arg.flags.isPositional()) {
@@ -292,8 +300,9 @@ class LocalNameInserter {
             } else if (arg.flags.isKeyword()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw keyword arg after keyword splat");
 
+                auto name = arg.arg._name;
                 kwArgKeyEntries.emplace_back(ast::MK::Literal(
-                    original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), arg.arg._name)));
+                    original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
                 kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
             } else if (arg.flags.isKeywordSplat()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");

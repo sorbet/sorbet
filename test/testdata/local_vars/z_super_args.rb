@@ -30,6 +30,9 @@ class Parent
   def takes_block(&blk)
     p blk
   end
+
+  def zsuper_inside_block
+  end
 end
 
 class Child < Parent
@@ -59,5 +62,11 @@ class Child < Parent
 
   def takes_block(&blk)
     super
+  end
+
+  def zsuper_inside_block
+    1.times do |i|
+      super
+    end
   end
 end
