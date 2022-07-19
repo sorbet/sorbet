@@ -63,13 +63,12 @@ public:
         auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
 
-        if (opts.stopAfterPhase == options::Phase::CFG) {
-            return;
-        }
-        cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
-        if (cfg) {
-            for (auto &extension : ctx.state.semanticExtensions) {
-                extension->typecheck(ctx, ctx.file, *cfg, m);
+        if (opts.stopAfterPhase != options::Phase::CFG) {
+            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            if (cfg) {
+                for (auto &extension : ctx.state.semanticExtensions) {
+                    extension->typecheck(ctx, ctx.file, *cfg, m);
+                }
             }
         }
         if (print.CFG.enabled) {
