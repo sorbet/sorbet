@@ -1830,6 +1830,7 @@ class ResolveTypeMembersAndFieldsWalk {
         core::SymbolRef owner;
         ast::ExpressionPtr *typeArg;
         ast::Cast *cast;
+        bool inFieldAssign;
     };
 
     struct ResolveFieldItem {
@@ -1892,6 +1893,7 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<bool> classOfDepth_;
     vector<core::SymbolRef> dependencies_;
     std::vector<int> nestedBlockCounts;
+    vector<bool> inFieldAssign;
 
     void extendClassOfDepth(ast::Send &send) {
         if (trackDependencies_) {
@@ -1958,7 +1960,9 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static bool resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job, bool lastTry) {
         ParsedSig emptySig;
         // Owner might be a class, because we haven't made the <static-init> methods yet.
-        if (job.owner.isMethod()) {
+        // Also, if we're in a field assign like `@x = ...`, don't use typeArguments, fields are
+        // technically in class scope, not method scope.
+        if (job.owner.isMethod() && !job.inFieldAssign) {
             for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
                 const auto &data = typeArg.data(gs);
                 auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
@@ -1981,12 +1985,31 @@ class ResolveTypeMembersAndFieldsWalk {
         return true;
     }
 
+    static core::TypePtr checkFieldTypeTodo(core::Context ctx, core::NameRef uidName, const ast::Cast *cast) {
+        auto castType = cast->type;
+        if (cast->type == core::Types::todo()) {
+            if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                e.setHeader("Unable to resolve declared type for `{}`", uidName.show(ctx));
+                e.addErrorNote("One possible cause is attempting to declare the type of a field using `{}`.",
+                               "\n    Type parameters are only valid within the scope of a method, while fields are in "
+                               "class scope.",
+                               "T.type_parameter");
+            }
+            castType = core::Types::untypedUntracked();
+        }
+
+        return castType;
+    }
+
     // Attempts to resolve the type of the given field. Returns `false` if the cast is not yet resolved.
     static void resolveField(core::MutableContext ctx, ResolveFieldItem &job) {
         auto cast = job.cast;
 
         core::ClassOrModuleRef scope;
         auto uid = job.ident;
+
+        auto castType = checkFieldTypeTodo(ctx, uid->name, cast);
+
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.isClassOrModule()) {
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
@@ -2004,14 +2027,14 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Declaring a instance variable
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
-                       !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
+                       !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
+            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Inside a method; declaring a normal instance variable
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
@@ -2024,7 +2047,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
         if (prior.exists() && prior.isFieldOrStaticField()) {
             auto priorField = prior.asFieldRef();
-            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, cast->type)) {
+            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
                 // We already have a symbol for this field, and it matches what we already saw, so we can short
                 // circuit.
                 return;
@@ -2058,7 +2081,7 @@ class ResolveTypeMembersAndFieldsWalk {
             var = ctx.state.enterFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
         }
 
-        var.data(ctx)->resultType = cast->type;
+        var.data(ctx)->resultType = castType;
         return;
     }
 
@@ -2408,14 +2431,23 @@ class ResolveTypeMembersAndFieldsWalk {
         arg.flags.isKeyword = true;
     }
 
-    // Returns `true` if `asgn` is a field declaration.
-    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+    ast::UnresolvedIdent *unwrapFieldAssign(ast::Assign &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
-            return false;
+            return nullptr;
         }
 
         if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
+            return nullptr;
+        }
+
+        return uid;
+    }
+
+    // Returns `true` if `asgn` is a field declaration.
+    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+        auto uid = unwrapFieldAssign(asgn);
+        if (uid == nullptr) {
             return false;
         }
 
@@ -2641,6 +2673,7 @@ class ResolveTypeMembersAndFieldsWalk {
 public:
     ResolveTypeMembersAndFieldsWalk() {
         nestedBlockCounts.emplace_back(0);
+        inFieldAssign.emplace_back(false);
     }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -2776,6 +2809,7 @@ public:
                     ResolveCastItem item;
                     item.file = ctx.file;
                     item.owner = ctx.owner;
+                    item.inFieldAssign = this->inFieldAssign.back();
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.getPosArg(1)));
                     auto expr = std::move(send.getPosArg(0));
@@ -2865,7 +2899,16 @@ public:
         }
     }
 
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto uid = unwrapFieldAssign(asgn);
+        auto foundField = uid != nullptr;
+        this->inFieldAssign.emplace_back(foundField);
+    }
+
     void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        this->inFieldAssign.pop_back();
+
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         if (handleFieldDeclaration(ctx, asgn)) {
             return;
