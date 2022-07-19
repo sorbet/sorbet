@@ -30,7 +30,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                       core::make_type<core::SelfTypeParam>(typeArgument));
         }
         if (!constr->solve(ctx)) {
-            Exception::raise("should never happen");
+            Exception::raise("Constraint should always solve after creating empty TypeConstraint with all upper bounds "
+                             "set to to SelfTypeParam of itself");
         }
         guessTypes = false;
     }

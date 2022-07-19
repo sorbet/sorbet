@@ -356,7 +356,6 @@ TypePtr NamedLiteralType::underlying(const GlobalState &gs) const {
         case LiteralTypeKind::Symbol:
             return Types::Symbol();
     }
-    Exception::raise("should never be reached");
 }
 
 IntegerLiteralType::IntegerLiteralType(int64_t val) : value(val) {
@@ -781,7 +780,7 @@ AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(
 }
 
 bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    Exception::raise("should never happen");
+    Exception::raise("Should never call `derivesFrom` on a SelfType");
 }
 
 void SelfType::_sanityCheck(const GlobalState &gs) const {}

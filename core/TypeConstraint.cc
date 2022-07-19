@@ -213,7 +213,7 @@ TypePtr TypeConstraint::findUpperBound(TypeArgumentRef forWhat) const {
             return entry.second;
         }
     }
-    Exception::raise("should never happen");
+    Exception::raise("Failed to find entry in TypeConstraint::upperBounds for type argument");
 }
 
 TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
@@ -222,7 +222,7 @@ TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
             return entry.second;
         }
     }
-    Exception::raise("should never happen");
+    Exception::raise("Failed to find entry in TypeConstraint::lowerBounds for type argument");
 }
 
 TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
@@ -231,7 +231,7 @@ TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
             return entry.second;
         }
     }
-    Exception::raise("should never happen");
+    Exception::raise("Failed to find entry in TypeConstraint::solution for type argument");
 }
 
 InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
@@ -266,7 +266,7 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "bounds: [{}]\n",
                    fmt::map_join(
-                       collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto {
+                       collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto{
                            const auto &[sym, bounds] = entry;
                            const auto &[lowerBound, upperBound] = bounds;
                            auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
@@ -275,7 +275,7 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
                        }));
     fmt::format_to(std::back_inserter(buf), "solution: [{}]\n",
                    fmt::map_join(
-                       this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
+                       this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto{
                            return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
                        }));
     return to_string(buf);
