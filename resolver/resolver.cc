@@ -11,7 +11,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
-#include "resolver/type_syntax.h"
+#include "resolver/type_syntax/type_syntax.h"
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
@@ -3383,12 +3383,7 @@ private:
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
             for (auto sig : lastSigs) {
-                auto allowSelfType = true;
-                auto allowRebind = false;
-                auto allowTypeMember = true;
-                TypeSyntax::parseSig(
-                    ctx, *sig, nullptr,
-                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::untyped()});
+                TypeSyntax::parseSigTop(ctx, *sig, core::Symbols::untyped());
             }
 
             if (auto e = ctx.beginError(lastSigs[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -3434,11 +3429,8 @@ private:
 
     ParsedSig parseSig(core::Context ctx, core::ClassOrModuleRef sigOwner, const ast::Send &send,
                        ast::MethodDef &mdef) {
-        auto allowSelfType = true;
-        auto allowRebind = false;
-        auto allowTypeMember = true;
-        return TypeSyntax::parseSig(ctx.withOwner(sigOwner), send, nullptr,
-                                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
+        auto blameSymbol = mdef.symbol;
+        return TypeSyntax::parseSigTop(ctx.withOwner(sigOwner), send, blameSymbol);
     }
 
     void processStatement(core::Context ctx, ast::ExpressionPtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {

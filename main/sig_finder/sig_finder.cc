@@ -1,5 +1,6 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
+#include "ast/treemap/treemap.h"
 #include "core/core.h"
 
 #include "main/sig_finder/sig_finder.h"
@@ -8,110 +9,133 @@ using namespace std;
 
 namespace sorbet::sig_finder {
 
-std::optional<SigLoc> findSignature(const core::GlobalState &gs, const core::SymbolRef &methodDef) {
-    auto defLoc = methodDef.loc(gs);
-    // We don't have a direct link to the signature for the method, so we
-    // heuristically look for the matching signature.
-    string_view source = defLoc.file().data(gs).source();
-    core::LocOffsets sigLocOffsets;
-    core::LocOffsets bodyLocOffsets;
+namespace {
 
-    // We only care about everything prior to the definition.
-    auto line_end = defLoc.beginPos();
-    auto method_def_line = source.rfind('\n', line_end);
-    auto prev_line_end = source.rfind('\n', method_def_line - 1);
-    while (prev_line_end != source.npos) {
-        auto line_start = prev_line_end + 1;
-        auto line = source.substr(line_start, line_end - line_start);
-        line = absl::StripAsciiWhitespace(line);
-        // We do skip empty lines between signature and definition
-        // Also we are starting from just before the method definition,
-        // the beginning of that line could look like an empty line, and
-        // we want to move to the previous line in that case.
-        if (line.empty()) {
-            line_end = prev_line_end;
-            prev_line_end = source.rfind('\n', line_end - 1);
-            continue;
-        }
-
-        const auto singleLineSig = "sig"sv;
-        const uint32_t singleLineSigSize = singleLineSig.size();
-        const auto alreadyFinalSig = "sig(:final)"sv;
-        const auto multiLineSigEnd = "end"sv;
-        const uint32_t multiLineSigEndSize = multiLineSigEnd.size();
-        const auto multiLineSigStart = "sig do"sv;
-        const auto commentLineStart = "#"sv;
-
-        // If something went wrong, we might find ourselves looking at an
-        // existing `sig(:final)`.  Bail instead of suggesting an autocorrect
-        // to an already final sig.
-        if (absl::StartsWith(line, alreadyFinalSig)) {
-            break;
-        }
-
-        if (absl::StartsWith(line, singleLineSig)) {
-            uint32_t offset = line.data() - source.data();
-            sigLocOffsets = core::LocOffsets{offset, offset + singleLineSigSize};
-            bodyLocOffsets =
-                core::LocOffsets{offset + singleLineSigSize + 1, static_cast<uint32_t>(offset + line.size())};
-            break;
-        }
-
-        if (absl::StartsWith(line, multiLineSigEnd)) {
-            // Loop backwards searching for the matching `sig do`.  We're
-            // going to:
-            // - Find it;
-            // - Hit an `end` or an already-final sig;
-            // - Hit the start of the file.
-            line_end = prev_line_end;
-            prev_line_end = source.rfind('\n', line_end - 1);
-            auto multiLineSigEndPos = line.data() - source.data() + multiLineSigEndSize;
-            while (prev_line_end != source.npos) {
-                auto line_start = prev_line_end + 1;
-                line = source.substr(line_start, line_end - line_start);
-                line = absl::StripAsciiWhitespace(line);
-
-                // Found the start of the multi-line sig we were looking for.
-                if (absl::StartsWith(line, multiLineSigStart)) {
-                    uint32_t offset = line.data() - source.data();
-                    sigLocOffsets = core::LocOffsets{offset, offset + singleLineSigSize};
-                    bodyLocOffsets =
-                        core::LocOffsets{offset + singleLineSigSize + 1, static_cast<uint32_t>(multiLineSigEndPos)};
-                    break;
-                }
-
-                if (absl::StartsWith(line, alreadyFinalSig)) {
-                    break;
-                }
-
-                // We hit an `end` in a place we didn't expect.  Bail.
-                if (absl::StartsWith(line, multiLineSigEnd)) {
-                    break;
-                }
-
-                line_end = prev_line_end;
-                prev_line_end = source.rfind('\n', line_end - 1);
-            }
-
-            // However we exited the above loop, we are done.
-            break;
-        }
-
-        // We found a comment between a sig and a method def, look one line higher
-        if (absl::StartsWith(line, commentLineStart)) {
-            line_end = prev_line_end;
-            prev_line_end = source.rfind('\n', line_end - 1);
-            continue;
-        }
-
-        // If we find anything else assume that the heuristic
-        // has failed.
-        break;
-    }
-    if (sigLocOffsets.exists() && bodyLocOffsets.exists()) {
-        return SigLoc{sigLocOffsets, bodyLocOffsets};
+// parseSigTop usually expects to be called when `ctx` is a class. The sig_finder code
+// sometimes runs after class_flatten, when sigs have been moved inside <static-init>
+// methods. We have to put the owner back to what it would have looked like at the top-level
+core::SymbolRef getEffectiveOwner(core::Context ctx) {
+    if (ctx.owner.isClassOrModule()) {
+        // class_flatten hasn't run, this `sig` send is still at a class top-level
+        return ctx.owner;
     } else {
-        return std::nullopt;
+        auto methodOwner = ctx.owner.asMethodRef();
+        ENFORCE(methodOwner.data(ctx)->name == core::Names::staticInit());
+        auto owner = methodOwner.data(ctx)->owner.data(ctx)->attachedClass(ctx);
+        ENFORCE(owner.exists());
+        return owner;
     }
 }
+
+} // namespace
+
+void SigFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    auto loc = core::Loc(ctx.file, tree.loc());
+
+    if (!this->narrowestClassDefRange.exists()) {
+        // No narrowestClassDefRange yet, so take the loc of the first ClassDef we see
+        // Usually this is the `<root>` class (whole file), but sometimes the caller might provide
+        // us a specific ClassDef to look in if it has one (not necessarily root)
+        this->narrowestClassDefRange = loc;
+    } else if (loc.contains(this->queryLoc) && this->narrowestClassDefRange.contains(loc)) {
+        // `loc` is contained in the current narrowestClassDefRange, and still contains `queryLoc`
+        this->narrowestClassDefRange = loc;
+
+        if (this->result_.has_value() && !loc.contains(ctx.locAt(this->result_->origSend->loc))) {
+            // If there's a result and it's not contained in the new narrowest range, we have to toss it out
+            // (Method defs and class defs are not necessarily sorted by their locs)
+            this->result_ = nullopt;
+        }
+    }
+
+    this->scopeContainsQueryLoc.emplace_back(loc.contains(this->queryLoc));
+}
+
+void SigFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    ENFORCE(!this->scopeContainsQueryLoc.empty());
+    this->scopeContainsQueryLoc.pop_back();
+}
+
+void SigFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    if (this->result_.has_value()) {
+        if (this->result_->origSend->loc.endPos() <= tree.loc().beginPos() &&
+            tree.loc().endPos() <= queryLoc.beginPos()) {
+            // There is a method definition between the current result sig and the queryLoc,
+            // so the sig we found is not for the right method.
+            this->result_ = nullopt;
+        }
+    }
+}
+
+void SigFinder::postTransformRuntimeMethodDefinition(core::Context ctx, ast::ExpressionPtr &tree) {
+    if (this->result_.has_value()) {
+        if (this->result_->origSend->loc.endPos() <= tree.loc().beginPos() &&
+            tree.loc().endPos() <= queryLoc.beginPos()) {
+            // There is a method definition between the current result sig and the queryLoc,
+            // so the sig we found is not for the right method.
+            this->result_ = nullopt;
+        }
+    }
+}
+
+void SigFinder::preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+
+    if (!resolver::TypeSyntax::isSig(ctx, send)) {
+        return;
+    }
+
+    ENFORCE(!this->scopeContainsQueryLoc.empty());
+    if (!this->scopeContainsQueryLoc.back()) {
+        // Regardless of whether this send is after the queryLoc or inside the narrowestClassDefRange,
+        // we're in a ClassDef whose scope doesn't contain the queryLoc.
+        // (one case where this happens: nested Inner class)
+        return;
+    }
+
+    auto currentLoc = ctx.locAt(tree.loc());
+    if (!currentLoc.exists()) {
+        // Defensive in case location information is disabled (e.g., certain fuzzer modes)
+        return;
+    }
+
+    ENFORCE(this->narrowestClassDefRange.exists());
+
+    if (!this->narrowestClassDefRange.contains(currentLoc)) {
+        // This send occurs outside the current narrowest range we know of for a ClassDef that
+        // still contains queryLoc, so even if this Send is after the queryLoc, it would not be
+        // in the right scope.
+        return;
+    } else if (!(currentLoc.endPos() <= this->queryLoc.beginPos())) {
+        // Query loc is not after the send
+        return;
+    }
+
+    if (this->result_.has_value()) {
+        // Method defs are not guaranteed to be sorted in order by their declLocs
+        auto resultLoc = this->result_->origSend->loc;
+        if (resultLoc.beginPos() < currentLoc.beginPos()) {
+            // Found a method defined before the query but later than previous result: overwrite previous result
+            auto owner = getEffectiveOwner(ctx);
+            auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
+            this->result_ = make_optional<resolver::ParsedSig>(move(parsedSig));
+        } else {
+            // We've already found an earlier result, so the current is not the first
+        }
+    } else {
+        // Haven't found a result yet, so this one is the best so far.
+        auto owner = getEffectiveOwner(ctx);
+        auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
+
+        this->result_ = make_optional<resolver::ParsedSig>(move(parsedSig));
+    }
+}
+
+optional<resolver::ParsedSig> SigFinder::findSignature(core::Context ctx, ast::ExpressionPtr &tree,
+                                                       core::Loc queryLoc) {
+    SigFinder sigFinder(queryLoc);
+    ast::TreeWalk::apply(ctx, sigFinder, tree);
+    return move(sigFinder.result_);
+}
+
 } // namespace sorbet::sig_finder

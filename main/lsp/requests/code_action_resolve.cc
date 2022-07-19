@@ -16,7 +16,6 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerInte
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
         return response;
     }
-    const core::GlobalState &gs = typechecker.state();
     const auto &actualParams = *params->data;
 
     const auto queryResult = LSPQuery::byLoc(config, typechecker, actualParams->textDocument->uri,
@@ -35,7 +34,7 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerInte
             auto action = make_unique<CodeAction>("Move method to a new module");
             action->kind = CodeActionKind::RefactorExtract;
             auto workspaceEdit = make_unique<WorkspaceEdit>();
-            workspaceEdit->documentChanges = getMoveMethodEdits(config, gs, *def, typechecker);
+            workspaceEdit->documentChanges = getMoveMethodEdits(typechecker, config, *def);
             action->edit = move(workspaceEdit);
             response->result = move(action);
         }

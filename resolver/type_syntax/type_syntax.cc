@@ -1,4 +1,4 @@
-#include "resolver/type_syntax.h"
+#include "resolver/type_syntax/type_syntax.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "common/typecase.h"
@@ -23,6 +23,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                      TypeSyntaxArgs args);
 } // namespace
+
+ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, core::SymbolRef blameSymbol) {
+    auto allowSelfType = true;
+    auto allowRebind = false;
+    auto allowTypeMember = true;
+    return TypeSyntax::parseSig(ctx, sigSend, nullptr,
+                                TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, blameSymbol});
+}
 
 ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                TypeSyntaxArgs args) {
@@ -99,17 +107,19 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (!send.hasBlock()) {
         return false;
     }
-    // NB: this only needs to check for Sorbet::Private::Static.sig and not
-    // Sorbet::Private::Static::ResolvedSig.sig, because this function is only
-    // used during resolver to identify potential sigs.  We don't create
-    // Sorbet::Private::Static::ResolvedSig.sig until after resolver is run.
+
+    auto recv = ast::cast_tree<ast::ConstantLit>(send.recv);
+    if (recv != nullptr && recv->symbol == core::Symbols::Sorbet_Private_Static_ResolvedSig()) {
+        // Regardless of how many arguments this method has, we already marked it resolved, so it's good.
+        return true;
+    }
+
     auto nargs = send.numPosArgs();
     if (!(nargs == 1 || nargs == 2)) {
         return false;
     }
 
-    auto recv = ast::cast_tree<ast::ConstantLit>(send.recv);
-    if (recv && recv->symbol == core::Symbols::Sorbet_Private_Static()) {
+    if (recv != nullptr && recv->symbol == core::Symbols::Sorbet_Private_Static()) {
         return true;
     }
 

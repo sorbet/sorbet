@@ -190,7 +190,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
                 action->data = move(params);
             } else {
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
-                auto edits = getMoveMethodEdits(config, gs, *def, typechecker);
+                auto edits = getMoveMethodEdits(typechecker, config, *def);
                 workspaceEdit->documentChanges = move(edits);
                 action->edit = move(workspaceEdit);
             }

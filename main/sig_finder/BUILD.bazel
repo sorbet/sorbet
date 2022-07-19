@@ -16,6 +16,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core",
+        "//resolver/type_syntax",
         "@com_google_absl//absl/strings",
     ],
 )

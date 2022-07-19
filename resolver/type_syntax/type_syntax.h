@@ -86,6 +86,7 @@ class TypeSyntax {
 public:
     static bool isSig(core::Context ctx, const ast::Send &send);
     static ParsedSig parseSig(core::Context ctx, const ast::Send &send, const ParsedSig *parent, TypeSyntaxArgs args);
+    static ParsedSig parseSigTop(core::Context ctx, const ast::Send &send, core::SymbolRef blameSymbol);
 
     struct ResultType {
         core::TypePtr type;
