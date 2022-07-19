@@ -2692,21 +2692,7 @@ public:
                 // This is the same as the implementation of T::Generic.[] in calls.cc
                 // NOTE: the type members of these symbols will only be depended on during payload construction, as
                 // after that their bounds will have been fully resolved.
-                if (klass == core::Symbols::T_Array()) {
-                    klass = core::Symbols::Array();
-                } else if (klass == core::Symbols::T_Hash()) {
-                    klass = core::Symbols::Hash();
-                } else if (klass == core::Symbols::T_Enumerable()) {
-                    klass = core::Symbols::Enumerable();
-                } else if (klass == core::Symbols::T_Enumerator()) {
-                    klass = core::Symbols::Enumerator();
-                } else if (klass == core::Symbols::T_Enumerator_Lazy()) {
-                    klass = core::Symbols::Enumerator_Lazy();
-                } else if (klass == core::Symbols::T_Range()) {
-                    klass = core::Symbols::Range();
-                } else if (klass == core::Symbols::T_Set()) {
-                    klass = core::Symbols::Set();
-                }
+                klass = klass.maybeUnwrapBuiltinGenericForwarder();
 
                 // crawl up uses of `T.class_of` to find the right singleton symbol.
                 // This is for cases like `T.class_of(T.class_of(A))`.

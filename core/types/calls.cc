@@ -209,7 +209,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             return emptyResult;
         }
         auto funLoc = args.funLoc();
-        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
         auto e = gs.beginError(errLoc, errors::Infer::CallOnTypeArgument);
         if (e) {
             auto thisStr = args.thisType.show(gs);
@@ -236,7 +236,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             }
 
             auto funLoc = args.funLoc();
-            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
             auto e = gs.beginError(errLoc, errors::Infer::CallOnUnboundedTypeMember);
             if (e) {
                 auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
@@ -685,7 +685,7 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
     auto funLoc = args.funLoc();
-    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
@@ -1591,7 +1591,7 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     auto funLoc = args.funLoc();
-    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? args.funLoc() : args.callLoc();
+    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
             if (!canCallNew(gs, wrapped)) {
@@ -1938,21 +1938,7 @@ public:
             return;
         }
 
-        if (attachedClass == Symbols::T_Array()) {
-            attachedClass = Symbols::Array();
-        } else if (attachedClass == Symbols::T_Hash()) {
-            attachedClass = Symbols::Hash();
-        } else if (attachedClass == Symbols::T_Enumerable()) {
-            attachedClass = Symbols::Enumerable();
-        } else if (attachedClass == Symbols::T_Enumerator()) {
-            attachedClass = Symbols::Enumerator();
-        } else if (attachedClass == Symbols::T_Enumerator_Lazy()) {
-            attachedClass = Symbols::Enumerator_Lazy();
-        } else if (attachedClass == Symbols::T_Range()) {
-            attachedClass = Symbols::Range();
-        } else if (attachedClass == Symbols::T_Set()) {
-            attachedClass = Symbols::Set();
-        }
+        attachedClass = attachedClass.maybeUnwrapBuiltinGenericForwarder();
 
         if (attachedClass.data(gs)->typeMembers().empty()) {
             return;

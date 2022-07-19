@@ -4,6 +4,7 @@
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
@@ -872,45 +873,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 auto klass = sym.asClassOrModuleRef();
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
                 // same way that we check against types like `Array`
-                bool isBuiltinGeneric = klass == core::Symbols::T_Hash() || klass == core::Symbols::T_Array() ||
-                                        klass == core::Symbols::T_Set() || klass == core::Symbols::T_Range() ||
-                                        klass == core::Symbols::T_Enumerable() ||
-                                        klass == core::Symbols::T_Enumerator() ||
-                                        klass == core::Symbols::T_Enumerator_Lazy();
-
-                if (isBuiltinGeneric || klass.data(ctx)->typeArity(ctx) > 0) {
-                    // This set **should not** grow over time.
-                    bool isStdlibWhitelisted = klass == core::Symbols::Hash() || klass == core::Symbols::Array() ||
-                                               klass == core::Symbols::Set() || klass == core::Symbols::Range() ||
-                                               klass == core::Symbols::Enumerable() ||
-                                               klass == core::Symbols::Enumerator();
-                    auto level = isStdlibWhitelisted ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
-                                                     : core::errors::Resolver::GenericClassWithoutTypeArgs;
+                if (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0) {
+                    auto level = klass.isLegacyStdlibGeneric()
+                                     ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
+                                     : core::errors::Resolver::GenericClassWithoutTypeArgs;
                     if (auto e = ctx.beginError(i.loc, level)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                     klass.show(ctx));
-                        // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
-                        // if we're already looking at `T::Array` instead.
-                        auto typePrefix = isBuiltinGeneric ? "" : "T::";
-
-                        auto loc = ctx.locAt(i.loc);
-                        if (auto locSource = loc.source(ctx)) {
-                            if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
-                                // Hash is special because it has arity 3 but you're only supposed to write the first 2
-                                e.replaceWith("Add type arguments", loc, "{}{}[T.untyped, T.untyped]", typePrefix,
-                                              locSource.value());
-                            } else if (isStdlibWhitelisted || isBuiltinGeneric) {
-                                // the default provided here for builtin generic types is 1, and that might need to
-                                // change if we add other builtin generics (but ideally we should never need to do so!)
-                                auto numTypeArgs = isBuiltinGeneric ? 1 : klass.data(ctx)->typeArity(ctx);
-                                vector<string> untypeds;
-                                for (int i = 0; i < numTypeArgs; i++) {
-                                    untypeds.emplace_back("T.untyped");
-                                }
-                                e.replaceWith("Add type arguments", loc, "{}{}[{}]", typePrefix, locSource.value(),
-                                              absl::StrJoin(untypeds, ", "));
-                            }
-                        }
+                        core::TypeErrorDiagnostics::insertUntypedTypeArguments(ctx, e, klass, ctx.locAt(i.loc));
                     }
                 }
                 if (klass == core::Symbols::StubModule()) {
@@ -1127,20 +1097,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
 
             core::SymbolRef corrected;
-            if (recvi->symbol == core::Symbols::Array()) {
-                corrected = core::Symbols::T_Array();
-            } else if (recvi->symbol == core::Symbols::Hash()) {
-                corrected = core::Symbols::T_Hash();
-            } else if (recvi->symbol == core::Symbols::Enumerable()) {
-                corrected = core::Symbols::T_Enumerable();
-            } else if (recvi->symbol == core::Symbols::Enumerator()) {
-                corrected = core::Symbols::T_Enumerator();
-            } else if (recvi->symbol == core::Symbols::Enumerator_Lazy()) {
-                corrected = core::Symbols::T_Enumerator_Lazy();
-            } else if (recvi->symbol == core::Symbols::Range()) {
-                corrected = core::Symbols::T_Range();
-            } else if (recvi->symbol == core::Symbols::Set()) {
-                corrected = core::Symbols::T_Set();
+            if (recvi->symbol.isClassOrModule()) {
+                corrected = recvi->symbol.asClassOrModuleRef().forwarderForBuiltinGeneric();
             }
             if (corrected.exists()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {

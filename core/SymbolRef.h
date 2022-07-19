@@ -164,6 +164,29 @@ public:
     // Given any other symbol, returns false.
     // Also returns false if called on core::Symbols::noClassOrModule().
     bool isPackageSpecSymbol(const GlobalState &gs) const;
+
+    // Certain classes that need to be generic in the standard library already have a definition for
+    // the `[]` method, which would otherwise be the way to apply type arguments to a generic class.
+    // For example, `Set[1, 2, 3]` creates a `Set` of `Integer`s.
+    //
+    // To allow people to continue this syntax, we create certain forwarder classes under the `T::`
+    // namespace so that the `[]` method does not conflict with any existing method.
+    //
+    // This method tells whether the current ClassOrModuleRef is one of those forwarder classes.
+    bool isBuiltinGenericForwarder() const;
+    // Unwraps things like `T::Hash` to `Hash`, otherwise returns itself.
+    ClassOrModuleRef maybeUnwrapBuiltinGenericForwarder() const;
+    // Gets the `T::` forwarder class for the builtin generic (like `::Array` -> `::T::Array`)
+    // Returns Symbols::noClassOrModule if there is no forwarder.
+    ClassOrModuleRef forwarderForBuiltinGeneric() const;
+
+    // Before stabilizing Sorbet's type syntax (indeed, before Sorbet even supported generic type
+    // syntax), it was allowed to use `Array` in place of `T::Array[T.untyped]`. Out of a desire to
+    // avoid a large code migration, we preserve that behavior for the select stdlib classes it
+    // applied to at the time.
+    //
+    // The set of stdlib classes receiving this special behavior should not grow over time.
+    bool isLegacyStdlibGeneric() const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
