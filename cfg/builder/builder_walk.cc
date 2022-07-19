@@ -100,6 +100,14 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
     }
 }
 
+bool sendRecvIsT(ast::Send &s) {
+    if (auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
+        return cnst->symbol == core::Symbols::T();
+    } else {
+        return false;
+    }
+}
+
 } // namespace
 
 void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
@@ -347,53 +355,52 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Send &s) {
                 LocalRef recv;
 
-                if (s.fun == core::Names::absurd()) {
-                    if (auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
-                        if (cnst->symbol == core::Symbols::T()) {
-                            if (s.hasKwArgs()) {
-                                if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
-                                    e.setHeader("`{}` does not accept keyword arguments", "T.absurd");
-                                }
-                                ret = current;
-                                return;
-                            }
-
-                            if (s.numPosArgs() != 1) {
-                                if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
-                                    e.setHeader("`{}` expects exactly one argument but got `{}`", "T.absurd",
-                                                s.numPosArgs());
-                                }
-                                ret = current;
-                                return;
-                            }
-
-                            auto &posArg0 = s.getPosArg(0);
-                            if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0)) {
-                                if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
-                                    // Providing a send is the most common way T.absurd is misused, so we provide a
-                                    // little extra hint in the error message in that case.
-                                    if (ast::isa_tree<ast::Send>(posArg0)) {
-                                        e.setHeader("`{}` expects to be called on a variable, not a method call",
-                                                    "T.absurd");
-                                    } else {
-                                        e.setHeader("`{}` expects to be called on a variable", "T.absurd");
-                                    }
-                                    e.addErrorLine(core::Loc(cctx.ctx.file, posArg0.loc()),
-                                                   "Assign this expression to a variable, and use it in both the "
-                                                   "conditional and the `{}` call",
-                                                   "T.absurd");
-                                }
-                                ret = current;
-                                return;
-                            }
-
-                            auto temp = cctx.newTemporary(core::Names::statTemp());
-                            current = walk(cctx.withTarget(temp), posArg0, current);
-                            current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
-                            ret = current;
-                            return;
+                // For performance, we do the name check first (single integer comparison in the
+                // common case)
+                if (s.fun == core::Names::absurd() && sendRecvIsT(s)) {
+                    if (s.hasKwArgs()) {
+                        if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
+                            e.setHeader("`{}` does not accept keyword arguments", "T.absurd");
                         }
+                        ret = current;
+                        return;
                     }
+
+                    if (s.numPosArgs() != 1) {
+                        if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
+                            e.setHeader("`{}` expects exactly one argument but got `{}`", "T.absurd", s.numPosArgs());
+                        }
+                        ret = current;
+                        return;
+                    }
+
+                    auto &posArg0 = s.getPosArg(0);
+                    if (!ast::isa_tree<ast::Local>(posArg0) && !ast::isa_tree<ast::UnresolvedIdent>(posArg0)) {
+                        if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
+                            // Providing a send is the most common way T.absurd is misused, so we provide a
+                            // little extra hint in the error message in that case.
+                            if (ast::isa_tree<ast::Send>(posArg0)) {
+                                e.setHeader("`{}` expects to be called on a variable, not a method call", "T.absurd");
+                            } else {
+                                e.setHeader("`{}` expects to be called on a variable", "T.absurd");
+                            }
+                            e.addErrorLine(core::Loc(cctx.ctx.file, posArg0.loc()),
+                                           "Assign this expression to a variable, and use it in both the "
+                                           "conditional and the `{}` call",
+                                           "T.absurd");
+                        }
+                        ret = current;
+                        return;
+                    }
+
+                    auto temp = cctx.newTemporary(core::Names::statTemp());
+                    current = walk(cctx.withTarget(temp), posArg0, current);
+                    current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
+                    ret = current;
+                    return;
+                } else if (s.fun == core::Names::attachedClass() && sendRecvIsT(s)) {
+                    s.recv = ast::MK::Magic(s.recv.loc());
+                    s.addPosArg(ast::MK::Self(s.recv.loc()));
                 }
 
                 recv = cctx.newTemporary(core::Names::statTemp());

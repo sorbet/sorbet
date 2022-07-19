@@ -133,7 +133,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     if (classMethodsNode) {
         // Generate a Send { Magic.mixes_in_class_methods(ClassMethods) }
-        auto magic = ast::MK::Constant(klass->loc, core::Symbols::Magic());
+        auto magic = ast::MK::Magic(klass->loc);
         auto classMethods =
             ast::MK::UnresolvedConstant(klass->loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
         auto sendForMixes =

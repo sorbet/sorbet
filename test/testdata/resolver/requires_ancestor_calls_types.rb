@@ -226,7 +226,7 @@ module Test10
 
     def m2
       T.attached_class.foo
-      #                ^^^ error: Call to method `foo` on `T.untyped` mistakes a type for a value
+    # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
       T.class_of(M2).foo
       #              ^^^ error: Call to method `foo` on `T.class_of(Test10::M2)`
     end

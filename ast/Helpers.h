@@ -184,13 +184,13 @@ public:
     }
 
     static ExpressionPtr Splat(core::LocOffsets loc, ExpressionPtr arg) {
-        return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), loc, std::move(arg));
+        return Send1(loc, Magic(loc), core::Names::splat(), loc, std::move(arg));
     }
 
     static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name,
                                        ExpressionPtr args) {
-        return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), loc, std::move(recv),
-                     MK::Symbol(loc, name), std::move(args));
+        return Send3(loc, Magic(loc), core::Names::callWithSplat(), loc, std::move(recv), MK::Symbol(loc, name),
+                     std::move(args));
     }
 
     static ExpressionPtr InsSeq1(core::LocOffsets loc, ExpressionPtr stat, ExpressionPtr expr) {
@@ -418,19 +418,21 @@ public:
                     flags);
     }
 
+    static ExpressionPtr Magic(core::LocOffsets loc) {
+        return Constant(loc, core::Symbols::Magic());
+    }
+
     static ExpressionPtr SelfNew(core::LocOffsets loc, core::LocOffsets funLoc, int numPosArgs,
                                  ast::Send::ARGS_store args, Send::Flags flags = {}) {
-        auto magic = Constant(loc, core::Symbols::Magic());
-        return Send(loc, std::move(magic), core::Names::selfNew(), funLoc, numPosArgs, std::move(args), flags);
+        return Send(loc, Magic(loc), core::Names::selfNew(), funLoc, numPosArgs, std::move(args), flags);
     }
 
     static ExpressionPtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
-        auto magic = Constant(loc, core::Symbols::Magic());
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
         // Use a 0-sized loc so that LSP queries for "what is at this location" do not return this synthetic send.
-        return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, std::move(magic),
-                    core::Names::defineTopClassOrModule(), loc, 1, SendArgs(Constant(loc, klass)), flags);
+        return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, Magic(loc), core::Names::defineTopClassOrModule(),
+                    loc, 1, SendArgs(Constant(loc, klass)), flags);
     }
 
     static ExpressionPtr RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod) {

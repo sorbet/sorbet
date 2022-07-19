@@ -520,6 +520,11 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::T_Private_Types_Void_VOID());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::T_Private_Types_Void_VOIDSingleton());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Methods());
+    ENFORCE(klass == Symbols::T_Private_Methods());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Methods(), Names::Constants::DeclBuilder());
+    klass.data(*this)->setIsModule(false);
+    ENFORCE(klass == Symbols::T_Private_Methods_DeclBuilder());
 
     // T.class_of(T::Sig::WithoutRuntime)
     klass = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this);
@@ -679,6 +684,11 @@ void GlobalState::initEmpty() {
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<self-new>(arg: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+    // Synthesize <Magic>.attachedClass(arg: *T.untyped) => T.untyped
+    // (accept any args to avoid repeating errors that would otherwise be reported by type syntax parsing)
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::attachedClass())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<check-and-and>(arg0: T.untyped, arg1: T.untyped, arg2: Symbol, arg: *T.untyped) => T.untyped

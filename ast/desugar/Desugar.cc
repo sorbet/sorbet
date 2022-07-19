@@ -237,7 +237,7 @@ ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::
     if (allStringsSoFar) {
         return mergeStrings(dctx, loc, std::move(stringsAccumulated));
     } else {
-        auto recv = MK::Constant(loc, core::Symbols::Magic());
+        auto recv = MK::Magic(loc);
         return MK::Send(loc, std::move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(),
                         interpArgs.size(), std::move(interpArgs));
     }
@@ -408,9 +408,8 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
         }
     }
 
-    auto expanded =
-        MK::Send3(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::expandSplat(), loc.copyWithZeroLength(),
-                  MK::Local(loc, tempRhs), MK::Int(loc, before), MK::Int(loc, after));
+    auto expanded = MK::Send3(loc, MK::Magic(loc), core::Names::expandSplat(), loc.copyWithZeroLength(),
+                              MK::Local(loc, tempRhs), MK::Int(loc, before), MK::Int(loc, after));
     stats.insert(stats.begin(), MK::Assign(loc, tempExpanded, std::move(expanded)));
     stats.insert(stats.begin(), MK::Assign(loc, tempRhs, std::move(rhs)));
 
@@ -756,8 +755,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             MK::Send1(loc, std::move(args), core::Names::concat(), locZeroLen, std::move(argsSplat));
 
                         auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
-                        auto kwargsSplat = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                     core::Names::toHashDup(), locZeroLen, std::move(fwdKwargs));
+                        auto kwargsSplat =
+                            MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, std::move(fwdKwargs));
 
                         Array::ENTRY_store kwargsEntries;
                         kwargsEntries.emplace_back(std::move(kwargsSplat));
@@ -784,8 +783,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     sendargs.emplace_back(std::move(kwargs));
                     ExpressionPtr res;
                     if (block == nullptr && !anonymousBlockPass) {
-                        res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                       locZeroLen, 4, std::move(sendargs), flags);
+                        res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), locZeroLen, 4,
+                                       std::move(sendargs), flags);
                     } else {
                         ExpressionPtr convertedBlock;
                         if (anonymousBlockPass) {
@@ -796,15 +795,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         }
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol()) {
-                            res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                           locZeroLen, 4, std::move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), locZeroLen, 4,
+                                           std::move(sendargs), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(
                                 symbol2Proc(dctx, std::move(convertedBlock)));
                         } else {
                             sendargs.emplace_back(std::move(convertedBlock));
-                            res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                           core::Names::callWithSplatAndBlock(), locZeroLen, 5, std::move(sendargs),
-                                           flags);
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), locZeroLen, 5,
+                                           std::move(sendargs), flags);
                         }
                     }
                     result = std::move(res);
@@ -899,8 +897,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                 sendargs.emplace_back(std::move(arg));
                             }
 
-                            res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithBlock(),
-                                           locZeroLen, numPosArgs, std::move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlock(), locZeroLen, numPosArgs,
+                                           std::move(sendargs), flags);
                         }
                     }
 
@@ -992,10 +990,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
                         } else {
                             int numPosArgs = mergeValues.size();
-                            updateStmts.emplace_back(MK::Assign(loc, acc,
-                                                                MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                                         core::Names::mergeHashValues(), locZeroLen,
-                                                                         numPosArgs, std::move(mergeValues))));
+                            updateStmts.emplace_back(
+                                MK::Assign(loc, acc,
+                                           MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(), locZeroLen,
+                                                    numPosArgs, std::move(mergeValues))));
                         }
 
                         mergeValues.clear();
@@ -1007,17 +1005,15 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
                     // intrinsic is assumed to mutate its first argument.
                     if (updateStmts.empty()) {
-                        updateStmts.emplace_back(
-                            MK::Assign(loc, acc,
-                                       MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                 core::Names::toHashDup(), locZeroLen, std::move(expr))));
+                        updateStmts.emplace_back(MK::Assign(
+                            loc, acc,
+                            MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, std::move(expr))));
                     } else {
-                        updateStmts.emplace_back(
-                            MK::Assign(loc, acc,
-                                       MK::Send2(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                 core::Names::mergeHash(), locZeroLen, MK::Local(loc, acc),
-                                                 MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                           core::Names::toHashNoDup(), locZeroLen, std::move(expr)))));
+                        updateStmts.emplace_back(MK::Assign(
+                            loc, acc,
+                            MK::Send2(loc, MK::Magic(loc), core::Names::mergeHash(), locZeroLen, MK::Local(loc, acc),
+                                      MK::Send1(loc, MK::Magic(loc), core::Names::toHashNoDup(), locZeroLen,
+                                                std::move(expr)))));
                     }
                 };
 
@@ -1032,9 +1028,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // through to the rest of the processing
                     int numPosArgs = mergeValues.size();
                     updateStmts.emplace_back(MK::Assign(loc, acc,
-                                                        MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                                 core::Names::mergeHashValues(), locZeroLen, numPosArgs,
-                                                                 std::move(mergeValues))));
+                                                        MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(),
+                                                                 locZeroLen, numPosArgs, std::move(mergeValues))));
                 }
 
                 if (updateStmts.empty()) {
@@ -1107,7 +1102,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             rhsSend->insertPosArg(0, std::move(rhsSend->recv));
                             rhsSend->insertPosArg(1, MK::Local(loc.copyWithZeroLength(), andAndTemp));
                             rhsSend->insertPosArg(2, MK::Symbol(rhsSend->funLoc.copyWithZeroLength(), rhsSend->fun));
-                            rhsSend->recv = MK::Constant(loc.copyWithZeroLength(), core::Symbols::Magic());
+                            rhsSend->recv = MK::Magic(loc.copyWithZeroLength());
                             rhsSend->fun = core::Names::checkAndAnd();
                             thenp = std::move(rhs);
                         } else {
@@ -1364,7 +1359,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
                 ExpressionPtr nil =
-                    MK::Send1(recvLoc.copyEndWithZeroLength(), ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
+                    MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
                               core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
                 auto res = MK::InsSeq1(csend->loc, std::move(assgn), std::move(iff));
@@ -1757,7 +1752,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::IRange *ret) {
-                auto recv = MK::Constant(loc, core::Symbols::Magic());
+                auto recv = MK::Magic(loc);
                 auto from = node2TreeImpl(dctx, std::move(ret->from));
                 auto to = node2TreeImpl(dctx, std::move(ret->to));
                 auto excludeEnd = MK::False(loc);
@@ -1766,7 +1761,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(send);
             },
             [&](parser::ERange *ret) {
-                auto recv = MK::Constant(loc, core::Symbols::Magic());
+                auto recv = MK::Magic(loc);
                 auto from = node2TreeImpl(dctx, std::move(ret->from));
                 auto to = node2TreeImpl(dctx, std::move(ret->to));
                 auto excludeEnd = MK::True(loc);
@@ -2055,7 +2050,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         ExpressionPtr test;
                         if (parser::isa_node<parser::Splat>(cnode.get())) {
                             ENFORCE(temp.exists(), "splats need something to test against");
-                            auto recv = MK::Constant(loc, core::Symbols::Magic());
+                            auto recv = MK::Magic(loc);
                             auto local = MK::Local(cloc, temp);
                             // TODO(froydnj): use the splat's var directly so we can elide the
                             // coercion to an array where possible.
@@ -2109,8 +2104,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto methodName = ident->kind == UnresolvedIdent::Kind::Instance ? core::Names::definedInstanceVar()
                                                                                      : core::Names::definedClassVar();
                     auto sym = MK::Symbol(loc, ident->name);
-                    auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), methodName, locZeroLen,
-                                         std::move(sym));
+                    auto res = MK::Send1(loc, MK::Magic(loc), methodName, locZeroLen, std::move(sym));
                     result = std::move(res);
                     return;
                 }
@@ -2128,8 +2122,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 absl::c_reverse(args);
 
                 auto numPosArgs = args.size();
-                auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                    locZeroLen, numPosArgs, std::move(args));
+                auto res =
+                    MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, std::move(args));
                 result = std::move(res);
             },
             [&](parser::LineLiteral *line) {
@@ -2201,7 +2195,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::Backref *backref) {
-                auto recv = MK::Constant(loc, core::Symbols::Magic());
+                auto recv = MK::Magic(loc);
                 auto arg = MK::Symbol(backref->loc, backref->name);
                 result = MK::Send1(loc, std::move(recv), core::Names::regexBackref(), locZeroLen, std::move(arg));
             },
@@ -2222,7 +2216,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::EncodingLiteral *encodingLiteral) {
-                auto recv = MK::Constant(loc, core::Symbols::Magic());
+                auto recv = MK::Magic(loc);
                 result = MK::Send0(loc, std::move(recv), core::Names::getEncoding(), locZeroLen);
             },
             [&](parser::MatchPattern *pattern) {

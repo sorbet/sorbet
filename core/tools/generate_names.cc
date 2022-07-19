@@ -234,6 +234,8 @@ NameDef names[] = {
     {"DeprecatedNumeric", "DeprecatedNumeric", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
+    {"Methods", "Methods", true},
+    {"DeclBuilder", "DeclBuilder", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
     {"prefix"},
