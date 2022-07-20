@@ -2563,16 +2563,16 @@ vector<std::pair<NameRef, SymbolRef>> ClassOrModule::membersStableOrderSlow(cons
     return result;
 }
 
-ClassOrModuleData::ClassOrModuleData(ClassOrModule &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+ClassOrModuleData::ClassOrModuleData(ClassOrModule &ref, GlobalState &gs) : DebugOnlyCheck(gs, &GlobalState::classAndModulesUsed), symbol(ref) {}
 
 ConstClassOrModuleData::ConstClassOrModuleData(const ClassOrModule &ref, const GlobalState &gs)
-    : DebugOnlyCheck(gs), symbol(ref) {}
+    : DebugOnlyCheck(gs, &GlobalState::classAndModulesUsed), symbol(ref) {}
 
-SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs)
-    : gs(gs), symbolCountAtCreation(gs.symbolsUsedTotal()) {}
+SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs, SymbolsUsedFunc fn)
+    : gs(gs), fn(fn), symbolCountAtCreation((gs.*fn)()) {}
 
 void SymbolDataDebugCheck::check() const {
-    ENFORCE_NO_TIMER(symbolCountAtCreation == gs.symbolsUsedTotal());
+    ENFORCE_NO_TIMER(symbolCountAtCreation == (gs.*fn)());
 }
 
 ClassOrModule *ClassOrModuleData::operator->() {
@@ -2590,9 +2590,9 @@ const ClassOrModule *ConstClassOrModuleData::operator->() const {
     return &symbol;
 };
 
-MethodData::MethodData(Method &ref, GlobalState &gs) : DebugOnlyCheck(gs), method(ref) {}
+MethodData::MethodData(Method &ref, GlobalState &gs) : DebugOnlyCheck(gs, &GlobalState::methodsUsed), method(ref) {}
 
-ConstMethodData::ConstMethodData(const Method &ref, const GlobalState &gs) : DebugOnlyCheck(gs), method(ref) {}
+ConstMethodData::ConstMethodData(const Method &ref, const GlobalState &gs) : DebugOnlyCheck(gs, &GlobalState::methodsUsed), method(ref) {}
 
 Method *MethodData::operator->() {
     runDebugOnlyCheck();
@@ -2609,9 +2609,9 @@ const Method *ConstMethodData::operator->() const {
     return &method;
 };
 
-FieldData::FieldData(Field &ref, GlobalState &gs) : DebugOnlyCheck(gs), field(ref) {}
+FieldData::FieldData(Field &ref, GlobalState &gs) : DebugOnlyCheck(gs, &GlobalState::fieldsUsed), field(ref) {}
 
-ConstFieldData::ConstFieldData(const Field &ref, const GlobalState &gs) : DebugOnlyCheck(gs), field(ref) {}
+ConstFieldData::ConstFieldData(const Field &ref, const GlobalState &gs) : DebugOnlyCheck(gs, &GlobalState::fieldsUsed), field(ref) {}
 
 Field *FieldData::operator->() {
     runDebugOnlyCheck();
@@ -2628,10 +2628,10 @@ const Field *ConstFieldData::operator->() const {
     return &field;
 };
 
-TypeParameterData::TypeParameterData(TypeParameter &ref, GlobalState &gs) : DebugOnlyCheck(gs), typeParam(ref) {}
+TypeParameterData::TypeParameterData(TypeParameter &ref, GlobalState &gs) : DebugOnlyCheck(gs, &GlobalState::typeParametersUsed), typeParam(ref) {}
 
 ConstTypeParameterData::ConstTypeParameterData(const TypeParameter &ref, const GlobalState &gs)
-    : DebugOnlyCheck(gs), typeParam(ref) {}
+    : DebugOnlyCheck(gs, &GlobalState::typeParametersUsed), typeParam(ref) {}
 
 TypeParameter *TypeParameterData::operator->() {
     runDebugOnlyCheck();
