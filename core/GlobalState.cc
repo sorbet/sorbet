@@ -1639,7 +1639,7 @@ FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
                     : this->files) {
         if (f) {
             if (f->path() == file->path()) {
-                Exception::raise("should never happen");
+                Exception::raise("Request to `enterFile` for already-entered file path?");
             }
         }
     })

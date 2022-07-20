@@ -213,7 +213,7 @@ TypePtr TypeConstraint::findUpperBound(TypeArgumentRef forWhat) const {
             return entry.second;
         }
     }
-    Exception::raise("should never happen");
+    Exception::raise("Failed to find entry in TypeConstraint::upperBounds for type argument");
 }
 
 TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
@@ -222,7 +222,7 @@ TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
             return entry.second;
         }
     }
-    Exception::raise("should never happen");
+    Exception::raise("Failed to find entry in TypeConstraint::lowerBounds for type argument");
 }
 
 TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
@@ -231,7 +231,7 @@ TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
             return entry.second;
         }
     }
-    Exception::raise("should never happen");
+    Exception::raise("Failed to find entry in TypeConstraint::solution for type argument");
 }
 
 InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {

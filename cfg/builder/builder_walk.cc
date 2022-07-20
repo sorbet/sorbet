@@ -338,7 +338,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     lhs = unresolvedIdent2Local(cctx, *ident);
                     ENFORCE(lhs.exists());
                 } else {
-                    Exception::raise("should never be reached");
+                    Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
                 }
 
                 auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);

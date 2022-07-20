@@ -317,7 +317,7 @@ public:
         if (flags.isContravariant) {
             return Variance::ContraVariant;
         }
-        Exception::raise("Should not happen");
+        Exception::raise("None of the variance-related flags are set. Call to variance() before resolver?");
     }
 
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const;
@@ -448,7 +448,7 @@ public:
             return false;
         }
 
-        Exception::raise("Should never happen");
+        Exception::raise("isModule() but neither flags.isModule nor flags.isClass. Call to isModule before resolver?");
     }
 
     inline bool isClassModuleSet() const {
