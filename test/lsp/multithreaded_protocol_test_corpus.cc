@@ -464,7 +464,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef "
                           "bar\nbaz\nend\nsig{returns(Float)}\ndef baz\n'not a float'\nend\nend\n",
-                          2, false, 1));
+                          2, false, 0));
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef branch\n1\nend\nend\n", 3));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
@@ -509,7 +509,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef "
                           "bar\n'hello'\nend\nend\n",
-                          2, false, 1));
+                          2, false, 0));
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef str\nFoo.new.bar\nend\nend\n",
         3));
@@ -537,7 +537,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
     //                      /* assertUniqueStartTimes */ false);
 }
 
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndThenCancelBoth") {
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndThenCancelBoth" * doctest::skip()) {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
     assertDiagnostics(
@@ -615,7 +615,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
                           "# typed: true\n"
                           "class Foo\n"
                           "extend(T::Sig",
-                          2, false, 1));
+                          2, false, 0));
 
     // Wait for typechecking to begin to avoid races.
     {
@@ -691,7 +691,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
                          /* assertUniqueStartTimes */ false);
 }
 
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") {
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile" * doctest::skip()) {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
     assertDiagnostics(
@@ -779,7 +779,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyM
                          /* assertUniqueStartTimes */ false);
 }
 
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptionByFastPathClearedByNewSlowPath") {
+TEST_CASE_FIXTURE(MultithreadedProtocolTest,
+                  "ErrorIntroducedInSlowPathPreemptionByFastPathClearedByNewSlowPath" * doctest::skip()) {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
     assertDiagnostics(

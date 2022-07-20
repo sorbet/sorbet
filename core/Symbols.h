@@ -40,11 +40,16 @@ enum class Visibility : uint8_t {
 };
 
 class Method final {
-public:
     friend class ClassOrModule;
+    friend class GlobalState;
     friend class serialize::SerializerImpl;
 
+    // This is to allow updating `GlobalState::methods` in place with a new method, over top of an existing method
+    Method &operator=(Method &&) = default;
+
+public:
     Method(const Method &) = delete;
+    Method &operator=(const Method &) = delete;
     Method() = default;
     Method(Method &&) noexcept = default;
     class Flags {
@@ -83,6 +88,7 @@ public:
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
+    void removeLocsForFile(core::FileRef file);
     uint32_t hash(const GlobalState &gs) const;
     uint32_t methodShapeHash(const GlobalState &gs) const;
     ArityHash methodArityHash(const GlobalState &gs) const;

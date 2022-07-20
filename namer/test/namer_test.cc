@@ -47,7 +47,8 @@ vector<ast::ParsedFile> runNamer(core::GlobalState &gs, ast::ParsedFile tree) {
     vector<ast::ParsedFile> v;
     v.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
-    return move(namer::Namer::run(gs, move(v), *workers).result());
+    core::FoundMethodHashes foundMethodHashes; // compute this just for test coverage
+    return move(namer::Namer::run(gs, move(v), *workers, &foundMethodHashes).result());
 }
 
 } // namespace

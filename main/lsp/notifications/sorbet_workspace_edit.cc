@@ -144,7 +144,11 @@ bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
-    return canTakeFastPath(index);
+    if (config.opts.lspExperimentalFastPathEnabled) {
+        return false;
+    } else {
+        return canTakeFastPath(index);
+    }
 }
 
 bool SorbetWorkspaceEditTask::needsMultithreading(const LSPIndexer &index) const {

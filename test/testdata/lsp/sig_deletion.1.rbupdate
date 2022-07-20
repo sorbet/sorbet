@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: sig_deletion.rb
 class Foo
   extend T::Sig
 

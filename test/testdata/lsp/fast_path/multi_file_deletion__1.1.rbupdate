@@ -1,0 +1,7 @@
+# typed: true
+# assert-fast-path: multi_file_deletion__1.rb,multi_file_deletion__2.rb
+
+class A
+end
+
+A.new.foo # error: Method `foo` does not exist on `A`

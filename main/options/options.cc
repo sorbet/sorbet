@@ -344,6 +344,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("enable-experimental-lsp-stale-state", "Enable experimental LSP feature: fast "
                                                                            "but approximate answers from stale "
                                                                            "typechecker state");
+    options.add_options("advanced")("enable-experimental-lsp-fast-path",
+                                    "Enable experimental LSP feature: a faster fast path using symbol deletions");
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
 
@@ -776,6 +778,9 @@ void readOptions(Options &opts,
         // until we get some other groundwork in place. Once things stabilize a bit more, we can slap
         // `enableAllLSPFeatures ||` onto the condition here.
         opts.lspStaleStateEnabled = raw["enable-experimental-lsp-stale-state"].as<bool>();
+
+        opts.lspExperimentalFastPathEnabled =
+            opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-fast-path"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
