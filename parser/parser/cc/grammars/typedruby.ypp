@@ -938,11 +938,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     }
                  | k_def error
                     {
-                      auto defNameToken = nullptr;
-                      auto defNameContext = driver.lex.context.dup();
-                      auto node = driver.build.defnHead(self, $1, defNameToken);
+                      driver.local_push();
+                      driver.current_arg_stack.push("");
+                      auto node = driver.build.defnHeadError(self, $1, defNameToken);
 
-                      $$ = driver.alloc.node_with_context(node, defNameContext);
+                      $$ = driver.alloc.node_with_context(node, driver.lex.context.dup());
+                      driver.lex.context.inDef = true;
+                      driver.lex.context.allowNumparams = false;
                       // TODO(jez) You're going to have to take a good look at what the lexer needs to say
                     }
 
