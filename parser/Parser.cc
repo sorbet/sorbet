@@ -35,6 +35,7 @@ core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
         case ruby_parser::dclass::DedentedEnd:
         case ruby_parser::dclass::BlockArgsUnexpectedNewline:
         case ruby_parser::dclass::EOFInsteadOfEnd:
+        case ruby_parser::dclass::DefMissingName:
             return core::errors::Parser::ErrorRecoveryHint;
         default:
             return core::errors::Parser::ParserError;

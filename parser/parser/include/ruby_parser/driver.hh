@@ -401,7 +401,7 @@ public:
     void rewind_if_dedented(token_t token, token_t kEND, bool force = false);
 
     // TODO(jez) Document
-    void rewind_if_different_line(token_t token1, token_t token2);
+    bool rewind_if_different_line(token_t token1, token_t token2);
 
     // Like rewind_if_dedented above, but has special logic for detecting when the decrease in
     // indentation happens midway through a list of statements. The properly indented statements are
@@ -419,7 +419,8 @@ public:
     void local_pop();
 
 private:
-    void rewind_for_end_token(token_t endToken);
+    void rewind_to_tok_start(token_t endToken);
+    void rewind_to_tok_end(token_t endToken);
 };
 
 class typedruby_release : public base_driver {

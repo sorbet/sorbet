@@ -901,7 +901,6 @@ public:
         return make_unique<DefnHead>(tokLoc(def), core::Names::methodDefNameMissing());
     }
 
-
     unique_ptr<Node> defsHead(const token *def, unique_ptr<Node> definee, const token *dot, const token *name) {
         core::LocOffsets declLoc = tokLoc(def, name);
 
@@ -2103,6 +2102,11 @@ ForeignPtr defnHead(SelfPtr builder, const token *def, const token *name) {
     return build->toForeign(build->defnHead(def, name));
 }
 
+ForeignPtr defnHeadError(SelfPtr builder, const token *def) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->defnHeadError(def));
+}
+
 ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr, ForeignPtr body,
                       const token *end_) {
     auto build = cast_builder(builder);
@@ -2704,6 +2708,7 @@ struct ruby_parser::builder Builder::interface = {
     defMethod,
     defModule,
     defnHead,
+    defnHeadError,
     def_sclass,
     defsHead,
     defSingleton,

@@ -930,22 +930,26 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
         defn_head: k_def def_name
                     {
                       auto defNameToken = $2->token;
-                      auto defNameContext = $2->context;
-                      auto node = driver.build.defnHead(self, $1, defNameToken);
+                      ForeignPtr node = nullptr;
+                      if (driver.rewind_if_different_line($1, defNameToken)) {
+                        node = driver.build.defnHeadError(self, $1);
+                      } else {
+                        node = driver.build.defnHead(self, $1, defNameToken);
+                      }
 
+                      auto defNameContext = $2->context;
                       $$ = driver.alloc.node_with_context(node, defNameContext);
-                      driver.rewind_if_different_line($1, defNameToken);
                     }
                  | k_def error
                     {
                       driver.local_push();
                       driver.current_arg_stack.push("");
-                      auto node = driver.build.defnHeadError(self, $1, defNameToken);
+                      auto node = driver.build.defnHeadError(self, $1);
+                      driver.rewind_and_reset(@1.endPos());
 
                       $$ = driver.alloc.node_with_context(node, driver.lex.context.dup());
                       driver.lex.context.inDef = true;
                       driver.lex.context.allowNumparams = false;
-                      // TODO(jez) You're going to have to take a good look at what the lexer needs to say
                     }
 
         defs_head: k_def singleton dot_or_colon

@@ -68,6 +68,7 @@ struct builder {
     ForeignPtr (*defMethod)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end);
     ForeignPtr (*defModule)(SelfPtr builder, const token *module, ForeignPtr name, ForeignPtr body, const token *end_);
     ForeignPtr (*defnHead)(SelfPtr builder, const token *def, const token *name);
+    ForeignPtr (*defnHeadError)(SelfPtr builder, const token *def);
     ForeignPtr (*def_sclass)(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr,
                              ForeignPtr body, const token *end_);
     ForeignPtr (*defsHead)(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name);
