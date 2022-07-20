@@ -3157,8 +3157,11 @@ private:
                                       const ast::MethodDef &mdef) {
         // Later passes are going to separate the sig and the method definition.
         // Record some information in the sig call itself so that we can reassociate
-        // them later.
-        //
+        // them later in the compiler.
+        if (ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
+            return;
+        }
+
         // Note that the sig still needs to send to a method called "sig" so that
         // code completion in LSP works.  We change the receiver, below, so that
         // sigs that don't pass through here still reflect the user's intent.
