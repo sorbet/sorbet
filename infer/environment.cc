@@ -1215,6 +1215,22 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     ENFORCE(symbol.resultType(ctx) != nullptr);
                     tp.origins.emplace_back(symbol.loc(ctx));
                     tp.type = core::make_type<core::MetaType>(symbol.resultType(ctx));
+                } else if (symbol.isTypeArgument()) {
+                    ENFORCE(symbol.resultType(ctx) != nullptr);
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
+
+                    auto owner = ctx.owner.asMethodRef();
+                    auto klass = owner.enclosingClass(ctx);
+                    ENFORCE(symbol.resultType(ctx) != nullptr);
+                    auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, symbol.resultType(ctx), klass, klass,
+                                                                          klass.data(ctx)->selfTypeArgs(ctx));
+                    if (owner.data(ctx)->flags.isGenericMethod) {
+                        // instantiate requires a frozen constraint, but the constraint might not be
+                        // frozen when we're running in guessTypes mode (and we never guess types if
+                        // the method is already generic).
+                        instantiated = core::Types::instantiate(ctx, instantiated, constr);
+                    }
+                    tp.type = core::make_type<core::MetaType>(instantiated);
                 } else {
                     Exception::notImplemented();
                 }

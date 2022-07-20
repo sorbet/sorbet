@@ -108,6 +108,71 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
+bool isAnyStaticInit(const core::GlobalState &gs, core::NameRef name) {
+    if (name == core::Names::staticInit()) {
+        return true;
+    } else if (name.kind() != core::NameKind::UNIQUE) {
+        return false;
+    } else {
+        return name.dataUnique(gs)->original == core::Names::staticInit();
+    }
+}
+
+InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
+    const auto &ctx = cctx.ctx;
+    auto method = cctx.inWhat.symbol;
+    if (!method.data(ctx)->flags.isGenericMethod) {
+        // Using staticInit as a crude proxy for "is inside a `sig` block"
+        // This means we do not report as many errors as we should (but cheaply guards against false positives)
+        if (!isAnyStaticInit(ctx, method.data(ctx)->name)) {
+            if (auto e = ctx.beginError(s.loc, core::errors::CFG::UnknownTypeParameter)) {
+                e.setHeader("Method `{}` does not declare any type parameters", method.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+            }
+        }
+
+        return nullptr;
+    }
+
+    if (s.numPosArgs() != 1 || !ast::isa_tree<ast::Literal>(s.getPosArg(0))) {
+        // Infer will report normal type error
+        return nullptr;
+    }
+    const auto &namedLiteral = ast::cast_tree_nonnull<ast::Literal>(s.getPosArg(0));
+    if (!namedLiteral.isSymbol()) {
+        // Infer will report normal type error
+        return nullptr;
+    }
+
+    auto typeVarName = ctx.state.lookupNameUnique(core::UniqueNameKind::TypeVarName, namedLiteral.asSymbol(), 1);
+    if (!typeVarName.exists()) {
+        if (auto e = ctx.beginError(namedLiteral.loc, core::errors::CFG::UnknownTypeParameter)) {
+            e.setHeader("Type parameter `{}` does not exist on `{}`", namedLiteral.toStringWithTabs(ctx, 0),
+                        method.show(ctx));
+            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+        }
+        return nullptr;
+    }
+
+    core::TypeArgumentRef typeParam;
+    for (const auto &it : method.data(ctx)->typeArguments()) {
+        if (it.data(ctx)->name == typeVarName) {
+            typeParam = it;
+        }
+    }
+
+    if (!typeParam.exists()) {
+        if (auto e = ctx.beginError(namedLiteral.loc, core::errors::CFG::UnknownTypeParameter)) {
+            e.setHeader("Type parameter `{}` does not exist on `{}`", namedLiteral.toStringWithTabs(ctx, 0),
+                        method.show(ctx));
+            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+        }
+        return nullptr;
+    }
+
+    return make_insn<Alias>(typeParam);
+}
+
 } // namespace
 
 void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
@@ -401,6 +466,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (s.fun == core::Names::attachedClass() && sendRecvIsT(s)) {
                     s.recv = ast::MK::Magic(s.recv.loc());
                     s.addPosArg(ast::MK::Self(s.recv.loc()));
+                } else if (s.fun == core::Names::typeParameter() && sendRecvIsT(s)) {
+                    if (auto insn = maybeMakeTypeParameterAlias(cctx, s)) {
+                        current->exprs.emplace_back(cctx.target, s.loc, move(insn));
+                        ret = current;
+                        return;
+                    }
                 }
 
                 recv = cctx.newTemporary(core::Names::statTemp());
