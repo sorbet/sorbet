@@ -957,7 +957,7 @@ int realmain(int argc, char *argv[]) {
     if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
-        returnCode = 1;
+        returnCode = 100;
     }
 
     opts.flushPrinters();
