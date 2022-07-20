@@ -3153,6 +3153,33 @@ private:
         return ast::MK::arg2Local(mdef.args[realPos]);
     }
 
+    static bool usesArgumentForwardingSyntax(core::Context ctx, core::MethodData methodInfo, const ast::MethodDef &mdef,
+                                             bool isOverloaded) {
+        // To match, the definition must have been desugared with at least 3 parameters named
+        // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
+        auto len = methodInfo->arguments.size();
+        if (len < 3) {
+            return false;
+        }
+
+        auto l1 = getArgLocal(ctx, methodInfo->arguments[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+        if (l1._name != core::Names::fwdArgs()) {
+            return false;
+        }
+
+        auto l2 = getArgLocal(ctx, methodInfo->arguments[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+        if (l2._name != core::Names::fwdKwargs()) {
+            return false;
+        }
+
+        auto l3 = getArgLocal(ctx, methodInfo->arguments[len - 1], mdef, len - 1, isOverloaded)->localVariable;
+        if (l3._name != core::Names::fwdBlock()) {
+            return false;
+        }
+
+        return true;
+    }
+
     static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
                                       const ast::MethodDef &mdef) {
         // Later passes are going to separate the sig and the method definition.
@@ -3241,24 +3268,14 @@ private:
 
         auto methodInfo = method.data(ctx);
 
-        // Is this a signature for a method defined with argument forwarding syntax?
-        if (methodInfo->arguments.size() >= 3) {
-            // To match, the definition must have been desugared with at least 3 parameters named
-            // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-            auto len = methodInfo->arguments.size();
-            auto l1 = getArgLocal(ctx, methodInfo->arguments[len - 3], mdef, len - 3, isOverloaded)->localVariable;
-            auto l2 = getArgLocal(ctx, methodInfo->arguments[len - 2], mdef, len - 2, isOverloaded)->localVariable;
-            auto l3 = getArgLocal(ctx, methodInfo->arguments[len - 1], mdef, len - 1, isOverloaded)->localVariable;
-            if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
-                l3._name == core::Names::fwdBlock()) {
-                if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
-                    e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
-                    e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
-                                   method.show(ctx));
-                }
-                return;
+        if (usesArgumentForwardingSyntax(ctx, methodInfo, mdef, isOverloaded)) {
+            if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
+                e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
+                e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
+                               method.show(ctx));
             }
+            return;
         }
 
         // Get the parameters order from the signature
