@@ -77,6 +77,36 @@ void base_driver::rewind_if_dedented(token_t token, token_t endToken, bool force
     }
 }
 
+void base_driver::rewind_if_different_line(token_t token1, token_t token2) {
+    if (!this->indentationAware) {
+        return;
+    }
+
+    if (token2->type() != token_type::tBEFORE_EOF && token1->lineStart() == token2->lineStart()) {
+        return;
+    }
+
+    // TODO(jez) How to handle tBEFORE_EOF ?
+    // this->rewind_for_end_token(endToken);
+    if (token2->type() == token_type::tBEFORE_EOF) {
+        // Rewinding doesn't make sense here, because we're already at EOF (there's nothing left for ragel to scan).
+        // Instead, just put the tBEFORE_EOF token back onto the queue so that other rules can use it.
+        this->lex.unadvance(token2);
+    } else {
+        this->rewind_and_reset(token1->end());
+    }
+
+    const char *token_str_name = this->token_name(token1->type());
+    // TODO(jez) I think this can't happen, because `tBEFORE_EOF` wouldn't happen here because we're
+    // not expecting it? Anyways you should test.
+    // if (endToken->type() == token_type::tBEFORE_EOF) {
+    //     this->diagnostics.emplace_back(dlevel::ERROR, dclass::EOFInsteadOfEnd, token, token_str_name);
+    // } else {
+        this->diagnostics.emplace_back(dlevel::ERROR, dclass::EmptyDef, token1, token_str_name, token2);
+    // }
+    this->lex.context.inArgDef = false;
+}
+
 // TODO(jez) This can quite easily get out of hand performance-wise. The major selling point of
 // LR parsers is that they admit linear-time implementations.
 //

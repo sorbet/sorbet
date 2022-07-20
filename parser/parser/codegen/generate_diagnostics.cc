@@ -79,6 +79,7 @@ tuple<string, string> MESSAGES[] = {
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
     {"BlockArgsUnexpectedNewline", "Hint: expected \\\"|\\\" token here"},
     {"EOFInsteadOfEnd", "Hint: this {} token is not closed before the end of the file"},
+    {"EmptyDef", "Hint: this {} token might be unmatched"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},

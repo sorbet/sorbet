@@ -934,6 +934,16 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       auto node = driver.build.defnHead(self, $1, defNameToken);
 
                       $$ = driver.alloc.node_with_context(node, defNameContext);
+                      driver.rewind_if_different_line($1, defNameToken);
+                    }
+                 | k_def error
+                    {
+                      auto defNameToken = nullptr;
+                      auto defNameContext = driver.lex.context.dup();
+                      auto node = driver.build.defnHead(self, $1, defNameToken);
+
+                      $$ = driver.alloc.node_with_context(node, defNameContext);
+                      // TODO(jez) You're going to have to take a good look at what the lexer needs to say
                     }
 
         defs_head: k_def singleton dot_or_colon

@@ -885,9 +885,16 @@ public:
     }
 
     unique_ptr<Node> defnHead(const token *def, const token *name) {
-        core::LocOffsets declLoc = tokLoc(def, name);
+        auto declLoc = tokLoc(def);
+        if (name != nullptr) {
+            // TODO(jez) Dedicated builder method, don't abuse nullptr
+            declLoc.join(tokLoc(name));
+        }
+        // TODO(jez) Choose different name
+        // TODO(jez) Never enter method symbol for method name missing
+        auto nameRef = name == nullptr ? core::Names::methodNameMissing() : gs_.enterNameUTF8(name->view());
 
-        return make_unique<DefnHead>(declLoc, gs_.enterNameUTF8(name->view()));
+        return make_unique<DefnHead>(declLoc, nameRef);
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,

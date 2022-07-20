@@ -400,6 +400,9 @@ public:
     // manually for the purpose of emitting an error).
     void rewind_if_dedented(token_t token, token_t kEND, bool force = false);
 
+    // TODO(jez) Document
+    void rewind_if_different_line(token_t token1, token_t token2);
+
     // Like rewind_if_dedented above, but has special logic for detecting when the decrease in
     // indentation happens midway through a list of statements. The properly indented statements are
     // returned, and the lexer is reset to a point where the improperly indented statements will be
