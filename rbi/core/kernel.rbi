@@ -728,7 +728,7 @@ module Kernel
     params(
         blk: T.proc.returns(BasicObject),
     )
-    .returns(T.nilable(Integer))
+    .returns(Integer)
   end
   def fork(&blk); end
 
