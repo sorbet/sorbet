@@ -2292,7 +2292,8 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             auto needMethodShapeHash =
                 this->lspExperimentalFastPathEnabled
                     ? (sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
-                       sym.name == Names::requiredAncestorsLin())
+                       sym.name == Names::requiredAncestorsLin() || sym.name == core::Names::initialize() ||
+                       sym.name == core::Names::call() || sym.name == core::Names::new_())
                     : true;
             if (needMethodShapeHash) {
                 uint32_t symhash = sym.methodShapeHash(*this);
