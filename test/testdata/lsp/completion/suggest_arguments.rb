@@ -6,6 +6,6 @@ class A # error: Hint: this "class" token is not closed before the end of the fi
   #           ^ error: Unknown argument name `x`
   #                       ^ error: Unknown argument name `y`
   def foo # error: Hint: this "def" token is not closed before the end of the file
-    #    ^ completion: foo
+    #    ^ completion: (sorbet) Suggested params
     #    ^ apply-completion: [A] item: 0
     # error: unexpected token "end of file"

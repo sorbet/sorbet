@@ -59,7 +59,7 @@ void SigFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tre
 void SigFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
     if (this->result_.has_value()) {
         if (this->result_->origSend->loc.endPos() <= tree.loc().beginPos() &&
-            tree.loc().endPos() <= queryLoc.beginPos()) {
+            tree.loc().endPos() < queryLoc.beginPos()) {
             // There is a method definition between the current result sig and the queryLoc,
             // so the sig we found is not for the right method.
             this->result_ = nullopt;
@@ -70,7 +70,7 @@ void SigFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tre
 void SigFinder::postTransformRuntimeMethodDefinition(core::Context ctx, ast::ExpressionPtr &tree) {
     if (this->result_.has_value()) {
         if (this->result_->origSend->loc.endPos() <= tree.loc().beginPos() &&
-            tree.loc().endPos() <= queryLoc.beginPos()) {
+            tree.loc().endPos() < queryLoc.beginPos()) {
             // There is a method definition between the current result sig and the queryLoc,
             // so the sig we found is not for the right method.
             this->result_ = nullopt;
