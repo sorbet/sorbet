@@ -34,13 +34,13 @@ public:
 
 private:
     struct Storage {
-        Kind kind;
         uint32_t id : 24; // We only support 2^24 (≈ 16M) definitions of any kind in a single file.
+        Kind kind;
     } _storage;
     CheckSize(Storage, 4, 4);
 
 public:
-    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({kind, idx}) {}
+    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({idx, kind}) {}
     FoundDefinitionRef() : FoundDefinitionRef(FoundDefinitionRef::Kind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
