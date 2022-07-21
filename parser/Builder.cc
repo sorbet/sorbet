@@ -176,7 +176,7 @@ public:
         return cond;
     }
 
-    void error(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
+    void error_without_recovery(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
         driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
     }
 
@@ -189,7 +189,7 @@ public:
             auto name_str = id->name.shortName(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
-                    error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
+                    error_without_recovery(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
                 }
 
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
@@ -207,7 +207,7 @@ public:
                         auto outer_scope_has_numparams = outer_scope.max > 0;
 
                         if (outer_scope_has_numparams) {
-                            error(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
+                            error_without_recovery(ruby_parser::dclass::NumparamUsedInOuterScope, node->loc);
                         } else {
                             // for now it's ok, but an outer scope can also be a block
                             // like proc { _1; proc { proc { proc { _2}}}}
@@ -225,7 +225,7 @@ public:
 
             auto last_char = name_str.back();
             if (last_char == '?' || last_char == '!') {
-                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+                error_without_recovery(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
             }
 
             if (driver_->lex.is_declared(name_str)) {
@@ -277,7 +277,7 @@ public:
             }
         }
         if (forwardArg && restArg) {
-            error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
+            error_without_recovery(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
         }
     }
 
@@ -354,10 +354,10 @@ public:
             checkAssignmentToNumberedParameters(name, mv->loc);
             return node;
         } else if (parser::isa_node<Backref>(node.get()) || parser::isa_node<NthRef>(node.get())) {
-            error(ruby_parser::dclass::BackrefAssignment, node->loc);
+            error_without_recovery(ruby_parser::dclass::BackrefAssignment, node->loc);
             return make_unique<Nil>(node->loc);
         } else {
-            error(ruby_parser::dclass::InvalidAssignment, node->loc);
+            error_without_recovery(ruby_parser::dclass::InvalidAssignment, node->loc);
             return make_unique<Nil>(node->loc);
         }
     }
@@ -394,7 +394,7 @@ public:
         core::LocOffsets loc = receiver->loc.join(selectorLoc);
         if ((dot != nullptr) && dot->view() == "&.") {
             if (masgn) {
-                error(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
+                error_without_recovery(ruby_parser::dclass::CSendInLHSOfMAsgn, tokLoc(dot));
             }
             return make_unique<CSend>(loc, std::move(receiver), method, selectorLoc, sorbet::parser::NodeVec());
         }
@@ -499,7 +499,7 @@ public:
     unique_ptr<Node> block(unique_ptr<Node> methodCall, const token *begin, unique_ptr<Node> args,
                            unique_ptr<Node> body, const token *end) {
         if (auto *y = parser::cast_node<Yield>(methodCall.get())) {
-            error(ruby_parser::dclass::BlockGivenToYield, y->loc);
+            error_without_recovery(ruby_parser::dclass::BlockGivenToYield, y->loc);
             return make_unique<Yield>(y->loc, sorbet::parser::NodeVec());
         }
 
@@ -515,9 +515,9 @@ public:
         }
         if (callargs != nullptr && !callargs->empty()) {
             if (auto *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
-                error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
+                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
             } else if (auto *fa = parser::cast_node<ForwardedArgs>(callargs->back().get())) {
-                error(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
+                error_without_recovery(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
             }
         }
 
@@ -900,7 +900,7 @@ public:
         core::LocOffsets loc = head->loc.join(tokLoc(end));
 
         if (isLiteralNode(*(head->definee.get()))) {
-            error(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
+            error_without_recovery(ruby_parser::dclass::SingletonLiteral, head->definee->loc);
         }
         checkReservedForNumberedParameters(head->name.toString(gs_), declLoc);
 
@@ -961,7 +961,7 @@ public:
 
     unique_ptr<Node> forwarded_args(const token *dots) {
         if (!driver_->lex.is_declared_forward_args()) {
-            error(ruby_parser::dclass::UnexpectedToken, tokLoc(dots), "\"...\"");
+            error_without_recovery(ruby_parser::dclass::UnexpectedToken, tokLoc(dots), "\"...\"");
         }
         return make_unique<ForwardedArgs>(tokLoc(dots));
     }
@@ -1063,7 +1063,7 @@ public:
                                   const token *rparen) {
         core::LocOffsets loc = tokLoc(keyword).join(collectionLoc(lparen, args, rparen));
         if (!args.empty() && parser::isa_node<BlockPass>(args.back().get())) {
-            error(ruby_parser::dclass::BlockGivenToYield, loc);
+            error_without_recovery(ruby_parser::dclass::BlockGivenToYield, loc);
         }
         return make_unique<Yield>(loc, std::move(args));
     }
@@ -1235,7 +1235,7 @@ public:
     unique_ptr<Node> match_var_hash_from_str(sorbet::parser::NodeVec strings) {
         auto loc = collectionLoc(strings);
         if (strings.size() > 1) {
-            error(ruby_parser::dclass::PatternInterpInVarName, loc);
+            error_without_recovery(ruby_parser::dclass::PatternInterpInVarName, loc);
         }
         auto &node = strings.at(0);
         if (auto *str = parser::cast_node<String>(node.get())) {
@@ -1312,7 +1312,7 @@ public:
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
         if (parser::isa_node<Backref>(lhs.get()) || parser::isa_node<NthRef>(lhs.get())) {
-            error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
+            error_without_recovery(ruby_parser::dclass::BackrefAssignment, lhs->loc);
         }
 
         if (op->view() == "&&") {
@@ -1336,7 +1336,7 @@ public:
     unique_ptr<Node> p_ident(const token *tok) {
         auto name_str = tok->asString();
         if (!driver_->lex.is_declared(name_str)) {
-            error(ruby_parser::dclass::PatternLVarUndefined, tokLoc(tok), name_str);
+            error_without_recovery(ruby_parser::dclass::PatternLVarUndefined, tokLoc(tok), name_str);
         }
         return ident(tok);
     }
@@ -1703,7 +1703,7 @@ public:
 
     bool hasCircularArgumentReferences(const Node *node, std::string_view name) {
         if (name == driver_->current_arg_stack.top()) {
-            error(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
+            error_without_recovery(ruby_parser::dclass::CircularArgumentReference, node->loc, std::string(name));
             return true;
         }
         return false;
@@ -1740,7 +1740,7 @@ public:
         if (that_arg_loc_it == map.end()) {
             map[this_name] = this_loc;
         } else if (argNameCollides(this_name)) {
-            error(ruby_parser::dclass::DuplicateArgument, this_loc, this_name);
+            error_without_recovery(ruby_parser::dclass::DuplicateArgument, this_loc, this_name);
         }
     }
 
@@ -1751,7 +1751,7 @@ public:
         }
 
         if (driver_->pattern_variables.declared(name)) {
-            error(ruby_parser::dclass::PatternDuplicateVariable, loc, name);
+            error_without_recovery(ruby_parser::dclass::PatternDuplicateVariable, loc, name);
         }
 
         driver_->pattern_variables.declare(name);
@@ -1759,7 +1759,7 @@ public:
 
     void checkDuplicatePatternKey(std::string name, core::LocOffsets loc) {
         if (driver_->pattern_hash_keys.declared(name)) {
-            error(ruby_parser::dclass::PatternDuplicateKey, loc, name);
+            error_without_recovery(ruby_parser::dclass::PatternDuplicateKey, loc, name);
         }
 
         driver_->pattern_hash_keys.declare(name);
@@ -1768,14 +1768,14 @@ public:
     void checkEndlessSetter(std::string name, core::LocOffsets loc) {
         if (name != "===" && name != "==" && name != "!=" && name != "<=" && name != ">=" &&
             name[name.length() - 1] == '=') {
-            error(ruby_parser::dclass::EndlessSetter, loc);
+            error_without_recovery(ruby_parser::dclass::EndlessSetter, loc);
         }
     }
 
     void checkLVarName(std::string name, core::LocOffsets loc) {
         std::regex lvar_regex("^[a-z_][a-zA-Z0-9_]*$");
         if (!std::regex_match(name, lvar_regex)) {
-            error(ruby_parser::dclass::PatternLVarName, loc, name);
+            error_without_recovery(ruby_parser::dclass::PatternLVarName, loc, name);
         }
     }
 
@@ -1791,7 +1791,7 @@ public:
             } else if (auto *b = parser::cast_node<Begin>(p.get())) {
                 res += collapseSymbolStrings(&b->stmts, loc);
             } else {
-                error(ruby_parser::dclass::PatternInterpInVarName, loc);
+                error_without_recovery(ruby_parser::dclass::PatternInterpInVarName, loc);
             }
         }
         return res;
