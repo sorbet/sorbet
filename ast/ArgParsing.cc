@@ -10,50 +10,60 @@ namespace sorbet::ast {
 namespace {
 core::ParsedArg parseArg(const ast::ExpressionPtr &arg) {
     core::ParsedArg parsedArg;
+    auto *cursor = &arg;
 
-    typecase(
-        arg,
-        [&](const ast::RestArg &rest) {
-            parsedArg = parseArg(rest.expr);
-            parsedArg.flags.isRepeated = true;
-        },
-        [&](const ast::KeywordArg &kw) {
-            parsedArg = parseArg(kw.expr);
-            parsedArg.flags.isKeyword = true;
-        },
-        [&](const ast::OptionalArg &opt) {
-            parsedArg = parseArg(opt.expr);
-            parsedArg.flags.isDefault = true;
-        },
-        [&](const ast::BlockArg &blk) {
-            parsedArg = parseArg(blk.expr);
-            parsedArg.flags.isBlock = true;
-        },
-        [&](const ast::ShadowArg &shadow) {
-            parsedArg = parseArg(shadow.expr);
-            parsedArg.flags.isShadow = true;
-        },
-        [&](const ast::Local &local) {
-            parsedArg.local = local.localVariable;
-            parsedArg.loc = local.loc;
-        });
+    while (cursor != nullptr) {
+        typecase(
+            *cursor,
+            [&](const ast::RestArg &rest) {
+                parsedArg.flags.isRepeated = true;
+                cursor = &rest.expr;
+            },
+            [&](const ast::KeywordArg &kw) {
+                parsedArg.flags.isKeyword = true;
+                cursor = &kw.expr;
+            },
+            [&](const ast::OptionalArg &opt) {
+                parsedArg.flags.isDefault = true;
+                cursor = &opt.expr;
+            },
+            [&](const ast::BlockArg &blk) {
+                parsedArg.flags.isBlock = true;
+                cursor = &blk.expr;
+            },
+            [&](const ast::ShadowArg &shadow) {
+                parsedArg.flags.isShadow = true;
+                cursor = &shadow.expr;
+            },
+            [&](const ast::Local &local) {
+                parsedArg.local = local.localVariable;
+                parsedArg.loc = local.loc;
+                cursor = nullptr;
+            });
+    }
 
     return parsedArg;
 }
 
 ExpressionPtr getDefaultValue(ExpressionPtr arg) {
-    ExpressionPtr default_;
-    typecase(
-        arg, [&](ast::RestArg &rest) { default_ = getDefaultValue(move(rest.expr)); },
-        [&](ast::KeywordArg &kw) { default_ = getDefaultValue(move(kw.expr)); },
-        [&](ast::OptionalArg &opt) { default_ = move(opt.default_); },
-        [&](ast::BlockArg &blk) { default_ = getDefaultValue(move(blk.expr)); },
-        [&](ast::ShadowArg &shadow) { default_ = getDefaultValue(move(shadow.expr)); },
-        [&](ast::Local &local) {
-            // No default.
-        });
-    ENFORCE(default_ != nullptr);
-    return default_;
+    auto *cursor = &arg;
+    bool done = false;
+    while (!done) {
+        typecase(
+            *cursor, [&](ast::RestArg &rest) { cursor = &rest.expr; }, [&](ast::KeywordArg &kw) { cursor = &kw.expr; },
+            [&](ast::OptionalArg &opt) {
+                cursor = &opt.default_;
+                done = true;
+            },
+            [&](ast::BlockArg &blk) { cursor = &blk.expr; }, [&](ast::ShadowArg &shadow) { cursor = &shadow.expr; },
+            [&](ast::Local &local) {
+                ENFORCE(false, "shouldn't reach a local variable for arg");
+                done = true;
+                // No default.
+            });
+    }
+    ENFORCE(cursor != &arg);
+    return std::move(*cursor);
 }
 
 } // namespace

@@ -39,56 +39,55 @@ class LocalNameInserter {
 
     struct NamedArg {
         core::NameRef name;
+        ArgFlags flags;
         core::LocalVariable local;
         core::LocOffsets loc;
         ast::ExpressionPtr expr;
-        ArgFlags flags;
     };
 
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
     NamedArg nameArg(ast::ExpressionPtr arg) {
         NamedArg named;
+        auto *cursor = &arg;
 
-        typecase(
-            arg,
-            [&](ast::UnresolvedIdent &nm) {
-                named.name = nm.name;
-                named.local = enterLocal(named.name);
-                named.loc = nm.loc;
-                named.expr = ast::make_expression<ast::Local>(nm.loc, named.local);
-            },
-            [&](ast::RestArg &rest) {
-                named = nameArg(move(rest.expr));
-                named.expr = ast::MK::RestArg(rest.loc, move(named.expr));
-                named.flags.repeated = true;
-            },
-            [&](ast::KeywordArg &kw) {
-                named = nameArg(move(kw.expr));
-                named.expr = ast::make_expression<ast::KeywordArg>(kw.loc, move(named.expr));
-                named.flags.keyword = true;
-            },
-            [&](ast::OptionalArg &opt) {
-                named = nameArg(move(opt.expr));
-                named.expr = ast::MK::OptionalArg(opt.loc, move(named.expr), move(opt.default_));
-            },
-            [&](ast::BlockArg &blk) {
-                named = nameArg(move(blk.expr));
-                named.expr = ast::MK::BlockArg(blk.loc, move(named.expr));
-                named.flags.block = true;
-            },
-            [&](ast::ShadowArg &shadow) {
-                named = nameArg(move(shadow.expr));
-                named.expr = ast::MK::ShadowArg(shadow.loc, move(named.expr));
-                named.flags.shadow = true;
-            },
-            [&](const ast::Local &local) {
-                named.name = local.localVariable._name;
-                named.local = enterLocal(named.name);
-                named.loc = local.loc;
-                named.expr = ast::make_expression<ast::Local>(local.loc, named.local);
-            });
+        while (cursor != nullptr) {
+            typecase(
+                *cursor,
+                [&](ast::UnresolvedIdent &nm) {
+                    named.name = nm.name;
+                    named.local = enterLocal(nm.name);
+                    named.loc = nm.loc;
+                    *cursor = ast::make_expression<ast::Local>(nm.loc, named.local);
+                    cursor = nullptr;
+                },
+                [&](ast::RestArg &rest) {
+                    named.flags.repeated = true;
+                    cursor = &rest.expr;
+                },
+                [&](ast::KeywordArg &kw) {
+                    named.flags.keyword = true;
+                    cursor = &kw.expr;
+                },
+                [&](ast::OptionalArg &opt) { cursor = &opt.expr; },
+                [&](ast::BlockArg &blk) {
+                    named.flags.block = true;
+                    cursor = &blk.expr;
+                },
+                [&](ast::ShadowArg &shadow) {
+                    named.flags.shadow = true;
+                    cursor = &shadow.expr;
+                },
+                [&](const ast::Local &local) {
+                    named.name = local.localVariable._name;
+                    named.local = enterLocal(local.localVariable._name);
+                    named.loc = local.loc;
+                    *cursor = ast::make_expression<ast::Local>(local.loc, named.local);
+                    cursor = nullptr;
+                });
+        }
 
+        named.expr = move(arg);
         return named;
     }
 
