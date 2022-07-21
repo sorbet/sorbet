@@ -46,18 +46,24 @@ core::ParsedArg parseArg(const ast::ExpressionPtr &arg) {
 }
 
 ExpressionPtr getDefaultValue(ExpressionPtr arg) {
-    ExpressionPtr default_;
-    typecase(
-        arg, [&](ast::RestArg &rest) { default_ = getDefaultValue(move(rest.expr)); },
-        [&](ast::KeywordArg &kw) { default_ = getDefaultValue(move(kw.expr)); },
-        [&](ast::OptionalArg &opt) { default_ = move(opt.default_); },
-        [&](ast::BlockArg &blk) { default_ = getDefaultValue(move(blk.expr)); },
-        [&](ast::ShadowArg &shadow) { default_ = getDefaultValue(move(shadow.expr)); },
-        [&](ast::Local &local) {
-            // No default.
-        });
-    ENFORCE(default_ != nullptr);
-    return default_;
+    auto *cursor = &arg;
+    bool done = false;
+    while (!done) {
+        typecase(
+            *cursor, [&](ast::RestArg &rest) { cursor = &rest.expr; }, [&](ast::KeywordArg &kw) { cursor = &kw.expr; },
+            [&](ast::OptionalArg &opt) {
+                cursor = &opt.default_;
+                done = true;
+            },
+            [&](ast::BlockArg &blk) { cursor = &blk.expr; }, [&](ast::ShadowArg &shadow) { cursor = &shadow.expr; },
+            [&](ast::Local &local) {
+                ENFORCE(false, "shouldn't reach a local variable for arg");
+                done = true;
+                // No default.
+            });
+    }
+    ENFORCE(cursor != &arg);
+    return std::move(*cursor);
 }
 
 } // namespace
