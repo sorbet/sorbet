@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def self<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+end

@@ -897,10 +897,20 @@ public:
         return make_unique<SClass>(loc, declLoc, std::move(expr), std::move(body));
     }
 
+    unique_ptr<Node> defnHeadError(const token *def) {
+        return make_unique<DefnHead>(tokLoc(def), core::Names::methodDefNameMissing());
+    }
+
     unique_ptr<Node> defsHead(const token *def, unique_ptr<Node> definee, const token *dot, const token *name) {
         core::LocOffsets declLoc = tokLoc(def, name);
 
         return make_unique<DefsHead>(declLoc, std::move(definee), gs_.enterNameUTF8(name->view()));
+    }
+
+    unique_ptr<Node> defsHeadError(const token *def, unique_ptr<Node> definee, const token *dot) {
+        core::LocOffsets declLoc = tokLoc(def, dot);
+
+        return make_unique<DefsHead>(declLoc, std::move(definee), core::Names::methodDefNameMissing());
     }
 
     unique_ptr<Node> defSingleton(unique_ptr<Node> defHead, unique_ptr<Node> args, unique_ptr<Node> body,
@@ -2098,6 +2108,11 @@ ForeignPtr defnHead(SelfPtr builder, const token *def, const token *name) {
     return build->toForeign(build->defnHead(def, name));
 }
 
+ForeignPtr defnHeadError(SelfPtr builder, const token *def) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->defnHeadError(def));
+}
+
 ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_, ForeignPtr expr, ForeignPtr body,
                       const token *end_) {
     auto build = cast_builder(builder);
@@ -2107,6 +2122,11 @@ ForeignPtr def_sclass(SelfPtr builder, const token *class_, const token *lshft_,
 ForeignPtr defsHead(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name) {
     auto build = cast_builder(builder);
     return build->toForeign(build->defsHead(def, build->cast_node(definee), dot, name));
+}
+
+ForeignPtr defsHeadError(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->defsHeadError(def, build->cast_node(definee), dot));
 }
 
 ForeignPtr defEndlessMethod(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal, ForeignPtr body) {
@@ -2699,8 +2719,10 @@ struct ruby_parser::builder Builder::interface = {
     defMethod,
     defModule,
     defnHead,
+    defnHeadError,
     def_sclass,
     defsHead,
+    defsHeadError,
     defSingleton,
     encodingLiteral,
     error_node,

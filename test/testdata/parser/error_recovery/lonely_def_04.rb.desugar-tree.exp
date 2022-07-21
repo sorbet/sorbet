@@ -1,0 +1,5 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def <method-def-name-missing><<todo method>>(&<blk>)
+    <emptyTree>
+  end
+end

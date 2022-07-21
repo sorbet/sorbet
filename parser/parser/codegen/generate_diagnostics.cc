@@ -6,6 +6,8 @@ using namespace std;
 namespace {
 
 tuple<string, string> MESSAGES[] = {
+    {"InternalError", "internal error while parsing: {}"},
+
     // Lexer errors
     {"UnicodePointTooLarge", "invalid Unicode codepoint (too large)"},
     {"InvalidEscape", "invalid escape character syntax"},
@@ -79,6 +81,7 @@ tuple<string, string> MESSAGES[] = {
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
     {"BlockArgsUnexpectedNewline", "Hint: expected \\\"|\\\" token here"},
     {"EOFInsteadOfEnd", "Hint: this {} token is not closed before the end of the file"},
+    {"DefMissingName", "Hint: this {} token might not be followed by a method name"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},
