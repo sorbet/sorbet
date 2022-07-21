@@ -1512,8 +1512,15 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             },
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
+
                 auto castType = core::Types::instantiate(ctx, c.type, klass.data(ctx)->typeMembers(),
                                                          klass.data(ctx)->selfTypeArgs(ctx));
+                if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
+                    // ^ This mimics the check in LoadArg's call to argumentTypeAsSeenByImplementation
+                    // It instantiates any `T.type_parameter(:U)`'s in the type (which are only
+                    // valid in a method body if the method's signature is generic).
+                    castType = core::Types::instantiate(ctx, castType, constr);
+                }
 
                 tp.type = castType;
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
@@ -1655,9 +1662,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     // variable came from some other source (e.g. a function argument)
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    e.replaceWith(fmt::format("Initialize as `{}`", suggest.show(ctx)), cur.origins[0],
-                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(),
-                                                  suggest.show(ctx));
+                                    auto replacement = suggest.show(ctx, core::ShowOptions().withShowForRBI());
+                                    e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0],
+                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(), replacement);
                                 } else {
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));

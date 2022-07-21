@@ -8,6 +8,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
+#include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
@@ -1829,6 +1830,7 @@ class ResolveTypeMembersAndFieldsWalk {
         core::SymbolRef owner;
         ast::ExpressionPtr *typeArg;
         ast::Cast *cast;
+        bool inFieldAssign;
     };
 
     struct ResolveFieldItem {
@@ -1859,7 +1861,7 @@ class ResolveTypeMembersAndFieldsWalk {
         core::NameRef fromName;
     };
 
-    struct ResolveTypeMembersAndFieldsResult {
+    struct ResolveTypeMembersAndFieldsWorkerResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
         vector<ResolveAttachedClassItem> todoAttachedClassItems;
@@ -1869,6 +1871,11 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
         vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
         vector<ResolveMethodAliasItem> todoMethodAliasItems;
+    };
+
+    struct ResolveTypeMembersAndFieldsResult {
+        vector<ast::ParsedFile> trees;
+        vector<ResolveCastItem> todoResolveCastItems;
     };
 
     vector<ResolveAssignItem> todoAssigns_;
@@ -1886,6 +1893,7 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<bool> classOfDepth_;
     vector<core::SymbolRef> dependencies_;
     std::vector<int> nestedBlockCounts;
+    vector<bool> inFieldAssign;
 
     void extendClassOfDepth(ast::Send &send) {
         if (trackDependencies_) {
@@ -1927,7 +1935,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
     // `ResolveCastItem` is not simple.
-    [[nodiscard]] static bool tryResolveSimpleClassCastItem(core::Context ctx, ResolveCastItem &job) {
+    [[nodiscard]] static bool tryResolveSimpleClassCastItem(const core::GlobalState &gs, ResolveCastItem &job) {
         if (!ast::isa_tree<ast::ConstantLit>(*job.typeArg)) {
             return false;
         }
@@ -1937,26 +1945,60 @@ class ResolveTypeMembersAndFieldsWalk {
             return false;
         }
 
-        auto data = lit.symbol.asClassOrModuleRef().data(ctx);
+        auto data = lit.symbol.asClassOrModuleRef().data(gs);
 
         // A class with type members is not simple.
         if (!data->typeMembers().empty()) {
             return false;
         }
 
-        resolveCastItem(ctx, job);
-        return true;
+        bool lastTry = false;
+        return resolveCastItem(gs, job, lastTry);
     }
 
     // Resolve a potentially more complex cast (e.g., may reference type member or alias).
-    static void resolveCastItem(core::Context ctx, ResolveCastItem &job) {
+    [[nodiscard]] static bool resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job, bool lastTry) {
         ParsedSig emptySig;
+        // Owner might be a class, because we haven't made the <static-init> methods yet.
+        // Also, if we're in a field assign like `@x = ...`, don't use typeArguments, fields are
+        // technically in class scope, not method scope.
+        if (job.owner.isMethod() && !job.inFieldAssign) {
+            for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
+                const auto &data = typeArg.data(gs);
+                auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
+                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{data->loc(), name, data->resultType});
+            }
+        }
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
-        job.cast->type = TypeSyntax::getResultType(
-            ctx, *job.typeArg, emptySig,
-            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
+        auto allowUnspecifiedTypeParameter = !lastTry;
+        auto ctx = core::Context(gs, job.owner.enclosingClass(gs), job.file);
+        auto type = TypeSyntax::getResultType(ctx, *job.typeArg, emptySig,
+                                              TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                             allowUnspecifiedTypeParameter, core::Symbols::noSymbol()});
+        if (type == core::Types::todo()) {
+            return false;
+        }
+
+        job.cast->type = move(type);
+        return true;
+    }
+
+    static core::TypePtr checkFieldTypeTodo(core::Context ctx, core::NameRef uidName, const ast::Cast *cast) {
+        auto castType = cast->type;
+        if (cast->type == core::Types::todo()) {
+            if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                e.setHeader("Unable to resolve declared type for `{}`", uidName.show(ctx));
+                e.addErrorNote("One possible cause is attempting to declare the type of a field using `{}`.",
+                               "\n    Type parameters are only valid within the scope of a method, while fields are in "
+                               "class scope.",
+                               "T.type_parameter");
+            }
+            castType = core::Types::untypedUntracked();
+        }
+
+        return castType;
     }
 
     // Attempts to resolve the type of the given field. Returns `false` if the cast is not yet resolved.
@@ -1965,6 +2007,9 @@ class ResolveTypeMembersAndFieldsWalk {
 
         core::ClassOrModuleRef scope;
         auto uid = job.ident;
+
+        auto castType = checkFieldTypeTodo(ctx, uid->name, cast);
+
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.isClassOrModule()) {
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
@@ -1982,14 +2027,14 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Declaring a instance variable
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
-                       !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
+                       !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
+            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Inside a method; declaring a normal instance variable
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
@@ -2002,7 +2047,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
         if (prior.exists() && prior.isFieldOrStaticField()) {
             auto priorField = prior.asFieldRef();
-            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, cast->type)) {
+            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
                 // We already have a symbol for this field, and it matches what we already saw, so we can short
                 // circuit.
                 return;
@@ -2036,7 +2081,7 @@ class ResolveTypeMembersAndFieldsWalk {
             var = ctx.state.enterFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
         }
 
-        var.data(ctx)->resultType = cast->type;
+        var.data(ctx)->resultType = castType;
         return;
     }
 
@@ -2163,8 +2208,11 @@ class ResolveTypeMembersAndFieldsWalk {
                     auto allowSelfType = true;
                     auto allowRebind = false;
                     auto allowTypeMember = false;
-                    core::TypePtr resTy = TypeSyntax::getResultType(
-                        ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+                    auto allowUnspecifiedTypeParameter = false;
+                    core::TypePtr resTy =
+                        TypeSyntax::getResultType(ctx, value, emptySig,
+                                                  TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                                 allowUnspecifiedTypeParameter, lhs});
 
                     switch (key->asSymbol().rawId()) {
                         case core::Names::fixed().rawId():
@@ -2299,9 +2347,10 @@ class ResolveTypeMembersAndFieldsWalk {
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
-        lhs.setResultType(ctx,
-                          TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
-                                                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs}));
+        auto allowUnspecifiedTypeParameter = false;
+        lhs.setResultType(ctx, TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
+                                                         TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                                        allowUnspecifiedTypeParameter, lhs}));
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
@@ -2382,14 +2431,23 @@ class ResolveTypeMembersAndFieldsWalk {
         arg.flags.isKeyword = true;
     }
 
-    // Returns `true` if `asgn` is a field declaration.
-    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+    ast::UnresolvedIdent *unwrapFieldAssign(ast::Assign &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
-            return false;
+            return nullptr;
         }
 
         if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
+            return nullptr;
+        }
+
+        return uid;
+    }
+
+    // Returns `true` if `asgn` is a field declaration.
+    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+        auto uid = unwrapFieldAssign(asgn);
+        if (uid == nullptr) {
             return false;
         }
 
@@ -2615,6 +2673,7 @@ class ResolveTypeMembersAndFieldsWalk {
 public:
     ResolveTypeMembersAndFieldsWalk() {
         nestedBlockCounts.emplace_back(0);
+        inFieldAssign.emplace_back(false);
     }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -2749,11 +2808,8 @@ public:
 
                     ResolveCastItem item;
                     item.file = ctx.file;
-
-                    // Compute the containing class when translating the type,
-                    // as there's a very good chance this has been called from a
-                    // method context.
-                    item.owner = ctx.owner.enclosingClass(ctx);
+                    item.owner = ctx.owner;
+                    item.inFieldAssign = this->inFieldAssign.back();
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.getPosArg(1)));
                     auto expr = std::move(send.getPosArg(0));
@@ -2768,7 +2824,7 @@ public:
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).getPosArg(0);
 
                     // We should be able to resolve simple casts immediately.
-                    if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
+                    if (!tryResolveSimpleClassCastItem(ctx.state, item)) {
                         todoResolveCastItems_.emplace_back(move(item));
                     }
 
@@ -2843,7 +2899,16 @@ public:
         }
     }
 
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto uid = unwrapFieldAssign(asgn);
+        auto foundField = uid != nullptr;
+        this->inFieldAssign.emplace_back(foundField);
+    }
+
     void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        this->inFieldAssign.pop_back();
+
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         if (handleFieldDeclaration(ctx, asgn)) {
             return;
@@ -2905,13 +2970,13 @@ public:
     }
 
     template <typename StateType>
-    static vector<ast::ParsedFile> run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+    static ResolveTypeMembersAndFieldsResult run(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
         static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
         constexpr bool isConstStateType = is_const_v<StateType>;
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsResult>>(trees.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsWorkerResult>>(trees.size());
         for (auto &tree : trees) {
             inputq->push(move(tree), 1);
         }
@@ -2920,7 +2985,7 @@ public:
         workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
             Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
             ResolveTypeMembersAndFieldsWalk walk;
-            ResolveTypeMembersAndFieldsResult output;
+            ResolveTypeMembersAndFieldsWorkerResult output;
             ast::ParsedFile job;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
@@ -2956,7 +3021,7 @@ public:
         vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
 
         {
-            ResolveTypeMembersAndFieldsResult threadResult;
+            ResolveTypeMembersAndFieldsWorkerResult threadResult;
             for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -3062,10 +3127,17 @@ public:
         }
 
         // Resolve the remaining casts and fields.
+        vector<ResolveCastItem> stillPendingTodoResolveCastItems;
         for (auto &threadTodos : combinedTodoResolveCastItems) {
             for (auto &job : threadTodos) {
-                core::Context ctx(gs, job.owner, job.file);
-                resolveCastItem(ctx, job);
+                auto lastTry = false;
+                if (!resolveCastItem(gs, job, lastTry)) {
+                    // Some cast items, like those using `T.type_parameter(:U)` have to resolve
+                    // after resolveSigs.
+                    // We're guaranteed that resolveSigs won't depend on these, because things like
+                    // `T.type_parameter(:U)` are not valid in static fields and type aliases.
+                    stillPendingTodoResolveCastItems.emplace_back(move(job));
+                }
             }
         }
         if constexpr (!isConstStateType) {
@@ -3095,7 +3167,20 @@ public:
             }
         }
 
-        return combinedFiles;
+        return {move(combinedFiles), move(stillPendingTodoResolveCastItems)};
+    }
+
+    static void resolvePendingCastItems(const core::GlobalState &gs, vector<ResolveCastItem> &todoResolveCastItems) {
+        for (auto &job : todoResolveCastItems) {
+            auto lastTry = true;
+            if (!resolveCastItem(gs, job, lastTry)) {
+                auto errLoc = core::Loc(job.file, job.cast->loc);
+                if (auto e = gs.beginError(errLoc, core::errors::Internal::InternalError)) {
+                    e.setHeader("Invariant failed: cast items should always resolve on final try");
+                    e.addErrorNote("Please report a bug to the Sorbet team");
+                }
+            }
+        }
     }
 };
 
@@ -3701,7 +3786,7 @@ public:
 };
 
 template <typename StateType>
-ast::ParsedFilesOrCancelled resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+vector<ast::ParsedFile> resolveSigs(StateType &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     static_assert(std::is_same_v<remove_const_t<StateType>, core::GlobalState>);
     constexpr bool isConstStateType = std::is_const_v<StateType>;
 
@@ -3813,12 +3898,10 @@ ast::ParsedFilesOrCancelled runIncrementalImpl(StateType &gs, vector<ast::Parsed
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(trees), *workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
+    auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
+    ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
+    sanityCheck(gs, result);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();
@@ -3842,16 +3925,14 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
-    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+        return ast::ParsedFilesOrCancelled::cancel(move(rtmafResult.trees), workers);
     }
 
-    auto result = resolveSigs(gs, std::move(trees), workers);
-    if (!result.hasResult()) {
-        return result;
-    }
-    sanityCheck(gs, result.result());
+    auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
+    ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
+    sanityCheck(gs, result);
 
     return result;
 }
