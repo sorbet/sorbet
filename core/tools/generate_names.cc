@@ -63,6 +63,7 @@ NameDef names[] = {
     {"cvarNameMissing", "@@<cvar-name-missing>"},
     {"ConstantNameMissing", "<ConstantNameMissing>", true},
     {"ErrorNode", "<ErrorNode>", true},
+    {"dynamicConstAssign", "<dynamic-const-assign>"},
 
     // used in CFG for temporaries
     {"whileTemp", "<whileTemp>"},
