@@ -180,6 +180,11 @@ public:
         driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), data);
     }
 
+    void error(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
+        driver_->diagnostics.emplace_back(ruby_parser::dlevel::ERROR, ruby_parser::dclass::DynamicConst,
+                                          ruby_parser::diagnostic::range(loc.beginPos(), loc.endPos()), data);
+    }
+
     /* Begin callback methods */
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
@@ -343,8 +348,13 @@ public:
         } else if (auto *c = parser::cast_node<Const>(node.get())) {
             if (driver_->lex.context.inDef) {
                 error(ruby_parser::dclass::DynamicConst, node->loc);
+                // Error recovery: lie and say it was an assign to something else so that the parse can continue
+                auto name = core::Names::dynamicConstAssign();
+                driver_->lex.declare(name.shortName(gs_));
+                return make_unique<LVarLhs>(c->loc, name);
+            } else {
+                return make_unique<ConstLhs>(c->loc, std::move(c->scope), c->name);
             }
-            return make_unique<ConstLhs>(c->loc, std::move(c->scope), c->name);
         } else if (auto *cv = parser::cast_node<CVar>(node.get())) {
             return make_unique<CVarLhs>(cv->loc, cv->name);
         } else if (auto *gv = parser::cast_node<GVar>(node.get())) {
