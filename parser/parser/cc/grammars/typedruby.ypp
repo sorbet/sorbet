@@ -928,7 +928,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.context.allowNumparams = false;
                     }
 
-        defn_head: k_def def_name
+       defn_head: k_def def_name
                     {
                       auto defNameToken = $2->token;
                       ForeignPtr node = nullptr;
@@ -953,26 +953,46 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.context.allowNumparams = false;
                     }
 
-    defs_head_pre: k_def singleton dot_or_colon
-                     {
-                       driver.lex.set_state_expr_fname();
-                       driver.lex.context.inArgDef = true;
-                       // This is not a real delimited node list, we just need a way to communicate up two tokens and a node
-                       auto fakeList = driver.alloc.node_list($2);
-                       $$ = driver.alloc.delimited_node_list($1, fakeList, $3);
-                     }
-        defs_head: defs_head_pre def_name
-                     {
-                       auto k_def = $1->begin;
-                       auto singleton = $1->inner->at(0);
-                       auto dot_or_colon = $1->end;
+   defs_head_pre: k_def singleton dot_or_colon
+                    {
+                      driver.lex.set_state_expr_fname();
+                      driver.lex.context.inArgDef = true;
+                      // This is not a real delimited node list, we just need a way to communicate up two tokens and a node
+                      auto fakeList = driver.alloc.node_list($2);
+                      $$ = driver.alloc.delimited_node_list($1, fakeList, $3);
+                    }
+       defs_head: defs_head_pre def_name
+                    {
+                      auto k_def = $1->begin;
+                      auto singleton = $1->inner->at(0);
+                      auto dot_or_colon = $1->end;
 
-                       auto defNameToken = $2->token;
-                       auto defNameContext = $2->context;
-                       auto node = driver.build.defsHead(self, k_def, singleton, dot_or_colon, defNameToken);
+                      auto defNameToken = $2->token;
+                      ForeignPtr node = nullptr;
+                      if (driver.rewind_if_different_line(dot_or_colon, defNameToken)) {
+                        node = driver.build.defsHeadError(self, k_def, singleton, dot_or_colon);
+                      } else {
+                        node = driver.build.defsHead(self, k_def, singleton, dot_or_colon, defNameToken);
+                      }
 
-                       $$ = driver.alloc.node_with_context(node, defNameContext);
-                     }
+                      auto defNameContext = $2->context;
+                      $$ = driver.alloc.node_with_context(node, defNameContext);
+                    }
+                 | defs_head_pre error
+                    {
+                      auto k_def = $1->begin;
+                      auto singleton = $1->inner->at(0);
+                      auto dot_or_colon = $1->end;
+
+                      driver.local_push();
+                      driver.current_arg_stack.push("");
+                      auto node = driver.build.defsHeadError(self, k_def, singleton, dot_or_colon);
+                      driver.rewind_and_reset(@1.endPos());
+
+                      $$ = driver.alloc.node_with_context(node, driver.lex.context.dup());
+                      driver.lex.context.inDef = true;
+                      driver.lex.context.allowNumparams = false;
+                    }
 
     command_call: command
                 | block_command

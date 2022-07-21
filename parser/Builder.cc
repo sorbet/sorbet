@@ -907,6 +907,12 @@ public:
         return make_unique<DefsHead>(declLoc, std::move(definee), gs_.enterNameUTF8(name->view()));
     }
 
+    unique_ptr<Node> defsHeadError(const token *def, unique_ptr<Node> definee, const token *dot) {
+        core::LocOffsets declLoc = tokLoc(def, dot);
+
+        return make_unique<DefsHead>(declLoc, std::move(definee), core::Names::methodDefNameMissing());
+    }
+
     unique_ptr<Node> defSingleton(unique_ptr<Node> defHead, unique_ptr<Node> args, unique_ptr<Node> body,
                                   const token *end) {
         auto *head = parser::cast_node<DefsHead>(defHead.get());
@@ -2118,6 +2124,11 @@ ForeignPtr defsHead(SelfPtr builder, const token *def, ForeignPtr definee, const
     return build->toForeign(build->defsHead(def, build->cast_node(definee), dot, name));
 }
 
+ForeignPtr defsHeadError(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->defsHeadError(def, build->cast_node(definee), dot));
+}
+
 ForeignPtr defEndlessMethod(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, const token *equal, ForeignPtr body) {
     auto build = cast_builder(builder);
     return build->toForeign(
@@ -2711,6 +2722,7 @@ struct ruby_parser::builder Builder::interface = {
     defnHeadError,
     def_sclass,
     defsHead,
+    defsHeadError,
     defSingleton,
     encodingLiteral,
     error_node,
