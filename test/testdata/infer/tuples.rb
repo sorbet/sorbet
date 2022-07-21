@@ -41,3 +41,10 @@ T.assert_type!([1].
                  concat(T::Array[Integer].new).
                  concat(T::Array[String].new),
                T::Array[T.any(Integer, String)])
+
+T.reveal_type([].sample) # error: `NilClass`
+T.reveal_type([1, ''].sample) # error: `T.any(Integer, String)`
+T.reveal_type([0.0, 0.1, 0.2].sample) # error: `Float`
+T.reveal_type([].sample(2)) # error: `[] (0-tuple)`
+T.reveal_type([1, ''].sample(2)) # error: `T::Array[T.any(Integer, String)]`
+T.reveal_type([0.0, 0.1, 0.2].sample(2)) # error: `T::Array[Float]`

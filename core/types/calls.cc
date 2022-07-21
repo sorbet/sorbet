@@ -3054,6 +3054,34 @@ public:
     }
 } Tuple_sum;
 
+class Tuple_sample : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto *tuple = cast_type<TupleType>(args.thisType);
+        ENFORCE(tuple);
+
+        if (args.args.size() > 1) {
+            return;
+        }
+        if (args.block != nullptr) {
+            return;
+        }
+        if (args.args.empty()) {
+            if (tuple->elems.empty()) {
+                res.returnType = Types::nilClass();
+            } else {
+                res.returnType = tuple->elementType(gs);
+            }
+        } else {
+            if (tuple->elems.empty()) {
+                res.returnType = make_type<TupleType>(vector<TypePtr>{});
+            } else {
+                res.returnType = Types::arrayOf(gs, tuple->elementType(gs));
+            }
+        }
+    }
+} Tuple_sample;
+
 class Tuple_to_a : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3902,6 +3930,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::min(), &Tuple_minMax},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::max(), &Tuple_minMax},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::sum(), &Tuple_sum},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::sample(), &Tuple_sample},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
