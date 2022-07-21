@@ -181,8 +181,8 @@ public:
     }
 
     void error(ruby_parser::dclass err, core::LocOffsets loc, std::string data = "") {
-        driver_->diagnostics.emplace_back(ruby_parser::dlevel::ERROR, ruby_parser::dclass::DynamicConst,
-                                          ruby_parser::diagnostic::range(loc.beginPos(), loc.endPos()), data);
+        auto range = ruby_parser::diagnostic::range(loc.beginPos(), loc.endPos());
+        driver_->diagnostics.emplace_back(ruby_parser::dlevel::ERROR, err, std::move(range), data);
     }
 
     /* Begin callback methods */
