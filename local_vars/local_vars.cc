@@ -39,10 +39,10 @@ class LocalNameInserter {
 
     struct NamedArg {
         core::NameRef name;
+        ArgFlags flags;
         core::LocalVariable local;
         core::LocOffsets loc;
         ast::ExpressionPtr expr;
-        ArgFlags flags;
     };
 
     // Map through the reference structure, naming the locals, and preserving
