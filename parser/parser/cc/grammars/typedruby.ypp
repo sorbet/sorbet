@@ -932,6 +932,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                     {
                       auto defNameToken = $2->token;
                       ForeignPtr node = nullptr;
+                      // If we are in indentation aware mode (e.g., first attempt at parsing produced completely empty tree)
+                      // We use a heuristic of whether k_def and def_name are on the same line as a recovery strategy.
+                      // This is a greedy heuristic, but it is safe because we only attempt it when !indentationAware mode
+                      // (So the file always has a chance to parse a syntactically valid file with, newline-separated defs)
+                      // See test lonely_def_14.rb for further explanation.
                       if (driver.rewind_if_different_line($1, defNameToken)) {
                         node = driver.build.defnHeadError(self, $1);
                       } else {
@@ -969,6 +974,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
 
                       auto defNameToken = $2->token;
                       ForeignPtr node = nullptr;
+                      // See previous rewind_if_different_line call site for further context.
                       if (driver.rewind_if_different_line(dot_or_colon, defNameToken)) {
                         node = driver.build.defsHeadError(self, k_def, singleton, dot_or_colon);
                       } else {
