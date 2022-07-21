@@ -2,6 +2,7 @@
 #include "Builder.h"
 #include "common/StableStringStorage.h"
 #include "core/Loc.h"
+#include "core/errors/internal.h"
 #include "core/errors/parser.h"
 #include "ruby_parser/driver.hh"
 #include <algorithm>
@@ -37,6 +38,8 @@ core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
         case ruby_parser::dclass::EOFInsteadOfEnd:
         case ruby_parser::dclass::DefMissingName:
             return core::errors::Parser::ErrorRecoveryHint;
+        case ruby_parser::dclass::InternalError:
+            return core::errors::Internal::InternalError;
         default:
             return core::errors::Parser::ParserError;
     }
