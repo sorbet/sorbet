@@ -400,7 +400,8 @@ public:
     // manually for the purpose of emitting an error).
     void rewind_if_dedented(token_t token, token_t kEND, bool force = false);
 
-    // TODO(jez) Document
+    // A helper similar to rewind_if_dedented above, but rewinds if the tokens are on different
+    // lines, regardless of the indentation.
     bool rewind_if_different_line(token_t token1, token_t token2);
 
     // Like rewind_if_dedented above, but has special logic for detecting when the decrease in
