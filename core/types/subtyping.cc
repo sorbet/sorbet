@@ -626,6 +626,11 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         if (sym1.data(gs)->isClass() && sym2.data(gs)->isClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
+        } else if (sym1.data(gs)->flags.isFinal || sym2.data(gs)->flags.isFinal) {
+            // If at least one of them is a module, the only way this type could ever be inhabited
+            // is if a descendant of one of the symbols later includes the module symbol. This can't
+            // happen if either one is final.
+            return Types::bottom();
         }
         categoryCounterInc("glb.<class>.collapsed", "no");
         return AndType::make_shared(t1, t2);
@@ -937,6 +942,11 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 // At this point, the two types are both classes, and unrelated
                 // to each other. Because ruby does not support multiple
                 // inheritance, this type is empty.
+                return Types::bottom();
+            } else if (a1->klass.data(gs)->flags.isFinal || a2->klass.data(gs)->flags.isFinal) {
+                // If at least one of them is a module, the only way this type could ever be
+                // inhabited is if a descendant of one of the symbols later includes the module
+                // symbol. This can't happen if either one is final.
                 return Types::bottom();
             } else {
                 return AndType::make_shared(t1, t2); // we can as well return nothing here?

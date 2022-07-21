@@ -3,7 +3,16 @@ id: intersection-types
 title: Intersection Types (T.all)
 ---
 
-> TODO: This page is still a fragment. Contributions welcome!
+<!--
+  TODO(jez) Fill this out into not a fragment
+
+  - Mention that `T.all(C1, C2)` is `T.noreturn`
+  - Mention that `T.all(C1, M1)` does not collapse, even if `C1` does not
+    include `M1`, because of the possibility of inheritance.
+  - Mention that in fact it will collapse if either of them is `final`
+  - Mention that the same logic applies with generic class types
+  - Doc for `T.noreturn` is also a fragment, might want to flesh that out too
+-->
 
 Intersection types can be useful to say, after the fact, that the input must
 implement two specific interfaces.
