@@ -43,10 +43,8 @@ def list_integer_to_list_string(xs)
   when List::Cons
     List::Cons[String].new(head: xs.head.to_s, tail: list_integer_to_list_string(xs))
   when List::Nil
-    T.reveal_type(xs) # error: Revealed type: `T.all(List[Integer], List::Nil)`
+    T.reveal_type(xs) # error: Revealed type: `List::Nil`
 
-    # Even though the T.all doesn't collapse above, it appears that type can
-    # still be used like an empty list.
     _unused = T.let(xs, List[String])
     0.times do
       puts(xs.head) # error: This code is unreachable
