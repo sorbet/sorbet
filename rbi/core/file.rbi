@@ -308,10 +308,11 @@ class File < IO
   sig do
     params(
         file: T.any(String, Pathname),
+        level: Integer,
     )
     .returns(String)
   end
-  def self.dirname(file); end
+  def self.dirname(file, level = 1); end
 
   # Returns `true` if the named file exists and has a zero size.
   #
