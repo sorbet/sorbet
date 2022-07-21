@@ -57,6 +57,7 @@ class Bad
     @z = T.let(nil, T.nilable(T.type_parameter(:U)))
     #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve declared type for `@z`
     #                                          ^^ error: Unspecified type parameter
+    #                         ^^^^^^^^^^^^^^^^^^^^ error: Method `Bad#foo` does not declare any type parameters
   end
 end
 
