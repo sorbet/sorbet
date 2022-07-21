@@ -975,6 +975,7 @@ class String < Object
   sig do
     params(
         arg0: String,
+        chomp: T::Boolean,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
     .returns(String)
@@ -982,10 +983,11 @@ class String < Object
   sig do
     params(
         arg0: String,
+        chomp: T::Boolean,
     )
     .returns(T::Enumerator[String])
   end
-  def each_line(arg0=T.unsafe(nil), &blk); end
+  def each_line(arg0=T.unsafe(nil), chomp: false, &blk); end
 
   # Returns `true` if *str* has a length of zero.
   #
