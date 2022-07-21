@@ -1370,7 +1370,7 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
         core::UnfreezeNameTable unfreeze(gs);
         core::packages::UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
-            if (FileOps::getFileName(file.file.data(gs).path()) != PACKAGE_FILE_NAME) {
+            if (!file.file.data(gs).isPackage()) {
                 continue;
             }
 
