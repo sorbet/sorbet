@@ -10,33 +10,37 @@ namespace sorbet::ast {
 namespace {
 core::ParsedArg parseArg(const ast::ExpressionPtr &arg) {
     core::ParsedArg parsedArg;
+    auto *cursor = &arg;
 
-    typecase(
-        arg,
-        [&](const ast::RestArg &rest) {
-            parsedArg = parseArg(rest.expr);
-            parsedArg.flags.isRepeated = true;
-        },
-        [&](const ast::KeywordArg &kw) {
-            parsedArg = parseArg(kw.expr);
-            parsedArg.flags.isKeyword = true;
-        },
-        [&](const ast::OptionalArg &opt) {
-            parsedArg = parseArg(opt.expr);
-            parsedArg.flags.isDefault = true;
-        },
-        [&](const ast::BlockArg &blk) {
-            parsedArg = parseArg(blk.expr);
-            parsedArg.flags.isBlock = true;
-        },
-        [&](const ast::ShadowArg &shadow) {
-            parsedArg = parseArg(shadow.expr);
-            parsedArg.flags.isShadow = true;
-        },
-        [&](const ast::Local &local) {
-            parsedArg.local = local.localVariable;
-            parsedArg.loc = local.loc;
-        });
+    while (cursor != nullptr) {
+        typecase(
+            *cursor,
+            [&](const ast::RestArg &rest) {
+                parsedArg.flags.isRepeated = true;
+                cursor = &rest.expr;
+            },
+            [&](const ast::KeywordArg &kw) {
+                parsedArg.flags.isKeyword = true;
+                cursor = &kw.expr;
+            },
+            [&](const ast::OptionalArg &opt) {
+                parsedArg.flags.isDefault = true;
+                cursor = &opt.expr;
+            },
+            [&](const ast::BlockArg &blk) {
+                parsedArg.flags.isBlock = true;
+                cursor = &blk.expr;
+            },
+            [&](const ast::ShadowArg &shadow) {
+                parsedArg.flags.isShadow = true;
+                cursor = &shadow.expr;
+            },
+            [&](const ast::Local &local) {
+                parsedArg.local = local.localVariable;
+                parsedArg.loc = local.loc;
+                cursor = nullptr;
+            });
+    }
 
     return parsedArg;
 }
