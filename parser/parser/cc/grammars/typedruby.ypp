@@ -1159,6 +1159,7 @@ lbrace_cmd_block_start:
        mlhs_node: user_variable
                     {
                       $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
                     }
                 | keyword_variable
                     {
@@ -1200,6 +1201,7 @@ lbrace_cmd_block_start:
              lhs: user_variable
                     {
                       $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
                     }
                 | keyword_variable
                     {
@@ -3747,6 +3749,7 @@ keyword_variable: kNIL
          var_lhs: user_variable
                     {
                       $$ = driver.build.assignable(self, $1);
+                      DIAGCHECK();
                     }
                 | keyword_variable
                     {
