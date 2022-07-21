@@ -954,8 +954,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         vector<TypePtr> newTargs;
         newTargs.reserve(a1->klass.data(gs)->typeMembers().size());
         int j = 0;
-        for (SymbolRef idx : a1->klass.data(gs)->typeMembers()) {
-            TypeMemberRef idxTypeMember = idx.asTypeMemberRef();
+        for (auto idx : a1->klass.data(gs)->typeMembers()) {
             int i = 0;
             if (j >= indexes.size()) {
                 i = INT_MAX;
@@ -966,20 +965,21 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (i >= a2->klass.data(gs)->typeMembers().size()) { // a1 has more tparams, this is fine, it's a child
                 newTargs.emplace_back(a1->targs[j]);
             } else {
-                if (idxTypeMember.data(gs)->flags.isCovariant) {
+                auto a2TypeMember = a2->klass.data(gs)->typeMembers()[i];
+                if (a2TypeMember.data(gs)->flags.isCovariant) {
                     newTargs.emplace_back(Types::all(gs, a1->targs[j], a2->targs[i]));
-                } else if (idxTypeMember.data(gs)->flags.isInvariant) {
+                } else if (a2TypeMember.data(gs)->flags.isInvariant) {
                     if (!Types::equiv(gs, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
-                    const auto &lambdaParam = cast_type<LambdaParam>(idxTypeMember.data(gs)->resultType);
+                    const auto &lambdaParam = cast_type<LambdaParam>(idx.data(gs)->resultType);
                     if (a1->targs[j].isUntyped() && Types::isSubType(gs, lambdaParam->lowerBound, a2->targs[i]) &&
                         Types::isSubType(gs, a2->targs[i], lambdaParam->upperBound)) {
                         newTargs.emplace_back(a2->targs[i]);
                     } else {
                         newTargs.emplace_back(a1->targs[j]);
                     }
-                } else if (idxTypeMember.data(gs)->flags.isContravariant) {
+                } else if (a2TypeMember.data(gs)->flags.isContravariant) {
                     newTargs.emplace_back(Types::any(gs, a1->targs[j], a2->targs[i]));
                 }
             }
