@@ -29,7 +29,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static::ResolvedSig.sig(<self>, true, :make) do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.void()
         end
         <self>.extend(::T::Sig)
