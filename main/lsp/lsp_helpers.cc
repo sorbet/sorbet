@@ -432,7 +432,10 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     }
 
     string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
-    documentation = string(absl::StripTrailingAsciiWhitespace(documentation));
+    string_view stripped = absl::StripTrailingAsciiWhitespace(documentation);
+    if (stripped.size() != documentation.size()) {
+        documentation.resize(stripped.size());
+    }
 
     if (documentation.empty()) {
         return nullopt;
