@@ -127,8 +127,7 @@ def list_map_blk(xs, &blk)
   case xs
   when List::Cons
     head = yield xs.head
-    # This error is a bug. Just capturing the existing behavior.
-    tail = list_map_blk(xs.tail, &blk) # error: Expected `T.proc.params(arg0: <top>).returns(<top>)`
+    tail = list_map_blk(xs.tail, &blk)
     List::Cons[T.type_parameter(:V)].new(head: head, tail: tail)
   when List::Nil
     List::Nil[T.type_parameter(:V)].new
@@ -154,8 +153,8 @@ T.reveal_type(res1) # error: Revealed type: `List[T.untyped]`
 # This error is a bug. Just capturing the existing behavior.
 res2 = list_map_blk(xs) do |x|
   # This error is a bug. Just capturing the existing behavior.
-  T.reveal_type(x) # error: Revealed type: `<top>`
+  T.reveal_type(x) # error: Revealed type: `Integer`
   # This error is a bug. Just capturing the existing behavior.
-  x.even? # error: Method `even?` does not exist on `<top>`
+  x.even?
 end
-T.reveal_type(res2) # error: Revealed type: `List[T.untyped]`
+T.reveal_type(res2) # error: Revealed type: `List[T::Boolean]`

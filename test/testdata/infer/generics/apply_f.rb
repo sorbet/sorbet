@@ -42,13 +42,13 @@ end
 sig {params(y: T.any(Integer, String)).void}
 def takes_any_int_string(y)
   x = apply_f(y) do |x|
-    T.reveal_type(x) # error: `Integer`
+    T.reveal_type(x) # error: `T.any(Integer, String)`
   end
-  T.reveal_type(x) # error: `Integer`
+  T.reveal_type(x) # error: `T.any(Integer, String)`
 
-  x = apply_f_int(y) do |x|
-    #             ^ error: Could not find valid instantiation of type parameters for `Object#apply_f_int`
+  x = apply_f_int(y) do |x| # error: Could not find valid instantiation of type parameters for `Object#apply_f_int`
+    #             ^ error: Expected `T.all(Integer, T.type_parameter(:U))` but found `T.any(Integer, String)` for argument `x`
     T.reveal_type(x) # error: `Integer`
   end
-  T.reveal_type(x) # error: `Integer`
+  T.reveal_type(x) # error: `T.untyped`
 end

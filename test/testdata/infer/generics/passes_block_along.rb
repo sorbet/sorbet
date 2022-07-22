@@ -14,6 +14,6 @@ sig do
     .void
 end
 def passes_along_generic_block(&blk)
-  T.reveal_type(blk)
+  T.reveal_type(blk) # error: `T.proc.params(arg0: T.type_parameter(:X) (of Object#passes_along_generic_block)).returns(T.type_parameter(:Y) (of Object#passes_along_generic_block))`
   takes_generic_block(&blk)
 end
