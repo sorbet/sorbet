@@ -2463,7 +2463,9 @@ void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLo
         }
     }
 
-    if (locs.empty() || (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI())) {
+    if (locs.empty()) {
+        locs.emplace_back(loc);
+    } else if (loc.file().data(gs).sourceType == core::File::Type::Normal && !loc.file().data(gs).isRBI()) {
         if (mainLoc.exists() && loc.file().data(gs).strictLevel >= mainLoc.file().data(gs).strictLevel) {
             // The new loc is stricter; make it the new canonical loc.
             locs.emplace_back(loc);
