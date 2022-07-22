@@ -1430,15 +1430,36 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (isa_type<TypeVar>(t1) && !constr.isSolved()) {
             return constr.rememberIsSubtype(gs, t1, t2);
         }
-        return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode) ||
-               Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
+
+        // This is a hack. isSubTypeUnderConstraint is trying to do double duty as constraint generation and constraint
+        // solving. It essentially implements a greedy algorithm despite no greedy algorithm being correct.
+        // There are a handful of places where we try to work around those hacks with more hacks, and this is one of
+        // them.
+        //
+        // Concretely, it's still possible to come up with cases where this heuristic isn't good enough.
+        // For more, see the comment in `no_short_circuit_type_constraint.rb`
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
+        auto stillNeedToCheckRight = t1.isUntyped() && o2->left.isFullyDefined() && !o2->right.isFullyDefined();
+        if (leftIsSubType && !stillNeedToCheckRight) {
+            // Short circuit to save time
+            return true;
+        } else {
+            return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
+        }
     }
     if (a1 != nullptr) { // 4
         if (isa_type<TypeVar>(t2) && !constr.isSolved()) {
             return constr.rememberIsSubtype(gs, t1, t2);
         }
-        return Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode) ||
-               Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
+        // See explanation in "// 3"
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode);
+        auto stillNeedToCheckRight = t2.isUntyped() && a1->left.isFullyDefined() && !a1->right.isFullyDefined();
+        if (leftIsSubType && !stillNeedToCheckRight) {
+            // Short circuit to save time
+            return true;
+        } else {
+            return Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
+        }
     }
 
     return isSubTypeUnderConstraintSingle(gs, constr, mode, t1, t2); // 1
