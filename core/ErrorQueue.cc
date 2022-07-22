@@ -22,6 +22,11 @@ void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     }
 }
 
+bool ErrorQueue::wouldFlushErrorsForFile(FileRef file) {
+    checkOwned();
+    return errorFlusher->wouldFlushErrors(file);
+}
+
 void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 

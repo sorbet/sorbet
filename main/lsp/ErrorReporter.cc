@@ -79,7 +79,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
     ENFORCE(file.exists());
 
     ErrorStatus &fileErrorStatus = getFileErrorStatus(file);
-    if (fileErrorStatus.lastReportedEpoch > epoch) {
+    if (!wouldReportForFile(epoch, file)) {
         // Internal errors should always crash Sorbet in tests. Most of the time though, ENFORCE
         // failures and Exception::raise translate into user-visible errors with `beginError`.
         // Regardless of epoch, we want internal errors to crash the process.
@@ -193,6 +193,11 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
     config->output->write(make_unique<LSPMessage>(
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
 };
+
+bool ErrorReporter::wouldReportForFile(uint32_t epoch, core::FileRef file) {
+    const auto &fileErrorStatus = getFileErrorStatus(file);
+    return fileErrorStatus.lastReportedEpoch <= epoch;
+}
 
 ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     if (file.id() >= fileErrorStatuses.size()) {
