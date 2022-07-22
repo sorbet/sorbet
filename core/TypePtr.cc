@@ -50,7 +50,8 @@ GENERATE_CALL_MEMBER(_instantiate, return nullptr, std::declval<const GlobalStat
 
 GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
 
-GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(), declval<const TypeConstraint &>())
+GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(), declval<const TypeConstraint &>(),
+                     declval<core::Polarity>())
 
 GENERATE_CALL_MEMBER(underlying,
                      Exception::raise("TypePtr::underlying called on non-proxy-type `{}`",
@@ -275,8 +276,8 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
     }
 }
 
-TypePtr TypePtr::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-#define _APPROXIMATE(T) return CALL_MEMBER__approximate<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
+TypePtr TypePtr::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+#define _APPROXIMATE(T) return CALL_MEMBER__approximate<const T>::call(cast_type_nonnull<T>(*this), gs, tc, polarity);
     GENERATE_TAG_SWITCH(tag(), _APPROXIMATE)
 #undef _APPROXIMATE
 }

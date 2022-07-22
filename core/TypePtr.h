@@ -3,6 +3,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/NameRef.h"
+#include "core/Polarity.h"
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include <memory>
@@ -270,7 +271,7 @@ public:
     // for use with LoadYieldParams
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
