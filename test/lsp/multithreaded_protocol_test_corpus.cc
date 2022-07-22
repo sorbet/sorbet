@@ -507,12 +507,25 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
     // Slow path: Edit foo to have a class with an error that also causes an error in bar
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*changeFile("foo.rb",
-                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef "
-                          "bar\n'hello'\nend\nend\n",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  extend T::Sig\n"
+                          "  sig{returns(Integer)}\n"
+                          "  def bar\n"
+                          "    'hello'\n"
+                          "  end\n"
+                          "end\n",
                           2, false, 1));
-    sendAsync(*changeFile(
-        "bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef str\nFoo.new.bar\nend\nend\n",
-        3));
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "class Bar\n"
+                          "  extend T::Sig\n"
+                          "  sig{returns(String)}\n"
+                          "  def str\n"
+                          "    Foo.new.bar\n"
+                          "  end\n"
+                          "end\n",
+                          3));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for typechecking to begin to avoid races.
@@ -522,10 +535,16 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    // Fast path 1: Correct return type on foo::bar, which should fix foo.rb and bar.rb.
+    // Fast path 1: Correct return type on Foo#bar, which should fix foo.rb and bar.rb.
     sendAsync(*changeFile("foo.rb",
-                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(String)}\ndef "
-                          "bar\n'hello'\nend\nend\n",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  extend T::Sig\n"
+                          "  sig{returns(String)}\n"
+                          "  def bar\n"
+                          "    'hello'\n"
+                          "  end\n"
+                          "end\n",
                           3));
     // Send a no-op to clear out the pipeline. Should have no errors at end of both typechecking runs.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
