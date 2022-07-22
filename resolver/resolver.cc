@@ -3406,15 +3406,15 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
-            bool isBlkArg = arg.name == core::Names::blkArg();
+            bool isSyntheticBlkArg = arg.name == core::Names::blkArg();
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
 
                 // It would be nice to remove the restriction on more than these two specific binds, but that would
                 // raise a lot more errors
-                if (!isBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
-                                  spec->rebind == core::Symbols::MagicBindToSelfType())) {
+                if (!isSyntheticBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
+                                           spec->rebind == core::Symbols::MagicBindToSelfType())) {
                     if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");
@@ -3431,7 +3431,7 @@ private:
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
+                if (!isOverloaded && !isSyntheticBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
