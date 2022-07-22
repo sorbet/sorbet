@@ -3299,8 +3299,14 @@ private:
         send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
-    static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
-                                  ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
+    struct SigInformation {
+        bool hasKwArgs = false;
+        // Optimistically assume this.
+        bool allArgsMatched = true;
+    };
+
+    static SigInformation fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
+                                            ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
@@ -3356,6 +3362,7 @@ private:
 
         auto methodInfo = method.data(ctx);
 
+        SigInformation info;
         if (usesArgumentForwardingSyntax(ctx, methodInfo, mdef, isOverloaded)) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
@@ -3363,7 +3370,7 @@ private:
                 e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
                                method.show(ctx));
             }
-            return;
+            return info;
         }
 
         // Get the parameters order from the signature
@@ -3383,13 +3390,16 @@ private:
             // Check that optional keyword parameters are after all the required ones
             bool isKwd = arg.flags.isKeyword;
             bool isReq = !arg.flags.isBlock && !arg.flags.isRepeated && !arg.flags.isDefault;
-            if (isKwd && !isReq) {
-                seenOptional = true;
-            } else if (isKwd && seenOptional && isReq) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
-                    e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
-                                "sig", treeArgName.show(ctx));
-                    e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+            if (isKwd) {
+                info.hasKwArgs = true;
+                if (!isReq) {
+                    seenOptional = true;
+                } else if (seenOptional && isReq) {
+                    if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
+                        e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
+                                    "sig", treeArgName.show(ctx));
+                        e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+                    }
                 }
             }
 
@@ -3454,6 +3464,7 @@ private:
                 auto dname = param->localVariable._name;
                 // TODO(jvilk): Do we need to check .show? Typically NameRef equality is equal to string equality.
                 if (sname != dname && sname.show(ctx) != dname.show(ctx)) {
+                    info.allArgsMatched = false;
                     if (auto e = ctx.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
                         e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname.show(ctx),
                                     sname.show(ctx));
@@ -3465,6 +3476,7 @@ private:
         }
 
         recordMethodInfoInSig(ctx, method, sig, mdef);
+        return info;
     }
 
     // Force errors from any signatures that didn't attach to methods.
