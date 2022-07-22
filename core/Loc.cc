@@ -111,11 +111,11 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
     buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
     ENFORCE(file.lineBreaks().size() > line + 1);
     auto endPos = file.lineBreaks()[line + 1];
-    auto numToWrite = endPos - file.lineBreaks()[line];
+    auto numToWrite = endPos - file.lineBreaks()[line] - 1;
     if (numToWrite <= 0) {
         return;
     }
-    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite - 1);
+    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite);
 }
 } // namespace
 
