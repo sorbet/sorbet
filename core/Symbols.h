@@ -5,6 +5,7 @@
 #include "core/ArityHash.h"
 #include "core/Loc.h"
 #include "core/Names.h"
+#include "core/Polarity.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
 #include <memory>
@@ -30,8 +31,6 @@ class IntrinsicMethod {
 public:
     virtual void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const = 0;
 };
-
-enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
 enum class Visibility : uint8_t {
     Public = 1,
