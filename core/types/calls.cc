@@ -188,6 +188,9 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
     if (methodName == Names::isA_p()) {
         e.addErrorNote("Use `{}` instead of `{}` to check the type of an unconstrained generic type {}", "case",
                        methodName.show(gs), genericKind);
+    } else if (methodName == Names::nil_p()) {
+        e.addErrorNote("Use `{}` instead of `{}` to check whether an unconstrained generic type {} is nil",
+                       "case ... when nil", methodName.show(gs), genericKind);
     } else if (definition.isTypeMember()) {
         e.addErrorSection(ErrorSection(
             ErrorColors::format("Consider adding an `{}` bound to `{}` here", "upper", definition.show(gs)),
