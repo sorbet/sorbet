@@ -14,6 +14,12 @@ def example1(x)
   else
     T.reveal_type(x)
   end
+
+  if x.nil?
+    T.reveal_type(x)
+  else
+    T.reveal_type(x)
+  end
 end
 
 module M

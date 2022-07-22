@@ -48,34 +48,79 @@ type_argument_suggest_unsafe.rb:15: Revealed type: `T.type_parameter(:U) (of Obj
     12 |  if x.is_a?(Integer)
              ^^^^^^^^^^^^^^^^
 
-type_argument_suggest_unsafe.rb:38: Call to method `foo` on generic type `T.type_parameter(:U) (of Object#example3)` component of `T.any(M, T.type_parameter(:U) (of Object#example3))` https://srb.help/7038
-    38 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
+type_argument_suggest_unsafe.rb:18: Call to method `nil?` on unconstrained generic type `T.type_parameter(:U) (of Object#example1)` https://srb.help/7038
+    18 |  if x.nil?
+               ^^^^
+  Got `T.type_parameter(:U) (of Object#example1)` originating from:
+    type_argument_suggest_unsafe.rb:9:
+     9 |def example1(x)
+                     ^
+    type_argument_suggest_unsafe.rb:12:
+    12 |  if x.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    type_argument_suggest_unsafe.rb:18: Replaced with `T.unsafe(x)`
+    18 |  if x.nil?
+             ^
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an unconstrained generic type parameter is nil
+
+type_argument_suggest_unsafe.rb:19: Revealed type: `T.all(NilClass, T.type_parameter(:U) (of Object#example1))` https://srb.help/7014
+    19 |    T.reveal_type(x)
+            ^^^^^^^^^^^^^^^^
+  Got `T.all(NilClass, T.type_parameter(:U) (of Object#example1))` originating from:
+    type_argument_suggest_unsafe.rb:9:
+     9 |def example1(x)
+                     ^
+    type_argument_suggest_unsafe.rb:12:
+    12 |  if x.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^
+    type_argument_suggest_unsafe.rb:18:
+    18 |  if x.nil?
+             ^^^^^^
+
+type_argument_suggest_unsafe.rb:21: Revealed type: `T.type_parameter(:U) (of Object#example1)` https://srb.help/7014
+    21 |    T.reveal_type(x)
+            ^^^^^^^^^^^^^^^^
+  Got `T.type_parameter(:U) (of Object#example1)` originating from:
+    type_argument_suggest_unsafe.rb:9:
+     9 |def example1(x)
+                     ^
+    type_argument_suggest_unsafe.rb:12:
+    12 |  if x.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^
+    type_argument_suggest_unsafe.rb:18:
+    18 |  if x.nil?
+             ^^^^^^
+
+type_argument_suggest_unsafe.rb:44: Call to method `foo` on generic type `T.type_parameter(:U) (of Object#example3)` component of `T.any(M, T.type_parameter(:U) (of Object#example3))` https://srb.help/7038
+    44 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
             ^^^
   Got `T.any(M, T.type_parameter(:U) (of Object#example3))` originating from:
-    type_argument_suggest_unsafe.rb:37:
-    37 |def example3(x)
+    type_argument_suggest_unsafe.rb:43:
+    43 |def example3(x)
                      ^
   Autocorrect: Done
-    type_argument_suggest_unsafe.rb:38: Replaced with `T.unsafe(x)`
-    38 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
+    type_argument_suggest_unsafe.rb:44: Replaced with `T.unsafe(x)`
+    44 |  x.foo # error: Method `foo` does not exist on `Object#example3#U` component of `T.any(M, Object#example3#U)`
           ^
   Note:
     Consider using `T.all(T.type_parameter(:U), Constraint)` to place a constraint on this type
 
-type_argument_suggest_unsafe.rb:47: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example4)` https://srb.help/7038
-    47 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
+type_argument_suggest_unsafe.rb:53: Call to method `foo` on unconstrained generic type `T.type_parameter(:U) (of Object#example4)` https://srb.help/7038
+    53 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                   ^^^^
   Got `T.type_parameter(:U) (of Object#example4)` originating from:
-    type_argument_suggest_unsafe.rb:47:
-    47 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
+    type_argument_suggest_unsafe.rb:53:
+    53 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                   ^
   Autocorrect: Done
-    type_argument_suggest_unsafe.rb:47: Replaced with `{|x| T.unsafe(x).foo}`
-    47 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
+    type_argument_suggest_unsafe.rb:53: Replaced with `{|x| T.unsafe(x).foo}`
+    53 |  xs.map(&:foo) # error: Method `foo` does not exist on `Object#example4#U`
                 ^^^^^^^
   Note:
     Consider using `T.all(T.type_parameter(:U), Constraint)` to place a constraint on this type
-Errors: 6
+Errors: 9
 
 --------------------------------------------------------------------------
 
@@ -91,6 +136,12 @@ def example1(x)
   T.unsafe(x).foo # error: Call to method `foo` on unconstrained generic type `Object#example1#U`
 
   if T.unsafe(x).is_a?(Integer)
+    T.reveal_type(x)
+  else
+    T.reveal_type(x)
+  end
+
+  if T.unsafe(x).nil?
     T.reveal_type(x)
   else
     T.reveal_type(x)
