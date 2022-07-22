@@ -3304,6 +3304,16 @@ private:
         // Optimistically assume this.
         bool allArgsMatched = true;
         bool hasMissingArgument = false;
+        struct {
+            core::Loc loc;
+            core::NameRef name;
+        } firstKwArg;
+
+        void merge(SigInformation other) {
+            this->hasKwArgs &= other.hasKwArgs;
+            this->allArgsMatched &= other.allArgsMatched;
+            this->hasMissingArgument |= other.hasMissingArgument;
+        }
     };
 
     static SigInformation fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
@@ -3448,9 +3458,9 @@ private:
             }
 
             if (isOverloaded && arg.flags.isKeyword) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                treeArgName.show(ctx));
+                if (!info.firstKwArg.name.exists()) {
+                    info.firstKwArg.loc = arg.loc;
+                    info.firstKwArg.name = treeArgName;
                 }
             }
         }
@@ -3683,6 +3693,7 @@ public:
         }
 
         int i = -1;
+        std::optional<SigInformation> combinedInfo;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;
@@ -3696,7 +3707,32 @@ public:
             } else {
                 overloadSym = mdef.symbol;
             }
-            fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
+            auto info = fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
+            if (combinedInfo.has_value()) {
+                combinedInfo->merge(info);
+            } else {
+                combinedInfo.emplace(info);
+            }
+        }
+
+        // We permit keyword arguments for overloaded methods only in the following case:
+        //
+        // * There are only two signatures;
+        // * They differ solely in the presence of a block argument.
+        //
+        // This usually comes up in the standard library (e.g. `String#each_line`).
+        //
+        // TODO(froydnj): what to use as the location for the error?
+        ENFORCE(combinedInfo.has_value());
+        if (isOverloaded && combinedInfo->hasKwArgs) {
+            ENFORCE(combinedInfo->firstKwArg.loc.exists());
+            ENFORCE(combinedInfo->firstKwArg.name.exists());
+            if (sigs.size() != 2 || !combinedInfo->allArgsMatched || combinedInfo->hasMissingArgument) {
+                if (auto e = ctx.state.beginError(combinedInfo->firstKwArg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
+                                combinedInfo->firstKwArg.name.show(ctx));
+                }
+            }
         }
         // handleAbstractMethod called elsewhere
     }
