@@ -3303,6 +3303,7 @@ private:
         bool hasKwArgs = false;
         // Optimistically assume this.
         bool allArgsMatched = true;
+        bool hasMissingArgument = false;
     };
 
     static SigInformation fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
@@ -3407,6 +3408,7 @@ private:
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
             bool isSyntheticBlkArg = arg.name == core::Names::blkArg();
+            bool isBlkArg = arg.flags.isBlock;
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
@@ -3426,6 +3428,10 @@ private:
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
             } else {
+                if (!isBlkArg) {
+                    info.hasMissingArgument = true;
+                }
+
                 if (arg.type == nullptr) {
                     arg.type = core::Types::untyped(ctx, method);
                 }
