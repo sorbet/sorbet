@@ -50,6 +50,11 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
         if (bound.isFullyDefined()) {
             return bound;
         }
+    } else if (tc.hasLowerBound(sym)) {
+        auto bound = tc.findLowerBound(sym);
+        if (bound.isFullyDefined() && !bound.isBottom()) {
+            return bound;
+        }
     }
     // TODO: in many languages this method is a huge adhoc heuristic
     // let's see if we can keep it small
