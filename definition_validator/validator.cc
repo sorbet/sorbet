@@ -117,9 +117,35 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         return;
     }
 
+    if (superMethod.data(ctx)->flags.isGenericMethod != method.data(ctx)->flags.isGenericMethod) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (superMethod.data(ctx)->flags.isGenericMethod) {
+                e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
+                            implementationOf(ctx, superMethod), superMethod.show(ctx));
+            } else {
+                e.setHeader("{} method `{}` must not accept declare type parameters",
+                            implementationOf(ctx, superMethod), superMethod.show(ctx));
+            }
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+        }
+        return;
+    }
+
     unique_ptr<core::TypeConstraint> _constr;
     auto *constr = &core::TypeConstraint::EmptyFrozenConstraint;
     if (method.data(ctx)->flags.isGenericMethod) {
+        ENFORCE(superMethod.data(ctx)->flags.isGenericMethod);
+        const auto &methodTypeArguments = method.data(ctx)->typeArguments();
+        const auto &superMethodTypeArguments = superMethod.data(ctx)->typeArguments();
+        if (methodTypeArguments.size() != superMethodTypeArguments.size()) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
+                            implementationOf(ctx, superMethod), superMethod.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            }
+            return;
+        }
+
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
         constr->defineDomain(ctx, method.data(ctx)->typeArguments());
