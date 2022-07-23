@@ -47,18 +47,13 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 
 // This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `nullptr` or if either
 // one is not fully defined. This is really just a useful helper function for this module: do not use it elsewhere.
-bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core::TypePtr &super) {
+bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
+                  const core::TypePtr &super) {
     if (sub == nullptr || super == nullptr) {
         return true;
     }
 
-    // type-checking these in the presence of generic type parameters is tricky, so for now we're going to punt on
-    // it. TODO: build up the machinery to type-check in the presence of type parameters!
-    if (!super.isFullyDefined() || !sub.isFullyDefined()) {
-        return true;
-    }
-
-    return core::Types::isSubType(ctx, sub, super);
+    return core::Types::isSubTypeUnderConstraint(ctx, constr, sub, super, core::UntypedMode::AlwaysCompatible);
 }
 
 string supermethodKind(const core::Context ctx, core::MethodRef method) {
@@ -87,7 +82,8 @@ string implementationOf(const core::Context ctx, core::MethodRef method) {
 
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
+                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
                      core::MethodRef method) {
@@ -98,7 +94,7 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
         auto superArgType = superArgs[idx].get().type;
         auto methodArgType = methodArgs[idx].get().type;
 
-        if (!checkSubtype(ctx, superArgType, methodArgType)) {
+        if (!checkSubtype(ctx, constr, superArgType, methodArgType)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                             methodArgs[idx].get().show(ctx), methodArgType.show(ctx), supermethodKind(ctx, superMethod),
@@ -119,6 +115,21 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         // to match overloads against their superclass definitions. Since we
         // Only permit overloading in the stdlib for now, this is no great loss.
         return;
+    }
+
+    unique_ptr<core::TypeConstraint> _constr;
+    auto *constr = &core::TypeConstraint::EmptyFrozenConstraint;
+    if (method.data(ctx)->flags.isGenericMethod) {
+        _constr = make_unique<core::TypeConstraint>();
+        constr = _constr.get();
+        constr->defineDomain(ctx, method.data(ctx)->typeArguments());
+    }
+    if (superMethod.data(ctx)->flags.isGenericMethod) {
+        if (_constr != nullptr) {
+            _constr = make_unique<core::TypeConstraint>();
+            constr = _constr.get();
+        }
+        constr->defineDomain(ctx, superMethod.data(ctx)->typeArguments());
     }
 
     auto left = decomposeSignature(ctx, superMethod);
@@ -155,9 +166,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     // match types of required positional arguments
-    matchPositional(ctx, left.pos.required, superMethod, right.pos.required, method);
+    matchPositional(ctx, *constr, left.pos.required, superMethod, right.pos.required, method);
     // match types of optional positional arguments
-    matchPositional(ctx, left.pos.optional, superMethod, right.pos.optional, method);
+    matchPositional(ctx, *constr, left.pos.optional, superMethod, right.pos.optional, method);
 
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
@@ -170,7 +181,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.required.end() && corresponding != right.kw.optional.end()) {
-                if (!checkSubtype(ctx, req.get().type, corresponding->get().type)) {
+                if (!checkSubtype(ctx, *constr, req.get().type, corresponding->get().type)) {
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -197,7 +208,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.optional.end()) {
-                if (!checkSubtype(ctx, opt.get().type, corresponding->get().type)) {
+                if (!checkSubtype(ctx, *constr, opt.get().type, corresponding->get().type)) {
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -219,7 +230,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             superMethod.show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
-        } else if (!checkSubtype(ctx, leftRest->get().type, right.kw.rest->get().type)) {
+        } else if (!checkSubtype(ctx, *constr, leftRest->get().type, right.kw.rest->get().type)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
                             right.kw.rest->get().show(ctx), right.kw.rest->get().type.show(ctx),
@@ -255,13 +266,21 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto superReturn = superMethod.data(ctx)->resultType;
         auto methodReturn = method.data(ctx)->resultType;
 
-        if (!checkSubtype(ctx, methodReturn, superReturn)) {
+        if (!checkSubtype(ctx, *constr, methodReturn, superReturn)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn.show(ctx),
                             supermethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
             }
+        }
+    }
+
+    if (!constr->solve(ctx)) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Could not find valid instantiation of type parameters to allow compatible override");
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Parent method `{}` defined here", superMethod.show(ctx));
+            e.addErrorSection(constr->explain(ctx));
         }
     }
 }
