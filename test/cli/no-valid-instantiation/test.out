@@ -5,7 +5,7 @@ test/cli/no-valid-instantiation/no-valid-instantiation.rb:40: Could not find val
     26 |def dispatch_call_fail(f, x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Found no solution for these constraints:
-    `Integer(0)` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `String`
+    `Integer` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `String`
 
 test/cli/no-valid-instantiation/no-valid-instantiation.rb:68: Could not find valid instantiation of type parameters for `Object#solve_constraint_fail` https://srb.help/7020
     68 |solve_constraint_fail(f) do # error: Could not find valid instantiation of type parameters for `Object#solve_constraint_fail`
@@ -15,5 +15,5 @@ test/cli/no-valid-instantiation/no-valid-instantiation.rb:68: Could not find val
     59 |def solve_constraint_fail(f, &blk)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Found no solution for these constraints:
-    `Integer(0)` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `String`
+    `Integer` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `String`
 Errors: 2
