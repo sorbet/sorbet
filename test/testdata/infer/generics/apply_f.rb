@@ -26,9 +26,9 @@ def apply_f_int(x, &f)
 end
 
 res = apply_f_int(0) do |x|
-  T.reveal_type(x)
+  T.reveal_type(x) # error: `Integer`
 end
-T.reveal_type(res)
+T.reveal_type(res) # error: `Integer`
 
 sig {params(int: Integer).void}
 def example(int)

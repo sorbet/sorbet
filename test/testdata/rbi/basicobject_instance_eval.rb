@@ -13,5 +13,5 @@ class A
   end
 end
 
-T.reveal_type(A.new.instance_eval {4}) # error: Revealed type: `Integer(4)`
+T.reveal_type(A.new.instance_eval {4}) # error: Revealed type: `Integer`
 A.new.instance_eval {T.reveal_type(self)} # error: Revealed type: `T.untyped`

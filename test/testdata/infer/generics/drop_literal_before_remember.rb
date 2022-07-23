@@ -25,5 +25,5 @@ def test_int(v)
 end
 
 a = build_a(42)
-T.reveal_type(a)
+T.reveal_type(a) # error: `Box[Integer]`
 test_int(a)
