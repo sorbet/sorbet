@@ -148,14 +148,35 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
-        constr->defineDomain(ctx, method.data(ctx)->typeArguments());
-    }
-    if (superMethod.data(ctx)->flags.isGenericMethod) {
-        if (_constr != nullptr) {
-            _constr = make_unique<core::TypeConstraint>();
-            constr = _constr.get();
+
+        // This doesn't allow the type arguments to be declared in a different order, but it does
+        // allow them to be declared with different names.
+        //
+        // The tradeoff is that this provides a cheap way to produce error messages at the
+        // individual arg that is imcompatible (versus only at the end once all constraints have
+        // been collected) at the cost of rejecting compatible overrides.
+        //
+        // (An alternative might be to collect a constraint and then after validating all arguments,
+        // attempt to find a substitution from one method's type params to the other method's type
+        // params, and report an error if no substitution exists, but this tends to result in errors
+        // that look like "it failed" with no further context.)
+        for (size_t i = 0; i < methodTypeArguments.size(); i++) {
+            auto typeArgument = methodTypeArguments[i];
+            auto superTypeArgument = superMethodTypeArguments[i];
+
+            // constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
+            //                           core::make_type<core::SelfTypeParam>(typeArgument));
+            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+            //                           superTypeArgument.data(ctx)->resultType);
+            // constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
+            //                           core::make_type<core::SelfTypeParam>(superTypeArgument));
+            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(superTypeArgument),
+            //                           typeArgument.data(ctx)->resultType);
+            constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(superTypeArgument));
+            constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(typeArgument));
         }
-        constr->defineDomain(ctx, superMethod.data(ctx)->typeArguments());
     }
 
     auto left = decomposeSignature(ctx, superMethod);
