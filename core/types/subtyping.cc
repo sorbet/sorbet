@@ -263,7 +263,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         auto t1d = underlying(gs, t1);
         auto t2filtered = dropLubComponents(gs, t2, t1d);
         if (t2filtered != t2) {
-            return lub(gs, t1, t2filtered);
+            return lub(gs, t1d, t2filtered);
         }
         if (isa_type<OrType>(t1)) {
             return lubDistributeOr(gs, t1, t2);
