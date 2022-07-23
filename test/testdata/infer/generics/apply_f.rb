@@ -25,6 +25,10 @@ def apply_f_int(x, &f)
   yield x
 end
 
+res = apply_f_int(0) do |x|
+  T.reveal_type(x)
+end
+T.reveal_type(res)
 
 sig {params(int: Integer).void}
 def example(int)
