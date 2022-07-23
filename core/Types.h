@@ -415,6 +415,10 @@ template <> inline TypePtr make_type<SelfTypeParam, core::SymbolRef &>(core::Sym
     return TypePtr(TypePtr::Tag::SelfTypeParam, definition.rawId());
 }
 
+template <> inline TypePtr make_type<SelfTypeParam, core::TypeArgumentRef &>(core::TypeArgumentRef &definition) {
+    return TypePtr(TypePtr::Tag::SelfTypeParam, SymbolRef(definition).rawId());
+}
+
 template <> inline SelfTypeParam cast_type_nonnull<SelfTypeParam>(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<SelfTypeParam>(what));
     return SelfTypeParam(core::SymbolRef::fromRaw(what.inlinedValue()));
