@@ -53,7 +53,9 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
         return true;
     }
 
-    return core::Types::isSubTypeUnderConstraint(ctx, constr, sub, super, core::UntypedMode::AlwaysCompatible);
+    auto subType = core::Types::approximate(ctx, sub, constr);
+    auto superType = core::Types::approximate(ctx, super, constr);
+    return core::Types::isSubTypeUnderConstraint(ctx, constr, subType, superType, core::UntypedMode::AlwaysCompatible);
 }
 
 string supermethodKind(const core::Context ctx, core::MethodRef method) {
@@ -164,18 +166,23 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             auto typeArgument = methodTypeArguments[i];
             auto superTypeArgument = superMethodTypeArguments[i];
 
-            // constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
-            //                           core::make_type<core::SelfTypeParam>(typeArgument));
-            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
-            //                           superTypeArgument.data(ctx)->resultType);
-            // constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
-            //                           core::make_type<core::SelfTypeParam>(superTypeArgument));
             // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(superTypeArgument),
             //                           typeArgument.data(ctx)->resultType);
             constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(superTypeArgument));
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+                                      superTypeArgument.data(ctx)->resultType);
+            // constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
+            //                           core::make_type<core::SelfTypeParam>(typeArgument));
+
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+                                      typeArgument.data(ctx)->resultType);
+            // constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
+            //                           core::make_type<core::SelfTypeParam>(typeArgument));
+            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(superTypeArgument),
+            //                           superTypeArgument.data(ctx)->resultType);
             constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
-                                      core::make_type<core::SelfTypeParam>(typeArgument));
+                                      core::make_type<core::SelfTypeParam>(superTypeArgument));
         }
     }
 
@@ -313,6 +320,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto superReturn = superMethod.data(ctx)->resultType;
         auto methodReturn = method.data(ctx)->resultType;
 
+        // TODO(jez) Pull the the approximated types up out of the checkSubtype call so that we can
+        // show them in the error message (probably want to make precondition of checkSubtype that
+        // caller has already approximated).
         if (!checkSubtype(ctx, *constr, methodReturn, superReturn)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn.show(ctx),
@@ -323,13 +333,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         }
     }
 
-    if (!constr->solve(ctx)) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Could not find valid instantiation of type parameters to allow compatible override");
-            e.addErrorLine(superMethod.data(ctx)->loc(), "Parent method `{}` defined here", superMethod.show(ctx));
-            e.addErrorSection(constr->explain(ctx));
-        }
-    }
+    // TODO(jez) The constraint doesn't solve (it doesn't from the start). Does that matter?
+    // if (!constr->solve(ctx)) {
+    //     if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+    //         e.setHeader("Could not find valid instantiation of type parameters to allow compatible override");
+    //         e.addErrorLine(superMethod.data(ctx)->loc(), "Parent method `{}` defined here", superMethod.show(ctx));
+    //         e.addErrorSection(constr->explain(ctx));
+    //     }
+    // }
 }
 
 void validateOverriding(const core::Context ctx, core::MethodRef method) {
