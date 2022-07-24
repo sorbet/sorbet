@@ -11,10 +11,43 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         if @supported_methods
           @supported_methods
         else
-          @supported_methods = <emptyTree>::<C T>.let(["fast", "slow", "special"].uniq().freeze(), <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+          begin
+            @supported_methods = <emptyTree>::<C T>.let(@supported_methods, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+            @supported_methods = ["fast", "slow", "special"].uniq().freeze()
+          end
         end
         <emptyTree>::<C T>.reveal_type(@supported_methods)
         <emptyTree>::<C T>.must(@supported_methods)
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def self.initialized_to_nilable<<todo method>>(&<blk>)
+      if @initialized_to_nilable
+        @initialized_to_nilable
+      else
+        begin
+          @initialized_to_nilable = <emptyTree>::<C T>.let(@initialized_to_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+          @initialized_to_nilable = nil
+        end
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>::<C Boolean>)
+    end
+
+    def self.lazy_boolean<<todo method>>(&<blk>)
+      if @lazy_boolean
+        @lazy_boolean
+      else
+        begin
+          @lazy_boolean = <emptyTree>::<C T>.let(@lazy_boolean, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Boolean>))
+          @lazy_boolean = false
+        end
       end
     end
   end

@@ -486,6 +486,20 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     return body;
 }
 
+Send *asTLet(ExpressionPtr &arg) {
+    auto *send = cast_tree<Send>(arg);
+    if (send == nullptr || send->fun != core::Names::let() || send->numPosArgs() < 2) {
+        return nullptr;
+    }
+
+    auto *recv = cast_tree<UnresolvedConstantLit>(send->recv);
+    if (recv == nullptr || recv->cnst != core::Names::Constants::T() || !isa_tree<EmptyTree>(recv->scope)) {
+        return nullptr;
+    }
+
+    return send;
+}
+
 struct OpAsgnScaffolding {
     core::NameRef temporaryName;
     InsSeq::STATS_store statementBody;
@@ -1198,6 +1212,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::OrAsgn *orAsgn) {
+                auto recvIsIvarLhs = parser::isa_node<parser::IVarLhs>(orAsgn->left.get());
                 auto recv = node2TreeImpl(dctx, std::move(orAsgn->left));
                 auto arg = node2TreeImpl(dctx, std::move(orAsgn->right));
                 if (auto s = cast_tree<Send>(recv)) {
@@ -1220,7 +1235,16 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 } else if (isa_reference(recv)) {
                     auto cond = MK::cpRef(recv);
                     auto body = MK::cpRef(recv);
-                    auto elsep = MK::Assign(loc, std::move(recv), std::move(arg));
+                    ExpressionPtr elsep;
+                    ast::Send *tlet;
+                    if (recvIsIvarLhs && (tlet = asTLet(arg))) {
+                        auto val = std::move(tlet->getPosArg(0));
+                        tlet->getPosArg(0) = MK::cpRef(recv);
+                        auto decl = MK::Assign(loc, MK::cpRef(recv), std::move(arg));
+                        elsep = MK::InsSeq1(loc, std::move(decl), MK::Assign(loc, std::move(recv), std::move(val)));
+                    } else {
+                        elsep = MK::Assign(loc, std::move(recv), std::move(arg));
+                    }
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
@@ -1233,11 +1257,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // The logic below is explained more fully in the OpAsgn case
                     auto ifExpr = cast_tree<If>(i->expr);
                     if (!ifExpr) {
-                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                        Exception::raise("Unexpected left-hand side of ||=: please file an issue");
                     }
                     auto s = cast_tree<Send>(ifExpr->elsep);
                     if (!s) {
-                        Exception::raise("Unexpected left-hand side of &&=: please file an issue");
+                        Exception::raise("Unexpected left-hand side of ||=: please file an issue");
                     }
 
                     auto sendLoc = s->loc;
