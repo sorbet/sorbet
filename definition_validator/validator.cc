@@ -55,7 +55,7 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
 
     auto subType = core::Types::approximate(ctx, sub, constr);
     auto superType = core::Types::approximate(ctx, super, constr);
-    return core::Types::isSubTypeUnderConstraint(ctx, constr, subType, superType, core::UntypedMode::AlwaysCompatible);
+    return core::Types::isSubType(ctx, subType, superType);
 }
 
 string supermethodKind(const core::Context ctx, core::MethodRef method) {
