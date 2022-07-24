@@ -26,8 +26,7 @@ class A
   sig {returns(Integer)}
   def or_eq
     # There are two errors reported here because this looks like both a read and a write after Desugar
-    @or_eq = T.let(@or_eq, T.nilable(Integer))
-    @or_eq ||= 0
+    @or_eq ||= T.let(0, T.nilable(Integer))
   # ^^^^^^ error: Use of undeclared variable `@or_eq`
   # ^^^^^^ error: The instance variable `@or_eq` must be declared using `T.let` when specifying `# typed: strict`
   end

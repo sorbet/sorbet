@@ -35,6 +35,7 @@ module Config
   def self.suggest_t_let
     # TODO(jez) Once #6016 lands, this should start providing an autocorrect.
     @suggest_t_let ||= ''
+  # ^^^^^^^^^^^^^^ error: The instance variable `@suggest_t_let` must be declared using `T.let` when specifying `# typed: strict`
   # ^^^^^^^^^^^^^^ error: Use of undeclared variable `@suggest_t_let`
   end
 
