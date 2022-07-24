@@ -82,3 +82,4 @@ class ChildBad < Parent
     f.call(x)
   end
 end
+
