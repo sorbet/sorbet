@@ -1,3 +1,4 @@
+# -- test/testdata/desugar/oror_ivar.rb --
 # typed: strict
 
 module Config
@@ -10,7 +11,7 @@ module Config
   def self.supported_methods
     @supported_methods ||= T.let(['fast', 'slow', 'special'].uniq.freeze, T.nilable(T::Array[String]))
     T.reveal_type(@supported_methods) # error: Revealed type: `T::Array[String]`
-    T.must(@supported_methods) # error: `T.must` called on `T::Array[String]`, which is never `nil`
+    @supported_methods # error: `T.must` called on `T::Array[String]`, which is never `nil`
   end
 
   sig {returns(String)}
@@ -37,3 +38,4 @@ module Config
     @suggest_t_let ||= ''
   end
 end
+# ------------------------------
