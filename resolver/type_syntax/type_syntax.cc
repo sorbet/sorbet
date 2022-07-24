@@ -303,7 +303,9 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 }
 
                 bool validBind = false;
-                auto bind = move(getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args).value());
+                auto bind = move(getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent,
+                                                                 args.withoutUnspecifiedTypeParameter())
+                                     .value());
                 if (core::isa_type<core::ClassType>(bind)) {
                     auto classType = core::cast_type_nonnull<core::ClassType>(bind);
                     sig.bind = classType.symbol;
@@ -396,10 +398,11 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     auto *lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol()) {
                         core::NameRef name = lit->asSymbol();
+                        // TODO(jez) Test case for this, should have been crashing before without this change.
+                        auto tmpArgs =
+                            (isProc ? args.withoutRebind() : args.withRebind()).withoutUnspecifiedTypeParameter();
                         auto resultAndBind =
-                            move(getResultTypeAndBindWithSelfTypeParams(
-                                     ctx, value, *parent, isProc ? args.withoutRebind() : args.withRebind())
-                                     .value());
+                            move(getResultTypeAndBindWithSelfTypeParams(ctx, value, *parent, tmpArgs).value());
 
                         sig.argTypes.emplace_back(
                             ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, resultAndBind.type, resultAndBind.rebind});
@@ -499,7 +502,9 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     break;
                 }
 
-                sig.returns = move(getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args).value());
+                sig.returns = move(getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent,
+                                                                   args.withoutUnspecifiedTypeParameter())
+                                       .value());
 
                 break;
             }

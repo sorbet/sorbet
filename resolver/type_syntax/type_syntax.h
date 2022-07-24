@@ -81,6 +81,10 @@ struct TypeSyntaxArgs {
     TypeSyntaxArgs withoutTypeMember() const {
         return TypeSyntaxArgs{allowSelfType, allowRebind, false, allowUnspecifiedTypeParameter, untypedBlame};
     }
+
+    TypeSyntaxArgs withoutUnspecifiedTypeParameter() const {
+        return TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, false, untypedBlame};
+    }
 };
 
 class TypeSyntax {
