@@ -35,5 +35,18 @@ module Config
   def self.suggest_t_let
     # TODO(jez) Once #6016 lands, this should start providing an autocorrect.
     @suggest_t_let ||= ''
+  # ^^^^^^^^^^^^^^ error: Use of undeclared variable `@suggest_t_let`
+  end
+
+  sig {returns(Integer)}
+  def self.accidentally_untyped
+    @accidentally_untyped ||= T.let(T.unsafe(nil), T.nilable(String))
+    T.must(@accidentally_untyped) # error: `T.must` called on `T.untyped`, which is redundant
+  end
+
+  sig {void}
+  def self.main
+    # Still shows as typed in other methods
+    T.reveal_type(@accidentally_untyped) # error: `T.nilable(String)`
   end
 end

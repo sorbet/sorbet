@@ -70,5 +70,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @suggest_t_let = ""
       end
     end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.accidentally_untyped<<todo method>>(&<blk>)
+      begin
+        if @accidentally_untyped
+          @accidentally_untyped
+        else
+          begin
+            @accidentally_untyped = <emptyTree>::<C T>.let(@accidentally_untyped, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+            @accidentally_untyped = <emptyTree>::<C T>.unsafe(nil)
+          end
+        end
+        <emptyTree>::<C T>.must(@accidentally_untyped)
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.void()
+    end
+
+    def self.main<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.reveal_type(@accidentally_untyped)
+    end
   end
 end
