@@ -81,14 +81,11 @@ struct TypeSyntaxArgs {
     TypeSyntaxArgs withoutTypeMember() const {
         return TypeSyntaxArgs{allowSelfType, allowRebind, false, allowUnspecifiedTypeParameter, untypedBlame};
     }
-
-    TypeSyntaxArgs withoutUnspecifiedTypeParameter() const {
-        return TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, false, untypedBlame};
-    }
 };
 
 class TypeSyntax {
-    static ParsedSig parseSig(core::Context ctx, const ast::Send &send, const ParsedSig *parent, TypeSyntaxArgs args);
+    static std::optional<ParsedSig> parseSig(core::Context ctx, const ast::Send &send, const ParsedSig *parent,
+                                             TypeSyntaxArgs args);
 
 public:
     static bool isSig(core::Context ctx, const ast::Send &send);
