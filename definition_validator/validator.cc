@@ -170,13 +170,13 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             //                           typeArgument.data(ctx)->resultType);
             constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(superTypeArgument));
-            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
-            //                           superTypeArgument.data(ctx)->resultType);
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+                                      superTypeArgument.data(ctx)->resultType);
             // constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
             //                           core::make_type<core::SelfTypeParam>(typeArgument));
 
-            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
-            //                           typeArgument.data(ctx)->resultType);
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+                                      typeArgument.data(ctx)->resultType);
             // constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
             //                           core::make_type<core::SelfTypeParam>(typeArgument));
             // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(superTypeArgument),
@@ -333,14 +333,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         }
     }
 
-    // TODO(jez) The constraint solves, even if override is bad... does this matter?
-    if (!constr->solve(ctx)) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Could not find valid instantiation of type parameters to allow compatible override");
-            e.addErrorLine(superMethod.data(ctx)->loc(), "Parent method `{}` defined here", superMethod.show(ctx));
-            e.addErrorSection(constr->explain(ctx));
-        }
-    }
+    // TODO(jez) The constraint doesn't solve (it doesn't from the start). Does that matter?
+    // if (!constr->solve(ctx)) {
+    //     if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+    //         e.setHeader("Could not find valid instantiation of type parameters to allow compatible override");
+    //         e.addErrorLine(superMethod.data(ctx)->loc(), "Parent method `{}` defined here", superMethod.show(ctx));
+    //         e.addErrorSection(constr->explain(ctx));
+    //     }
+    // }
 }
 
 void validateOverriding(const core::Context ctx, core::MethodRef method) {
