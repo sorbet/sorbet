@@ -194,6 +194,10 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
             result = mergeSimilarMethods(similarMethodsForReceiver(gs, type.left, prefix),
                                          similarMethodsForReceiver(gs, type.right, prefix));
         },
+        [&](const core::LambdaParam &type) { result = similarMethodsForReceiver(gs, type.upperBound, prefix); },
+        [&](const core::SelfTypeParam &type) {
+            result = similarMethodsForReceiver(gs, type.definition.resultType(gs), prefix);
+        },
         [&](const core::TypePtr &type) {
             if (is_proxy_type(receiver)) {
                 result = similarMethodsForReceiver(gs, receiver.underlying(gs), prefix);
