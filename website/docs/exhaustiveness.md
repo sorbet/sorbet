@@ -42,7 +42,19 @@ def foo(x)
 end
 ```
 
-Otherwise, let's walk through an example explaining not only **how** we can get
+And some quick notes:
+
+1.  Exhaustiveness checks are **opt-in**, not enabled by default. This is
+    primarily to make it easier to adopt Sorbet in existing projects.
+
+1.  `T.absurd(...)` is implemented both statically and at runtime. Statically
+    Sorbet will report an error, and at runtime Sorbet will raise an exception.
+
+1.  Sorbet will error statically if the condition to a case statement using
+    `T.absurd` is `T.untyped`. This prevents against losing exhaustiveness
+    checking due to a change in the code that weakens static type information.
+
+Now let's walk through an example explaining not only **how** Sorbet provides
 exhaustiveness checking, but also **why** it's useful:
 
 ## Example
@@ -152,29 +164,32 @@ def foo(x)
 end
 ```
 
-## Notes
+## Using `T.absurd` to assert a dead condition
 
-1.  Given all the above, it should be clear that exhaustiveness checks are
-    **opt-in**, i.e., not the default. This is primarily to make it easier to
-    adopt Sorbet in existing projects. That being said, it's still possible that
-    a future version of Sorbet will have exhaustiveness checks enabled by
-    default, with a way to opt out of checking them.
+Note that exhaustiveness checking via `T.absurd` is merely a mode of use of
+checking that a particular conditional branch is unreachable. Sorbet allows
+using `T.absurd` to assert that arbitrary conditions are unreachable:
 
-1.  `T.absurd(...)` is implemented both statically and at runtime. Statically
-    Sorbet will report an error, and at runtime Sorbet will raise an exception.
+```ruby
+sig {params(x: Integer).void}
+def example(x)
+  if x.nil?
+    # `x` must never be `nil`
+    T.absurd(x)
+  end
 
-1.  Sorbet will error statically if the condition to a case statement using
-    `T.absurd` is `T.untyped`. This prevents against losing exhaustiveness
-    checking due to a change in the code that weakens static type information.
+  # ...
+end
+```
 
-1.  Exhaustiveness checks are powered by Sorbet's
-    [Flow-Sensitive Typing](flow-sensitive.md) constructs. Specifically, this is
-    also a valid use of `T.absurd`:
+This can be used to assert that, for example, the `example` method is never
+refactored in such a way that `x` is allowed to become possibly `nil`. If such a
+refactor happened in the future, Sorbet would flag that the `T.absurd` call was
+in fact reachable.
 
-    ```ruby
-    # Will error if `x` ever becomes nilable or untyped due to a refactoring
-    T.absurd(x) if x.nil?
-    ```
+Recall that since `T.absurd` will also complain that the condition is reachable
+if `x` ever becomes `T.untyped`, so `T.absurd` can be used to assert not only
+that a variable has a given type, but also that the type is known statically.
 
 ## What's next?
 
