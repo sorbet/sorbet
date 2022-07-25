@@ -143,12 +143,14 @@ This is an unavoidable downside of Sorbet's use of [`T.untyped`](untyped.md) to
 implement a [gradual type system](gradual.md).
 
 This is a major reason why Sorbet's [runtime type checking](runtime.md) is
-valuable: in order for Sorbet's dead code analysis to be accurate, Sorbet relies
-on the fact that violations of the declared types will as a last resort be
-caught at runtime by checking [method signatures](sigs.md) and
+valuable: in order for Sorbet's static dead code analysis to be accurate, Sorbet
+relies on the fact that static violations of the declared types will be caught
+at runtime by checking [method signatures](sigs.md) and
 [type assertions](type-assertions.md).
 
-Disabling these checks at runtime can cause Sorbet to incorrectly judge which
-code is or is not reachable at runtime.
+Disabling runtime checks will not change anything about what Sorbet infers
+statically--in particular, Sorbet will still believe it is impossible to have a
+value of type `T.noreturn` and will still report the same unreachable code
+errors it normally would.
 
 [daemon processes]: https://en.wikipedia.org/wiki/Daemon_(computing)
