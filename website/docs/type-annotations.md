@@ -104,21 +104,29 @@ class A
 end
 ```
 
-It's common to use this technique to add type annotations for instance variables
-in functions that memoize their results by lazily initializing instance
-variables:
+## Declaring lazily-initialized instance variables
+
+Sorbet also supports `T.let` type annotations for instance variables that are
+lazily initialized with `||=`, just like those initialized eagerly with `=`. The
+syntax looks just the same:
 
 ```ruby
 module B
   sig {returns(String)}
   def current_user
-    unless defined?(@user)
-      @user = T.let(ENV.fetch('USER'), T.nilable(String))
-    end
-    T.must(@user)
+    @user ||= T.let(ENV.fetch('USER'), T.nilable(String))
   end
 end
 ```
+
+Note that the same restrictions about the variable being declared `T.nilable`
+apply, but that Sorbet's [control flow-sensitive](flow-sensitive.md) typing is
+smart enough to understand that either:
+
+1.  `@user` has already been initialized to a non-nil value, so the `||`
+    condition is truthy and thus must return a `String`, or
+2.  `@user` has not yet been initialized, but the initial value, computed using
+    `ENV.fetch('USER')`, has type `String` (and is thus non-nil).
 
 ## Limitations on instance variable inference
 

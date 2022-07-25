@@ -393,6 +393,16 @@ files are `typed: strict` or above.
 That's pretty much it for the `typed: strict` features, so with the next section
 we're back to normal type system features.
 
+> **Update, 2022-07-23**: The changes described in this section are now
+> obsolete. We have changed Sorbet to allow declaring lazily-initialized
+> instance variables in the natural way. Simply use
+>
+> ```ruby
+> @current_user ||= T.let(ENV.fetch('USER'), T.nilable(String))
+> ```
+>
+> like normal.
+
 ### Type checking database code with `T.attached_class`
 
 Sorbet has had `T.class_of(MyClass)` [since it was open sourced][class-of-docs],

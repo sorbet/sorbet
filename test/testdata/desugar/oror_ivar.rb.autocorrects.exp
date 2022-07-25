@@ -1,3 +1,4 @@
+# -- test/testdata/desugar/oror_ivar.rb --
 # typed: strict
 
 module Config
@@ -10,7 +11,7 @@ module Config
   def self.supported_methods
     @supported_methods ||= T.let(['fast', 'slow', 'special'].uniq.freeze, T.nilable(T::Array[String]))
     T.reveal_type(@supported_methods) # error: Revealed type: `T::Array[String]`
-    T.must(@supported_methods) # error: `T.must` called on `T::Array[String]`, which is never `nil`
+    @supported_methods # error: `T.must` called on `T::Array[String]`, which is never `nil`
   end
 
   sig {returns(String)}
@@ -41,7 +42,7 @@ module Config
   sig {returns(Integer)}
   def self.accidentally_untyped
     @accidentally_untyped ||= T.let(T.unsafe(nil), T.nilable(String))
-    T.must(@accidentally_untyped) # error: `T.must` called on `T.untyped`, which is redundant
+    @accidentally_untyped # error: `T.must` called on `T.untyped`, which is redundant
   end
 
   sig {void}
@@ -50,3 +51,4 @@ module Config
     T.reveal_type(@accidentally_untyped) # error: `T.nilable(String)`
   end
 end
+# ------------------------------
