@@ -1084,7 +1084,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (constr.isSolved()) {
             return constr.isAlreadyASubType(gs, t1, t2);
         } else {
-            return constr.rememberIsSubtype(gs, t1, t2);
+            return constr.rememberIsSubtype(gs, Types::dropLiteral(gs, t1), Types::dropLiteral(gs, t2));
         }
     }
 
