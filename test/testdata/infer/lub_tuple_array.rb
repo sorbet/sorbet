@@ -14,7 +14,7 @@ sig {
 def foo(x)
   res = case x
   when Array
-    # This type is particularly unweildly, and I'd love to make it smaller if possible.
+    # This type is particularly unwieldy, and I'd love to make it smaller if possible.
     # But this test used to crash us, and at least it doesn't do that anymore.
     T.reveal_type(x) # error: `T.all(T::Array[T.untyped], T.any(T::Array[T.type_parameter(:U) (of Object#foo)], T.type_parameter(:U) (of Object#foo)))`
 
