@@ -142,19 +142,15 @@ p xs
 # interface doesn't include a way to create new instances.
 T.reveal_type(xs.map(&:to_s)) # error: Revealed type: `T::Array[String]`
 
-# This error is a bug. Just capturing the existing behavior.
 res1 = list_map_pos(xs, -> (x) {
-  # This error is a bug. Just capturing the existing behavior.
+  # Somewhat expected, see https://github.com/sorbet/sorbet/issues/4149
   T.reveal_type(x) # error: Revealed type: `T.untyped`
   x.even?
 })
 T.reveal_type(res1) # error: Revealed type: `List[T.untyped]`
 
-# This error is a bug. Just capturing the existing behavior.
 res2 = list_map_blk(xs) do |x|
-  # This error is a bug. Just capturing the existing behavior.
   T.reveal_type(x) # error: Revealed type: `Integer`
-  # This error is a bug. Just capturing the existing behavior.
   x.even?
 end
 T.reveal_type(res2) # error: Revealed type: `List[T::Boolean]`
