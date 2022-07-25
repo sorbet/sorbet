@@ -3408,8 +3408,9 @@ private:
                     seenOptional = true;
                 } else if (seenOptional && isReq) {
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
-                        e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
-                                    "sig", treeArgName.show(ctx));
+                        e.setHeader(
+                            "Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
+                            "sig", treeArgName.show(ctx));
                         e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }
                 }
@@ -3763,8 +3764,8 @@ public:
                 for (auto &argv : kwArgs) {
                     for (auto &arg : argv) {
                         if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                        arg.name.show(ctx));
+                            e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`",
+                                        "sig", arg.name.show(ctx));
                         }
                     }
                 }
