@@ -40,14 +40,14 @@ class HasOverloads
   sig do
     params(
       a: Class,  # error: Malformed `sig`
-      b: String,
+      b: String, # error: Malformed `sig`
     )
     .returns(Integer)
   end
   sig do
     params(
-      b: Class,
-      a: String,
+      b: Class,  # error: Malformed `sig`
+      a: String, # error: Malformed `sig`
     )
     .returns(Symbol)
   end
