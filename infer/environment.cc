@@ -1563,7 +1563,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             auto argLoc = ctx.locAt(c.valueLoc);
                             if (argLoc.exists()) {
-                                e.replaceWith("Delete `T.cast`", ctx.locAt(bind.loc), "{}", argLoc.source(ctx).value());
+                                if (ctx.state.suggestUnsafe.has_value()) {
+                                    e.replaceWith("Convert to `T.unsafe`", ctx.locAt(bind.loc), "{}({})",
+                                                  ctx.state.suggestUnsafe.value(), argLoc.source(ctx).value());
+                                } else {
+                                    e.replaceWith("Delete `T.cast`", ctx.locAt(bind.loc), "{}",
+                                                  argLoc.source(ctx).value());
+                                }
                             }
                         }
                     }
