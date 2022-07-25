@@ -45,6 +45,7 @@ constexpr ErrorClass CallAfterAndAnd{7037, StrictLevel::True};
 constexpr ErrorClass CallOnTypeArgument{7038, StrictLevel::True};
 constexpr ErrorClass CallOnUnboundedTypeMember{7039, StrictLevel::True};
 constexpr ErrorClass AttachedClassOnInstance{7040, StrictLevel::True};
+constexpr ErrorClass UntypedFieldSuggestion{7043, StrictLevel::Strict};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif

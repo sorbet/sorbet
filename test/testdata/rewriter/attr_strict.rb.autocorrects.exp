@@ -1,3 +1,4 @@
+# -- test/testdata/rewriter/attr_strict.rb --
 # typed: strict
 
 class Test
@@ -26,3 +27,4 @@ class Test
   sig {params(untyped_writer: T.untyped).returns(T.untyped)}
   attr_writer :untyped_writer
 end
+# ------------------------------

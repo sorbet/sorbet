@@ -304,8 +304,9 @@ public:
 
     bool requiresAncestorEnabled = false;
 
-private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
+
+private:
     struct DeepCloneHistoryEntry {
         int globalStateId;
         unsigned int lastUTF8NameKnownByParentGlobalState;

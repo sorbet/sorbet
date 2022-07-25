@@ -727,21 +727,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto fs = OSFileSystem{};
         auto applied = core::AutocorrectSuggestion::apply(*gs, fs, autocorrects);
 
-        auto toWrite = vector<pair<core::FileRef, string>>{};
+        auto toWrite = UnorderedMap<core::FileRef, string>{};
         for (const auto &[file, editedSource] : applied) {
-            toWrite.emplace_back(file, move(editedSource));
+            toWrite[file] = move(editedSource);
         }
-
-        fast_sort(toWrite, [&](const auto &lhs, const auto &rhs) {
-            return lhs.first.data(*gs).path() < rhs.first.data(*gs).path();
-        });
 
         auto addNewline = false;
         handler.addObserved(
             *gs, "autocorrects",
             [&]() {
                 fmt::memory_buffer buf;
-                for (const auto &[file, editedSource] : toWrite) {
+                for (const auto &file : files) {
+                    string editedSource;
+                    if (toWrite.find(file) != toWrite.end()) {
+                        editedSource = toWrite[file];
+                    } else {
+                        editedSource = file.data(*gs).source();
+                    }
                     fmt::format_to(std::back_inserter(buf), "# -- {} --\n{}# ------------------------------\n",
                                    core::File::censorFilePathForSnapshotTests(file.data(*gs).path()), editedSource);
                 }

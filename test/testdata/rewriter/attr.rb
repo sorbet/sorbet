@@ -21,11 +21,11 @@ class TestAttr
   attr_accessor :v2
 
   sig {returns(String)}
-  attr_reader :v3 # error: Use of undeclared variable
+  attr_reader :v3 # error: Use of undeclared variable `@v3`
 
   attr_writer :v4, :v5 # error-with-dupes: This function does not have a `sig`
-#              ^^        error: Use of undeclared variable `@v4`
-#                   ^^   error: Use of undeclared variable `@v5`
+  #            ^^        error: The instance variable `@v4` must be declared using `T.let` when specifying `# typed: strict`
+  #                 ^^   error: The instance variable `@v5` must be declared using `T.let` when specifying `# typed: strict`
 
   sig {returns(Float)}
   attr_reader "strv7"

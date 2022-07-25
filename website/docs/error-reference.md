@@ -1688,7 +1688,7 @@ with a `T.let`.
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
-See also: [6002](#6002), [7017](#7017), [7027](#7027).
+See also: [6002](#6002), [7017](#7017), [7027](#7027), [7043](#7043).
 
 ## 5030
 
@@ -2636,7 +2636,7 @@ variables are annotated with a `T.let`.
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
-See also: [5028](#5028), [7017](#7017), [7028](#7028).
+See also: [5028](#5028), [7017](#7017), [7028](#7028), [7043](#7043).
 
 ## 6004
 
@@ -3217,7 +3217,7 @@ constant and method definitions)!
 
 For how to fix, see [Method Signatures](sigs.md).
 
-See also: [5028](#5028), [6002](#6002), [7028](#7028).
+See also: [5028](#5028), [6002](#6002), [7028](#7028), [7043](#7043).
 
 ## 7018
 
@@ -3373,7 +3373,7 @@ with a `T.let`.
 For how to fix, see [Type Annotations](type-annotations.md), or accept the
 autocorrect suggestion associated with this error.
 
-See also: [5028](#5028), [6002](#6002), [7017](#7017).
+See also: [5028](#5028), [6002](#6002), [7017](#7017), [7043](#7043).
 
 ## 7030
 
@@ -3783,6 +3783,15 @@ For more information see the [`T.attached_class`](attached-class.md) docs.
 
 It may also be interesting to compare and contrast
 [`T.self_type`](self-type.md).
+
+## 7043
+
+In `# typed: strict` files, Sorbet requires that all instance and class
+variables are annotated with a `T.let`.
+
+For how to fix, see [Type Annotations](type-annotations.md).
+
+See also: [5028](#5028), [6002](#6002), [7017](#7017), [7027](#7027).
 
 <!-- -->
 

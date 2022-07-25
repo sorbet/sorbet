@@ -22,12 +22,13 @@ class Config
   end
 
   @@suggest_t_let_class_rhs ||= ''
+# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The class variable `@@suggest_t_let_class_rhs` must be declared using `T.let` when specifying `# typed: strict`
 # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_class_rhs`
 
   sig {returns(Integer)}
   def self.suggest_t_let_method
-    # TODO(jez) Once #6016 lands, this should start providing an autocorrect.
     @@suggest_t_let_method ||= ''
+  # ^^^^^^^^^^^^^^^^^^^^^^ error: The class variable `@@suggest_t_let_method` must be declared using `T.let` when specifying `# typed: strict`
   # ^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_method`
   end
 end

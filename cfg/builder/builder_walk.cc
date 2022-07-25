@@ -58,7 +58,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     return alias;
 }
 
-LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) {
+pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id, bool isAssign) {
     core::ClassOrModuleRef klass;
 
     switch (id.kind) {
@@ -82,21 +82,27 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
 
     auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id.name);
     if (!sym.exists()) {
+        auto hasError = id.kind != ast::UnresolvedIdent::Kind::Global && id.name != core::Names::ivarNameMissing() &&
+                        id.name != core::Names::cvarNameMissing();
+
         auto fnd = cctx.discoveredUndeclaredFields.find(id.name);
         if (fnd == cctx.discoveredUndeclaredFields.end()) {
-            if (id.kind != ast::UnresolvedIdent::Kind::Global && id.name != core::Names::ivarNameMissing() &&
-                id.name != core::Names::cvarNameMissing()) {
+            // For reads (not assigns) we only report the problem on the first offense.
+            if (hasError && !isAssign) {
                 if (auto e = cctx.ctx.beginError(id.loc, core::errors::CFG::UndeclaredVariable)) {
                     e.setHeader("Use of undeclared variable `{}`", id.name.show(cctx.ctx));
+                    e.addErrorNote("Use `{}` to declare this variable.\n"
+                                   "    For more information, see https://sorbet.org/docs/type-annotations",
+                                   "T.let");
                 }
             }
             auto ret = cctx.newTemporary(id.name);
             cctx.discoveredUndeclaredFields[id.name] = ret;
-            return ret;
+            return {ret, hasError && isAssign};
         }
-        return fnd->second;
+        return {fnd->second, hasError && isAssign};
     } else {
-        return global2Local(cctx, sym);
+        return {global2Local(cctx, sym), false};
     }
 }
 
@@ -353,7 +359,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](const ast::UnresolvedIdent &id) {
-                LocalRef loc = unresolvedIdent2Local(cctx, id);
+                auto isAssign = false;
+                auto [loc, _foundError] = unresolvedIdent2Local(cctx, id, isAssign);
                 ENFORCE(loc.exists());
                 current->exprs.emplace_back(cctx.target, id.loc, make_insn<Ident>(loc));
 
@@ -400,7 +407,26 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
-                    lhs = unresolvedIdent2Local(cctx, *ident);
+                    auto isAssign = true;
+                    auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
+                    lhs = newLhs;
+                    // Detect if we would have reported an error
+                    // Only do this transformation if we're sure that it would produce an error, so
+                    // that we don't pay the performance cost of inflating the CFG needlessly.
+                    auto shouldReportErrorOn = cctx.ctx.state.shouldReportErrorOn(
+                        cctx.ctx.locAt(a.loc), core::errors::CFG::UndeclaredVariable);
+                    if (foundError && shouldReportErrorOn) {
+                        auto zeroLoc = a.loc.copyWithZeroLength();
+                        auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
+                        auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
+                                                                                          : core::Names::instance();
+                        // Mutate a.rhs before walking.
+                        a.rhs =
+                            ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
+                                           move(a.rhs), ast::MK::String(zeroLoc, fieldKind),
+                                           ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name),
+                                           ast::MK::Symbol(zeroLoc, ident->name));
+                    }
                     ENFORCE(lhs.exists());
                 } else {
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());

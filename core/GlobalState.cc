@@ -678,9 +678,16 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplatAndBlock())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
-    // Synthesize <Magic>.<suggest-type>(arg: *T.untyped) => T.untyped
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::suggestType())
+    // Synthesize <Magic>.<suggest-constant-type>(arg: *T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::suggestConstantType())
                  .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+    // Synthesize <Magic>.<suggest-field-type>
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::suggestFieldType())
+                 .untypedArg(Names::arg0()) // expr
+                 .untypedArg(Names::arg1()) // field kind (instance or class)
+                 .untypedArg(Names::arg2()) // method name where assign is
+                 .untypedArg(Names::arg3()) // name of variable
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<self-new>(arg: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew())

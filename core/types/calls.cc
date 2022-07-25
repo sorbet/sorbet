@@ -2661,6 +2661,47 @@ public:
     }
 } Magic_suggestUntypedConstantType;
 
+class Magic_suggestUntypedFieldType : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 4);
+        res.returnType = core::Types::widen(gs, args.args[0]->type);
+
+        if (args.suppressErrors) {
+            return;
+        }
+
+        if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::UntypedFieldSuggestion)) {
+            const auto &fieldKindTy = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
+            auto fieldKind = fieldKindTy.asName().show(gs);
+            const auto &definingMethodNameTy = cast_type_nonnull<NamedLiteralType>(args.args[2]->type);
+            auto definingMethodName = definingMethodNameTy.asName();
+            const auto &fieldNameTy = cast_type_nonnull<NamedLiteralType>(args.args[3]->type);
+            auto fieldName = fieldNameTy.asName().show(gs);
+
+            auto suggestType = res.returnType;
+            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit()) {
+                suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
+            }
+            e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
+                        "T.let", "# typed: strict");
+            auto replaceLoc = args.argLoc(0);
+            if (replaceLoc.exists()) {
+                // Loc might not exist be because our argument was an EmptyTree (`begin; end`).
+                // In that case we don't have an RHS we can easily wrap in something, so skip the autocorrect.
+                auto title = fmt::format("Initialize as `{}`", suggestType.show(gs));
+
+                if (replaceLoc.adjustLen(gs, -2, 1).source(gs) == "=") {
+                    // Defensive; might be an ivar assignment from `attr_accessor` or `prop`, which
+                    // we don't want an autocorrect for.
+                    e.replaceWith(title, replaceLoc, "T.let({}, {})", replaceLoc.source(gs).value(),
+                                  suggestType.show(gs));
+                }
+            }
+        }
+    }
+} Magic_suggestUntypedFieldType;
+
 /**
  * This is a special version of `new` that will return `T.attached_class`
  * instead.
@@ -3911,7 +3952,8 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},

@@ -71,6 +71,12 @@ public:
         return Send(loc, std::move(recv), fun, funLoc, 3, SendArgs(std::move(arg1), std::move(arg2), std::move(arg3)));
     }
 
+    static ExpressionPtr Send4(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                               ExpressionPtr arg1, ExpressionPtr arg2, ExpressionPtr arg3, ExpressionPtr arg4) {
+        return Send(loc, std::move(recv), fun, funLoc, 3,
+                    SendArgs(std::move(arg1), std::move(arg2), std::move(arg3), std::move(arg4)));
+    }
+
     static ExpressionPtr Literal(core::LocOffsets loc, const core::TypePtr &tpe) {
         return make_expression<ast::Literal>(loc, tpe);
     }
