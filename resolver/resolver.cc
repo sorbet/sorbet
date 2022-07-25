@@ -1281,8 +1281,8 @@ public:
         }
 
         // Check for ambiguous definitions.
-        if (checkAmbiguousDefinition(ctx)) {
-            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx);
+        if (checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent)) {
+            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, nesting_->scope, nesting_->parent);
             if (ambigDef.exists()) {
                 if (auto e = ctx.beginError(original.declLoc, core::errors::Resolver::AmbiguousDefinitionError)) {
                     auto name = klass.data(ctx)->name.show(ctx);
@@ -1299,7 +1299,7 @@ public:
         nesting_ = nesting_->parent;
     }
 
-    const bool checkAmbiguousDefinition(core::Context ctx) {
+    const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym, shared_ptr<Nesting> curNesting) {
         if (ctx.state.runningUnderAutogen) {
             // no need to check in autogen
             return false;
@@ -1310,24 +1310,23 @@ public:
             return false;
         }
 
-        if (nesting_->scope == core::Symbols::root()) {
+        if (curSym == core::Symbols::root()) {
             // no need to check <root> def itself
             return false;
         }
 
         // Can't be ambiguous if current definition is single-part, don't check in this case.
-        const core::SymbolRef curOwner = nesting_->scope.owner(ctx);
-        if (curOwner == nesting_->parent->scope) {
+        const core::SymbolRef curOwner = curSym.owner(ctx);
+        if (curOwner == curNesting->scope) {
             return false;
         }
 
         return true;
     }
 
-    const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx) {
+    const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx, core::SymbolRef curSym,
+                                                                shared_ptr<Nesting> curNesting) {
         const core::SymbolRef defaultSymbol;
-        auto curSym = nesting_->scope;
-        auto curNesting = nesting_->parent;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
             // can't be ambiguous if nested directly under root scope
             return defaultSymbol;
@@ -1410,6 +1409,22 @@ public:
             // we'll still emit a warning when the rhs of a type alias doesn't resolve.
             this->todo_.emplace_back(nesting_, id);
             return;
+        }
+
+        // Check for ambiguous definitions.
+        if (checkAmbiguousDefinition(ctx, id->symbol, nesting_)) {
+            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, id->symbol, nesting_);
+            if (ambigDef.exists()) {
+                if (auto e = ctx.beginError(asgn.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
+                    auto name = id->symbol.name(ctx).show(ctx);
+                    e.setHeader("Definition of `{}` is ambiguous", name);
+                    auto casgnOwner = id->symbol.owner(ctx);
+                    auto option1 = fmt::format("{}::{}", casgnOwner.show(ctx), name);
+                    e.addErrorLine(casgnOwner.loc(ctx), "Could mean `{}` if nested under here", option1);
+                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
+                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
+                }
+            }
         }
 
         auto *rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);

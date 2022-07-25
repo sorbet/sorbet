@@ -930,7 +930,7 @@ end
 
 # A constant
 class RDoc::Constant < ::RDoc::CodeObject
-  RDoc::Constant::MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
+  ::RDoc::Constant::MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
   # Creates a new constant with `name`, `value` and `comment`
   def self.new(name, value, comment); end
