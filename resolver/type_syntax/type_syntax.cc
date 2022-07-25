@@ -23,8 +23,8 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParams(core::Co
                                                                         const ParsedSig &sigBeingParsed,
                                                                         TypeSyntaxArgs args);
 
-ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
-                                     TypeSyntaxArgs args);
+optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
+                                               TypeSyntaxArgs args);
 } // namespace
 
 ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, core::SymbolRef blameSymbol) {
@@ -35,12 +35,17 @@ ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, c
         /* allowUnspecifiedTypeParameter */ false,
         blameSymbol,
     };
-    return TypeSyntax::parseSig(ctx, sigSend, nullptr, args);
+    // Because allowUnspecifiedTypeParameter is always `false`, we know that `parseSig` will never return nullopt.
+    return move(TypeSyntax::parseSig(ctx, sigSend, nullptr, args).value());
 }
 
-ParsedSig TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
-                               TypeSyntaxArgs args) {
-    auto result = parseSigWithSelfTypeParams(ctx, sigSend, parent, args);
+optional<ParsedSig> TypeSyntax::parseSig(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
+                                         TypeSyntaxArgs args) {
+    auto maybeResult = parseSigWithSelfTypeParams(ctx, sigSend, parent, args);
+    if (!maybeResult.has_value()) {
+        return nullopt;
+    }
+    auto result = move(maybeResult.value());
 
     for (auto &arg : result.argTypes) {
         arg.type = core::Types::unwrapSelfTypeParam(ctx, arg.type);
@@ -185,8 +190,8 @@ void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, c
     e.replaceWith("Use a chained sig builder", ctx.locAt(insseq->loc), "{}", replacement);
 }
 
-ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
-                                     TypeSyntaxArgs args) {
+optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
+                                               TypeSyntaxArgs args) {
     ParsedSig sig;
     sig.origSend = const_cast<ast::Send *>(&sigSend);
 
@@ -303,7 +308,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 }
 
                 bool validBind = false;
-                auto bind = move(getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args).value());
+                auto maybeBind = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                core::TypePtr bind;
+                if (!maybeBind.has_value()) {
+                    validBind = false;
+                } else {
+                    bind = move(maybeBind.value());
+                }
+
                 if (core::isa_type<core::ClassType>(bind)) {
                     auto classType = core::cast_type_nonnull<core::ClassType>(bind);
                     sig.bind = classType.symbol;
@@ -396,10 +408,12 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     auto *lit = ast::cast_tree<ast::Literal>(key);
                     if (lit && lit->isSymbol()) {
                         core::NameRef name = lit->asSymbol();
-                        auto resultAndBind =
-                            move(getResultTypeAndBindWithSelfTypeParams(
-                                     ctx, value, *parent, isProc ? args.withoutRebind() : args.withRebind())
-                                     .value());
+                        auto maybeResultAndBind = getResultTypeAndBindWithSelfTypeParams(
+                            ctx, value, *parent, isProc ? args.withoutRebind() : args.withRebind());
+                        if (!maybeResultAndBind.has_value()) {
+                            return nullopt;
+                        }
+                        auto resultAndBind = move(maybeResultAndBind.value());
 
                         sig.argTypes.emplace_back(
                             ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, resultAndBind.type, resultAndBind.rebind});
@@ -499,7 +513,11 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     break;
                 }
 
-                sig.returns = move(getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args).value());
+                auto maybeReturns = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                if (!maybeReturns.has_value()) {
+                    return nullopt;
+                }
+                sig.returns = move(maybeReturns.value());
 
                 break;
             }
@@ -1033,7 +1051,11 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
     } else if (ast::isa_tree<ast::Send>(expr)) {
         const auto &s = ast::cast_tree_nonnull<ast::Send>(expr);
         if (isTProc(ctx, &s)) {
-            auto sig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
+            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
+            if (!maybeSig.has_value()) {
+                return nullopt;
+            }
+            auto sig = move(maybeSig.value());
             if (sig.bind.exists()) {
                 if (!args.allowRebind) {
                     if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
