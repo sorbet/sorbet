@@ -1,10 +1,20 @@
-test/cli/ambiguous-definitions/foo.rb:5: Definition of `Bar` is ambiguous https://srb.help/5068
+foo.rb:5: Definition of `Bar` is ambiguous https://srb.help/5068
      5 |    module Foo::Bar # ambiguous
             ^^^^^^^^^^^^^^^
-    test/cli/ambiguous-definitions/foo.rb:5: Could mean `Opus::Foo::Foo::Bar` if nested under here
+    foo.rb:5: Could mean `Opus::Foo::Foo::Bar` if nested under here
      5 |    module Foo::Bar # ambiguous
                    ^^^
-    test/cli/ambiguous-definitions/foo.rb:4: Or could mean `Opus::Foo::Bar` if nested under here
+    foo.rb:4: Or could mean `Opus::Foo::Bar` if nested under here
      4 |  module Foo
           ^^^^^^^^^^
-Errors: 1
+
+baz.rb:5: Definition of `C` is ambiguous https://srb.help/5068
+     5 |    Baz::C = 1 # ambiguous
+            ^^^^^^^^^^
+    baz.rb:5: Could mean `Opus::Baz::Baz::C` if nested under here
+     5 |    Baz::C = 1 # ambiguous
+            ^^^
+    baz.rb:4: Or could mean `Opus::Baz::C` if nested under here
+     4 |  module Baz
+          ^^^^^^^^^^
+Errors: 2

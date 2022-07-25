@@ -2439,8 +2439,8 @@ resolvable to a class, not a module.
 
 ## 5068
 
-Sorbet requires that class or module definitions be namespaced unambiguously.
-For example, in this code:
+Sorbet requires that class, module or constant definitions be namespaced
+unambiguously. For example, in this code:
 
 ```ruby
 # typed: true
