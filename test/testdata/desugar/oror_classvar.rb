@@ -26,7 +26,6 @@ class Config
 
   sig {returns(Integer)}
   def self.suggest_t_let_method
-    # TODO(jez) Once #6016 lands, this should start providing an autocorrect.
     @@suggest_t_let_method ||= ''
   # ^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_method`
   end

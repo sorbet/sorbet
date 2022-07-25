@@ -22,13 +22,12 @@ class Config
     T.must(@@supported_methods)
   end
 
-  @@suggest_t_let_class_rhs ||= ''
+  @@suggest_t_let_class_rhs ||= T.let('', String)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_class_rhs`
 
   sig {returns(Integer)}
   def self.suggest_t_let_method
-    # TODO(jez) Once #6016 lands, this should start providing an autocorrect.
-    @@suggest_t_let_method ||= ''
+    @@suggest_t_let_method ||= T.let('', T.nilable(String))
   # ^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_method`
   end
 end
