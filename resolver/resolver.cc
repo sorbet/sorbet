@@ -1298,7 +1298,8 @@ public:
         nesting_ = nesting_->parent;
     }
 
-    const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym, shared_ptr<Nesting> curNesting) {
+    const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym,
+                                        const shared_ptr<Nesting> &curNesting) {
         if (ctx.state.runningUnderAutogen) {
             // no need to check in autogen
             return false;
@@ -1324,7 +1325,7 @@ public:
     }
 
     const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx, core::SymbolRef curSym,
-                                                                shared_ptr<Nesting> curNesting) {
+                                                                const shared_ptr<Nesting> &curNesting) {
         const core::SymbolRef defaultSymbol;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
             // can't be ambiguous if nested directly under root scope
@@ -1359,10 +1360,10 @@ public:
         core::NameRef filler = precedingSymForCurDef.name(ctx);
 
         // Look for filler name in all nestings above current nesting.
-        curNesting = curNesting->parent;
-        while (curNesting != nullptr) {
-            if (curNesting->scope.isClassOrModule()) {
-                auto scopeSym = curNesting->scope.asClassOrModuleRef().data(ctx);
+        auto searchNesting = curNesting->parent;
+        while (searchNesting != nullptr) {
+            if (searchNesting->scope.isClassOrModule()) {
+                auto scopeSym = searchNesting->scope.asClassOrModuleRef().data(ctx);
                 const auto ambigDef = scopeSym->findMember(ctx, filler);
                 if (ambigDef.exists()) {
                     // Filler name found! Definition is ambiguous.
@@ -1370,7 +1371,7 @@ public:
                 }
             }
 
-            curNesting = curNesting->parent;
+            searchNesting = searchNesting->parent;
         }
 
         return defaultSymbol;
