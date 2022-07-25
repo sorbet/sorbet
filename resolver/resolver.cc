@@ -3299,17 +3299,18 @@ private:
         send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
+    // This structure serves double duty: it holds information about a single sig and the
+    // results of running it through fillInInfoFromSig and it also holds information about
+    // merging the results of several such structures together from overloaded methods.
     struct SigInformation {
         bool hasKwArgs = false;
         // Optimistically assume this.
         bool allArgsMatched = true;
         bool hasMissingArgument = false;
-        struct {
-            core::Loc loc;
-            core::NameRef name;
-        } firstKwArg;
 
-        void merge(SigInformation other) {
+        std::optional<std::vector<core::ArgInfo>> kwArgs;
+
+        void merge(SigInformation &other) {
             this->hasKwArgs &= other.hasKwArgs;
             this->allArgsMatched &= other.allArgsMatched;
             this->hasMissingArgument |= other.hasMissingArgument;
@@ -3458,10 +3459,10 @@ private:
             }
 
             if (isOverloaded && arg.flags.isKeyword) {
-                if (!info.firstKwArg.name.exists()) {
-                    info.firstKwArg.loc = arg.loc;
-                    info.firstKwArg.name = treeArgName;
+                if (!info.kwArgs.has_value()) {
+                    info.kwArgs.emplace();
                 }
+                info.kwArgs->emplace_back(arg.deepCopy());
             }
         }
 
@@ -3671,6 +3672,30 @@ private:
             [&](const ast::ExpressionPtr &e) {});
     }
 
+    static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs, const SigInformation &info,
+                                                      const std::vector<std::vector<core::ArgInfo>> &kwArgs) {
+        if (numSigs != 2) {
+            return false;
+        }
+        if (!info.allArgsMatched) {
+            return false;
+        }
+        if (info.hasMissingArgument) {
+            return false;
+        }
+
+        const auto &argv0 = kwArgs[0];
+        const auto &argv1 = kwArgs[1];
+
+        // Unlike std::equal, absl::c_equal will test for equal sizes.
+        return absl::c_equal(argv0, argv1, [&ctx](const auto &arg0, const auto &arg1) {
+            if (arg0.name != arg1.name) {
+                return false;
+            }
+            return core::Types::equiv(ctx, arg0.type, arg1.type);
+        });
+    }
+
 public:
     static void resolveMultiSignatureJob(core::MutableContext ctx, ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
@@ -3694,6 +3719,7 @@ public:
 
         int i = -1;
         std::optional<SigInformation> combinedInfo;
+        std::vector<std::vector<core::ArgInfo>> kwArgs;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;
@@ -3708,10 +3734,18 @@ public:
                 overloadSym = mdef.symbol;
             }
             auto info = fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
+            if (info.kwArgs.has_value()) {
+                ENFORCE(info.hasKwArgs);
+                kwArgs.emplace_back(std::move(*info.kwArgs));
+            } else {
+                // Add an empty kwargs vector.
+                ENFORCE(!info.hasKwArgs);
+                kwArgs.emplace_back();
+            }
             if (combinedInfo.has_value()) {
                 combinedInfo->merge(info);
             } else {
-                combinedInfo.emplace(info);
+                combinedInfo.emplace(std::move(info));
             }
         }
 
@@ -3725,12 +3759,14 @@ public:
         // TODO(froydnj): what to use as the location for the error?
         ENFORCE(combinedInfo.has_value());
         if (isOverloaded && combinedInfo->hasKwArgs) {
-            ENFORCE(combinedInfo->firstKwArg.loc.exists());
-            ENFORCE(combinedInfo->firstKwArg.name.exists());
-            if (sigs.size() != 2 || !combinedInfo->allArgsMatched || combinedInfo->hasMissingArgument) {
-                if (auto e = ctx.state.beginError(combinedInfo->firstKwArg.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                combinedInfo->firstKwArg.name.show(ctx));
+            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, kwArgs)) {
+                for (auto &argv : kwArgs) {
+                    for (auto &arg : argv) {
+                        if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
+                                        arg.name.show(ctx));
+                        }
+                    }
                 }
             }
         }
