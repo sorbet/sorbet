@@ -311,11 +311,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 auto maybeBind = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
                 core::TypePtr bind;
                 if (!maybeBind.has_value()) {
-                    if (auto e =
-                            ctx.beginError(send->getPosArg(0).loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Cannot use `{}` inside `{}`", "T.type_parameter", "bind");
-                        bind = core::Types::untypedUntracked();
-                    }
+                    validBind = false;
                 } else {
                     bind = move(maybeBind.value());
                 }

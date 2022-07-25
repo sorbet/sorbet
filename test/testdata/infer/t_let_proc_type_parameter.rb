@@ -33,8 +33,7 @@ class A
   end
   def self.example_bad(&blk)
     f = T.let(blk, T.proc.bind(T.type_parameter(:U)).void)
-    #              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
-    #                          ^^^^^^^^^^^^^^^^^^^^error: Cannot use `T.type_parameter` inside `bind`
+    #              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `bind`: Can only bind to simple class names
     f
   end
 end
