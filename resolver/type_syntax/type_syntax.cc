@@ -313,7 +313,6 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 if (!maybeBind.has_value()) {
                     if (auto e =
                             ctx.beginError(send->getPosArg(0).loc(), core::errors::Resolver::InvalidMethodSignature)) {
-                        // TODO(jez) Test this branch
                         e.setHeader("Cannot use `{}` inside `{}`", "T.type_parameter", "bind");
                         bind = core::Types::untypedUntracked();
                     }
