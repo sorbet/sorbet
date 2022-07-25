@@ -1065,6 +1065,7 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
         compareToUntyped(gs, constr, t->right, blame);
     } else if (auto *t = cast_type<TypeVar>(ty)) {
         constr.rememberIsSubtype(gs, ty, blame);
+        constr.rememberIsSubtype(gs, blame, ty);
     }
 }
 

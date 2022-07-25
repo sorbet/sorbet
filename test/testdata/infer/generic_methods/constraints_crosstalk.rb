@@ -5,8 +5,11 @@ class Test
   sig {params(value: T.any(A, B)).returns(NilClass)}
   private def serialize_value(value)
       # this is a horrible example. We hate to solve constraint that comes from multiple methods at once.
-      #
+      # As far as I can tell, this error is actually correct: given the blk types,
+      # it's not possible for either `A#map` or `B#map` to call their block,
+      # because neither one of them has a way to produce a value of type `T.type_parameter(:U)` to the block.
       T.let(value.map {|val| 1}, T.any(T::Array[Integer], Integer))
+      #                      ^ error: This code is unreachable
       nil
   end
 end

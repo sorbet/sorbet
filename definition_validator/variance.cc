@@ -1,5 +1,5 @@
-
 #include "common/typecase.h"
+#include "core/Polarity.h"
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
@@ -10,64 +10,13 @@ using namespace std;
 
 namespace sorbet::definition_validator::variance {
 
-enum class Polarity {
-    Positive = 1,
-    Neutral = 0,
-    Negative = -1,
-};
-
-// Show a Polarity using the same in/out notation as Variance.
-string showPolarity(const Polarity polarity) {
-    switch (polarity) {
-        case Polarity::Positive:
-            return ":out";
-        case Polarity::Neutral:
-            return ":invariant";
-        case Polarity::Negative:
-            return ":in";
-    }
-}
-
-const Polarity negatePolarity(const Polarity polarity) {
-    switch (polarity) {
-        case Polarity::Positive:
-            return Polarity::Negative;
-        case Polarity::Neutral:
-            return Polarity::Neutral;
-        case Polarity::Negative:
-            return Polarity::Positive;
-    }
-}
-
-string showVariance(const core::Variance variance) {
-    switch (variance) {
-        case core::Variance::CoVariant:
-            return ":out";
-        case core::Variance::Invariant:
-            return ":invariant";
-        case core::Variance::ContraVariant:
-            return ":in";
-    }
-}
-
-bool hasCompatibleVariance(const Polarity polarity, const core::Variance argVariance) {
-    switch (polarity) {
-        case Polarity::Positive:
-            return argVariance != core::Variance::ContraVariant;
-        case Polarity::Neutral:
-            return true;
-        case Polarity::Negative:
-            return argVariance != core::Variance::CoVariant;
-    }
-}
-
 class VarianceValidator {
 private:
     const core::Loc loc;
 
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
-    void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr &type) {
+    void validate(const core::Context ctx, const core::Polarity polarity, const core::TypePtr &type) {
         typecase(
             type, [&](const core::ClassType &klass) {},
 
@@ -118,13 +67,13 @@ private:
                     // example:
                     //
                     // -(-a -> +b) -> +c === (+a -> -b) -> + c
-                    Polarity paramPolarity;
+                    core::Polarity paramPolarity;
                     switch (memberVariance) {
                         case core::Variance::ContraVariant:
-                            paramPolarity = negatePolarity(polarity);
+                            paramPolarity = core::Polarities::negatePolarity(polarity);
                             break;
                         case core::Variance::Invariant:
-                            paramPolarity = Polarity::Neutral;
+                            paramPolarity = core::Polarity::Neutral;
                             break;
                         case core::Variance::CoVariant:
                             paramPolarity = polarity;
@@ -140,7 +89,7 @@ private:
                 auto paramData = param.definition.data(ctx);
                 auto paramVariance = paramData->variance();
 
-                if (!hasCompatibleVariance(polarity, paramVariance)) {
+                if (!core::Polarities::hasCompatibleVariance(polarity, paramVariance)) {
                     if (paramData->name == core::Names::Constants::AttachedClass()) {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
                             e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.attached_class",
@@ -156,10 +105,11 @@ private:
                             auto paramName = paramData->name.show(ctx);
 
                             e.setHeader("`{}` `{}` was defined as `{}` but is used in an `{}` context", flavor,
-                                        paramName, showVariance(paramVariance), showPolarity(polarity));
+                                        paramName, core::Polarities::showVariance(paramVariance),
+                                        core::Polarities::showPolarity(polarity));
 
                             e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
-                                           showVariance(paramVariance));
+                                           core::Polarities::showVariance(paramVariance));
                         }
                     }
                 }
@@ -184,7 +134,7 @@ private:
     }
 
 public:
-    static void validatePolarity(const core::Loc loc, const core::Context ctx, const Polarity polarity,
+    static void validatePolarity(const core::Loc loc, const core::Context ctx, const core::Polarity polarity,
                                  const core::TypePtr &type) {
         VarianceValidator validator(loc);
         return validator.validate(ctx, polarity, type);
@@ -192,12 +142,12 @@ public:
 
     // Variance checking, parameterized on the external polarity of the method
     // context.
-    static void validateMethod(const core::Context ctx, const Polarity polarity, const core::MethodRef method) {
+    static void validateMethod(const core::Context ctx, const core::Polarity polarity, const core::MethodRef method) {
         auto methodData = method.data(ctx);
 
         // Negate the polarity for checking arguments in a ContraVariant
         // context.
-        const Polarity negated = negatePolarity(polarity);
+        const core::Polarity negated = core::Polarities::negatePolarity(polarity);
 
         for (auto &arg : methodData->arguments) {
             if (arg.type != nullptr) {
@@ -213,7 +163,7 @@ public:
 
 // Validates uses of type members according to their variance.
 void validateMethodVariance(const core::Context ctx, const core::MethodRef method) {
-    VarianceValidator::validateMethod(ctx, Polarity::Positive, method);
+    VarianceValidator::validateMethod(ctx, core::Polarity::Positive, method);
 }
 
 } // namespace sorbet::definition_validator::variance

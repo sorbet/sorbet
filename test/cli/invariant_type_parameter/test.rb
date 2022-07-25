@@ -56,7 +56,7 @@ takes_ibox_string = T.let(->(box) {}, T.proc.params(box: IBox[N]).void)
 #   T.any(Integer, String) <: T.type_parameter(:U) (of Object#box_example) <: T.noreturn
 # because `T.all(Integer, String)` collapses to `T.noreturn`
 box_example(Box[Integer].new, takes_box_string) do |box|
-  # Solution takes the upper bound, regardless of whether it solves, I guess?
+  # Approximate solution takes the lower bound because `box` has negative polarity
   T.reveal_type(box)
 end
 
