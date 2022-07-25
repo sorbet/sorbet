@@ -1,11 +1,18 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
+  x = <emptyTree>::<C T>.let(0, <emptyTree>::<C Integer>)
+
+  <emptyTree>::<C T>.must(x)
+
   class <emptyTree>::<C Config><<C <todo sym>>> < (::<todo sym>)
     if @@supported_methods
       @@supported_methods
     else
-      @@supported_methods = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+      begin
+        @@supported_methods = <emptyTree>::<C T>.let(@@supported_methods, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+        @@supported_methods = nil
+      end
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -26,6 +33,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
         <emptyTree>::<C T>.reveal_type(@@supported_methods)
         <emptyTree>::<C T>.must(@@supported_methods)
+      end
+    end
+
+    if @@suggest_t_let_class_rhs
+      @@suggest_t_let_class_rhs
+    else
+      @@suggest_t_let_class_rhs = ""
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.suggest_t_let_method<<todo method>>(&<blk>)
+      if @@suggest_t_let_method
+        @@suggest_t_let_method
+      else
+        @@suggest_t_let_method = ""
       end
     end
   end

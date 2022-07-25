@@ -1,10 +1,11 @@
+# -- test/testdata/desugar/oror_classvar.rb --
 # typed: strict
 
 extend T::Sig
 
 # hack to ensure that there is at least one autocorrect
 x = T.let(0, Integer)
-T.must(x) # error: never `nil`
+x # error: never `nil`
 
 class Config
   @@supported_methods ||= T.let(nil, T.nilable(T::Array[String]))
@@ -31,3 +32,4 @@ class Config
   # ^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_method`
   end
 end
+# ------------------------------

@@ -1213,6 +1213,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::OrAsgn *orAsgn) {
                 auto recvIsIvarLhs = parser::isa_node<parser::IVarLhs>(orAsgn->left.get());
+                auto recvIsCvarLhs = parser::isa_node<parser::CVarLhs>(orAsgn->left.get());
                 auto recv = node2TreeImpl(dctx, std::move(orAsgn->left));
                 auto arg = node2TreeImpl(dctx, std::move(orAsgn->right));
                 if (auto s = cast_tree<Send>(recv)) {
@@ -1233,17 +1234,20 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
-                    auto cond = MK::cpRef(recv);
-                    auto body = MK::cpRef(recv);
+                    // When it's a reference (something variable-like), using the recv/Send terminology only
+                    // confuses things. Let's just call it LHS like we would for normal assignments.
+                    auto lhs = move(recv);
+                    auto cond = MK::cpRef(lhs);
+                    auto body = MK::cpRef(lhs);
                     ExpressionPtr elsep;
                     ast::Send *tlet;
-                    if (recvIsIvarLhs && (tlet = asTLet(arg))) {
+                    if ((recvIsIvarLhs || recvIsCvarLhs) && (tlet = asTLet(arg))) {
                         auto val = std::move(tlet->getPosArg(0));
-                        tlet->getPosArg(0) = MK::cpRef(recv);
-                        auto decl = MK::Assign(loc, MK::cpRef(recv), std::move(arg));
-                        elsep = MK::InsSeq1(loc, std::move(decl), MK::Assign(loc, std::move(recv), std::move(val)));
+                        tlet->getPosArg(0) = MK::cpRef(lhs);
+                        auto decl = MK::Assign(loc, MK::cpRef(lhs), std::move(arg));
+                        elsep = MK::InsSeq1(loc, std::move(decl), MK::Assign(loc, std::move(lhs), std::move(val)));
                     } else {
-                        elsep = MK::Assign(loc, std::move(recv), std::move(arg));
+                        elsep = MK::Assign(loc, std::move(lhs), std::move(arg));
                     }
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
