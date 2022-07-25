@@ -401,7 +401,7 @@ we're back to normal type system features.
 > @current_user ||= T.let(ENV.fetch('USER'), T.nilable(String))
 > ```
 >
-> like would be normal for eagerly initialized instance variables.
+> like normal.
 
 ### Type checking database code with `T.attached_class`
 
