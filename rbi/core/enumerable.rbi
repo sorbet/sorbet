@@ -598,9 +598,6 @@ module Enumerable
   sig {returns(T::Enumerator[[Elem, Integer]])}
   def each_with_index(&blk); end
 
-  ### TODO: the arg1 type in blk should be `T.type_parameter(:U)`, but because of
-  ### issue #38, this won't work.
-
   # Iterates the given block for each element with an arbitrary object given,
   # and returns the initially given object.
   #
@@ -613,7 +610,7 @@ module Enumerable
   sig do
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
-        blk: T.proc.params(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+        blk: T.proc.params(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject),
     )
     .returns(T.type_parameter(:U))
   end
