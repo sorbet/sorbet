@@ -3,6 +3,8 @@
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
+#include "absl/algorithm/container.h"
+
 using namespace std;
 
 namespace sorbet::realmain::lsp {
@@ -17,11 +19,7 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
 
     for (auto mem : sym.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
-            bool foundThisFile = false;
-            for (auto loc : mem.second.locs(gs)) {
-                foundThisFile = foundThisFile || loc.file() == filter;
-            }
-            if (!foundThisFile) {
+            if (!absl::c_any_of(mem.second.locs(gs), [&filter](const auto &loc) { return loc.file() == filter; })) {
                 continue;
             }
             auto inner = symbolRef2DocumentSymbol(gs, mem.second, filter);
