@@ -18,14 +18,15 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
     }
 
     for (auto mem : sym.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
-        if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
-            if (!absl::c_any_of(mem.second.locs(gs), [&filter](const auto &loc) { return loc.file() == filter; })) {
-                continue;
-            }
-            auto inner = symbolRef2DocumentSymbol(gs, mem.second, filter);
-            if (inner) {
-                out.push_back(move(inner));
-            }
+        if (mem.first == core::Names::attached() || mem.first == core::Names::singleton()) {
+            continue;
+        }
+        if (!absl::c_any_of(mem.second.locs(gs), [&filter](const auto &loc) { return loc.file() == filter; })) {
+            continue;
+        }
+        auto inner = symbolRef2DocumentSymbol(gs, mem.second, filter);
+        if (inner) {
+            out.push_back(move(inner));
         }
     }
 }
@@ -104,16 +105,21 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     for (auto [kind, used] : symbolTypes) {
         for (uint32_t idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
-            if (!hideSymbol(gs, ref) &&
-                // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-                (ref.owner(gs).loc(gs).file() != fref || ref.owner(gs) == core::Symbols::root())) {
+            if (hideSymbol(gs, ref)) {
+                continue;
+            }
+
+            // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
+            if (ref.owner(gs).loc(gs).file() != fref || ref.owner(gs) == core::Symbols::root()) {
                 for (auto definitionLocation : ref.locs(gs)) {
-                    if (definitionLocation.file() == fref) {
-                        auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                        if (data) {
-                            result.push_back(move(data));
-                            break;
-                        }
+                    if (definitionLocation.file() != fref) {
+                        continue;
+                    }
+
+                    auto data = symbolRef2DocumentSymbol(gs, ref, fref);
+                    if (data) {
+                        result.push_back(move(data));
+                        break;
                     }
                 }
             }
