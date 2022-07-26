@@ -33,13 +33,23 @@ class Wrap1
   sig {params(x: Integer, y: String, blk: T.proc.returns(Integer)).void}
   def two_kw(x:, y:, &blk); end
 
-  sig {params(x: Integer, y: String).void} # error: Unknown argument name
-  sig {params(x: Integer, y: String, blk: T.proc.returns(Integer)).void} # error: Unknown argument name
+  sig {params(x: Integer, y: String).void}
+#             ^ error: Overloaded functions cannot have keyword arguments
+#                         ^ error: Unknown argument name
+  sig {params(x: Integer, y: String, blk: T.proc.returns(Integer)).void}
+#             ^ error: Overloaded functions cannot have keyword arguments
+#                         ^ error: Unknown argument name
   def arg_in_sig_but_not_method(x:, &blk); end
 
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   sig {params(y: String, x: Integer).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   def keyword_ordering_matters(x:, y:); end # error-with-dupes: Bad parameter ordering
+
+  sig {params(x: T::Boolean).void}
+#             ^ error: Overloaded functions cannot have keyword arguments
+  sig {params(x: FalseClass, blk: T.proc.returns(Integer)).void}
+#             ^ error: Overloaded functions cannot have keyword arguments
+  def arg_types_must_match(x:, &blk); end
 end
 
 Wrap1.new.opt_kw()
@@ -53,7 +63,6 @@ Wrap1.new.opt_pos_opt_kw(x: 7.0) # error: Expected `Integer` but found
 class Wrap2
   extend T::Sig
 
-  # Furthermore, the errors at infer time are somewhat nonsensical.
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   def missing_kw1(x:, y: ''); end
@@ -68,6 +77,14 @@ class Wrap2
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer, y: String, z: Float).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
   def multiple_missing_kw(x:, y: '', z: 0.0); end
+
+  sig {params(z: String, x: Integer).void} # error: Overloaded functions cannot have keyword arguments
+  sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
+  def mismatched_positional_args1(z='', x:); end
+
+  sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
+  sig {params(z: String, x: Integer).void} # error: Overloaded functions cannot have keyword arguments
+  def mismatched_positional_args2(z='', x:); end
 end
 
 Wrap2.new.missing_kw1(x: 0, y: 'foo') # error: Unrecognized keyword argument
@@ -77,3 +94,9 @@ Wrap2.new.missing_kw2(x: 0)
 
 Wrap2.new.multiple_missing_kw(x: 1)
 Wrap2.new.multiple_missing_kw(x: 1, y: 'bar', z: 0.1) # error-with-dupes: Unrecognized keyword argument
+
+# These errors are wrong; they are artifacts of overload matching ignoring keyword arguments.
+Wrap2.new.mismatched_positional_args1('z', x: 0) # error: Too many positional arguments
+Wrap2.new.mismatched_positional_args1(x: 0)
+Wrap2.new.mismatched_positional_args2('z', x: 0) # error: Too many positional arguments
+Wrap2.new.mismatched_positional_args2(x: 0)

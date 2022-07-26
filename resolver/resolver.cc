@@ -3299,6 +3299,12 @@ private:
         send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
+    struct ArgInformation {
+        std::vector<core::ArgInfo> posArgs;
+        std::vector<core::ArgInfo> kwArgs;
+        std::optional<core::ArgInfo> blkArg;
+    };
+
     // This structure serves double duty: it holds information about a single sig and the
     // results of running it through fillInInfoFromSig and it also holds information about
     // merging the results of several such structures together from overloaded methods.
@@ -3308,7 +3314,8 @@ private:
         bool allArgsMatched = true;
         bool hasMissingArgument = false;
 
-        std::optional<std::vector<core::ArgInfo>> kwArgs;
+        // This is used solely in the information for a single sig.
+        std::optional<ArgInformation> args;
 
         void merge(SigInformation &other) {
             this->hasKwArgs &= other.hasKwArgs;
@@ -3439,6 +3446,16 @@ private:
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
+                // Since methods always have (synthesized if necessary) block arguments,
+                // we need to record the explicit presence of a block arg from the sig here.
+                if (isBlkArg) {
+                    if (!info.args.has_value()) {
+                        info.args.emplace();
+                    }
+                    if (!info.args->blkArg.has_value()) {
+                        info.args->blkArg.emplace(arg.deepCopy());
+                    }
+                }
             } else {
                 if (!isBlkArg) {
                     info.hasMissingArgument = true;
@@ -3459,15 +3476,20 @@ private:
                 }
             }
 
-            if (isOverloaded && arg.flags.isKeyword) {
-                if (!info.kwArgs.has_value()) {
-                    info.kwArgs.emplace();
+            if (isOverloaded) {
+                if (!info.args.has_value()) {
+                    info.args.emplace();
                 }
-                info.kwArgs->emplace_back(arg.deepCopy());
+                if (arg.flags.isKeyword) {
+                    info.args->kwArgs.emplace_back(arg.deepCopy());
+                } else if (!arg.flags.isBlock) {
+                    info.args->posArgs.emplace_back(arg.deepCopy());
+                }
             }
         }
 
         for (const auto &spec : sig.argTypes) {
+            info.allArgsMatched = false;
             if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
@@ -3674,7 +3696,7 @@ private:
     }
 
     static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs, const SigInformation &info,
-                                                      const std::vector<std::vector<core::ArgInfo>> &kwArgs) {
+                                                      const std::vector<ArgInformation> &args) {
         if (numSigs != 2) {
             return false;
         }
@@ -3685,16 +3707,26 @@ private:
             return false;
         }
 
-        const auto &argv0 = kwArgs[0];
-        const auto &argv1 = kwArgs[1];
+        const auto &argv0 = args[0];
+        const auto &argv1 = args[1];
 
         // Unlike std::equal, absl::c_equal will test for equal sizes.
-        return absl::c_equal(argv0, argv1, [&ctx](const auto &arg0, const auto &arg1) {
+        auto argsEqual = [&ctx](const auto &arg0, const auto &arg1) {
             if (arg0.name != arg1.name) {
                 return false;
             }
             return core::Types::equiv(ctx, arg0.type, arg1.type);
-        });
+        };
+
+        // TODO(froydnj) better error messages for users trying to provide overloads with kwargs?
+        if (!absl::c_equal(argv0.posArgs, argv1.posArgs, argsEqual)) {
+            return false;
+        }
+        if (!absl::c_equal(argv0.kwArgs, argv1.kwArgs, argsEqual)) {
+            return false;
+        }
+        return ((argv0.blkArg.has_value() && !argv1.blkArg.has_value()) ||
+                (!argv0.blkArg.has_value() && argv1.blkArg.has_value()));
     }
 
 public:
@@ -3720,7 +3752,7 @@ public:
 
         int i = -1;
         std::optional<SigInformation> combinedInfo;
-        std::vector<std::vector<core::ArgInfo>> kwArgs;
+        std::vector<ArgInformation> args;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;
@@ -3735,13 +3767,11 @@ public:
                 overloadSym = mdef.symbol;
             }
             auto info = fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
-            if (info.kwArgs.has_value()) {
-                ENFORCE(info.hasKwArgs);
-                kwArgs.emplace_back(std::move(*info.kwArgs));
+            if (info.args.has_value()) {
+                args.emplace_back(std::move(*info.args));
             } else {
                 // Add an empty kwargs vector.
-                ENFORCE(!info.hasKwArgs);
-                kwArgs.emplace_back();
+                args.emplace_back();
             }
             if (combinedInfo.has_value()) {
                 combinedInfo->merge(info);
@@ -3760,9 +3790,9 @@ public:
         // TODO(froydnj): what to use as the location for the error?
         ENFORCE(combinedInfo.has_value());
         if (isOverloaded && combinedInfo->hasKwArgs) {
-            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, kwArgs)) {
-                for (auto &argv : kwArgs) {
-                    for (auto &arg : argv) {
+            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, args)) {
+                for (auto &argv : args) {
+                    for (auto &arg : argv.kwArgs) {
                         if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`",
                                         "sig", arg.name.show(ctx));
