@@ -8,6 +8,7 @@ class Parent
   # TODO(jez) This only tests Elem, which is an invariant type member. Also test with co- and contravariant
   # TODO(jez) The `T.proc` cases test AppliedType's applied to a contravariant generic, but there are no tests of applying a covariant generic (maybe enough to just test with T.proc that returns something?).
   # TODO(jez) Do "module instance method overriden by class singleton method" to be sure that resultTypeAsSeenFrom works
+  # TODO(jez) Document override(allow_incompatible: true) as an escape hatch
   Elem = type_member
 
   sig {abstract.returns(Elem)}
