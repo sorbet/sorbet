@@ -849,17 +849,17 @@ module Enumerable
     .returns(T.untyped)
   end
   sig do
-    params(
-        initial: T.untyped,
-        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
+    type_parameters(:U).params(
+        initial: T.type_parameter(:U),
+        blk: T.proc.params(arg0: T.type_parameter(:U), arg1: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(T.untyped)
+    .returns(T.type_parameter(:U))
   end
   sig do
-    params(
-        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: T.any(Elem, T.type_parameter(:U)), arg1: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(T.untyped)
+    .returns(T.type_parameter(:U))
   end
   def inject(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
