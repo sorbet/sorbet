@@ -50,9 +50,26 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
                   const core::TypePtr &super) {
     if (sub == nullptr || super == nullptr) {
+        // nullptr is just "unannotated" which is T.untyped
         return true;
     }
 
+    // We're only using the TypeConstraint as a way to have an easy way to replace a `TypeVar` with
+    // a "skolem" type variable (type variable representing an unknown but specific type). In
+    // Sorbet, those skolems are SelfTypeParam types that wrap a TypeArgumentRef.
+    //
+    // Types::approximate does this "replace all the TypeVar with SelfTypeParam" naturally and in a
+    // predictable way (i.e., respecting polarity), so it's convenient do to this with approximate
+    // rather than build a dedicated function for this.
+    //
+    // However, it's neither required nor desired to use that constraint to type check the two types
+    // themselves. If we somehow managed to construct the constr incorrectly, there might still be
+    // un-skolemized TypeVar's in either type, which would then record new constraints during the
+    // call to isSubType. To guarantee that never happens, we typecheck the type under the
+    // EmptyFrozenConstraint, instead of this constraint that we should only be using for skolemization.
+    //
+    // Another approach might be to create the constr right here, instead of threading it around
+    // everywhere. We've taken the aprpopach of only constructing the constraint once as an optimization.
     auto subType = core::Types::approximate(ctx, sub, constr);
     auto superType = core::Types::approximate(ctx, super, constr);
     return core::Types::isSubType(ctx, subType, superType);
@@ -332,15 +349,6 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             }
         }
     }
-
-    // TODO(jez) The constraint doesn't solve (it doesn't from the start). Does that matter?
-    // if (!constr->solve(ctx)) {
-    //     if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-    //         e.setHeader("Could not find valid instantiation of type parameters to allow compatible override");
-    //         e.addErrorLine(superMethod.data(ctx)->loc(), "Parent method `{}` defined here", superMethod.show(ctx));
-    //         e.addErrorSection(constr->explain(ctx));
-    //     }
-    // }
 }
 
 void validateOverriding(const core::Context ctx, core::MethodRef method) {
