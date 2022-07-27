@@ -109,18 +109,23 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
                 continue;
             }
 
-            // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
-            if (ref.owner(gs).loc(gs).file() != fref || ref.owner(gs) == core::Symbols::root()) {
-                for (auto definitionLocation : ref.locs(gs)) {
-                    if (definitionLocation.file() != fref) {
-                        continue;
-                    }
+            // If the owner lives in this file, then the owner will be caught elsewhere
+            // in this loop and `ref` will be output as a child of owner.  So we should
+            // avoid outputting `ref` at this point.  Symbols owned by root, however,
+            // should always be output, as we don't output root itself.
+            if (ref.owner(gs).loc(gs).file() == fref && ref.owner(gs) != core::Symbols::root()) {
+                continue;
+            }
 
-                    auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                    if (data) {
-                        result.push_back(move(data));
-                        break;
-                    }
+            for (auto definitionLocation : ref.locs(gs)) {
+                if (definitionLocation.file() != fref) {
+                    continue;
+                }
+
+                auto data = symbolRef2DocumentSymbol(gs, ref, fref);
+                if (data) {
+                    result.push_back(move(data));
+                    break;
                 }
             }
         }
