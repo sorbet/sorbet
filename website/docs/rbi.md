@@ -211,7 +211,7 @@ You can read about all the DSL RBI compilers supplied by Tapioca in the
 
 ## The Hidden Definition RBI
 
-> **The `srb rbi hidden-definitions` is in
+> **The `srb rbi hidden-definitions` command is in
 > [maintenance mode](../blog/2022/07/28/srb-tapioca), please use `tapioca`
 > instead.**
 >
