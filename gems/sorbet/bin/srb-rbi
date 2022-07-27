@@ -41,9 +41,7 @@ module Sorbet::Private::Main
     <<~MESSAGE
       #{emojify("⚠️ ", yellow("The"))} #{cyan("srb rbi")} #{yellow("command is in maintenance mode, please use")} #{cyan("Tapioca")} #{yellow("instead.")}
 
-      #{yellow("The command")} #{cyan("srb rbi")} #{yellow("will be removed in future versions and all RBI generation should be done through Tapioca.")}
-
-      Add Tapioca to your Gemfile then run #{cyan("bundle install")} to install it:
+      To switch, add Tapioca to your Gemfile then run #{cyan("bundle install")} to install it:
 
           #{cyan("gem \"tapioca\", require: false, :group => :development")}
 
