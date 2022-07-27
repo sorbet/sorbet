@@ -3788,8 +3788,6 @@ public:
         // * They differ solely in the presence of a block argument.
         //
         // This usually comes up in the standard library (e.g. `String#each_line`).
-        //
-        // TODO(froydnj): what to use as the location for the error?
         ENFORCE(combinedInfo.has_value());
         if (isOverloaded && combinedInfo->hasKwArgs) {
             if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, args)) {
