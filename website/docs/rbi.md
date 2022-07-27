@@ -32,11 +32,11 @@ project:
 | -------------------------------------------------------------------------- | ---------------------------- |
 | Initialize a new Sorbet project, including all RBI files                   | `tapioca init`               |
 | &nbsp;                                                                     | &nbsp;                       |
-| Fetch pre-written RBIs from [`rbi-central`]                                | `tapioca rbi annotations`    |
-| (Re)generate RBIs for all gems using runtime reflection                    | `tapioca rbi gems`           |
-| (Re)generate RBIs for all DSLs such as Rails using runtime reflection      | `tapioca rbi dsl`            |
+| Fetch pre-written RBIs from [`rbi-central`]                                | `tapioca annotations`        |
+| (Re)generate RBIs for all gems using runtime reflection                    | `tapioca gems`               |
+| (Re)generate RBIs for all DSLs such as Rails using runtime reflection      | `tapioca dsl`                |
 | (Re)generate an RBI for all "hidden definitions" in a project (deprecated) | `srb rbi hidden-definitions` |
-| (Re)generate a the TODO RBI file (for missing constants)                   | `tapioca rbi todo`           |
+| (Re)generate a the TODO RBI file (for missing constants)                   | `tapioca todo`               |
 
 For more information about `tapioca init`, see [Adopting Sorbet](adopting.md).
 
