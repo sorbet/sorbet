@@ -176,7 +176,7 @@ or add new RBI files from `rbi-central`, run:
 ```
 
 > **Note**: With
-> [`srb rbi` moving to maintenance mode](../blog/2022/07/28/srb-tapioca),
+> [`srb rbi` moving to maintenance mode](../blog/2022/07/27/srb-tapioca),
 > [`rbi-central`] has shifted to being the main repository of community-sourced
 > RBI files for open source gems, replacing [`sorbet-typed`].
 
@@ -217,7 +217,7 @@ You can read about all the DSL RBI compilers supplied by Tapioca in the
 ## The Hidden Definitions RBI
 
 > **The `srb rbi hidden-definitions` command is in
-> [maintenance mode](../blog/2022/07/28/srb-tapioca), please use `tapioca`
+> [maintenance mode](../blog/2022/07/27/srb-tapioca), please use `tapioca`
 > instead.**
 >
 > This command will be removed in future versions and all RBI generation will be
