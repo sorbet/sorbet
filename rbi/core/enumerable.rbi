@@ -1892,7 +1892,7 @@ module Enumerable
     type_parameters(:U).params(
         blk: T.proc.params(arg0: T.any(Elem, T.type_parameter(:U)), arg1: Elem).returns(T.type_parameter(:U)),
     )
-    .returns(T.type_parameter(:U))
+    .returns(T.nilable(T.type_parameter(:U)))
   end
   def reduce(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
