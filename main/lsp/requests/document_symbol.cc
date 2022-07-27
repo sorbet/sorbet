@@ -127,6 +127,37 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
             }
         }
     }
+
+    // Despite our best efforts above, we might still output duplicates from the
+    // list of candidate symbols.  For instance, given an ownership chain:
+    //
+    // A -> B -> C
+    //
+    // Consider the case where B was defined in a different file and C was defined
+    // in the current file: then C will be in our candidate list.
+    //
+    // But if B has a loc in the current file and A was defined in a different file,
+    // then B will also be in our candidate list!
+    //
+    // To avoid that case, we need to walk the ownership chains of each symbol to
+    // deduplicate the candidate list.
+    UnorderedSet<core::SymbolRef> deduplicatedCandidates(candidates.begin(), candidates.end());
+    for (auto ref : candidates) {
+        auto owner = ref.owner(gs);
+        while (owner != core::Symbols::root()) {
+            if (deduplicatedCandidates.contains(owner)) {
+                deduplicatedCandidates.erase(ref);
+                break;
+            }
+
+            owner = owner.owner(gs);
+        }
+    }
+    candidates.erase(
+        std::remove_if(candidates.begin(), candidates.end(),
+                       [&deduplicatedCandidates](const auto ref) { return !deduplicatedCandidates.contains(ref); }),
+        candidates.end());
+
     for (auto ref : candidates) {
         auto data = symbolRef2DocumentSymbol(gs, ref, fref);
         if (data) {
