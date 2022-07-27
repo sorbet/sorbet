@@ -90,7 +90,7 @@ exactly equivalent) command in `tapioca`, which brings us to the next question.
 ## What's different between `srb rbi` and `tapioca`?
 
 From one standpoint, they're quite similar: they both use various heuristics to
-generate [RBI files](rbi.md) before `srb tc` runs on the project. Specifically,
+generate [RBI files](/docs/rbi) before `srb tc` runs on the project. Specifically,
 they both rely on Sorbet to typecheck the project itself (Tapioca is not some
 sort of alternative type checker for Ruby).
 
@@ -249,11 +249,11 @@ not even a gem, but simply a folder called `lib/types/`) as well as all of the
 scripts for generating RBIs.
 
 When we set out to open source Sorbet in the
-[spring of 2019](2019/05/16/state-of-sorbet-spring-2019), we hurriedly copied
+[spring of 2019](/blog/2019/05/16/state-of-sorbet-spring-2019), we hurriedly copied
 everything we thought might be useful out of Stripe's monorepo into custom gems.
 After a private beta period of a few months where people were given early access
 to these gems, we figured that Sorbet was good enough to share with the world
-and [open sourced it](blog/2019/06/20/open-sourcing-sorbet).
+and [open sourced it](/blog/2019/06/20/open-sourcing-sorbet).
 
 Over time, it became clear that what worked for generating RBIs in Stripe's Ruby
 codebase did not necessarily work well for all Ruby codebases. Stripe's test
