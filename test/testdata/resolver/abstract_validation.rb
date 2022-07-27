@@ -18,6 +18,33 @@ module AbstractMixin
   def concrete_no_signature; end
 end
 
+class AbstractClassVisibility
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.returns(Object)}
+  def foo; end
+
+  sig {abstract.returns(Object)}
+  def bar; end
+
+  sig {abstract.returns(Object)}
+  protected def baz; end
+end
+
+class ImplVisibility < AbstractClassVisibility
+  sig {override.returns(Object)}
+  protected def foo; end
+          # ^^^^^^^ error: Override of `AbstractClassVisibility#foo` must be public but `ImplVisibility#foo` is protected. Alternatively, `AbstractClassVisibility#foo` can be made protected
+
+  private def bar; end
+        # ^^^^^^^ error: Override of `AbstractClassVisibility#bar` must be public but `ImplVisibility#bar` is private. Alternatively, `AbstractClassVisibility#bar` can be made private
+
+  sig {override.returns(Object)}
+  private def baz; end
+        # ^^^^^^^ error: Override of `AbstractClassVisibility#baz` must be protected or public but `ImplVisibility#baz` is private. Alternatively, `AbstractClassVisibility#baz` can be made private
+end
 
 class AbstractClass
   extend T::Sig
