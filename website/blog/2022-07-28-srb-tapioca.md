@@ -120,8 +120,10 @@ Tapioca has some unique benefits compared to `srb rbi`:
   [rbi-central](https://github.com/Shopify/rbi-central) instead of from
   [sorbet-typed](https://github.com/sorbet/sorbet-typed), which `srb rbi` uses.
   The difference between the two repos is largely just about how metadata is
-  stored. It should be painless to contribute any relevant `sorbet-typed` RBI
-  files to `rbi-central` if your codebase depended on them.
+  stored and how
+  [RBI correctness is ensured](https://github.com/Shopify/rbi-central#ci-checks).
+  It should be painless to contribute any relevant `sorbet-typed` RBI files to
+  `rbi-central` if your codebase depended on them.
 
 This is only a quick summary of some of the benefits of Tapioca. For a more
 detailed comparison, you can read
