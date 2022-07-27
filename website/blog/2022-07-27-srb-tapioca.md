@@ -1,6 +1,9 @@
 ---
 id: srb-tapioca
 title: Tapioca is the recommended way to generate RBIs for Sorbet
+author: Jake Zimmerman
+authorURL: https://twitter.com/jez_io
+authorImageURL: https://avatars0.githubusercontent.com/u/5544532?s=460&v=4
 ---
 
 Today we're excited to announce that the Sorbet team officially recommends using
@@ -17,19 +20,20 @@ To elaborate, here's what's happening:
 
 - The [`tapioca`](https://github.com/Shopify/tapioca) gem is now the recommended
   approach to [RBI generation](/docs/rbi) in projects that use Sorbet. This
-  recommendation is reflected in the Sorbet docs. Tapioca replaces (and improves
-  on!) functionality currently provided by the `srb rbi` command. Tapioca is
-  maintained by Shopify and powers RBI generation in all of their Ruby
-  codebases. We'll discuss Tapioca in more depth below.
+  recommendation is reflected throughout the Sorbet docs. Tapioca replaces (and
+  improves on!) functionality currently provided by the `srb rbi` command.
+  Tapioca is maintained by Shopify and powers RBI generation in all of their
+  Ruby codebases. We'll discuss Tapioca's strengths in more depth below.
 
 - We're putting `srb rbi` (and by extension, certain phases of `srb init`) into
-  maintenance mode. This largely codifies what was already the case. It will
+  maintenance mode. This move largely codifies what was already the case, as
+  `srb rbi` has had unfixed usability problems since its creation. It will
   remain available for the foreseeable future, but may be removed at some point
   if it breaks in a way that would require substantial effort to repair.
 
-- Stripe remains actively invested in developing Sorbet itself (aka, `srb tc`)
-  as well as the runtime support libraries (`sorbet-runtime`). In fact, 2022 has
-  been
+- Stripe remains actively invested in developing the Sorbet type checker itself
+  (aka, `srb tc`) as well as the runtime support libraries (`sorbet-runtime`).
+  In fact, 2022 has been
   [one of the most active periods](https://github.com/sorbet/sorbet/graphs/contributors?from=2022-01-01&to=2022-07-26&type=c)
   in Sorbet's history, with nearly 700 commits from 30 different contributors so
   far this year.
@@ -55,8 +59,8 @@ cannot otherwise see—such as gems, Rails and other DSLs—compiles them into R
 files, and makes it easy for you to add gradual typing to your application."
 
 This is largely what the `srb init` and `srb rbi` commands, (which are provided
-by Sorbet itself) already do, but Tapioca does it better. We can explain what
-Tapioca does by way of comparison:
+by Sorbet itself) already do, but Tapioca does the job better. We can explain
+what Tapioca does by way of comparison:
 
 | `srb`                        | `tapioca`                                         |
 | ---------------------------- | ------------------------------------------------- |
@@ -80,26 +84,26 @@ Tapioca does by way of comparison:
   https://github.com/Shopify/tapioca#rbi-files-for-missing-constants-and-methods
 [spoom-bump]: https://github.com/Shopify/spoom#change-the-sigil-used-in-files
 
-You'll notice that most `srb` subcommands have a nearly (if not exactly)
-equivalent command in `tapioca`, which brings us to the next question.
+You'll notice that most `srb` subcommands have a nearly equivalent (if not
+exactly equivalent) command in `tapioca`, which brings us to the next question.
 
 ## What's different between `srb rbi` and `tapioca`?
 
 From one standpoint, they're quite similar: they both use various heuristics to
-generate RBI files before `srb tc` runs on the project. Specifically, they both
-rely on Sorbet to typecheck the project itself (Tapioca is not some sort of
-alternative type checker for Ruby).
+generate [RBI files](rbi.md) before `srb tc` runs on the project. Specifically,
+they both rely on Sorbet to typecheck the project itself (Tapioca is not some
+sort of alternative type checker for Ruby).
 
-Both Tapioca and `srb rbi` generate RBIs for a project's gems as well as RBI
-files that teach Sorbet about various kinds of metaprogramming in use inside the
-project itself.
+Both Tapioca and `srb rbi` generate RBIs for a project's gems as well as for the
+various DSLs and metaprogramming used inside a project itself.
 
-Tapioca has some unique benefits compared to `srb rbi`:
+But Tapioca has some unique benefits compared to `srb rbi`. Put simply, it's
+easier to use and works better out of the box. Over the years we've seen many
+times where someone new to Sorbet struggling to get `srb rbi` to do the right
+thing and the suggestion to switch to `tapioca` for RBI generation gets them
+unblocked.
 
-- It's generally easier to use, and generally works better for a larger fraction
-  of existing Ruby projects. Many times when someone is having trouble adopting
-  Sorbet in a codebase, the suggestion to switch from `srb rbi` to `tapioca` for
-  RBI generation gets them unblocked.
+Some of the specific benefits:
 
 - Tapioca generally does a better job working with third-party gems. For
   example, Tapioca allows customizing how gems are loaded before attempting to
