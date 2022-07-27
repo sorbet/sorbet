@@ -102,6 +102,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
         {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
         {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
+    vector<core::SymbolRef> candidates;
     for (auto [kind, used] : symbolTypes) {
         for (uint32_t idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
@@ -122,12 +123,14 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
                     continue;
                 }
 
-                auto data = symbolRef2DocumentSymbol(gs, ref, fref);
-                if (data) {
-                    result.push_back(move(data));
-                    break;
-                }
+                candidates.emplace_back(ref);
             }
+        }
+    }
+    for (auto ref : candidates) {
+        auto data = symbolRef2DocumentSymbol(gs, ref, fref);
+        if (data) {
+            result.push_back(move(data));
         }
     }
     response->result = move(result);
