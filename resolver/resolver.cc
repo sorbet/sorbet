@@ -3299,7 +3299,7 @@ private:
         send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
-    struct ArgInformation {
+    struct OverloadedMethodArgInformation {
         std::vector<core::ArgInfo> posArgs;
         std::vector<core::ArgInfo> kwArgs;
         std::optional<core::ArgInfo> blkArg;
@@ -3308,24 +3308,25 @@ private:
     // This structure serves double duty: it holds information about a single sig and the
     // results of running it through fillInInfoFromSig and it also holds information about
     // merging the results of several such structures together from overloaded methods.
-    struct SigInformation {
+    struct OverloadedMethodSigInformation {
         bool hasKwArgs = false;
         // Optimistically assume this.
         bool allArgsMatched = true;
         bool hasMissingArgument = false;
 
         // This is used solely in the information for a single sig.
-        std::optional<ArgInformation> args;
+        std::optional<OverloadedMethodArgInformation> args;
 
-        void merge(SigInformation &other) {
+        void merge(OverloadedMethodSigInformation &other) {
             this->hasKwArgs &= other.hasKwArgs;
             this->allArgsMatched &= other.allArgsMatched;
             this->hasMissingArgument |= other.hasMissingArgument;
         }
     };
 
-    static SigInformation fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
-                                            ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
+    static OverloadedMethodSigInformation fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method,
+                                                            core::LocOffsets exprLoc, ParsedSig &sig, bool isOverloaded,
+                                                            const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
@@ -3381,7 +3382,7 @@ private:
 
         auto methodInfo = method.data(ctx);
 
-        SigInformation info;
+        OverloadedMethodSigInformation info;
         if (usesArgumentForwardingSyntax(ctx, methodInfo, mdef, isOverloaded)) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
@@ -3695,8 +3696,9 @@ private:
             [&](const ast::ExpressionPtr &e) {});
     }
 
-    static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs, const SigInformation &info,
-                                                      const std::vector<ArgInformation> &args) {
+    static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs,
+                                                      const OverloadedMethodSigInformation &info,
+                                                      const std::vector<OverloadedMethodArgInformation> &args) {
         if (numSigs != 2) {
             return false;
         }
@@ -3751,8 +3753,8 @@ public:
         }
 
         int i = -1;
-        std::optional<SigInformation> combinedInfo;
-        std::vector<ArgInformation> args;
+        std::optional<OverloadedMethodSigInformation> combinedInfo;
+        std::vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;
