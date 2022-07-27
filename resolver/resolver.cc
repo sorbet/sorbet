@@ -3315,8 +3315,34 @@ private:
         send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
     }
 
-    static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
-                                  ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
+    struct OverloadedMethodArgInformation {
+        std::vector<core::ArgInfo> posArgs;
+        std::vector<core::ArgInfo> kwArgs;
+        std::optional<core::ArgInfo> blkArg;
+    };
+
+    // This structure serves double duty: it holds information about a single sig and the
+    // results of running it through fillInInfoFromSig and it also holds information about
+    // merging the results of several such structures together from overloaded methods.
+    struct OverloadedMethodSigInformation {
+        bool hasKwArgs = false;
+        // Optimistically assume this.
+        bool allArgsMatched = true;
+        bool hasMissingArgument = false;
+
+        // This is used solely in the information for a single sig.
+        std::optional<OverloadedMethodArgInformation> args;
+
+        void merge(OverloadedMethodSigInformation &other) {
+            this->hasKwArgs &= other.hasKwArgs;
+            this->allArgsMatched &= other.allArgsMatched;
+            this->hasMissingArgument |= other.hasMissingArgument;
+        }
+    };
+
+    static OverloadedMethodSigInformation fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method,
+                                                            core::LocOffsets exprLoc, ParsedSig &sig, bool isOverloaded,
+                                                            const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
 
@@ -3372,6 +3398,7 @@ private:
 
         auto methodInfo = method.data(ctx);
 
+        OverloadedMethodSigInformation info;
         if (usesArgumentForwardingSyntax(ctx, methodInfo, mdef, isOverloaded)) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
@@ -3379,7 +3406,7 @@ private:
                 e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
                                method.show(ctx));
             }
-            return;
+            return info;
         }
 
         // Get the parameters order from the signature
@@ -3399,28 +3426,33 @@ private:
             // Check that optional keyword parameters are after all the required ones
             bool isKwd = arg.flags.isKeyword;
             bool isReq = !arg.flags.isBlock && !arg.flags.isRepeated && !arg.flags.isDefault;
-            if (isKwd && !isReq) {
-                seenOptional = true;
-            } else if (isKwd && seenOptional && isReq) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
-                    e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
-                                "sig", treeArgName.show(ctx));
-                    e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+            if (isKwd) {
+                info.hasKwArgs = true;
+                if (!isReq) {
+                    seenOptional = true;
+                } else if (seenOptional && isReq) {
+                    if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
+                        e.setHeader(
+                            "Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
+                            "sig", treeArgName.show(ctx));
+                        e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+                    }
                 }
             }
 
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
-            bool isBlkArg = arg.name == core::Names::blkArg();
+            bool isSyntheticBlkArg = arg.name == core::Names::blkArg();
+            bool isBlkArg = arg.flags.isBlock;
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
 
                 // It would be nice to remove the restriction on more than these two specific binds, but that would
                 // raise a lot more errors
-                if (!isBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
-                                  spec->rebind == core::Symbols::MagicBindToSelfType())) {
+                if (!isSyntheticBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
+                                           spec->rebind == core::Symbols::MagicBindToSelfType())) {
                     if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");
@@ -3431,13 +3463,27 @@ private:
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
+                // Since methods always have (synthesized if necessary) block arguments,
+                // we need to record the explicit presence of a block arg from the sig here.
+                if (isBlkArg) {
+                    if (!info.args.has_value()) {
+                        info.args.emplace();
+                    }
+                    if (!info.args->blkArg.has_value()) {
+                        info.args->blkArg.emplace(arg.deepCopy());
+                    }
+                }
             } else {
+                if (!isBlkArg) {
+                    info.hasMissingArgument = true;
+                }
+
                 if (arg.type == nullptr) {
                     arg.type = core::Types::untyped(ctx, method);
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
+                if (!isOverloaded && !isSyntheticBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
@@ -3447,15 +3493,20 @@ private:
                 }
             }
 
-            if (isOverloaded && arg.flags.isKeyword) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                treeArgName.show(ctx));
+            if (isOverloaded) {
+                if (!info.args.has_value()) {
+                    info.args.emplace();
+                }
+                if (arg.flags.isKeyword) {
+                    info.args->kwArgs.emplace_back(arg.deepCopy());
+                } else if (!arg.flags.isBlock) {
+                    info.args->posArgs.emplace_back(arg.deepCopy());
                 }
             }
         }
 
         for (const auto &spec : sig.argTypes) {
+            info.allArgsMatched = false;
             if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
@@ -3470,6 +3521,7 @@ private:
                 auto dname = param->localVariable._name;
                 // TODO(jvilk): Do we need to check .show? Typically NameRef equality is equal to string equality.
                 if (sname != dname && sname.show(ctx) != dname.show(ctx)) {
+                    info.allArgsMatched = false;
                     if (auto e = ctx.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
                         e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname.show(ctx),
                                     sname.show(ctx));
@@ -3481,6 +3533,7 @@ private:
         }
 
         recordMethodInfoInSig(ctx, method, sig, mdef);
+        return info;
     }
 
     // Force errors from any signatures that didn't attach to methods.
@@ -3659,6 +3712,41 @@ private:
             [&](const ast::ExpressionPtr &e) {});
     }
 
+    static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs,
+                                                      const OverloadedMethodSigInformation &info,
+                                                      const std::vector<OverloadedMethodArgInformation> &args) {
+        if (numSigs != 2) {
+            return false;
+        }
+        if (!info.allArgsMatched) {
+            return false;
+        }
+        if (info.hasMissingArgument) {
+            return false;
+        }
+
+        const auto &argv0 = args[0];
+        const auto &argv1 = args[1];
+
+        // Unlike std::equal, absl::c_equal will test for equal sizes.
+        auto argsEqual = [&ctx](const auto &arg0, const auto &arg1) {
+            if (arg0.name != arg1.name) {
+                return false;
+            }
+            return core::Types::equiv(ctx, arg0.type, arg1.type);
+        };
+
+        // TODO(froydnj) better error messages for users trying to provide overloads with kwargs?
+        if (!absl::c_equal(argv0.posArgs, argv1.posArgs, argsEqual)) {
+            return false;
+        }
+        if (!absl::c_equal(argv0.kwArgs, argv1.kwArgs, argsEqual)) {
+            return false;
+        }
+        return ((argv0.blkArg.has_value() && !argv1.blkArg.has_value()) ||
+                (!argv0.blkArg.has_value() && argv1.blkArg.has_value()));
+    }
+
 public:
     static void resolveMultiSignatureJob(core::MutableContext ctx, ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
@@ -3681,6 +3769,8 @@ public:
         }
 
         int i = -1;
+        std::optional<OverloadedMethodSigInformation> combinedInfo;
+        std::vector<OverloadedMethodArgInformation> args;
         for (auto &sig : sigs) {
             i++;
             core::MethodRef overloadSym;
@@ -3694,7 +3784,38 @@ public:
             } else {
                 overloadSym = mdef.symbol;
             }
-            fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
+            auto info = fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
+            if (info.args.has_value()) {
+                args.emplace_back(std::move(*info.args));
+            } else {
+                // Add an empty kwargs vector.
+                args.emplace_back();
+            }
+            if (combinedInfo.has_value()) {
+                combinedInfo->merge(info);
+            } else {
+                combinedInfo.emplace(std::move(info));
+            }
+        }
+
+        // We permit keyword arguments for overloaded methods only in the following case:
+        //
+        // * There are only two signatures;
+        // * They differ solely in the presence of a block argument.
+        //
+        // This usually comes up in the standard library (e.g. `String#each_line`).
+        ENFORCE(combinedInfo.has_value());
+        if (isOverloaded && combinedInfo->hasKwArgs) {
+            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, args)) {
+                for (auto &argv : args) {
+                    for (auto &arg : argv.kwArgs) {
+                        if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`",
+                                        "sig", arg.name.show(ctx));
+                        }
+                    }
+                }
+            }
         }
         // handleAbstractMethod called elsewhere
     }
