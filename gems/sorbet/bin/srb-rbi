@@ -37,6 +37,23 @@ module Sorbet::Private::Main
       "
   end
 
+  def self.deprecation
+    <<~MESSAGE
+      #{emojify("⚠️ ", yellow("The"))} #{cyan("srb rbi")} #{yellow("command is in maintenance mode, please use")} #{cyan("Tapioca")} #{yellow("instead.")}
+
+      To switch, add Tapioca to your Gemfile then run #{cyan("bundle install")} to install it:
+
+          #{cyan("gem \"tapioca\", require: false, :group => :development")}
+
+      Once Tapioca is installed, simply run #{cyan("tapioca init")} to initialize your project with Sorbet and generate the necessary RBI files:
+
+          #{cyan("bundle exec tapioca init")}
+
+      For more information, please see https://github.com/Shopify/tapioca.
+
+    MESSAGE
+  end
+
   def self.emojify(emoji, msg)
     if STDOUT.isatty && RUBY_PLATFORM =~ /darwin/
       "#{emoji} #{msg}"
@@ -183,6 +200,8 @@ If instead you want to explore your files locally, here are some things to try:
   end
 
   def self.main(argv)
+    puts self.deprecation
+
     if argv.length == 0
       puts self.usage
       exit(1)

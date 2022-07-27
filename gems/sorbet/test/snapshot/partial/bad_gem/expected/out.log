@@ -1,3 +1,15 @@
+The srb rbi command is in maintenance mode, please use Tapioca instead.
+
+To switch, add Tapioca to your Gemfile then run bundle install to install it:
+
+    gem "tapioca", require: false, :group => :development
+
+Once Tapioca is installed, simply run tapioca init to initialize your project with Sorbet and generate the necessary RBI files:
+
+    bundle exec tapioca init
+
+For more information, please see https://github.com/Shopify/tapioca.
+
 
 Hey there!
 
