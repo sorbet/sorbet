@@ -2,12 +2,28 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://sorbet.org/blog</id>
     <title>Sorbet Blog</title>
-    <updated>2022-01-06T06:00:00.000Z</updated>
+    <updated>2022-07-27T06:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
     <rights>© 2022 Stripe</rights>
+    <entry>
+        <title type="html"><![CDATA[Tapioca is the recommended way to generate RBIs for Sorbet]]></title>
+        <id>https://sorbet.org/blog/2022/07/27/srb-tapioca.html</id>
+        <link href="https://sorbet.org/blog/2022/07/27/srb-tapioca.html"/>
+        <updated>2022-07-27T06:00:00.000Z</updated>
+        <summary type="html"><![CDATA[<p>Today we’re excited to announce that the Sorbet team officially recommends using
+Shopify’s <a href="https://github.com/Shopify/tapioca">Tapioca</a> gem for RBI generation
+in projects that use Sorbet. Tapioca takes the place of the <code>srb rbi</code> family of
+commands, which as of today are officially in maintenance mode. Sorbet itself
+remains in active development.</p>
+]]></summary>
+        <author>
+            <name>Jake Zimmerman</name>
+            <uri>https://twitter.com/jez_io</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Open-sourcing the Sorbet VS Code Extension]]></title>
         <id>https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode.html</id>

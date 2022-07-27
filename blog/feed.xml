@@ -4,7 +4,7 @@
         <title>Sorbet Blog</title>
         <link>https://sorbet.org/blog</link>
         <description>The best place to stay up-to-date with the latest Sorbet news and events.</description>
-        <lastBuildDate>Thu, 06 Jan 2022 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 27 Jul 2022 06:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <image>
@@ -13,6 +13,18 @@
             <link>https://sorbet.org/blog</link>
         </image>
         <copyright>© 2022 Stripe</copyright>
+        <item>
+            <title><![CDATA[Tapioca is the recommended way to generate RBIs for Sorbet]]></title>
+            <link>https://sorbet.org/blog/2022/07/27/srb-tapioca.html</link>
+            <guid>https://sorbet.org/blog/2022/07/27/srb-tapioca.html</guid>
+            <pubDate>Wed, 27 Jul 2022 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Today we’re excited to announce that the Sorbet team officially recommends using
+Shopify’s <a href="https://github.com/Shopify/tapioca">Tapioca</a> gem for RBI generation
+in projects that use Sorbet. Tapioca takes the place of the <code>srb rbi</code> family of
+commands, which as of today are officially in maintenance mode. Sorbet itself
+remains in active development.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Open-sourcing the Sorbet VS Code Extension]]></title>
             <link>https://sorbet.org/blog/2022/01/06/open-sourcing-sorbet-vscode.html</link>

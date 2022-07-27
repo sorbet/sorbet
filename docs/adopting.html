@@ -63,12 +63,21 @@
               }
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/adopting.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Adopting Sorbet in an Existing Codebase</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="step-1-install-dependencies"></a><a href="#step-1-install-dependencies" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 1: Install dependencies</h2>
-<p>There are two components to Sorbet: the command line interface and runtime
-systems. We’ll declare them in our Gemfile and install them with Bundler:</p>
+<p>There are three components to Sorbet:</p>
+<ol>
+<li>The static type checker, which runs as a command line executable (<code>srb tc</code>)</li>
+<li>The runtime package, which provides syntax for type annotations as well as
+certain type-friendly data structures.</li>
+<li>Tools for generating <a href="/docs/rbi">RBI files</a>, which allow Sorbet to interoperate
+with gems and metaprogramming. We recommend using
+<a href="https://github.com/Shopify/tapioca">Tapioca</a>.</li>
+</ol>
+<p>We’ll declare them in our Gemfile and install them with Bundler:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- Gemfile --</span>
 
 gem <span class="hljs-string">'sorbet'</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
 gem <span class="hljs-string">'sorbet-runtime'</span>
+gem <span class="hljs-string">'tapioca'</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
 </code></pre>
 <pre><code class="hljs css language-plaintext">❯ bundle install
 </code></pre>
@@ -80,6 +89,7 @@ for some important caveats.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- Gemfile --</span>
 
 gem <span class="hljs-string">'sorbet-static-and-runtime'</span>
+gem <span class="hljs-string">'tapioca'</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
 </code></pre>
 <p>Note that this is not the recommended way to add Sorbet to our project if we
 work on a gem as it would declare <code>sorbet</code> as a runtime dependency instead of a
@@ -100,7 +110,7 @@ true
 information. But for projects that have multiple files and depend on other gems,
 Sorbet needs to know more information to work.</p>
 <p>To initialize Sorbet in an existing project, run:</p>
-<pre><code class="hljs css language-plaintext">❯ srb init
+<pre><code class="hljs css language-plaintext">❯ bundle exec tapioca init
 </code></pre>
 <p>It’s normal for this command to spew a bunch of output to the terminal. When
 it’s done, there should be a <code>sorbet/</code> folder in the current directory. Be sure
@@ -118,11 +128,13 @@ to check the entire folder into version control.</p>
 <li><p><code>sorbet/rbi/</code> is a folder containing <a href="/docs/rbi">RBI files</a>. RBI files (or “Ruby
 Interface” files) declare classes, modules, constants, and methods to Sorbet
 that it can’t see on its own.</p>
-<p><code>srb init</code> creates many kinds of RBI files. For more information, see
-<a href="/docs/rbi">RBI files</a>.</p></li>
+<p><code>tapioca init</code> creates many kinds of RBI files. For more information, see
+<a href="/docs/rbi">RBI files</a>. In addition <code>tapioca init</code> will also create a
+<a href="https://bundler.io/man/bundle-binstubs.1.html">binstub</a> for itself under
+<code>bin/tapioca</code> so further calls to Tapioca can be done through <code>bin/tapioca</code>
+rather than <code>bundle exec tapioca</code>.</p></li>
 </ul>
-<p>If these two items exist, we’re all set to typecheck our project for the first
-time.</p>
+<p>If these items exist, we’re all set to typecheck our project for the first time.</p>
 <h2><a class="anchor" aria-hidden="true" id="step-3-run-srb-tc-for-the-first-time"></a><a href="#step-3-run-srb-tc-for-the-first-time" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 3: Run <code>srb tc</code> for the first time</h2>
 <p>Now that we’ve initialized Sorbet, type checking Sorbet should be as simple as:</p>
 <pre><code class="hljs css language-plaintext">❯ srb tc
@@ -158,10 +170,10 @@ central to understanding the inheritance hierarchy and thus knowing which
 types can be used in place of which other types.</p></li>
 </ol>
 <p>To solve points (3) and (4), Sorbet uses <a href="/docs/rbi">RBI files</a>. We mentioned RBI
-files before when we introduced <code>srb init</code>. RBI files are purely annotations
-files, separate from Ruby source code. While <code>srb init</code> can automatically create
-these files, it’s not a perfect process. To eliminate constant errors, sometimes
-Sorbet requires hand-written RBI files.</p>
+files before when we introduced <code>tapioca init</code>. RBI files are purely annotations
+files, separate from Ruby source code. While <code>tapioca init</code> can automatically
+create these files, it’s not a perfect process. To eliminate constant errors,
+sometimes Sorbet requires hand-written RBI files.</p>
 <p>To learn more about RBI files and how they can help with adopting Sorbet, see
 <a href="/docs/rbi">the docs here</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="step-5-enable-type-checking"></a><a href="#step-5-enable-type-checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 5: Enable type checking</h2>
@@ -183,8 +195,8 @@ enable. The tl;dr is that type checking happens when we add
 <a href="/docs/static"><code># typed: true</code></a> to files and write <a href="/docs/sigs">method signatures</a> in
 those files.</p>
 <h2><a class="anchor" aria-hidden="true" id="step-6-source-control"></a><a href="#step-6-source-control" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Step 6: Source Control</h2>
-<p>All files generated by <code>srb init</code> should be committed to source control,
-including the entire <code>sorbet</code> directory.</p>
+<p>All files generated by <code>tapioca init</code> (including <code>bin/tapioca</code>) should be
+committed to source control, including the entire <code>sorbet</code> directory.</p>
 <p>Optionally, <code>sorbet/rbi/hidden-definitions/errors.txt</code> can be ignored (eg.
 <code>.gitignore</code>). It is essentially a debug log for sorbet maintainers and is not
 needed at runtime.</p>

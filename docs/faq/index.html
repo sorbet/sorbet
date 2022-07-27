@@ -298,17 +298,16 @@ require_relative <span class="hljs-string">'./my_rake_tasks'</span>
 <p>Sorbet has not reached version 1.0 yet. As such, it will make breaking changes
 constantly, without warning.</p>
 <p>To upgrade a patch level (e.g., from 0.4.4314 to 0.4.4358):</p>
-<pre><code class="hljs"><span class="hljs-attr">bundle</span> <span class="hljs-string">update sorbet sorbet-runtime</span>
+<pre><code class="hljs">bundle update sorbet sorbet-runtime
 <span class="hljs-comment"># also update plugins like sorbet-rails, if any</span>
-<span class="hljs-attr">bundle</span> <span class="hljs-string">exec srb init</span>
-<span class="hljs-comment">
-# For plugins like sorbet-rails, see their docs, eg.</span>
-<span class="hljs-attr">https</span>:<span class="hljs-string">//github.com/chanzuckerberg/sorbet-rails#initial-setup</span>
-<span class="hljs-comment">
-# Optional: Suggest new, stronger sigils (per-file strictness</span>
+
+<span class="hljs-comment"># For plugins like sorbet-rails, see their docs, eg.</span>
+https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/chanzuckerberg/</span>sorbet-rails<span class="hljs-comment">#initial-setup</span>
+
+<span class="hljs-comment"># Optional: Suggest new, stronger sigils (per-file strictness</span>
 <span class="hljs-comment"># levels) when possible. Currently, the suggestion process is</span>
 <span class="hljs-comment"># fallible, and may suggest downgrading when it's not necessary.</span>
-<span class="hljs-attr">bundle</span> <span class="hljs-string">exec srb rbi suggest-typed</span>
+bundle exec srb rbi suggest-typed
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="what-platforms-does-sorbet-support"></a><a href="#what-platforms-does-sorbet-support" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What platforms does Sorbet support?</h2>
 <p>The <code>sorbet-runtime</code> gem is currently only tested on Ruby 2.6 and Ruby 2.7. It
@@ -356,8 +355,11 @@ some support libraries:</p>
     rm glibc-<span class="hljs-variable">${GLIBC_RELEASE_VERSION}</span>.apk</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="does-sorbet-support-activerecord-and-rails"></a><a href="#does-sorbet-support-activerecord-and-rails" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Does Sorbet support ActiveRecord (and Rails?)</h2>
-<p><a href="https://github.com/chanzuckerberg/sorbet-rails">sorbet-rails</a> is a community-maintained project which can help generate RBI
-files for certain Rails constructs.</p>
+<p>Sorbet doesn’t support Rails, but
+<a href="https://github.com/Shopify/tapioca#generating-rbi-files-for-rails-and-other-dsls">Tapioca can generate RBI files for it</a>.</p>
+<p>If you’re not using Tapioca, you could use <a href="https://github.com/chanzuckerberg/sorbet-rails">sorbet-rails</a>, a
+community-maintained project which can help generate RBI files for certain Rails
+constructs.</p>
 <p>Also see the <a href="/en/community">Community</a> page for more community-maintained projects!</p>
 <h2><a class="anchor" aria-hidden="true" id="can-i-convert-from-yard-docs-to-sorbet-signatures"></a><a href="#can-i-convert-from-yard-docs-to-sorbet-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Can I convert from YARD docs to Sorbet signatures?</h2>
 <p><a href="https://github.com/AaronC81/sord">Sord</a> is a community-maintained project which can generate Sorbet RBI files

@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Tapioca is the recommended way to generate RBIs for Sorbet · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Today we&#x27;re excited to announce that the Sorbet team officially recommends using"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Tapioca is the recommended way to generate RBIs for Sorbet · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/blog/2022/07/27/srb-tapioca"/><meta property="og:description" content="Today we&#x27;re excited to announce that the Sorbet team officially recommends using"/><meta property="og:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://sorbet.org/img/sorbet-logo-card@2x.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-119877071-2', 'auto');
+              ga('send', 'pageview');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class=""><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class="siteNavGroupActive"><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Recent Posts</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Recent Posts</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/blog/2022/07/27/srb-tapioca">Tapioca is the recommended way to generate RBIs for Sorbet</a></li><li class="navListItem"><a class="navItem" href="/blog/2022/01/06/open-sourcing-sorbet-vscode">Open-sourcing the Sorbet VS Code Extension</a></li><li class="navListItem"><a class="navItem" href="/blog/2021/07/30/open-sourcing-sorbet-compiler">Sorbet Compiler: An experimental, ahead-of-time compiler for Ruby</a></li><li class="navListItem"><a class="navItem" href="/blog/2020/07/30/ruby-3-rbs-sorbet">Types in Ruby 3, RBS, and Sorbet</a></li><li class="navListItem"><a class="navItem" href="/blog/2019/12/20/announcing-sorbet-0.5">Announcing Sorbet 0.5</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer postContainer blogContainer"><div class="wrapper"><div class="lonePost"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle"><a href="/blog/2022/07/27/srb-tapioca">Tapioca is the recommended way to generate RBIs for Sorbet</a></h1><p class="post-meta">July 27, 2022</p><div class="authorBlock"><p class="post-authorName"><a href="https://twitter.com/jez_io" target="_blank" rel="noreferrer noopener">Jake Zimmerman</a></p><div class="authorPhoto"><a href="https://twitter.com/jez_io" target="_blank" rel="noreferrer noopener"><img src="https://avatars0.githubusercontent.com/u/5544532?s=460&amp;v=4" alt="Jake Zimmerman"/></a></div></div></header><div><span><p>Today we’re excited to announce that the Sorbet team officially recommends using
+Shopify’s <a href="https://github.com/Shopify/tapioca">Tapioca</a> gem for RBI generation
+in projects that use Sorbet. Tapioca takes the place of the <code>srb rbi</code> family of
+commands, which as of today are officially in maintenance mode. Sorbet itself
+remains in active development.</p>
+<!--truncate-->
+<p><img src="/img/sorbet-plus-tapioca.svg" alt="sorbet plus tapioca"></p>
+<p>To elaborate, here’s what’s happening:</p>
+<ul>
+<li><p>The <a href="https://github.com/Shopify/tapioca"><code>tapioca</code></a> gem is now the recommended
+approach to <a href="/docs/rbi">RBI generation</a> in projects that use Sorbet. This
+recommendation is reflected throughout the Sorbet docs. Tapioca replaces (and
+improves on!) functionality currently provided by the <code>srb rbi</code> command.
+Tapioca is maintained by Shopify and powers RBI generation in all of their
+Ruby codebases. We’ll discuss Tapioca’s strengths in more depth below.</p></li>
+<li><p>We’re putting <code>srb rbi</code> (and by extension, certain phases of <code>srb init</code>) into
+maintenance mode. This move largely codifies what was already the case, as
+<code>srb rbi</code> has had unfixed usability problems since its creation. It will
+remain available for the foreseeable future, but may be removed at some point
+if it breaks in a way that would require substantial effort to repair.</p></li>
+<li><p>Stripe remains actively invested in developing the Sorbet type checker itself
+(aka, <code>srb tc</code>) as well as the runtime support libraries (<code>sorbet-runtime</code>).
+In fact, 2022 has been
+<a href="https://github.com/sorbet/sorbet/graphs/contributors?from=2022-01-01&amp;to=2022-07-26&amp;type=c">one of the most active periods</a>
+in Sorbet’s history, with nearly 700 commits from 30 different contributors so
+far this year.</p></li>
+</ul>
+<p>As of today Sorbet’s guide to
+<a href="/docs/adopting">Adopting Sorbet in an Existing Codebase</a> has been updated to
+recommend using Tapioca. The old guide remains available in the
+<a href="https://github.com/sorbet/sorbet/blob/834c45a98cc52c2474b75fc58d06d4526888f48f/website/docs/adopting.md">repo history</a>
+if you need to reference it.</p>
+<p>If you’d like to start using Tapioca in a project that already uses <code>srb rbi</code>,
+<a href="https://github.com/Shopify/tapioca/wiki/Migrating-to-Tapioca">see this migration guide</a>.</p>
+<p>With the announcements out of the way, let’s dive into some questions we imagine
+you might have.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-is-tapioca"></a><a href="#what-is-tapioca" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What is Tapioca?</h2>
+<p><a href="https://github.com/Shopify/tapioca">Tapioca</a> is a Ruby gem that provides
+command line tools for generating <a href="/docs/rbi">RBI files</a>. From its
+documentation, “Tapioca surfaces types and methods from many sources that Sorbet
+cannot otherwise see—such as gems, Rails and other DSLs—compiles them into RBI
+files, and makes it easy for you to add gradual typing to your application.”</p>
+<p>This is largely what the <code>srb init</code> and <code>srb rbi</code> commands, (which are provided
+by Sorbet itself) already do, but Tapioca does the job better. We can explain
+what Tapioca does by way of comparison:</p>
+<table>
+<thead>
+<tr><th><code>srb</code></th><th><code>tapioca</code></th></tr>
+</thead>
+<tbody>
+<tr><td><code>srb init</code></td><td><a href="https://github.com/Shopify/tapioca#getting-started"><code>tapioca init</code></a></td></tr>
+<tr><td><code>srb rbi config</code></td><td><a href="https://github.com/Shopify/tapioca#getting-started"><code>tapioca config</code></a></td></tr>
+<tr><td><code>srb rbi sorbet-typed</code></td><td><a href="https://github.com/Shopify/tapioca#pulling-rbi-annotations-from-remote-sources"><code>tapioca annotations</code></a></td></tr>
+<tr><td><code>srb rbi gems</code></td><td><a href="https://github.com/Shopify/tapioca#generating-rbi-files-for-gems"><code>tapioca gems</code></a></td></tr>
+<tr><td><code>srb rbi hidden-definitions</code></td><td>Partially covered by <a href="https://github.com/Shopify/tapioca#generating-rbi-files-for-rails-and-other-dsls"><code>tapioca dsl</code></a></td></tr>
+<tr><td><code>srb rbi todo</code></td><td><a href="https://github.com/Shopify/tapioca#rbi-files-for-missing-constants-and-methods"><code>tapioca todo</code></a></td></tr>
+<tr><td><code>srb rbi suggest-typed</code></td><td>Delegated to <a href="https://github.com/Shopify/spoom#change-the-sigil-used-in-files"><code>spoom bump</code></a></td></tr>
+<tr><td><code>srb rbi find-gem-rbis</code></td><td>Folded inside <code>tapioca gems</code></td></tr>
+</tbody>
+</table>
+<p>You’ll notice that most <code>srb</code> subcommands have a nearly equivalent (if not
+exactly equivalent) command in <code>tapioca</code>, which brings us to the next question.</p>
+<h2><a class="anchor" aria-hidden="true" id="whats-different-between-srb-rbi-and-tapioca"></a><a href="#whats-different-between-srb-rbi-and-tapioca" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s different between <code>srb rbi</code> and <code>tapioca</code>?</h2>
+<p>From one standpoint, they’re quite similar: they both use various heuristics to
+generate <a href="rbi.md">RBI files</a> before <code>srb tc</code> runs on the project. Specifically,
+they both rely on Sorbet to typecheck the project itself (Tapioca is not some
+sort of alternative type checker for Ruby).</p>
+<p>Both Tapioca and <code>srb rbi</code> generate RBIs for a project’s gems as well as for the
+various DSLs and metaprogramming used inside a project itself.</p>
+<p>But Tapioca has some unique benefits compared to <code>srb rbi</code>. Put simply, it’s
+easier to use and works better out of the box. Over the years we’ve seen many
+times where someone new to Sorbet struggling to get <code>srb rbi</code> to do the right
+thing and the suggestion to switch to <code>tapioca</code> for RBI generation gets them
+unblocked.</p>
+<p>Some of the specific benefits:</p>
+<ul>
+<li><p>Tapioca generally does a better job working with third-party gems. For
+example, Tapioca allows customizing how gems are loaded before attempting to
+generate an RBI for the gem.</p></li>
+<li><p>Tapioca has a more predictable approach to DSLs and metaprogramming. In
+particular, Tapioca has built in support for various Rails DSLs, something
+which <code>srb rbi</code> does not. Tapioca also provides an easy way to define
+<a href="https://github.com/Shopify/tapioca#writing-custom-dsl-compilers">custom DSL generators</a>
+for teaching Sorbet about DSLs specific to your project.</p></li>
+<li><p>Tapioca will do a better job at generating actual types inside the generated
+RBI files. The custom DSL generators usually generate types in addition to
+method stubs. It will also generate <code>T.let</code> annotations for constants defined
+by the gem.</p></li>
+<li><p>Tapioca pulls community-driven type annotations for public gems from
+<a href="https://github.com/Shopify/rbi-central">rbi-central</a> instead of from
+<a href="https://github.com/sorbet/sorbet-typed">sorbet-typed</a>, which <code>srb rbi</code> uses.
+The difference between the two repos is largely just about how metadata is
+stored and how
+<a href="https://github.com/Shopify/rbi-central#ci-checks">RBI correctness is ensured</a>.
+It should be painless to contribute any relevant <code>sorbet-typed</code> RBI files to
+<code>rbi-central</code> if your codebase depended on them.</p></li>
+</ul>
+<p>This is only a quick summary of some of the benefits of Tapioca. For a more
+detailed comparison, you can read
+<a href="https://github.com/Shopify/tapioca/wiki/How-does-Tapioca-compare-to-%60srb-rbi%60%3F">this page in the Tapioca docs</a>.</p>
+<p>The biggest feature that is <em>only</em> available in <code>srb rbi</code> (and has no exact
+analogue in Tapioca) is <code>srb rbi hidden-definitions</code>, which brings us to our
+next question.</p>
+<h2><a class="anchor" aria-hidden="true" id="whats-happening-with-srb-rbi-hidden-definitions"></a><a href="#whats-happening-with-srb-rbi-hidden-definitions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s happening with <code>srb rbi hidden-definitions</code>?</h2>
+<p>Tapioca has no exact replacement for <code>srb rbi hidden-definitions</code>. This is the
+main reason why we have no active plans to remove the <code>srb rbi</code> command and its
+related tooling in the immediate future.</p>
+<p>Recall that the <code>hidden-definitions</code> subcommand works like this:</p>
+<ol>
+<li><p>Require <em>all</em> Ruby code in the project. This includes all gems, all
+application code, potentially even all scripts.</p></li>
+<li><p>Use Ruby’s reflection APIs to list all the classes, methods, and constants
+that have been defined.</p></li>
+<li><p>Compute a diff between that list of definitions and the list of definitions
+that Sorbet can see statically in the codebase (including any RBIs that
+might have already been generated).</p></li>
+<li><p>Write out an RBI containing that difference.</p></li>
+</ol>
+<p>This tool is great when it works—you don’t have to think about it!—but extremely
+frustrating when it doesn’t. Some ways it might not work:</p>
+<ul>
+<li><p>It finds too many files to require. For example, it might accidentally require
+a script that was only intended to be run manually. The <code>srb</code> tool tries to
+look for whether the file has executable permissions or a <code>#!</code> shebang at the
+top and skips running it in that case, but not all scripts have this.</p>
+<p>The <code>srb</code> command prints a warning that it is about to require <em>all</em> code in
+the project, and requires a confirmation before running, but many people
+ignore this warning and then are confused when things break.</p></li>
+<li><p>It takes a long time. In large projects, requiring all code can take many
+minutes, quickly dwarfing how quickly Sorbet can typecheck a project (usually
+in seconds or less).</p></li>
+<li><p>It never generates types. Even when it can detect that a method exists at
+runtime, the generated RBI will never have types for the arguments or return
+type.</p></li>
+<li><p>It’s not very robust to seemingly isolated failures. If there’s a problem in a
+single file or a single gem, that can sometimes cause the whole process to
+abort.</p></li>
+</ul>
+<p>For these reasons and many more, <code>srb rbi hidden-definitions</code> is one of the
+tools that people struggle with the most when adopting Sorbet.</p>
+<p>But its one selling point is that sometimes there’s simply no other tool. Its
+position as a “last resort” kind of tool is the main reason why we’ll be keeping
+<code>srb rbi hidden-definitions</code> around in maintenance mode for the foreseeable
+future.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-does-maintenance-mode-mean"></a><a href="#what-does-maintenance-mode-mean" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What does “maintenance mode” mean?</h2>
+<p>Maintenance mode for <code>srb rbi</code> largely codifies what was already the case with
+the <code>srb</code> tooling:</p>
+<ul>
+<li><p>We won’t be building new features into any <code>srb</code> tool (except for <code>srb tc</code>, of
+course, which will continue to be actively improved).</p></li>
+<li><p>Minor changes that are easy to review will likely get reviewed (and
+automatically released), but changes that merely add new features or are hard
+to review will likely be politely rejected.</p></li>
+<li><p>If a future Ruby version makes a breaking change which requires substantial
+effort to fix, we may or may not have time to invest in fixing it. For this
+reason we recommend that you switch to Tapioca at your earliest convenience.</p></li>
+</ul>
+<p>Even with thousands of changes to the Sorbet repo, the <code>srb rbi</code> command has
+only been changed a handful of times in the past few years. These changes have
+largely been the sort of minor, easy to review changes that we mentioned above.
+The problems with <code>srb rbi</code> are pretty fundamental, and we believe that
+<code>tapioca</code> solves most of them, so we won’t be investing in <code>srb rbi</code> going
+forwards.</p>
+<p>Note that the source code for the <code>srb</code> command is open source and licensed
+under the <a href="https://github.com/sorbet/sorbet/blob/master/LICENSE">Apache 2.0</a>. If
+you feel strongly that any or all of the <code>srb rbi</code> commands survive, you’re more
+than welcome to use ideas or code from <code>srb rbi</code> into your own project! If you
+do, please be aware of the
+<a href="/docs/legal/trademark-policy">Sorbet Trademark Policy</a>. We are always happy to
+list community projects on the <a href="/en/community">Community section</a> of the
+website.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-happens-next"></a><a href="#what-happens-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What happens next?</h2>
+<p>Today, we are updating various Sorbet docs pages to recommend installing Tapioca
+as one of the gems you will want to install in order to get started with Sorbet
+in a new codebase.</p>
+<p>Going forward, members of Shopify will continue to maintain and improve Tapioca.
+If you have questions, they’re happy to chat with you in the
+<a href="https://sorbet-ruby.slack.com/archives/C02VD06EQ3U">#tapioca</a> channel on the
+<a href="/slack">Sorbet Slack</a>!</p>
+<p>Meanwhile the Sorbet team will continue improving Sorbet. We’re always eager to
+hear from you in the
+<a href="https://sorbet-ruby.slack.com/archives/CHN2L03NH">#discuss</a> channel on Slack!</p>
+<p>— @jez, on behalf of the Sorbet Team at Stripe</p>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="appendix-history-of-the-srb-and-tapioca-commands"></a><a href="#appendix-history-of-the-srb-and-tapioca-commands" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Appendix: History of the <code>srb</code> and <code>tapioca</code> commands</h2>
+<p>Sorbet was initially developed in tandem with Stripe’s Ruby monorepo. All
+tooling that did not live in the (closed source) Sorbet repo was checked into
+Stripe’s monorepo. That includes all of <code>sorbet-runtime</code> (which at the time was
+not even a gem, but simply a folder called <code>lib/types/</code>) as well as all of the
+scripts for generating RBIs.</p>
+<p>When we set out to open source Sorbet in the
+<a href="2019/05/16/state-of-sorbet-spring-2019">spring of 2019</a>, we hurriedly copied
+everything we thought might be useful out of Stripe’s monorepo into custom gems.
+After a private beta period of a few months where people were given early access
+to these gems, we figured that Sorbet was good enough to share with the world
+and <a href="blog/2019/06/20/open-sourcing-sorbet">open sourced it</a>.</p>
+<p>Over time, it became clear that what worked for generating RBIs in Stripe’s Ruby
+codebase did not necessarily work well for all Ruby codebases. Stripe’s test
+suite enforced stronger guarantees about what was and was not allowed in Ruby
+code, which mean that, for example, requiring all code in Stripe’s codebase was
+trivial.</p>
+<p>Around the same time that we announced our Sorbet private beta (over three years
+ago!),
+<a href="https://github.com/Shopify/tapioca/commit/490bc863b30fb753ac4c657e6d8eaf0610e8b30f">Tapioca began development</a>
+at Shopify. As discussed above, it took some different approaches to RBI
+generation which worked better in their codebase.</p>
+<p>After open sourcing Sorbet, the <code>lib/types/</code> folder was deleted from Stripe’s
+monorepo in favor of depending on the public <code>sorbet-runtime</code> gem. But the
+scripts for RBI generation in Stripe’s codebase were never replaced, and remain
+in use today. In the three years since Sorbet has been open source, those
+scripts have drifted from their open source counterparts.</p>
+<p>Meanwhile, Shopify has been using Tapioca exclusively for those last three
+years, and over time, so have other Sorbet users. We’re grateful to them for
+sharing Tapioca with the community and for developing the tool we wish we could
+have built when open sourcing Sorbet all those years ago.</p>
+</span></div></div><div class="blogSocialSection"></div></div><div class="blog-recent"><a class="button" href="/blog/">Recent Posts</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#what-is-tapioca">What is Tapioca?</a></li><li><a href="#whats-different-between-srb-rbi-and-tapioca">What's different between <code>srb rbi</code> and <code>tapioca</code>?</a></li><li><a href="#whats-happening-with-srb-rbi-hidden-definitions">What's happening with <code>srb rbi hidden-definitions</code>?</a></li><li><a href="#what-does-maintenance-mode-mean">What does &quot;maintenance mode&quot; mean?</a></li><li><a href="#what-happens-next">What happens next?</a></li><li><a href="#appendix-history-of-the-srb-and-tapioca-commands">Appendix: History of the <code>srb</code> and <code>tapioca</code> commands</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
