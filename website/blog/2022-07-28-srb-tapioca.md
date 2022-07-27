@@ -127,7 +127,7 @@ next question.
 ## What's happening with `srb rbi hidden-definitions`?
 
 Tapioca has no exact replacement for `srb rbi hidden-definitions`. This is the
-main reason why we have no active plans to remove the `srb rbi` command and it's
+main reason why we have no active plans to remove the `srb rbi` command and its
 related tooling in the immediate future.
 
 Recall that the `hidden-definitions` subcommand works like this:
@@ -171,7 +171,7 @@ frustrating when it doesn't. Some ways it might not work:
 For these reasons and many more, `srb rbi hidden-definitions` is one of the
 tools that people struggle with the most when adopting Sorbet.
 
-But its one selling point is that sometimes there's simply no other tool. It's
+But its one selling point is that sometimes there's simply no other tool. Its
 position as a "last resort" kind of tool is the main reason why we'll be keeping
 `srb rbi hidden-definitions` around in maintenance mode for the foreseeable
 future.
@@ -185,14 +185,14 @@ the `srb` tooling:
   course, which will continue to be actively improved).
 
 - Minor changes that are easy to review will likely get reviewed (and
-  automatically released), but changes that merely add new features and are hard
+  automatically released), but changes that merely add new features or are hard
   to review will likely be politely rejected.
 
 - If a future Ruby version makes a breaking change which requires substantial
   effort to fix, we may or may not have time to invest in fixing it. For this
   reason we recommend that you switch to Tapioca at your earliest convenience.
 
-Even with thousands of change to the Sorbet repo, the `srb rbi` command has only
+Even with thousands of changes to the Sorbet repo, the `srb rbi` command has only
 been changed a handful of times in the past few years. These changes have
 largely been the sort of minor, easy to review changes that we mentioned above.
 The problems with `srb rbi` are pretty fundamental, and we believe that
