@@ -1585,6 +1585,11 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
             return false;
         }
+
+        auto klassId = appliedType->klass.id();
+        if (core::Symbols::Proc(0).id() <= klassId && klassId <= core::Symbols::last_proc().id()) {
+            return false;
+        }
     }
 
     return true;
