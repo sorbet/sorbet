@@ -16,7 +16,8 @@ line:
 ```
 
 In this doc, we'll cover **only** the command line interface to the `srb tc`
-subcommand. For information about `tapioca` and `srb`, see [RBI files](rbi.md).
+subcommand. For information about `tapioca` and `srb rbi`, see
+[RBI files](rbi.md).
 
 ## Config file
 
