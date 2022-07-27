@@ -116,6 +116,13 @@ Tapioca has some unique benefits compared to `srb rbi`:
   method stubs. It will also generate `T.let` annotations for constants defined
   by the gem.
 
+- Tapioca pulls community-driven type annotations for public gems from
+  [rbi-central](https://github.com/Shopify/rbi-central) instead of from
+  [sorbet-typed](https://github.com/sorbet/sorbet-typed), which `srb rbi` uses.
+  The difference between the two repos is largely just about how metadata is
+  stored. It should be painless to contribute any relevant `sorbet-typed` RBI
+  files to `rbi-central` if your codebase depended on them.
+
 This is only a quick summary of some of the benefits of Tapioca. For a more
 detailed comparison, you can read
 [this page in the Tapioca docs](https://github.com/Shopify/tapioca/wiki/How-does-Tapioca-compare-to-%60srb-rbi%60%3F).
@@ -192,8 +199,8 @@ the `srb` tooling:
   effort to fix, we may or may not have time to invest in fixing it. For this
   reason we recommend that you switch to Tapioca at your earliest convenience.
 
-Even with thousands of changes to the Sorbet repo, the `srb rbi` command has only
-been changed a handful of times in the past few years. These changes have
+Even with thousands of changes to the Sorbet repo, the `srb rbi` command has
+only been changed a handful of times in the past few years. These changes have
 largely been the sort of minor, easy to review changes that we mentioned above.
 The problems with `srb rbi` are pretty fundamental, and we believe that
 `tapioca` solves most of them, so we won't be investing in `srb rbi` going
