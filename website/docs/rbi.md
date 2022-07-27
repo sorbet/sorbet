@@ -214,7 +214,7 @@ To generate the RBI files for the DSLs used in your application:
 You can read about all the DSL RBI compilers supplied by Tapioca in the
 [Tapioca's manual](https://github.com/Shopify/tapioca/blob/main/manual/compilers.md).
 
-## The Hidden Definition RBI
+## The Hidden Definitions RBI
 
 > **The `srb rbi hidden-definitions` command is in
 > [maintenance mode](../blog/2022/07/28/srb-tapioca), please use `tapioca`
