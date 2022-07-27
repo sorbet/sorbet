@@ -467,7 +467,6 @@ private:
                 return;
             }
         }
-        auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency
@@ -585,6 +584,8 @@ private:
                     return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
             }
         } catch (SorbetException &e) {
+            auto loc = what.loc();
+
             Exception::failInFuzzer();
 
             throw ReportedRubyException{e, loc};
