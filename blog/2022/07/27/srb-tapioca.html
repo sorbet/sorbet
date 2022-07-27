@@ -126,9 +126,9 @@ what Tapioca does by way of comparison:</p>
 exactly equivalent) command in <code>tapioca</code>, which brings us to the next question.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-different-between-srb-rbi-and-tapioca"></a><a href="#whats-different-between-srb-rbi-and-tapioca" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s different between <code>srb rbi</code> and <code>tapioca</code>?</h2>
 <p>From one standpoint, they’re quite similar: they both use various heuristics to
-generate <a href="rbi.md">RBI files</a> before <code>srb tc</code> runs on the project. Specifically,
-they both rely on Sorbet to typecheck the project itself (Tapioca is not some
-sort of alternative type checker for Ruby).</p>
+generate <a href="/docs/rbi">RBI files</a> before <code>srb tc</code> runs on the project.
+Specifically, they both rely on Sorbet to typecheck the project itself (Tapioca
+is not some sort of alternative type checker for Ruby).</p>
 <p>Both Tapioca and <code>srb rbi</code> generate RBIs for a project’s gems as well as for the
 various DSLs and metaprogramming used inside a project itself.</p>
 <p>But Tapioca has some unique benefits compared to <code>srb rbi</code>. Put simply, it’s
@@ -253,11 +253,11 @@ Stripe’s monorepo. That includes all of <code>sorbet-runtime</code> (which at 
 not even a gem, but simply a folder called <code>lib/types/</code>) as well as all of the
 scripts for generating RBIs.</p>
 <p>When we set out to open source Sorbet in the
-<a href="2019/05/16/state-of-sorbet-spring-2019">spring of 2019</a>, we hurriedly copied
-everything we thought might be useful out of Stripe’s monorepo into custom gems.
-After a private beta period of a few months where people were given early access
-to these gems, we figured that Sorbet was good enough to share with the world
-and <a href="blog/2019/06/20/open-sourcing-sorbet">open sourced it</a>.</p>
+<a href="/blog/2019/05/16/state-of-sorbet-spring-2019">spring of 2019</a>, we hurriedly
+copied everything we thought might be useful out of Stripe’s monorepo into
+custom gems. After a private beta period of a few months where people were given
+early access to these gems, we figured that Sorbet was good enough to share with
+the world and <a href="/blog/2019/06/20/open-sourcing-sorbet">open sourced it</a>.</p>
 <p>Over time, it became clear that what worked for generating RBIs in Stripe’s Ruby
 codebase did not necessarily work well for all Ruby codebases. Stripe’s test
 suite enforced stronger guarantees about what was and was not allowed in Ruby
