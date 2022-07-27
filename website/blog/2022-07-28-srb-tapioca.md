@@ -41,7 +41,7 @@ recommend using Tapioca. The old guide remains available in the
 if you need to reference it.
 
 If you'd like to start using Tapioca in a project that already uses `srb rbi`,
-[see this migration guide](#TODO).
+[see this migration guide](https://github.com/Shopify/tapioca/wiki/Migrating-to-Tapioca).
 
 With the announcements out of the way, let's dive into some questions we imagine
 you might have.
@@ -90,9 +90,9 @@ generate RBI files before `srb tc` runs on the project. Specifically, they both
 rely on Sorbet to typecheck the project itself (Tapioca is not some sort of
 alternative type checker for Ruby).
 
-Both Tapioca and `srb rbi` generate RBIs for a project's gems and support
-various generating RBI files that teach Sorbet about various kinds of
-metaprogramming in use inside the project itself.
+Both Tapioca and `srb rbi` generate RBIs for a project's gems as well as RBI
+files that teach Sorbet about various kinds of metaprogramming in use inside the
+project itself.
 
 Tapioca has some unique benefits compared to `srb rbi`:
 
@@ -111,7 +111,7 @@ Tapioca has some unique benefits compared to `srb rbi`:
   [custom DSL generators](https://github.com/Shopify/tapioca#writing-custom-dsl-compilers)
   for teaching Sorbet about DSLs specific to your project.
 
-- Tapioca will do a better job at generating actually types inside the generated
+- Tapioca will do a better job at generating actual types inside the generated
   RBI files. The custom DSL generators usually generate types in addition to
   method stubs. It will also generate `T.let` annotations for constants defined
   by the gem.
