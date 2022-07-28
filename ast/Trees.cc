@@ -12,6 +12,9 @@ using namespace std;
 
 namespace sorbet::ast {
 
+static_assert(std::is_nothrow_default_constructible_v<ExpressionPtr>, "oops");
+static_assert(std::is_nothrow_move_constructible_v<ExpressionPtr>, "oops");
+
 #define CASE_STATEMENT(CASE_BODY, T) \
     case Tag::T: {                   \
         CASE_BODY(T)                 \
