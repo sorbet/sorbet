@@ -1926,7 +1926,7 @@ public:
 
         for (size_t i = 1; i < args.args.size(); i += 2) {
             auto unwrappedType = unwrapType(gs, args.argLoc(i), args.args[i]->type);
-            targs.emplace_back(unwrappedType);
+            targs.emplace_back(move(unwrappedType));
         }
 
         res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
