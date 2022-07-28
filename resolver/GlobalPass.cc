@@ -101,8 +101,8 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
         auto tps = parent.data(gs)->typeMembers();
         bool foundAll = true;
-        for (core::SymbolRef tp : tps) {
-            bool foundThis = resolveTypeMember(gs, parent, tp.asTypeMemberRef(), sym, typeAliases);
+        for (auto tp : tps) {
+            bool foundThis = resolveTypeMember(gs, parent, tp, sym, typeAliases);
             foundAll = foundAll && foundThis;
         }
         if (foundAll) {
@@ -137,14 +137,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
     for (auto mixin : sym.data(gs)->mixins()) {
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
         auto typeMembers = mixin.data(gs)->typeMembers();
-        for (core::SymbolRef tp : typeMembers) {
-            resolveTypeMember(gs, mixin, tp.asTypeMemberRef(), sym, typeAliases);
+        for (auto tm : typeMembers) {
+            resolveTypeMember(gs, mixin, tm, sym, typeAliases);
         }
     }
 
     if (sym.data(gs)->isClass()) {
-        for (core::SymbolRef tp : sym.data(gs)->typeMembers()) {
-            auto tm = tp.asTypeMemberRef();
+        for (auto tm : sym.data(gs)->typeMembers()) {
             // AttachedClass is covariant, but not controlled by the user.
             if (tm.data(gs)->name == core::Names::Constants::AttachedClass()) {
                 continue;
