@@ -3,6 +3,7 @@
 #include "cfg/builder/builder.h"
 #include "common/typecase.h"
 #include "core/Names.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/cfg.h"
 #include "core/errors/internal.h"
 
@@ -510,6 +511,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 e.setHeader("`{}` is a generic class, and requires being instantiated with explicit "
                                             "type arguments",
                                             klass.show(cctx.ctx));
+                                auto replaceLoc = cctx.ctx.locAt(s.recv.loc());
+                                core::TypeErrorDiagnostics::insertUntypedTypeArguments(cctx.ctx, e, klass, replaceLoc);
                             }
                         }
                     }
