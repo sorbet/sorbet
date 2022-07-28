@@ -92,10 +92,10 @@ void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, Err
                                                       core::Loc replaceLoc) {
     // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
     // if we're already looking at `T::Array` instead.
-    klass = klass.maybeUnwrapBuiltinGenericForwarder();
-    auto typePrefixSym = klass.forwarderForBuiltinGeneric();
+    auto unwrapped = klass.maybeUnwrapBuiltinGenericForwarder();
+    auto typePrefixSym = unwrapped.forwarderForBuiltinGeneric();
     if (!typePrefixSym.exists()) {
-        typePrefixSym = klass;
+        typePrefixSym = unwrapped;
     }
 
     auto loc = replaceLoc;
@@ -109,7 +109,13 @@ void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, Err
             for (int i = 0; i < numTypeArgs; i++) {
                 untypeds.emplace_back("T.untyped");
             }
-            e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs), absl::StrJoin(untypeds, ", "));
+            if (typePrefixSym == klass) {
+                e.replaceWith("Insert type arguments", loc.copyEndWithZeroLength(), "[{}]",
+                              absl::StrJoin(untypeds, ", "));
+            } else {
+                e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs),
+                              absl::StrJoin(untypeds, ", "));
+            }
         }
     }
 }
