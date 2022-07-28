@@ -1954,7 +1954,7 @@ public:
         auto sym = core::Symbols::Proc(0);
         vector<core::TypePtr> targs;
         auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
-        targs.emplace_back(unwrappedType);
+        targs.emplace_back(move(unwrappedType));
         res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }
 } T_proc_returns;
