@@ -366,9 +366,6 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto superReturn = superMethod.data(ctx)->resultType;
         auto methodReturn = method.data(ctx)->resultType;
 
-        // TODO(jez) Pull the the approximated types up out of the checkSubtype call so that we can
-        // show them in the error message (probably want to make precondition of checkSubtype that
-        // caller has already approximated).
         if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn.show(ctx),
