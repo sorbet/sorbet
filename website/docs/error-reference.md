@@ -2695,6 +2695,43 @@ no such `T.type_parameter` in scope.
 For more information, see the docs for
 [Generic methods](generics.md#generic-methods).
 
+## 6007
+
+User-defined generic classes require type arguments when instantiated. For
+example:
+
+```ruby
+class Box
+  extend T::Generic
+  Elem = type_member
+end
+
+Box.new          # error
+Box[Integer].new # okay
+```
+
+Sorbet does not (cannot, in general) use the arguments to the constructor to
+attempt to infer the type arguments when instantiating a generic class.
+
+This requirement to pass type arguments to generic classes does not apply to
+generic classes defined in the standard library, in order to allow easier
+interoperation with pre-existing Ruby codebases, the same error is not reported
+when instantiating standard library classes.
+
+For example:
+
+```ruby
+arr = Array.new(10)
+T.reveal_type()
+set = Set.new([0])
+T.reveal_type(set) # => `T::Set[T.untyped]`
+set = T::Set[Integer].new([0])
+T.reveal_type(set) # => `T::Set[Integer]`
+```
+
+Note that when no type arguments are provided, Sorbet defaults to using
+`T.untyped` for the element type of the generic class.
+
 ## 7001
 
 Sorbet does not allow reassigning a variable to a different type within a loop
