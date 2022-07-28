@@ -10,6 +10,10 @@ using namespace std;
 
 namespace sorbet::cfg {
 
+static_assert(std::is_nothrow_default_constructible<VariableUseSite>::value, "oops");
+static_assert(std::is_nothrow_constructible<VariableUseSite, LocalRef>::value, "oops");
+static_assert(std::is_nothrow_move_constructible<VariableUseSite>::value, "oops");
+
 namespace {
 string spacesForTabLevel(int tabs) {
     fmt::memory_buffer ss;
