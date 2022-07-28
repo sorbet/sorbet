@@ -80,7 +80,7 @@ public:
 
     inline Loc(FileRef file, LocOffsets offsets) : Loc(file, offsets.beginPos(), offsets.endPos()){};
 
-    Loc() : Loc(0, LocOffsets::none()){};
+    Loc() noexcept : Loc(0, LocOffsets::none()){};
 
     Loc &operator=(const Loc &rhs) = default;
     Loc &operator=(Loc &&rhs) = default;

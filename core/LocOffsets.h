@@ -27,7 +27,7 @@ struct LocOffsets {
         ENFORCE_NO_TIMER(exists());
         return beginLoc == endLoc;
     }
-    static LocOffsets none() {
+    static LocOffsets none() noexcept {
         return LocOffsets{INVALID_POS_LOC, INVALID_POS_LOC};
     }
     LocOffsets join(LocOffsets other) const;
