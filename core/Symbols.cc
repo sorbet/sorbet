@@ -131,22 +131,16 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
         vector<TypePtr> targs;
         targs.reserve(typeMembers().size());
 
-        // Special-case covariant stdlib generics to have their types
-        // defaulted to `T.untyped`. This set *should not* grow over time.
-        bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
-                               ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
-                               ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator() ||
-                               ref == core::Symbols::Enumerator_Lazy();
-
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
-            if (isStdlibGeneric) {
-                // For backwards compatibility, instantiate stdlib generics
-                // with T.untyped.
+            if (ref.isLegacyStdlibGeneric()) {
+                // Special-case covariant stdlib generics to have their types
+                // defaulted to `T.untyped`. This set *should not* grow over time.
                 targs.emplace_back(Types::untyped(gs, ref));
+                flags.externalTypeImplicitlyUntyped = true;
             } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
                 // Default fixed or covariant parameters to their upper
                 // bound.
@@ -156,6 +150,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
                 // this will behave a bit like a unification variable with
                 // Types::glb.
                 targs.emplace_back(Types::untyped(gs, ref));
+                flags.externalTypeImplicitlyUntyped = true;
             } else {
                 // The remaining case is a contravariant parameter, which
                 // gets defaulted to its lower bound.

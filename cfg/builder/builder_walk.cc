@@ -498,6 +498,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         ret = current;
                         return;
                     }
+                } else if (s.fun == core::Names::new_() && ast::isa_tree<ast::ConstantLit>(s.recv)) {
+                    const auto &cnst = ast::cast_tree_nonnull<ast::ConstantLit>(s.recv);
+                    auto sym = cnst.symbol;
+                    if (sym.isClassOrModule()) {
+                        auto klass = sym.asClassOrModuleRef();
+                        if (klass.data(cctx.ctx)->flags.externalTypeImplicitlyUntyped &&
+                            !klass.isLegacyStdlibGeneric()) {
+                            auto errLoc = (s.funLoc.exists() && !s.funLoc.empty()) ? s.funLoc : s.loc;
+                            if (auto e = cctx.ctx.beginError(errLoc, core::errors::CFG::TypeArgsGenericClassNew)) {
+                                e.setHeader("`{}` is a generic class, and requires being instantiated with explicit "
+                                            "type arguments",
+                                            klass.show(cctx.ctx));
+                            }
+                        }
+                    }
                 }
 
                 recv = cctx.newTemporary(core::Names::statTemp());
