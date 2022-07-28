@@ -95,8 +95,8 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
     auto maxLen = min(superArgs.size(), methodArgs.size());
 
     while (idx < maxLen) {
-        auto superArgType = superArgs[idx].get().type;
-        auto methodArgType = methodArgs[idx].get().type;
+        auto &superArgType = superArgs[idx].get().type;
+        auto &methodArgType = methodArgs[idx].get().type;
 
         if (!checkSubtype(ctx, superArgType, methodArgType)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
@@ -252,8 +252,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     {
         // make sure the return types are compatible
-        auto superReturn = superMethod.data(ctx)->resultType;
-        auto methodReturn = method.data(ctx)->resultType;
+        auto &superReturn = superMethod.data(ctx)->resultType;
+        auto &methodReturn = method.data(ctx)->resultType;
 
         if (!checkSubtype(ctx, methodReturn, superReturn)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
