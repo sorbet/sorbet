@@ -7,11 +7,11 @@ namespace sorbet::cfg {
 class CFG;
 
 class LocalRef final {
-    uint32_t _id;
+    uint32_t _id = 0;
 
 public:
-    LocalRef() : _id(0){};
-    LocalRef(uint32_t id) : _id(id){};
+    LocalRef() = default;
+    LocalRef(uint32_t id) noexcept : _id(id){};
     LocalRef(const LocalRef &) = default;
     LocalRef(LocalRef &&) = default;
     LocalRef &operator=(LocalRef &&) = default;

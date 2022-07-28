@@ -4,6 +4,11 @@
 using namespace std;
 
 namespace sorbet::cfg {
+static_assert(std::is_nothrow_default_constructible_v<LocalRef>, "oops");
+static_assert(std::is_nothrow_copy_constructible_v<LocalRef>, "oops");
+static_assert(std::is_nothrow_move_constructible_v<LocalRef>, "oops");
+static_assert(std::is_nothrow_constructible_v<LocalRef, uint32_t>, "oops");
+
 core::LocalVariable LocalRef::data(const CFG &cfg) const {
     ENFORCE(cfg.localVariables.size() > this->_id);
     // Note: It's OK to call `.data()` of a variable that doesn't exist; it returns `LocalVariable::noVariable`.
