@@ -14,6 +14,10 @@ using namespace std;
 
 namespace sorbet::core {
 
+static_assert(std::is_nothrow_default_constructible_v<NameRef>, "oops");
+static_assert(std::is_nothrow_copy_constructible_v<NameRef>, "oops");
+static_assert(std::is_nothrow_move_constructible_v<NameRef>, "oops");
+
 NameRef::NameRef(const GlobalState &gs, NameKind kind, uint32_t id)
     : DebugOnlyCheck(gs, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
     // If this fails, the symbol table is too big :(

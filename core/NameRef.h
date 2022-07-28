@@ -85,7 +85,7 @@ private:
 public:
     // The value `0` implies that there is no NameKind tag present (NameKind begin at 1) and is a special-value used to
     // indicate a non-existant NameRef.
-    constexpr NameRef() : _id(0){};
+    constexpr NameRef() noexcept : _id(0){};
 
     // WellKnown is a tag to statically indicate that the caller is deliberately
     // constructing a well-known name, whose ID is stable across all
