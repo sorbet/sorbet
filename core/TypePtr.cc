@@ -36,6 +36,10 @@ using namespace std;
 
 namespace sorbet::core {
 
+static_assert(std::is_nothrow_default_constructible_v<TypePtr>, "oops");
+static_assert(std::is_nothrow_copy_constructible_v<TypePtr>, "oops");
+static_assert(std::is_nothrow_move_constructible_v<TypePtr>, "oops");
+
 namespace {
 GENERATE_CALL_MEMBER(showWithMoreInfo, return self.show(std::forward<Args>(args)...),
                      std::declval<const GlobalState &>())
