@@ -21,9 +21,7 @@ class Foo
 
   sig do
     params(
-        blk: T.proc.params(arg0: Integer).type_parameters(:A).
-        #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: can only be specified in outer sig
-        #                                 ^^^^^^^^^^^^^^^ error: Call to method `type_parameters` on `T.proc.params(arg0: Integer).returns(<todo sym>)` mistakes a type for a value
+        blk: T.proc.params(arg0: Integer).type_parameters(:A). # error: can only be specified in outer sig
           returns(T.type_parameter(:A)), # error: Unspecified type parameter
     )
     .returns(T::Array[T.type_parameter(:A)]) # error: Unspecified type parameter

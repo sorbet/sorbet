@@ -112,10 +112,10 @@ bb5[rubyRegionId=1, firstDead=13](<self>: T.class_of(<root>), <block-pre-call-te
     <statTemp>$16: T.class_of(T.proc) = <cfgAlias>$18: T.class_of(T).proc()
     <hashTemp>$19: Symbol(:x) = :x
     <cfgAlias>$21: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$15: Runtime object representing type: T.proc.params(arg0: Integer).returns(<todo sym>) = <statTemp>$16: T.class_of(T.proc).params(<hashTemp>$19: Symbol(:x), <cfgAlias>$21: T.class_of(Integer))
+    <statTemp>$15: T.class_of(T.proc) = <statTemp>$16: T.class_of(T.proc).params(<hashTemp>$19: Symbol(:x), <cfgAlias>$21: T.class_of(Integer))
     <cfgAlias>$23: T.class_of(String) = alias <C String>
-    <hashTemp>$14: Runtime object representing type: T.proc.params(arg0: Integer).returns(String) = <statTemp>$15: Runtime object representing type: T.proc.params(arg0: Integer).returns(<todo sym>).returns(<cfgAlias>$23: T.class_of(String))
-    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:blk), <hashTemp>$14: Runtime object representing type: T.proc.params(arg0: Integer).returns(String))
+    <hashTemp>$14: T.class_of(T.proc) = <statTemp>$15: T.class_of(T.proc).returns(<cfgAlias>$23: T.class_of(String))
+    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:blk), <hashTemp>$14: T.class_of(T.proc))
     <cfgAlias>$25: T.class_of(String) = alias <C String>
     <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <statTemp>$11: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$25: T.class_of(String))
     <blockReturnTemp>$26: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder

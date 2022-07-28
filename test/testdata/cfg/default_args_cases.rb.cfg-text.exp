@@ -246,8 +246,8 @@ bb5[rubyRegionId=1, firstDead=20](<self>: T.class_of(Test), <block-pre-call-temp
     <hashTemp>$31: Symbol(:blk) = :blk
     <cfgAlias>$35: T.class_of(T) = alias <C T>
     <statTemp>$33: T.class_of(T.proc) = <cfgAlias>$35: T.class_of(T).proc()
-    <hashTemp>$32: Runtime object representing type: T.proc.void = <statTemp>$33: T.class_of(T.proc).void()
-    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:a), <cfgAlias>$15: T.class_of(Integer), <hashTemp>$16: Symbol(:b), <cfgAlias>$18: T.class_of(Integer), <hashTemp>$19: Symbol(:c), <cfgAlias>$21: T.class_of(Integer), <hashTemp>$22: Symbol(:d), <cfgAlias>$24: T.class_of(Integer), <hashTemp>$25: Symbol(:e), <cfgAlias>$27: T.class_of(Integer), <hashTemp>$28: Symbol(:f), <cfgAlias>$30: T.class_of(String), <hashTemp>$31: Symbol(:blk), <hashTemp>$32: Runtime object representing type: T.proc.void)
+    <hashTemp>$32: T.class_of(T.proc) = <statTemp>$33: T.class_of(T.proc).void()
+    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:a), <cfgAlias>$15: T.class_of(Integer), <hashTemp>$16: Symbol(:b), <cfgAlias>$18: T.class_of(Integer), <hashTemp>$19: Symbol(:c), <cfgAlias>$21: T.class_of(Integer), <hashTemp>$22: Symbol(:d), <cfgAlias>$24: T.class_of(Integer), <hashTemp>$25: Symbol(:e), <cfgAlias>$27: T.class_of(Integer), <hashTemp>$28: Symbol(:f), <cfgAlias>$30: T.class_of(String), <hashTemp>$31: Symbol(:blk), <hashTemp>$32: T.class_of(T.proc))
     <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <statTemp>$11: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$36: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
@@ -281,8 +281,8 @@ bb9[rubyRegionId=2, firstDead=12](<self>: T.class_of(Test), <block-pre-call-temp
     <hashTemp>$53: Symbol(:blk) = :blk
     <cfgAlias>$57: T.class_of(T) = alias <C T>
     <statTemp>$55: T.class_of(T.proc) = <cfgAlias>$57: T.class_of(T).proc()
-    <hashTemp>$54: Runtime object representing type: T.proc.void = <statTemp>$55: T.class_of(T.proc).void()
-    <statTemp>$45: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$47: Symbol(:x), <cfgAlias>$49: T.class_of(Integer), <hashTemp>$50: Symbol(:rest), <cfgAlias>$52: T.class_of(Integer), <hashTemp>$53: Symbol(:blk), <hashTemp>$54: Runtime object representing type: T.proc.void)
+    <hashTemp>$54: T.class_of(T.proc) = <statTemp>$55: T.class_of(T.proc).void()
+    <statTemp>$45: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$47: Symbol(:x), <cfgAlias>$49: T.class_of(Integer), <hashTemp>$50: Symbol(:rest), <cfgAlias>$52: T.class_of(Integer), <hashTemp>$53: Symbol(:blk), <hashTemp>$54: T.class_of(T.proc))
     <blockReturnTemp>$44: T::Private::Methods::DeclBuilder = <statTemp>$45: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$58: T.noreturn = blockreturn<sig> <blockReturnTemp>$44: T::Private::Methods::DeclBuilder
     <unconditional> -> bb6
@@ -317,8 +317,8 @@ bb13[rubyRegionId=3, firstDead=12](<self>: T.class_of(Test), <block-pre-call-tem
     <hashTemp>$75: Symbol(:blk) = :blk
     <cfgAlias>$79: T.class_of(T) = alias <C T>
     <statTemp>$77: T.class_of(T.proc) = <cfgAlias>$79: T.class_of(T).proc()
-    <hashTemp>$76: Runtime object representing type: T.proc.void = <statTemp>$77: T.class_of(T.proc).void()
-    <statTemp>$67: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$69: Symbol(:x), <cfgAlias>$71: T.class_of(Integer), <hashTemp>$72: Symbol(:rest), <cfgAlias>$74: T.class_of(Integer), <hashTemp>$75: Symbol(:blk), <hashTemp>$76: Runtime object representing type: T.proc.void)
+    <hashTemp>$76: T.class_of(T.proc) = <statTemp>$77: T.class_of(T.proc).void()
+    <statTemp>$67: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$69: Symbol(:x), <cfgAlias>$71: T.class_of(Integer), <hashTemp>$72: Symbol(:rest), <cfgAlias>$74: T.class_of(Integer), <hashTemp>$75: Symbol(:blk), <hashTemp>$76: T.class_of(T.proc))
     <blockReturnTemp>$66: T::Private::Methods::DeclBuilder = <statTemp>$67: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$80: T.noreturn = blockreturn<sig> <blockReturnTemp>$66: T::Private::Methods::DeclBuilder
     <unconditional> -> bb10

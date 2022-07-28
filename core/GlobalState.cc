@@ -776,20 +776,20 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg0())
                  .buildWithResultUntyped();
 
-    // Synthesize <DeclBuilderForProcs>.params(args: T.untyped) => DeclBuilderForProcs
+    // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
                  .kwsplatArg(Names::arg0())
                  .buildWithResult(Types::declBuilderForProcsSingletonClass());
-    // Synthesize <DeclBuilderForProcs>.bind(args: T.untyped) =>
+    // Synthesize <DeclBuilderForProcs>.<bind>(args: T.untyped) =>
     // DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::bind())
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::declBuilderForProcsSingletonClass());
-    // Synthesize <DeclBuilderForProcs>.returns(args: T.untyped) => DeclBuilderForProcs
+    // Synthesize <DeclBuilderForProcs>.<returns>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::returns())
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::declBuilderForProcsSingletonClass());
-    // Synthesize <DeclBuilderForProcs>.type_parameters(args: T.untyped) =>
+    // Synthesize <DeclBuilderForProcs>.<type_parameters>(args: T.untyped) =>
     // DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::typeParameters())
                  .untypedArg(Names::arg0())

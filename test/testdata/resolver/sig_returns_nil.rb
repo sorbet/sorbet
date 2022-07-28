@@ -13,12 +13,8 @@ class A
   sig do
     params(
       blk: T.proc.params(
-        x: nil
-        #  ^^^ error: Unsupported literal in type syntax
-        #  ^^^ error: Unexpected bare `NilClass` value found in type position
-      ).returns(nil)
-      #         ^^^ error: Unsupported literal in type syntax
-      #         ^^^ error: Unexpected bare `NilClass` value found in type position
+        x: nil # error: Unsupported literal in type syntax
+      ).returns(nil) # error: Unsupported literal in type syntax
     )
     .void
   end
