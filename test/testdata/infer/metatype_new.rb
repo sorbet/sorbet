@@ -14,11 +14,12 @@ end
 
 MyArrayString = T.type_alias {T::Array[String]}
 
-# -- good --
+# -- good from the perspective of "call to `new` is allowed" --
 
 String.new
 T::Array[String].new
 MyGeneric.new
+#         ^^^ error: `MyGeneric` is a generic class and requires being instantiated with explicit type arguments
 MyGeneric[Integer].new
 MyOtherGeneric.new
 

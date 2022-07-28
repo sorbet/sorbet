@@ -108,9 +108,9 @@ end
 integer_pairs = T.let([IntegerPair.new(1, 2), IntegerPair.new(3, 4)], T::Array[IntegerPair])
 super_pairs = T.let([SuperPair.new(1, 2)], T::Array[SuperPair])
 
-generic_pairs = T.let([GenericPair.new(1, 2), GenericPair.new(3, 4)], T::Array[GenericPair[Integer]])
+generic_pairs = T.let([GenericPair[Integer].new(1, 2), GenericPair[Integer].new(3, 4)], T::Array[GenericPair[Integer]])
 nested_generic_pairs = T.let(
-  [GenericPair.new(GenericPair.new(1, 2), GenericPair.new(3, 4))],
+  [GenericPair[GenericPair[Integer]].new(GenericPair[Integer].new(1, 2), GenericPair[Integer].new(3, 4))],
   T::Array[GenericPair[GenericPair[Integer]]]
 )
 

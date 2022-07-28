@@ -19,5 +19,7 @@
  module Foo
     def bar
        MySet.new() - MySet.new()
+       #     ^^^ error: `MySet` is a generic class and requires being instantiated with explicit type arguments
+       #                   ^^^ error: `MySet` is a generic class and requires being instantiated with explicit type arguments
     end
  end

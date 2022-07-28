@@ -53,4 +53,7 @@ end
 T.reveal_type(Nil.new) # error: `Nil`
 empty = T.let(Nil.new, List[Integer])
 T.let(Cons.new(head: 0, tail: empty), List[Integer])
-T.let(Cons.new(head: 0, tail: Nil.new), List[Integer])
+#          ^^^ error: `Cons` is a generic class and requires being instantiated with explicit type arguments
+T.let(Cons[Integer].new(head: 0, tail: Nil.new), List[Integer])
+T.let(Cons[String].new(head: 0, tail: Nil.new), List[Integer]) # error: Argument does not have asserted type `List[Integer]`
+#                            ^ error: Expected `String` but found `Integer(0)` for argument `head`

@@ -16,4 +16,5 @@ class Parent
   sig {returns(K)}
   def foo; T.unsafe(nil); end
   puts PreChild.new.foo() # this line previously caused a failed ENFORCE in LambdaParam::_instantiate
+  #             ^^^ error: `PreChild` is a generic class and requires being instantiated with explicit type arguments
 end

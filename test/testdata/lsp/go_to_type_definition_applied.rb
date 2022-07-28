@@ -23,6 +23,7 @@ class TestClass
   #    ^ type: AB
 
   bare_box_a = BoxA.new
+  #                 ^^^ error: `BoxA` is a generic class and requires being instantiated with explicit type arguments
   puts T.reveal_type(bare_box_a) # error: Revealed type: `BoxA[T.untyped]`
   #                  ^ type: BoxA
 

@@ -17,7 +17,12 @@ sig do
   .returns(Box[T.type_parameter(:T)])
 end
 def build_a(v)
-  Box.new(v)
+  box = Box.new(v)
+  #         ^^^ error: `Box` is a generic class and requires being instantiated with explicit type arguments
+  T.reveal_type(box) # error: `Box[T.untyped]`
+  res = Box[T.type_parameter(:T)].new(v)
+  T.reveal_type(res) # error: `Box[T.type_parameter(:T) (of Object#build_a)]`
+  res
 end
 
 sig { params(v: Box[Integer]).void }
