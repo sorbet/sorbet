@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 extend T::Sig
 
 # All of the examples in this file showcase current limitations in how we've
@@ -23,6 +23,13 @@ class Box
     T.reveal_type(res) # error: `T.attached_class (of Box)`
     res
   end
+
+  sig {returns(T.self_type)}
+  def another
+    res = self.class.new
+    T.reveal_type(res) # error: `Box[T.untyped]`
+    res
+  end
 end
 
 sig {params(box_class: T.class_of(Box)).void}
@@ -36,4 +43,10 @@ def example
   box_class = Box
   box = box_class.new
   T.reveal_type(box) # error: `Box[T.untyped]`
+
+  box = Box.make
+  T.reveal_type(box) # error: `Box[T.untyped]`
+
+  box2 = box.another
+  T.reveal_type(box2) # error: `Box[T.untyped]`
 end
