@@ -1650,6 +1650,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             original.main.sendTp = wrapped;
             return original;
         }
+        case Names::bind().rawId():
         case Names::returns().rawId():
         case Names::void_().rawId(): {
             auto *applied = cast_type<AppliedType>(this->wrapped);
@@ -1660,6 +1661,14 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             auto klassId = applied->klass.id();
             if (!(core::Symbols::Proc(0).id() <= klassId && klassId <= core::Symbols::last_proc().id())) {
                 return badMetaTypeCall(gs, args, errLoc, this->wrapped);
+            }
+
+            if (args.name == Names::bind()) {
+                // Sometimes people put T.proc.void.bind(...) instead of T.proc.bind(...).void in a signature
+                auto member = core::Symbols::T_Private_Methods_DeclBuilder().data(gs)->findMember(gs, args.name);
+                // might not exist if running with --no-stdlib
+                auto method = member.exists() ? member.asMethodRef() : core::Symbols::noMethod();
+                return DispatchResult(args.selfType, args.selfType, method);
             }
 
             if (applied->targs.size() < 1 || applied->targs[0] != core::Types::todo()) {

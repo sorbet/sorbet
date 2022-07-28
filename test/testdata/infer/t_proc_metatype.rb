@@ -27,3 +27,15 @@ T.reveal_type(xs) # error: `T::Array[T.untyped]`
 opts = T::Hash[T.untyped, T.untyped].new
 xs = T::Array[T.proc.params(**opts).void].new
 T.reveal_type(xs) # error: `T::Array[T.proc.void]`
+
+class A
+  extend T::Sig
+  # Should be allowed to use bind out of order
+  sig {params(blk: T.proc.void.bind(T.self_type)).void}
+  def example(&blk)
+  end
+end
+
+A.new.example do
+  T.reveal_type(self) # error: `A`
+end
