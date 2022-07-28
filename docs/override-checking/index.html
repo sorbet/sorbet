@@ -159,6 +159,184 @@ of <code>Numeric</code>, like <code>Integer</code> or <code>Float</code>), but n
 <code>String</code>. So the above definition of <code>Child#returns_at_most_numeric</code> is an
 invalid override, because it attempts to widen the method’s declared return type
 to something wider than what the parent specified.</p>
+<h2><a class="anchor" aria-hidden="true" id="what-if-i-really-want-the-child-method-to-narrow-the-type"></a><a href="#what-if-i-really-want-the-child-method-to-narrow-the-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What if I really want the child method to narrow the type?</h2>
+<p>The most common place where compatible overrides are difficult or frustrating to
+maintain is with arguments. It’s common to encounter a scenario where multiple
+classes conform to some interface where each class knows that it will only ever
+be called with a certain argument type, like this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DogFood</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatFood</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dog</span></span>
+  sig {params(<span class="hljs-symbol">food:</span> DogFood).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cat</span></span>
+  sig {params(<span class="hljs-symbol">food:</span> CatFood).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>A naive approach to extract an interface for the <code>feed</code> method might look like
+this, which has problems:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DogFood</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatFood</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Pet</span></span>
+  extend T::Helpers
+  interface!
+  <span class="hljs-comment"># Warning: this `T.any` is faulty, and leads to override checking errors</span>
+  sig {abstract.params(<span class="hljs-symbol">food:</span> T.any(DogFood, CatFood)).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dog</span></span>
+  <span class="hljs-keyword">include</span> Pet
+  sig {override.params(<span class="hljs-symbol">food:</span> DogFood).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: DogFood is not a supertype of T.any(DogFood, CatFood)</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cat</span></span>
+  <span class="hljs-keyword">include</span> Pet
+  sig {override.params(<span class="hljs-symbol">food:</span> CatFood).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span> <span class="hljs-comment"># error: CatFood is not a supertype of T.any(DogFood, CatFood)</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In cases like this, what we actually want, instead of using a <code>T.any</code> in the
+interface, is to define the <code>Pet</code> interface as a <a href="/docs/generics">generic class</a>
+using <code>type_member</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DogFood</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatFood</span>;</span> <span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Pet</span></span>
+  extend T::Helpers
+  interface!
+  <span class="hljs-comment"># (1) Pulls in the `type_member` helper</span>
+  extend T::Generic
+  <span class="hljs-comment"># (2) Define `Pet` as a generic interface</span>
+  FoodType = type_member
+
+  <span class="hljs-comment"># (3) Use the `FoodType` generic type variable here</span>
+  sig {abstract.params(<span class="hljs-symbol">food:</span> FoodType).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dog</span></span>
+  <span class="hljs-keyword">include</span> Pet
+  extend T::Generic
+  <span class="hljs-comment"># (4) Declare that Dog implements the Pet interface, subject to the constraint</span>
+  <span class="hljs-comment">#     that FoodType is always DogFood</span>
+  FoodType = type_member {{<span class="hljs-symbol">fixed:</span> DogFood}}
+
+  <span class="hljs-comment"># (5) Use FoodType generic variable in the method.</span>
+  <span class="hljs-comment">#     Because it's the same generic variable as in the abstract method,</span>
+  <span class="hljs-comment">#     `feed` is now a valid override.</span>
+  sig {override.params(<span class="hljs-symbol">food:</span> FoodType).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># same thing for Cat</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cat</span></span>
+  <span class="hljs-keyword">include</span> Pet
+  extend T::Generic
+  FoodType = type_member {{<span class="hljs-symbol">fixed:</span> CatFood}}
+
+  sig {override.params(<span class="hljs-symbol">food:</span> FoodType).void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">feed</span><span class="hljs-params">(food)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Module%3B%20include%20T%3A%3ASig%3B%20end%0A%0Aclass%20DogFood%3B%20end%0Aclass%20CatFood%3B%20end%0A%0Amodule%20Pet%0A%20%20extend%20T%3A%3AHelpers%0A%20%20interface!%0A%20%20%23%20%281%29%20Pulls%20in%20the%20%60type_member%60%20helper%0A%20%20extend%20T%3A%3AGeneric%0A%20%20%23%20%282%29%20Define%20%60Pet%60%20as%20a%20generic%20interface%0A%20%20FoodType%20%3D%20type_member%0A%0A%20%20%23%20%283%29%20Use%20the%20%60FoodType%60%20generic%20type%20variable%20here%0A%20%20sig%20%7Babstract.params%28food%3A%20FoodType%29.void%7D%0A%20%20def%20feed%28food%29%3B%20end%0Aend%0A%0Aclass%20Dog%0A%20%20include%20Pet%0A%20%20extend%20T%3A%3AGeneric%0A%20%20%23%20%284%29%20Declare%20that%20Dog%20implements%20the%20Pet%20interface%2C%20subject%20to%20the%20constraint%0A%20%20%23%20%20%20%20%20that%20FoodType%20is%20always%20DogFood%0A%20%20FoodType%20%3D%20type_member%20%7B%7Bfixed%3A%20DogFood%7D%7D%0A%0A%20%20%23%20%285%29%20Use%20FoodType%20generic%20variable%20in%20the%20method.%0A%20%20%23%20%20%20%20%20Because%20it's%20the%20same%20generic%20variable%20as%20in%20the%20abstract%20method%2C%0A%20%20%23%20%20%20%20%20%60feed%60%20is%20now%20a%20valid%20override.%0A%20%20sig%20%7Boverride.params%28food%3A%20FoodType%29.void%7D%0A%20%20def%20feed%28food%29%3B%20end%0Aend%0A%0A%23%20same%20thing%20for%20Cat%0Aclass%20Cat%0A%20%20include%20Pet%0A%20%20extend%20T%3A%3AGeneric%0A%20%20FoodType%20%3D%20type_member%20%7B%7Bfixed%3A%20CatFood%7D%7D%0A%0A%20%20sig%20%7Boverride.params%28food%3A%20FoodType%29.void%7D%0A%20%20def%20feed%28food%29%3B%20end%0Aend">→ View full example on sorbet.run</a></p>
+<p>This approach has some key benefits:</p>
+<ul>
+<li><p>All the override methods are compatible overrides.</p></li>
+<li><p>The <code>Pet</code> interface is explicit about what the relationship is between the
+implementing class and the type of the <code>feed</code> method. For example,</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(
+    <span class="hljs-symbol">food:</span> T.any(DogFood, CatFood),
+    <span class="hljs-symbol">pet:</span> Pet
+  )
+  .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">give_food_to_pet</span><span class="hljs-params">(food, pet)</span></span>
+  <span class="hljs-comment"># Warning: does not guarantee `food` is the right type for `pet`</span>
+  pet.feed(food)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>This method, assuming the original (not generic) implementation of <code>Pet</code>
+doesn’t actually check whether it’s okay to give <code>food</code> to <code>pet</code>.</p>
+<p>In the generic example, it says that <code>Pet</code> is a generic class without type
+arguments, which essentially forces us to rewrite this method in a way that
+guarantees that the <code>food</code> type matches the <code>pet</code> type.</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  type_parameters(<span class="hljs-symbol">:Food</span>)
+    .params(
+      <span class="hljs-symbol">food:</span> T.type_parameter(<span class="hljs-symbol">:Food</span>),
+      <span class="hljs-symbol">pet:</span> Pet[T.type_parameter(<span class="hljs-symbol">:Food</span>)]
+    )
+    .void
+<span class="hljs-keyword">end</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">give_food_to_pet</span><span class="hljs-params">(food, pet)</span></span>
+  pet.feed(food)
+<span class="hljs-keyword">end</span>
+
+give_food_to_pet(DogFood.new, Dog.new)
+give_food_to_pet(CatFood.new, Dog.new) <span class="hljs-comment"># error!</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0Aclass%20Module%3B%20include%20T%3A%3ASig%3B%20end%0A%0Aclass%20DogFood%3B%20end%0Aclass%20CatFood%3B%20end%0A%0Amodule%20Pet%0A%20%20extend%20T%3A%3AHelpers%0A%20%20interface!%0A%20%20%23%20%281%29%20Pulls%20in%20the%20%60type_member%60%20helper%0A%20%20extend%20T%3A%3AGeneric%0A%20%20%23%20%282%29%20Define%20%60Pet%60%20as%20a%20generic%20interface%0A%20%20FoodType%20%3D%20type_member%0A%0A%20%20%23%20%283%29%20Use%20the%20%60FoodType%60%20generic%20type%20variable%20here%0A%20%20sig%20%7Babstract.params%28food%3A%20FoodType%29.void%7D%0A%20%20def%20feed%28food%29%3B%20end%0Aend%0A%0Aclass%20Dog%0A%20%20include%20Pet%0A%20%20extend%20T%3A%3AGeneric%0A%20%20%23%20%284%29%20Declare%20that%20Dog%20implements%20the%20Pet%20interface%2C%20subject%20to%20the%20constraint%0A%20%20%23%20%20%20%20%20that%20FoodType%20is%20always%20DogFood%0A%20%20FoodType%20%3D%20type_member%20%7B%7Bfixed%3A%20DogFood%7D%7D%0A%0A%20%20%23%20%285%29%20Use%20FoodType%20generic%20variable%20in%20the%20method.%0A%20%20%23%20%20%20%20%20Because%20it's%20the%20same%20generic%20variable%20as%20in%20the%20abstract%20method%2C%0A%20%20%23%20%20%20%20%20%60feed%60%20is%20now%20a%20valid%20override.%0A%20%20sig%20%7Boverride.params%28food%3A%20FoodType%29.void%7D%0A%20%20def%20feed%28food%29%3B%20end%0Aend%0A%0A%23%20same%20thing%20for%20Cat%0Aclass%20Cat%0A%20%20include%20Pet%0A%20%20extend%20T%3A%3AGeneric%0A%20%20FoodType%20%3D%20type_member%20%7B%7Bfixed%3A%20CatFood%7D%7D%0A%0A%20%20sig%20%7Boverride.params%28food%3A%20FoodType%29.void%7D%0A%20%20def%20feed%28food%29%3B%20end%0Aend%0A%0Asig%20do%0A%20%20type_parameters%28%3AFood%29%0A%20%20%20%20.params%28%0A%20%20%20%20%20%20food%3A%20T.type_parameter%28%3AFood%29%2C%0A%20%20%20%20%20%20pet%3A%20Pet%5BT.type_parameter%28%3AFood%29%5D%0A%20%20%20%20%29%0A%20%20%20%20.void%0Aend%0Adef%20give_food_to_pet%28food%2C%20pet%29%0A%20%20pet.feed%28food%29%0Aend%0A%0Agive_food_to_pet%28DogFood.new%2C%20Dog.new%29%0Agive_food_to_pet%28CatFood.new%2C%20Dog.new%29%0A%0A">→ View on sorbet.run</a></p></li>
+</ul>
+<p>For more information about designing generic interfaces, see
+<a href="/docs/generics">Generic Classes and Methods</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="escape-hatches-for-override-checking"></a><a href="#escape-hatches-for-override-checking" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Escape hatches for override checking</h2>
+<p>When confronted with an override checking error, the first reaction should
+always be to fix the error. As described in the previous sections, incompatible
+overrides by a child class break the contract established by the parent class.</p>
+<p>If you’ve exhausted all other options and simply need to silence the error to
+make progress, there are two main approaches.</p>
+<h3><a class="anchor" aria-hidden="true" id="use-tuntyped"></a><a href="#use-tuntyped" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Use <code>T.untyped</code></h3>
+<p>Changing either the parent method or the child method type to <code>T.untyped</code> will
+essentially silence the type error for that position. <code>T.untyped</code> is both a
+supertype and subtype of all types, which we’ve previously described as a
+<a href="/docs/gradual">double-edged sword</a>.</p>
+<p>If the <code>T.untyped</code> is placed on the parent class, it will silence the
+incompatible override warnings for <strong>all</strong> child classes, as well as opting out
+of static type checking for all uses of the parent class.</p>
+<p>If the <code>T.untyped</code> is placed on the child class, it will be limited in effect to
+just that class.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- WARNING: Uses T.untyped to opt out of static override checking! --</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {overridable.returns(Numeric)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  sig {override.returns(T.untyped)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># no error, because of T.untyped</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="use-overrideallow_incompatible-true"></a><a href="#use-overrideallow_incompatible-true" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Use <code>override(allow_incompatible: true)</code></h3>
+<p>Using <code>T.untyped</code> can be heavy handed, as it means not only opting out of
+override checking, but also out of normal argument or return type checking.</p>
+<p>An alternative to <strong>only</strong> silence the override checks while keeping the
+incompatible types is to use <code>override(allow_incompatible: true)</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span></span>
+  extend T::Sig
+
+  sig {overridable.returns(Numeric)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> &lt; Parent</span>
+  sig {override(<span class="hljs-symbol">allow_incompatible:</span> <span class="hljs-literal">true</span>).returns(T.any(Numeric, String))}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">returns_at_most_numeric</span>;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># no error, explicitly silenced</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><strong>Again</strong>, reach for this escape hatch sparingly. Every location where override
+checking has been silenced is a place where Sorbet could fail to catch an error
+that it might otherwise have been able to catch.</p>
 <h2><a class="anchor" aria-hidden="true" id="whats-next"></a><a href="#whats-next" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What’s next?</h2>
 <ul>
 <li><p><a href="/docs/final">Final Methods, Classes, and Modules</a></p>
@@ -169,7 +347,7 @@ class level.</p></li>
 a powerful tool for code organization and correctness. Learn more about
 Sorbet’s support for abstract classes and interfaces.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/final"><span class="arrow-prev">← </span><span>Final Methods &amp; Classes</span></a><a class="docs-next button" href="/docs/sealed"><span>Sealed Classes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-note-on-variance">A note on variance</a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/final"><span class="arrow-prev">← </span><span>Final Methods &amp; Classes</span></a><a class="docs-next button" href="/docs/sealed"><span>Sealed Classes</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-note-on-variance">A note on variance</a></li><li><a href="#what-if-i-really-want-the-child-method-to-narrow-the-type">What if I really want the child method to narrow the type?</a></li><li><a href="#escape-hatches-for-override-checking">Escape hatches for override checking</a><ul class="toc-headings"><li><a href="#use-tuntyped">Use <code>T.untyped</code></a></li><li><a href="#use-overrideallow_incompatible-true">Use <code>override(allow_incompatible: true)</code></a></li></ul></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
