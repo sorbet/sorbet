@@ -100,16 +100,16 @@ void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, Err
 
     auto loc = replaceLoc;
     if (loc.exists()) {
-        if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
+        if (unwrapped == core::Symbols::Hash() || unwrapped == core::Symbols::T_Hash()) {
             // Hash is special because it has arity 3 but you're only supposed to write the first 2
             e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
         } else {
-            auto numTypeArgs = klass.data(gs)->typeArity(gs);
+            auto numTypeArgs = unwrapped.data(gs)->typeArity(gs);
             vector<string> untypeds;
             for (int i = 0; i < numTypeArgs; i++) {
                 untypeds.emplace_back("T.untyped");
             }
-            if (typePrefixSym == klass) {
+            if (typePrefixSym == unwrapped) {
                 e.replaceWith("Insert type arguments", loc.copyEndWithZeroLength(), "[{}]",
                               absl::StrJoin(untypeds, ", "));
             } else {

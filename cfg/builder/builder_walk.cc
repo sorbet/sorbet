@@ -527,7 +527,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             !isLegacyStdlibGenericOrChild(cctx.ctx, klass)) {
                             auto errLoc = (s.funLoc.exists() && !s.funLoc.empty()) ? s.funLoc : s.loc;
                             if (auto e = cctx.ctx.beginError(errLoc, core::errors::CFG::TypeArgsGenericClassNew)) {
-                                e.setHeader("`{}` is a generic class, and requires being instantiated with explicit "
+                                e.setHeader("`{}` is a generic class and requires being instantiated with explicit "
                                             "type arguments",
                                             klass.show(cctx.ctx));
                                 auto replaceLoc = cctx.ctx.locAt(s.recv.loc());
