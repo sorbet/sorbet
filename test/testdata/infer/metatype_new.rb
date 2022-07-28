@@ -42,6 +42,6 @@ T.class_of(MyGeneric).new          # error: Call to method `new` on `T.class_of(
 # If you fix that bug, please feel free to delete the following line.
 T.class_of(MyGeneric[Integer]).new # error: Call to method `new` on `T.class_of(MyGeneric)` mistakes a type for a value
 
-T.proc.void.new                    # error: Call to method `new` on `T.class_of(T.proc)` mistakes a type for a value
+T.proc.void.new                    # error: Call to method `new` on `T.proc.void` mistakes a type for a value
 
 T.noreturn.new                     # error: Call to method `new` on `T.noreturn` mistakes a type for a value

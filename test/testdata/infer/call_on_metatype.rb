@@ -17,8 +17,7 @@ T.self_type.to_s # error: Call to method `to_s` on `T.untyped` mistakes a type f
 # And yet another one
 T.class_of(Integer).to_s # error: Call to method `to_s` on `T.class_of(Integer)` mistakes a type for a value
 
-# This one is weird and kind of tricky to change: https://github.com/sorbet/sorbet/issues/3427
-puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(T.proc)`
+puts (T.proc.void + 1) # error: Call to method `+` on `T.proc.void` mistakes a type for a value
 
 # Edge cases. Do anything but crash.
 T.class_of.foo # error: Not enough arguments

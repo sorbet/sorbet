@@ -109,8 +109,8 @@ bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(B), <block-pre-call-temp>$7
     <statTemp>$16: T.class_of(T.proc) = <cfgAlias>$18: T.class_of(T).proc()
     <cfgAlias>$20: T.class_of(C) = alias <C C>
     <statTemp>$15: T.class_of(T.proc) = <statTemp>$16: T.class_of(T.proc).bind(<cfgAlias>$20: T.class_of(C))
-    <hashTemp>$14: T.class_of(T.proc) = <statTemp>$15: T.class_of(T.proc).void()
-    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:blk), <hashTemp>$14: T.class_of(T.proc))
+    <hashTemp>$14: Runtime object representing type: T.proc.void = <statTemp>$15: T.class_of(T.proc).void()
+    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:blk), <hashTemp>$14: Runtime object representing type: T.proc.void)
     <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <statTemp>$11: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$21: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
@@ -173,8 +173,8 @@ bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$7
     <statTemp>$16: T.class_of(T.proc) = <cfgAlias>$18: T.class_of(T).proc()
     <cfgAlias>$20: T.class_of(B) = alias <C B>
     <statTemp>$15: T.class_of(T.proc) = <statTemp>$16: T.class_of(T.proc).bind(<cfgAlias>$20: T.class_of(B))
-    <hashTemp>$14: T.class_of(T.proc) = <statTemp>$15: T.class_of(T.proc).void()
-    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:blk), <hashTemp>$14: T.class_of(T.proc))
+    <hashTemp>$14: Runtime object representing type: T.proc.void = <statTemp>$15: T.class_of(T.proc).void()
+    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:blk), <hashTemp>$14: Runtime object representing type: T.proc.void)
     <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <statTemp>$11: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$21: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2

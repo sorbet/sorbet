@@ -1585,9 +1585,29 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
             return false;
         }
+
+        auto klassId = appliedType->klass.id();
+        if (core::Symbols::Proc(0).id() <= klassId && klassId <= core::Symbols::last_proc().id()) {
+            return false;
+        }
     }
 
     return true;
+}
+
+DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, core::Loc errLoc,
+                               const TypePtr &wrapped) {
+    if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
+        e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs), wrapped.show(gs));
+        if (args.name == core::Names::tripleEq()) {
+            if (auto appliedType = cast_type<AppliedType>(wrapped)) {
+                e.addErrorNote("It looks like you're trying to pattern match on a generic, "
+                               "which doesn't work at runtime");
+                e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
+            }
+        }
+    }
+    return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
 }
 
 } // namespace
@@ -1630,6 +1650,56 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             original.main.sendTp = wrapped;
             return original;
         }
+        case Names::bind().rawId():
+        case Names::returns().rawId():
+        case Names::void_().rawId(): {
+            auto *applied = cast_type<AppliedType>(this->wrapped);
+            if (applied == nullptr) {
+                return badMetaTypeCall(gs, args, errLoc, this->wrapped);
+            }
+
+            auto klassId = applied->klass.id();
+            if (!(core::Symbols::Proc(0).id() <= klassId && klassId <= core::Symbols::last_proc().id())) {
+                return badMetaTypeCall(gs, args, errLoc, this->wrapped);
+            }
+
+            if (args.name == Names::bind()) {
+                // Sometimes people put T.proc.void.bind(...) instead of T.proc.bind(...).void in a signature
+                auto member = core::Symbols::T_Private_Methods_DeclBuilder().data(gs)->findMember(gs, args.name);
+                // might not exist if running with --no-stdlib
+                auto method = member.exists() ? member.asMethodRef() : core::Symbols::noMethod();
+                return DispatchResult(args.selfType, args.selfType, method);
+            }
+
+            if (applied->targs.size() < 1 || applied->targs[0] != core::Types::todo()) {
+                return badMetaTypeCall(gs, args, errLoc, this->wrapped);
+            }
+
+            if (args.name == Names::returns() && args.args.size() != 1 && args.numPosArgs != 1) {
+                return badMetaTypeCall(gs, args, errLoc, this->wrapped);
+            }
+
+            auto returns = core::Types::void_();
+            if (args.name == core::Names::returns()) {
+                returns = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+            }
+
+            // Have to create a new type for the result because dispatchCall is a const member method
+            vector<core::TypePtr> targs;
+
+            // Going to overwrite the return type later in MetaType::dispatchCall
+            targs.emplace_back(returns);
+            for (size_t i = 1; i < applied->targs.size(); i++) {
+                targs.emplace_back(applied->targs[i]);
+            }
+
+            auto proc = make_type<MetaType>(core::make_type<core::AppliedType>(applied->klass, move(targs)));
+
+            auto member = core::Symbols::T_Private_Methods_DeclBuilder().data(gs)->findMember(gs, args.name);
+            // might not exist if running with --no-stdlib
+            auto method = member.exists() ? member.asMethodRef() : core::Symbols::noMethod();
+            return DispatchResult(proc, std::move(args.selfType), method);
+        }
         case Names::valid_p().rawId():
         case Names::recursivelyValid_p().rawId():
         case Names::subtypeOf_p().rawId():
@@ -1643,18 +1713,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         }
         default:
-            if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
-                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
-                            this->wrapped.show(gs));
-                if (args.name == core::Names::tripleEq()) {
-                    if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
-                        e.addErrorNote("It looks like you're trying to pattern match on a generic, "
-                                       "which doesn't work at runtime");
-                        e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
-                    }
-                }
-            }
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+            return badMetaTypeCall(gs, args, errLoc, this->wrapped);
     }
 }
 
@@ -1855,6 +1914,67 @@ public:
         res.returnType = Types::declBuilderForProcsSingletonClass();
     }
 } T_proc;
+
+class T_proc_params : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.numPosArgs != 0 || args.args.size() % 2 == 1) {
+            res.returnType = Types::declBuilderForProcsSingletonClass();
+            return;
+        }
+
+        auto sym = core::Symbols::Proc(args.args.size() / 2);
+        if (!sym.exists()) {
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        vector<core::TypePtr> targs;
+        // Going to overwrite the return type later in MetaType::dispatchCall
+        targs.emplace_back(core::Types::todo());
+
+        for (size_t i = 1; i < args.args.size(); i += 2) {
+            auto unwrappedType = unwrapType(gs, args.argLoc(i), args.args[i]->type);
+            targs.emplace_back(move(unwrappedType));
+        }
+
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+    }
+} T_proc_params;
+
+class T_proc_void : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto sym = core::Symbols::Proc(0);
+        vector<core::TypePtr> targs;
+        targs.emplace_back(core::Types::void_());
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+    }
+} T_proc_void;
+
+class T_proc_returns : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            res.returnType = core::Types::untypedUntracked();
+            return;
+        }
+
+        auto sym = core::Symbols::Proc(0);
+        vector<core::TypePtr> targs;
+        auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        targs.emplace_back(move(unwrappedType));
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+    }
+} T_proc_returns;
+
+class DeclBuilderForProcs_bind : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // NOTE: real validation done in infer
+        res.returnType = Types::declBuilderForProcsSingletonClass();
+    }
+} DeclBuilderForProcs_bind;
 
 class Object_class : public IntrinsicMethod {
 public:
@@ -2968,38 +3088,6 @@ public:
     };
 } Magic_splat;
 
-class DeclBuilderForProcs_void : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        // NOTE: real validation done in infer
-        res.returnType = Types::declBuilderForProcsSingletonClass();
-    }
-} DeclBuilderForProcs_void;
-
-class DeclBuilderForProcs_returns : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        // NOTE: real validation done in infer
-        res.returnType = Types::declBuilderForProcsSingletonClass();
-    }
-} DeclBuilderForProcs_returns;
-
-class DeclBuilderForProcs_params : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        // NOTE: real validation done in infer
-        res.returnType = Types::declBuilderForProcsSingletonClass();
-    }
-} DeclBuilderForProcs_params;
-
-class DeclBuilderForProcs_bind : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        // NOTE: real validation done in infer
-        res.returnType = Types::declBuilderForProcsSingletonClass();
-    }
-} DeclBuilderForProcs_bind;
-
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3924,6 +4012,10 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::attachedClass(), &T_attached_class},
 
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
+    {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::params(), &T_proc_params},
+    {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::void_(), &T_proc_void},
+    {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::returns(), &T_proc_returns},
+    {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::bind(), &DeclBuilderForProcs_bind},
 
     {Symbols::T_Generic(), Intrinsic::Kind::Instance, Names::squareBrackets(), &T_Generic_squareBrackets},
 
@@ -3962,12 +4054,6 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashNoDup(), &Magic_toHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHash(), &Magic_mergeHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHashValues(), &Magic_mergeHashValues},
-
-    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
-    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
-     &DeclBuilderForProcs_returns},
-    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::params(), &DeclBuilderForProcs_params},
-    {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::bind(), &DeclBuilderForProcs_bind},
 
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
