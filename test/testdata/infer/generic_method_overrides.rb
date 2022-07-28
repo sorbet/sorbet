@@ -67,6 +67,8 @@ class ChildBad < Parent
       .returns(T.nilable(T.type_parameter(:W)))
   end
   def id(x); x; end
+# ^^^^^^^^^ error: Parameter `x` of type `T.all(IFoo, T.type_parameter(:W))` not compatible with type of overridable method `Parent#id`
+# ^^^^^^^^^ error: Return type `T.nilable(T.type_parameter(:W))` does not match return type of overridable method `Parent#id`
 
   sig do
     override
@@ -78,6 +80,8 @@ class ChildBad < Parent
       .void
   end
   def apply_f(x, f)
+# ^^^^^^^^^^^^^^^^^ error: Parameter `x` of type `T.all(IFoo, T.type_parameter(:W))` not compatible with type of overridable method `Parent#apply_f`
+# ^^^^^^^^^^^^^^^^^ error: Parameter `f` of type `T.proc.params(arg0: T.nilable(T.type_parameter(:W))).void` not compatible with type of overridable method `Parent#apply_f`
     f.call(x)
   end
 end

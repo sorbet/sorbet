@@ -146,6 +146,8 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
                                superArgs[idx].get().show(ctx), superArgType.show(ctx));
+                e.addErrorNote(
+                    "A parameter's type must be a supertype of the same parameter's type on the super method.");
             }
         }
         idx++;
@@ -288,6 +290,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The corresponding parameter `{}` was declared here with type `{}`",
                                        req.get().show(ctx), req.get().type.show(ctx));
+                        e.addErrorNote(
+                            "A parameter's type must be a supertype of the same parameter's type on the super method.");
                     }
                 }
             } else {
@@ -316,6 +320,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The super method parameter `{}` was declared here with type `{}`",
                                        opt.get().show(ctx), opt.get().type.show(ctx));
+                        e.addErrorNote(
+                            "A parameter's type must be a supertype of the same parameter's type on the super method.");
                     }
                 }
             }
@@ -338,6 +344,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter **`{}` was declared here with type `{}`",
                                left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
+                e.addErrorNote(
+                    "A parameter's type must be a supertype of the same parameter's type on the super method.");
             }
         }
     }
@@ -372,6 +380,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             supermethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
+                e.addErrorNote("A method's return type must be a subtype of the return type on the super method.");
             }
         }
     }
