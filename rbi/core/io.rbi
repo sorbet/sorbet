@@ -1730,18 +1730,18 @@ class IO < Object
     params(
       fd: T.any(String, Integer),
       mode: T.any(Integer, String),
-      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      opt: T.untyped,
     ).returns(IO)
   end
   sig do
     type_parameters(:U).params(
       fd: T.any(String, Integer),
       mode: T.any(Integer, String),
-      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      opt: T.untyped,
       blk: T.proc.params(io: T.attached_class).returns(T.type_parameter(:U))
     ).returns(T.type_parameter(:U))
   end
-  def self.open(fd, mode='r', opt=nil, &blk); end
+  def self.open(fd, mode='r', **opt, &blk); end
 
   # Returns the process ID of a child process associated with the stream, which
   # will have been set by IO#popen, or `nil` if the stream was not created by
