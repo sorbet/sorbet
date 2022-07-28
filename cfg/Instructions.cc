@@ -125,11 +125,9 @@ Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core:
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
 
-    this->args.resize(args.size());
-    int i = 0;
+    this->args.reserve(args.size());
     for (const auto &e : args) {
-        this->args[i].variable = e;
-        i++;
+        this->args.emplace_back(e);
     }
     categoryCounterInc("cfg", "send");
     histogramInc("cfg.send.args", this->args.size());
