@@ -73,7 +73,7 @@ class Wrap1
   end
   sig do
     type_parameters(:U)
-      .params(x: T.type_parameter(:U), y: Integer, blk: T.proc.returns(Integer).void) # error: Overloaded functions cannot have keyword arguments
+      .params(x: T.type_parameter(:U), y: Integer, blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
   def matching_positional_type_parameters_not_allowed(x, y:, &blk); end
@@ -85,7 +85,7 @@ class Wrap1
   end
   sig do
     type_parameters(:V)
-      .params(x: T.type_parameter(:V), y: Integer, blk: T.proc.returns(Integer).void) # error: Overloaded functions cannot have keyword arguments
+      .params(x: T.type_parameter(:V), y: Integer, blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
   def mismatched_positional_type_parameters_not_allowed(x, y:, &blk); end
@@ -97,7 +97,7 @@ class Wrap1
   end
   sig do
     type_parameters(:U)
-      .params(x: T.type_parameter(:U), blk: T.proc.returns(Integer).void) # error: Overloaded functions cannot have keyword arguments
+      .params(x: T.type_parameter(:U), blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
   def matching_kwarg_type_parameters_not_allowed(x:, &blk); end
@@ -109,7 +109,7 @@ class Wrap1
   end
   sig do
     type_parameters(:V)
-      .params(x: T.type_parameter(:V), blk: T.proc.returns(Integer).void) # error: Overloaded functions cannot have keyword arguments
+      .params(x: T.type_parameter(:V), blk: T.proc.returns(Integer)) # error: Overloaded functions cannot have keyword arguments
       .void
   end
   def mismatched_kwargs_type_parameters_not_allowed(x:, &blk); end
@@ -175,7 +175,7 @@ class WrapGeneric1
       .void
   end
   sig do
-    params(x: Elem, y: Integer, blk: T.proc.returns(Integer).void)
+    params(x: Elem, y: Integer, blk: T.proc.returns(Integer))
       .void
   end
   def matching_positional_type_members(x, y:, &blk); end
@@ -185,7 +185,7 @@ class WrapGeneric1
       .void
   end
   sig do
-    params(x: Elem, blk: T.proc.returns(Integer).void)
+    params(x: Elem, blk: T.proc.returns(Integer))
       .void
   end
   def matching_kwarg_type_members(x:, &blk); end
@@ -202,7 +202,7 @@ class WrapGeneric2
       .void
   end
   sig do
-    params(x: Elem, y: Integer, blk: T.proc.returns(Integer).void)
+    params(x: Elem, y: Integer, blk: T.proc.returns(Integer))
       .void
   end
   def self.matching_positional_type_templates(x, y:, &blk); end
@@ -212,7 +212,7 @@ class WrapGeneric2
       .void
   end
   sig do
-    params(x: Elem, blk: T.proc.returns(Integer).void)
+    params(x: Elem, blk: T.proc.returns(Integer))
       .void
   end
   def self.matching_kwarg_type_templates(x:, &blk); end
@@ -231,7 +231,7 @@ class WrapGeneric3
       .void
   end
   sig do
-    params(x: Mele, y: Integer, blk: T.proc.returns(Integer).void)
+    params(x: Mele, y: Integer, blk: T.proc.returns(Integer))
 #                   ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
@@ -243,7 +243,7 @@ class WrapGeneric3
       .void
   end
   sig do
-    params(x: Mele, blk: T.proc.returns(Integer).void)
+    params(x: Mele, blk: T.proc.returns(Integer))
 #          ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
@@ -263,7 +263,7 @@ class WrapGeneric4
       .void
   end
   sig do
-    params(x: Mele, y: Integer, blk: T.proc.returns(Integer).void)
+    params(x: Mele, y: Integer, blk: T.proc.returns(Integer))
 #                   ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
@@ -275,7 +275,7 @@ class WrapGeneric4
       .void
   end
   sig do
-    params(x: Mele, blk: T.proc.returns(Integer).void)
+    params(x: Mele, blk: T.proc.returns(Integer))
 #          ^ error: Overloaded functions cannot have keyword arguments
       .void
   end
