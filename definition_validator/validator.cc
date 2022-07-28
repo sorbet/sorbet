@@ -211,21 +211,13 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             auto typeArgument = methodTypeArguments[i];
             auto superTypeArgument = superMethodTypeArguments[i];
 
-            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(superTypeArgument),
-            //                           typeArgument.data(ctx)->resultType);
             constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(superTypeArgument));
             constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
                                       superTypeArgument.data(ctx)->resultType);
-            // constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
-            //                           core::make_type<core::SelfTypeParam>(typeArgument));
 
             constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
                                       typeArgument.data(ctx)->resultType);
-            // constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
-            //                           core::make_type<core::SelfTypeParam>(typeArgument));
-            // constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(superTypeArgument),
-            //                           superTypeArgument.data(ctx)->resultType);
             constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(superTypeArgument));
         }

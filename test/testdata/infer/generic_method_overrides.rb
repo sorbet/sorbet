@@ -90,3 +90,37 @@ class ChildNoSig < Parent
   def id(x); x; end
   def apply_f(x, f); f.call(x); end
 end
+
+class ParentApplyFWrongOrder
+  extend T::Sig
+  sig do
+    overridable
+      .type_parameters(:A, :B)
+      .params(
+        x: T.type_parameter(:A),
+        f: T.proc.params(x: T.type_parameter(:A)).returns(T.type_parameter(:B)),
+      )
+      .returns(T.type_parameter(:B))
+  end
+  def apply_f(x, f); f.call(x); end
+end
+
+class ChildApplyFWrongOrder < ParentApplyFWrongOrder
+  # This showcases a current limitation of our implementation.
+  # The type parameters in the parent have to used in the same order as in the parent.
+  # This signature is alpha-equivalent (equivalent modulo naming) to the parent,
+  # but Sorbet rejects it.
+  sig do
+    override
+      .type_parameters(:U, :V)
+      .params(
+        x: T.type_parameter(:V),
+        f: T.proc.params(x: T.type_parameter(:V)).returns(T.type_parameter(:U)),
+      )
+      .returns(T.type_parameter(:U))
+  end
+  def apply_f(x, f); f.call(x); end
+# ^^^^^^^^^^^^^^^^^ error: Parameter `x` of type `T.type_parameter(:V)` not compatible with type of overridable method `ParentApplyFWrongOrder#apply_f`
+# ^^^^^^^^^^^^^^^^^ error: Parameter `f` of type `T.proc.params(arg0: T.type_parameter(:V)).returns(T.type_parameter(:U))` not compatible with type of overridable method `ParentApplyFWrongOrder#apply_f`
+# ^^^^^^^^^^^^^^^^^ error: Return type `T.type_parameter(:U)` does not match return type of overridable method `ParentApplyFWrongOrder#apply_f`
+end
