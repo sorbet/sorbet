@@ -150,6 +150,8 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
                 // this will behave a bit like a unification variable with
                 // Types::glb.
                 targs.emplace_back(Types::untyped(gs, ref));
+                // This flag is an optimization so that we don't have to recompute all the logic this
+                // method computes when checking whether to allow a call to `new` on a generic class.
                 flags.externalTypeImplicitlyUntyped = true;
             } else {
                 // The remaining case is a contravariant parameter, which
