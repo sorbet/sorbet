@@ -263,7 +263,7 @@ bool NameRef::isUpdateKnowledgeName() const {
     }
 }
 
-NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t index) {
+NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t index) noexcept {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
     globalStateId = gs.globalStateId;

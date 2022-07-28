@@ -40,7 +40,9 @@ private:
     T storage;
 
 public:
-    template <typename... Args> constexpr DebugOnlyCheck(Args &&...args) : storage(std::forward<Args>(args)...) {}
+    template <typename... Args>
+    constexpr DebugOnlyCheck(Args &&...args) noexcept(noexcept(T(std::forward<Args>(args)...)))
+        : storage(std::forward<Args>(args)...) {}
 
     template <typename... Args> void runDebugOnlyCheck(Args &&...args) const {
         storage.check(std::forward<Args>(args)...);
@@ -49,7 +51,7 @@ public:
 
 template <class T> class DebugOnlyCheck<T, false> {
 public:
-    template <typename... Args> constexpr DebugOnlyCheck(Args &&...args) {}
+    template <typename... Args> constexpr DebugOnlyCheck(Args &&...args) noexcept {};
 
     template <typename... Args> void runDebugOnlyCheck(Args &&...args) const {}
 };

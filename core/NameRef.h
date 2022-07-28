@@ -56,11 +56,11 @@ constexpr size_t alignof__UniqueName = alignof(UniqueName *);
 CheckSize(UniqueNameData, sizeof__UniqueName, alignof__UniqueName);
 
 struct NameRefDebugCheck {
-    int globalStateId;
+    int globalStateId = -1;
 
-    constexpr NameRefDebugCheck() : globalStateId(-1) {}
+    constexpr NameRefDebugCheck() = default;
 
-    NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t id);
+    NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t id) noexcept;
 
     void check(const GlobalState &gs, NameKind kind, uint32_t id) const;
     void check(const NameSubstitution &subst) const;
@@ -76,16 +76,16 @@ private:
     static constexpr uint32_t KIND_MASK = (1 << KIND_BITS) - 1;
     static constexpr uint32_t MAX_ID = (1 << ID_BITS) - 1;
 
-    uint32_t _id;
+    // The value `0` implies that there is no NameKind tag present (NameKind begin at 1) and is a special-value used to
+    // indicate a non-existant NameRef.
+    uint32_t _id = 0;
 
     uint32_t unsafeTableIndex() const {
         return _id >> KIND_BITS;
     }
 
 public:
-    // The value `0` implies that there is no NameKind tag present (NameKind begin at 1) and is a special-value used to
-    // indicate a non-existant NameRef.
-    constexpr NameRef() noexcept : _id(0){};
+    constexpr NameRef() = default;
 
     // WellKnown is a tag to statically indicate that the caller is deliberately
     // constructing a well-known name, whose ID is stable across all
