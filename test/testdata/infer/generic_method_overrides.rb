@@ -63,7 +63,6 @@ class ChildBad < Parent
   sig do
     override
       .type_parameters(:W)
-      # .params(x: T.all(T.type_parameter(:W), IFoo))
       .params(x: T.all(T.type_parameter(:W), IFoo))
       .returns(T.nilable(T.type_parameter(:W)))
   end
@@ -83,3 +82,7 @@ class ChildBad < Parent
   end
 end
 
+class ChildNoSig < Parent
+  def id(x); x; end
+  def apply_f(x, f); f.call(x); end
+end

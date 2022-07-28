@@ -161,7 +161,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         return;
     }
 
-    if (superMethod.data(ctx)->flags.isGenericMethod != method.data(ctx)->flags.isGenericMethod) {
+    if (superMethod.data(ctx)->flags.isGenericMethod != method.data(ctx)->flags.isGenericMethod &&
+        method.data(ctx)->hasSig()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             if (superMethod.data(ctx)->flags.isGenericMethod) {
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
