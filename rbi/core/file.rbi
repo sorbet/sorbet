@@ -742,7 +742,7 @@ class File < IO
       filename: T.any(String, Pathname),
       mode: T.any(Integer, String),
       perm: T.nilable(Integer),
-      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      opt: T.untyped,
     ).returns(File)
   end
   sig do
@@ -750,11 +750,11 @@ class File < IO
       filename: T.any(String, Pathname),
       mode: T.any(Integer, String),
       perm: T.nilable(Integer),
-      opt: T.nilable(T::Hash[Symbol, T.untyped]),
+      opt: T.untyped,
       blk: T.proc.params(file: File).returns(T.type_parameter(:U))
     ).returns(T.type_parameter(:U))
   end
-  def self.open(filename, mode='r', perm=nil, opt=nil, &blk); end
+  def self.open(filename, mode='r', perm=nil, **opt, &blk); end
 
   # Returns `true` if the named file exists and the effective used id of the
   # calling process is the owner of the file.
