@@ -9,8 +9,8 @@ class File;
 
 class FileRef final {
 public:
-    FileRef() : _id(0){};
-    FileRef(unsigned int id);
+    FileRef() = default;
+    FileRef(unsigned int id) noexcept;
 
     FileRef(FileRef &f) = default;
     FileRef(const FileRef &f) = default;
@@ -48,7 +48,7 @@ public:
     File &dataAllowingUnsafe(GlobalState &gs) const;
 
 private:
-    uint32_t _id;
+    uint32_t _id = 0;
 };
 CheckSize(FileRef, 4, 4);
 

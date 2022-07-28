@@ -12,6 +12,11 @@ using namespace std;
 
 namespace sorbet::core {
 
+static_assert(std::is_nothrow_default_constructible_v<FileRef>, "oops");
+static_assert(std::is_nothrow_copy_constructible_v<FileRef>, "oops");
+static_assert(std::is_nothrow_move_constructible_v<FileRef>, "oops");
+static_assert(std::is_nothrow_constructible_v<FileRef, uint32_t>, "oops");
+
 namespace {
 
 constexpr auto EXTERNAL_PREFIX = "external/com_stripe_ruby_typer/"sv;
@@ -272,7 +277,7 @@ const shared_ptr<const FileHash> &File::getFileHash() const {
     return hash_;
 }
 
-FileRef::FileRef(unsigned int id) : _id(id) {}
+FileRef::FileRef(unsigned int id) noexcept : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(gs.files[_id]);
