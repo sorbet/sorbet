@@ -26,13 +26,13 @@ class BasicBlock;
 class BlockExit final {
 public:
     VariableUseSite cond;
-    BasicBlock *thenb;
-    BasicBlock *elseb;
+    BasicBlock *thenb = nullptr;
+    BasicBlock *elseb = nullptr;
     core::LocOffsets loc;
     bool isCondSet() {
         return cond.variable.exists();
     }
-    BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
+    BlockExit() = default;
 };
 
 class Binding final {
