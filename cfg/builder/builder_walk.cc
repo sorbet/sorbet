@@ -180,6 +180,25 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     return make_insn<Alias>(typeParam);
 }
 
+bool isLegacyStdlibGenericOrChild(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
+    if (klass.isLegacyStdlibGeneric()) {
+        return true;
+    }
+    const auto &data = klass.data(gs);
+    ENFORCE(data->flags.isLinearizationComputed);
+    for (auto m : data->mixins()) {
+        if (m.isLegacyStdlibGeneric()) {
+            return true;
+        }
+    }
+
+    if (data->superClass().exists()) {
+        return isLegacyStdlibGenericOrChild(gs, data->superClass());
+    }
+
+    return false;
+}
+
 } // namespace
 
 void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
@@ -505,7 +524,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     if (sym.isClassOrModule()) {
                         auto klass = sym.asClassOrModuleRef();
                         if (klass.data(cctx.ctx)->flags.externalTypeImplicitlyUntyped &&
-                            !klass.isLegacyStdlibGeneric()) {
+                            !isLegacyStdlibGenericOrChild(cctx.ctx, klass)) {
                             auto errLoc = (s.funLoc.exists() && !s.funLoc.empty()) ? s.funLoc : s.loc;
                             if (auto e = cctx.ctx.beginError(errLoc, core::errors::CFG::TypeArgsGenericClassNew)) {
                                 e.setHeader("`{}` is a generic class, and requires being instantiated with explicit "
