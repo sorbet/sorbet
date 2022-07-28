@@ -45,20 +45,59 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
     return sig;
 }
 
-// This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `nullptr` or if either
-// one is not fully defined. This is really just a useful helper function for this module: do not use it elsewhere.
-bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core::TypePtr &super) {
+// This is really just a useful helper function for this module: do not use it elsewhere.
+//
+// It makes certain assuptions that it is running for the sake of computing overrides that are not
+// going to be true in other situations.
+bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
+                  core::MethodRef subMethod, const core::TypePtr &super, core::MethodRef superMethod,
+                  core::Polarity polarity) {
     if (sub == nullptr || super == nullptr) {
+        // nullptr is just "unannotated" which is T.untyped
         return true;
     }
 
-    // type-checking these in the presence of generic type parameters is tricky, so for now we're going to punt on
-    // it. TODO: build up the machinery to type-check in the presence of type parameters!
-    if (!super.isFullyDefined() || !sub.isFullyDefined()) {
-        return true;
-    }
+    auto subOwner = subMethod.data(ctx)->owner;
+    auto superOwner = superMethod.data(ctx)->owner;
 
-    return core::Types::isSubType(ctx, sub, super);
+    // Need this to be true for the sake of resultTypeAsSeenFrom.
+    ENFORCE(subOwner.data(ctx)->derivesFrom(ctx, superOwner));
+
+    // We're only using the TypeConstraint as a way to have an easy way to replace a `TypeVar` with
+    // a "skolem" type variable (type variable representing an unknown but specific type). In
+    // Sorbet, those skolems are SelfTypeParam types that wrap a TypeArgumentRef.
+    //
+    // Types::approximate does this "replace all the TypeVar with SelfTypeParam" naturally and in a
+    // predictable way (i.e., respecting polarity), so it's convenient do to this with approximate
+    // rather than build a dedicated function for this.
+    //
+    // However, it's neither required nor desired to use that constraint to type check the two types
+    // themselves. If we somehow managed to construct the constr incorrectly, there might still be
+    // un-skolemized TypeVar's in either type, which would then record new constraints during the
+    // call to isSubType. To guarantee that never happens, we typecheck the type under the
+    // EmptyFrozenConstraint, instead of this constraint that we should only be using for skolemization.
+    //
+    // Another approach might be to create the constr right here, instead of threading it around
+    // everywhere. We've taken the aprpopach of only constructing the constraint once as an optimization.
+
+    // For the sake of comparison, we always compare the two types as if they were being "observed"
+    // in the child class, so we always instantiate with the sub class types
+    const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
+
+    auto subType = core::Types::approximate(ctx, sub, constr);
+    subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
+    auto superType = core::Types::approximate(ctx, super, constr);
+    superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subOwner, subSelfTypeArgs);
+
+    switch (polarity) {
+        case core::Polarity::Negative:
+            return core::Types::isSubType(ctx, superType, subType);
+        case core::Polarity::Positive:
+            return core::Types::isSubType(ctx, subType, superType);
+        case core::Polarity::Neutral:
+            Exception::raise("{}: unexpected neutral polarity, did you mean to pass Positive?",
+                             ctx.file.data(ctx).path());
+    }
 }
 
 string supermethodKind(const core::Context ctx, core::MethodRef method) {
@@ -87,7 +126,8 @@ string implementationOf(const core::Context ctx, core::MethodRef method) {
 
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
+                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
                      core::MethodRef method) {
@@ -98,7 +138,7 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
         auto superArgType = superArgs[idx].get().type;
         auto methodArgType = methodArgs[idx].get().type;
 
-        if (!checkSubtype(ctx, superArgType, methodArgType)) {
+        if (!checkSubtype(ctx, constr, methodArgType, method, superArgType, superMethod, core::Polarity::Negative)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                             methodArgs[idx].get().show(ctx), methodArgType.show(ctx), supermethodKind(ctx, superMethod),
@@ -106,6 +146,8 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
                                superArgs[idx].get().show(ctx), superArgType.show(ctx));
+                e.addErrorNote(
+                    "A parameter's type must be a supertype of the same parameter's type on the super method.");
             }
         }
         idx++;
@@ -119,6 +161,66 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         // to match overloads against their superclass definitions. Since we
         // Only permit overloading in the stdlib for now, this is no great loss.
         return;
+    }
+
+    if (superMethod.data(ctx)->flags.isGenericMethod != method.data(ctx)->flags.isGenericMethod &&
+        method.data(ctx)->hasSig()) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            if (superMethod.data(ctx)->flags.isGenericMethod) {
+                e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
+                            implementationOf(ctx, superMethod), superMethod.show(ctx));
+            } else {
+                e.setHeader("{} method `{}` must not declare type parameters", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx));
+            }
+            e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+        }
+        return;
+    }
+
+    unique_ptr<core::TypeConstraint> _constr;
+    auto *constr = &core::TypeConstraint::EmptyFrozenConstraint;
+    if (method.data(ctx)->flags.isGenericMethod) {
+        ENFORCE(superMethod.data(ctx)->flags.isGenericMethod);
+        const auto &methodTypeArguments = method.data(ctx)->typeArguments();
+        const auto &superMethodTypeArguments = superMethod.data(ctx)->typeArguments();
+        if (methodTypeArguments.size() != superMethodTypeArguments.size()) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
+                            implementationOf(ctx, superMethod), superMethod.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            }
+            return;
+        }
+
+        _constr = make_unique<core::TypeConstraint>();
+        constr = _constr.get();
+
+        // This doesn't allow the type arguments to be declared in a different order, but it does
+        // allow them to be declared with different names.
+        //
+        // The tradeoff is that this provides a cheap way to produce error messages at the
+        // individual arg that is imcompatible (versus only at the end once all constraints have
+        // been collected) at the cost of rejecting compatible overrides.
+        //
+        // (An alternative might be to collect a constraint and then after validating all arguments,
+        // attempt to find a substitution from one method's type params to the other method's type
+        // params, and report an error if no substitution exists, but this tends to result in errors
+        // that look like "it failed" with no further context.)
+        for (size_t i = 0; i < methodTypeArguments.size(); i++) {
+            auto typeArgument = methodTypeArguments[i];
+            auto superTypeArgument = superMethodTypeArguments[i];
+
+            constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(superTypeArgument));
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+                                      superTypeArgument.data(ctx)->resultType);
+
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
+                                      typeArgument.data(ctx)->resultType);
+            constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(superTypeArgument));
+        }
     }
 
     auto left = decomposeSignature(ctx, superMethod);
@@ -155,9 +257,9 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     // match types of required positional arguments
-    matchPositional(ctx, left.pos.required, superMethod, right.pos.required, method);
+    matchPositional(ctx, *constr, left.pos.required, superMethod, right.pos.required, method);
     // match types of optional positional arguments
-    matchPositional(ctx, left.pos.optional, superMethod, right.pos.optional, method);
+    matchPositional(ctx, *constr, left.pos.optional, superMethod, right.pos.optional, method);
 
     if (!right.kw.rest) {
         for (auto req : left.kw.required) {
@@ -170,7 +272,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.required.end() && corresponding != right.kw.optional.end()) {
-                if (!checkSubtype(ctx, req.get().type, corresponding->get().type)) {
+                if (!checkSubtype(ctx, *constr, corresponding->get().type, method, req.get().type, superMethod,
+                                  core::Polarity::Negative)) {
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -179,6 +282,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The corresponding parameter `{}` was declared here with type `{}`",
                                        req.get().show(ctx), req.get().type.show(ctx));
+                        e.addErrorNote(
+                            "A parameter's type must be a supertype of the same parameter's type on the super method.");
                     }
                 }
             } else {
@@ -197,7 +302,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.optional.end()) {
-                if (!checkSubtype(ctx, opt.get().type, corresponding->get().type)) {
+                if (!checkSubtype(ctx, *constr, corresponding->get().type, method, opt.get().type, superMethod,
+                                  core::Polarity::Negative)) {
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -206,6 +312,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The super method parameter `{}` was declared here with type `{}`",
                                        opt.get().show(ctx), opt.get().type.show(ctx));
+                        e.addErrorNote(
+                            "A parameter's type must be a supertype of the same parameter's type on the super method.");
                     }
                 }
             }
@@ -219,7 +327,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             superMethod.show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
-        } else if (!checkSubtype(ctx, leftRest->get().type, right.kw.rest->get().type)) {
+        } else if (!checkSubtype(ctx, *constr, right.kw.rest->get().type, method, leftRest->get().type, superMethod,
+                                 core::Polarity::Negative)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
                             right.kw.rest->get().show(ctx), right.kw.rest->get().type.show(ctx),
@@ -227,6 +336,8 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter **`{}` was declared here with type `{}`",
                                left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
+                e.addErrorNote(
+                    "A parameter's type must be a supertype of the same parameter's type on the super method.");
             }
         }
     }
@@ -255,12 +366,13 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         auto superReturn = superMethod.data(ctx)->resultType;
         auto methodReturn = method.data(ctx)->resultType;
 
-        if (!checkSubtype(ctx, methodReturn, superReturn)) {
+        if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn.show(ctx),
                             supermethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
+                e.addErrorNote("A method's return type must be a subtype of the return type on the super method.");
             }
         }
     }

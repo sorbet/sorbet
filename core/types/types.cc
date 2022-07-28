@@ -730,7 +730,9 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
 }
 
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
-void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {}
+void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(definition.isTypeMember() || definition.isTypeArgument());
+}
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
     TypePtr res(TypePtr::Tag::OrType, new OrType(left, right));
