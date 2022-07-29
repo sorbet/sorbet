@@ -1092,6 +1092,7 @@ class IO < Object
     params(
         sep: String,
         limit: Integer,
+        chomp: T::Boolean,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
     .returns(T.self_type)
@@ -1100,10 +1101,11 @@ class IO < Object
     params(
         sep: String,
         limit: Integer,
+        chomp: T::Boolean,
     )
     .returns(T::Enumerator[String])
   end
-  def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
+  def each(sep=T.unsafe(nil), limit=T.unsafe(nil), chomp: false, &blk); end
 
   # Calls the given block once for each byte (0..255) in *ios*, passing the byte
   # as an argument. The stream must be opened for reading or an
@@ -2161,10 +2163,11 @@ class IO < Object
     params(
         sep: String,
         limit: Integer,
+        chomp: T::Boolean,
     )
     .returns(String)
   end
-  def readline(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
+  def readline(sep=T.unsafe(nil), limit=T.unsafe(nil), chomp: false); end
 
   # Reads all of the lines in *ios*, and returns them in an array. Lines are
   # separated by the optional *sep*. If *sep* is `nil`, the rest of the stream
@@ -3477,6 +3480,7 @@ class IO < Object
     params(
         sep: String,
         limit: Integer,
+        chomp: T::Boolean,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
     .returns(T.self_type)
@@ -3485,10 +3489,11 @@ class IO < Object
     params(
         sep: String,
         limit: Integer,
+        chomp: T::Boolean,
     )
     .returns(T::Enumerator[String])
   end
-  def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
+  def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), chomp: false, &blk); end
 
   # Returns `true` if the stream is positioned at its end, `false` otherwise;
   # see [Position](#class-IO-label-Position):
