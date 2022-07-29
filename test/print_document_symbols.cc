@@ -52,7 +52,7 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
     return make_pair(uri, move(fileContents));
 }
 
-int printDocumentSymbols(string_view filePath, int numFiles, char **files) {
+int printDocumentSymbols(string_view filePath, const vector<string> &files) {
     auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
     int nextId = 0;
@@ -156,8 +156,12 @@ int main(int argc, char *argv[]) {
 
     int numFiles = argc - 2;
     char **files = &argv[2];
+    std::vector<std::string> filenames;
+    for (int i = 0; i < numFiles; ++i) {
+        filenames.emplace_back(files[i]);
+    }
 
-    int rbupdates = std::count_if(files, &files[numFiles], [](const char *f) {
+    int rbupdates = absl::c_count_if(filenames, [](const auto &f) {
             return absl::EndsWith(f, "rbupdate");
         });
     if (rbupdates > 1) {
@@ -165,5 +169,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    return sorbet::realmain::lsp::printDocumentSymbols(argv[1], argc - 2, &argv[2]);
+    return sorbet::realmain::lsp::printDocumentSymbols(argv[1], filenames);
 }
