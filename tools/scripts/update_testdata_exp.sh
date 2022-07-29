@@ -117,6 +117,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
     fi
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
+      if ! [ -e "$candidate" ]; then
+        continue
+      fi
       if $needs_requires_ancestor; then
         args=("--enable-experimental-requires-ancestor")
       else
@@ -148,9 +151,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
             args+=("--extra-package-files-directory-prefix-slash" "${prefix}")
           done
         fi
-      fi
-      if ! [ -e "$candidate" ]; then
-        continue
       fi
       case "$pass" in
         document-symbols)
