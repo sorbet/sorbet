@@ -48,7 +48,7 @@ pair<string, vector<string>> findEditsToApply(string_view filePath) {
     return make_pair(uri, move(fileContents));
 }
 
-int printDocumentSymbols(string_view filePath) {
+int printDocumentSymbols(string_view filePath, int numFiles, char **files) {
     auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
     int nextId = 0;
@@ -145,10 +145,10 @@ int printDocumentSymbols(string_view filePath) {
 } // namespace sorbet::realmain::lsp
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cout << "Usage: print_document_symbols path/to/file.rb\n";
+    if (argc != 3) {
+        std::cout << "Usage: print_document_symbols path/to/file/for/symbols.rb path/to/file1.rb path/to/file2.rb ...\n";
         return 1;
     }
 
-    return sorbet::realmain::lsp::printDocumentSymbols(argv[1]);
+    return sorbet::realmain::lsp::printDocumentSymbols(argv[1], argc - 2, &argv[2]);
 }

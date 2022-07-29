@@ -155,7 +155,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
       case "$pass" in
         document-symbols)
           echo bazel-bin/test/print_document_symbols \
-            "${srcs[@]}" \
+            "${srcs[@]}" "${srcs[@]}" \
             \> "$candidate" \
             2\>/dev/null \
             >>"$COMMAND_FILE"
