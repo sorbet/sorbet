@@ -96,6 +96,64 @@ The complete list of constructs that affect Sorbet's flow-sensitive typing:
 > overridden! For example, Sorbet can behave unpredictably when overriding
 > `is_a?` in weird ways.
 
+## What about `respond_to?`?
+
+Sorbet cannot support flow sensitivity for `respond_to?` in the way that most
+people expect.
+
+For example:
+
+```ruby
+sig {params(x: Object).void}
+def flow_sensitivity(x)
+  # Does not work:
+  if x.respond_to?(:foo)
+    T.reveal_type(x) # => Object
+    x.foo # Method `foo` does not exist
+  end
+end
+```
+
+In this example, knowing that `x` responds to a method with the name `foo` does
+not tell Sorbet anything more specific about the type for `x`. Sorbet does not
+have any sort of duck-typed interfaces that let Sorbet update its knowledge of
+the type of `x` to "`Object` plus responds to `foo`", so it must keep the type
+of `x` at `Object`, which does not allow calling `foo`.
+
+Note that even if Sorbet did support such a type, it's likely that
+flow-sensitive type updates for `respond_to?` would _still_ not be supported,
+because knowing that the method `foo` exists says nothing about what parameters
+that method expects, what their types are, or what the return type of that
+function is.
+
+It's possible that someday that Sorbet could support a limited form of
+`x.respond_to?(:foo)` when one of the component types of `x` is a type which has
+a known method called `foo`. There is more information
+[in this issue](https://github.com/sorbet/sorbet/issues/3469), which details the
+implementation complexity and limitations involved in supporting such a feature.
+
+Code making the most of Sorbet is best written to avoid needing to use
+`respond_to?`. Some alternatives include:
+
+- Use [union types](union-types.md) alongside one of the flow-sensitivity
+  mechanisms that Sorbet already understands, like `is_a?` or `case`
+- Use [interface types](abstract.md) to require that a given interface method
+  must exist.
+
+If using `respond_to?` is absolutely necessary, use
+[`T.unsafe`](troubleshooting.md#escape-hatches) to call the method after
+checking for its existence:
+
+```ruby
+sig {params(x: Object).void}
+def flow_sensitivity(x)
+  if x.respond_to?(:foo)
+    # T.unsafe silences all errors from this call site
+    T.unsafe(x).foo
+  end
+end
+```
+
 ## Limitations of flow-sensitivity
 
 An alternative title for this section: "_Why does Sorbet think this is nil? I
