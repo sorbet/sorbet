@@ -71,7 +71,9 @@ end
 module T::Generic
   include T::Helpers
 
+  sig {params(variance: Symbol, blk: T.untyped).returns(T::Types::TypeMember)}
   def type_member(variance=:invariant, &blk); end
+  sig {params(variance: Symbol, blk: T.untyped).returns(T::Types::TypeTemplate)}
   def type_template(variance=:invariant, &blk); end
   def [](*types); end
 end

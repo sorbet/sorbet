@@ -216,7 +216,7 @@ bb0[rubyRegionId=0, firstDead=7]():
     <cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
     <statTemp>$3: T.class_of(Base)[T.class_of(Base)::Klass] = <self>: T.class_of(Base)[T.class_of(Base)::Klass].extend(<cfgAlias>$6: T.class_of(T::Generic))
-    <C Klass>$10: T.untyped = <self>: T.class_of(Base)[T.class_of(Base)::Klass].type_template()
+    <C Klass>$10: T::Types::TypeTemplate = <self>: T.class_of(Base)[T.class_of(Base)::Klass].type_template()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -254,7 +254,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Concrete), <block-pre-call-
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$12: Sorbet::Private::Static::Void, <selfRestore>$13: T.class_of(Concrete)):
-    <C Klass>$10: T.untyped = Solve<<block-pre-call-temp>$12, type_template>
+    <C Klass>$10: T::Types::TypeTemplate = Solve<<block-pre-call-temp>$12, type_template>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
