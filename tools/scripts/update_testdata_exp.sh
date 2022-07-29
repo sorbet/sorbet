@@ -97,11 +97,6 @@ basename=
 srcs=()
 
 for this_src in "${rb_src[@]}" DUMMY; do
-  # We will discover the exp files for relevant source files below.
-  if [[ "$this_src" =~ .*.exp ]]; then
-    continue
-  fi
-
   # Packager tests are folder based.
   if [[ "$this_src" =~ (.*/packager/([^/]+)/).* ]]; then
     # Basename for all .exp files in packager folder is "pass.$pass.exp"
