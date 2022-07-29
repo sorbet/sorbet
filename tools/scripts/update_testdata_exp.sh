@@ -117,8 +117,43 @@ for this_src in "${rb_src[@]}" DUMMY; do
     fi
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
-      if ! [ -e "$candidate" ]; then
-        continue
+      # Document symbols is weird, because it's (currently) the only exp-style
+      # test where you can have multiple files and multiple exp files (e.g. one
+      # per file, reflecting the document symbols for that particular file).
+      # Everything else either has a one-to-one mapping or has a many-to-one
+      # mapping (e.g. packager tests).
+      #
+      # If `candidate` doesn't exist, we might be in the case where we have files
+      # foo_test__1.rb, foo_test__2.rb, and so on, `basename`/`this_base` would
+      # therefore be `foo_test`, and `foo_test.document-symbols.exp` doesn't exist
+      # ...but `foo_test__1.rb.document-symbols.exp` does!
+      #
+      # So in the case that our first candidate doesn't exist, we need to check
+      # for the existence of other possible exp files specifically for
+      # document-symbols, and therefore we need an entirely separate list.
+      document_symbols_candidates=("$candidate")
+      if [ ! -e "$candidate" ]; then
+        if [ "$pass" != "document-symbols" ]; then
+          continue
+        fi
+
+        # Avoid re-checking the thing we already checked.
+        if [ "${#srcs[@]}" = 1 ]; then
+          continue
+        fi
+
+        document_symbols_candidates=()
+        for src in "${srcs[@]}"; do
+          src_candidate="$src.document-symbols.exp"
+          if [ -e "$src_candidate" ]; then
+            document_symbols_candidates=("${document_symbols_candidates[@]}" "$src_candidate")
+          fi
+        done
+
+        # If we still didn't find anything, we can move on.
+        if [ "${#document_symbols_candidates[@]}" = 0 ]; then
+          continue
+        fi
       fi
       if $needs_requires_ancestor; then
         args=("--enable-experimental-requires-ancestor")
@@ -154,11 +189,15 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
       case "$pass" in
         document-symbols)
-          echo bazel-bin/test/print_document_symbols \
-            "${srcs[@]}" "${srcs[@]}" \
-            \> "$candidate" \
-            2\>/dev/null \
-            >>"$COMMAND_FILE"
+          # See above for why this case is weird.
+          for exp in "${document_symbols_candidates[@]}"; do
+            wanted_file="${exp%.document-symbols.exp}"
+            echo bazel-bin/test/print_document_symbols \
+              "$wanted_file" "${srcs[@]}" \
+              \> "$exp" \
+              2\>/dev/null \
+              >>"$COMMAND_FILE"
+          done
           ;;
         autocorrects)
           echo tools/scripts/print_autocorrects_exp.sh \
