@@ -22,7 +22,7 @@ struct TestFile {
     vector<string> edits;
 };
 
-UnorderedMap<string, TestFile> loadFiles(const vector<string>& files) {
+UnorderedMap<string, TestFile> loadFiles(const vector<string> &files) {
     UnorderedMap<string, TestFile> data;
     for (const auto &f : files) {
         string_view filePath{f};
@@ -119,8 +119,8 @@ int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
     {
         // Initialize empty files.
         for (auto &filename : files) {
-            auto params =
-                make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(testdata[filename].uri, "ruby", fileId++, ""));
+            auto params = make_unique<DidOpenTextDocumentParams>(
+                make_unique<TextDocumentItem>(testdata[filename].uri, "ruby", fileId++, ""));
             auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
             // Discard responses.
             lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
@@ -139,7 +139,8 @@ int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
         }
     }
 
-    auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testdata[chosenFile].uri));
+    auto docSymbolParams =
+        make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testdata[chosenFile].uri));
     auto req =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymbolParams));
     // Make documentSymbol request.
@@ -165,7 +166,8 @@ int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        std::cout << "Usage: print_document_symbols path/to/file/for/symbols.rb path/to/file1.rb path/to/file2.rb ...\n";
+        std::cout
+            << "Usage: print_document_symbols path/to/file/for/symbols.rb path/to/file1.rb path/to/file2.rb ...\n";
         return 1;
     }
 
@@ -176,9 +178,7 @@ int main(int argc, char *argv[]) {
         filenames.emplace_back(files[i]);
     }
 
-    int rbupdates = absl::c_count_if(filenames, [](const auto &f) {
-            return absl::EndsWith(f, "rbupdate");
-        });
+    int rbupdates = absl::c_count_if(filenames, [](const auto &f) { return absl::EndsWith(f, "rbupdate"); });
     if (rbupdates > 1) {
         std::cout << "multiple updated files not supported at this time\n";
         return 1;
