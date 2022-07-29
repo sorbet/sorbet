@@ -266,7 +266,7 @@ bb3[rubyRegionId=0, firstDead=7](<block-pre-call-temp>$7: Sorbet::Private::Stati
     <cfgAlias>$22: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$24: T.class_of(T) = alias <C T>
     <statTemp>$19: T.class_of(Generic) = <self>: T.class_of(Generic).extend(<cfgAlias>$22: T.class_of(T::Generic))
-    <C TM>$26: T.untyped = <self>: T.class_of(Generic).type_member()
+    <C TM>$26: T::Types::TypeMember = <self>: T.class_of(Generic).type_member()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
