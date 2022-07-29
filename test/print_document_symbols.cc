@@ -17,47 +17,57 @@ constexpr string_view uriPrefix = "file:///"sv;
 
 // Given a path to a *.rb or *.rbupdate file, returns the set of edits to apply to Sorbet before requesting document
 // symbols along with the URI of the document.
-pair<string, vector<string>> findEditsToApply(string_view filePath) {
-    const auto idx = filePath.rfind('.');
-    if (idx == string_view::npos) {
-        Exception::raise("Invalid file path: {}", filePath);
-    }
-    string_view extension = filePath.substr(idx);
-    OSFileSystem fs;
-    vector<string> fileContents;
+struct TestFile {
     string uri;
-    fileContents.push_back(fs.readFile(filePath));
-    if (extension == ".rbupdate") {
-        // Find basename[.]version.rbupdate
-        const auto versionIdx = filePath.rfind('.', idx - 1);
-        if (versionIdx == string_view::npos) {
-            Exception::raise("rbupdate file is missing version number: {}", filePath);
+    vector<string> edits;
+};
+
+UnorderedMap<string, TestFile> loadFiles(const vector<string>& files) {
+    UnorderedMap<string, TestFile> data;
+    for (const auto &f : files) {
+        string_view filePath{f};
+        const auto idx = filePath.rfind('.');
+        if (idx == string_view::npos) {
+            Exception::raise("Invalid file path: {}", filePath);
         }
-        string_view baseName = filePath.substr(0, versionIdx);
-        uri = absl::StrCat(uriPrefix, baseName, ".rb");
-        string_view versionString = filePath.substr(versionIdx + 1, idx - versionIdx);
-        int version = stoi(string(versionString));
-        for (version = version - 1; version >= 0; version--) {
-            try {
-                fileContents.push_back(fs.readFile(fmt::format("{}.{}.rbupdate", baseName, version)));
-            } catch (FileNotFoundException e) {
-                // Ignore.
+        string_view extension = filePath.substr(idx);
+        OSFileSystem fs;
+        vector<string> fileContents;
+        string uri;
+        fileContents.push_back(fs.readFile(filePath));
+        if (extension == ".rbupdate") {
+            // Find basename[.]version.rbupdate
+            const auto versionIdx = filePath.rfind('.', idx - 1);
+            if (versionIdx == string_view::npos) {
+                Exception::raise("rbupdate file is missing version number: {}", filePath);
             }
+            string_view baseName = filePath.substr(0, versionIdx);
+            uri = absl::StrCat(uriPrefix, baseName, ".rb");
+            string_view versionString = filePath.substr(versionIdx + 1, idx - versionIdx);
+            int version = stoi(string(versionString));
+            for (version = version - 1; version >= 0; version--) {
+                try {
+                    fileContents.push_back(fs.readFile(fmt::format("{}.{}.rbupdate", baseName, version)));
+                } catch (FileNotFoundException e) {
+                    // Ignore.
+                }
+            }
+            fileContents.push_back(fs.readFile(fmt::format("{}.rb", baseName)));
+            reverse(fileContents.begin(), fileContents.end());
+        } else {
+            uri = absl::StrCat(uriPrefix, filePath);
         }
-        fileContents.push_back(fs.readFile(fmt::format("{}.rb", baseName)));
-        reverse(fileContents.begin(), fileContents.end());
-    } else {
-        uri = absl::StrCat(uriPrefix, filePath);
+        data[filePath] = TestFile{uri, move(fileContents)};
     }
-    return make_pair(uri, move(fileContents));
+    return data;
 }
 
-int printDocumentSymbols(string_view filePath, const vector<string> &files) {
+int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
     auto lspWrapper = SingleThreadedLSPWrapper::create();
     lspWrapper->enableAllExperimentalFeatures();
     int nextId = 0;
     int fileId = 1;
-    auto [fileUri, fileEdits] = findEditsToApply(filePath);
+    auto testdata = loadFiles(files);
 
     // Send 'initialize' message.
     {
@@ -107,24 +117,28 @@ int printDocumentSymbols(string_view filePath, const vector<string> &files) {
     }
 
     {
-        // Initialize empty file.
-        auto params =
-            make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", fileId++, ""));
-        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
-        // Discard responses.
-        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        // Initialize empty files.
+        for (auto &[filename, testfile] : testdata) {
+            auto params =
+                make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(testfile.uri, "ruby", fileId++, ""));
+            auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
+            // Discard responses.
+            lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        }
     }
 
-    for (auto &fileEdit : fileEdits) {
-        vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
-        edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
-        auto params = make_unique<DidChangeTextDocumentParams>(
-            make_unique<VersionedTextDocumentIdentifier>(fileUri, static_cast<double>(fileId++)), move(edits));
-        auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
-        lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+    for (auto &[filename, testfile] : testdata) {
+        for (auto &fileEdit : testfile.edits) {
+            vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
+            edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
+            auto params = make_unique<DidChangeTextDocumentParams>(
+                make_unique<VersionedTextDocumentIdentifier>(testfile.uri, static_cast<double>(fileId++)), move(edits));
+            auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidChange, move(params));
+            lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
+        }
     }
 
-    auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(fileUri));
+    auto docSymbolParams = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(testdata[chosenFile].uri));
     auto req =
         make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(docSymbolParams));
     // Make documentSymbol request.
