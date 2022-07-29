@@ -359,6 +359,23 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                         superMethod.show(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
+    } else {
+        const auto &methodBlkArg = method.data(ctx)->arguments.back();
+        const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
+
+        if (!checkSubtype(ctx, *constr, methodBlkArg.type, method, superMethodBlkArg.type, superMethod,
+                          core::Polarity::Negative)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
+                            methodBlkArg.argumentName(ctx), methodBlkArg.type.show(ctx),
+                            supermethodKind(ctx, superMethod), superMethod.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(),
+                               "The super method parameter `{}` was declared here with type `{}`",
+                               superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
+                e.addErrorNote(
+                    "A parameter's type must be a supertype of the same parameter's type on the super method.");
+            }
+        }
     }
 
     {
