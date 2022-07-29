@@ -27,6 +27,16 @@ class Parent
   sig {abstract.params(f: T.proc.returns(Elem)).void}
   def example_proc_returns_2(f); end
 
+  sig {abstract.params(f: T.proc.params(x: Elem).void).void}
+  def example_block_1(&f); end
+  sig {abstract.params(f: T.proc.params(x: Elem).void).void}
+  def example_block_2(&f); end
+
+  sig {abstract.params(f: T.proc.returns(Elem)).void}
+  def example_block_returns_1(&f); end
+  sig {abstract.params(f: T.proc.returns(Elem)).void}
+  def example_block_returns_2(&f); end
+
   sig {abstract.params(x: T.all(Elem, Kernel)).void}
   def example_params_all_1(x); end
   sig {abstract.params(x: T.all(Elem, Kernel)).void}
@@ -67,6 +77,16 @@ class Child < Parent
   def example_proc_returns_1(f); end
   sig {override.params(f: T.proc.returns(T.all(Elem, Kernel))).void}
   def example_proc_returns_2(f); end # error: Parameter `f` of type `T.proc.returns(T.all(Kernel, Child::Elem))` not compatible with type of abstract method `Parent#example_proc_returns_2`
+
+  sig {override.params(f: T.proc.params(x: T.nilable(Elem)).void).void}
+  def example_block_1(&f); end # error: Block parameter `f` of type `T.proc.params(arg0: T.nilable(Child::Elem)).void` not compatible with type of abstract method `Parent#example_block_1`
+  sig {override.params(f: T.proc.params(x: T.all(Elem, Kernel)).void).void}
+  def example_block_2(&f); end
+
+  sig {override.params(f: T.proc.returns(T.nilable(Elem))).void}
+  def example_block_returns_1(&f); end
+  sig {override.params(f: T.proc.returns(T.all(Elem, Kernel))).void}
+  def example_block_returns_2(&f); end # error: Block parameter `f` of type `T.proc.returns(T.all(Kernel, Child::Elem))` not compatible with type of abstract method `Parent#example_block_returns_2`
 
   sig {override.params(x: Elem).void}
   def example_params_all_1(x); end
