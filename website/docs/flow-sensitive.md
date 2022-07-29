@@ -120,10 +120,11 @@ have any sort of duck-typed interfaces that let Sorbet update its knowledge of
 the type of `x` to "`Object` plus responds to `foo`", so it must keep the type
 of `x` at `Object`, which does not allow calling `foo`.
 
-Note that even if Sorbet did support such a type, it's likely that `respond_to?`
-would _still_ not be supported, because knowing that the method `foo` exists
-says nothing about what parameters that method expects, what their types are, or
-what the return type of that function is.
+Note that even if Sorbet did support such a type, it's likely that
+flow-sensitive type updates for `respond_to?` would _still_ not be supported,
+because knowing that the method `foo` exists says nothing about what parameters
+that method expects, what their types are, or what the return type of that
+function is.
 
 It's possibly someday that Sorbet could support a limited form of
 `x.respond_to?(:foo)` when one of the component types of `x` is a type which has
