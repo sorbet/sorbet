@@ -116,8 +116,8 @@ end
 
 In this example, knowing that `x` responds to a method with the name `foo` does
 not tell Sorbet anything more specific about the type for `x`. Sorbet does not
-have any sort of duck-typed interfaces that let Sorbet update it's knowledge of
-the type of `x` to, "`Object` plus responds to `foo`" so it must keep the type
+have any sort of duck-typed interfaces that let Sorbet update its knowledge of
+the type of `x` to "`Object` plus responds to `foo`", so it must keep the type
 of `x` at `Object`, which does not allow calling `foo`.
 
 Note that even if Sorbet did support such a type, it's likely that `respond_to?`
