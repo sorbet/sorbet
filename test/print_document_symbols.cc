@@ -2,6 +2,10 @@
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
+
+#include "absl/algorithm/container.h"
+#include "absl/strings/match.h"
+
 #include <iostream>
 #include <memory>
 
@@ -147,6 +151,17 @@ int printDocumentSymbols(string_view filePath, int numFiles, char **files) {
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         std::cout << "Usage: print_document_symbols path/to/file/for/symbols.rb path/to/file1.rb path/to/file2.rb ...\n";
+        return 1;
+    }
+
+    int numFiles = argc - 2;
+    char **files = &argv[2];
+
+    int rbupdates = std::count_if(files, &files[numFiles], [](const char *f) {
+            return absl::EndsWith(f, "rbupdate");
+        });
+    if (rbupdates > 1) {
+        std::cout << "multiple updated files not supported at this time\n";
         return 1;
     }
 
