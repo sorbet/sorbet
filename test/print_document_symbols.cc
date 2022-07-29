@@ -163,7 +163,7 @@ int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
 } // namespace sorbet::realmain::lsp
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc < 3) {
         std::cout << "Usage: print_document_symbols path/to/file/for/symbols.rb path/to/file1.rb path/to/file2.rb ...\n";
         return 1;
     }
