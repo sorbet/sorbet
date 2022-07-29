@@ -144,6 +144,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
 
         document_symbols_candidates=()
         for src in "${srcs[@]}"; do
+          if [[ "$src" =~ .*.exp ]]; then
+            continue
+          fi
+
           src_candidate="$src.document-symbols.exp"
           if [ -e "$src_candidate" ]; then
             document_symbols_candidates=("${document_symbols_candidates[@]}" "$src_candidate")
@@ -192,6 +196,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           # See above for why this case is weird.
           for exp in "${document_symbols_candidates[@]}"; do
             wanted_file="${exp%.document-symbols.exp}"
+            # `srcs` contains all of the exp files, too, but including them should be harmless.
             echo bazel-bin/test/print_document_symbols \
               "$wanted_file" "${srcs[@]}" \
               \> "$exp" \
