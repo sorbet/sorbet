@@ -20,7 +20,7 @@ generics.
 
 The tests you'll need to write look materially different from other Ruby tests
 you may be accustomed to writing, because the tests need to deal with what code
-should or should not typecheck, rather than code what should or should not run
+should or should not typecheck, rather than what code should or should not run
 correctly.
 
 - Sometimes, something that shouldn't type check **does type check anyways**.
@@ -480,7 +480,7 @@ instances).
 At the call site, both `wants_at_least_child` and `wants_at_least_parent`
 satisfy the contract that `takes_func` is asking for. In particular, the
 `wants_at_least_parent` is fine being given **any** instance, as long as it's
-okay to call of `parnet.on_parent` (because of inheritance, both `Child` and
+okay to call `parent.on_parent` (because of inheritance, both `Child` and
 `GrandChild` have this method). Since `takes_func` guarantees that it will
 always provide a `Child` instance, the thing provided will always have an
 `on_parent` method defined.
