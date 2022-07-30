@@ -13,8 +13,8 @@
                     "character": 0
                 },
                 "end": {
-                    "line": 2,
-                    "character": 7
+                    "line": 8,
+                    "character": 3
                 }
             },
             "selectionRange": {
@@ -64,8 +64,8 @@
                             "character": 2
                         },
                         "end": {
-                            "line": 5,
-                            "character": 9
+                            "line": 7,
+                            "character": 5
                         }
                     },
                     "selectionRange": {
