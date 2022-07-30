@@ -118,16 +118,17 @@ int printDocumentSymbols(string_view chosenFile, const vector<string> &files) {
 
     {
         // Initialize empty files.
-        for (auto &[filename, testfile] : testdata) {
+        for (auto &filename : files) {
             auto params =
-                make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(testfile.uri, "ruby", fileId++, ""));
+                make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(testdata[filename].uri, "ruby", fileId++, ""));
             auto notif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(params));
             // Discard responses.
             lspWrapper->getLSPResponsesFor(make_unique<LSPMessage>(move(notif)));
         }
     }
 
-    for (auto &[filename, testfile] : testdata) {
+    for (auto &filename : files) {
+        auto &testfile = testdata[filename];
         for (auto &fileEdit : testfile.edits) {
             vector<unique_ptr<TextDocumentContentChangeEvent>> edits;
             edits.push_back(make_unique<TextDocumentContentChangeEvent>(fileEdit));
