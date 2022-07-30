@@ -28,10 +28,10 @@ for intersection types:
 As the names indicate, union types and intersection types can be understood by
 analogy to the related operations on sets. Given `Type1` and `Type2`:
 
-- `T.any(Type1, Type2)` is the union of the set of values that either have type
-  `Type1` or have type `Type2`.
-- `T.all(Type1, Type2)` is the intersection of the set of values that both have
-  type`Type1` and have type `Type2`.
+- `T.any(Type1, Type2)` is the set of values that either have type `Type1` or
+  have type `Type2`.
+- `T.all(Type1, Type2)` is the set of values that both have type `Type1` and
+  have type `Type2`.
 
 An example to make things more concrete:
 
