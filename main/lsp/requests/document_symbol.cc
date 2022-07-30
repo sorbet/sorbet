@@ -8,6 +8,7 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+namespace {
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
                                                          core::FileRef filter);
 
@@ -73,6 +74,7 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     result->children = move(children);
     return result;
 }
+} // namespace
 
 DocumentSymbolTask::DocumentSymbolTask(const LSPConfiguration &config, MessageId id,
                                        std::unique_ptr<DocumentSymbolParams> params)
