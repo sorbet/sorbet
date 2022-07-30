@@ -75,7 +75,7 @@ are not easy to use.</li>
 generics.</p>
 <p>The tests you’ll need to write look materially different from other Ruby tests
 you may be accustomed to writing, because the tests need to deal with what code
-should or should not typecheck, rather than code what should or should not run
+should or should not typecheck, rather than what code should or should not run
 correctly.</p>
 <ul>
 <li><p>Sometimes, something that shouldn’t type check <strong>does type check anyways</strong>.</p>
@@ -453,7 +453,7 @@ instances).</p>
 <p>At the call site, both <code>wants_at_least_child</code> and <code>wants_at_least_parent</code>
 satisfy the contract that <code>takes_func</code> is asking for. In particular, the
 <code>wants_at_least_parent</code> is fine being given <strong>any</strong> instance, as long as it’s
-okay to call of <code>parnet.on_parent</code> (because of inheritance, both <code>Child</code> and
+okay to call <code>parent.on_parent</code> (because of inheritance, both <code>Child</code> and
 <code>GrandChild</code> have this method). Since <code>takes_func</code> guarantees that it will
 always provide a <code>Child</code> instance, the thing provided will always have an
 <code>on_parent</code> method defined.</p>
