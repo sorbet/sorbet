@@ -53,6 +53,14 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
 }
 
 namespace {
+core::lsp::Query queryFrom(const Range &, core::Loc loc) {
+    return core::lsp::Query::createRangeQuery(loc);
+}
+
+core::lsp::Query queryFrom(const Position&, core::Loc loc) {
+    return core::lsp::Query::createLocQuery(loc);
+}
+
 template<typename T>
 LSPQueryResult queryByLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
                           const T &lspPos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
@@ -88,7 +96,7 @@ LSPQueryResult queryByLoc(const LSPConfiguration &config, LSPTypecheckerDelegate
         return LSPQueryResult{{}, move(error)};
     }
 
-    return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
+    return typechecker.query(queryFrom(lspPos, loc.value()), {fref});
 }
 }
 
