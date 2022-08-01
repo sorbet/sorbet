@@ -48,4 +48,9 @@ class TestClass
   a_or_b_or_mn = T.let(A.new, T.any(A, B, T.all(M, N)))
   puts a_or_b_or_mn
   #    ^ type: ABMN
+
+  def example(x)
+    #         ^ type: (nothing)
+  end
 end
+

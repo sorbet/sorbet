@@ -30,6 +30,9 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
             // localExp should never be null, but guard against the possibility.
             if (localExp && lspQuery.matchesLoc(ctx.locAt(localExp->loc))) {
                 tp.type = argType.type;
+                if (tp.type == nullptr) {
+                    tp.type = core::Types::untyped(ctx, methodDef.symbol);
+                }
                 tp.origins.emplace_back(ctx.locAt(localExp->loc));
                 core::lsp::QueryResponse::pushQueryResponse(
                     ctx,
