@@ -1,5 +1,6 @@
 #include "main/lsp/requests/inlay_hint.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
@@ -26,6 +27,44 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerInterface &t
         return response;
     }
 
+    const core::GlobalState &gs = typechecker.state();
+    auto &uri = params->textDocument->uri;
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->range,
+                                  LSPMethod::TextDocumentInlayHint);
+    if (result.error) {
+        // An error happened while setting up the query.
+        response->error = move(result.error);
+        return response;
+    }
+
+    // An explicit null indicates that we don't support this request (or that nothing was at the location).
+    // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
+    response->result = variant<JSONNullObject, vector<unique_ptr<InlayHint>>>(JSONNullObject());
+    auto fref = config.uri2FileRef(gs, uri);
+    if (!fref.exists()) {
+        return response;
+    }
+
+    vector<unique_ptr<InlayHint>> hints;
+    auto &queryResponses = result.responses;
+    for (auto &queryResponse : queryResponses) {
+        // TODO(froydnj): figure out how to handle everything else.
+        if (auto *ident = queryResponse->isIdent()) {
+            auto position = Position::fromLoc(gs, ident->termLoc.copyWithZeroLength());
+            if (position == nullptr) {
+                continue;
+            }
+
+            auto hint = make_unique<InlayHint>(move(position), ident->retType.type.show(gs));
+            // TODO(froydnj): is it worth trying to propagate enough information through this
+            // to label things as `InlayHintKind::Parameter`?
+            hint->kind = InlayHintKind::Type;
+            // TODO(froydnj): What do we set tooltip to?  paddingLeft?  paddingRight?
+            hints.emplace_back(move(hint));
+        }
+    }
+
+    response->result = move(hints);
     return response;
 }
 }
