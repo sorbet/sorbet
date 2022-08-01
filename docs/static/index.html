@@ -107,7 +107,12 @@ in an ignored file. We recommend pushing the entire project to out of <code>igno
 <li><p>At <code># typed: false</code>, only errors related to syntax, constant resolution and
 correctness of <code>sig</code>s are reported. Fixing these errors is the baseline for
 adopting Sorbet in a new codebase, and provides value even before adding type
-annotations. <code># typed: false</code> is the <strong>default</strong> for files without sigils.</p></li>
+annotations. <code># typed: false</code> is the <strong>default</strong> for files without sigils.</p>
+<p>(<strong>Note</strong>: Sorbet will still parse and store <a href="/docs/sigs">method signatures</a> even
+in <code># typed: false</code> files, for use whenever it sees a call to that method in
+<code># typed: true</code> or higher files. <code># typed: false</code> only prevents that method’s
+body from being typechecked, which means that signatures in <code># typed: false</code>
+files are simply assumed to hold.)</p></li>
 <li><p>At <code># typed: true</code>, things that would normally be called “type errors” are
 reported. This includes calling a non-existent method, calling a method with
 mismatched argument counts, using variables inconsistently with their types,
