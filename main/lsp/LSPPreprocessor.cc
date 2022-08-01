@@ -247,6 +247,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
             case LSPMethod::TextDocumentFormatting:
                 return make_unique<DocumentFormattingTask>(*config, id,
                                                            move(get<unique_ptr<DocumentFormattingParams>>(rawParams)));
+            case LSPMethod::TextDocumentInlayHint:
+                return make_unique<InlayHintTask>(*config, id,
+                                                  move(get<unique_ptr<InlayHintParams>>(rawParams)));
             case LSPMethod::TextDocumentSignatureHelp:
                 return make_unique<SignatureHelpTask>(*config, id,
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
