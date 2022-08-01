@@ -262,6 +262,7 @@ struct Options {
     bool lspSignatureHelpEnabled = false;
     bool lspStaleStateEnabled = false;
     bool lspExperimentalFastPathEnabled = false;
+    bool lspInlayHintsEnabled = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;
