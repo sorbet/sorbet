@@ -4,7 +4,7 @@
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::realmain::lsp {
-
+class Range;
 class LSPQuery {
 public:
     static std::vector<std::unique_ptr<core::lsp::QueryResponse>>
@@ -13,6 +13,9 @@ public:
 
     static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
                                 std::string_view uri, const Position &pos, LSPMethod forMethod,
+                                bool errorIfFileIsUntyped = true);
+    static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+                                std::string_view uri, const Range &pos, LSPMethod forMethod,
                                 bool errorIfFileIsUntyped = true);
     static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
                                           core::SymbolRef symbol, std::vector<core::FileRef> frefs);

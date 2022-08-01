@@ -52,8 +52,10 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
     return responses;
 }
 
-LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, string_view uri,
-                               const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
+namespace {
+template<typename T>
+LSPQueryResult queryByLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, string_view uri,
+                          const T &lspPos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
@@ -78,7 +80,7 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
         return LSPQueryResult{{}, nullptr};
     }
 
-    auto loc = pos.toLoc(gs, fref);
+    auto loc = lspPos.toLoc(gs, fref);
     if (!loc.has_value()) {
         if (typechecker.isStale()) {
             // File location was not valid, but it's _probably_ not the client's fault--instead it's
@@ -88,12 +90,25 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
         } else {
             auto error = make_unique<ResponseError>(
                 (int)LSPErrorCodes::InvalidParams,
-                fmt::format("Position {} in {} does not correspond to a valid location", pos.showRaw(), uri));
+                fmt::format("Position {} in {} does not correspond to a valid location", lspPos.showRaw(), uri));
             return LSPQueryResult{{}, move(error)};
         }
     }
 
     return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
+}
+}
+
+LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+                               std::string_view uri, const Position &pos, LSPMethod forMethod,
+                               bool errorIfFileIsUntyped) {
+    return queryByLoc(config, typechecker, uri, pos, forMethod, errorIfFileIsUntyped);
+}
+
+LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+                               std::string_view uri, const Range &range, LSPMethod forMethod,
+                               bool errorIfFileIsUntyped) {
+    return queryByLoc(config, typechecker, uri, range, forMethod, errorIfFileIsUntyped);
 }
 
 LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,

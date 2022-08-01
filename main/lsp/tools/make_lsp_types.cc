@@ -113,6 +113,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
                        "std::optional<core::Loc> toLoc(const core::GlobalState &gs, core::FileRef file) const;",
                        "int cmp(const Range &b) const;",
+                       "std::string showRaw() const;",
                        "std::unique_ptr<Range> copy() const;",
                        "bool contains(const Range &b) const;",
                        "bool contains(const Position &b) const;",
