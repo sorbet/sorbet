@@ -928,6 +928,15 @@ public:
         auto methodData = methodDef.symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);
 
+        if (methodData->locs().empty()) {
+            Exception::raise("method has no locs! ctx.file=\"{}\" method=\"{}\"", ctx.file.data(ctx).path(),
+                             methodDef.symbol.show(ctx));
+        }
+        if (!methodData->loc().file().exists()) {
+            Exception::raise("file for method does not exist! ctx.file=\"{}\" method=\"{}\"", ctx.file.data(ctx).path(),
+                             methodDef.symbol.show(ctx));
+        }
+
         // Only perform this check if this isn't a module from the stdlib, and
         // if there are type members in the owning context.
         // NOTE: We're skipping variance checks on the stdlib right now, as
