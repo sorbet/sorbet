@@ -3845,7 +3845,10 @@ public:
             }
 
             // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
-            // behavior of the runtime.
+            // behavior of the runtime, but only in compiled files.
+            if (ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
+                return;
+            }
             ast::Send::ARGS_store args;
 
             auto argIdx = -1;

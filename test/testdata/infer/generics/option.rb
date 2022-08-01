@@ -1,4 +1,4 @@
-# typed: strict
+# typed: strong
 
 class Module
   include T::Sig
