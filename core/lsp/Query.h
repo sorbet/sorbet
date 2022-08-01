@@ -16,6 +16,8 @@ public:
         NONE,
         // Looking for the item at a specific location.
         LOC,
+        // Looking for all items in a given range.
+        RANGE,
         // Looking for all references to the given symbol.
         SYMBOL,
         // Looking for all references to the given variable.
@@ -25,6 +27,7 @@ public:
     };
 
     Kind kind;
+    // If Kind == LOC or Kind == RANGE, the location we're matching against.
     core::Loc loc;
     // If Kind == SYMBOL, this is the symbol that the query is looking for.
     // If Kind == SUGGEST_SIG, this is the method to suggest a sig for.
@@ -34,6 +37,7 @@ public:
 
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
+    static Query createRangeQuery(core::Loc loc);
     static Query createSymbolQuery(core::SymbolRef symbol);
     static Query createVarQuery(core::SymbolRef owner, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);

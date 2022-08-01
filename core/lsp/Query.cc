@@ -16,6 +16,11 @@ Query Query::createLocQuery(core::Loc loc) {
     return Query(Query::Kind::LOC, loc, core::Symbols::noSymbol(), core::LocalVariable());
 }
 
+Query Query::createRangeQuery(core::Loc loc) {
+    ENFORCE(loc.exists());
+    return Query(Query::Kind::RANGE, loc, core::Symbols::noSymbol(), core::LocalVariable());
+}
+
 Query Query::createSymbolQuery(core::SymbolRef symbol) {
     ENFORCE(symbol.exists());
     return Query(Query::Kind::SYMBOL, core::Loc::none(), symbol, core::LocalVariable());
@@ -37,10 +42,23 @@ bool Query::matchesSymbol(const core::SymbolRef &symbol) const {
 }
 
 bool Query::matchesLoc(const core::Loc &loc) const {
+    if (this->kind != Query::Kind::LOC && this->kind != Query::Kind::RANGE) {
+        return false;
+    }
+
     // N.B.: Sorbet inserts zero-length Locs for items that are implicitly inserted during parsing.
     // Example: `foo` may be translated into `self.foo`, where `self.` has a 0-length loc.
     // We disregard these in LSP matches, as they don't correspond to source text that the user is pointing at.
-    return this->kind == Query::Kind::LOC && loc.exists() && !loc.empty() && loc.contains(this->loc);
+    if (!loc.exists() || loc.empty()) {
+        return false;
+    }
+
+    if (this->kind == Query::Kind::LOC) {
+        return loc.contains(this->loc);
+    }
+
+    ENFORCE(this->kind == Query::Kind::RANGE);
+    return this->loc.contains(loc);
 }
 
 bool Query::matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const {
