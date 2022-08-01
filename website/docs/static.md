@@ -54,6 +54,12 @@ Each strictness level reports all errors at lower levels, plus new errors:
   adopting Sorbet in a new codebase, and provides value even before adding type
   annotations. `# typed: false` is the **default** for files without sigils.
 
+  (**Note**: Sorbet will still parse and store [method signatures](sigs.md) even
+  in `# typed: false` files, for use whenever it sees a call to that method in
+  `# typed: true` or higher files. `# typed: false` only prevents that method's
+  body from being typechecked, which means that signatures in `# typed: false`
+  files are simply assumed to hold.)
+
 - At `# typed: true`, things that would normally be called "type errors" are
   reported. This includes calling a non-existent method, calling a method with
   mismatched argument counts, using variables inconsistently with their types,
