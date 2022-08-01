@@ -90,12 +90,12 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 // shown when the symbol is selected.  Sorbet's loc for a symbol covers the latter.
 // We do store the former, but that loc lives in the AST, not in the symbol table,
 // so we build a separate temporary mapping with this tree walker.
-class DefLocSaver {
+class DefinitionLocSaver {
 public:
     core::FileRef fref;
     UnorderedMap<core::SymbolRef, core::Loc> &mapping;
 
-    DefLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, core::Loc> &mapping) : fref(fref), mapping(mapping) {}
+    DefinitionLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, core::Loc> &mapping) : fref(fref), mapping(mapping) {}
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
@@ -203,7 +203,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
         candidates.end());
 
     UnorderedMap<core::SymbolRef, core::Loc> defMapping;
-    DefLocSaver saver{fref, defMapping};
+    DefinitionLocSaver saver{fref, defMapping};
     core::Context ctx{gs, core::Symbols::root(), fref};
     auto resolved = typechecker.getResolved({fref});
     ast::TreeWalk::apply(ctx, saver, resolved[0].tree);
