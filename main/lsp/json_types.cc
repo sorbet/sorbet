@@ -151,6 +151,10 @@ bool Range::contains(const Position &p) const {
     return endCmp >= 0;
 }
 
+string Range::showRaw() const {
+    return fmt::format("Range{.start={}, .end={}}", this->start->showRaw(), this->end->showRaw());
+}
+
 int Location::cmp(const Location &b) const {
     const int uriCmp = uri.compare(b.uri);
     if (uriCmp != 0) {
