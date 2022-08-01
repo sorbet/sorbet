@@ -99,6 +99,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "std::unique_ptr<Position> copy() const;",
                        "std::string showRaw() const;",
                        "std::optional<core::Loc> toLoc(const core::GlobalState &gs, core::FileRef fref) const;",
+                       "static std::unique_ptr<Position> fromLoc(const core::GlobalState &gs, core::Loc loc);",
                    });
 
     auto Range =
