@@ -938,11 +938,18 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
-            [&](const ast::ExpressionPtr &n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
+            [&](const ast::ExpressionPtr &n) {
+                if (n == nullptr) {
+                    Exception::raise("Tried to convert `nullptr` to CFG in ctx.file=\"{}\"",
+                                     cctx.ctx.file.data(cctx.ctx).path());
+                } else {
+                    Exception::raise("Unimplemented AST Node: {}", what.nodeName());
+                }
+            });
 
         // For, Rescue,
         // Symbol, Array,
-        ENFORCE(ret != nullptr, "CFB builder ret unset");
+        ENFORCE(ret != nullptr, "CFG builder ret unset");
         return ret;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
