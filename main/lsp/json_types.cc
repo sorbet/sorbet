@@ -201,6 +201,17 @@ optional<core::Loc> Position::toLoc(const core::GlobalState &gs, const core::Fil
     }
 }
 
+std::unique_ptr<Position> Position::fromLoc(const core::GlobalState &gs, core::Loc loc) {
+    if (!loc.exists()) {
+        return nullptr;
+    }
+
+    ENFORCE(loc.empty());
+    auto pair = loc.position(gs);
+    // All LSP numbers are zero-based, ours are 1-based.
+    return make_unique<Position>(pair.first.line - 1, pair.first.column - 1);
+}
+
 unique_ptr<DiagnosticRelatedInformation> DiagnosticRelatedInformation::copy() const {
     return make_unique<DiagnosticRelatedInformation>(location->copy(), message);
 }
