@@ -63,7 +63,7 @@ void explainError(core::GlobalState &gs, core::FileRef file, core::ErrorBuilder 
                 if (lCurlyPos != string::npos && rCurlyPos != string::npos) {
                     replacement[lCurlyPos] = '(';
                     replacement[rCurlyPos] = ')';
-                    e.replaceWith("Replace the curly braces with parens", loc, replacement);
+                    e.replaceWith("Replace the curly braces with parens", loc, "{}", replacement);
                 }
             }
             break;
