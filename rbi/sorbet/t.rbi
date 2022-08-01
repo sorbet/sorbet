@@ -16,7 +16,7 @@ end
 module T
   extend T::Sig
 
-  # Statically, converst the argument to type `T.untyped`.
+  # Statically, converts the argument to type `T.untyped`.
   # This is mostly useful to silence type errors.
   #
   # At runtime, returns the provided argument completely unchanged.
