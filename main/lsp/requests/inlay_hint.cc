@@ -55,11 +55,13 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerInterface &t
                 continue;
             }
 
-            auto hint = make_unique<InlayHint>(move(position), ident->retType.type.show(gs));
+            auto label = ident->retType.type.show(gs);
+            auto hint = make_unique<InlayHint>(move(position), label);
             // TODO(froydnj): is it worth trying to propagate enough information through this
             // to label things as `InlayHintKind::Parameter`?
             hint->kind = InlayHintKind::Type;
             // TODO(froydnj): What do we set tooltip to?  paddingLeft?  paddingRight?
+            hint->tooltip = label;
             hints.emplace_back(move(hint));
         }
     }
