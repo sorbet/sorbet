@@ -631,6 +631,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("documentSymbolProvider", makeOptional(JSONBool)),
             makeField("workspaceSymbolProvider", makeOptional(JSONBool)),
             makeField("codeActionProvider", makeOptional(makeVariant({JSONBool, CodeActionOptions}))),
+            makeField("inlayHintProvider", makeOptional(JSONBool)),
             makeField("codeLensProvider", makeOptional(CodeLensOptions)),
             makeField("documentFormattingProvider", makeOptional(JSONBool)),
             makeField("documentRangeFormattingProvider", makeOptional(JSONBool)),

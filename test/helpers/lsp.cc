@@ -131,6 +131,7 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities(bo
     capabilities->typeDefinition = makeDynamicRegistrationOption(true);
     capabilities->implementation = makeDynamicRegistrationOption(true);
     capabilities->colorProvider = makeDynamicRegistrationOption(true);
+    capabilities->inlayHints = makeDynamicRegistrationOption(true);
 
     if (supportsCodeActionResolve) {
         auto codeActionCaps = make_unique<CodeActionCapabilities>();
