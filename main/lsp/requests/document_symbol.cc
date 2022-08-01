@@ -95,7 +95,8 @@ public:
     core::FileRef fref;
     UnorderedMap<core::SymbolRef, core::Loc> &mapping;
 
-    DefinitionLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, core::Loc> &mapping) : fref(fref), mapping(mapping) {}
+    DefinitionLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, core::Loc> &mapping)
+        : fref(fref), mapping(mapping) {}
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
