@@ -57,7 +57,7 @@ Each strictness level reports all errors at lower levels, plus new errors:
   (**Note**: Sorbet will still parse and store [method signatures](sigs.md) even
   in `# typed: false` files, for use whenever it sees a call to that method in
   `# typed: true` or higher files. `# typed: false` only prevents that method's
-  body from being typechecked, which means that a signatures in `# typed: false`
+  body from being typechecked, which means that signatures in `# typed: false`
   files are simply assumed to hold.)
 
 - At `# typed: true`, things that would normally be called "type errors" are
