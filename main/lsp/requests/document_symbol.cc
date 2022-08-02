@@ -140,6 +140,11 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     vector<unique_ptr<DocumentSymbol>> result;
     string_view uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
+    if (!fref.exists()) {
+        response->result = std::move(result);
+        return response;
+    }
+
     vector<pair<core::SymbolRef::Kind, uint32_t>> symbolTypes = {
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
