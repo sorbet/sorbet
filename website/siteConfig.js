@@ -47,6 +47,11 @@ const users = [
     infoLink: 'https://gusto.com/',
   },
   {
+    caption: 'HealthSherpa',
+    image: 'img/healthsherpa-logo.png',
+    infoLink: 'https://www.healthsherpa.com/',
+  },
+  {
     caption: 'Hummingbird',
     image: 'img/hummingbird-logo.png',
     infoLink: 'https://hummingbird.co/',
