@@ -764,7 +764,7 @@ void readOptions(Options &opts,
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspDocumentSymbolEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-document-symbol"].as<bool>();
+            opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-document-symbol"].as<bool>();
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
