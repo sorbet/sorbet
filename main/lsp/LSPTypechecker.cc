@@ -317,31 +317,37 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
         }
 
-        int i = -1;
-        // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe `subset`.
-        for (auto &oldFile : gs->getFiles()) {
-            i++;
-            if (oldFile == nullptr) {
-                continue;
-            }
+        if (!changedSymbolNameHashes.empty()) {
+            // ^ optimization--skip the loop over every file in the project (`gs->getFiles()`) if
+            // the set of changed symbols is empty (e.g., running a completion request inside a
+            // method body)
+            int i = -1;
+            // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe
+            // `subset`.
+            for (auto &oldFile : gs->getFiles()) {
+                i++;
+                if (oldFile == nullptr) {
+                    continue;
+                }
 
-            if (this->config->opts.stripePackages && oldFile->isPackage()) {
-                continue; // See note above about --stripe-packages.
-            }
+                if (this->config->opts.stripePackages && oldFile->isPackage()) {
+                    continue; // See note above about --stripe-packages.
+                }
 
-            ENFORCE(oldFile->getFileHash() != nullptr);
-            const auto &oldHash = *oldFile->getFileHash();
-            vector<core::ShortNameHash> intersection;
-            absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes,
-                                     std::back_inserter(intersection));
-            if (intersection.empty()) {
-                continue;
-            }
+                ENFORCE(oldFile->getFileHash() != nullptr);
+                const auto &oldHash = *oldFile->getFileHash();
+                vector<core::ShortNameHash> intersection;
+                absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes,
+                                         std::back_inserter(intersection));
+                if (intersection.empty()) {
+                    continue;
+                }
 
-            auto ref = core::FileRef(i);
-            config->logger->debug("Added {} to update set as used a changed symbol",
-                                  !ref.exists() ? "" : ref.data(*gs).path());
-            subset.emplace_back(ref);
+                auto ref = core::FileRef(i);
+                config->logger->debug("Added {} to update set as used a changed symbol",
+                                      !ref.exists() ? "" : ref.data(*gs).path());
+                subset.emplace_back(ref);
+            }
         }
         // Remove any duplicate files.
         fast_sort(subset);
