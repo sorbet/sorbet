@@ -255,20 +255,16 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "sorbet.configure",
-          "when": "editorLangId == ruby"
+          "command": "sorbet.configure"
         },
         {
-          "command": "sorbet.disable",
-          "when": "editorLangId == ruby"
+          "command": "sorbet.disable"
         },
         {
-          "command": "sorbet.enable",
-          "when": "editorLangId == ruby"
+          "command": "sorbet.enable"
         },
         {
-          "command": "sorbet.restart",
-          "when": "editorLangId == ruby"
+          "command": "sorbet.restart"
         },
         {
           "command": "sorbet.showOutput",
