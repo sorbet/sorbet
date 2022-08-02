@@ -69,6 +69,11 @@ vector<unique_ptr<LSPMessage>> LSPOutputToVector::getOutput() {
     return messages;
 }
 
+uint32_t LSPOutputToVector::size() {
+    absl::MutexLock lock(&mtx);
+    return output.size();
+}
+
 unique_ptr<LSPMessage> LSPOutputToVector::read(int timeoutMs) {
     absl::MutexLock lock(&mtx);
     mtx.AwaitWithTimeout(absl::Condition(

@@ -398,16 +398,20 @@ TEST_CASE("Global error limit") {
     auto epoch = 0;
     auto file1 = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
     auto file2 = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
+    auto file3 = make_shared<core::File>("baz.rb", "baz", core::File::Type::Normal, epoch);
     core::FileRef fref1;
     core::FileRef fref2;
+    core::FileRef fref3;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
         fref1 = gs->enterFile(file1);
         fref2 = gs->enterFile(file2);
+        fref3 = gs->enterFile(file3);
     }
 
     vector<unique_ptr<core::Error>> errorsFile1;
     vector<unique_ptr<core::Error>> errorsFile2;
+    vector<unique_ptr<core::Error>> errorsFile3;
 
     SUBCASE("Reports all errors when error count does not exceed limit") {
         generateErrors(fref1, errorsFile1, 2);
@@ -431,6 +435,35 @@ TEST_CASE("Global error limit") {
 
         SUBCASE("Reports partial error list for a single file that exceeds the limit") {
             // Only tests the common part of the test above.
+        }
+
+        SUBCASE("Does not report any error list for a file that exceeds the limit if it has not previously reported "
+                "errors") {
+            epoch++;
+            const bool isIncremental = true;
+            generateErrors(fref3, errorsFile3, 3);
+            er.beginEpoch(epoch, isIncremental, {});
+            er.pushDiagnostics(epoch, fref3, errorsFile3, *gs);
+            er.endEpoch(epoch);
+            CHECK_EQ(0, outputVector->size());
+            // clear the vector
+            outputVector->getOutput();
+
+            SUBCASE("Does report error lists for the file if the global error count decreases") {
+                epoch++;
+                const bool isIncremental = true;
+                errorsFile2.clear();
+                errorsFile3.clear();
+                generateErrors(fref3, errorsFile3, 3);
+                er.beginEpoch(epoch, isIncremental, {});
+                // Reduce error count by 2
+                er.pushDiagnostics(epoch, fref2, errorsFile2, *gs);
+                // Report 2 of the 3 errors in file 3.
+                er.pushDiagnostics(epoch, fref3, errorsFile3, *gs);
+                er.endEpoch(epoch);
+                CHECK_EQ(2, outputVector->size());
+                CHECK_EQ(2, errorsReported(*outputVector));
+            }
         }
 
         SUBCASE("Reports new errors in subsequent epochs if they bring global error count down") {
