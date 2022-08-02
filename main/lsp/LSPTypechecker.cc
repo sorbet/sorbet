@@ -331,10 +331,25 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
             ENFORCE(oldFile->getFileHash() != nullptr);
             const auto &oldHash = *oldFile->getFileHash();
-            vector<core::ShortNameHash> intersection;
-            absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes,
-                                     std::back_inserter(intersection));
-            if (intersection.empty()) {
+            // Like std::set_intersection, but we don't actually care about the contents of
+            // the intersection, we just care that it's non-empty.
+            bool hasIntersection = false;
+            auto changedIter = changedSymbolNameHashes.begin();
+            auto changedEnd = changedSymbolNameHashes.end();
+            auto oldIter = oldHash.usages.nameHashes.begin();
+            auto oldEnd = oldHash.usages.nameHashes.end();
+            while (changedIter != changedEnd && oldIter != oldEnd) {
+                if (*changedIter < *oldIter) {
+                    ++changedIter;
+                } else if (*oldIter < *changedIter) {
+                    ++oldIter;
+                } else {
+                    ENFORCE(*changedIter == *oldIter);
+                    hasIntersection = true;
+                    break;
+                }
+            }
+            if (!hasIntersection) {
                 continue;
             }
 
