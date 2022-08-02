@@ -323,11 +323,14 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // the set of changed symbols is empty (e.g., running a completion request inside a
             // method body)
             int i = -1;
-            // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe
-            // `subset`.
             for (auto &oldFile : gs->getFiles()) {
                 i++;
                 if (oldFile == nullptr) {
+                    continue;
+                }
+
+                if (oldFile->epoch == updates.epoch) {
+                    // This is one of the edited files, which means it is already in the subset.
                     continue;
                 }
 
@@ -348,10 +351,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 subset.emplace_back(ref);
             }
         }
-        // Remove any duplicate files.
         fast_sort(subset);
-        subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
-
+        DEBUG_ONLY(auto initialSize = subset.size();
+                   // Remove any duplicate files.
+                   subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
+                   ENFORCE(subset.size() == initialSize, "subset is not free of duplicates by construction"););
         config->logger->debug("Added {} files that were not part of the edit to the update set",
                               subset.size() - subsetSizeBefore);
     }
