@@ -1098,6 +1098,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 auto rhs = node2TreeImpl(dctx, std::move(and_->right));
                 if (isa_reference(lhs)) {
                     auto cond = MK::cpRef(lhs);
+                    // TODO(jez) How to handle this case?
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
                 } else {
@@ -1125,8 +1126,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     } else {
                         thenp = std::move(rhs);
                     }
+                    auto lhsLoc = lhs.loc();
                     auto temp = MK::Assign(loc, andAndTemp, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(loc, andAndTemp), std::move(thenp), MK::Local(loc, andAndTemp));
+                    auto iff =
+                        MK::If(loc, MK::Local(lhsLoc, andAndTemp), std::move(thenp), MK::Local(lhsLoc, andAndTemp));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }

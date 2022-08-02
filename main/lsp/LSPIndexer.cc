@@ -175,6 +175,10 @@ bool LSPIndexer::canTakeFastPathInternal(
         }
     }
 
+    {
+        // TODO(jez)
+    }
+
     logger.debug("Taking fast path");
     return true;
 }

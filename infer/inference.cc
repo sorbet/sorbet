@@ -210,7 +210,20 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                     } else if (auto e =
                                    ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
-                        e.setHeader("This code is unreachable");
+                        auto *ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
+
+                        bool isAndAnd = false;
+                        if (ident != nullptr) {
+                            auto name = ident->what.data(*cfg)._name;
+                            if (name.kind() == core::NameKind::UNIQUE &&
+                                name.dataUnique(ctx)->original == core::Names::andAnd()) {
+                                e.setHeader("Left side of `{}` condition was always `{}`", "&&", "truthy");
+                                isAndAnd = true;
+                            }
+                        }
+                        if (!isAndAnd) {
+                            e.setHeader("This code is unreachable");
+                        }
 
                         for (const auto &prevBasicBlock : bb->backEdges) {
                             const auto &prevEnv = outEnvironments[prevBasicBlock->id];
@@ -231,6 +244,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             }
 
                             auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
+                            ENFORCE(!isAndAnd || string_view(alwaysWhat) == "truthy");
                             auto bexitLoc = ctx.locAt(prevBasicBlock->bexit.loc);
                             e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
                                            cond.type.show(ctx));
