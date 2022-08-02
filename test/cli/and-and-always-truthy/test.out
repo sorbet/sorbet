@@ -8,6 +8,9 @@ test/cli/and-and-always-truthy/test.rb:11: Left side of `&&` condition was alway
     test/cli/and-and-always-truthy/test.rb:11:
     11 |  if always_true && T.unsafe(true)
              ^^^^^^^^^^^
+  Note:
+    If this is intentional, either delete the always-truthy code or 
+    restructure it to use `T.absurd` so Sorbet can check exhaustiveness.
 
 test/cli/and-and-always-truthy/test.rb:17: This code is unreachable https://srb.help/7006
     17 |  if always_false && T.unsafe(true)

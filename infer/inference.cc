@@ -212,16 +212,16 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                    ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         auto *ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
 
-                        bool isAndAnd = false;
+                        bool andAndAlwaysTruthy = false;
                         if (ident != nullptr) {
                             auto name = ident->what.data(*cfg)._name;
                             if (name.kind() == core::NameKind::UNIQUE &&
                                 name.dataUnique(ctx)->original == core::Names::andAnd()) {
                                 e.setHeader("Left side of `{}` condition was always `{}`", "&&", "truthy");
-                                isAndAnd = true;
+                                andAndAlwaysTruthy = true;
                             }
                         }
-                        if (!isAndAnd) {
+                        if (!andAndAlwaysTruthy) {
                             e.setHeader("This code is unreachable");
                         }
 
@@ -244,7 +244,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             }
 
                             auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
-                            ENFORCE(!isAndAnd || string_view(alwaysWhat) == "truthy");
+                            ENFORCE(!andAndAlwaysTruthy || string_view(alwaysWhat) == "truthy");
                             auto bexitLoc = ctx.locAt(prevBasicBlock->bexit.loc);
                             e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
                                            cond.type.show(ctx));
@@ -256,6 +256,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                             auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
                             e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
+                        }
+
+                        if (andAndAlwaysTruthy) {
+                            e.addErrorNote("If this is intentional, either delete the always-truthy code or \n"
+                                           "    restructure it to use `{}` so Sorbet can check exhaustiveness.",
+                                           "T.absurd");
                         }
                     }
                 }
