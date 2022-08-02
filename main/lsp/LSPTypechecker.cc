@@ -317,6 +317,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
         }
 
+        auto subsetSizeBefore = subset.size();
         if (!changedSymbolNameHashes.empty()) {
             // ^ optimization--skip the loop over every file in the project (`gs->getFiles()`) if
             // the set of changed symbols is empty (e.g., running a completion request inside a
@@ -344,14 +345,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 }
 
                 auto ref = core::FileRef(i);
-                config->logger->debug("Added {} to update set as used a changed symbol",
-                                      !ref.exists() ? "" : ref.data(*gs).path());
                 subset.emplace_back(ref);
             }
         }
         // Remove any duplicate files.
         fast_sort(subset);
         subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
+
+        config->logger->debug("Added {} files that were not part of the edit to the update set",
+                              subset.size() - subsetSizeBefore);
     }
     config->logger->debug("Running fast path over num_files={}", subset.size());
     unique_ptr<ShowOperation> op;
