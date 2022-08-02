@@ -1,0 +1,60 @@
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "requestMethod": "textDocument/documentSymbol",
+    "result": [
+        {
+            "name": "Upper",
+            "detail": "",
+            "kind": 2,
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 0
+                },
+                "end": {
+                    "line": 5,
+                    "character": 3
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 3,
+                    "character": 2
+                },
+                "end": {
+                    "line": 3,
+                    "character": 14
+                }
+            },
+            "children": [
+                {
+                    "name": "Lower",
+                    "detail": "",
+                    "kind": 2,
+                    "range": {
+                        "start": {
+                            "line": 3,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 5
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 3,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 3,
+                            "character": 14
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        }
+    ]
+}
