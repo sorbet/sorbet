@@ -105,6 +105,8 @@ int_box.val += 1
 
 [→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Box%0A%20%20extend%20T%3A%3ASig%0A%20%20extend%20T%3A%3AGeneric%20%23%20Provides%20%60type_member%60%20helper%0A%0A%20%20Elem%20%3D%20type_member%20%23%20Makes%20the%20%60Box%60%20class%20generic%0A%0A%20%20%23%20References%20the%20class-level%20generic%20%60Elem%60%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.void%7D%0A%20%20def%20initialize%28val%3A%29%3B%20%40val%20%3D%20val%3B%20end%0A%20%20sig%20%7Breturns%28Elem%29%7D%0A%20%20def%20val%3B%20%40val%3B%20end%0A%20%20sig%20%7Bparams%28val%3A%20Elem%29.returns%28Elem%29%7D%0A%20%20def%20val%3D%28val%29%3B%20%40val%20%3D%20val%3B%20end%0Aend%0A%0Aint_box%20%3D%20Box%5BInteger%5D.new%28val%3A%200%29%0AT.reveal_type%28int_box%29%20%23%20%60Box%5BInteger%5D%60%0A%0AT.reveal_type%28int_box.val%29%20%23%20%60Integer%60%0A%0Aint_box.val%20%2B%3D%201)
 
+The basic syntax for function generics in Sorbet looks like this:
+
 ```ruby
 # typed: true
 extend T::Sig
@@ -113,7 +115,8 @@ sig do
   # `extend T::Generic` is not required just to use `type_parameters`
   type_parameters(:U)
     .params(
-      # The block can return anything
+      # The block can return any value, and the type of
+      # that value defines type_parameter(:U)
       blk: T.proc.returns(T.type_parameter(:U))
     )
     # The method returns whatever the block returns

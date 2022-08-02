@@ -3597,7 +3597,7 @@ In this example, the call to `a.foo.even?` results in an error, even though we
 checked that `a.foo` was not `nil` with the `&&`, because Sorbet does not assume
 any methods are pure, not even methods defined with the `T::Struct` class's
 `const` DSL. (There are a number of technical and philosophical reasons why
-Sorbet behaves this way, and we do not foresee these reasons changing).
+Sorbet behaves this way, and we do not foresee these reasons changing.)
 
 There is always a simple solution, which is to either factor out the method
 call's result into a variable, or to use Ruby's conditional method call operator
