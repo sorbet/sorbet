@@ -115,7 +115,8 @@ sig do
   # `extend T::Generic` is not required just to use `type_parameters`
   type_parameters(:U)
     .params(
-      # The block can return anything
+      # The block can return any value, and the type of
+      # that value defines type_parameter(:U)
       blk: T.proc.returns(T.type_parameter(:U))
     )
     # The method returns whatever the block returns
