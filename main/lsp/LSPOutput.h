@@ -70,6 +70,12 @@ public:
     std::vector<std::unique_ptr<LSPMessage>> getOutput();
 
     /**
+     * Counts the number of messages in the internal vector.
+     * Used in tests.
+     */
+    uint32_t size();
+
+    /**
      * Blocking read. Waits until the next message is available, or the given timeout occurs. If a timeout occurs, it
      * returns nullptr.
      */

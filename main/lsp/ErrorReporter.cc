@@ -89,7 +89,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
     // Update clientErrorCount
     if (fileErrorStatus.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
-        // clientErrorCount contains the errors from the last reported epoch. Subtract them since this action will
+        // clientErrorCount counts the errors from the last reported epoch. Subtract them since this action will
         // revoke them via publishing a new error list.
         this->clientErrorCount = this->clientErrorCount - fileErrorStatus.errorCount;
     }
@@ -107,7 +107,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         }
     }
 
-    this->clientErrorCount += errors.size();
+    this->clientErrorCount += errorsToReport;
 
     fileErrorStatus.lastReportedEpoch = epoch;
 
@@ -124,12 +124,13 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         }
     }
 
-    // If errors is empty and the file had no errors previously, break
-    if (errors.empty() && fileErrorStatus.errorCount == 0) {
+    // If the error reporter is not going to report errors and the file had no errors previously, break
+    // Avoids an issue where ErrorReporter sends an empty error list for files that have hidden errors.
+    if (errorsToReport == 0 && fileErrorStatus.errorCount == 0) {
         return;
     }
 
-    fileErrorStatus.errorCount = errors.size();
+    fileErrorStatus.errorCount = errorsToReport;
 
     const string uri = config->fileRef2Uri(gs, file);
     vector<unique_ptr<Diagnostic>> diagnostics;
