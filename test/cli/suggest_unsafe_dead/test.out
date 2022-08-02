@@ -33,11 +33,11 @@ suggest_unsafe_dead.rb:35: This code is unreachable https://srb.help/7006
                              ^^^^^^^^^^^^
     suggest_unsafe_dead.rb:35: This condition was always `truthy` (`Integer`)
     35 |  returns_integer || do_something
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest_unsafe_dead.rb:35: Replaced with `T.unsafe(returns_integer || do_something)`
+    suggest_unsafe_dead.rb:35: Replaced with `T.unsafe(returns_integer)`
     35 |  returns_integer || do_something
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^
   Got `Integer` originating from:
     suggest_unsafe_dead.rb:35:
     35 |  returns_integer || do_something
@@ -195,8 +195,8 @@ end
 
 sig {void}
 def test3_method_or_method
-  # For some reason, this behaves different from when the LHS of `||` is a variable.
-  T.unsafe(returns_integer || do_something)
+
+  T.unsafe(returns_integer) || do_something
 end
 
 sig {params(x: T.any(Integer, String)).void}

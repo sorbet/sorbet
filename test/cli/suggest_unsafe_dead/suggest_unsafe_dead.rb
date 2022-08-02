@@ -31,7 +31,7 @@ end
 
 sig {void}
 def test3_method_or_method
-  # For some reason, this behaves different from when the LHS of `||` is a variable.
+
   returns_integer || do_something
 end
 

@@ -1,0 +1,61 @@
+test/cli/and-and-always-truthy/test.rb:11: Left side of `&&` condition was always `truthy` https://srb.help/7006
+    11 |  if always_true && T.unsafe(true)
+             ^^^^^^^^^^^
+    test/cli/and-and-always-truthy/test.rb:11: This condition was always `truthy` (`TrueClass`)
+    11 |  if always_true && T.unsafe(true)
+             ^^^^^^^^^^^
+  Got `TrueClass` originating from:
+    test/cli/and-and-always-truthy/test.rb:11:
+    11 |  if always_true && T.unsafe(true)
+             ^^^^^^^^^^^
+  Note:
+    If this is intentional, either delete the redundant code or restructure
+    it to use `T.absurd` so that Sorbet can check for exhaustiveness.
+
+test/cli/and-and-always-truthy/test.rb:15: This code is unreachable https://srb.help/7006
+    15 |  if always_true || T.unsafe(true)
+                            ^^^^^^^^^^^^^^
+    test/cli/and-and-always-truthy/test.rb:15: This condition was always `truthy` (`TrueClass`)
+    15 |  if always_true || T.unsafe(true)
+             ^^^^^^^^^^^
+  Got `TrueClass` originating from:
+    test/cli/and-and-always-truthy/test.rb:15:
+    15 |  if always_true || T.unsafe(true)
+             ^^^^^^^^^^^
+
+test/cli/and-and-always-truthy/test.rb:21: This code is unreachable https://srb.help/7006
+    21 |  if always_false && T.unsafe(true)
+                             ^^^^^^^^^^^^^^
+    test/cli/and-and-always-truthy/test.rb:21: This condition was always `falsy` (`FalseClass`)
+    21 |  if always_false && T.unsafe(true)
+             ^^^^^^^^^^^^
+  Got `FalseClass` originating from:
+    test/cli/and-and-always-truthy/test.rb:21:
+    21 |  if always_false && T.unsafe(true)
+             ^^^^^^^^^^^^
+
+test/cli/and-and-always-truthy/test.rb:24: Left side of `||` condition was always `falsy` https://srb.help/7006
+    24 |  if always_false || T.unsafe(true)
+             ^^^^^^^^^^^^
+    test/cli/and-and-always-truthy/test.rb:24: This condition was always `falsy` (`FalseClass`)
+    24 |  if always_false || T.unsafe(true)
+             ^^^^^^^^^^^^
+  Got `FalseClass` originating from:
+    test/cli/and-and-always-truthy/test.rb:24:
+    24 |  if always_false || T.unsafe(true)
+             ^^^^^^^^^^^^
+  Note:
+    If this is intentional, either delete the redundant code or restructure
+    it to use `T.absurd` so that Sorbet can check for exhaustiveness.
+
+test/cli/and-and-always-truthy/test.rb:31: This code is unreachable https://srb.help/7006
+    31 |  if always_true && T.unsafe(true)
+             ^^^^^^^^^^^
+    test/cli/and-and-always-truthy/test.rb:31: This condition was always `truthy` (`TrueClass`)
+    31 |  if always_true && T.unsafe(true)
+             ^^^^^^^^^^^
+  Got `TrueClass` originating from:
+    test/cli/and-and-always-truthy/test.rb:29:
+    29 |def example3(always_true)
+                     ^^^^^^^^^^^
+Errors: 5

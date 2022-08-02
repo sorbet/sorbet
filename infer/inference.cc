@@ -210,7 +210,24 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                     } else if (auto e =
                                    ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
-                        e.setHeader("This code is unreachable");
+                        auto *ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
+
+                        bool andAndOrOr = false;
+                        if (ident != nullptr) {
+                            auto name = ident->what.data(*cfg)._name;
+                            if (name.kind() == core::NameKind::UNIQUE &&
+                                name.dataUnique(ctx)->original == core::Names::andAnd()) {
+                                e.setHeader("Left side of `{}` condition was always `{}`", "&&", "truthy");
+                                andAndOrOr = true;
+                            } else if (name.kind() == core::NameKind::UNIQUE &&
+                                       name.dataUnique(ctx)->original == core::Names::orOr()) {
+                                e.setHeader("Left side of `{}` condition was always `{}`", "||", "falsy");
+                                andAndOrOr = true;
+                            }
+                        }
+                        if (!andAndOrOr) {
+                            e.setHeader("This code is unreachable");
+                        }
 
                         for (const auto &prevBasicBlock : bb->backEdges) {
                             const auto &prevEnv = outEnvironments[prevBasicBlock->id];
@@ -242,6 +259,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                             auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
                             e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
+                        }
+
+                        if (andAndOrOr) {
+                            e.addErrorNote("If this is intentional, either delete the redundant code or restructure\n"
+                                           "    it to use `{}` so that Sorbet can check for exhaustiveness.",
+                                           "T.absurd");
                         }
                     }
                 }
