@@ -1098,7 +1098,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 auto rhs = node2TreeImpl(dctx, std::move(and_->right));
                 if (isa_reference(lhs)) {
                     auto cond = MK::cpRef(lhs);
-                    // TODO(jez) How to handle this case?
+                    // Note that this case doesn't currently get the same "always truthy" dead code
+                    // error that the other case would get.
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
                 } else {
