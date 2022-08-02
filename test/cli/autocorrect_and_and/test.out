@@ -9,9 +9,6 @@ autocorrect_and_and.rb:12: Call to method `even?` after `&&` assumes result type
     autocorrect_and_and.rb:12:
     12 |    if a.foo && a.foo.even?
                ^^^^^
-    autocorrect_and_and.rb:12:
-    12 |    if a.foo && a.foo.even?
-               ^^^^^^^^^^^^^^^^^^^^
   Note:
     Sorbet never assumes that a method called twice returns the same result both times.
     Either factor out a variable or use `&.`
@@ -34,9 +31,6 @@ autocorrect_and_and.rb:17: Call to method `even?` after `&&` assumes result type
     autocorrect_and_and.rb:16:
     16 |    if a.foo &&
                ^^^^^
-    autocorrect_and_and.rb:16:
-    16 |    if a.foo &&
-    17 |        a.foo.even?
   Note:
     Sorbet never assumes that a method called twice returns the same result both times.
     Either factor out a variable or use `&.`
@@ -59,9 +53,6 @@ autocorrect_and_and.rb:22: Call to method `even?` after `&&` assumes result type
     autocorrect_and_and.rb:21:
     21 |    if foo &&
                ^^^
-    autocorrect_and_and.rb:21:
-    21 |    if foo &&
-    22 |        foo.even?
   Note:
     Sorbet never assumes that a method called twice returns the same result both times.
     Either factor out a variable or use `&.`
@@ -96,9 +87,6 @@ autocorrect_and_and.rb:36: Call to method `even?` after `&&` assumes result type
     autocorrect_and_and.rb:35:
     35 |    if a.foo && a.foo.
                ^^^^^
-    autocorrect_and_and.rb:35:
-    35 |    if a.foo && a.foo.
-    36 |        even?
   Note:
     Sorbet never assumes that a method called twice returns the same result both times.
     Either factor out a variable or use `&.`
