@@ -11,10 +11,17 @@ def example1
   if always_true && T.unsafe(true)
     puts 'here'
   end
+
+  if always_true || T.unsafe(true)
+    puts 'here'
+  end
 end
 
 def example2
   if always_false && T.unsafe(true)
+  end
+
+  if always_false || T.unsafe(true)
   end
 end
 
