@@ -9,7 +9,7 @@ namespace sorbet {
 
 template <size_t PageSize = 4096> class StableStringStorage {
     std::shared_ptr<char> &addPage(size_t size) {
-        auto page = std::make_unique<char[]>(size);
+        auto page = std::unique_ptr<char[]>(new char[size]);
         return strings.emplace_back(page.release(), page.get_deleter());
     }
 
