@@ -59,12 +59,12 @@
                             "kind": 2,
                             "range": {
                                 "start": {
-                                    "line": 3,
-                                    "character": 2
+                                    "line": 2,
+                                    "character": 0
                                 },
                                 "end": {
-                                    "line": 3,
-                                    "character": 14
+                                    "line": 6,
+                                    "character": 3
                                 }
                             },
                             "selectionRange": {
@@ -88,8 +88,8 @@
                                             "character": 2
                                         },
                                         "end": {
-                                            "line": 3,
-                                            "character": 15
+                                            "line": 5,
+                                            "character": 5
                                         }
                                     },
                                     "selectionRange": {
@@ -114,7 +114,7 @@
                                                 },
                                                 "end": {
                                                     "line": 4,
-                                                    "character": 12
+                                                    "character": 17
                                                 }
                                             },
                                             "selectionRange": {
