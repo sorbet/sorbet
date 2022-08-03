@@ -168,11 +168,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
                 continue;
             }
 
-            for (auto definitionLocation : ref.locs(gs)) {
-                if (definitionLocation.file() != fref) {
-                    continue;
-                }
-
+            if (absl::c_any_of(ref.locs(gs), [&fref](const auto &loc) { return loc.file() == fref; })) {
                 candidates.emplace_back(ref);
             }
         }
