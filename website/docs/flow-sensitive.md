@@ -154,6 +154,74 @@ def flow_sensitivity(x)
 end
 ```
 
+## Flow-sensitivity and the `Singleton` module
+
+Ruby has a module in the standard library called
+[`'singleton'`](https://ruby-doc.org/stdlib-3.1.2/libdoc/singleton/rdoc/Singleton.html),
+which can be used to create a class that has exactly one instance. Sorbet has
+special support for flow-sensitivity on classes that include `Singleton` and
+also are marked [`final!`](final.md):
+
+```ruby
+# typed: true
+extend T::Sig
+require 'singleton'
+
+class Unset
+  include Singleton
+  extend T::Helpers
+  final!
+end
+
+sig {params(x: T.nilable(T.any(Unset, Integer))).void}
+def example1(x: Unset.instance)
+  T.reveal_type(x) # => `T.nilable(T.any(Unset, Integer))
+
+  # `==` comparisons on Singleton types update the type in
+  # both the `if` and the `else` case:
+
+  if x == Unset.instance
+    T.reveal_type(x) # => `Unset`
+  else
+    T.reveal_type(x) # => `T.nilable(Integer)`
+  end
+end
+
+sig {params(x: T.nilable(Integer)).void}
+def example2(x: nil)
+  T.reveal_type(x) # => `T.nilable(Integer)
+  if x == 0
+    # All `==` comparisons on non-Singleton types only update
+    # the type if the type test is true.
+    T.reveal_type(x) # => `Integer`
+  else
+    # When the `==` comparison above is false, the type of `x`
+    # remains identical to what it was outside the `if`.
+    T.reveal_type(x) # => `T.nilable(Integer)`
+  end
+end
+```
+
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0Arequire%20'singleton'%0A%0Aclass%20Unset%0A%20%20include%20Singleton%0A%20%20extend%20T%3A%3AHelpers%0A%20%20final!%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.nilable%28T.any%28Unset%2C%20Integer%29%29%29.void%7D%0Adef%20example1%28x%3A%20Unset.instance%29%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28T.any%28Unset%2C%20Integer%29%29%0A%0A%20%20%23%20%60%3D%3D%60%20comparisons%20on%20Singleton%20types%20update%20the%20type%20in%0A%20%20%23%20both%20the%20%60if%60%20and%20the%20%60else%60%20case%3A%0A%0A%20%20if%20x%20%3D%3D%20Unset.instance%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60Unset%60%0A%20%20else%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28Integer%29%60%0A%20%20end%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.nilable%28Integer%29%29.void%7D%0Adef%20example2%28x%3A%20nil%29%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28Integer%29%0A%20%20if%20x%20%3D%3D%200%0A%20%20%20%20%23%20All%20%60%3D%3D%60%20comparisons%20on%20non-Singleton%20types%20only%20update%0A%20%20%20%20%23%20the%20type%20if%20the%20type%20test%20is%20true.%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60Integer%60%0A%20%20else%0A%20%20%20%20%23%20When%20the%20%60%3D%3D%60%20comparison%20above%20is%20false%2C%20the%20type%20of%20%60x%60%0A%20%20%20%20%23%20remains%20identical%20to%20what%20it%20was%20outside%20the%20%60if%60.%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28Integer%29%60%0A%20%20end%0Aend)
+
+As mentioned in the example above, normally `==` only gives additional,
+flow-sensitive information about the type of a variable in the case that the
+type test was truthy.
+
+But as we see within the `example1` method above, using `==` on a `Singleton`
+value will allow Sorbet to update it's knowledge about the type of `x` both when
+the `==` comparison is true and when false.
+
+This technique can be useful as indicated above to distinguish between cases
+when a possibly-`nil`, optional argument was explicitly passed at the call site
+and set to `nil`, or when a value was omitted at the call site and the default
+value of `Unset.instance` was used.
+
+Note that using `final!` is required, as without it, the `==` comparison could
+return `true` in the presence of subclasses of `Singleton` classes.
+
+[→ Example of `Singleton` but not `final!`](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0Arequire%20'singleton'%0A%0Aclass%20Unset%0A%20%20include%20Singleton%0A%20%20extend%20T%3A%3AHelpers%0Aend%0A%0Aclass%20UnsetChild%20%3C%20Unset%3B%20end%0A%0Asig%20%7Bparams%28x%3A%20T.nilable%28T.any%28Unset%2C%20Integer%29%29%29.void%7D%0Adef%20example1%28x%3A%20Unset.instance%29%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28T.any%28Unset%2C%20Integer%29%29%0A%0A%20%20if%20x%20%3D%3D%20Unset.instance%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60Unset%60%0A%20%20else%0A%20%20%20%20%23%20Can%20still%20reach%20here%20because%20any%20number%20of%20child%20classes%0A%20%20%20%20%23%20of%20%60Unset%60%20could%20also%20exist%2C%20so%20Sorbet%20has%20to%20think%20that%0A%20%20%20%20%23%20the%20type%20could%20still%20include%20%60Unset%60%0A%20%20%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20%60T.nilable%28T.any%28Unset%2C%20Integer%29%29%0A%20%20end%0Aend%0A%0Aexample1%28x%3A%20UnsetChild.instance%29)
+
 ## Limitations of flow-sensitivity
 
 An alternative title for this section: "_Why does Sorbet think this is nil? I
