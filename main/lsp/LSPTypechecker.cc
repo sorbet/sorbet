@@ -235,7 +235,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(updates.canTakeFastPath);
 
     Timer timeit(config->logger, "fast_path");
-    vector<core::FileRef> subset;
+    UnorderedSet<core::FileRef> changedFiles;
+    vector<core::FileRef> extraFiles;
     vector<core::ShortNameHash> changedSymbolNameHashes;
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
     // Replace error queue with one that is owned by this thread.
@@ -305,7 +306,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     gs->replaceFile(fref, updatedFile);
                     // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                     fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
-                    subset.emplace_back(fref);
+                    changedFiles.emplace(fref);
                 }
             }
 
@@ -317,7 +318,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
         }
 
-        auto subsetSizeBefore = subset.size();
         if (!changedSymbolNameHashes.empty()) {
             // ^ optimization--skip the loop over every file in the project (`gs->getFiles()`) if
             // the set of changed symbols is empty (e.g., running a completion request inside a
@@ -329,8 +329,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     continue;
                 }
 
-                if (oldFile->epoch == updates.epoch) {
-                    // This is one of the edited files, which means it is already in the subset.
+                auto ref = core::FileRef(i);
+                if (changedFiles.contains(ref)) {
                     continue;
                 }
 
@@ -347,26 +347,28 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     continue;
                 }
 
-                auto ref = core::FileRef(i);
-                subset.emplace_back(ref);
+                extraFiles.emplace_back(ref);
             }
         }
-        fast_sort(subset);
-        DEBUG_ONLY(auto initialSize = subset.size();
-                   // Remove any duplicate files.
-                   subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
-                   ENFORCE(subset.size() == initialSize, "subset is not free of duplicates by construction"););
-        config->logger->debug("Added {} files that were not part of the edit to the update set",
-                              subset.size() - subsetSizeBefore);
+        config->logger->debug("Added {} files that were not part of the edit to the update set", extraFiles.size());
     }
-    config->logger->debug("Running fast path over num_files={}", subset.size());
+    vector<core::FileRef> allFiles;
+    for (auto f : changedFiles) {
+        allFiles.emplace_back(f);
+    }
+    for (auto f : extraFiles) {
+        allFiles.emplace_back(f);
+    }
+    fast_sort(allFiles);
+
+    config->logger->debug("Running fast path over num_files={}", allFiles.size());
     unique_ptr<ShowOperation> op;
-    if (subset.size() > 100) {
+    if (allFiles.size() > 100) {
         op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : subset) {
+    for (auto &f : allFiles) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         auto t = pipeline::indexOne(config->opts, *gs, f);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
@@ -394,7 +396,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
 
-    return subset;
+    return allFiles;
 }
 
 namespace {
