@@ -1,5 +1,8 @@
 # typed: true
 
+# This test at one point failed because we make use of the Array#[] intrinsic
+# in one of the steps to load the types of block arguments
+
 class A
   extend T::Sig
   extend T::Generic
