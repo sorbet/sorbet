@@ -1312,7 +1312,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto key = cast_type_nonnull<NamedLiteralType>(keyType);
                 auto underlying = key.underlying(gs);
                 ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
-                if (klass == Symbols::Symbol() && consumed.find(key.asName()) != consumed.end()) {
+                if (klass == Symbols::Symbol() && consumed.contains(key.asName())) {
                     continue;
                 }
                 NameRef arg = key.asName();

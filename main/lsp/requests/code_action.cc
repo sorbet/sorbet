@@ -13,13 +13,13 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
+const UnorderedSet<string> OPERATORS = {"+",  "−",  "*",   "/",   "%",   "**",    "==",     "!=",  ">",
+                                        "<",  ">=", "<=",  "<=>", "===", ".eql?", "equal?", "=",   "+=",
+                                        "-=", "*=", "/=",  "%=",  "**=", "&",     "|",      "^",   "~",
+                                        "<<", ">>", "and", "or",  "&&",  "||",    "!",      "not", ".."};
 
 bool isOperator(string_view name) {
-    const vector<string> operators = {"+",  "−",  "*",   "/",   "%",   "**",    "==",     "!=",  ">",
-                                      "<",  ">=", "<=",  "<=>", "===", ".eql?", "equal?", "=",   "+=",
-                                      "-=", "*=", "/=",  "%=",  "**=", "&",     "|",      "^",   "~",
-                                      "<<", ">>", "and", "or",  "&&",  "||",    "!",      "not", ".."};
-    return std::find(operators.begin(), operators.end(), name) != operators.end();
+    return OPERATORS.contains(name);
 }
 
 vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &config, const core::GlobalState &gs,

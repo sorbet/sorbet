@@ -127,8 +127,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         auto rbiEntry = maybeRbiEntry.asMethodRef();
 
         if (sourceClass.exists()) {
-            auto sourceEntryIt = sourceMembersByName.find(rbiEntryName.show(rbiGS));
-            if (sourceEntryIt != sourceMembersByName.end()) {
+            if (sourceMembersByName.contains(rbiEntryName.show(rbiGS))) {
                 continue;
             }
         }

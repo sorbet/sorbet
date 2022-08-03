@@ -740,7 +740,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 fmt::memory_buffer buf;
                 for (const auto &file : files) {
                     string editedSource;
-                    if (toWrite.find(file) != toWrite.end()) {
+                    if (toWrite.contains(file)) {
                         editedSource = toWrite[file];
                     } else {
                         editedSource = file.data(*gs).source();
