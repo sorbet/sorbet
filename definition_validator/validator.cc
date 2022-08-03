@@ -467,9 +467,8 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if (!method.data(ctx)->flags.isOverride && method.data(ctx)->hasSig() &&
-            overridenMethod.data(ctx)->flags.isAbstract && overridenMethod.data(ctx)->hasSig() &&
-            !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
+        if (!method.data(ctx)->flags.isOverride && overridenMethod.data(ctx)->flags.isAbstract &&
+            overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.show(ctx), overridenMethod.show(ctx), "override.");
