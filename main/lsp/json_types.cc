@@ -131,6 +131,21 @@ unique_ptr<Range> Range::copy() const {
     return make_unique<Range>(start->copy(), end->copy());
 }
 
+// cf.
+// https://github.com/microsoft/vscode/blob/21f7df634a8ac45d1198cb414fe90366f782bcee/src/vs/workbench/api/common/extHostTypes.ts#L312-L327
+bool Range::contains(const Range &b) const {
+    return contains(*b.start) && contains(*b.end);
+}
+
+bool Range::contains(const Position &p) const {
+    int startCmp = p.cmp(*this->start);
+    if (startCmp < 0) {
+        return false;
+    }
+    int endCmp = this->end->cmp(p);
+    return endCmp >= 0;
+}
+
 int Location::cmp(const Location &b) const {
     const int uriCmp = uri.compare(b.uri);
     if (uriCmp != 0) {

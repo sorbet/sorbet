@@ -75,6 +75,26 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
+// cf.
+// https://github.com/microsoft/vscode/blob/21f7df634a8ac45d1198cb414fe90366f782bcee/src/vs/workbench/api/common/extHostTypes.ts#L1224-L1232
+void validateDocumentSymbol(unique_ptr<DocumentSymbol> &sym) {
+    REQUIRE(!sym->name.empty());
+    REQUIRE(sym->range != nullptr);
+    REQUIRE(sym->selectionRange != nullptr);
+    REQUIRE(sym->range->start != nullptr);
+    REQUIRE(sym->range->end != nullptr);
+    REQUIRE(sym->selectionRange->start != nullptr);
+    REQUIRE(sym->selectionRange->end != nullptr);
+
+    REQUIRE(sym->range->contains(*sym->selectionRange));
+
+    if (sym->children.has_value()) {
+        for (auto &child : *sym->children) {
+            validateDocumentSymbol(child);
+        }
+    }
+}
+
 optional<unique_ptr<CodeAction>> resolveCodeAction(LSPWrapper &lspWrapper, int &nextId,
                                                    unique_ptr<CodeAction> codeAction) {
     const auto &config = lspWrapper.config().getClientConfig();
@@ -406,6 +426,13 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
     // Simple string comparison, just like other *.exp files.
     CHECK_EQ_DIFF(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse),
                   "Mismatch on: " + expectedSymbolsPath);
+
+    // VSCode validates document symbols, so we should too.
+    if (auto *syms = get_if<vector<unique_ptr<DocumentSymbol>>>(&receivedSymbolResponse)) {
+        for (auto &sym : *syms) {
+            validateDocumentSymbol(sym);
+        }
+    }
 }
 
 void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
