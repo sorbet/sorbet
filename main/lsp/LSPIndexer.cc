@@ -175,6 +175,19 @@ bool LSPIndexer::canTakeFastPathInternal(
         }
     }
 
+    // Technically we could say "yes, we can take the fast path" here (because we've detected that
+    // the hierarchy hash has not changed for any file).
+    //
+    // But because of how the fast path is currently always run in a blocking "Typechecking  in
+    // foreground.." operation, we also compute how many downstream files (outside of the changed
+    // files) would need to be typechecked on the fast path so we can compare that number against
+    // `lspMaxFilesOnFastPath` as well.
+
+    for (auto &f : changedFiles) {
+        // TODO(jez)
+        (void)f;
+    }
+
     logger.debug("Taking fast path");
     return true;
 }
