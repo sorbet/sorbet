@@ -224,8 +224,14 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 namespace {
 
 struct FastPathFilesToTypecheckResult {
-    UnorderedSet<core::FileRef> toTypecheck;
+    // size_t is an index into the updatedFiles vector
+    UnorderedMap<core::FileRef, size_t> changedFiles;
+
+    // The names of all symbols changed by this set of updates
     vector<core::ShortNameHash> changedSymbolNameHashes;
+
+    // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
+    vector<core::FileRef> extraFiles;
 };
 
 FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
@@ -236,7 +242,9 @@ FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, 
         {
             vector<core::SymbolHash> changedMethodSymbolHashes;
             vector<core::SymbolHash> changedFieldSymbolHashes;
+            auto idx = -1;
             for (const auto &updatedFile : updatedFiles) {
+                idx++;
                 auto fref = gs.findFileByPath(updatedFile->path());
                 // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
                 // path logic in LSPPreprocessor.
@@ -262,16 +270,6 @@ FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, 
                         // will get deduped later.
                         absl::c_set_symmetric_difference(oldMethodHashes, newMethodHashes,
                                                          std::back_inserter(changedMethodSymbolHashes));
-
-                        // Only set oldFoundMethodHashesForFiles if symbols actually changed
-                        // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
-                        // methods only to redefine them with different IDs.
-                        if (!changedMethodSymbolHashes.empty()) {
-                            // Okay to `move` here (steals component of getFileHash) because we're about to use
-                            // replaceFile to clobber fref.data(gs) anyways.
-                            oldFoundMethodHashesForFiles.emplace(fref,
-                                                                 move(fref.data(gs).getFileHash()->foundMethodHashes));
-                        }
                     } else {
                         // Both oldHash and newHash should have the same methods, since this is the fast path!
                         ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
@@ -293,10 +291,7 @@ FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, 
                     absl::c_set_difference(oldFieldHashes, newFieldHashes,
                                            std::back_inserter(changedFieldSymbolHashes));
 
-                    gs.replaceFile(fref, updatedFile);
-                    // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
-                    fref.data(gs).strictLevel = pipeline::decideStrictLevel(gs, fref, config.opts);
-                    result.toTypecheck.emplace(fref);
+                    result.changedFiles.emplace(fref, idx);
                 }
             }
 
@@ -308,7 +303,6 @@ FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, 
             core::ShortNameHash::sortAndDedupe(result.changedSymbolNameHashes);
         }
 
-        auto initialSize = result.toTypecheck.size();
         if (!result.changedSymbolNameHashes.empty()) {
             // ^ optimization--skip the loop over every file in the project (`gs.getFiles()`) if
             // the set of changed symbols is empty (e.g., running a completion request inside a
@@ -321,7 +315,7 @@ FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, 
                 }
 
                 auto ref = core::FileRef(i);
-                if (result.toTypecheck.contains(ref)) {
+                if (result.changedFiles.contains(ref)) {
                     continue;
                 }
 
@@ -344,11 +338,11 @@ FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, 
                     continue;
                 }
 
-                result.toTypecheck.emplace(ref);
+                result.extraFiles.emplace_back(ref);
             }
         }
         config.logger->debug("Added {} files that were not part of the edit to the update set",
-                             result.toTypecheck.size() - initialSize);
+                             result.extraFiles.size());
     }
 
     return result;
@@ -373,18 +367,38 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     auto result = getFilesToTypecheck(*gs, *config, updates.updatedFiles);
-    UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles; // TODO(jez) populate this
-    vector<core::FileRef> sortedToTypecheck(result.toTypecheck.begin(), result.toTypecheck.end());
-    fast_sort(sortedToTypecheck);
+    UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
+    auto toTypecheck = move(result.extraFiles);
+    for (auto [fref, idx] : result.changedFiles) {
+        // TODO(jez) If you are seeing problems, on problem might be because this used to use only
+        // changedMethodSymbolHashes instead of changedSymbolNameHashes. I think this change should
+        // be safe but it's possible I'm wrong.
+        if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
+            // Only set oldFoundMethodHashesForFiles if symbols actually changed
+            // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
+            // methods only to redefine them with different IDs.
 
-    config->logger->debug("Running fast path over num_files={}", sortedToTypecheck.size());
+            // Okay to `move` here (steals component of getFileHash) because we're about to use
+            // replaceFile to clobber fref.data(gs) anyways.
+            oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundMethodHashes));
+        }
+
+        gs->replaceFile(fref, updates.updatedFiles[idx]);
+        // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
+        fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
+
+        toTypecheck.emplace_back(fref);
+    }
+    fast_sort(toTypecheck);
+
+    config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
     unique_ptr<ShowOperation> op;
-    if (sortedToTypecheck.size() > 100) {
+    if (toTypecheck.size() > 100) {
         op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : sortedToTypecheck) {
+    for (auto &f : toTypecheck) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
         // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
@@ -415,7 +429,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
 
-    return sortedToTypecheck;
+    return toTypecheck;
 }
 
 namespace {
