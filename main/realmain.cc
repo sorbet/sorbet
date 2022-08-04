@@ -118,6 +118,11 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
 core::StrictLevel levelToRecommendation(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::Ignore:
+            // We don't suggest `# typed: ignore` because it is too common for some probem in a
+            // generated RBI file to cause a problem that actually does need to be fixed, and not by
+            // ignoring the RBI file. Ignoring the file has bad consequences, like introducing more
+            // errors in other files, causing those files to be ignored, etc.
+            return core::StrictLevel::False;
         case core::StrictLevel::False:
         case core::StrictLevel::True:
         case core::StrictLevel::Strict:
