@@ -75,6 +75,7 @@ string documentSymbolsToString(const variant<JSONNullObject, vector<unique_ptr<D
     }
 }
 
+// cf. https://github.com/microsoft/vscode/blob/21f7df634a8ac45d1198cb414fe90366f782bcee/src/vs/workbench/api/common/extHostTypes.ts#L1224-L1232
 void validateDocumentSymbol(unique_ptr<DocumentSymbol> &sym) {
     REQUIRE(!sym->name.empty());
     REQUIRE(sym->range != nullptr);
@@ -83,6 +84,8 @@ void validateDocumentSymbol(unique_ptr<DocumentSymbol> &sym) {
     REQUIRE(sym->range->end != nullptr);
     REQUIRE(sym->selectionRange->start != nullptr);
     REQUIRE(sym->selectionRange->end != nullptr);
+
+    REQUIRE(sym->range->contains(*sym->selectionRange));
 
     if (sym->children.has_value()) {
         for (auto &child : *sym->children) {
