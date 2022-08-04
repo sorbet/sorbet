@@ -366,6 +366,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     vector<ast::ParsedFile> updatedIndexed;
     for (auto &f : allFiles) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
+        // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
+        // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
+        // access to `initialGS`, but that's owned by the indexer thread, not this thread.)
         auto t = pipeline::indexOne(config->opts, *gs, f);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
