@@ -10,8 +10,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @@supported_methods
     else
       begin
+        <statTemp>$2 = nil
         @@supported_methods = <emptyTree>::<C T>.let(@@supported_methods, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
-        @@supported_methods = nil
+        @@supported_methods = <statTemp>$2
       end
     end
 
