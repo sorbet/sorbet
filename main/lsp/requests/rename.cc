@@ -101,8 +101,7 @@ public:
 
         // If we're renaming the exact same place twice, silently ignore it. We reach this condition when we find the
         // same method send through multiple definitions (e.g. in the case of union types)
-        auto it = edits.find(loc);
-        if (it != edits.end()) {
+        if (edits.contains(loc)) {
             return;
         }
 
