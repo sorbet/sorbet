@@ -227,8 +227,6 @@ UnorderedSet<core::FileRef> getFilesToTypecheck() {
     UnorderedSet<core::FileRef> toTypecheck;
     vector<core::ShortNameHash> changedSymbolNameHashes;
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
-    // Replace error queue with one that is owned by this thread.
-    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     {
         Timer timeit(config->logger, "compute_fast_path_file_set");
         {
@@ -366,6 +364,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(updates.canTakeFastPath);
 
     Timer timeit(config->logger, "fast_path");
+    // Replace error queue with one that is owned by this thread.
+    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     auto toTypecheck = getFilesToTypecheck();
     vector<core::FileRef> sortedToTypecheck(toTypecheck.begin(), toTypecheck.end());
     fast_sort(sortedToTypecheck);
