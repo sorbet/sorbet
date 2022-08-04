@@ -221,20 +221,9 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     return committed;
 }
 
-vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
-                                                  shared_ptr<core::ErrorFlusher> errorFlusher) const {
-    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
-    ENFORCE(this->initialized);
-    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
-    ENFORCE(gs->lspTypecheckCount > 0,
-            "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
-    // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
-    ENFORCE(!updates.cancellationExpected);
-    ENFORCE(updates.preemptionsExpected == 0);
-    // This path only works for fast path updates.
-    ENFORCE(updates.canTakeFastPath);
+namespace {
 
-    Timer timeit(config->logger, "fast_path");
+UnorderedSet<core::FileRef> getFilesToTypecheck() {
     UnorderedSet<core::FileRef> toTypecheck;
     vector<core::ShortNameHash> changedSymbolNameHashes;
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
@@ -359,6 +348,25 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         config->logger->debug("Added {} files that were not part of the edit to the update set",
                               toTypecheck.size() - initialSize);
     }
+}
+
+} // namespace
+
+vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
+                                                  shared_ptr<core::ErrorFlusher> errorFlusher) const {
+    ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
+    ENFORCE(this->initialized);
+    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
+    ENFORCE(gs->lspTypecheckCount > 0,
+            "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
+    // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
+    ENFORCE(!updates.cancellationExpected);
+    ENFORCE(updates.preemptionsExpected == 0);
+    // This path only works for fast path updates.
+    ENFORCE(updates.canTakeFastPath);
+
+    Timer timeit(config->logger, "fast_path");
+    auto toTypecheck = getFilesToTypecheck();
     vector<core::FileRef> sortedToTypecheck(toTypecheck.begin(), toTypecheck.end());
     fast_sort(sortedToTypecheck);
 
