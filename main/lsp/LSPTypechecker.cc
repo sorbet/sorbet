@@ -236,7 +236,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     Timer timeit(config->logger, "fast_path");
     UnorderedSet<core::FileRef> changedFiles;
-    vector<core::FileRef> extraFiles;
+    vector<core::FileRef> allFiles;
     vector<core::ShortNameHash> changedSymbolNameHashes;
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
     // Replace error queue with one that is owned by this thread.
@@ -347,16 +347,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     continue;
                 }
 
-                extraFiles.emplace_back(ref);
+                allFiles.emplace_back(ref);
             }
         }
-        config->logger->debug("Added {} files that were not part of the edit to the update set", extraFiles.size());
+        config->logger->debug("Added {} files that were not part of the edit to the update set", allFiles.size());
     }
-    vector<core::FileRef> allFiles;
     for (auto f : changedFiles) {
-        allFiles.emplace_back(f);
-    }
-    for (auto f : extraFiles) {
         allFiles.emplace_back(f);
     }
     fast_sort(allFiles);
