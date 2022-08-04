@@ -3,6 +3,8 @@
 
 #include "ast/ast.h"
 #include "common/common.h"
+#include "core/FileHash.h"
+#include "main/lsp/LSPConfiguration.h"
 
 namespace sorbet::realmain::lsp {
 /**
@@ -47,6 +49,20 @@ public:
      * Returns a copy of this LSPFileUpdates object. Does not handle deepCopying `updatedGS`.
      */
     LSPFileUpdates copy() const;
+
+    struct FastPathFilesToTypecheckResult {
+        // size_t is an index into the LSPFileUpdates::updatedFiles vector
+        UnorderedMap<core::FileRef, size_t> changedFiles;
+
+        // The names of all symbols changed by this set of updates
+        std::vector<core::ShortNameHash> changedSymbolNameHashes;
+
+        // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
+        std::vector<core::FileRef> extraFiles;
+    };
+
+    FastPathFilesToTypecheckResult fastPathFilesToTypecheck(const core::GlobalState &gs,
+                                                            const LSPConfiguration &config) const;
 };
 } // namespace sorbet::realmain::lsp
 
