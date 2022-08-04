@@ -209,10 +209,10 @@ flow-sensitive information about the type of a variable in the case that the
 type test was truthy.
 
 But as we see within the `example1` method above, using `==` on a `Singleton`
-value will allow Sorbet to update it's knowledge about the type of `x` both when
-the `==` comparison is true and when false.
+value will allow Sorbet to update its knowledge about the type of `x` both when
+the `==` comparison is true and when it is false.
 
-This technique can be useful as indicated above to distinguish between cases
+This technique can be useful to distinguish between cases
 when a possibly-`nil`, optional argument was explicitly passed at the call site
 and set to `nil`, or when a value was omitted at the call site and the default
 value of `Unset.instance` was used.
