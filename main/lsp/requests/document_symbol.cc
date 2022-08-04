@@ -12,10 +12,12 @@ namespace sorbet::realmain::lsp {
 namespace {
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
                                                          core::FileRef filter,
-                                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping);
+                                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping,
+                                                         const UnorderedSet<core::SymbolRef> &forced);
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
                                          const UnorderedMap<core::SymbolRef, core::Loc> &defMapping,
+                                         const UnorderedSet<core::SymbolRef> &forced,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
     if (!sym.isClassOrModule()) {
         return;
@@ -26,9 +28,11 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
             continue;
         }
         if (!absl::c_any_of(mem.second.locs(gs), [&filter](const auto &loc) { return loc.file() == filter; })) {
-            continue;
+            if (!forced.contains(mem.second)) {
+                continue;
+            }
         }
-        auto inner = symbolRef2DocumentSymbol(gs, mem.second, filter, defMapping);
+        auto inner = symbolRef2DocumentSymbol(gs, mem.second, filter, defMapping, forced);
         if (inner) {
             out.push_back(move(inner));
         }
@@ -37,7 +41,8 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
 
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
                                                          core::FileRef filter,
-                                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping) {
+                                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping,
+                                                         const UnorderedSet<core::SymbolRef> &forced) {
     if (!symRef.exists()) {
         return nullptr;
     }
@@ -74,11 +79,11 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     result->detail = "";
 
     vector<unique_ptr<DocumentSymbol>> children;
-    symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, defMapping, children);
+    symbolRef2DocumentSymbolWalkMembers(gs, symRef, filter, defMapping, forced, children);
     if (symRef.isClassOrModule()) {
         auto singleton = symRef.asClassOrModuleRef().data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
-            symbolRef2DocumentSymbolWalkMembers(gs, singleton, filter, defMapping, children);
+            symbolRef2DocumentSymbolWalkMembers(gs, singleton, filter, defMapping, forced, children);
         }
     }
     result->children = move(children);
@@ -188,11 +193,30 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     // To avoid that case, we need to walk the ownership chains of each symbol to
     // deduplicate the candidate list.
     UnorderedSet<core::SymbolRef> deduplicatedCandidates(candidates.begin(), candidates.end());
+
+    // We may wind up in a situation where we have something like:
+    //
+    // A::B::C::D::E
+    //
+    // B and E are candidates, but neither C nor D have locs in the current
+    // file.  We'll eliminate E from candidacy, but then when we go to get
+    // children for B, we find that C doesn't appear in the current file, so
+    // we won't walk C's children.  Which means we'll never walk D's children
+    // and therefore E won't appear in the list of document symbols.
+    //
+    // So we need to ensure that both C and D are displayed; this set records
+    // symbols that appear in an ownership chain between two candidates.
+    UnorderedSet<core::SymbolRef> forced;
     for (auto ref : candidates) {
         auto owner = ref.owner(gs);
         while (owner != core::Symbols::root()) {
             if (deduplicatedCandidates.contains(owner)) {
                 deduplicatedCandidates.erase(ref);
+                auto forcedOwner = ref.owner(gs);
+                while (forcedOwner != owner) {
+                    forced.insert(forcedOwner);
+                    forcedOwner = forcedOwner.owner(gs);
+                }
                 break;
             }
 
@@ -211,7 +235,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     ast::TreeWalk::apply(ctx, saver, resolved[0].tree);
 
     for (auto ref : candidates) {
-        auto data = symbolRef2DocumentSymbol(gs, ref, fref, defMapping);
+        auto data = symbolRef2DocumentSymbol(gs, ref, fref, defMapping, forced);
         if (data) {
             result.push_back(move(data));
         }
