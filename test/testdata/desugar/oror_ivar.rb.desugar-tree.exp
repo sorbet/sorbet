@@ -20,8 +20,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           @supported_methods
         else
           begin
-            <statTemp>$2 = ["fast", "slow", "special"].uniq().freeze()
             @supported_methods = <emptyTree>::<C T>.let(@supported_methods, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+            <statTemp>$2 = ["fast", "slow", "special"].uniq().freeze()
             @supported_methods = <statTemp>$2
           end
         end
@@ -39,8 +39,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @initialized_to_nilable
       else
         begin
-          <statTemp>$2 = nil
           @initialized_to_nilable = <emptyTree>::<C T>.let(@initialized_to_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+          <statTemp>$2 = nil
           @initialized_to_nilable = <statTemp>$2
         end
       end
@@ -55,8 +55,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @lazy_boolean
       else
         begin
-          <statTemp>$2 = <self>.expensively_compute_boolean()
           @lazy_boolean = <emptyTree>::<C T>.let(@lazy_boolean, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Boolean>))
+          <statTemp>$2 = <self>.expensively_compute_boolean()
           @lazy_boolean = <statTemp>$2
         end
       end
@@ -84,8 +84,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           @accidentally_untyped
         else
           begin
-            <statTemp>$2 = <emptyTree>::<C T>.unsafe(nil)
             @accidentally_untyped = <emptyTree>::<C T>.let(@accidentally_untyped, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+            <statTemp>$2 = <emptyTree>::<C T>.unsafe(nil)
             @accidentally_untyped = <statTemp>$2
           end
         end
