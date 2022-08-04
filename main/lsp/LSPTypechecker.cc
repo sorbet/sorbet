@@ -235,8 +235,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(updates.canTakeFastPath);
 
     Timer timeit(config->logger, "fast_path");
-    UnorderedSet<core::FileRef> changedFiles;
-    vector<core::FileRef> allFiles;
+    UnorderedSet<core::FileRef> toTypecheck;
     vector<core::ShortNameHash> changedSymbolNameHashes;
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
     // Replace error queue with one that is owned by this thread.
@@ -306,7 +305,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     gs->replaceFile(fref, updatedFile);
                     // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                     fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
-                    changedFiles.emplace(fref);
+                    toTypecheck.emplace(fref);
                 }
             }
 
@@ -318,6 +317,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
         }
 
+        auto initialSize = toTypecheck.size();
         if (!changedSymbolNameHashes.empty()) {
             // ^ optimization--skip the loop over every file in the project (`gs->getFiles()`) if
             // the set of changed symbols is empty (e.g., running a completion request inside a
@@ -330,7 +330,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 }
 
                 auto ref = core::FileRef(i);
-                if (changedFiles.contains(ref)) {
+                if (toTypecheck.contains(ref)) {
                     continue;
                 }
 
@@ -347,24 +347,23 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     continue;
                 }
 
-                allFiles.emplace_back(ref);
+                toTypecheck.emplace(ref);
             }
         }
-        config->logger->debug("Added {} files that were not part of the edit to the update set", allFiles.size());
+        config->logger->debug("Added {} files that were not part of the edit to the update set",
+                              toTypecheck.size() - initialSize);
     }
-    for (auto f : changedFiles) {
-        allFiles.emplace_back(f);
-    }
-    fast_sort(allFiles);
+    vector<core::FileRef> sortedToTypecheck(toTypecheck.begin(), toTypecheck.end());
+    fast_sort(sortedToTypecheck);
 
-    config->logger->debug("Running fast path over num_files={}", allFiles.size());
+    config->logger->debug("Running fast path over num_files={}", sortedToTypecheck.size());
     unique_ptr<ShowOperation> op;
-    if (allFiles.size() > 100) {
+    if (sortedToTypecheck.size() > 100) {
         op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : allFiles) {
+    for (auto &f : sortedToTypecheck) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
         // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
@@ -395,7 +394,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
 
-    return allFiles;
+    return sortedToTypecheck;
 }
 
 namespace {
