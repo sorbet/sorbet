@@ -11,6 +11,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
+    end
+
+    def self.two_tuple_looks_like_array<<todo method>>(&<blk>)
+      [123, "foo"]
+    end
+
+    <self>.sig() do ||
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
@@ -71,6 +79,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @suggest_t_let
       else
         @suggest_t_let = ""
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.needs_cast<<todo method>>(&<blk>)
+      if @needs_cast
+        @needs_cast
+      else
+        begin
+          @needs_cast = <emptyTree>::<C T>.let(@needs_cast, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+          <statTemp>$2 = <self>.two_tuple_looks_like_array().first()
+          @needs_cast = <statTemp>$2
+        end
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.allows_cast<<todo method>>(&<blk>)
+      if @allows_cast
+        @allows_cast
+      else
+        begin
+          @allows_cast = <emptyTree>::<C T>.let(@allows_cast, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+          <statTemp>$2 = <emptyTree>::<C T>.cast(<self>.two_tuple_looks_like_array().first(), <emptyTree>::<C Integer>)
+          @allows_cast = <statTemp>$2
+        end
       end
     end
 
