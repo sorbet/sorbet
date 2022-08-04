@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # typed: strict
-# assert-fast-path: a.rb,https://github.com/sorbet/sorbet/tree/master/rbi/core/thread.rbi,https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/bundler.rbi,https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/erb.rbi,https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/irb.rbi,https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rdoc.rbi,https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi,https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/webrick.rbi
+# assert-fast-path: a.rb
 
 # Various things in the standard library mention `run`, so we currently type check them on the fast path.
 

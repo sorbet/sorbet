@@ -335,6 +335,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     continue; // See note above about --stripe-packages.
                 }
 
+                if (oldFile->isPayload()) {
+                    // Don't retypecheck files in the payload via incremental namer, as that might
+                    // cause well-known symbols to get deleted and assigned a new SymbolRef ID.
+                    continue;
+                }
+
                 ENFORCE(oldFile->getFileHash() != nullptr);
                 const auto &oldHash = *oldFile->getFileHash();
                 vector<core::ShortNameHash> intersection;
