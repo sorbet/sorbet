@@ -280,6 +280,7 @@ module T::Helpers
   # `include` target.
   #
   # For more information, see https://sorbet.org/docs/abstract#interfaces-and-the-included-hook
+  sig {params(mod: Module, mods: Module).void}
   def mixes_in_class_methods(mod, *mods); end
 
   # Experimental feature to require that a module be eventually mixed into a

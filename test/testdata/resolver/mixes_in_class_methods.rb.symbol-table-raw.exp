@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=65:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=67:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
   module <C <U Bad1>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=25:1 end=25:12}
   class <S <C <U Bad1>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=25:8 end=25:12}
@@ -30,18 +30,18 @@ class <C <U <root>>> < <C <U Object>> ()
   module <C <U Bad4>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=46:1 end=46:12}
   class <S <C <U Bad4>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=46:8 end=46:12}
     type-member(+) <S <C <U Bad4>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Bad4>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Bad4) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=46:8 end=46:12}
-    method <S <C <U Bad4>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=46:1 end=51:4}
+    method <S <C <U Bad4>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=46:1 end=52:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
-  module <C <U Bad5>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=53:1 end=53:12}
-    static-field <C <U Bad5>>::<C <U RUBY_CONSTANT>> -> Integer @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=57:3 end=57:16}
-  class <S <C <U Bad5>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=53:8 end=53:12}
-    type-member(+) <S <C <U Bad5>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Bad5>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Bad5) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=53:8 end=53:12}
-    method <S <C <U Bad5>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=53:1 end=59:4}
+  module <C <U Bad5>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=54:1 end=54:12}
+    static-field <C <U Bad5>>::<C <U RUBY_CONSTANT>> -> Integer @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=58:3 end=58:16}
+  class <S <C <U Bad5>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=54:8 end=54:12}
+    type-member(+) <S <C <U Bad5>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Bad5>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Bad5) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=54:8 end=54:12}
+    method <S <C <U Bad5>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=54:1 end=61:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
-  module <C <U Bad6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=61:1 end=61:12}
-  class <S <C <U Bad6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=61:8 end=61:12}
-    type-member(+) <S <C <U Bad6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Bad6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Bad6) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=61:8 end=61:12}
-    method <S <C <U Bad6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=61:1 end=65:4}
+  module <C <U Bad6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=63:1 end=63:12}
+  class <S <C <U Bad6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=63:8 end=63:12}
+    type-member(+) <S <C <U Bad6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Bad6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Bad6) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=63:8 end=63:12}
+    method <S <C <U Bad6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=63:1 end=67:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=??? end=???}
   module <C <U Mixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=2:1 end=2:13}
     module <C <U Mixin>>::<C <U ClassMethods>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/mixes_in_class_methods.rb start=6:3 end=6:22}
