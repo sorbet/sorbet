@@ -223,16 +223,20 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
 namespace {
 
-UnorderedSet<core::FileRef> getFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) {
+struct FastPathFilesToTypecheckResult {
     UnorderedSet<core::FileRef> toTypecheck;
     vector<core::ShortNameHash> changedSymbolNameHashes;
-    UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
+};
+
+FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                   const vector<shared_ptr<core::File>> updatedFiles) {
+    FastPathFilesToTypecheckResult result;
     {
         Timer timeit(config.logger, "compute_fast_path_file_set");
         {
             vector<core::SymbolHash> changedMethodSymbolHashes;
             vector<core::SymbolHash> changedFieldSymbolHashes;
-            for (auto &updatedFile : updates.updatedFiles) {
+            for (const auto &updatedFile : updatedFiles) {
                 auto fref = gs.findFileByPath(updatedFile->path());
                 // We don't support new files on the fast path. This enforce failing indicates a bug in our fast/slow
                 // path logic in LSPPreprocessor.
@@ -292,20 +296,20 @@ UnorderedSet<core::FileRef> getFilesToTypecheck(const core::GlobalState &gs, con
                     gs.replaceFile(fref, updatedFile);
                     // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                     fref.data(gs).strictLevel = pipeline::decideStrictLevel(gs, fref, config.opts);
-                    toTypecheck.emplace(fref);
+                    result.toTypecheck.emplace(fref);
                 }
             }
 
-            changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedFieldSymbolHashes.size());
-            absl::c_transform(changedMethodSymbolHashes, std::back_inserter(changedSymbolNameHashes),
+            result.changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedFieldSymbolHashes.size());
+            absl::c_transform(changedMethodSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
                               [](const auto &symhash) { return symhash.nameHash; });
-            absl::c_transform(changedFieldSymbolHashes, std::back_inserter(changedSymbolNameHashes),
+            absl::c_transform(changedFieldSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
                               [](const auto &symhash) { return symhash.nameHash; });
-            core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
+            core::ShortNameHash::sortAndDedupe(result.changedSymbolNameHashes);
         }
 
-        auto initialSize = toTypecheck.size();
-        if (!changedSymbolNameHashes.empty()) {
+        auto initialSize = result.toTypecheck.size();
+        if (!result.changedSymbolNameHashes.empty()) {
             // ^ optimization--skip the loop over every file in the project (`gs.getFiles()`) if
             // the set of changed symbols is empty (e.g., running a completion request inside a
             // method body)
@@ -317,7 +321,7 @@ UnorderedSet<core::FileRef> getFilesToTypecheck(const core::GlobalState &gs, con
                 }
 
                 auto ref = core::FileRef(i);
-                if (toTypecheck.contains(ref)) {
+                if (result.toTypecheck.contains(ref)) {
                     continue;
                 }
 
@@ -334,18 +338,20 @@ UnorderedSet<core::FileRef> getFilesToTypecheck(const core::GlobalState &gs, con
                 ENFORCE(oldFile->getFileHash() != nullptr);
                 const auto &oldHash = *oldFile->getFileHash();
                 vector<core::ShortNameHash> intersection;
-                absl::c_set_intersection(changedSymbolNameHashes, oldHash.usages.nameHashes,
+                absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
                                          std::back_inserter(intersection));
                 if (intersection.empty()) {
                     continue;
                 }
 
-                toTypecheck.emplace(ref);
+                result.toTypecheck.emplace(ref);
             }
         }
         config.logger->debug("Added {} files that were not part of the edit to the update set",
-                             toTypecheck.size() - initialSize);
+                             result.toTypecheck.size() - initialSize);
     }
+
+    return result;
 }
 
 } // namespace
@@ -366,8 +372,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
-    auto toTypecheck = getFilesToTypecheck(*gs, *config);
-    vector<core::FileRef> sortedToTypecheck(toTypecheck.begin(), toTypecheck.end());
+    auto result = getFilesToTypecheck(*gs, *config, updates.updatedFiles);
+    UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles; // TODO(jez) populate this
+    vector<core::FileRef> sortedToTypecheck(result.toTypecheck.begin(), result.toTypecheck.end());
     fast_sort(sortedToTypecheck);
 
     config->logger->debug("Running fast path over num_files={}", sortedToTypecheck.size());
@@ -387,7 +394,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
         // See earlier in the method for an explanation of the .empty() check here.
-        if (config->opts.lspExperimentalFastPathEnabled && !changedSymbolNameHashes.empty() &&
+        if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty() &&
             oldFoundMethodHashesForFiles.find(f) == oldFoundMethodHashesForFiles.end()) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
