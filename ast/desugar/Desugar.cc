@@ -1258,8 +1258,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto assign = MK::Assign(loc, MK::cpRef(lhs), std::move(tempLocal));
 
                         InsSeq::STATS_store stats;
-                        stats.emplace_back(std::move(value));
                         stats.emplace_back(std::move(decl));
+                        stats.emplace_back(std::move(value));
 
                         elsep = MK::InsSeq(loc, std::move(stats), std::move(assign));
                     } else {

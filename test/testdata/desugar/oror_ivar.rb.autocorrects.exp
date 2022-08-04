@@ -7,6 +7,9 @@ module Config
   sig {returns(T::Boolean)}
   def self.expensively_compute_boolean; false; end
 
+  sig {returns(T::Array[T.any(Integer, String)])}
+  def self.two_tuple_looks_like_array; [123, 'foo']; end
+
   sig {returns(T::Array[String])}
   def self.supported_methods
     @supported_methods ||= T.let(['fast', 'slow', 'special'].uniq.freeze, T.nilable(T::Array[String]))
@@ -37,6 +40,16 @@ module Config
     @suggest_t_let ||= T.let('', T.nilable(String))
   # ^^^^^^^^^^^^^^ error: The instance variable `@suggest_t_let` must be declared using `T.let` when specifying `# typed: strict`
   # ^^^^^^^^^^^^^^ error: Use of undeclared variable `@suggest_t_let`
+  end
+
+  sig {returns(Integer)}
+  def self.needs_cast
+    @needs_cast ||= T.let(two_tuple_looks_like_array.first, T.nilable(Integer)) # error: Expected `T.nilable(Integer)` but found `T.nilable(T.any(Integer, String))` for field
+  end # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+
+  sig {returns(Integer)}
+  def self.allows_cast
+    @allows_cast ||= T.let(T.cast(two_tuple_looks_like_array.first, Integer), T.nilable(Integer))
   end
 
   sig {returns(Integer)}

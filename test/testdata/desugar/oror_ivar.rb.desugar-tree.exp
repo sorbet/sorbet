@@ -11,6 +11,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
+    end
+
+    def self.two_tuple_looks_like_array<<todo method>>(&<blk>)
+      [123, "foo"]
+    end
+
+    <self>.sig() do ||
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
@@ -20,8 +28,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           @supported_methods
         else
           begin
-            <statTemp>$2 = ["fast", "slow", "special"].uniq().freeze()
             @supported_methods = <emptyTree>::<C T>.let(@supported_methods, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+            <statTemp>$2 = ["fast", "slow", "special"].uniq().freeze()
             @supported_methods = <statTemp>$2
           end
         end
@@ -39,8 +47,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @initialized_to_nilable
       else
         begin
-          <statTemp>$2 = nil
           @initialized_to_nilable = <emptyTree>::<C T>.let(@initialized_to_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+          <statTemp>$2 = nil
           @initialized_to_nilable = <statTemp>$2
         end
       end
@@ -55,8 +63,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @lazy_boolean
       else
         begin
-          <statTemp>$2 = <self>.expensively_compute_boolean()
           @lazy_boolean = <emptyTree>::<C T>.let(@lazy_boolean, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Boolean>))
+          <statTemp>$2 = <self>.expensively_compute_boolean()
           @lazy_boolean = <statTemp>$2
         end
       end
@@ -78,14 +86,46 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
+    def self.needs_cast<<todo method>>(&<blk>)
+      if @needs_cast
+        @needs_cast
+      else
+        begin
+          @needs_cast = <emptyTree>::<C T>.let(@needs_cast, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+          <statTemp>$2 = <self>.two_tuple_looks_like_array().first()
+          @needs_cast = <statTemp>$2
+        end
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.allows_cast<<todo method>>(&<blk>)
+      if @allows_cast
+        @allows_cast
+      else
+        begin
+          @allows_cast = <emptyTree>::<C T>.let(@allows_cast, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+          <statTemp>$2 = <emptyTree>::<C T>.cast(<self>.two_tuple_looks_like_array().first(), <emptyTree>::<C Integer>)
+          @allows_cast = <statTemp>$2
+        end
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
     def self.accidentally_untyped<<todo method>>(&<blk>)
       begin
         if @accidentally_untyped
           @accidentally_untyped
         else
           begin
-            <statTemp>$2 = <emptyTree>::<C T>.unsafe(nil)
             @accidentally_untyped = <emptyTree>::<C T>.let(@accidentally_untyped, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+            <statTemp>$2 = <emptyTree>::<C T>.unsafe(nil)
             @accidentally_untyped = <statTemp>$2
           end
         end
