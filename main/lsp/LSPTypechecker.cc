@@ -235,7 +235,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     ENFORCE(updates.canTakeFastPath);
 
     Timer timeit(config->logger, "fast_path");
-    vector<core::FileRef> subset;
+    UnorderedSet<core::FileRef> toTypecheck;
     vector<core::ShortNameHash> changedSymbolNameHashes;
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
     // Replace error queue with one that is owned by this thread.
@@ -305,7 +305,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     gs->replaceFile(fref, updatedFile);
                     // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
                     fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
-                    subset.emplace_back(fref);
+                    toTypecheck.emplace(fref);
                 }
             }
 
@@ -317,17 +317,20 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             core::ShortNameHash::sortAndDedupe(changedSymbolNameHashes);
         }
 
-        auto subsetSizeBefore = subset.size();
+        auto initialSize = toTypecheck.size();
         if (!changedSymbolNameHashes.empty()) {
             // ^ optimization--skip the loop over every file in the project (`gs->getFiles()`) if
             // the set of changed symbols is empty (e.g., running a completion request inside a
             // method body)
             int i = -1;
-            // N.B.: We'll iterate over the changed files, too, but it's benign if we re-add them since we dedupe
-            // `subset`.
             for (auto &oldFile : gs->getFiles()) {
                 i++;
                 if (oldFile == nullptr) {
+                    continue;
+                }
+
+                auto ref = core::FileRef(i);
+                if (toTypecheck.contains(ref)) {
                     continue;
                 }
 
@@ -350,26 +353,27 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                     continue;
                 }
 
-                auto ref = core::FileRef(i);
-                subset.emplace_back(ref);
+                toTypecheck.emplace(ref);
             }
         }
-        // Remove any duplicate files.
-        fast_sort(subset);
-        subset.resize(std::distance(subset.begin(), std::unique(subset.begin(), subset.end())));
-
         config->logger->debug("Added {} files that were not part of the edit to the update set",
-                              subset.size() - subsetSizeBefore);
+                              toTypecheck.size() - initialSize);
     }
-    config->logger->debug("Running fast path over num_files={}", subset.size());
+    vector<core::FileRef> sortedToTypecheck(toTypecheck.begin(), toTypecheck.end());
+    fast_sort(sortedToTypecheck);
+
+    config->logger->debug("Running fast path over num_files={}", sortedToTypecheck.size());
     unique_ptr<ShowOperation> op;
-    if (subset.size() > 100) {
+    if (sortedToTypecheck.size() > 100) {
         op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
     vector<ast::ParsedFile> updatedIndexed;
-    for (auto &f : subset) {
+    for (auto &f : sortedToTypecheck) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
+        // (`updates` has already-indexed trees, but they've been indexed with initialGS, not the
+        // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
+        // access to `initialGS`, but that's owned by the indexer thread, not this thread.)
         auto t = pipeline::indexOne(config->opts, *gs, f);
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
@@ -396,7 +400,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
     gs->lspTypecheckCount++;
 
-    return subset;
+    return sortedToTypecheck;
 }
 
 namespace {
