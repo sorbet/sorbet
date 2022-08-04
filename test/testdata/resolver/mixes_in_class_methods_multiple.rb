@@ -18,7 +18,7 @@ module Mixin
   end
 
   mixes_in_class_methods(ClassMethods1, ClassMethods2, ClassMethods3)
- 
+
   def mixin_method
   end
 end
@@ -91,4 +91,5 @@ module Bad3
 
   module ClassMethods; end
   mixes_in_class_methods(ClassMethods, 0) # error: must be statically resolvable to a module
+  #                                    ^ error: Expected `Module` but found `Integer(0)`
 end
