@@ -23,4 +23,5 @@ in [k, *, l]
 in [m, *n]
   T.reveal_type(m) # error: Revealed type: `T.untyped`
   T.reveal_type(n) # error: Revealed type: `T.untyped`
+else
 end
