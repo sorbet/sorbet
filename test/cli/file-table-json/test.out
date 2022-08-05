@@ -768,6 +768,12 @@
    "min_error_level": "Max"
   },
   {
+   "path": "https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/reline.rbi",
+   "sigil": "Stdlib",
+   "strict": "Stdlib",
+   "min_error_level": "Max"
+  },
+  {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/resolv.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",

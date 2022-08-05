@@ -1523,6 +1523,42 @@ end
 
 class IRB::OutputMethod::NotImplementedError < ::StandardError; end
 
+class IRB::ReidlineInputMethod < ::IRB::InputMethod
+  include(::Reline)
+
+  # Creates a new input method object using
+  # [`Reline`](https://docs.ruby-lang.org/en/3.1.0/Reline.html)
+  def self.new; end
+
+  # The external encoding for standard input.
+  def encoding; end
+
+  # Whether the end of this input method has been reached, returns `true` if
+  # there is no more data to read.
+  #
+  # See [`IO#eof?`](https://docs.ruby-lang.org/en/3.1.0/IO.html#method-i-eof-3F)
+  # for more information.
+  def eof?; end
+
+  # Reads the next line from this input method.
+  #
+  # See [`IO#gets`](https://docs.ruby-lang.org/en/3.1.0/IO.html#method-i-gets)
+  # for more information.
+  def gets; end
+
+  # Returns the current line number for io.
+  #
+  # [`line`](https://docs.ruby-lang.org/en/3.1.0/IRB/ReadlineInputMethod.html#method-i-line)
+  # counts the number of times
+  # [`gets`](https://docs.ruby-lang.org/en/3.1.0/IRB/ReadlineInputMethod.html#method-i-gets)
+  # is called.
+  #
+  # See
+  # [`IO#lineno`](https://docs.ruby-lang.org/en/3.1.0/IO.html#method-i-lineno)
+  # for more information.
+  def line(line_no); end
+end
+
 class IRB::ReadlineInputMethod < ::IRB::InputMethod
   include(::Readline)
 
