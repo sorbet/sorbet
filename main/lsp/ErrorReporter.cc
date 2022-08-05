@@ -201,7 +201,7 @@ bool ErrorReporter::wouldReportForFile(uint32_t epoch, core::FileRef file) {
 
 ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     if (file.id() >= fileErrorStatuses.size()) {
-        fileErrorStatuses.resize(file.id() + 1, ErrorStatus{0, false});
+        fileErrorStatuses.resize(file.id() + 1, ErrorStatus{0, 0});
     }
     return fileErrorStatuses[file.id()];
 };
