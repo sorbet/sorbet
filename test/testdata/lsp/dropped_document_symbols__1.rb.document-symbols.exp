@@ -34,22 +34,22 @@
                     "kind": 2,
                     "range": {
                         "start": {
-                            "line": 8,
-                            "character": 8
+                            "line": 2,
+                            "character": 0
                         },
                         "end": {
-                            "line": 8,
-                            "character": 15
+                            "line": 7,
+                            "character": 3
                         }
                     },
                     "selectionRange": {
                         "start": {
-                            "line": 8,
-                            "character": 8
+                            "line": 2,
+                            "character": 0
                         },
                         "end": {
-                            "line": 8,
-                            "character": 15
+                            "line": 2,
+                            "character": 32
                         }
                     },
                     "children": [
@@ -59,22 +59,22 @@
                             "kind": 2,
                             "range": {
                                 "start": {
-                                    "line": 8,
-                                    "character": 8
+                                    "line": 2,
+                                    "character": 0
                                 },
                                 "end": {
-                                    "line": 8,
-                                    "character": 25
+                                    "line": 7,
+                                    "character": 3
                                 }
                             },
                             "selectionRange": {
                                 "start": {
-                                    "line": 8,
-                                    "character": 8
+                                    "line": 2,
+                                    "character": 0
                                 },
                                 "end": {
-                                    "line": 8,
-                                    "character": 25
+                                    "line": 2,
+                                    "character": 32
                                 }
                             },
                             "children": [
