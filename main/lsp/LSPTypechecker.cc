@@ -224,7 +224,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 namespace {
 
 struct FastPathFilesToTypecheckResult {
-    // size_t is an index into the updatedFiles vector
+    // size_t is an index into the LSPFileUpdates::updatedFiles vector
     UnorderedMap<core::FileRef, size_t> changedFiles;
 
     // The names of all symbols changed by this set of updates
