@@ -139,8 +139,8 @@ symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, co
     if (owner.exists() && owner.isClassOrModule() && owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
         prefix = "self.";
     }
-    auto result =
-        make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(info->range), move(info->selectionRange));
+    auto result = make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(info->range),
+                                              move(info->selectionRange));
 
     // Previous versions of VSCode have a bug that requires this non-optional field to be present.
     // This previously tried to include the method signature but due to issues where large signatures were not readable
