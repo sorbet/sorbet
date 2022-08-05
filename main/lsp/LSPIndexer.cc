@@ -183,9 +183,14 @@ bool LSPIndexer::canTakeFastPathInternal(
     // files) would need to be typechecked on the fast path so we can compare that number against
     // `lspMaxFilesOnFastPath` as well.
 
-    for (auto &f : changedFiles) {
-        // TODO(jez)
-        (void)f;
+    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles);
+    auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
+    if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
+        logger.debug(
+            "Taking slow path because too many extra files would be typechecked on the fast path ({} files > {} files)",
+            filesToTypecheck, config->opts.lspMaxFilesOnFastPath);
+        prodCategoryCounterInc("lsp.slow_path_reason", "too_many_extra_files");
+        return false;
     }
 
     logger.debug("Taking fast path");

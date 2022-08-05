@@ -82,7 +82,8 @@ bool validateIdenticalFingerprints(const std::vector<core::SymbolHash> &a, const
 } // namespace
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
-LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
+LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                         const vector<shared_ptr<core::File>> &updatedFiles) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedMethodSymbolHashes;
@@ -184,6 +185,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
     }
 
     return result;
+}
+LSPFileUpdates::FastPathFilesToTypecheckResult
+LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
+    return fastPathFilesToTypecheck(gs, config, this->updatedFiles);
 }
 
 } // namespace sorbet::realmain::lsp
