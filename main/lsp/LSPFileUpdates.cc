@@ -83,7 +83,8 @@ bool validateIdenticalFingerprints(const std::vector<core::SymbolHash> &a, const
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
-                                         const vector<shared_ptr<core::File>> &updatedFiles) {
+                                         const vector<shared_ptr<core::File>> &updatedFiles,
+                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedMethodSymbolHashes;
@@ -105,7 +106,9 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         if (fref.exists()) {
             // Update to existing file on fast path
             ENFORCE(fref.data(gs).getFileHash() != nullptr);
-            const auto &oldSymbolHashes = fref.data(gs).getFileHash()->localSymbolTableHashes;
+            const auto &oldSymbolHashes = evictedFiles.empty()
+                                              ? fref.data(gs).getFileHash()->localSymbolTableHashes
+                                              : evictedFiles.at(fref)->getFileHash()->localSymbolTableHashes;
             const auto &newSymbolHashes = updatedFile->getFileHash()->localSymbolTableHashes;
             const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
             const auto &newMethodHashes = newSymbolHashes.methodHashes;
@@ -186,6 +189,18 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
 
     return result;
 }
+
+namespace {
+const UnorderedMap<core::FileRef, shared_ptr<core::File>> EMPTY_CONST_MAP;
+
+}
+
+LSPFileUpdates::FastPathFilesToTypecheckResult
+LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                         const vector<shared_ptr<core::File>> &updatedFiles) {
+    return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP);
+}
+
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
     return fastPathFilesToTypecheck(gs, config, this->updatedFiles);

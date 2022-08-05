@@ -189,7 +189,7 @@ bool LSPIndexer::canTakeFastPathInternal(
     //
     // As an optimization, we might want to try to store that information on the update itself, so
     // that the typechecking thread can simply read it instead of having to compute it.
-    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles);
+    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
     auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
     if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
         logger.debug(

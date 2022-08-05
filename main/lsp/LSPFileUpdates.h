@@ -68,6 +68,14 @@ public:
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles);
 
+    // Overload because sometimes we have to look up the old file's hash in GlobalState (when
+    // running on the typechecker thread), and sometimes we have to look it up in evictedFiles (when
+    // running on the indexer thread).
+    static FastPathFilesToTypecheckResult
+    fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                             const std::vector<std::shared_ptr<core::File>> &updatedFiles,
+                             const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles);
+
     FastPathFilesToTypecheckResult fastPathFilesToTypecheck(const core::GlobalState &gs,
                                                             const LSPConfiguration &config) const;
 };
