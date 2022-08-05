@@ -192,6 +192,26 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             }
 
             result.extraFiles.emplace_back(ref);
+
+            if (result.changedFiles.size() + result.extraFiles.size() > config.opts.lspMaxFilesOnFastPath) {
+                // Short circuit, as a performance optimization.
+                // (gs.getFiles() is usually 3-4 orders of magnitude larger than lspMaxFilesOnFastPath)
+                //
+                // One of two things could be true:
+                // - We're running on the indexer thread to decide canTakeFastPath, which only cares about how
+                //   many extra files there are, not what they are.
+                // - We're running on the typechecker thread (knowing that canTakeFastPath was already true)
+                //   and simply need to compute the list of files to typecheck. But that would be a
+                //   contradiction--because otherwise the indexer would have marked the update as not being
+                //   able to take the fast path.
+                //
+                // So it's actually only the first thing that's true.
+
+                // Crude indicator of being on indexer thread, as the typechecker thread always
+                // calls us with an empty map of evictedFiles
+                ENFORCE(!evictedFiles.empty());
+                return result;
+            }
         }
     }
 
