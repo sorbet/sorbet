@@ -2337,19 +2337,6 @@ uint32_t TypeParameter::hash(const GlobalState &gs) const {
 }
 
 uint32_t Method::methodShapeHash(const GlobalState &gs) const {
-    if (name == core::Names::initialize() || name == core::Names::call() || name == core::Names::new_()) {
-        // TODO(jez) This is a hack. LSP currently does a poor job of taking the fast path when
-        // there are thousands or tens of thousands of files to typecheck as a part of the fast path.
-        // The problem manifests as a fast path that is neither preemptible nor cancellable that
-        // runs on a single thread (not the typecheck worker pool) until everything has finished.
-        //
-        // This problem most frequently comes with these handful of methods, so to partially
-        // alleviate it before we build a longer-term solution, we're going to force any changes to
-        // these methods to take the slow path, even if it would have otherwise been possible to
-        // take the fast path.
-        return this->hash(gs);
-    }
-
     uint32_t result = _hash(name.shortName(gs));
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());

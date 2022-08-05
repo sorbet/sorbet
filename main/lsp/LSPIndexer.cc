@@ -175,6 +175,30 @@ bool LSPIndexer::canTakeFastPathInternal(
         }
     }
 
+    // Technically we could say "yes, we can take the fast path" here (because we've detected that
+    // the hierarchy hash has not changed for any file).
+    //
+    // But because of how the fast path is currently always run in a blocking "Typechecking in
+    // foreground..." operation, we also compute how many downstream files (outside of the changed
+    // files) would need to be typechecked on the fast path so we can compare that number against
+    // `lspMaxFilesOnFastPath` as well.
+
+    // TODO(jez) Currently we compute the full set of information that we would need for the sake of
+    // whether to take the fast path twice--once here and once again in runFastPath on the
+    // typechecking thread.
+    //
+    // As an optimization, we might want to try to store that information on the update itself, so
+    // that the typechecking thread can simply read it instead of having to compute it.
+    auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
+    auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
+    if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
+        logger.debug(
+            "Taking slow path because too many extra files would be typechecked on the fast path ({} files > {} files)",
+            filesToTypecheck, config->opts.lspMaxFilesOnFastPath);
+        prodCategoryCounterInc("lsp.slow_path_reason", "too_many_extra_files");
+        return false;
+    }
+
     logger.debug("Taking fast path");
     return true;
 }

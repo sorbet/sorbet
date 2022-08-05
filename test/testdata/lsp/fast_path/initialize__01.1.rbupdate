@@ -1,0 +1,10 @@
+# typed: true
+# assert-slow-path: true
+
+class A_01
+  extend T::Sig
+  sig {params(x: String).void}
+  def initialize(x)
+    T.reveal_type(x) # error: `String`
+  end
+end
