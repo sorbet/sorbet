@@ -3,6 +3,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/util/type_resolver_util.h>
 
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
 #include "common/Random.h"
@@ -390,8 +391,14 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs, boo
     com::stripe::rubytyper::FileTable files;
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
-        if (!showFull && file.data(gs).isPayload()) {
-            continue;
+        if (file.data(gs).isPayload()) {
+            if (!showFull) {
+                continue;
+            } else if (gs.censorForSnapshotTests && i > 10) {
+                // Only show the first 10 payload files for the sake of snapshot tests, so that
+                // adding a new RBI file to the payload doesn't require updating snapshot tests.
+                continue;
+            }
         }
         auto *entry = files.add_files();
         auto path_view = file.data(gs).path();
