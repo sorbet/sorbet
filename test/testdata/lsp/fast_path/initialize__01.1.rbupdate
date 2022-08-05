@@ -1,7 +1,7 @@
 # typed: true
 # assert-slow-path: true
 
-class A
+class A_01
   extend T::Sig
   sig {params(x: String).void}
   def initialize(x)

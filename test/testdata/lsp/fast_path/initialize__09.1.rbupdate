@@ -1,6 +1,7 @@
 # typed: true
+# exclude-from-file-update: true
 
-class A_01
+class A_09
   extend T::Sig
   sig {params(x: Integer).void}
   def initialize(x)
