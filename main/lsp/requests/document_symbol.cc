@@ -83,6 +83,35 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
     }
 }
 
+struct RangeInfo {
+    unique_ptr<Range> range;
+    unique_ptr<Range> selectionRange;
+};
+
+std::optional<RangeInfo> rangesForSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
+                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping) {
+    RangeInfo info;
+    auto it = defMapping.find(symRef);
+    if (it != defMapping.end()) {
+        info.range = Range::fromLoc(gs, it->second.loc);
+        info.selectionRange = Range::fromLoc(gs, it->second.declLoc);
+    } else {
+        auto loc = symRef.loc(gs);
+        if (!loc.file().exists()) {
+            return nullopt;
+        }
+
+        info.range = Range::fromLoc(gs, loc);
+        info.selectionRange = Range::fromLoc(gs, loc);
+    }
+
+    if (info.range == nullptr || info.selectionRange == nullptr) {
+        return nullopt;
+    }
+
+    return info;
+}
+
 std::unique_ptr<DocumentSymbol>
 symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
                          const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
@@ -90,25 +119,14 @@ symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, co
     if (!symRef.exists()) {
         return nullptr;
     }
-    auto loc = symRef.loc(gs);
-    if (!loc.file().exists() || hideSymbol(gs, symRef)) {
+    if (hideSymbol(gs, symRef)) {
+        return nullptr;
+    }
+    auto info = rangesForSymbol(gs, symRef, defMapping);
+    if (!info.has_value()) {
         return nullptr;
     }
     auto kind = symbolRef2SymbolKind(gs, symRef);
-    auto it = defMapping.find(symRef);
-    unique_ptr<Range> range;
-    unique_ptr<Range> selectionRange;
-    if (it != defMapping.end()) {
-        range = Range::fromLoc(gs, it->second.loc);
-        selectionRange = Range::fromLoc(gs, it->second.declLoc);
-    } else {
-        range = Range::fromLoc(gs, loc);
-        selectionRange = Range::fromLoc(gs, loc);
-    }
-
-    if (range == nullptr || selectionRange == nullptr) {
-        return nullptr;
-    }
 
     string prefix;
     auto owner = symRef.owner(gs);
@@ -116,7 +134,7 @@ symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, co
         prefix = "self.";
     }
     auto result =
-        make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(range), move(selectionRange));
+        make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(info->range), move(info->selectionRange));
 
     // Previous versions of VSCode have a bug that requires this non-optional field to be present.
     // This previously tried to include the method signature but due to issues where large signatures were not readable
