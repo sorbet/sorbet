@@ -3101,27 +3101,66 @@ public:
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType);
-        ENFORCE(tuple);
-        TypePtr argType = nullptr;
-        if (args.args.size() == 1) {
-            argType = args.args.front()->type;
-        }
-        if (!isa_type<IntegerLiteralType>(argType)) {
+        if (args.args.empty() || args.args.size() > 2) {
             return;
         }
 
+        auto *tuple = cast_type<TupleType>(args.thisType);
+        ENFORCE(tuple);
+        auto tupleSize = tuple->elems.size();
+
+        auto argType = args.args.front()->type;
+        if (!isa_type<IntegerLiteralType>(argType)) {
+            // One day we might want to handle support for ranges,
+            // but it's tricky because we don't have literal types for ranges.
+            //
+            // We might honestly have better luck by desugaring literal ranges to an equivalent
+            // index+len call if supporting literal ranges isn't a good idea.
+            return;
+        }
         auto &lit = cast_type_nonnull<IntegerLiteralType>(argType);
 
         auto idx = lit.value;
         if (idx < 0) {
-            idx = tuple->elems.size() + idx;
+            idx = tupleSize + idx;
         }
-        if (idx >= tuple->elems.size()) {
+
+        if (args.args.size() == 1) {
+            if (idx >= tupleSize) {
+                res.returnType = Types::nilClass();
+            } else {
+                res.returnType = tuple->elems[idx];
+            }
+            return;
+        }
+
+        ENFORCE(args.args.size() == 2);
+
+        if (idx < 0 || idx > tupleSize) {
             res.returnType = Types::nilClass();
-        } else {
-            res.returnType = tuple->elems[idx];
+            return;
         }
+
+        const auto &lengthType = args.args[1]->type;
+        if (!isa_type<IntegerLiteralType>(lengthType)) {
+            return;
+        }
+        const auto &lengthLit = cast_type_nonnull<IntegerLiteralType>(lengthType);
+        auto length = lengthLit.value;
+        if (length < 0) {
+            res.returnType = Types::nilClass();
+            return;
+        }
+
+        if (tupleSize < length || tupleSize < idx + length) {
+            length = tupleSize - idx;
+        }
+
+        vector<TypePtr> newElems;
+        for (long i = 0; i < length; i++) {
+            newElems.emplace_back(tuple->elems[idx + i]);
+        }
+        res.returnType = make_type<TupleType>(move(newElems));
     }
 } Tuple_squareBrackets;
 

@@ -12,6 +12,17 @@ x[i]
 
 T.assert_type!(x[i], T.any(NilClass, Integer, String, Symbol, Float))
 
+T.reveal_type(x[0, 0]) # error: `[] (0-tuple)`
+T.reveal_type(x[0, -1]) # error: `NilClass`
+T.reveal_type(x[-2, 1]) # error: `[Symbol(:what)] (1-tuple)`
+T.reveal_type(x[1, 10]) # error: `[String("hi"), Symbol(:what), Float(3.141593)] (3-tuple)`
+long_max = 9223372036854775807
+T.reveal_type(x[1, long_max]) # error: `[String("hi"), Symbol(:what), Float(3.141593)] (3-tuple)`
+T.reveal_type(x[-6, 1]) # error: `NilClass`
+T.reveal_type(x[1, 2]) # error: `[String("hi"), Symbol(:what)] (2-tuple)`
+
+T.reveal_type(x[1..2]) # error: `T.nilable(T::Array[T.any(Integer, String, Symbol, Float)])`
+
 T.assert_type!([1, 2].min, Integer)
 T.assert_type!([1, 2].max, Integer)
 T.assert_type!([1, 2].first, Integer)
