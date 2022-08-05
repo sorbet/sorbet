@@ -23,15 +23,15 @@ suggest-typed-true.rb:1: You could add `# typed: true` https://srb.help/7022
         ^
 Errors: 1
 -------------------------
-suggest-typed-ignore.rb:1: You could add `# typed: ignore` https://srb.help/7022
+suggest-typed-ignore.rb:1: You could add `# typed: false` https://srb.help/7022
      1 |Foo
         ^
   Autocorrect: Done
-    suggest-typed-ignore.rb:1: Inserted `# typed: ignore`
+    suggest-typed-ignore.rb:1: Inserted `# typed: false`
      1 |Foo
         ^
 Errors: 1
-# typed: ignore
+# typed: false
 Foo
 No errors! Great job.
 -------------------------
