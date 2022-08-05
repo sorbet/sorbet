@@ -156,62 +156,64 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                       [](const auto &symhash) { return symhash.nameHash; });
     core::ShortNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 
-    if (!result.changedSymbolNameHashes.empty()) {
-        // ^ optimization--skip the loop over every file in the project (`gs.getFiles()`) if
+    if (result.changedSymbolNameHashes.empty()) {
+        // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
         // the set of changed symbols is empty (e.g., running a completion request inside a
         // method body)
-        int i = -1;
-        for (auto &oldFile : gs.getFiles()) {
-            i++;
-            if (oldFile == nullptr) {
-                continue;
-            }
+        return result;
+    }
 
-            auto ref = core::FileRef(i);
-            if (result.changedFiles.contains(ref)) {
-                continue;
-            }
+    int i = -1;
+    for (auto &oldFile : gs.getFiles()) {
+        i++;
+        if (oldFile == nullptr) {
+            continue;
+        }
 
-            if (config.opts.stripePackages && oldFile->isPackage()) {
-                continue; // See note above about --stripe-packages.
-            }
+        auto ref = core::FileRef(i);
+        if (result.changedFiles.contains(ref)) {
+            continue;
+        }
 
-            if (oldFile->isPayload()) {
-                // Don't retypecheck files in the payload via incremental namer, as that might
-                // cause well-known symbols to get deleted and assigned a new SymbolRef ID.
-                continue;
-            }
+        if (config.opts.stripePackages && oldFile->isPackage()) {
+            continue; // See note above about --stripe-packages.
+        }
 
-            ENFORCE(oldFile->getFileHash() != nullptr);
-            const auto &oldHash = *oldFile->getFileHash();
-            vector<core::ShortNameHash> intersection;
-            absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
-                                     std::back_inserter(intersection));
-            if (intersection.empty()) {
-                continue;
-            }
+        if (oldFile->isPayload()) {
+            // Don't retypecheck files in the payload via incremental namer, as that might
+            // cause well-known symbols to get deleted and assigned a new SymbolRef ID.
+            continue;
+        }
 
-            result.extraFiles.emplace_back(ref);
+        ENFORCE(oldFile->getFileHash() != nullptr);
+        const auto &oldHash = *oldFile->getFileHash();
+        vector<core::ShortNameHash> intersection;
+        absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
+                                 std::back_inserter(intersection));
+        if (intersection.empty()) {
+            continue;
+        }
 
-            if (result.changedFiles.size() + result.extraFiles.size() > config.opts.lspMaxFilesOnFastPath) {
-                // Short circuit, as a performance optimization.
-                // (gs.getFiles() is usually 3-4 orders of magnitude larger than lspMaxFilesOnFastPath)
-                //
-                // One of two things could be true:
-                // - We're running on the indexer thread to decide canTakeFastPath, which only cares about how
-                //   many extra files there are, not what they are.
-                // - We're running on the typechecker thread (knowing that canTakeFastPath was already true)
-                //   and simply need to compute the list of files to typecheck. But that would be a
-                //   contradiction--because otherwise the indexer would have marked the update as not being
-                //   able to take the fast path.
-                //
-                // So it's actually only the first thing that's true.
+        result.extraFiles.emplace_back(ref);
 
-                // Crude indicator of being on indexer thread, as the typechecker thread always
-                // calls us with an empty map of evictedFiles
-                ENFORCE(!evictedFiles.empty());
-                return result;
-            }
+        if (result.changedFiles.size() + result.extraFiles.size() > config.opts.lspMaxFilesOnFastPath) {
+            // Short circuit, as a performance optimization.
+            // (gs.getFiles() is usually 3-4 orders of magnitude larger than lspMaxFilesOnFastPath)
+            //
+            // One of two things could be true:
+            // - We're running on the indexer thread to decide canTakeFastPath, which only cares about how
+            //   many extra files there are, not what they are.
+            // - We're running on the typechecker thread (knowing that canTakeFastPath was already true)
+            //   and simply need to compute the list of files to typecheck. But that would be a
+            //   contradiction--because otherwise the indexer would have marked the update as not being
+            //   able to take the fast path.
+            //
+            // So it's actually only the first thing that's true.
+
+            // Crude indicator of being on indexer thread, as the typechecker thread always
+            // calls us with an empty map of evictedFiles
+            ENFORCE(!evictedFiles.empty());
+            return result;
         }
     }
 
