@@ -89,13 +89,19 @@ struct RangeInfo {
 };
 
 std::optional<RangeInfo> rangesForSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
-                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping) {
+                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
+                                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced) {
     RangeInfo info;
     auto it = defMapping.find(symRef);
     if (it != defMapping.end()) {
         info.range = Range::fromLoc(gs, it->second.loc);
         info.selectionRange = Range::fromLoc(gs, it->second.declLoc);
     } else {
+        auto it = forced.find(symRef);
+        if (it != forced.end()) {
+            return rangesForSymbol(gs, it->second, defMapping, forced);
+        }
+
         auto loc = symRef.loc(gs);
         if (!loc.file().exists()) {
             return nullopt;
@@ -122,7 +128,7 @@ symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, co
     if (hideSymbol(gs, symRef)) {
         return nullptr;
     }
-    auto info = rangesForSymbol(gs, symRef, defMapping);
+    auto info = rangesForSymbol(gs, symRef, defMapping, forced);
     if (!info.has_value()) {
         return nullptr;
     }
