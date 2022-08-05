@@ -61,9 +61,8 @@ public:
         std::vector<core::FileRef> extraFiles;
     };
 
-    // TODO(jez) It would be nice to have this accept `...<const core::File>...` but I can't figure
-    // out how to get the callers, which do not have `const core::File`'s. I don't know how to have
-    // C++ let me do upcasts on constness inside templates like that.
+    // It would be nice to have this accept `...<const core::File>...`
+    // As written, it's possible to mutate the files, but that's not intentional.
     static FastPathFilesToTypecheckResult
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles);
