@@ -27,12 +27,12 @@ struct SymbolFileLocs {
     core::Loc declLoc;
 };
 
-class DefinitionLocSaver {
+class SymbolFileLocSaver {
 public:
     core::FileRef fref;
     UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping;
 
-    DefinitionLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping)
+    SymbolFileLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping)
         : fref(fref), mapping(mapping) {}
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
@@ -243,7 +243,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
         candidates.end());
 
     UnorderedMap<core::SymbolRef, SymbolFileLocs> defMapping;
-    DefinitionLocSaver saver{fref, defMapping};
+    SymbolFileLocSaver saver{fref, defMapping};
     core::Context ctx{gs, core::Symbols::root(), fref};
     auto resolved = typechecker.getResolved({fref});
     ast::TreeWalk::apply(ctx, saver, resolved[0].tree);
