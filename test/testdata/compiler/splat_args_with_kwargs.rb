@@ -17,44 +17,46 @@ p(0,*[],**{})
 p(0,*[],c: 22,**{})
 p(*[],c: 22,**{})
 
-def f(a,b,c,d: 5)
-  yield (a+b+c+d)
+class A
+  def self.f(a,b,c,d: 5)
+    yield (a+b+c+d)
+  end
 end
 
-f(*[1,2,3],**{d:4}) { |x| p x }
-f(*[1,2,3],d: 4) { |x| p x }
-f(*[1,2,3]) { |x| p x }
-f(*[1,2,3,{}]) { |x| p x }
-f(*[1,2,3,{d: 10}]) { |x| p x }
+A.f(*[1,2,3],**{d:4}) { |x| p x }
+A.f(*[1,2,3],d: 4) { |x| p x }
+A.f(*[1,2,3]) { |x| p x }
+A.f(*[1,2,3,{}]) { |x| p x }
+A.f(*[1,2,3,{d: 10}]) { |x| p x }
 
 def expects_ArgumentError
   begin
     yield
   rescue ArgumentError => e
     p e.message
-  else
-    raise "Didn't get expected ArgumentError"
+  rescue => e
+    puts "Didn't get ArgumentError: #{e.class} #{e.message}"
   end
 end
 
 # Regular splat arguments are not re-processed as keyword args.
 expects_ArgumentError do
-  f(*[1,2,3,:d,10]) {|x| p x}
+  T.unsafe(A).f(*[1,2,3,:d,10]) {|x| p x}
 end
 expects_ArgumentError do
-  f(*[1,2,3,:d,10], d: 9) {|x| p x}
+  T.unsafe(A).f(*[1,2,3,:d,10], d: 9) {|x| p x}
 end
 # Splat args with a kwargs-style hash are not re-processed if the call has kwargs.
 expects_ArgumentError do
-  f(*[1,2,3,{d: 10}], d: 9) {|x| p x}
+  T.unsafe(A).f(*[1,2,3,{d: 10}], d: 9) {|x| p x}
 end
 # Splat args with a kwargs-style hash are not re-processed if the call has a kwsplat
 expects_ArgumentError do
-  f(*[1,2,3,{d: 10}], **{d: 9}) {|x| p x}
+  T.unsafe(A).f(*[1,2,3,{d: 10}], **{d: 9}) {|x| p x}
 end
 # Number of args checks are done before valid/invalid kwargs checks.
 expects_ArgumentError do
-  f(*[1,2,3,{d: 10}], e: 9) {|x| p x}
+  T.unsafe(A).f(*[1,2,3,{d: 10}], e: 9) {|x| p x}
 end
 
 def g(*args,**kwargs)

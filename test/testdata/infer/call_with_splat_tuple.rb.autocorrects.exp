@@ -1,0 +1,20 @@
+# -- test/testdata/infer/call_with_splat_tuple.rb --
+# typed: true
+extend T::Sig
+
+sig {params(x: T.nilable(Integer)).void}
+def example1(x)
+  T.must(x).even?()
+  # ^^^^^ error: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)`
+  T.must(x).even?(*[])
+  # ^^^^^ error: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)`
+end
+
+sig {params(x: Integer).void}
+def example2(x)
+  x.even?()
+  # ^^^^ error: Method `even` does not exist on `Integer`
+  x.even?(*[])
+  # ^^^^ error: Method `even` does not exist on `Integer`
+end
+# ------------------------------
