@@ -521,6 +521,7 @@ class Reline::History < Array
   def initialize(config); end
   def push(*val); end
   def to_s; end
+  Elem = type_member(:out)
 end
 module Reline::Terminfo
   def self.curses_dl; end
