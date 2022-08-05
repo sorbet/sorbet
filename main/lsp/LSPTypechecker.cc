@@ -235,7 +235,7 @@ struct FastPathFilesToTypecheckResult {
 };
 
 FastPathFilesToTypecheckResult getFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
-                                                   const vector<shared_ptr<core::File>> updatedFiles) {
+                                                   const vector<shared_ptr<core::File>> &updatedFiles) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedMethodSymbolHashes;
