@@ -357,7 +357,7 @@ public:
             ensureOutputDir(irOutputDir.value(), fileName);
         }
         if (!compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), compiledOutputDir.value(), irOutputDir,
-                                              fileName)) {
+                                              fileName, gs.censorForSnapshotTests)) {
             compiler::failCompilation(gs, core::Loc(f, 0, 0), "Object file emitter failed");
         }
     };

@@ -42,6 +42,7 @@
 #include "compiler/Linker/Linker.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "compiler/Passes/Passes.h"
+#include <regex>
 #include <string_view>
 
 using namespace std;
@@ -330,7 +331,8 @@ void ObjectFileEmitter::init() {
 
 [[nodiscard]] bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx,
                                           unique_ptr<llvm::Module> module, string_view soDir,
-                                          optional<string_view> llvmIrDir, string_view objectName) {
+                                          optional<string_view> llvmIrDir, string_view objectName,
+                                          bool censorForSnapshotTests) {
     // We need to ensure that the codegen flags have been initialized, so that InitTargetOptionsFromCodeGenFlags has
     // sane defaults to use.
     static llvm::codegen::RegisterCodeGenFlags codeGenFlags;
@@ -376,6 +378,11 @@ void ObjectFileEmitter::init() {
         llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
         ppm.add(llvm::createPrintModulePass(llFile, ""));
         ppm.run(*module);
+        if (censorForSnapshotTests) {
+            auto llvmIRTextContents = FileOps::read(name);
+            auto censored =
+                std::regex_replace(llvmIRTextContents, regex(R"(<static-init>\$\d+)"), "<static-init>$CENSORED");
+        }
     }
 
     // add platform specific information
