@@ -57,11 +57,11 @@ public:
 std::unique_ptr<DocumentSymbol>
 symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
                          const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
-                         const UnorderedSet<core::SymbolRef> &forced);
+                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced);
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
                                          const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
-                                         const UnorderedSet<core::SymbolRef> &forced,
+                                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
     if (!sym.isClassOrModule()) {
         return;
@@ -83,40 +83,64 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
     }
 }
 
+struct RangeInfo {
+    unique_ptr<Range> range;
+    unique_ptr<Range> selectionRange;
+};
+
+std::optional<RangeInfo> rangesForSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
+                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
+                                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced) {
+    RangeInfo info;
+    auto it = defMapping.find(symRef);
+    if (it != defMapping.end()) {
+        info.range = Range::fromLoc(gs, it->second.loc);
+        info.selectionRange = Range::fromLoc(gs, it->second.declLoc);
+    } else {
+        auto it = forced.find(symRef);
+        if (it != forced.end()) {
+            return rangesForSymbol(gs, it->second, defMapping, forced);
+        }
+
+        auto loc = symRef.loc(gs);
+        if (!loc.file().exists()) {
+            return nullopt;
+        }
+
+        info.range = Range::fromLoc(gs, loc);
+        info.selectionRange = Range::fromLoc(gs, loc);
+    }
+
+    if (info.range == nullptr || info.selectionRange == nullptr) {
+        return nullopt;
+    }
+
+    return info;
+}
+
 std::unique_ptr<DocumentSymbol>
 symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
                          const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
-                         const UnorderedSet<core::SymbolRef> &forced) {
+                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced) {
     if (!symRef.exists()) {
         return nullptr;
     }
-    auto loc = symRef.loc(gs);
-    if (!loc.file().exists() || hideSymbol(gs, symRef)) {
+    if (hideSymbol(gs, symRef)) {
+        return nullptr;
+    }
+    auto info = rangesForSymbol(gs, symRef, defMapping, forced);
+    if (!info.has_value()) {
         return nullptr;
     }
     auto kind = symbolRef2SymbolKind(gs, symRef);
-    auto it = defMapping.find(symRef);
-    unique_ptr<Range> range;
-    unique_ptr<Range> selectionRange;
-    if (it != defMapping.end()) {
-        range = Range::fromLoc(gs, it->second.loc);
-        selectionRange = Range::fromLoc(gs, it->second.declLoc);
-    } else {
-        range = Range::fromLoc(gs, loc);
-        selectionRange = Range::fromLoc(gs, loc);
-    }
-
-    if (range == nullptr || selectionRange == nullptr) {
-        return nullptr;
-    }
 
     string prefix;
     auto owner = symRef.owner(gs);
     if (owner.exists() && owner.isClassOrModule() && owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
         prefix = "self.";
     }
-    auto result =
-        make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(range), move(selectionRange));
+    auto result = make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(info->range),
+                                              move(info->selectionRange));
 
     // Previous versions of VSCode have a bug that requires this non-optional field to be present.
     // This previously tried to include the method signature but due to issues where large signatures were not readable
@@ -210,7 +234,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
 
     // We may wind up in a situation where we have something like:
     //
-    // A::B::C::D::E
+    // module A::B; class C::D::E; ...; end; end
     //
     // B and E are candidates, but neither C nor D have locs in the current
     // file.  We'll eliminate E from candidacy, but then when we go to get
@@ -218,9 +242,23 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     // we won't walk C's children.  Which means we'll never walk D's children
     // and therefore E won't appear in the list of document symbols.
     //
-    // So we need to ensure that both C and D are displayed; this set records
-    // symbols that appear in an ownership chain between two candidates.
-    UnorderedSet<core::SymbolRef> forced;
+    // So we need to ensure that both C and D are represented in the document
+    // symbols for the file.  But this raises a separate issue: what ranges do
+    // we assign to the symbols for C and D?  Giving them ranges representing
+    // their actual definitions is not correct, because their locs appear in an
+    // entirely different file.  Giving them null ranges seems reasonable, but
+    // that solution breaks cursor following in VSCode.
+    //
+    // As a sort of hacky compromise, we will give them ranges corresponding to
+    // the nearest owner that appears in the file.  For C and D above, that
+    // would be B.  (It would probably be more technically correct to give C and
+    // D ranges corresponding to E, but this is complicated to do with our setup
+    // here.).
+    //
+    // This map's keys record symbols that appear in an ownership chain between two
+    // candidates; the corresponding values are the closest ancestor that appears
+    // in this file.
+    UnorderedMap<core::SymbolRef, core::SymbolRef> forced;
     for (auto ref : candidates) {
         auto owner = ref.owner(gs);
         while (owner != core::Symbols::root()) {
@@ -228,7 +266,13 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
                 deduplicatedCandidates.erase(ref);
                 auto forcedOwner = ref.owner(gs);
                 while (forcedOwner != owner) {
-                    forced.insert(forcedOwner);
+                    // We could record `owner` here, but `owner` itself may
+                    // eventually wind up in `forced`, which implies that the
+                    // value for `forcedOwner` should really be something
+                    // further up the ownership chain.  We'll fixup the values
+                    // later once we're sure of where all the original candidates
+                    // go.
+                    forced[forcedOwner] = core::Symbols::noSymbol();
                     forcedOwner = forcedOwner.owner(gs);
                 }
                 break;
@@ -237,6 +281,19 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
             owner = owner.owner(gs);
         }
     }
+
+    for (auto &slot : forced) {
+        ENFORCE(!deduplicatedCandidates.contains(slot.first));
+        auto owner = slot.first.owner(gs);
+        while (!deduplicatedCandidates.contains(owner)) {
+            ENFORCE(owner != core::Symbols::root());
+            ENFORCE(owner.exists());
+            owner = owner.owner(gs);
+        }
+        ENFORCE(owner.exists());
+        slot.second = owner;
+    }
+
     candidates.erase(
         std::remove_if(candidates.begin(), candidates.end(),
                        [&deduplicatedCandidates](const auto ref) { return !deduplicatedCandidates.contains(ref); }),
