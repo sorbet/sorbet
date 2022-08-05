@@ -783,7 +783,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
 
                     auto kwargs = node2TreeImpl(dctx, std::move(kwArray));
-                    auto method = MK::Symbol(send->methodLoc, send->method);
+                    auto method = MK::Symbol(locZeroLen, send->method);
 
                     if (auto *array = cast_tree<Array>(kwargs)) {
                         DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
@@ -796,7 +796,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     sendargs.emplace_back(std::move(kwargs));
                     ExpressionPtr res;
                     if (block == nullptr && !anonymousBlockPass) {
-                        res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), locZeroLen, 4,
+                        res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                        std::move(sendargs), flags);
                     } else {
                         ExpressionPtr convertedBlock;

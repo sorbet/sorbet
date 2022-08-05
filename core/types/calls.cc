@@ -2411,7 +2411,7 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
             Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.args[1], sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,

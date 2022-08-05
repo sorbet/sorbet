@@ -12,7 +12,7 @@ end
 sig {params(x: Integer).void}
 def example2(x)
   x.even()
-  # ^^^^^ error: Method `even` does not exist on `Integer`
+  # ^^^^ error: Method `even` does not exist on `Integer`
   x.even(*[])
-  # ^^^^^ error: Method `even` does not exist on `Integer`
+  # ^^^^ error: Method `even` does not exist on `Integer`
 end
