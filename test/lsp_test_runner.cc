@@ -86,6 +86,8 @@ void validateDocumentSymbol(unique_ptr<DocumentSymbol> &sym) {
     REQUIRE(sym->selectionRange->start != nullptr);
     REQUIRE(sym->selectionRange->end != nullptr);
 
+    INFO(fmt::format("Checking range {} contains selectionRange {}", sym->range->toJSON(false),
+                     sym->selectionRange->toJSON(false)));
     REQUIRE(sym->range->contains(*sym->selectionRange));
 
     if (sym->children.has_value()) {
