@@ -104,8 +104,16 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
         if (fref.exists()) {
-            // Update to existing file on fast path
-            ENFORCE(fref.data(gs).getFileHash() != nullptr);
+            // When run from the indexer, the old file will actually have been evicted from the initialGS
+            // so that the initialGS containing the new file can be given to the pipeline to be indexed
+            // (and thus have the new hashes computed), so that the `updatedFile` and
+            // `fref.data(gs)` actually are the same File object. For this case, we have to find the
+            // old File's hashes in `evictedFiles`.
+            //
+            // When run from the typechecker, the old file will not yet have been evicted before
+            // fastPathFilesToTypecheck is called (it will be evicted later on that thread, right
+            // before calling into the pipeline). On that thread, `updatedFile` represents the new
+            // File, and the thing in GlobalState is the old File.
             const auto &oldSymbolHashes = evictedFiles.empty()
                                               ? fref.data(gs).getFileHash()->localSymbolTableHashes
                                               : evictedFiles.at(fref)->getFileHash()->localSymbolTableHashes;
