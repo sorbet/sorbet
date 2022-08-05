@@ -1399,7 +1399,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
                                    method.show(gs), possibleArg);
                     auto howManyExtra = numArgsGiven - hashArgsCount - maxPossiblePositional;
-                    if (howManyExtra == 1) {
+                    if (howManyExtra == 1 && extraArgsLoc.adjustLen(gs, -1, 2).source(gs) != "&:") {
                         e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
                                       "{}: ", possibleArg);
                     }

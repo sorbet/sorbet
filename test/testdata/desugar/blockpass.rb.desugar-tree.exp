@@ -39,8 +39,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def foo<<todo method>>(&blk)
     begin
-      <self>.calls_with_object() do |<block-pass>$2|
-        <block-pass>$2.meth()
+      <self>.calls_with_object() do |*<block-pass>$2|
+        ::<Magic>.<call-with-splat>(<block-pass>$2.[](0), :meth, ::<Magic>.<splat>(<block-pass>$2.[](1, 9223372036854775807)), nil)
       end
       <self>.calls_with_object() do |*args|
         ::<Magic>.<call-with-splat>(:meth.to_proc(), :call, ::<Magic>.<splat>(args), nil)
@@ -57,24 +57,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.calls_with_object() do |*args|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C HasToProc>.new().to_proc(), :call, ::<Magic>.<splat>(args), nil)
       end
-      <emptyTree>::<C CallsWithObject>.calls_with_object() do |<block-pass>$3|
-        <block-pass>$3.meth()
+      <emptyTree>::<C CallsWithObject>.calls_with_object() do |*<block-pass>$3|
+        ::<Magic>.<call-with-splat>(<block-pass>$3.[](0), :meth, ::<Magic>.<splat>(<block-pass>$3.[](1, 9223372036854775807)), nil)
       end
       begin
         <assignTemp>$4 = <emptyTree>::<C CallsWithObject>
         if ::NilClass.===(<assignTemp>$4)
           ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
         else
-          <assignTemp>$4.calls_with_object() do |<block-pass>$5|
-            <block-pass>$5.meth()
+          <assignTemp>$4.calls_with_object() do |*<block-pass>$5|
+            ::<Magic>.<call-with-splat>(<block-pass>$5.[](0), :meth, ::<Magic>.<splat>(<block-pass>$5.[](1, 9223372036854775807)), nil)
           end
         end
       end
-      <emptyTree>::<C CallsWithObjectChild>.calls_with_object() do |<block-pass>$6|
-        <block-pass>$6.meth()
+      <emptyTree>::<C CallsWithObjectChild>.calls_with_object() do |*<block-pass>$6|
+        ::<Magic>.<call-with-splat>(<block-pass>$6.[](0), :meth, ::<Magic>.<splat>(<block-pass>$6.[](1, 9223372036854775807)), nil)
       end
-      <self>.calls_arg_with_object(<emptyTree>::<C HasMeth>.new()) do |<block-pass>$7|
-        <block-pass>$7.meth()
+      <self>.calls_arg_with_object(<emptyTree>::<C HasMeth>.new()) do |*<block-pass>$7|
+        ::<Magic>.<call-with-splat>(<block-pass>$7.[](0), :meth, ::<Magic>.<splat>(<block-pass>$7.[](1, 9223372036854775807)), nil)
       end
       <self>.calls_arg_with_object(<emptyTree>::<C HasMeth>.new()) do |x|
         x.meth()

@@ -331,13 +331,16 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     Literal *lit = cast_tree<Literal>(expr);
     ENFORCE(lit && lit->isSymbol());
 
-    // &:foo => {|temp| temp.foo() }
+    // &:foo => {|*temp| (temp[0]).foo(*tmp[1, LONG_MAX]) }
     core::NameRef name = core::cast_type_nonnull<core::NamedLiteralType>(lit->value).asName();
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
-    ExpressionPtr recv = MK::Local(zeroLengthLoc, temp);
-    ExpressionPtr body = MK::Send0(loc, std::move(recv), name, zeroLengthLoc);
-    return MK::Block1(loc, std::move(body), MK::Local(zeroLengthLoc, temp));
+    auto recv = MK::Send1(zeroLengthLoc, MK::Local(zeroLengthLoc, temp), core::Names::squareBrackets(), zeroLengthLoc,
+                          MK::Int(zeroLengthLoc, 0));
+    auto sliced = MK::Send2(zeroLengthLoc, MK::Local(zeroLengthLoc, temp), core::Names::squareBrackets(), zeroLengthLoc,
+                            MK::Int(zeroLengthLoc, 1), MK::Int(zeroLengthLoc, LONG_MAX));
+    auto body = MK::CallWithSplat(loc, std::move(recv), name, zeroLengthLoc, MK::Splat(zeroLengthLoc, move(sliced)));
+    return MK::Block1(loc, std::move(body), MK::RestArg(zeroLengthLoc, MK::Local(zeroLengthLoc, temp)));
 }
 
 ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {

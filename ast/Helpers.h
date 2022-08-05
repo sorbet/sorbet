@@ -194,9 +194,9 @@ public:
     }
 
     static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name,
-                                       ExpressionPtr args) {
-        return Send3(loc, Magic(loc), core::Names::callWithSplat(), loc, std::move(recv), MK::Symbol(loc, name),
-                     std::move(args));
+                                       core::LocOffsets funLoc, ExpressionPtr splat) {
+        return Send4(loc, Magic(loc), core::Names::callWithSplat(), loc, std::move(recv), MK::Symbol(loc, name),
+                     std::move(splat), MK::Nil(loc.copyWithZeroLength()));
     }
 
     static ExpressionPtr InsSeq1(core::LocOffsets loc, ExpressionPtr stat, ExpressionPtr expr) {
