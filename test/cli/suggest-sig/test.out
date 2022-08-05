@@ -235,7 +235,7 @@ suggest-sig.rb:124: Method `generated` does not exist on `T::Private::Methods::D
     suggest-sig.rb:124: Replaced with `inherited`
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                                                                          ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L133: Defined here
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
      133 |  def inherited(arg0); end
             ^^^^^^^^^^^^^^^^^^^
 
@@ -250,7 +250,7 @@ suggest-sig.rb:137: Method `generated` does not exist on `T::Private::Methods::D
     suggest-sig.rb:137: Replaced with `inherited`
      137 |  generated
             ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L133: Defined here
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
      133 |  def inherited(arg0); end
             ^^^^^^^^^^^^^^^^^^^
 

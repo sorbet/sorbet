@@ -278,7 +278,7 @@ test/cli/flow-sensitivity-hint/test.rb:144: Method `even?` does not exist on `T.
     To fix, refactor so the `===` call is on a variable and use that variable everywhere,
     or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L704: Insert `self.`
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED: Insert `self.`
      704 |  def even?(); end
                 ^
 

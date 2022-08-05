@@ -30,7 +30,7 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
     10 |"hi" + foo
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
     68 |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
@@ -58,7 +58,7 @@ suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `a
     15 |"hi" + 1
                ^
   Expected `String` for argument `arg0` of method `String#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
     68 |        arg0: String,
                 ^^^^
   Got `Integer(1)` originating from:
@@ -146,7 +146,7 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
     10 |"hi" + foo
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
     68 |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
@@ -174,7 +174,7 @@ suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `a
     15 |"hi" + 1
                ^
   Expected `String` for argument `arg0` of method `String#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L68:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
     68 |        arg0: String,
                 ^^^^
   Got `Integer(1)` originating from:

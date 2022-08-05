@@ -2,7 +2,7 @@ test/cli/remove-path-prefix-no-match/remove-path-prefix-no-match.rb:2: Expected 
      2 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:

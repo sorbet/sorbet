@@ -2,7 +2,7 @@ test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `Strin
      1 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
@@ -14,7 +14,7 @@ Errors: 1
      1 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
@@ -26,7 +26,7 @@ test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `Strin
      1 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:

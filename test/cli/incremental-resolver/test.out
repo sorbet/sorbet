@@ -122,7 +122,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void`
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Replace with `load`
     68 |  sig {void}
                ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1909: Defined here
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
     1909 |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -141,7 +141,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void`
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Replace with `load`
     69 |  sig {void}
                ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1909: Defined here
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
     1909 |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 10
