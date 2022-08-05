@@ -362,9 +362,6 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
     for (auto [fref, idx] : result.changedFiles) {
-        // TODO(jez) If you are seeing problems, on problem might be because this used to use only
-        // changedMethodSymbolHashes instead of changedSymbolNameHashes. I think this change should
-        // be safe but it's possible I'm wrong.
         if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
             // Only set oldFoundMethodHashesForFiles if symbols actually changed
             // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
