@@ -783,8 +783,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
 
                     auto kwargs = node2TreeImpl(dctx, std::move(kwArray));
-                    auto method = MK::Literal(
-                        loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), send->method));
+                    auto method = MK::Symbol(send->methodLoc, send->method);
 
                     if (auto *array = cast_tree<Array>(kwargs)) {
                         DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);

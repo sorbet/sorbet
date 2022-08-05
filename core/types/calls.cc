@@ -2411,7 +2411,7 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
             Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.args[1], sendArgLocs};
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,
@@ -2427,15 +2427,14 @@ public:
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
-        dispatched.main.errors.clear();
+        dispatched.main.errors = move(res.main.errors);
 
-        // TODO(trevor) this should merge constrains from `res` and `dispatched` instead
+        // TODO(trevor) this should merge constraints from `res` and `dispatched` instead
         if ((dispatched.main.constr == nullptr) || dispatched.main.constr->isEmpty()) {
             dispatched.main.constr = move(res.main.constr);
         }
-        res.main = move(dispatched.main);
+        res = move(dispatched);
 
-        res.returnType = dispatched.returnType;
         return;
     }
 } Magic_callWithSplat;
