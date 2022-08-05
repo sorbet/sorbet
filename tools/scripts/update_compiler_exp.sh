@@ -62,6 +62,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
             syncback+=("$exp")
             echo \
                 bazel-bin/compiler/sorbet \
+                --censor-for-snapshot-tests \
                 --silence-dev-message \
                 --no-error-count \
                 --suppress-non-critical \
