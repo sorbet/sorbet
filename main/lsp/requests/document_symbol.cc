@@ -10,13 +10,57 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 namespace {
-std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
-                                                         core::FileRef filter,
-                                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping,
-                                                         const UnorderedSet<core::SymbolRef> &forced);
+
+// Document symbols in the LSP spec include two different ranges: one that covers
+// the entire extent of the definition and one that covers just what should be
+// shown when the symbol is selected.  Sorbet's loc for a symbol covers the latter
+// (e.g. ClassDef::declLoc, MethodDef::declLoc).
+//
+// We do store the former, but that loc lives in the AST, not in the symbol table
+// (e.g. ClassDef::loc, MethodDef::loc).  So we have to walk the AST to retrieve
+// that loc...and then we might as well record `declLoc` when we do so we can
+// ensure that both of the locs we're looking at are referencing the same file.
+// (We could do this with the locs from the symbol table, but it seems simpler
+// to do things this way.)
+struct SymbolFileLocs {
+    core::Loc loc;
+    core::Loc declLoc;
+};
+
+class DefinitionLocSaver {
+public:
+    core::FileRef fref;
+    UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping;
+
+    DefinitionLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping)
+        : fref(fref), mapping(mapping) {}
+
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
+        if (!klass.symbol.exists()) {
+            return;
+        }
+
+        mapping[klass.symbol] = SymbolFileLocs{core::Loc{fref, klass.loc}, core::Loc{fref, klass.declLoc}};
+    }
+
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &expr) {
+        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(expr);
+        if (!method.symbol.exists()) {
+            return;
+        }
+
+        mapping[method.symbol] = SymbolFileLocs{core::Loc{fref, method.loc}, core::Loc{fref, method.declLoc}};
+    }
+};
+
+std::unique_ptr<DocumentSymbol>
+symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
+                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
+                         const UnorderedSet<core::SymbolRef> &forced);
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
-                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping,
+                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
                                          const UnorderedSet<core::SymbolRef> &forced,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
     if (!sym.isClassOrModule()) {
@@ -39,10 +83,10 @@ void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::Symb
     }
 }
 
-std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
-                                                         core::FileRef filter,
-                                                         const UnorderedMap<core::SymbolRef, core::Loc> &defMapping,
-                                                         const UnorderedSet<core::SymbolRef> &forced) {
+std::unique_ptr<DocumentSymbol>
+symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
+                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
+                         const UnorderedSet<core::SymbolRef> &forced) {
     if (!symRef.exists()) {
         return nullptr;
     }
@@ -53,13 +97,15 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     auto kind = symbolRef2SymbolKind(gs, symRef);
     auto it = defMapping.find(symRef);
     unique_ptr<Range> range;
+    unique_ptr<Range> selectionRange;
     if (it != defMapping.end()) {
-        range = Range::fromLoc(gs, it->second);
-    }
-    if (range == nullptr) {
+        range = Range::fromLoc(gs, it->second.loc);
+        selectionRange = Range::fromLoc(gs, it->second.declLoc);
+    } else {
         range = Range::fromLoc(gs, loc);
+        selectionRange = Range::fromLoc(gs, loc);
     }
-    auto selectionRange = Range::fromLoc(gs, loc);
+
     if (range == nullptr || selectionRange == nullptr) {
         return nullptr;
     }
@@ -89,38 +135,6 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
     result->children = move(children);
     return result;
 }
-
-// Document symbols in the LSP spec include two different ranges: one that covers
-// the entire extent of the definition and one that covers just what should be
-// shown when the symbol is selected.  Sorbet's loc for a symbol covers the latter.
-// We do store the former, but that loc lives in the AST, not in the symbol table,
-// so we build a separate temporary mapping with this tree walker.
-class DefinitionLocSaver {
-public:
-    core::FileRef fref;
-    UnorderedMap<core::SymbolRef, core::Loc> &mapping;
-
-    DefinitionLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, core::Loc> &mapping)
-        : fref(fref), mapping(mapping) {}
-
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
-        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(expr);
-        if (!klass.symbol.exists()) {
-            return;
-        }
-
-        mapping[klass.symbol] = core::Loc{fref, klass.loc};
-    }
-
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &expr) {
-        auto &method = ast::cast_tree_nonnull<ast::MethodDef>(expr);
-        if (!method.symbol.exists()) {
-            return;
-        }
-
-        mapping[method.symbol] = core::Loc{fref, method.loc};
-    }
-};
 
 } // namespace
 
@@ -228,7 +242,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
                        [&deduplicatedCandidates](const auto ref) { return !deduplicatedCandidates.contains(ref); }),
         candidates.end());
 
-    UnorderedMap<core::SymbolRef, core::Loc> defMapping;
+    UnorderedMap<core::SymbolRef, SymbolFileLocs> defMapping;
     DefinitionLocSaver saver{fref, defMapping};
     core::Context ctx{gs, core::Symbols::root(), fref};
     auto resolved = typechecker.getResolved({fref});
