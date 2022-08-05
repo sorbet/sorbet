@@ -9,7 +9,7 @@ tmp="$(mktemp -d)"
   cp "$infile" "$tmp"
 
   cd "$tmp" || exit 1
-  if "$cwd/main/sorbet" --silence-dev-message --suggest-unsafe -a suggest_t_unsafe.rb 2>&1; then
+  if "$cwd/main/sorbet" --censor-for-snapshot-tests --silence-dev-message --suggest-unsafe -a suggest_t_unsafe.rb 2>&1; then
     echo "Expected to fail!"
     exit 1
   fi
@@ -32,7 +32,7 @@ echo
   cp "$infile" "$tmp"
 
   cd "$tmp" || exit 1
-  if "$cwd/main/sorbet" --silence-dev-message --suggest-unsafe=custom_wrapper -a suggest_t_unsafe.rb 2>&1; then
+  if "$cwd/main/sorbet" --censor-for-snapshot-tests --silence-dev-message --suggest-unsafe=custom_wrapper -a suggest_t_unsafe.rb 2>&1; then
     echo "Expected to fail!"
     exit 1
   fi

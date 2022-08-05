@@ -9,7 +9,7 @@ for file in $(find . -name '*.rb' | sort); do
 done
 cd "$tmp" || exit 1
 
-"$cwd/main/sorbet" -a --silence-dev-message --stripe-packages --max-threads=0 . 2>&1
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --stripe-packages --max-threads=0 . 2>&1
 
 echo
 echo --------------------------------------------------------------------------

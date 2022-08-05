@@ -7,7 +7,7 @@ cp "$infile" "$tmp"
 cwd="$(pwd)"
 cd "$tmp" || exit 1
 
-"$cwd/main/sorbet" --silence-dev-message -a suggest-sig.rb 2>&1
+"$cwd/main/sorbet" --censor-for-snapshot-tests --silence-dev-message -a suggest-sig.rb 2>&1
 
 echo
 echo --------------------------------------------------------------------------

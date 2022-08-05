@@ -13,13 +13,13 @@ metrics="$dir/metrics.json"
 # verify that it fails (i.e. that it isn't re-using cached DSL-passed
 # source). We re-run twice to exercise both cached and uncached paths.
 main/sorbet \
-    --silence-dev-message \
+    --censor-for-snapshot-tests --silence-dev-message \
     --cache-dir "$dir/" \
     test/cli/cache-dsl/attr_accessor.rb 2>&1
 
 for pass in uncached cached; do
     if main/sorbet \
-           --silence-dev-message \
+           --censor-for-snapshot-tests --silence-dev-message \
            --cache-dir "$dir/" \
            --skip-rewriter-passes \
            --metrics-prefix=cache-dsl \

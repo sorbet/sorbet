@@ -7,7 +7,7 @@ cp "$infile" "$tmp"
 cwd="$(pwd)"
 cd "$tmp" || exit 1
 
-if "$cwd/main/sorbet" --silence-dev-message -a suggest_t_must.rb 2>&1; then
+if "$cwd/main/sorbet" --censor-for-snapshot-tests --silence-dev-message -a suggest_t_must.rb 2>&1; then
   echo "Expected to fail!"
   exit 1
 fi

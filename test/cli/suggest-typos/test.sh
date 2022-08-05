@@ -1,2 +1,2 @@
 #!/bin/bash
-main/sorbet --silence-dev-message -e '1.to_' 2>&1
+main/sorbet --censor-for-snapshot-tests --silence-dev-message -e '1.to_' 2>&1
