@@ -5,7 +5,7 @@ namespace sorbet::realmain::lsp {
 ErrorFlusherLSP::ErrorFlusherLSP(const uint32_t epoch, shared_ptr<ErrorReporter> errorReporter)
     : epoch(epoch), errorReporter(errorReporter){};
 
-bool ErrorFlusherLSP::wouldFlushErrors(core::FileRef file) {
+bool ErrorFlusherLSP::wouldFlushErrors(core::FileRef file) const {
     return errorReporter->wouldReportForFile(epoch, file);
 }
 

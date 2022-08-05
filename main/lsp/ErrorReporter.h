@@ -55,7 +55,7 @@ public:
      * When this happens, it means we can short circuit, because the file has already been
      * typechecked by a followup edit.
      */
-    bool wouldReportForFile(uint32_t epoch, core::FileRef file);
+    bool wouldReportForFile(uint32_t epoch, core::FileRef file) const;
 
     void beginEpoch(uint32_t epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(uint32_t epoch, bool committed = true);

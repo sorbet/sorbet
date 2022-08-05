@@ -10,7 +10,7 @@ public:
     NullFlusher() = default;
     ~NullFlusher() = default;
 
-    bool wouldFlushErrors(core::FileRef file) override {
+    bool wouldFlushErrors(core::FileRef file) const override {
         return true;
     }
     void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,

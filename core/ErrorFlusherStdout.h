@@ -19,7 +19,7 @@ public:
 
     // wouldFlushErrors is only ever false in LSP mode, where a later edit can produce newer
     // errors, making it not useful to report errors for the given file.
-    bool wouldFlushErrors(core::FileRef file) override {
+    bool wouldFlushErrors(core::FileRef file) const override {
         return true;
     }
     void flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
