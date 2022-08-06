@@ -7,7 +7,7 @@
 # Break is only used in the second call to `Array#map`, so we should see that the first version uses the `noBreak`
 # variant of `sorbet_callIntrinsicInlineBlock`, and the second does not.
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>
+# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
 # INITIAL: call i64 @sorbet_callIntrinsicInlineBlock_noBreak(i64 (i64)* @forward_sorbet_rb_array_collect
 # INITIAL: call i64 @sorbet_callIntrinsicInlineBlock(i64 (i64)* @forward_sorbet_rb_array_collect
 # INITIAL{LITERAL}: }

@@ -55,6 +55,14 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::MethodRef sym)
     string suffix;
     if (name.kind() == core::NameKind::UTF8) {
         suffix = string(name.shortName(cs));
+    } else if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(cs)->original == core::Names::staticInit()) {
+        // For file-level static init, the unique name generated depends on the
+        // number of files Sorbet is processing (especially, for tests, the number
+        // of files in the payload), which makes the output of just name.toString(cs)
+        // less deterministic than we would like.  For class-level static-init,
+        // the function name will be prefixed with the class name anyway, so we
+        // don't need the unique integer appended to it.
+        suffix = name.dataUnique(cs)->original.toString(cs);
     } else {
         suffix = name.toString(cs);
     }
