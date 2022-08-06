@@ -68,6 +68,7 @@ class NilClass < Object
   # ```ruby
   # nil.to_i   #=> 0
   # ```
+  sig {returns(Integer)}
   def to_i; end
 
   # Returns zero as a rational.
