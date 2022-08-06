@@ -290,4 +290,64 @@ class BasicObject
     .returns(T.type_parameter(:U))
   end
   def instance_exec(*args, &blk); end
+
+  ### This method is a lie--it does not exist here at runtime. (It is
+  ### instead defined as an instance method on `Module`).
+  ### T.class_of(BasicObject) is a `Class` which is a `Module`, which makes this
+  ### the highest place where we could add a type for `define_method` as a
+  ### singleton class method, which also means that we can bind the block type
+  ### to `T.attached_class`.
+
+  # Defines an instance method in the receiver. The *method* parameter can be a
+  # `Proc`, a `Method` or an `UnboundMethod` object. If a block is specified, it
+  # is used as the method body. If a block or the *method* parameter has
+  # parameters, they're used as method parameters. This block is evaluated using
+  # [`instance_eval`](https://docs.ruby-lang.org/en/2.7.0/BasicObject.html#method-i-instance_eval).
+  #
+  # ```ruby
+  # class A
+  #   def fred
+  #     puts "In Fred"
+  #   end
+  #   def create_method(name, &block)
+  #     self.class.define_method(name, &block)
+  #   end
+  #   define_method(:wilma) { puts "Charge it!" }
+  #   define_method(:flint) {|name| puts "I'm #{name}!"}
+  # end
+  # class B < A
+  #   define_method(:barney, instance_method(:fred))
+  # end
+  # a = B.new
+  # a.barney
+  # a.wilma
+  # a.flint('Dino')
+  # a.create_method(:betty) { p self }
+  # a.betty
+  # ```
+  #
+  # *produces:*
+  #
+  # ```
+  # In Fred
+  # Charge it!
+  # I'm Dino!
+  # #<B:0x401b39e8>
+  # ```
+  sig do
+    params(
+        arg0: T.any(Symbol, String),
+        arg1: T.any(Proc, Method, UnboundMethod)
+    )
+    .returns(Symbol)
+  end
+  sig do
+    params(
+        arg0: T.any(Symbol, String),
+        blk: T.proc.bind(T.attached_class).void,
+    )
+    .returns(Symbol)
+  end
+  def self.define_method(arg0, arg1=T.unsafe(nil), &blk); end
+
 end
