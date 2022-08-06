@@ -5,7 +5,7 @@
 
 enumerator = ['zero', 'one', 'two'].reject
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>
+# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
 # INITIAL: call i64 @sorbet_rb_array_reject(
 # INITIAL{LITERAL}: }
 

@@ -10,7 +10,7 @@ result.map! do |x|
   x + 1
 end
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>
+# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
 # INITIAL: call i64 @sorbet_callIntrinsicInlineBlock_noBreak(i64 (i64)* @forward_sorbet_rb_array_collect_bang
 # INITIAL{LITERAL}: }
 

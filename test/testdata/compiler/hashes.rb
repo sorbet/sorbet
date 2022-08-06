@@ -5,6 +5,6 @@
 
 puts({a: 1, b: 2})
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.17<static-init>
+# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
 # INITIAL: call i64 @sorbet_globalConstDupHash
 # INITIAL{LITERAL}: }
