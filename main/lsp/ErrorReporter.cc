@@ -202,7 +202,7 @@ bool ErrorReporter::wouldReportForFile(uint32_t epoch, core::FileRef file) const
         return true;
     } else {
         const auto &fileErrorStatus = fileErrorStatuses[file.id()];
-        return fileErrorStatus.lastReportedEpoch < epoch;
+        return fileErrorStatus.lastReportedEpoch <= epoch;
     }
 }
 
