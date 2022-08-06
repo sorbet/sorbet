@@ -1,6 +1,7 @@
 // has to go first as it violates our poisons
 #include "rang.hpp"
 
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
@@ -115,15 +116,18 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
     if (numToWrite <= 0) {
         return;
     }
-    // TODO(jez) I think the fact that we're getting this from `libc.so.6` means that the problem is
-    // coming from the call to `memcpy(3)` that's buried deep within the call to `buf.write`.
-    // Probably something about the math or assumptions this method makes are wrong.
-    //
-    //     /lib/x86_64-linux-gnu/libc.so.6(+0x18b9c9)[0x7fd15b7319c9]
-    //     ??:?(_ZNSt3__115basic_streambufIcNS_11char_traitsIcEEE6xsputnEPKcl)[0x6202ff]
-    //     ??:?(_ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEE5writeEPKcl)[0x62164c]
-    //     /proc/self/cwd/core/Loc.cc:119(_ZN6sorbet4core12_GLOBAL__N_110addLocLineERNSt3__118basic_stringstreamIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEiRKNS0_4FileEii)[0xc048ac]
-    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite);
+    auto offset = file.lineBreaks()[line] + 1;
+    if (offset < 0 || offset >= file.source().size()) {
+        fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
+                           line, offset);
+        fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+    }
+    if (offset + numToWrite >= file.source().size()) {
+        fatalLogger->error(R"(msg="Bad addLocLine write size" path="{}" line="{}" offset="{}" numToWrite="{}")",
+                           absl::CEscape(file.path()), line, offset, numToWrite);
+        fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+    }
+    buf.write(file.source().data() + offset, numToWrite);
 }
 } // namespace
 
