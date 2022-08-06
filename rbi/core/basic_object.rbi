@@ -344,6 +344,7 @@ class BasicObject
   sig do
     params(
         arg0: T.any(Symbol, String),
+        # The `params` annotation for this block is handled specially in environment.cc
         blk: T.proc.bind(T.attached_class).void,
     )
     .returns(Symbol)

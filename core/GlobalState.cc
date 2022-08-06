@@ -353,6 +353,8 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::Class());
     klass = synthesizeClass(core::Names::Constants::BasicObject(), 0);
     ENFORCE(klass == Symbols::BasicObject());
+    klass = core::Symbols::BasicObject().data(*this)->singletonClass(*this);
+    ENFORCE(klass == Symbols::BasicObjectSingleton());
     klass = synthesizeClass(core::Names::Constants::Kernel(), 0, true);
     ENFORCE(klass == Symbols::Kernel());
     klass = synthesizeClass(core::Names::Constants::Range());

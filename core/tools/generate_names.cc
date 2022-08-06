@@ -101,6 +101,7 @@ NameDef names[] = {
     {"extend"},
     {"currentFile", "__FILE__"},
     {"merge"},
+    {"defineMethod", "define_method"},
 
     // T keywords
     {"sig"},
@@ -343,6 +344,7 @@ NameDef names[] = {
     {"arg", "<arg>"},
     {"kwargs", "<kwargs>"},
     {"blkArg", "<blk>"},
+    {"blk"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 

@@ -911,6 +911,8 @@ core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr 
     return applied->targs.front();
 }
 
+namespace {
+
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
                           core::NameRef fun, const core::Loc &loc) {
     if (fun != core::Names::flatMap()) {
@@ -946,6 +948,31 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
 
     return mapType;
 }
+
+core::TypePtr getCallArgumentsForComponent(core::Context ctx, core::DispatchComponent &component) {
+    // This check for BasicObject.define_method is a hack. We used to set the `blk` type to
+    // `BasicObject` so that `getCallArguments` would simply return `T.untyped`, making all block
+    // arguments inside a block also have type `T.untyped`.
+    //
+    // At some point we changed the sig to use `.bind(T.attached_class)`, which allows calling
+    // instance methods inside the block passed to `define_method`, but that requires annotating the
+    // `blk` argument using `T.proc`. Also there is no way to use `T.proc` to model procs that take
+    // non-positional args (like rest args). To avoid having to treat `define_method`'s block as
+    // having an arbitrary arity, we hijack the type here, making any `T.proc.params` annotation on
+    // the sig for `BasicObject.define_method` irrelevant.
+    const auto &data = component.method.data(ctx);
+    if (data->owner == core::Symbols::BasicObjectSingleton() &&
+        // Becaise the method is actually `define_method (overload.1)`
+        (data->name == core::Names::defineMethod() ||
+         (data->name.kind() == core::NameKind::UNIQUE &&
+          data->name.dataUnique(ctx)->original == core::Names::defineMethod()))) {
+        return core::Types::untyped(ctx, component.method);
+    } else {
+        return component.blockPreType.getCallArguments(ctx, core::Names::call());
+    }
+}
+
+} // namespace
 
 core::TypePtr
 Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
@@ -1291,13 +1318,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(insn.link->result);
                 ENFORCE(insn.link->result->main.blockPreType);
 
-                auto &procType = insn.link->result->main.blockPreType;
-                auto params = procType.getCallArguments(ctx, core::Names::call());
+                auto params = getCallArgumentsForComponent(ctx, insn.link->result->main);
                 auto it = insn.link->result->secondary.get();
                 while (it != nullptr) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
-                        auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        auto secondaryParams = getCallArgumentsForComponent(ctx, it->main);
                         switch (insn.link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
