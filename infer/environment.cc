@@ -1664,7 +1664,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     // sometimes a variable has a given type because of a constant outside this method
                                     ctx.locAt(inWhat.loc).contains(cur.origins[0]) &&
                                     // don't attempt to insert a `T.let` into the method params list
-                                    !inWhat.symbol.data(ctx)->loc().contains(cur.origins[0])) {
+                                    (inWhat.symbol.data(ctx)->name.isAnyStaticInitName(ctx) ||
+                                     !inWhat.symbol.data(ctx)->loc().contains(cur.origins[0]))) {
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
                                     auto replacement = suggest.show(ctx, core::ShowOptions().withShowForRBI());
