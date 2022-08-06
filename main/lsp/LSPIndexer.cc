@@ -321,10 +321,10 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
         if (!update.canTakeFastPath && initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
             // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
             update.mergeOlder(pendingTypecheckUpdates);
-            // The two updates together could end up taking the fast path.
-            update.canTakeFastPath = canTakeFastPath(update, evictedFiles);
-            update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
+            // The two updates together could end up taking the fast path.
+            update.canTakeFastPath = canTakeFastPath(update, newlyEvictedFiles);
+            update.canceledSlowPath = true;
         }
     }
 
