@@ -70,5 +70,5 @@ class A
 end
 
 1.times do
-  res = A.new.sum
+  res = A.new.sum # error: This code is unreachable
 end
