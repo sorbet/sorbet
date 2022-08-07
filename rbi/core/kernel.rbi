@@ -627,11 +627,20 @@ module Kernel
   end
   def ===(other); end
 
+  # =~ is on Object is deprecated, and is almost always a mistake to use.
+  #
+  # Likely what you meant to do is call `=~` on `String` or `Symbol`--you can
+  # do so by first checking whether the type is correct first.
+  #
+  # This method has been deprecated in Ruby, and may be removed at some point
+  # in the future. In the mean time, we've assigned a sig of `T.noreturn` to
+  # this method, so that people don't try to use it incorrectly.
   sig do
     params(
         other: BasicObject,
     )
-    .returns(NilClass)
+      # .returns(NilClass)
+      .returns(T.noreturn)
   end
   def =~(other); end
 
