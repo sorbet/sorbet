@@ -28,7 +28,7 @@ end
 module IBox5
   extend T::Generic
   X = type_member(:out) {x = 1; {upper: Integer}}
-  #                      ^^^^^^^^^^^^^^^^^^^^^^^^ error: Block given to `type_member` must contain a single `Hash` literal
+  #                      ^^^^^^^^^^^^^^^^^^^^^^^ error: Block given to `type_member` must contain a single `Hash` literal
 end
 
 module IBox6
