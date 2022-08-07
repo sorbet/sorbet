@@ -809,9 +809,15 @@ class Pathname < Object
   sig do
     params(
         ignore_error: T::Boolean,
-        blk: T.nilable(T.proc.params(arg0: Pathname).void),
     )
-    .returns(T.nilable(T::Enumerator[Pathname]))
+    .returns(T::Enumerator[Pathname])
+  end
+  sig do
+    params(
+        ignore_error: T::Boolean,
+        blk: T.proc.params(arg0: Pathname).void,
+    )
+    .returns(NilClass)
   end
   def find(ignore_error: true, &blk); end
 
