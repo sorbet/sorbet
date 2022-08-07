@@ -3,6 +3,7 @@
 def basic_example
   return
   puts(123)
+  #    ^^^ error: This expression appears after an unconditional return
 end
 
 def only_once_per_method
@@ -10,6 +11,7 @@ def only_once_per_method
     if T.unsafe(nil)
       next []
       puts(x)
+      #    ^ error: This expression appears after an unconditional return
     else
       next [x]
       puts(123)
@@ -27,6 +29,7 @@ def next_in_block
     else
       next [x]
       puts(123)
+      #    ^^^ error: This expression appears after an unconditional return
     end
   end
 end

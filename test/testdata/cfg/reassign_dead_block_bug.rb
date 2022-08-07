@@ -5,4 +5,5 @@
   x = 1
   return 1
   x = 10
+  #   ^^ error: This expression appears after an unconditional return
 end

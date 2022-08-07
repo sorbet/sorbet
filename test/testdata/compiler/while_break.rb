@@ -9,7 +9,6 @@ class A
       puts x
       if x >= 3
         break
-        puts '??'
       end
       x += 1
     end

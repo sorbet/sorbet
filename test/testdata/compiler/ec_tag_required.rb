@@ -7,8 +7,6 @@
 # INITIAL-NOT: call { i64, i8 } @sorbet_vm_return_from_block_wrapper
 # INITIAL{LITERAL}: }
 def func_a
-  return
-
   if T.unsafe(35 > 36)
     return 209
   end
