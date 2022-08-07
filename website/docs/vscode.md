@@ -415,3 +415,35 @@ result.
 
 It is not possible to opt-out of these completion snippets. If you find that
 this is annoying, please let us know.
+
+## Reporting metrics
+
+> Sorbet does not require metrics gathering for full functionality. If you are
+> seeing a log line like "Sorbet metrics gathering disabled," Sorbet is working
+> as intended.
+
+It is possible to ask the Sorbet VS Code extension to collect and report usage
+metrics. This is predominantly useful if you maintain a large Ruby codebase that
+uses Sorbet, and want to gather metrics on things like daily users and editor
+responsiveness.
+
+To start gathering metrics, implement a
+[custom VS Code command](https://code.visualstudio.com/api/extension-guides/command#creating-new-commands)
+using the name `sorbet.metrics.getExportedApi`.
+
+The implementation of this command should simply return an object like this:
+
+```js
+{
+  metricsEmitter: ...
+}
+```
+
+The `metricsEmitter` value should conform to the [`MetricsEmitter` interface]
+declared in the Sorbet VS Code extension source code. Most likely, you will want
+to implement this interface by importing a StatsD client, connecting to an
+internal metrics reporting host, and forwarding requests from the
+`MetricEmitter` interface function calls to the StatsD client of your choice.
+
+[`metricsemitter` interface]:
+  https://github.com/sorbet/sorbet/blob/2b850340e9bccd689d6a976cddbbfecf533933ae/vscode_extension/src/veneur.ts#L11
