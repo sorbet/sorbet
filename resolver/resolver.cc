@@ -2369,7 +2369,7 @@ class ResolveTypeMembersAndFieldsWalk {
                                                                         allowUnspecifiedTypeParameter, lhs}));
     }
 
-    static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
+    static bool resolveAssign(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
         ENFORCE(job.lhs.isTypeAlias(ctx) || job.lhs.isTypeMember());
 
         auto it = std::remove_if(job.dependencies.begin(), job.dependencies.end(), [&](core::SymbolRef dep) {
@@ -2790,6 +2790,15 @@ public:
         }
     }
 
+    void postTransformLocal(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
+        if (trackDependencies_ && nestedBlockCounts.back() > 0 &&
+            local.localVariable == core::LocalVariable::selfVariable() &&
+            !ctx.owner.enclosingClass(ctx).data(ctx)->typeMembers().empty()) {
+            dependencies_.emplace_back(ctx.owner);
+        }
+    }
+
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
@@ -3104,7 +3113,7 @@ public:
                                        auto threadTodoIt = std::remove_if(
                                            threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
                                                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                               return resolveJob(ctx, job, resolvedAttachedClasses);
+                                               return resolveAssign(ctx, job, resolvedAttachedClasses);
                                            });
                                        threadTodos.erase(threadTodoIt, threadTodos.end());
                                        progress = progress || threadTodos.size() != origSize;

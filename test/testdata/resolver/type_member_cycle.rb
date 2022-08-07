@@ -23,3 +23,9 @@ class B
 end
 
 T.reveal_type(B.new.test) # error: Revealed type: `T.untyped`
+
+class C
+  extend T::Generic
+
+  Elem = type_member {{upper: self}} # error: Type member `C::Elem` is involved in a cycle
+end
