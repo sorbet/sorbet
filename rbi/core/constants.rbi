@@ -42,3 +42,5 @@
 ::TOPLEVEL_BINDING = T.let(T.unsafe(nil), Binding)
 # An obsolete alias of `true`
 ::TRUE = T.let(T.unsafe(nil), TrueClass)
+# Constant that is available if using the __END__ keyword
+::DATA = T.let(T.unsafe(nil), IO)
