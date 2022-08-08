@@ -82,7 +82,13 @@ async function initSorbetMetricsApi(outputChannel: OutputChannel) {
     },
     (reason) => {
       sorbetMetricsApi = NoOpApi.INSTANCE;
-      outputChannel.appendLine(`Sorbet metrics gathering disabled: ${reason}`);
+      const adjustedReason =
+        reason.message === "command 'sorbet.metrics.getExportedApi' not found"
+          ? "Define the 'sorbet.metrics.getExportedApi' command to enable metrics gathering"
+          : reason.message;
+      outputChannel.appendLine(
+        `Sorbet metrics gathering disabled: ${adjustedReason}`,
+      );
     },
   );
 }
