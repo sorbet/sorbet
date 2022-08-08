@@ -1,6 +1,7 @@
 // has to go first as it violates our poisons
 #include "rang.hpp"
 
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
@@ -115,7 +116,20 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
     if (numToWrite <= 0) {
         return;
     }
-    buf.write(file.source().data() + file.lineBreaks()[line] + 1, numToWrite);
+    auto offset = file.lineBreaks()[line] + 1;
+    if (offset < 0 || offset >= file.source().size()) {
+        fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
+                           line, offset);
+        fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        ENFORCE(false);
+    }
+    if (offset + numToWrite > file.source().size()) {
+        fatalLogger->error(R"(msg="Bad addLocLine write size" path="{}" line="{}" offset="{}" numToWrite="{}")",
+                           absl::CEscape(file.path()), line, offset, numToWrite);
+        fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        ENFORCE(false);
+    }
+    buf.write(file.source().data() + offset, numToWrite);
 }
 } // namespace
 
