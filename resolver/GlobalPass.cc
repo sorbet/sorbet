@@ -59,6 +59,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         typeMember.data(gs)->flags.isFixed = true;
         auto untyped = core::Types::untyped(gs, sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
+        typeAliases[sym.id()].emplace_back(parentTypeMember, typeMember);
         return false;
     }
     if (!my.isTypeMember()) {
@@ -70,10 +71,12 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         typeMember.data(gs)->flags.isFixed = true;
         auto untyped = core::Types::untyped(gs, sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
+        typeAliases[sym.id()].emplace_back(parentTypeMember, typeMember);
         return false;
     }
 
     auto myTypeMember = my.asTypeMemberRef();
+    typeAliases[sym.id()].emplace_back(parentTypeMember, myTypeMember);
     auto myVariance = myTypeMember.data(gs)->variance();
     auto parentVariance = parentTypeMember.data(gs)->variance();
     if (!sym.data(gs)->derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
@@ -83,7 +86,6 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         }
         return true;
     }
-    typeAliases[sym.id()].emplace_back(parentTypeMember, myTypeMember);
     return true;
 } // namespace
 
