@@ -6,7 +6,7 @@ cp "test/cli/autocorrect-requires-ancestor-block/autocorrect-requires-ancestor-b
 old_pwd="$(pwd)"
 cd "$tmp" || exit 1
 
-"$old_pwd/main/sorbet" --silence-dev-message --enable-experimental-requires-ancestor -a autocorrect-requires-ancestor-block.rb 2>&1
+"$old_pwd/main/sorbet" --censor-for-snapshot-tests --silence-dev-message --enable-experimental-requires-ancestor -a autocorrect-requires-ancestor-block.rb 2>&1
 
 echo
 echo --------------------------------------------------------------------------

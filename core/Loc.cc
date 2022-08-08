@@ -241,14 +241,15 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
             } else {
                 buf << ":";
             }
-            buf << pos.first.line;
+            auto censor = gs.censorForSnapshotTests && file().data(gs).isPayload();
+            buf << (censor ? "CENSORED" : to_string(pos.first.line));
             if (showFull) {
                 buf << ":";
-                buf << pos.first.column;
+                buf << (censor ? "CENSORED" : to_string(pos.first.column));
                 buf << "-";
-                buf << pos.second.line;
+                buf << (censor ? "CENSORED" : to_string(pos.second.line));
                 buf << ":";
-                buf << pos.second.column;
+                buf << (censor ? "CENSORED" : to_string(pos.second.column));
             } else {
                 // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
             }

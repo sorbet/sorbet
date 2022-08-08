@@ -9,7 +9,7 @@
     -e:1: Replace with `to_c`
      1 |1.to_
           ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L1116: Defined here
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED: Defined here
     1116 |  def to_c(); end
             ^^^^^^^^^^
 Errors: 1

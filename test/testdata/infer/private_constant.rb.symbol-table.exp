@@ -55,7 +55,7 @@ class ::<root> < ::Object ()
     method ::<Class:Foo>#using_private_module (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:64
       argument x<> -> T.class_of(Foo::PrivateModule) @ Loc {file=test/testdata/infer/private_constant.rb start=63:16 end=63:17}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L27
+  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#LCENSORED
     method ::Object#foo : private (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:100
       argument x<> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=98:13 end=98:14}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}

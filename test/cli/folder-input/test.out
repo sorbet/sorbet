@@ -2,7 +2,7 @@ test/cli/folder-input/folder-input.rb:4: Expected `Integer` but found `String("f
      4 |1 + "foo.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("foo.rb")` originating from:
@@ -14,7 +14,7 @@ test/cli/folder-input/input/subfolder/baz.rb:4: Expected `Integer` but found `St
      4 |1 + "baz.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("baz.rb")` originating from:
@@ -26,7 +26,7 @@ test/cli/folder-input/input/input.rb:3: Expected `Integer` but found `String("ba
      3 |1 + "bar.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
      148 |        arg0: Integer,
                   ^^^^
   Got `String("bar.rb")` originating from:
