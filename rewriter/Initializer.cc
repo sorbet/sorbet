@@ -11,9 +11,16 @@ namespace sorbet::rewriter {
 
 namespace {
 
-// We can't actually use a T.type_parameter type in the body of a method, so this prevents us from copying those.
+enum class ArgKind {
+    Plain,
+    RestArg,
+    KeywordRestArg,
+};
+
+// Type parameters are only scoped to the body of a method.
 //
-// TODO: remove once https://github.com/sorbet/sorbet/issues/1715 is fixed
+// But an instance variable is scoped to the entire class, so it's not allowed to use type
+// parameters as instance variable annotations.
 bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
     auto send = ast::cast_tree<ast::Send>(typeExpr);
     if (send && send->fun == core::Names::typeParameter()) {
@@ -25,7 +32,8 @@ bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
 // if expr is of the form `@var = local`, and `local` is typed, then replace it with with `@var = T.let(local,
 // type_of_local)`
 void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
-                 const UnorderedMap<core::NameRef, const ast::ExpressionPtr *> &argTypeMap) {
+                 const UnorderedMap<core::NameRef, const ast::ExpressionPtr *> &argTypeMap,
+                 const UnorderedMap<core::NameRef, ArgKind> &argKindMap) {
     auto assn = ast::cast_tree<ast::Assign>(expr);
     if (assn == nullptr) {
         return;
@@ -44,7 +52,28 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
     auto typeExpr = argTypeMap.find(rhs->name);
     if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
         auto loc = rhs->loc;
-        auto newLet = ast::MK::Let(loc, move(assn->rhs), (*typeExpr->second).deepCopy());
+        auto type = (*typeExpr->second).deepCopy();
+        switch (argKindMap.at(rhs->name)) {
+            case ArgKind::Plain:
+                break;
+            case ArgKind::RestArg: {
+                auto loc = type.loc();
+                auto zloc = loc.copyWithZeroLength();
+                type = ast::MK::Send1(loc, ast::MK::Constant(zloc, core::Symbols::T_Array()),
+                                      core::Names::squareBrackets(), zloc, move(type));
+                break;
+            }
+            case ArgKind::KeywordRestArg: {
+                auto loc = type.loc();
+                auto zloc = loc.copyWithZeroLength();
+                type =
+                    ast::MK::Send2(loc, ast::MK::Constant(zloc, core::Symbols::T_Hash()), core::Names::squareBrackets(),
+                                   zloc, ast::MK::Constant(zloc, core::Symbols::Symbol()), move(type));
+                break;
+            }
+        }
+
+        auto newLet = ast::MK::Let(loc, move(assn->rhs), move(type));
         assn->rhs = move(newLet);
     }
 }
@@ -156,14 +185,27 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         }
     }
 
+    UnorderedMap<core::NameRef, ArgKind> argKindMap;
+    for (const auto &arg : methodDef->args) {
+        const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
+        if (restArg == nullptr) {
+            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
+        } else if (const auto *kwRestArg = ast::cast_tree<ast::KeywordArg>(restArg->expr)) {
+            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
+        } else {
+            ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));
+            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::RestArg;
+        }
+    }
+
     // look through the rhs to find statements of the form `@var = local`
     if (auto stmts = ast::cast_tree<ast::InsSeq>(methodDef->rhs)) {
         for (auto &s : stmts->stats) {
-            maybeAddLet(ctx, s, argTypeMap);
+            maybeAddLet(ctx, s, argTypeMap, argKindMap);
         }
-        maybeAddLet(ctx, stmts->expr, argTypeMap);
+        maybeAddLet(ctx, stmts->expr, argTypeMap, argKindMap);
     } else {
-        maybeAddLet(ctx, methodDef->rhs, argTypeMap);
+        maybeAddLet(ctx, methodDef->rhs, argTypeMap, argKindMap);
     }
 }
 
