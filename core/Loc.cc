@@ -121,11 +121,13 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
         fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
                            line, offset);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        ENFORCE(false);
     }
-    if (offset + numToWrite >= file.source().size()) {
+    if (offset + numToWrite > file.source().size()) {
         fatalLogger->error(R"(msg="Bad addLocLine write size" path="{}" line="{}" offset="{}" numToWrite="{}")",
                            absl::CEscape(file.path()), line, offset, numToWrite);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        ENFORCE(false);
     }
     buf.write(file.source().data() + offset, numToWrite);
 }
