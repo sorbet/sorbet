@@ -193,6 +193,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         } else if (const auto *kwRestArg = ast::cast_tree<ast::KeywordArg>(restArg->expr)) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
         } else {
+            ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::RestArg;
         }
     }
