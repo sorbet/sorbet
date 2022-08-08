@@ -239,6 +239,16 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
     }
 }
 
+bool NameRef::isAnyStaticInitName(const GlobalState &gs) const {
+    if (*this == core::Names::staticInit()) {
+        return true;
+    } else if (this->kind() != core::NameKind::UNIQUE) {
+        return false;
+    } else {
+        return this->dataUnique(gs)->original == core::Names::staticInit();
+    }
+}
+
 bool NameRef::isUpdateKnowledgeName() const {
     switch (this->rawId()) {
         case Names::bang().rawId():

@@ -186,6 +186,10 @@ public:
 
     bool isValidConstantName(const GlobalState &gs) const;
 
+    // Returns true if the name is `<static-init>` (class-level static init) or `<static-init>$...`
+    // (file-level static init).
+    bool isAnyStaticInitName(const GlobalState &gs) const;
+
     // All the names that Environment::updateKnowledge treats as special for the purposes of
     // updating control flow-sensitive type knowledge.
     //
