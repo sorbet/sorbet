@@ -29,7 +29,38 @@ class Box
 
     box_elem
   end
+
+  sig do
+    type_parameters(:U)
+      .params(x: T.type_parameter(:U))
+      .returns(T.all(T.attached_class, Box[T.type_parameter(:U)]))
+  end
+  def self.make(x)
+    # "works" but only because of T.untyped
+    res = new(x)
+    T.reveal_type(res) # error: `T.attached_class (of Box)`
+
+    # No error for using Integer because, again, it's T.untyped
+    res = new(0)
+    T.reveal_type(res) # error: `T.attached_class (of Box)`
+
+    # Wild that this syntax works, even at runtime!
+    res = self[T.type_parameter(:U)].new(x) # !!
+    # Drops attached class, also non-private
+    T.reveal_type(res) # error: `Box[T.type_parameter(:U) (of Box.make)]`
+
+    new(x)
+  end
+end
+
+class ChildBox < Box
+  Elem = type_member
 end
 
 box = Box[Integer].new(0).copy_with(1)
 T.reveal_type(box) # error: `Box[Integer]`
+
+box = Box.make('')
+T.reveal_type(box) # error: `Box[String]`
+box = ChildBox.make('')
+T.reveal_type(box) # error: `ChildBox[String]`
