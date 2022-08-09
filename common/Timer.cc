@@ -19,7 +19,12 @@ clockid_t clock_monotonic_coarse() {
 #endif
 }
 
-microseconds get_clock_threshold_coarse() {
+// Don't want to have to measure the resolution of the clock every time we ask for the time.
+const microseconds clock_threshold_coarse = Timer::get_clock_threshold_coarse();
+
+} // namespace
+
+microseconds Timer::get_clock_threshold_coarse() {
     timespec tp;
     clock_getres(clock_monotonic_coarse(), &tp);
     auto usec = 2 * (tp.tv_sec * 1'000'000L) + (tp.tv_nsec / 1'000L);
@@ -29,11 +34,6 @@ microseconds get_clock_threshold_coarse() {
         return {usec};
     }
 }
-
-// Don't want to have to measure the resolution of the clock every time we ask for the time.
-const microseconds clock_threshold_coarse = get_clock_threshold_coarse();
-
-} // namespace
 
 microseconds Timer::clock_gettime_coarse() {
     timespec tp;
