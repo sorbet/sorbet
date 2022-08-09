@@ -444,16 +444,28 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 
         // [Test only] Wait for a preemption if one is expected.
         while (updates.preemptionsExpected > 0) {
+            auto loopStartTime = Timer::clock_gettime_coarse();
+            auto coarseThreshold = Timer::get_clock_threshold_coarse();
             while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
-                Timer::timedSleep(1ms, *logger, "slow_path.expected_preemption.sleep");
+                auto curTime = Timer::clock_gettime_coarse();
+                if (curTime.usec - loopStartTime.usec > 20'000'000) {
+                    Exception::raise("Slow path timed out waiting for preemption edit");
+                }
+                Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_preemption.sleep");
             }
             updates.preemptionsExpected--;
         }
 
         // [Test only] Wait for a cancellation if one is expected.
         if (updates.cancellationExpected) {
+            auto loopStartTime = Timer::clock_gettime_coarse();
+            auto coarseThreshold = Timer::get_clock_threshold_coarse();
             while (!epochManager.wasTypecheckingCanceled()) {
-                Timer::timedSleep(1ms, *logger, "slow_path.expected_cancellation.sleep");
+                auto curTime = Timer::clock_gettime_coarse();
+                if (curTime.usec - loopStartTime.usec > 20'000'000) {
+                    Exception::raise("Slow path timed out waiting for cancellation edit");
+                }
+                Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_cancellation.sleep");
             }
             return;
         }

@@ -53,7 +53,12 @@ public:
         Timer timer(log, name);
         std::this_thread::sleep_for(sleep_duration);
     }
+    static void timedSleep(const microseconds &sleep_duration, spdlog::logger &log, ConstExprStr name) {
+        Timer timer(log, name);
+        std::this_thread::sleep_for(std::chrono::microseconds{sleep_duration.usec});
+    }
 
+    static microseconds get_clock_threshold_coarse();
     static microseconds clock_gettime_coarse();
 
     void setEndTime();
