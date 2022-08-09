@@ -749,6 +749,65 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile" *
                          /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class Foo\n"
+                                               "end\n")),
+                      {});
+    assertDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                               "class Bar\n"
+                                               "  extend T::Sig\n"
+                                               "  sig {returns(Integer)}\n"
+                                               "  def example\n"
+                                               "    1+1\n"
+                                               "  end\n"
+                                               "end\n")),
+                      {});
+
+    // Slow path in foo.rb
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class FooNew\n"
+                          "end\n",
+                          2, true));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // Fast path edit in bar.rb preempts previous foo.rb edit
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "class Bar\n"
+                          "  extend T::Sig\n"
+                          "  sig {returns(String)}\n"
+                          "  def example\n"
+                          "    1+1\n"
+                          "  end\n"
+                          "end\n",
+                          2, false));
+    // Undo change in foo.rb
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "end\n",
+                          3));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+
+    // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
+                                                                       make_unique<SorbetFenceParams>(20, false)))),
+                      {{"bar.rb", 5, "Expected `String` but found `Integer` for method result type"}});
+}
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyMetrics") {
     assertDiagnostics(initializeLSP(), {});
 
