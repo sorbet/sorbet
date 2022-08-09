@@ -31,15 +31,13 @@ bb1[rubyRegionId=0, firstDead=-1](<returnMethodTemp>$2):
 # backedges
 # - bb0(rubyRegionId=0)
 bb2[rubyRegionId=0, firstDead=-1]():
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    s: {} = <magic>$5: T.class_of(<Magic>).<build-hash>()
+    s: {} = {}
     <unconditional> -> bb4
 
 # backedges
 # - bb0(rubyRegionId=0)
 bb3[rubyRegionId=0, firstDead=-1]():
-    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    s: {} = <magic>$6: T.class_of(<Magic>).<build-hash>()
+    s: {} = {}
     <unconditional> -> bb4
 
 # backedges

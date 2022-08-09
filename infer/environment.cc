@@ -1484,6 +1484,43 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
+            [&](cfg::Array &a) {
+                vector<core::TypePtr> elems;
+                elems.reserve(a.elems.size());
+                for (auto elem : a.elems) {
+                    elems.emplace_back(getTypeAndOrigin(ctx, elem).type);
+                }
+                tp.type = core::make_type<core::TupleType>(std::move(elems));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
+            },
+            [&](cfg::Hash &h) {
+                ENFORCE(h.elems.size() % 2 == 0);
+
+                // TODO: we had this separate loop because it seemed to better to not
+                // allocate `keys` and `values` if we didn't have a `ShapeType`, but
+                // maybe allocating `keys` to not do lookups in `getTypeAndOrigin` twice
+                // would actually be better?
+                for (size_t i = 0; i < h.elems.size(); i += 2) {
+                    if (!core::isa_type<core::LiteralType>(getTypeAndOrigin(ctx, h.elems[i]).type)) {
+                        tp.type = core::Types::hashOfUntyped();
+                        tp.origins.emplace_back(ctx.locAt(bind.loc));
+                        return;
+                    }
+                }
+
+                vector<core::TypePtr> keys;
+                vector<core::TypePtr> values;
+                keys.reserve(h.elems.size() / 2);
+                values.reserve(h.elems.size() / 2);
+                for (int i = 0; i < h.elems.size(); i += 2) {
+                    auto &keyType = getTypeAndOrigin(ctx, h.elems[i]).type;
+                    keys.emplace_back(keyType);
+                    auto &valType = getTypeAndOrigin(ctx, h.elems[i + 1]).type;
+                    values.emplace_back(valType);
+                }
+                tp.type = core::make_type<core::ShapeType>(move(keys), move(values));
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
+            },
             [&](cfg::GetCurrentException &i) {
                 tp.type = core::Types::untypedUntracked();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));

@@ -47,6 +47,8 @@ enum class Tag : uint8_t {
     YieldLoadArg,
     Cast,
     TAbsurd,
+    Array,
+    Hash,
 };
 
 // A mapping from instruction type to its corresponding tag.
@@ -277,6 +279,29 @@ public:
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(TAbsurd, 16, 8);
+
+INSN(Array) : public Instruction {
+public:
+    InlinedVector<LocalRef, 4> elems;
+
+    Array(InlinedVector<LocalRef, 4> elems);
+
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+};
+CheckSize(Array, 24, 8);
+
+INSN(Hash) : public Instruction {
+public:
+    // k0, v0, k1, v1, ..., kn, vn
+    InlinedVector<LocalRef, 4> elems;
+
+    Hash(InlinedVector<LocalRef, 4> elems);
+
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+};
+CheckSize(Hash, 24, 8);
 
 class InstructionPtr final {
     using tagged_storage = uint64_t;

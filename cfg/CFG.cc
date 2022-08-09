@@ -130,6 +130,14 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockReads.add(v->send.id());
             } else if (auto *v = cast_instruction<YieldLoadArg>(bind.value)) {
                 blockReads.add(v->yieldParam.variable.id());
+            } else if (auto *v = cast_instruction<Array>(bind.value)) {
+                for (auto elem : v->elems) {
+                    blockReads.add(elem.id());
+                }
+            } else if (auto *v = cast_instruction<Hash>(bind.value)) {
+                for (auto elem : v->elems) {
+                    blockReads.add(elem.id());
+                }
             }
 
             if (!blockReads.contains(bind.bind.variable.id())) {

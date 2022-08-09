@@ -4,10 +4,9 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <arrayTemp>$5: Integer(1) = 1
     <arrayTemp>$6: Integer(2) = 2
-    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$4: [Integer(1), Integer(2)] = <magic>$7: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1), <arrayTemp>$6: Integer(2))
-    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <statTemp>$4: [Integer(1), Integer(2)].map()
-    <selfRestore>$9: Object = <self>
+    <statTemp>$4: [Integer(1), Integer(2)] = [<arrayTemp>$5, <arrayTemp>$6]
+    <block-pre-call-temp>$7: Sorbet::Private::Static::Void = <statTemp>$4: [Integer(1), Integer(2)].map()
+    <selfRestore>$8: Object = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -17,37 +16,37 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb2[rubyRegionId=1, firstDead=-1](<self>: Object, <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: Object):
+bb2[rubyRegionId=1, firstDead=-1](<self>: Object, <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: Object):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: Object):
-    target: T::Array[T.noreturn] = Solve<<block-pre-call-temp>$8, map>
+bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: Object):
+    target: T::Array[T.noreturn] = Solve<<block-pre-call-temp>$7, map>
     <unconditional> -> bb4
 
 # backedges
 # - bb3(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
-bb4[rubyRegionId=0, firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: Object):
-    <cfgAlias>$19: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <cfgAlias>$19: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))
+bb4[rubyRegionId=0, firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$8: Object):
+    <cfgAlias>$18: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <cfgAlias>$18: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)
     <unconditional> -> bb1
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=-1](<self>: Object, <selfRestore>$9: Object):
+bb5[rubyRegionId=1, firstDead=-1](<self>: Object, <selfRestore>$8: Object):
     # outerLoops: 1
     <self>: Object = loadSelf(map)
-    <blk>$10: [Integer] = load_yield_params(map)
-    x$1: Integer = yield_load_arg(0, <blk>$10: [Integer])
-    <returnTemp>$14: Integer = x$1
-    <block-break-assign>$15: Integer = x$1
-    <magic>$16: T.class_of(<Magic>) = alias <C <Magic>>
-    <block-break>$17: T.untyped = <magic>$16: T.class_of(<Magic>).<block-break>(<returnTemp>$14: Integer)
-    target: Integer = <block-break-assign>$15
+    <blk>$9: [Integer] = load_yield_params(map)
+    x$1: Integer = yield_load_arg(0, <blk>$9: [Integer])
+    <returnTemp>$13: Integer = x$1
+    <block-break-assign>$14: Integer = x$1
+    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
+    <block-break>$16: T.untyped = <magic>$15: T.class_of(<Magic>).<block-break>(<returnTemp>$13: Integer)
+    target: Integer = <block-break-assign>$14
     <unconditional> -> bb4
 
 }
