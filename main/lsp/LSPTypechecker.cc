@@ -235,7 +235,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
     unique_ptr<ShowOperation> op;
-    if (toTypecheck.size() > 100) {
+    if (toTypecheck.size() > config->opts.lspMaxFilesOnFastPath / 2) {
         op = make_unique<ShowOperation>(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
