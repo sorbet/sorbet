@@ -83,6 +83,18 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
+            for (const auto &bind : bb->exprs) {
+                if (bind.value.isSynthetic() || bind.loc.empty()) {
+                    continue;
+                }
+
+                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
+                    e.setHeader("This expression appears after an unconditional return");
+                }
+
+                // Only report the expression expression in the dead block
+                break;
+            }
             continue;
         }
         Environment &current = outEnvironments[bb->id];

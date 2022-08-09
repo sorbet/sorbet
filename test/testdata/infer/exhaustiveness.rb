@@ -165,13 +165,11 @@ $some_global = T.let(true, T::Boolean)
 
 sig {void}
 def absurd_not_reached_on_global_var
-  if $some_global
-    return
-  else
-    return
+  case $some_global
+  when TrueClass
+  when FalseClass
+  else T.absurd($some_global) # error: Control flow could reach `T.absurd` because argument was `T.untyped`
   end
-
-  T.absurd($some_global)
 end
 
 sig {void}
@@ -192,13 +190,12 @@ class SomeClass
 
   sig {void}
   def absurd_not_reached_on_class_var
-    if @@some_class_var
-      return
+    case @@some_class_var
+    when TrueClass
+    when FalseClass
     else
-      return
+      T.absurd(@@some_class_var)
     end
-
-    T.absurd(@@some_class_var)
   end
 
   sig {void}
@@ -208,13 +205,12 @@ class SomeClass
 
   sig {void}
   def absurd_not_reached_on_instance_var
-    if @some_instance_var
-      return
+    case @some_instance_var
+    when TrueClass
+    when FalseClass
     else
-      return
+      T.absurd(@some_instance_var)
     end
-
-    T.absurd(@some_instance_var)
   end
 
   sig {void}

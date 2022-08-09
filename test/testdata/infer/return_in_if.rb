@@ -9,6 +9,7 @@ def foo(cond)
   else
     return 1
     a = "1"
+    #   ^^^ error: This expression appears after an unconditional return
   end
   a
 end
