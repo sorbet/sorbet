@@ -168,7 +168,6 @@ struct Options {
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;
-    bool skipRewriterPasses = false;
     bool censorForSnapshotTests = false;
     bool forceHashing = false;
     int threads = 0;

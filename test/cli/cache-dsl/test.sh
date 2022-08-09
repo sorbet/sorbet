@@ -21,7 +21,6 @@ for pass in uncached cached; do
     if main/sorbet \
            --censor-for-snapshot-tests --silence-dev-message \
            --cache-dir "$dir/" \
-           --skip-rewriter-passes \
            --metrics-prefix=cache-dsl \
            --metrics-file="$metrics" \
            test/cli/cache-dsl/attr_accessor.rb 2>&1; then

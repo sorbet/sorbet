@@ -188,9 +188,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
-            if (!opts.skipRewriterPasses) {
-                tree = runRewriter(lgs, file, move(tree));
-            }
+            tree = runRewriter(lgs, file, move(tree));
             if (print.RewriterTree.enabled) {
                 print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
             }

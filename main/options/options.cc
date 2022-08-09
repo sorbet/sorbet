@@ -448,7 +448,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "[experimental] Output a minimal RBI contining the diff between Sorbet's view of a "
                                "codebase and the definitions present in this file",
                                cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
-    options.add_options("dev")("skip-rewriter-passes", "Do not run Rewriter passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("stress-incremental-resolver",
                                "Force incremental updates to discover resolver & namer bugs");
@@ -890,7 +889,6 @@ void readOptions(Options &opts,
         }
 
         opts.showProgress = raw["P"].as<bool>();
-        opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         if (raw.count("suggest-unsafe") > 0) {
             opts.suggestUnsafe = raw["suggest-unsafe"].as<string>();

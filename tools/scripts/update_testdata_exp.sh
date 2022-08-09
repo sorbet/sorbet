@@ -165,7 +165,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args=()
       fi
       if [ "$pass" = "autogen" ]; then
-        args=("--stop-after=namer --skip-rewriter-passes")
+        args=("--stop-after=namer")
       elif [ "$pass" = "minimized-rbi" ]; then
         args=("--minimize-to-rbi=$basename.minimize.rbi")
       elif [ "$pass" = "package-tree" ]; then
