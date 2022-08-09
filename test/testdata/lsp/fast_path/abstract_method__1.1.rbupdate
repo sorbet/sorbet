@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: abstract_method__1.rb,abstract_method__2.rb
+# spacer for exclude from file update
+
+module IFoo
+  extend T::Sig
+  extend T::Helpers
+
+  abstract!
+
+  sig {void}
+  def foo; end
+end
