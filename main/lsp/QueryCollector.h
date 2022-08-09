@@ -13,6 +13,10 @@ public:
     QueryCollector() = default;
     ~QueryCollector() = default;
 
+    // Can never skip, because we need to run for the sake of reporting query responses
+    bool wouldFlushErrors(core::FileRef file) const override {
+        return true;
+    }
     void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
                      std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) override;
 

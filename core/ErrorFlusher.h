@@ -10,6 +10,8 @@ namespace core {
 
 class ErrorFlusher {
 public:
+    virtual bool wouldFlushErrors(core::FileRef file) const = 0;
+
     virtual void flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
                              std::vector<std::unique_ptr<ErrorQueueMessage>> errors) = 0;
     virtual ~ErrorFlusher() = default;

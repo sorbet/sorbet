@@ -22,6 +22,13 @@ void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     }
 }
 
+bool ErrorQueue::wouldFlushErrorsForFile(FileRef file) const {
+    // Must be able to to call this from multiple threads.
+    // No checkedOwned call, and instead explicitly only use `const &` here.
+    const auto &flusher = *errorFlusher;
+    return flusher.wouldFlushErrors(file);
+}
+
 void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 

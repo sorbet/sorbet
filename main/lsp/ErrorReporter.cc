@@ -78,14 +78,15 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                                     const core::GlobalState &gs) {
     ENFORCE(file.exists());
 
-    ErrorStatus &fileErrorStatus = getFileErrorStatus(file);
-    if (fileErrorStatus.lastReportedEpoch > epoch) {
+    if (!wouldReportForFile(epoch, file)) {
         // Internal errors should always crash Sorbet in tests. Most of the time though, ENFORCE
         // failures and Exception::raise translate into user-visible errors with `beginError`.
         // Regardless of epoch, we want internal errors to crash the process.
         assertNoCritical(errors);
         return;
     }
+
+    ErrorStatus &fileErrorStatus = getFileErrorStatus(file);
 
     // Update clientErrorCount
     if (fileErrorStatus.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
@@ -194,9 +195,20 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentPublishDiagnostics, move(params))));
 };
 
+bool ErrorReporter::wouldReportForFile(uint32_t epoch, core::FileRef file) const {
+    if (file.id() >= fileErrorStatuses.size()) {
+        // No entry in fileErrorStatuses yet means we have never reported for this file, so we will
+        // certainly report any errors when requested.
+        return true;
+    } else {
+        const auto &fileErrorStatus = fileErrorStatuses[file.id()];
+        return fileErrorStatus.lastReportedEpoch <= epoch;
+    }
+}
+
 ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
     if (file.id() >= fileErrorStatuses.size()) {
-        fileErrorStatuses.resize(file.id() + 1, ErrorStatus{0, false});
+        fileErrorStatuses.resize(file.id() + 1, ErrorStatus{0, 0});
     }
     return fileErrorStatuses[file.id()];
 };

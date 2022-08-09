@@ -12,6 +12,9 @@ private:
 public:
     ErrorCollector() = default;
     ~ErrorCollector() = default;
+    bool wouldFlushErrors(core::FileRef file) const override {
+        return true;
+    }
     void flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
                      std::vector<std::unique_ptr<core::ErrorQueueMessage>> errors) override;
     std::vector<std::unique_ptr<core::Error>> drainErrors();

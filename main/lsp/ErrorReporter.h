@@ -42,6 +42,21 @@ public:
     void pushDiagnostics(uint32_t epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
 
+    /**
+     * Checks whether, given the ErrorStatus for the file, diagnostics would even be reported for
+     * this file.
+     *
+     * Sometimes the lastReportedEpoch can be greater than the file's epoch. The file's epoch is a
+     * function of which edit last changed the source contents of the file, while the
+     * lastReportedEpoch is a function of which edit last triggered a fast or slow path which caused
+     * the file to be typechecked, whether as a part of the edit or included by way of looking for
+     * downstream files.
+     *
+     * When this happens, it means we can short circuit, because the file has already been
+     * typechecked by a followup edit.
+     */
+    bool wouldReportForFile(uint32_t epoch, core::FileRef file) const;
+
     void beginEpoch(uint32_t epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(uint32_t epoch, bool committed = true);
     uint32_t lastDiagnosticEpochForFile(core::FileRef file);

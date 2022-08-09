@@ -38,6 +38,7 @@ public:
 
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);
+    bool wouldFlushErrorsForFile(FileRef file) const;
 
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;

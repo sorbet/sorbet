@@ -17,6 +17,11 @@ public:
     ErrorFlusherStdout() = default;
     ~ErrorFlusherStdout() = default;
 
+    // wouldFlushErrors is only ever false in LSP mode, where a later edit can produce newer
+    // errors, making it not useful to report errors for the given file.
+    bool wouldFlushErrors(core::FileRef file) const override {
+        return true;
+    }
     void flushErrors(spdlog::logger &logger, const GlobalState &gs, core::FileRef file,
                      std::vector<std::unique_ptr<ErrorQueueMessage>> errors) override;
     void flushErrorCount(spdlog::logger &logger, int count);

@@ -1146,7 +1146,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                             // typechecking!
                             // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
                             const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
-                            if (!isCanceled && !fileWasChanged) {
+                            if (!isCanceled && !fileWasChanged && gs.errorQueue->wouldFlushErrorsForFile(job.file)) {
                                 core::FileRef file = job.file;
                                 try {
                                     core::Context ctx(gs, core::Symbols::root(), file);
