@@ -589,12 +589,18 @@ void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
         name.append(send.fun.shortName(ctx));
         e.setHeader("`{}` does not accept keyword arguments", name);
 
-        auto start = send.getKwKey(0).loc();
-        auto end = send.getKwValue(send.numKwArgs() - 1).loc();
-        if (start.exists() && end.exists()) {
-            core::Loc loc{ctx.file, start.join(end)};
-            if (auto keywords = loc.source(ctx)) {
-                e.replaceWith("Remove keyword args", core::Loc{ctx.file, start.join(end)}, "{{{}}}", *keywords);
+        if (send.hasKwSplat()) {
+            // There's not _really_ a good autocorrect we can do here. Something is completely wrong.
+            // Simply deleting the whole kwsplat might mean that we're left with no args entirely,
+            // which is not obviously better than having the splat there.
+        } else {
+            auto start = send.getKwKey(0).loc();
+            auto end = send.getKwValue(send.numKwArgs() - 1).loc();
+            if (start.exists() && end.exists()) {
+                core::Loc loc{ctx.file, start.join(end)};
+                if (auto keywords = loc.source(ctx)) {
+                    e.replaceWith("Remove keyword args", core::Loc{ctx.file, start.join(end)}, "{{{}}}", *keywords);
+                }
             }
         }
     }

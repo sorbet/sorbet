@@ -46,6 +46,14 @@ autocorrect-t-combinator-kwargs.rb:13: `T.class_of` does not accept keyword argu
     13 |      klass: T.class_of(a: Integer),
                                 ^^^^^^^^^^
 
+autocorrect-t-combinator-kwargs.rb:14: `T.class_of` does not accept keyword arguments https://srb.help/5003
+    14 |      splat: T.class_of(**TYPES),
+                     ^^^^^^^^^^^^^^^^^^^
+
+autocorrect-t-combinator-kwargs.rb:15: `T.class_of` does not accept keyword arguments https://srb.help/5003
+    15 |      pos_and_splat: T.class_of(Float, **TYPES),
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 autocorrect-t-combinator-kwargs.rb:9: Unexpected bare `Symbol(:a)` value found in type position https://srb.help/7009
      9 |      all: T.all(Integer, M, a: Integer, b: String),
                                      ^
@@ -61,7 +69,7 @@ autocorrect-t-combinator-kwargs.rb:10: Unexpected bare `Symbol(:a)` value found 
 autocorrect-t-combinator-kwargs.rb:10: Unexpected bare `Symbol(:b)` value found in type position https://srb.help/7009
     10 |      any: T.any(Integer, String, a: Integer, b: String),
                                                       ^
-Errors: 10
+Errors: 12
 
 --------------------------------------------------------------------------
 
@@ -78,9 +86,14 @@ module M
       param: T.type_parameter({a: Integer}),
       enum: T.deprecated_enum({a: Integer}),
       klass: T.class_of({a: Integer}),
+      splat: T.class_of(**TYPES),
+      pos_and_splat: T.class_of(Float, **TYPES),
     ).void
   end
-  def test(nilable, all, any, param, enum, klass)
+  def test(nilable, all, any, param, enum, klass, splat, pos_and_splat)
   end
 
 end
+
+# This is down here so that the locs in the snapshot didn't change
+TYPES = [Integer, String]
