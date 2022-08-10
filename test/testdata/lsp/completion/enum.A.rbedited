@@ -1,0 +1,10 @@
+# typed: true
+class Test
+  class ${1} < T::Enum
+  #    ^ apply-completion [A] item: 0
+    enums do
+      ${0}
+    end
+  end
+  
+end
