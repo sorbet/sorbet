@@ -2002,6 +2002,10 @@ public:
 
 class Class_new : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::initialize()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
@@ -2355,6 +2359,8 @@ private:
     }
 
 public:
+    // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
+    // handling in Substitute.cc to account for fast path updates.
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
@@ -2457,11 +2463,10 @@ private:
             }
         }
 
-        NameRef to_proc = core::Names::toProc();
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         CallLocs sendLocs{file, callLoc, receiverLoc, funLoc, sendArgLocs};
-        DispatchArgs innerArgs{to_proc,
+        DispatchArgs innerArgs{core::Names::toProc(),
                                sendLocs,
                                0,
                                sendArgs,
@@ -2595,6 +2600,14 @@ private:
     }
 
 public:
+    vector<NameRef> dispatchesTo() const override {
+        // This is in addition to the custom handling that we do in Substitute.cc for the dispatch
+        // to the Symbol literal arg.
+        return {core::Names::toProc()};
+    }
+
+    // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
+    // handling in Substitute.cc to account for fast path updates.
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
@@ -2672,6 +2685,14 @@ public:
 
 class Magic_callWithSplatAndBlock : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        // This is in addition to the custom handling that we do in Substitute.cc for the dispatch
+        // to the Symbol literal arg.
+        return {core::Names::toProc()};
+    }
+
+    // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
+    // handling in Substitute.cc to account for fast path updates.
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
@@ -2837,6 +2858,10 @@ public:
  */
 class Magic_selfNew : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::new_()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the Class to create an instance of
         // args[1..] are the arguments to the constructor
@@ -2925,6 +2950,8 @@ public:
 
 class Magic_checkAndAnd : public IntrinsicMethod {
 public:
+    // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
+    // handling in Substitute.cc to account for fast path updates.
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // <Magic>.<check-and-and> is created when desugaring for the purpose of adding a more
         // specific error message when using `&&`. The normal error is something like "Method not
@@ -3064,6 +3091,10 @@ public:
 
 class Magic_splat : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::toA()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1);
 
@@ -3474,6 +3505,10 @@ class Shape_to_hash : public IntrinsicMethod {
 // `<Magic>.<to-hash-dup>(x)` and `<Magic>.<to-hash-nodup>(x) both behave like `x.to_hash`
 class Magic_toHash : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::toHash()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1);
 
@@ -3504,6 +3539,10 @@ public:
 // intrinsic that look like `a = <Magic>.<merge-hash>(a, b)`, so the fact that `merge!` won't update the type of the
 // receiver isn't a problem here.
 class Magic_mergeHash : public IntrinsicMethod {
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::merge()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 2);
 
@@ -3538,6 +3577,10 @@ class Magic_mergeHash : public IntrinsicMethod {
 //
 // See the note on Magic_mergeHash for why this doesn't dispatch to `merge!`.
 class Magic_mergeHashValues : public IntrinsicMethod {
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::merge()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Argument format is
         // 0 - the hash to merge values into
@@ -3682,6 +3725,10 @@ class Array_flatten : public IntrinsicMethod {
     }
 
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::toAry()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
@@ -3771,6 +3818,10 @@ public:
 
 class Array_plus : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::concat()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.suppressErrors || res.main.errors.empty() || args.numPosArgs != 1) {
             return;
@@ -3896,6 +3947,10 @@ public:
 
 class Enumerable_toH : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::enumerableToH()};
+    }
+
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Exit early when this is the case that's handled by the enumerable.rbi sig
