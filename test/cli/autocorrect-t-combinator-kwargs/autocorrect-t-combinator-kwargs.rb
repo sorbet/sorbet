@@ -11,9 +11,14 @@ module M
       param: T.type_parameter(a: Integer),
       enum: T.deprecated_enum(a: Integer),
       klass: T.class_of(a: Integer),
+      splat: T.class_of(**TYPES),
+      pos_and_splat: T.class_of(Float, **TYPES),
     ).void
   end
-  def test(nilable, all, any, param, enum, klass)
+  def test(nilable, all, any, param, enum, klass, splat, pos_and_splat)
   end
 
 end
+
+# This is down here so that the locs in the snapshot didn't change
+TYPES = [Integer, String]
