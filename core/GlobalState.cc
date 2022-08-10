@@ -698,11 +698,11 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::attachedClass())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
-    // Synthesize <Magic>.<check-and-and>(arg0: T.untyped, arg1: T.untyped, arg2: Symbol, arg: *T.untyped) => T.untyped
+    // Synthesize <Magic>.<check-and-and>(arg0: T.untyped, arg1: Symbol, arg2: T.untyped, arg: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::checkAndAnd())
                  .untypedArg(Names::arg0())
-                 .untypedArg(Names::arg1())
-                 .typedArg(Names::arg2(), core::Types::Symbol())
+                 .typedArg(Names::arg1(), core::Types::Symbol())
+                 .untypedArg(Names::arg2())
                  .repeatedUntypedArg(Names::arg())
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<nil-for-safe-navigation>(recv: T.untyped) => NilClass

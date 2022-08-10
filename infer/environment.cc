@@ -1130,7 +1130,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const bool isDesugarTripleEqSend = send.fun == core::Names::tripleEq() && send.funLoc.empty();
                 if (lspQueryMatch && !isDesugarTripleEqSend) {
                     auto fun = send.fun;
-                    if (fun == core::Names::checkAndAnd() && core::isa_type<core::NamedLiteralType>(args[2]->type)) {
+                    if (fun == core::Names::checkAndAnd() && core::isa_type<core::NamedLiteralType>(args[1]->type)) {
                         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[2]->type);
                         if (lit.derivesFrom(ctx, core::Symbols::Symbol())) {
                             fun = lit.asName();

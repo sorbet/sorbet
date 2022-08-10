@@ -2959,8 +2959,8 @@ public:
         // special wording (especially for first-time Sorbet users).
         //
         // args[0] is recv
-        // args[1] is the && tmp var
-        // args[2] is the method name
+        // args[1] is the method name
+        // args[2] is the && tmp var
         // args[3...] are the args
 
         ENFORCE(args.args.size() >= 3, "Desugar should have created call to <check-and-and> with exactly 3 args");
@@ -2969,12 +2969,12 @@ public:
         }
 
         auto selfTy = *args.args[0];
-        auto selfTyAndAnd = *args.args[1];
+        auto selfTyAndAnd = *args.args[2];
 
-        if (!isa_type<NamedLiteralType>(args.args[2]->type)) {
+        if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
         }
-        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[2]->type);
+        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
@@ -3060,7 +3060,7 @@ public:
                                     auto funLoc = core::Loc(args.locs.file, args.locs.fun);
                                     if (funLoc.exists() && !funLoc.empty() &&
                                         funLoc.adjustLen(gs, -1, 1).source(gs) == ".") {
-                                        auto andAndLoc = args.locs.args[1];
+                                        auto andAndLoc = args.locs.args[2];
                                         newErr.addAutocorrect(AutocorrectSuggestion{
                                             "Refactor to use `&.`",
                                             {

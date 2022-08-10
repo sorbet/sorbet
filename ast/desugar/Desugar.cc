@@ -1118,8 +1118,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             // Have to use zero-width locs here so that these auto-generated things
                             // don't show up in e.g. completion requests.
                             rhsSend->insertPosArg(0, std::move(rhsSend->recv));
-                            rhsSend->insertPosArg(1, MK::Local(loc.copyWithZeroLength(), andAndTemp));
-                            rhsSend->insertPosArg(2, MK::Symbol(rhsSend->funLoc.copyWithZeroLength(), rhsSend->fun));
+                            rhsSend->insertPosArg(1, MK::Symbol(rhsSend->funLoc.copyWithZeroLength(), rhsSend->fun));
+                            rhsSend->insertPosArg(2, MK::Local(loc.copyWithZeroLength(), andAndTemp));
                             rhsSend->recv = MK::Magic(loc.copyWithZeroLength());
                             rhsSend->fun = core::Names::checkAndAnd();
                             thenp = std::move(rhs);
