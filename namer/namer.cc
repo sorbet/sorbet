@@ -1260,14 +1260,14 @@ public:
         definedClasses.reserve(foundDefs.klasses().size());
         definedMethods.reserve(foundDefs.methods().size());
 
-        for (auto ref : foundDefs.nonMethodDefinitions()) {
+        for (auto ref : foundDefs.nonDeletableDefinitions()) {
             defineNonMethodSingle(ctx, ref);
         }
 
         // This currently interleaves deleting and defining across files.
         // It's possible that this causes problems at some point? Though I haven't found a test case.
         // That being said, if it does cause problems, we should be able to not interleave, and have
-        // all the `nonMethodDefinitions` from all files get defined, then delete all the old
+        // all the `nonDeletableDefinitions` from all files get defined, then delete all the old
         // methods, then define all the methods.
         if (oldFoundMethodHashes.has_value()) {
             for (const auto &oldMethodHash : oldFoundMethodHashes.value()) {
