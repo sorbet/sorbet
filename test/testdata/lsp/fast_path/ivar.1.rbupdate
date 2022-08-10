@@ -1,0 +1,16 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  extend T::Sig
+
+  sig {void}
+  def initialize
+    @x = T.let(0, String) # error: Argument does not have asserted type `String`
+  end
+
+  sig {void}
+  def example
+    T.reveal_type(@x) # error: `String`
+  end
+end
