@@ -1,0 +1,10 @@
+# typed: strict
+# assert-fast-path: name_kind__1.rb,name_kind__3.rb
+
+class A
+  extend T::Sig
+
+  sig {returns(String)}
+  def Foo; 0; end
+  #        ^ error: Expected `String` but found `Integer(0)` for method result type
+end
