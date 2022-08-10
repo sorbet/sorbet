@@ -1,5 +1,5 @@
 # typed: strict
-# spacer for exclude from update
+# spacer for exclude-from-file-update
 extend T::Sig
 
 sig {returns(String)}

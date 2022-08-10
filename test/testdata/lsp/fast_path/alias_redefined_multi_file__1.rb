@@ -1,6 +1,6 @@
 # typed: true
-# spacer for exclude from file update
-# spacer for assert fast path
+# spacer for exclude-from-file-update
+# spacer for assert-fast-path
 
 class A
   def to_method; end

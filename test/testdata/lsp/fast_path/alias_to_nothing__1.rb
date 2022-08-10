@@ -1,5 +1,5 @@
 # typed: true
-# Spacer for assert fast path
+# Spacer for assert-fast-path
 # Spacer to allow for exclude from file update assertion
 
 class A

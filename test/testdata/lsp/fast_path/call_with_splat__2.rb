@@ -1,5 +1,5 @@
 # typed: strict
-# spacer for exclude from file update
+# spacer for exclude-from-file-update
 
 res = A.example(&:foo)
 T.reveal_type(res) # error: `String`

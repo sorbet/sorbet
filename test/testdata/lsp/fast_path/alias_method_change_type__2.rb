@@ -1,5 +1,5 @@
 # typed: true
-# spacer for exclude from update
+# spacer for exclude-from-file-update
 
 class A
   alias_method :from_method, :to_method
