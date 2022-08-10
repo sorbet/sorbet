@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: rebind.rb
+
+class A
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(Integer).void).void}
+  def example(&blk)
+  end
+end
+
+A.new.example do
+  T.reveal_type(self) # error: `Integer`
+end
