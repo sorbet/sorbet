@@ -2302,9 +2302,9 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
                        sym.name == Names::requiredAncestorsLin())
                     : true;
             if (needMethodShapeHash) {
-                uint32_t symhash = sym.methodShapeHash(*this);
-                hierarchyHash = mix(hierarchyHash, symhash);
-                methodHash = mix(methodHash, symhash);
+                uint32_t methodShapeHash = sym.methodShapeHash(*this);
+                hierarchyHash = mix(hierarchyHash, methodShapeHash);
+                methodHash = mix(methodHash, methodShapeHash);
             }
 
             counter++;
