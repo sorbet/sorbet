@@ -70,12 +70,11 @@ template <typename H> H AbslHashValue(H h, const FullNameHash &m) {
 struct SymbolHash {
     // The hash of the symbol's name. Note that symbols with the same name owned by different
     // symbols map to the same WithoutUniqueNameHash. This is fine, because our strategy for deciding which
-    // downstream files to retypecheck is "any file that mentions any method with this name,"
-    // regardless of which method symbol(s) that call might dispatch to.
+    // downstream files to retypecheck is "any file that mentions any symbol with this name,"
+    // regardless of which symbol(s) that name might refer to in that position.
     WithoutUniqueNameHash nameHash;
-    // The combined hash of all method symbols with the given nameHash. If this changes, it tells us
-    // that at least one method symbol with the given name changed in some way, including type
-    // information.
+    // The combined hash of all symbols with the given nameHash. If this changes, it tells us that at
+    // least one symbol with the given name changed in some way, ignoring nothing about the symbol.
     uint32_t symbolHash;
 
     SymbolHash() noexcept = default;
