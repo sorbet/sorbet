@@ -303,7 +303,9 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     SymbolFileLocSaver saver{fref, defMapping};
     core::Context ctx{gs, core::Symbols::root(), fref};
     auto resolved = typechecker.getResolved({fref});
-    ast::TreeWalk::apply(ctx, saver, resolved[0].tree);
+    for (auto &f : resolved) {
+        ast::TreeWalk::apply(ctx, saver, f.tree);
+    }
 
     for (auto ref : candidates) {
         auto data = symbolRef2DocumentSymbol(gs, ref, fref, defMapping, forced);
