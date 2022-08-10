@@ -6,27 +6,27 @@
 #     bazel test //gems/sorbet-runtime:update_call_validation
 
 module T::Private::Methods::CallValidation
-  def self.create_validator_method_fast(mod, original_method, method_sig)
+  def self.create_validator_method_fast(mod, original_method, method_sig, original_visibility)
     if method_sig.return_type.is_a?(T::Private::Types::Void)
       raise 'Should have used create_validator_procedure_fast'
     end
     # trampoline to reduce stack frame size
     if method_sig.arg_types.empty?
-      create_validator_method_fast0(mod, original_method, method_sig, method_sig.return_type.raw_type)
+      create_validator_method_fast0(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type)
     elsif method_sig.arg_types.length == 1
-      create_validator_method_fast1(mod, original_method, method_sig, method_sig.return_type.raw_type,
+      create_validator_method_fast1(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
                                     method_sig.arg_types[0][1].raw_type)
     elsif method_sig.arg_types.length == 2
-      create_validator_method_fast2(mod, original_method, method_sig, method_sig.return_type.raw_type,
+      create_validator_method_fast2(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
                                     method_sig.arg_types[0][1].raw_type,
                                     method_sig.arg_types[1][1].raw_type)
     elsif method_sig.arg_types.length == 3
-      create_validator_method_fast3(mod, original_method, method_sig, method_sig.return_type.raw_type,
+      create_validator_method_fast3(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
                                     method_sig.arg_types[0][1].raw_type,
                                     method_sig.arg_types[1][1].raw_type,
                                     method_sig.arg_types[2][1].raw_type)
     elsif method_sig.arg_types.length == 4
-      create_validator_method_fast4(mod, original_method, method_sig, method_sig.return_type.raw_type,
+      create_validator_method_fast4(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
                                     method_sig.arg_types[0][1].raw_type,
                                     method_sig.arg_types[1][1].raw_type,
                                     method_sig.arg_types[2][1].raw_type,
@@ -36,8 +36,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_fast0(mod, original_method, method_sig, return_type)
-    mod.send(:define_method, method_sig.method_name) do |&blk|
+  def self.create_validator_method_fast0(mod, original_method, method_sig, original_visibility, return_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       # The following line breaks are intentional to show nice pry message
 
@@ -73,8 +73,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_fast1(mod, original_method, method_sig, return_type, arg0_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+  def self.create_validator_method_fast1(mod, original_method, method_sig, original_visibility, return_type, arg0_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -122,8 +122,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_fast2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+  def self.create_validator_method_fast2(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -183,8 +183,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_fast3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+  def self.create_validator_method_fast3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -256,8 +256,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_fast4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+  def self.create_validator_method_fast4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -341,24 +341,24 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_fast(mod, original_method, method_sig)
+  def self.create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
     # trampoline to reduce stack frame size
     if method_sig.arg_types.empty?
-      create_validator_procedure_fast0(mod, original_method, method_sig)
+      create_validator_procedure_fast0(mod, original_method, method_sig, original_visibility)
     elsif method_sig.arg_types.length == 1
-      create_validator_procedure_fast1(mod, original_method, method_sig,
+      create_validator_procedure_fast1(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1].raw_type)
     elsif method_sig.arg_types.length == 2
-      create_validator_procedure_fast2(mod, original_method, method_sig,
+      create_validator_procedure_fast2(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1].raw_type,
                                     method_sig.arg_types[1][1].raw_type)
     elsif method_sig.arg_types.length == 3
-      create_validator_procedure_fast3(mod, original_method, method_sig,
+      create_validator_procedure_fast3(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1].raw_type,
                                     method_sig.arg_types[1][1].raw_type,
                                     method_sig.arg_types[2][1].raw_type)
     elsif method_sig.arg_types.length == 4
-      create_validator_procedure_fast4(mod, original_method, method_sig,
+      create_validator_procedure_fast4(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1].raw_type,
                                     method_sig.arg_types[1][1].raw_type,
                                     method_sig.arg_types[2][1].raw_type,
@@ -368,8 +368,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_fast0(mod, original_method, method_sig)
-    mod.send(:define_method, method_sig.method_name) do |&blk|
+  def self.create_validator_procedure_fast0(mod, original_method, method_sig, original_visibility)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       # The following line breaks are intentional to show nice pry message
 
@@ -391,8 +391,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_fast1(mod, original_method, method_sig, arg0_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+  def self.create_validator_procedure_fast1(mod, original_method, method_sig, original_visibility, arg0_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -426,8 +426,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_fast2(mod, original_method, method_sig, arg0_type, arg1_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+  def self.create_validator_procedure_fast2(mod, original_method, method_sig, original_visibility, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -473,8 +473,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_fast3(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+  def self.create_validator_procedure_fast3(mod, original_method, method_sig, original_visibility, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -532,8 +532,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_fast4(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type, arg3_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+  def self.create_validator_procedure_fast4(mod, original_method, method_sig, original_visibility, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
@@ -603,27 +603,27 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_medium(mod, original_method, method_sig)
+  def self.create_validator_method_medium(mod, original_method, method_sig, original_visibility)
     if method_sig.return_type.is_a?(T::Private::Types::Void)
       raise 'Should have used create_validator_procedure_medium'
     end
     # trampoline to reduce stack frame size
     if method_sig.arg_types.empty?
-      create_validator_method_medium0(mod, original_method, method_sig, method_sig.return_type)
+      create_validator_method_medium0(mod, original_method, method_sig, original_visibility, method_sig.return_type)
     elsif method_sig.arg_types.length == 1
-      create_validator_method_medium1(mod, original_method, method_sig, method_sig.return_type,
+      create_validator_method_medium1(mod, original_method, method_sig, original_visibility, method_sig.return_type,
                                     method_sig.arg_types[0][1])
     elsif method_sig.arg_types.length == 2
-      create_validator_method_medium2(mod, original_method, method_sig, method_sig.return_type,
+      create_validator_method_medium2(mod, original_method, method_sig, original_visibility, method_sig.return_type,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1])
     elsif method_sig.arg_types.length == 3
-      create_validator_method_medium3(mod, original_method, method_sig, method_sig.return_type,
+      create_validator_method_medium3(mod, original_method, method_sig, original_visibility, method_sig.return_type,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1],
                                     method_sig.arg_types[2][1])
     elsif method_sig.arg_types.length == 4
-      create_validator_method_medium4(mod, original_method, method_sig, method_sig.return_type,
+      create_validator_method_medium4(mod, original_method, method_sig, original_visibility, method_sig.return_type,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1],
                                     method_sig.arg_types[2][1],
@@ -633,8 +633,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_medium0(mod, original_method, method_sig, return_type)
-    mod.send(:define_method, method_sig.method_name) do |&blk|
+  def self.create_validator_method_medium0(mod, original_method, method_sig, original_visibility, return_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       # The following line breaks are intentional to show nice pry message
 
@@ -670,8 +670,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_medium1(mod, original_method, method_sig, return_type, arg0_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+  def self.create_validator_method_medium1(mod, original_method, method_sig, original_visibility, return_type, arg0_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -719,8 +719,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_medium2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+  def self.create_validator_method_medium2(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -780,8 +780,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_medium3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+  def self.create_validator_method_medium3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -853,8 +853,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_medium4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+  def self.create_validator_method_medium4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -938,24 +938,24 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_medium(mod, original_method, method_sig)
+  def self.create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
     # trampoline to reduce stack frame size
     if method_sig.arg_types.empty?
-      create_validator_procedure_medium0(mod, original_method, method_sig)
+      create_validator_procedure_medium0(mod, original_method, method_sig, original_visibility)
     elsif method_sig.arg_types.length == 1
-      create_validator_procedure_medium1(mod, original_method, method_sig,
+      create_validator_procedure_medium1(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1])
     elsif method_sig.arg_types.length == 2
-      create_validator_procedure_medium2(mod, original_method, method_sig,
+      create_validator_procedure_medium2(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1])
     elsif method_sig.arg_types.length == 3
-      create_validator_procedure_medium3(mod, original_method, method_sig,
+      create_validator_procedure_medium3(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1],
                                     method_sig.arg_types[2][1])
     elsif method_sig.arg_types.length == 4
-      create_validator_procedure_medium4(mod, original_method, method_sig,
+      create_validator_procedure_medium4(mod, original_method, method_sig, original_visibility,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1],
                                     method_sig.arg_types[2][1],
@@ -965,8 +965,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_medium0(mod, original_method, method_sig)
-    mod.send(:define_method, method_sig.method_name) do |&blk|
+  def self.create_validator_procedure_medium0(mod, original_method, method_sig, original_visibility)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       # The following line breaks are intentional to show nice pry message
 
@@ -988,8 +988,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_medium1(mod, original_method, method_sig, arg0_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+  def self.create_validator_procedure_medium1(mod, original_method, method_sig, original_visibility, arg0_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -1023,8 +1023,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_medium2(mod, original_method, method_sig, arg0_type, arg1_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+  def self.create_validator_procedure_medium2(mod, original_method, method_sig, original_visibility, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -1070,8 +1070,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_medium3(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+  def self.create_validator_procedure_medium3(mod, original_method, method_sig, original_visibility, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(
@@ -1129,8 +1129,8 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_procedure_medium4(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type, arg3_type)
-    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+  def self.create_validator_procedure_medium4(mod, original_method, method_sig, original_visibility, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       unless arg0_type.valid?(arg0)
         CallValidation.report_error(

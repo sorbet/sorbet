@@ -847,4 +847,55 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       replaced&.restore
     end
   end
+
+  it 'redefines wrapper methods with the right visibility upfront' do
+    method_redefinitions = []
+
+    klass = Class.new do
+      define_singleton_method(:method_added) do |name|
+        # Reaching into a private method for testing purposes
+        visibility = T::Private::ClassUtils.send(:visibility_method_name, self, name)
+
+        method_redefinitions << [name, visibility]
+
+        super(name)
+      end
+
+      extend T::Sig
+
+      sig {returns(String)}
+      def a_public_method
+        "public"
+      end
+
+      protected
+
+      sig {returns(String)}
+      def a_protected_method
+        "protected"
+      end
+
+      private
+
+      sig {returns(String)}
+      def a_private_method
+        "private"
+      end
+    end
+
+    instance = klass.new
+
+    assert_equal("public", instance.a_public_method)
+    assert_equal("protected", instance.send(:a_protected_method))
+    assert_equal("private", instance.send(:a_private_method))
+
+    # We are not interested in repeated method redefinitions
+    unique_method_redefinitions = method_redefinitions.uniq
+
+    assert_equal([
+      %i[a_private_method private],
+      %i[a_protected_method protected],
+      %i[a_public_method public],
+    ], unique_method_redefinitions.sort)
+  end
 end
