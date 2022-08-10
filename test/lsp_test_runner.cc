@@ -585,8 +585,6 @@ TEST_CASE("LSPTest") {
     }
 
     if (test.expectations.contains("autogen")) {
-        // When autogen is enabled, skip Rewriter passes...
-        lspWrapper->opts->skipRewriterPasses = true;
         // Some autogen tests assume that some errors will occur from the resolver step, others assume the resolver
         // won't run.
         if (!RangeAssertion::getErrorAssertions(assertions).empty()) {
