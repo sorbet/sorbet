@@ -1,5 +1,5 @@
 # typed: true
-# spacer for exclude from file update assertion
+# spacer for exclude-from-file-update
 
 class A_08
   extend T::Sig

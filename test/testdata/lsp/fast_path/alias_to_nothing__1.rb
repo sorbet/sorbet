@@ -1,6 +1,6 @@
 # typed: true
-# Spacer for assert fast path
-# Spacer to allow for exclude from file update assertion
+# spacer for assert-fast-path
+# spacer for exclude-from-file-update
 
 class A
   extend T::Sig

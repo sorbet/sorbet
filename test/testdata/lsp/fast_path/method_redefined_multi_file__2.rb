@@ -1,5 +1,5 @@
 # typed: true
-# spacer for exclude from file update
+# spacer for exclude-from-file-update
 
 # -- imagine that this file were an RBI --
 

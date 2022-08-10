@@ -1,5 +1,5 @@
 # typed: true
-# spacer for exclude from update
+# spacer for exclude-from-file-update
 
 # Pretend this is a source file that implements a method with the type from
 # the RBI. This files does not have any calls to `foo`

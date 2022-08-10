@@ -1,6 +1,6 @@
 # typed: true
 # assert-fast-path: alias_to_nothing__1.rb,alias_to_nothing__2.rb,alias_to_nothing__3.rb
-# Spacer to allow for exclude from file update assertion
+# spacer for exclude-from-file-update
 
 class A
   extend T::Sig

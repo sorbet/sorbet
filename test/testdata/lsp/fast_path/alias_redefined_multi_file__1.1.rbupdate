@@ -1,5 +1,5 @@
 # typed: true
-# spacer for exclude from file update
+# spacer for exclude-from-file-update
 # assert-fast-path: alias_redefined_multi_file__1.rb,alias_redefined_multi_file__2.rb
 
 class A
