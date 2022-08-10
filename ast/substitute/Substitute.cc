@@ -124,7 +124,7 @@ public:
             // We're lucky because all of these methods have the symbol they dispatch to as the
             // positional arg at index 1.
             auto name = unwrapLiteralToName(send.getPosArg(1));
-            ENFORCE(name.exists());
+            ENFORCE(name.exists(), "Name should exist because this arg should be a Literal");
             [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
         }
 
