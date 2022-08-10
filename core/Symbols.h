@@ -37,9 +37,7 @@ public:
     //
     // If your intrinsic cannot declare the list of methods it might dispatch to (like
     // `<call-with-splat>`, etc.), you will have to edit Substitute.cc.
-    virtual std::vector<NameRef> dispatchesTo() const {
-        return {};
-    }
+    virtual std::vector<NameRef> dispatchesTo() const;
 
     virtual void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const = 0;
 };

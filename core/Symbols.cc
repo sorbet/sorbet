@@ -2641,6 +2641,10 @@ bool Method::hasIntrinsic() const {
     return this->intrinsicOffset != INVALID_INTRINSIC_OFFSET;
 }
 
+vector<NameRef> IntrinsicMethod::dispatchesTo() const {
+    return {};
+}
+
 const IntrinsicMethod *Method::getIntrinsic() const {
     if (this->intrinsicOffset == INVALID_INTRINSIC_OFFSET) {
         return nullptr;
