@@ -7,7 +7,6 @@ class NameRef;
 class GlobalState;
 class ShortNameHash {
 public:
-    /** Sorts an array of ShortNameHashes and removes duplicates. */
     static void sortAndDedupe(std::vector<core::ShortNameHash> &hashes);
 
     ShortNameHash(const GlobalState &gs, NameRef nm);
@@ -39,7 +38,6 @@ template <typename H> H AbslHashValue(H h, const ShortNameHash &m) {
 
 class FullNameHash {
 public:
-    /** Sorts an array of ShortNameHashes and removes duplicates. */
     static void sortAndDedupe(std::vector<core::FullNameHash> &hashes);
 
     FullNameHash(const GlobalState &gs, NameRef nm);
