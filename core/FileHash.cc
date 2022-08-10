@@ -40,9 +40,9 @@ uint32_t hashFullNameRef(const GlobalState &gs, NameRef nm) {
 
 } // namespace
 
-ShortNameHash::ShortNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
+WithoutUniqueNameHash::WithoutUniqueNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
 
-void ShortNameHash::sortAndDedupe(std::vector<core::ShortNameHash> &hashes) {
+void WithoutUniqueNameHash::sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }

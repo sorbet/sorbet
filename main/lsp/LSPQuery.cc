@@ -109,7 +109,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     ENFORCE(symbol.exists());
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();
-    const core::ShortNameHash symShortNameHash(gs, symbol.name(gs));
+    const core::WithoutUniqueNameHash symShortNameHash(gs, symbol.name(gs));
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     int i = -1;
     for (auto &file : typechecker.state().getFiles()) {

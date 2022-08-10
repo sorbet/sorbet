@@ -55,7 +55,7 @@ public:
         UnorderedMap<core::FileRef, size_t> changedFiles;
 
         // The names of all symbols changed by this set of updates
-        std::vector<core::ShortNameHash> changedSymbolNameHashes;
+        std::vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
 
         // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
         std::vector<core::FileRef> extraFiles;

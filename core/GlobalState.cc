@@ -2234,8 +2234,8 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<ShortNameHash, uint32_t> methodHashesMap;
-    UnorderedMap<ShortNameHash, uint32_t> staticFieldHashesMap;
+    UnorderedMap<WithoutUniqueNameHash, uint32_t> methodHashesMap;
+    UnorderedMap<WithoutUniqueNameHash, uint32_t> staticFieldHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2280,7 +2280,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
         if (field.flags.isStaticField) {
-            auto &target = staticFieldHashesMap[ShortNameHash(*this, field.name)];
+            auto &target = staticFieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
         }
         hierarchyHash = mix(hierarchyHash, field.fieldShapeHash(*this));
@@ -2294,7 +2294,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashesMap[ShortNameHash(*this, sym.name)];
+            auto &target = methodHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
             auto needMethodShapeHash =
                 this->lspExperimentalFastPathEnabled
