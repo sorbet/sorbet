@@ -187,8 +187,8 @@ CheckSize(FoundModifier, 24, 4);
 class FoundDefinitions final {
     // Contains references to items in _klasses, _staticFields, and _typeMembers.
     // Used to determine the order in which symbols are defined in SymbolDefiner.
-    // (All non-method definitions are defined before all method definitions)
-    std::vector<FoundDefinitionRef> _nonMethodDefinitions;
+    // (All non-deletable definitions are defined before all deletable definitions)
+    std::vector<FoundDefinitionRef> _nonDeletableDefinitions;
     // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
     // Symbols for classes that are referenced from but not present in the given file.
     std::vector<FoundClassRef> _klassRefs;
@@ -215,7 +215,7 @@ class FoundDefinitions final {
             case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
         });
-        _nonMethodDefinitions.emplace_back(ref);
+        _nonDeletableDefinitions.emplace_back(ref);
         return ref;
     }
 
@@ -261,9 +261,9 @@ public:
         _modifiers.emplace_back(std::move(mod));
     }
 
-    // See documentation on _nonMethodDefinitions
-    const std::vector<FoundDefinitionRef> &nonMethodDefinitions() const {
-        return _nonMethodDefinitions;
+    // See documentation on _nonDeletableDefinitions
+    const std::vector<FoundDefinitionRef> &nonDeletableDefinitions() const {
+        return _nonDeletableDefinitions;
     }
 
     // See documentation on _klasses
