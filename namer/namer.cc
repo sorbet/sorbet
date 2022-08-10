@@ -865,8 +865,8 @@ class SymbolDefiner {
             // When modifyMethod is called later, it won't be able to find the correct method entry.
             // Let's leave the method visibility what it was.
             // TODO(jez) After #5808 lands, can we delete this check?
-            // TODO(jez) The change to only populate oldFoundMethodHashesForFiles means that no, we
-            // actually can't remove this quite yet.
+            // TODO(jez) The change to only populate oldFoundMethodHashesForFiles if something
+            // actually changed means that no, we actually can't remove this quite yet.
             return symbol;
         }
 

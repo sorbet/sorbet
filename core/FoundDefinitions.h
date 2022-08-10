@@ -261,7 +261,7 @@ public:
         _modifiers.emplace_back(std::move(mod));
     }
 
-    // See documentation on _definitions
+    // See documentation on _nonMethodDefinitions
     const std::vector<FoundDefinitionRef> &nonMethodDefinitions() const {
         return _nonMethodDefinitions;
     }
