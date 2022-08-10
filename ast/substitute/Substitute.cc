@@ -129,7 +129,14 @@ public:
         }
 
         send.fun = subst.substituteSymbolName(send.fun);
-        // TODO(jez) Also use the intrinsic methods to record other symbol names.
+
+        // Some intrinsic method dispatch to other methods. Defensively assume that any method that
+        // shares a name with an intrinsic might be an intrinsic method.
+        for (const auto &[source, targets] : core::intrinsicMethodsDispatchMap()) {
+            for (const auto target : targets) {
+                [[maybe_unused]] auto _substituted = subst.substituteSymbolName(target);
+            }
+        }
     }
 
     void postTransformLiteral(core::MutableContext ctx, ExpressionPtr &tree) {

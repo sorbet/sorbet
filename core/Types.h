@@ -183,6 +183,8 @@ struct Intrinsic {
     const IntrinsicMethod *impl;
 };
 absl::Span<const Intrinsic> intrinsicMethods();
+using IntrinsicMethodsDispatchMap = UnorderedMap<NameRef, const std::vector<NameRef>>;
+const IntrinsicMethodsDispatchMap &intrinsicMethodsDispatchMap();
 
 template <class To> bool isa_type(const TypePtr &what) {
     return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;

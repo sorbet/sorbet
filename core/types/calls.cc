@@ -2859,7 +2859,9 @@ public:
 class Magic_selfNew : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
-        return {core::Names::new_()};
+        // Technically only dispatches to `new` but we manually flatten the chain to avoid having to
+        // compute the transitive closure of dispatchesTo.
+        return {core::Names::new_(), core::Names::initialize()};
     }
 
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4188,10 +4190,29 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
 };
 
+UnorderedMap<NameRef, const vector<NameRef>> computeIntrinsicsDispatchMap() {
+    UnorderedMap<NameRef, const vector<NameRef>> result;
+    for (const auto &intrinsic : intrinsics) {
+        auto targets = intrinsic.impl->dispatchesTo();
+        if (targets.empty()) {
+            continue;
+        }
+
+        result.emplace(intrinsic.method, move(targets));
+    }
+    return result;
+}
+
+const IntrinsicMethodsDispatchMap intrinsicsDispatchMap = computeIntrinsicsDispatchMap();
+
 } // namespace
 
 absl::Span<const Intrinsic> intrinsicMethods() {
     return absl::MakeSpan(intrinsics);
+}
+
+const IntrinsicMethodsDispatchMap &intrinsicMethodsDispatchMap() {
+    return intrinsicsDispatchMap;
 }
 
 } // namespace sorbet::core
