@@ -1,6 +1,6 @@
 # typed: true
 
-# This is only an error because autogen does **not** run the ClassNew Rewriter pass.
+# This was previously a problem because autogen skipped the rewriter passes
 
 A = Class.new
 
@@ -8,5 +8,5 @@ A = Class.new
 # resolve it because we replace `A` with `StubModule` and we would
 # interpret B as unresolved.
 
-class B < A # error: Superclasses and mixins may only use class aliases like `A = Integer`
+class B < A
 end
