@@ -1,0 +1,11 @@
+# typed: true
+# exclude-from-file-update: true
+
+class Foo
+  extend T::Sig
+  include IFoo
+
+  sig {override.void}
+  def foo; end
+
+end

@@ -1,0 +1,11 @@
+# typed: true
+# spacer for exclude from file update
+
+class Foo
+  extend T::Sig
+  include IFoo
+
+  sig {void}
+  def foo; end
+# ^^^^^^^ error: Method `Foo#foo` implements an abstract method `IFoo#foo` but is not declared with `override.`
+end
