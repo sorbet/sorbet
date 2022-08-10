@@ -1,5 +1,5 @@
 # typed: true
-# Spacer to allow for exclude from file update assertion
+# spacer for exclude-from-file-update
 
 A.new.from_method
 A.new.from_method_new # error: Method `from_method_new` does not exist on `A`
