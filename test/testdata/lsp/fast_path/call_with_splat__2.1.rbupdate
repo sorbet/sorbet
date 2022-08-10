@@ -1,0 +1,21 @@
+# typed: strict
+# exclude-from-file-update: true
+
+res = A.example(&:foo) # error: Method `foo` does not exist on `A`
+T.reveal_type(res) # error: `T.untyped`
+res = A.example(&:fooo)
+T.reveal_type(res) # error: `String`
+
+int_str = [1, '']
+str_int = ['', 1]
+int_str_false = [1, '', false]
+  A.takes_int_and_string(*int_str)
+# ^ error: Expected `String` but found `Integer(1)` for argument `x`
+# ^ error: Expected `Integer` but found `String("")` for argument `y`
+  A.takes_int_and_string(*str_int)
+# spacer
+# spacer
+  A.takes_int_and_string(*int_str_false)
+# ^ error: Expected `String` but found `Integer(1)` for argument `x`
+# ^ error: Expected `Integer` but found `String("")` for argument `y`
+# ^ error: Too many arguments provided

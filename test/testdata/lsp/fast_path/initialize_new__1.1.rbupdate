@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: initialize_new__1.rb,initialize_new__2.rb,initialize_new__3.rb
+
+class A
+  extend T::Sig
+
+  sig {params(x: String).void}
+  def initialize(x)
+    T.reveal_type(x) # error: `String`
+  end
+end
+
+A.new(0) # error: Expected `String` but found `Integer(0)`
+A.new('')

@@ -29,6 +29,16 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
+    // A list of method names that this intrinsic dispatches to.
+    // Used to ensure that calls involving intrinsics are correctly typechecked on the fast path.
+    //
+    // If your intrinsic does not dispatch to another method, the default implementation returns an
+    // empty vector, so you can elide an implementation.
+    //
+    // If your intrinsic cannot declare the list of methods it might dispatch to (like
+    // `<call-with-splat>`, etc.), you will have to edit Substitute.cc.
+    virtual std::vector<NameRef> dispatchesTo() const;
+
     virtual void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const = 0;
 };
 

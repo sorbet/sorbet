@@ -98,8 +98,9 @@ public:
     void preTransformSend(core::MutableContext ctx, ExpressionPtr &original) {
         auto &send = cast_tree_nonnull<Send>(original);
         if (send.fun == core::Names::aliasMethod()) {
-            // This is basically a MethodDef in disguise, so we have to do similar logic to record
-            // the names that the MethodDef case would.
+            // `alias_method :foo :bar` is very similar to `def foo; self.bar(); end`, so in
+            // addition to handling the `alias_method` fun, we also want to look at the two
+            // possibly-Symbol-literal arguments and call substituteSymbolName on them as well.
 
             // Discards the new name. We only care to do this for the side effect of recording the entry in
             // acc.symbols in the NameSubstitution. When the tree traversal actually visits the arg
@@ -116,9 +117,26 @@ public:
                     [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
                 }
             }
+        } else if (send.fun == core::Names::callWithSplat() || send.fun == core::Names::callWithBlock() ||
+                   send.fun == core::Names::callWithSplatAndBlock() || send.fun == core::Names::checkAndAnd()) {
+            ENFORCE(send.numPosArgs() > 2, "These are special desugar methods, should have at least two args");
+
+            // We're lucky because all of these methods have the symbol they dispatch to as the
+            // positional arg at index 1.
+            auto name = unwrapLiteralToName(send.getPosArg(1));
+            ENFORCE(name.exists(), "Name should exist because this arg should be a Literal");
+            [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
         }
 
         send.fun = subst.substituteSymbolName(send.fun);
+
+        // Some intrinsic method dispatch to other methods. Defensively assume that any method that
+        // shares a name with an intrinsic might be an intrinsic method.
+        for (const auto &[source, targets] : core::intrinsicMethodsDispatchMap()) {
+            for (const auto target : targets) {
+                [[maybe_unused]] auto _substituted = subst.substituteSymbolName(target);
+            }
+        }
     }
 
     void postTransformLiteral(core::MutableContext ctx, ExpressionPtr &tree) {

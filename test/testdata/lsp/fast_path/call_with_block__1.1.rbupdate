@@ -1,0 +1,11 @@
+# typed: strict
+# assert-fast-path: call_with_block__1.rb,call_with_block__2.rb
+
+class A
+  extend T::Sig
+
+  sig {params(blk: T.proc.params(arg0: String).returns(Integer)).void}
+  def self.takes_blk(&blk)
+    yield ''
+  end
+end
