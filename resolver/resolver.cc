@@ -3826,14 +3826,12 @@ public:
                 }
             }
         }
-        // handleAbstractMethod called elsewhere
     }
     static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
-        // handleAbstractMethod called elsewhere
     }
 
     static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
