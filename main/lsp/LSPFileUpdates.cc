@@ -157,7 +157,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                       [](const auto &symhash) { return symhash.nameHash; });
     absl::c_transform(changedFieldSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
                       [](const auto &symhash) { return symhash.nameHash; });
-    core::ShortNameHash::sortAndDedupe(result.changedSymbolNameHashes);
+    core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 
     if (result.changedSymbolNameHashes.empty()) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
@@ -190,7 +190,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
 
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
-        vector<core::ShortNameHash> intersection;
+        vector<core::WithoutUniqueNameHash> intersection;
         absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
                                  std::back_inserter(intersection));
         if (intersection.empty()) {

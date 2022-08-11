@@ -13,6 +13,44 @@ uint32_t incZero(uint32_t a) {
     return a == 0 ? 1 : a;
 };
 
+// We ignore unique names because those are names created by Sorbet not written by the user. If a
+// symbol with a unique name changes (like an overload, or a T::Enum name, or a Singleton class), we
+// want to force the fast path to retypecheck any file that mentioned the original name in any way
+//
+// For example, `A#foo (overload.1)` changes, that means we should typecheck all files with `foo`,
+// because the that `foo` might end up dispatching to the unique name, despite not mentioning the
+// unique name directly.
+//
+// Similarly for constant names--changes to the the fake `MyEnum::X$1` symbols we create to model
+// `T::Enum` subclasses could affect a file that simply mentions a constant with the name `X` (but
+// not a file that mentions a method called `X()`, which is why we still include the name kind in
+// the hash for non-UNIQUE names).
+uint32_t hashNameRefWithoutUniques(const GlobalState &gs, NameRef nm) {
+    uint32_t result;
+    auto kind = nm.kind();
+
+    switch (kind) {
+        case NameKind::UTF8: {
+            result = _hash(nm.dataUtf8(gs)->utf8);
+            break;
+        }
+        case NameKind::CONSTANT: {
+            result = hashNameRefWithoutUniques(gs, nm.dataCnst(gs)->original);
+            break;
+        }
+        case NameKind::UNIQUE: {
+            result = hashNameRefWithoutUniques(gs, nm.dataUnique(gs)->original);
+            break;
+        }
+    }
+
+    if (kind != NameKind::UNIQUE) {
+        auto hashedKind = static_cast<underlying_type<NameKind>::type>(kind);
+        result = mix(result, hashedKind);
+    }
+    return result;
+}
+
 uint32_t hashFullNameRef(const GlobalState &gs, NameRef nm) {
     uint32_t result;
     auto kind = nm.kind();
@@ -40,9 +78,10 @@ uint32_t hashFullNameRef(const GlobalState &gs, NameRef nm) {
 
 } // namespace
 
-ShortNameHash::ShortNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
+WithoutUniqueNameHash::WithoutUniqueNameHash(const GlobalState &gs, NameRef nm)
+    : _hashValue(incZero(hashNameRefWithoutUniques(gs, nm))){};
 
-void ShortNameHash::sortAndDedupe(std::vector<core::ShortNameHash> &hashes) {
+void WithoutUniqueNameHash::sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }

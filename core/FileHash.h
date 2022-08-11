@@ -5,41 +5,39 @@
 namespace sorbet::core {
 class NameRef;
 class GlobalState;
-class ShortNameHash {
+class WithoutUniqueNameHash {
 public:
-    /** Sorts an array of ShortNameHashes and removes duplicates. */
-    static void sortAndDedupe(std::vector<core::ShortNameHash> &hashes);
+    static void sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes);
 
-    ShortNameHash(const GlobalState &gs, NameRef nm);
+    WithoutUniqueNameHash(const GlobalState &gs, NameRef nm);
     inline bool isDefined() const {
         return _hashValue != 0;
     }
-    ShortNameHash(const ShortNameHash &nm) noexcept = default;
-    ShortNameHash() noexcept : _hashValue(0){};
-    inline bool operator==(const ShortNameHash &rhs) const noexcept {
+    WithoutUniqueNameHash(const WithoutUniqueNameHash &nm) noexcept = default;
+    WithoutUniqueNameHash() noexcept : _hashValue(0){};
+    inline bool operator==(const WithoutUniqueNameHash &rhs) const noexcept {
         ENFORCE(isDefined());
         ENFORCE(rhs.isDefined());
         return _hashValue == rhs._hashValue;
     }
 
-    inline bool operator!=(const ShortNameHash &rhs) const noexcept {
+    inline bool operator!=(const WithoutUniqueNameHash &rhs) const noexcept {
         return !(rhs == *this);
     }
 
-    inline bool operator<(const ShortNameHash &rhs) const noexcept {
+    inline bool operator<(const WithoutUniqueNameHash &rhs) const noexcept {
         return this->_hashValue < rhs._hashValue;
     }
 
     uint32_t _hashValue;
 };
 
-template <typename H> H AbslHashValue(H h, const ShortNameHash &m) {
+template <typename H> H AbslHashValue(H h, const WithoutUniqueNameHash &m) {
     return H::combine(std::move(h), m._hashValue);
 }
 
 class FullNameHash {
 public:
-    /** Sorts an array of ShortNameHashes and removes duplicates. */
     static void sortAndDedupe(std::vector<core::FullNameHash> &hashes);
 
     FullNameHash(const GlobalState &gs, NameRef nm);
@@ -71,17 +69,17 @@ template <typename H> H AbslHashValue(H h, const FullNameHash &m) {
 
 struct SymbolHash {
     // The hash of the symbol's name. Note that symbols with the same name owned by different
-    // symbols map to the same ShortNameHash. This is fine, because our strategy for deciding which
-    // downstream files to retypecheck is "any file that mentions any method with this name,"
-    // regardless of which method symbol(s) that call might dispatch to.
-    ShortNameHash nameHash;
-    // The combined hash of all method symbols with the given nameHash. If this changes, it tells us
-    // that at least one method symbol with the given name changed in some way, including type
-    // information.
+    // symbols map to the same WithoutUniqueNameHash. This is fine, because our strategy for deciding which
+    // downstream files to retypecheck is "any file that mentions any symbol with this name,"
+    // regardless of which symbol(s) that name might refer to in that position.
+    WithoutUniqueNameHash nameHash;
+    // The combined hash of all symbols with the given nameHash. If this changes, it tells us that at
+    // least one symbol with the given name changed in some way, ignoring nothing about the symbol.
     uint32_t symbolHash;
 
     SymbolHash() noexcept = default;
-    SymbolHash(ShortNameHash nameHash, uint32_t symbolHash) noexcept : nameHash(nameHash), symbolHash(symbolHash) {}
+    SymbolHash(WithoutUniqueNameHash nameHash, uint32_t symbolHash) noexcept
+        : nameHash(nameHash), symbolHash(symbolHash) {}
 
     inline bool operator<(const SymbolHash &h) const noexcept {
         return this->nameHash < h.nameHash || (!(h.nameHash < this->nameHash) && this->symbolHash < h.symbolHash);
@@ -157,7 +155,7 @@ struct LocalSymbolTableHashes {
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
 
-    // Essentially a map from ShortNameHash -> uint32_t, where keys are names of methods and values are
+    // Essentially a map from WithoutUniqueNameHash -> uint32_t, where keys are names of methods and values are
     // Symbol hashes for all methods defined in the file with that name (on any owner).
     //
     // Stored as a vector instead of a map to optimize for set_difference and compact storage
@@ -226,7 +224,7 @@ struct LocalSymbolTableHashes {
 //
 // (Useful for _over_ approximating the set of files that might be affected.)
 struct UsageHash {
-    std::vector<core::ShortNameHash> nameHashes;
+    std::vector<core::WithoutUniqueNameHash> nameHashes;
 };
 
 // This is stored on the core::File object directly, which is then cached.

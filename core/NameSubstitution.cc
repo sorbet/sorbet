@@ -87,7 +87,7 @@ NameRef LazyNameSubstitution::defineName(NameRef from) {
 }
 
 core::UsageHash LazyNameSubstitution::getAllNames() {
-    core::ShortNameHash::sortAndDedupe(acc.nameHashes);
+    core::WithoutUniqueNameHash::sortAndDedupe(acc.nameHashes);
     return move(acc);
 }
 } // namespace sorbet::core
