@@ -241,6 +241,8 @@ public:
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
+    bool isClassAlias() const;
+
     uint32_t hash(const GlobalState &gs) const;
     uint32_t fieldShapeHash(const GlobalState &gs) const;
 

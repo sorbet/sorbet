@@ -2320,6 +2320,11 @@ uint32_t Method::hash(const GlobalState &gs) const {
     return result;
 }
 
+bool Field::isClassAlias() const {
+    ENFORCE(this->flags.isStaticField, "should never ask whether instance variable is a class alias");
+    return isa_type<AliasType>(resultType);
+}
+
 uint32_t Field::hash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
@@ -2364,7 +2369,7 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
         // this and the corresponding code in GlobalState, but one step at a time.
         !this->flags.isField &&
         // Only normal static fields are ok (no type aliases, no class aliases/type templates).
-        (!this->flags.isStaticFieldTypeAlias && !isa_type<AliasType>(this->resultType));
+        (!this->flags.isStaticFieldTypeAlias && !this->isClassAlias());
 
     if (!canSkipType) {
         result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
