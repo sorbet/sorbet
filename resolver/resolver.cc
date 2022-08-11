@@ -218,8 +218,7 @@ private:
                 // static fields to find the field on the singleton class.
                 auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, name);
                 if (lookup.isStaticField(ctx)) {
-                    const auto &resultType = lookup.asFieldRef().data(ctx)->resultType;
-                    if (core::isa_type<core::AliasType>(resultType)) {
+                    if (lookup.asFieldRef().data(ctx)->isClassAlias()) {
                         auto dealiased = lookup.dealias(ctx);
                         if (dealiased.isTypeMember() &&
                             dealiased.asTypeMemberRef().data(ctx)->owner ==
