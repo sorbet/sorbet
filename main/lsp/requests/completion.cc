@@ -89,7 +89,7 @@ const RubyKeyword rubyKeywords[] = {
 };
 
 // Since these are not technically Ruby keywords but will be treated as such we store
-// these separately for hygiene. 
+// these separately for hygiene.
 const KeywordLikeSnippet keywordLikeSnippets[] = {
     {"enum", "Creates an enum class", "class ${1:EnumName} < T::Enum\n  enums do\n    $0\n  end\nend"},
     {"struct", "Creates a new struct class", "class ${1:StructName} < T::Struct\n  $0\nend"},
@@ -260,8 +260,9 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
 }
 
 vector<KeywordLikeSnippet> allSimilarLikeKeywords(string_view prefix) {
-    ENFORCE(absl::c_is_sorted(keywordLikeSnippets, [](auto &left, auto &right) { return left.keyword < right.keyword; }),
-            "keywordLikeSnippets is not sorted by keyword; completion results will be out of order");
+    ENFORCE(
+        absl::c_is_sorted(keywordLikeSnippets, [](auto &left, auto &right) { return left.keyword < right.keyword; }),
+        "keywordLikeSnippets is not sorted by keyword; completion results will be out of order");
 
     if (prefix == "") {
         // Since we suggest keyword snippets first, they're just noise when the prefix is empty
@@ -278,7 +279,6 @@ vector<KeywordLikeSnippet> allSimilarLikeKeywords(string_view prefix) {
     // The result is trivially sorted because we walked rubyKeywords (which is sorted) in order.
     return result;
 }
-
 
 vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const vector<core::NameRef> &locals,
                                            string_view prefix) {
@@ -1138,7 +1138,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     // ----- keywords -----
 
     auto similarKeywords = params.suggestKeywords ? allSimilarKeywords(params.prefix) : vector<RubyKeyword>{};
-    auto similarLikeKeywords = params.suggestKeywords ? allSimilarLikeKeywords(params.prefix) : vector<KeywordLikeSnippet>{};
+    auto similarLikeKeywords =
+        params.suggestKeywords ? allSimilarLikeKeywords(params.prefix) : vector<KeywordLikeSnippet>{};
 
     // ----- methods -----
 
