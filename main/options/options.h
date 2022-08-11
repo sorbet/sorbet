@@ -157,7 +157,7 @@ struct Options {
     bool silenceErrors = false;
     bool silenceDevMessage = false;
     bool suggestSig = false;
-    bool supressNonCriticalErrors = false;
+    bool suppressNonCriticalErrors = false;
     bool runLSP = false;
     bool disableWatchman = false;
     std::string watchmanPath = "watchman";

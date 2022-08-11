@@ -961,7 +961,7 @@ int realmain(int argc, char *argv[]) {
 #endif
     if (!gs || gs->hadCriticalError() || (gsForMinimize && gsForMinimize->hadCriticalError())) {
         returnCode = 10;
-    } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
+    } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.suppressNonCriticalErrors) {
         returnCode = 100;
     }
 
