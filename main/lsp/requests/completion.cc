@@ -276,7 +276,7 @@ vector<KeywordLikeSnippet> allSimilarLikeKeywords(string_view prefix) {
         }
     }
 
-    // The result is trivially sorted because we walked rubyKeywords (which is sorted) in order.
+    // The result is trivially sorted because we walked keywordLikeSnippets (which is sorted) in order.
     return result;
 }
 
