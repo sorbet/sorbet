@@ -27,7 +27,7 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.silenceErrors, opts.silenceErrors);
     CHECK_EQ(empty.silenceDevMessage, opts.silenceDevMessage);
     CHECK_EQ(empty.suggestSig, opts.suggestSig);
-    CHECK_EQ(empty.supressNonCriticalErrors, opts.supressNonCriticalErrors);
+    CHECK_EQ(empty.suppressNonCriticalErrors, opts.suppressNonCriticalErrors);
     CHECK_EQ(empty.runLSP, opts.runLSP);
     CHECK_EQ(empty.disableWatchman, opts.disableWatchman);
     CHECK_EQ(empty.watchmanPath, opts.watchmanPath);

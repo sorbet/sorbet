@@ -1117,7 +1117,7 @@ void readOptions(Options &opts,
             }
         }
 
-        opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
+        opts.suppressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStrictnessOverrides(raw["typed-override"].as<string>(), logger);
         }
