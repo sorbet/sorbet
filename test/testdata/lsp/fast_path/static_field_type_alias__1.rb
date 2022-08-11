@@ -5,8 +5,11 @@ class AliasContainer
 
   ContainedThing = T.type_alias {T.any(Float, Symbol)}
 
-  sig {params(x: ContainedThing).void}
-  def example(x)
+  sig {params(x: ContainedThing).returns(ContainedThing)}
+  def example(x=0.0)
     T.reveal_type(x) # error: `T.any(Float, Symbol)`
   end
+end
+
+class AliasContainerChild < AliasContainer
 end
