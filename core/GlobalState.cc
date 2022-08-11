@@ -2279,7 +2279,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         counter++;
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
-        if (field.flags.isStaticField && !field.flags.isStaticFieldTypeAlias && !field.isClassAlias()) {
+        if (field.flags.isStaticField && !field.isClassAlias()) {
             auto &target = staticFieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
