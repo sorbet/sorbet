@@ -2187,7 +2187,7 @@ void GlobalState::replaceFile(FileRef whatFile, const shared_ptr<File> &withWhat
 }
 
 FileRef GlobalState::findFileByPath(string_view path) const {
-    auto fnd = fileRefByPath.find(string(path));
+    auto fnd = fileRefByPath.find(path);
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
     }
