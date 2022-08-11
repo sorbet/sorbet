@@ -2368,6 +2368,7 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
     ENFORCE(!this->flags.isField && !this->flags.isStaticFieldTypeAlias && !this->isClassAlias());
     uint32_t result = _hash(name.shortName(gs));
 
+    result = mix(result, 1 + (this->resultType != nullptr));
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     return result;

@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: static_field_type.rb
+# assert-slow-path: true
 
 class A
   def foo(x); end
