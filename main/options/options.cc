@@ -195,7 +195,7 @@ core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> l
     }
 }
 
-UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileName, shared_ptr<spdlog::logger> logger) {
+UnorderedMap<string, core::StrictLevel> extractStrictnessOverrides(string fileName, shared_ptr<spdlog::logger> logger) {
     UnorderedMap<string, core::StrictLevel> result;
     try {
         YAML::Node config = YAML::LoadFile(fileName);
@@ -1119,7 +1119,7 @@ void readOptions(Options &opts,
 
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
-            opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
+            opts.strictnessOverrides = extractStrictnessOverrides(raw["typed-override"].as<string>(), logger);
         }
 
         for (auto &provider : semanticExtensionProviders) {
