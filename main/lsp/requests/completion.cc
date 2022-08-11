@@ -91,8 +91,8 @@ const RubyKeyword rubyKeywords[] = {
 // Since these are not technically Ruby keywords but will be treated as such we store
 // these separately for hygiene. 
 const KeywordLikeSnippet keywordLikeSnippets[] = {
-    {"enum", "Creates an enum class", "class $1 < T::Enum\nenums do\n$0\nend\nend"},
-    {"struct", "Creates a new struct class", "class $1 < T::Struct\n $0\nend"},
+    {"enum", "Creates an enum class", "class ${1:EnumName} < T::Enum\n  enums do\n    $0\n  end\nend"},
+    {"struct", "Creates a new struct class", "class ${1:StructName} < T::Struct\n  $0\nend"},
 };
 
 vector<core::ClassOrModuleRef> ancestorsImpl(const core::GlobalState &gs, core::ClassOrModuleRef sym,

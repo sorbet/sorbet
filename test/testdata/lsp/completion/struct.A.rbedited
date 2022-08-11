@@ -1,9 +1,27 @@
 # typed: true
 
-class Test
-  class ${0} < T::Struct
-  #    ^ apply-completion [A] item: 0
-    ${1}
+class Foo
+  class ${1:StructName} < T::Struct
+    $0
+  end # error: does not exist
+  #     ^ apply-completion: [A] item: 0
+end
+
+class Bar
+  def foo
+    struct = "xyz"
+    struc # error: does not exist
+    #  ^ completion: struct, ...
   end
-  
+end
+
+class Baz
+  def struct
+    return 1
+  end
+
+  def bat
+    struc # error: does not exist
+    #    ^ completion: struct, ...
+  end
 end
