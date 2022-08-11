@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: type_alias_chain__1.rb,type_alias_chain__2.rb
+# ^ bug, should also check __3.rb
+
+extend T::Sig
+
+
+Alias1 = T.type_alias {String}
+
+sig {params(x: Alias1).void}
+def example1(x)
+  T.reveal_type(x) # error: `String`
+end
