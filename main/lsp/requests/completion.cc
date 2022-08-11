@@ -33,6 +33,8 @@ struct RubyKeyword {
         : keyword(move(keyword)), documentation(move(documentation)), snippet(move(snippet)), detail(move(detail)){};
 };
 
+using KeywordLikeSnippet = RubyKeyword;
+
 // Taken from https://docs.ruby-lang.org/en/2.6.0/keywords_rdoc.html
 // We might want to put this somewhere shareable if there are more places that want to use it.
 //
@@ -58,7 +60,6 @@ const RubyKeyword rubyKeywords[] = {
     {"end",
      "The end of a syntax block. Used by classes, modules, methods, exception handling and control expressions."},
     {"ensure", "Starts a section of code that is always run when an exception is raised."},
-    {"enum", "Creates an enum class", "class $1 < T::Enum\nenums do\n$0\nend\nend"},
     {"false", "Boolean false."},
     {"for", "A loop that is similar to using the each method."},
     {"if", "Used for if and modifier if expressions.", "if ${1:expr}\n  $0\nend", "if/end"},
@@ -74,7 +75,6 @@ const RubyKeyword rubyKeywords[] = {
     {"retry", "Retries an exception block."},
     {"return", "Exits a method."},
     {"self", "The object the current method is attached to."},
-    {"struct", "Creates a new struct class", "class $1 < T::Struct\n $0\nend"},
     {"super", "Calls the current method in a superclass."},
     {"then", "Indicates the end of conditional blocks in control structures."},
     {"true", "Boolean true."},
@@ -86,6 +86,13 @@ const RubyKeyword rubyKeywords[] = {
     {"when", "A condition in a case expression.", "when ${1:expr}$0"},
     {"while", "Creates a loop that executes while the condition is true.", "while ${1:expr}\n  $0\nend", "while/end"},
     {"yield", "Starts execution of the block sent to the current method."},
+};
+
+// Since these are not technically Ruby keywords but will be treated as such we store
+// these separately for hygiene. 
+const KeywordLikeSnippet keywordLikeSnippets[] = {
+    {"enum", "Creates an enum class", "class $1 < T::Enum\nenums do\n$0\nend\nend"},
+    {"struct", "Creates a new struct class", "class $1 < T::Struct\n $0\nend"},
 };
 
 vector<core::ClassOrModuleRef> ancestorsImpl(const core::GlobalState &gs, core::ClassOrModuleRef sym,
@@ -251,6 +258,27 @@ vector<RubyKeyword> allSimilarKeywords(string_view prefix) {
     // The result is trivially sorted because we walked rubyKeywords (which is sorted) in order.
     return result;
 }
+
+vector<KeywordLikeSnippet> allSimilarLikeKeywords(string_view prefix) {
+    ENFORCE(absl::c_is_sorted(keywordLikeSnippets, [](auto &left, auto &right) { return left.keyword < right.keyword; }),
+            "keywordLikeSnippets is not sorted by keyword; completion results will be out of order");
+
+    if (prefix == "") {
+        // Since we suggest keyword snippets first, they're just noise when the prefix is empty
+        return {};
+    }
+
+    auto result = vector<KeywordLikeSnippet>{};
+    for (const auto &keywordSnippet : keywordLikeSnippets) {
+        if (absl::StartsWith(keywordSnippet.keyword, prefix)) {
+            result.emplace_back(keywordSnippet);
+        }
+    }
+
+    // The result is trivially sorted because we walked rubyKeywords (which is sorted) in order.
+    return result;
+}
+
 
 vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const vector<core::NameRef> &locals,
                                            string_view prefix) {
@@ -1110,6 +1138,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     // ----- keywords -----
 
     auto similarKeywords = params.suggestKeywords ? allSimilarKeywords(params.prefix) : vector<RubyKeyword>{};
+    auto similarLikeKeywords = params.suggestKeywords ? allSimilarLikeKeywords(params.prefix) : vector<KeywordLikeSnippet>{};
 
     // ----- methods -----
 
@@ -1143,6 +1172,15 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         for (auto &similarLocal : similarLocals) {
             items.push_back(getCompletionItemForLocalName(gs, this->config, similarLocal, params.queryLoc,
                                                           params.prefix, items.size()));
+        }
+    }
+    // since these are not actually keywords, clashing local names are valid, and we prefer those
+    // hence, this is placed after local names
+    {
+        Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".like_keyword_items");
+        for (auto &similarLikeKeywords : similarLikeKeywords) {
+            items.push_back(getCompletionItemForKeyword(gs, this->config, similarLikeKeywords, params.queryLoc,
+                                                        params.prefix, items.size()));
         }
     }
     {
