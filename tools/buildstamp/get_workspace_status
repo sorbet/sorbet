@@ -14,6 +14,17 @@ set -e
 # If the script exits with non-zero code, it's considered as a failure
 # and the output will be discarded.
 
+# Provide an escape hatch for people building from github release tarballs,
+# but in non-Sorbet git repositories, to get somewhat more accurate version
+# information.
+if [ -f .github/SORBET_ARCHIVE_SHA ]; then
+    git_rev=$(head -n 1 .github/SORBET_ARCHIVE_SHA)
+    echo "STABLE_BUILD_SCM_REVISION ${git_rev}"
+    echo "STABLE_BUILD_SCM_COMMIT_COUNT 0"
+    echo "STABLE_BUILD_SCM_CLEAN 0"
+    exit 0
+fi
+    
 if ! git rev-parse --git-dir >&/dev/null; then
     echo "STABLE_BUILD_SCM_REVISION nongit"
     echo "STABLE_BUILD_SCM_COMMIT_COUNT 0"
