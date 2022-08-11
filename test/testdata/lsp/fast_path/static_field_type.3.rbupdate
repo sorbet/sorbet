@@ -1,0 +1,10 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  def foo(x); end
+
+  X = 0 + 0
+end
+
+T.reveal_type(A::X) # error: `T.untyped`

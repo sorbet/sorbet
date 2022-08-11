@@ -1,0 +1,10 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  def foo(x); end
+
+  X = T.let(0 + 0, Float) # error: Argument does not have asserted type `Float`
+end
+
+T.reveal_type(A::X) # error: `Float`
