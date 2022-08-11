@@ -2361,19 +2361,13 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
 }
 
 uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
+    // Only consider static fields for the fast path at the moment.  It is probably
+    // straightforward to take the fast path for changes to regular fields by changing
+    // this and the corresponding code in GlobalState, but one step at a time.
+    // Only normal static fields are ok (no type aliases, no class aliases).
+    ENFORCE(!this->flags.isField && !this->flags.isStaticFieldTypeAlias && !this->isClassAlias());
     uint32_t result = _hash(name.shortName(gs));
 
-    auto canSkipType =
-        // Only consider static fields for the fast path at the moment.  It is probably
-        // straightforward to take the fast path for changes to regular fields by changing
-        // this and the corresponding code in GlobalState, but one step at a time.
-        !this->flags.isField &&
-        // Only normal static fields are ok (no type aliases, no class aliases/type templates).
-        (!this->flags.isStaticFieldTypeAlias && !this->isClassAlias());
-
-    if (!canSkipType) {
-        result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
-    }
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     return result;

@@ -2279,12 +2279,16 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         counter++;
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
-        if (field.flags.isStaticField) {
+        if (field.flags.isStaticField && !field.flags.isStaticFieldTypeAlias && !field.isClassAlias()) {
             auto &target = staticFieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
+            uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
+            hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
+            fieldHash = mix(fieldHash, staticFieldShapeHash);
+        } else {
+            hierarchyHash = mix(hierarchyHash, symhash);
+            fieldHash = mix(fieldHash, symhash);
         }
-        hierarchyHash = mix(hierarchyHash, field.fieldShapeHash(*this));
-        fieldHash = mix(fieldHash, symhash);
 
         if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, field.name.show(*this));
