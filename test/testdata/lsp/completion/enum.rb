@@ -22,3 +22,22 @@ class Baz
     #  ^ completion: enum, ...
   end
 end
+
+class A
+  def bar
+    b = Baz.new
+    b.enu # error: does not exist
+    #    ^ completion: enum, ...
+  end
+end
+
+class B
+  def self.enum
+    return "enum"
+  end
+
+  def self.bar
+    self.enu # error: does not exist
+    #       ^ completion: enum, ...
+  end
+end
