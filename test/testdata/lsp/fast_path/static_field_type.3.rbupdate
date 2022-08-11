@@ -1,10 +1,10 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: static_field_type.rb
 
 class A
   def foo(x); end
 
-  X = 0 + 0
+  X = 0 + 0 # error: Expected `String` but found `Integer` for field
 end
 
-T.reveal_type(A::X) # error: `T.untyped`
+T.reveal_type(A::X) # error: `String`
