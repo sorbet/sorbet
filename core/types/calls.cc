@@ -946,7 +946,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
         auto splatLoc = args.argLoc(args.args.size() - 1);
 
-        // If --ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
+        // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
         if (gs.ruby3KeywordArgs) {
             if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
                 e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
