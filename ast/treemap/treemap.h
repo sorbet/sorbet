@@ -255,7 +255,7 @@ private:
     return_type mapMethodDef(arg_type v, CTX ctx) {
         CALL_PRE(MethodDef);
 
-        for (auto &arg : cast_tree_nonnull<MethodDef>(v).args) {
+        for (auto &arg : cast_tree_nonnull<MethodDef>(v).args()) {
             // Only OptionalArgs have subexpressions within them.
             if (auto *optArg = cast_tree<OptionalArg>(arg)) {
                 CALL_MAP(optArg->default_, ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));

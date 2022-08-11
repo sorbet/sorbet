@@ -221,7 +221,7 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
+        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args());
         foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         auto def = foundDefs->addMethod(move(foundMethod));
 
@@ -1839,31 +1839,29 @@ public:
         tree = ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(vector<core::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
-        ast::MethodDef::ARGS_store args;
+    void fillInArgs(absl::Span<ast::ExpressionPtr> args, vector<core::ParsedArg> parsedArgs) {
+        ENFORCE(args.size() == parsedArgs.size());
         int i = -1;
         for (auto &arg : parsedArgs) {
             i++;
+            ENFORCE(i < args.size());
             auto localVariable = arg.local;
 
             if (arg.flags.isShadow) {
                 auto localExpr = ast::make_expression<ast::Local>(arg.loc, localVariable);
-                args.emplace_back(move(localExpr));
+                args[i] = move(localExpr);
             } else {
-                ENFORCE(i < oldArgs.size());
-                auto expr = arg2Symbol(i, arg, move(oldArgs[i]));
-                args.emplace_back(move(expr));
+                auto expr = arg2Symbol(i, arg, move(args[i]));
+                args[i] = move(expr);
             }
         }
-
-        return args;
     }
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, ctx.owner, method.flags.isSelfMethod);
-        auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
+        auto parsedArgs = ast::ArgParsing::parseArgs(method.args());
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         if (!sym.exists()) {
             ENFORCE(this->bestEffort);
@@ -1873,7 +1871,7 @@ public:
             return;
         }
         method.symbol = sym;
-        method.args = fillInArgs(move(parsedArgs), std::move(method.args));
+        fillInArgs(method.args(), move(parsedArgs));
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1884,8 +1882,8 @@ public:
             return;
         }
 
-        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
-                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
+        ENFORCE(method.args().size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
+                method.name.showRaw(ctx), method.args().size(), method.symbol.data(ctx)->arguments.size());
     }
 
     ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {

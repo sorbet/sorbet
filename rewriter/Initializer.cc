@@ -190,7 +190,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     }
 
     UnorderedMap<core::NameRef, ArgKind> argKindMap;
-    for (const auto &arg : methodDef->args) {
+    for (const auto &arg : methodDef->args()) {
         const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
         if (restArg == nullptr) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;

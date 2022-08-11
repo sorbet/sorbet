@@ -42,7 +42,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         bool isAbstract = md.symbol.data(ctx)->flags.isAbstract;
         bool seenKeyword = false;
         int i = -1;
-        for (auto &argExpr : md.args) {
+        for (auto &argExpr : md.args()) {
             i++;
             auto *a = ast::MK::arg2Local(argExpr);
             auto local = res->enterLocal(a->localVariable);

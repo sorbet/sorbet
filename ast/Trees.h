@@ -389,7 +389,17 @@ public:
     ExpressionPtr rhs;
 
     using ARGS_store = InlinedVector<ExpressionPtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
-    ARGS_store args;
+
+private:
+    ARGS_store args_;
+
+public:
+    absl::Span<ExpressionPtr> args() {
+        return absl::MakeSpan(args_);
+    }
+    absl::Span<const ExpressionPtr> args() const {
+        return absl::MakeSpan(args_);
+    }
 
     core::NameRef name;
 

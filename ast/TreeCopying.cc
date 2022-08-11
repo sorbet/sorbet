@@ -9,6 +9,15 @@ namespace {
 
 ExpressionPtr deepCopy(const void *avoid, const ExpressionPtr &tree, bool root = false);
 
+template <class T> T deepCopySpan(const void *avoid, absl::Span<const ExpressionPtr> origin) {
+    T copy;
+    copy.reserve(origin.size());
+    for (const auto &memb : origin) {
+        copy.emplace_back(deepCopy(avoid, memb));
+    };
+    return copy;
+}
+
 template <class T> T deepCopyVec(const void *avoid, const T &origin) {
     T copy;
     copy.reserve(origin.size());
@@ -45,7 +54,8 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
         case Tag::MethodDef: {
             auto *exp = reinterpret_cast<const MethodDef *>(tree);
             return make_expression<MethodDef>(exp->loc, exp->declLoc, exp->symbol, exp->name,
-                                              deepCopyVec(avoid, exp->args), deepCopy(avoid, exp->rhs), exp->flags);
+                                              deepCopySpan<MethodDef::ARGS_store>(avoid, exp->args()),
+                                              deepCopy(avoid, exp->rhs), exp->flags);
         }
 
         case Tag::If: {

@@ -91,7 +91,7 @@ class LocalNameInserter {
         return named;
     }
 
-    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
+    vector<NamedArg> nameArgs(core::MutableContext ctx, absl::Span<ast::ExpressionPtr> methodArgs) {
         vector<NamedArg> namedArgs;
         for (auto &arg : methodArgs) {
             if (!ast::isa_reference(arg)) {
@@ -182,17 +182,17 @@ class LocalNameInserter {
 
     // Enter names from arguments into the current frame, building a new
     // argument list back up for the original context.
-    ast::MethodDef::ARGS_store fillInArgs(vector<NamedArg> namedArgs) {
-        ast::MethodDef::ARGS_store args;
+    void fillInArgs(absl::Span<ast::ExpressionPtr> args, vector<NamedArg> namedArgs) {
+        ENFORCE(args.size() == namedArgs.size());
 
+        int i = -1;
         for (auto &named : namedArgs) {
-            args.emplace_back(move(named.expr));
+            ++i;
+            args[i] = move(named.expr);
             auto &frame = scopeStack.back();
             frame.locals[named.name] = named.local;
             frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
         }
-
-        return args;
     }
 
     core::ClassOrModuleRef methodOwner(core::MutableContext ctx) {
@@ -475,7 +475,8 @@ public:
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        method.args = fillInArgs(nameArgs(ctx, method.args));
+        auto args = method.args();
+        fillInArgs(args, nameArgs(ctx, method.args()));
     }
 
     void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
@@ -503,7 +504,8 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk.args = fillInArgs(nameArgs(ctx, blk.args));
+        absl::Span<ast::ExpressionPtr> args{blk.args};
+        fillInArgs(args, nameArgs(ctx, args));
     }
 
     void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
