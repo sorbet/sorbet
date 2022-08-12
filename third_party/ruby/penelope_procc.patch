@@ -1,12 +1,12 @@
 diff --git proc.c proc.c
-index e189c20..7c41055 100644
+index e189c20..6a6754f 100644
 --- proc.c
 +++ proc.c
 @@ -43,6 +43,9 @@ VALUE rb_cMethod;
  VALUE rb_cBinding;
  VALUE rb_cProc;
 
-+static int ME_CLONE_DO_NOT_CLONE = false;
++static int ME_CLONE_DO_NOT_CONE = false;
 +static int ME_CLONE_CLONE = true;
 +
  static rb_block_call_func bmcall;
@@ -87,10 +87,12 @@ index e189c20..7c41055 100644
      struct METHOD bound = { recv, klass, 0, me };
 
      VALUE passed_procval = rb_block_given_p() ? rb_block_proc() : Qnil;
-@@ -4002,6 +4042,7 @@ Init_Proc(void)
+@@ -4001,7 +4041,8 @@ Init_Proc(void)
+     rb_define_method(rb_cUnboundMethod, "original_name", method_original_name, 0);
      rb_define_method(rb_cUnboundMethod, "owner", method_owner, 0);
      rb_define_method(rb_cUnboundMethod, "bind", umethod_bind, 1);
-     rb_define_method(rb_cUnboundMethod, "bind_call", umethod_bind_call, -1);
+-    rb_define_method(rb_cUnboundMethod, "bind_call", umethod_bind_call, -1);
++    rb_define_method(rb_cUnboundMethod, "bind_call", umethod_bind_call_experimental_optimized, -1);
 +    rb_define_method(rb_cUnboundMethod, "bind_call_experimental_optimized", umethod_bind_call_experimental_optimized, -1);
      rb_define_method(rb_cUnboundMethod, "source_location", rb_method_location, 0);
      rb_define_method(rb_cUnboundMethod, "parameters", rb_method_parameters, 0);
