@@ -1,7 +1,7 @@
-diff --git a/proc.c b/proc.c
+diff --git proc.c proc.c
 index 0c8889f04b..0f231efa8b 100644
---- a/proc.c
-+++ b/proc.c
+--- proc.c
++++ proc.c
 @@ -43,6 +43,9 @@ VALUE rb_cMethod;
  VALUE rb_cBinding;
  VALUE rb_cProc;
