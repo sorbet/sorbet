@@ -6,7 +6,7 @@ index e189c20..6a6754f 100644
  VALUE rb_cBinding;
  VALUE rb_cProc;
 
-+static int ME_CLONE_DO_NOT_CONE = false;
++static int ME_CLONE_DO_NOT_CLONE = false;
 +static int ME_CLONE_CLONE = true;
 +
  static rb_block_call_func bmcall;
