@@ -1056,7 +1056,6 @@ class SymbolDefiner {
                                    staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
-        auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
             emitRedefinedConstantError(ctx, ctx.locAt(staticField.asgnLoc), staticField.name.show(ctx),
                                        currSym.loc(ctx));
@@ -1070,6 +1069,7 @@ class SymbolDefiner {
                                            renamedSym.loc(ctx));
             }
         }
+        auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
 
         if (staticField.isTypeAlias) {
