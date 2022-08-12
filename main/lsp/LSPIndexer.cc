@@ -138,10 +138,15 @@ bool LSPIndexer::canTakeFastPathInternal(
                 newHash.localSymbolTableHashes.typeMemberHash != oldHash.localSymbolTableHashes.typeMemberHash;
             const bool fieldsDiffer =
                 newHash.localSymbolTableHashes.fieldHash != oldHash.localSymbolTableHashes.fieldHash;
+            const bool staticFieldsDiffer =
+                newHash.localSymbolTableHashes.staticFieldHash != oldHash.localSymbolTableHashes.staticFieldHash;
+            const bool staticFieldAliasesDiffer = newHash.localSymbolTableHashes.staticFieldAliasHash !=
+                                                  oldHash.localSymbolTableHashes.staticFieldAliasHash;
             const bool methodsDiffer =
                 newHash.localSymbolTableHashes.methodHash != oldHash.localSymbolTableHashes.methodHash;
             const uint32_t differCount = int(classesDiffer) + int(typeArgumentsDiffer) + int(typeMembersDiffer) +
-                                         int(fieldsDiffer) + int(methodsDiffer);
+                                         int(fieldsDiffer) + int(staticFieldsDiffer) + int(staticFieldAliasesDiffer) +
+                                         int(methodsDiffer);
             if (classesDiffer) {
                 prodCategoryCounterInc("lsp.slow_path_changed_def", "classmodule");
             }
@@ -152,7 +157,13 @@ bool LSPIndexer::canTakeFastPathInternal(
                 prodCategoryCounterInc("lsp.slow_path_changed_def", "typemember");
             }
             if (fieldsDiffer) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "field");
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "icvar");
+            }
+            if (staticFieldsDiffer) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "staticfield");
+            }
+            if (staticFieldAliasesDiffer) {
+                prodCategoryCounterInc("lsp.slow_path_changed_def", "staticfieldalias");
             }
             if (methodsDiffer) {
                 prodCategoryCounterInc("lsp.slow_path_changed_def", "method");
@@ -165,7 +176,11 @@ bool LSPIndexer::canTakeFastPathInternal(
                 } else if (typeMembersDiffer) {
                     prodCategoryCounterInc("lsp.slow_path_changed_def", "onlytypemembers");
                 } else if (fieldsDiffer) {
-                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlyfields");
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlyicvars");
+                } else if (staticFieldsDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlystaticfields");
+                } else if (staticFieldAliasesDiffer) {
+                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlystaticfieldaliases");
                 } else {
                     ENFORCE(methodsDiffer);
                     prodCategoryCounterInc("lsp.slow_path_changed_def", "onlymethods");

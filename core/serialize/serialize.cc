@@ -240,6 +240,13 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     }
     p.putU1(1);
     p.putU4(fh->localSymbolTableHashes.hierarchyHash);
+    p.putU4(fh->localSymbolTableHashes.classModuleHash);
+    p.putU4(fh->localSymbolTableHashes.typeArgumentHash);
+    p.putU4(fh->localSymbolTableHashes.typeMemberHash);
+    p.putU4(fh->localSymbolTableHashes.fieldHash);
+    p.putU4(fh->localSymbolTableHashes.staticFieldHash);
+    p.putU4(fh->localSymbolTableHashes.staticFieldAliasHash);
+    p.putU4(fh->localSymbolTableHashes.methodHash);
     p.putU4(fh->localSymbolTableHashes.methodHashes.size());
     for (const auto &[key, value] : fh->localSymbolTableHashes.methodHashes) {
         p.putU4(key._hashValue);
@@ -271,6 +278,13 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     FileHash ret;
 
     ret.localSymbolTableHashes.hierarchyHash = p.getU4();
+    ret.localSymbolTableHashes.classModuleHash = p.getU4();
+    ret.localSymbolTableHashes.typeArgumentHash = p.getU4();
+    ret.localSymbolTableHashes.typeMemberHash = p.getU4();
+    ret.localSymbolTableHashes.fieldHash = p.getU4();
+    ret.localSymbolTableHashes.staticFieldHash = p.getU4();
+    ret.localSymbolTableHashes.staticFieldAliasHash = p.getU4();
+    ret.localSymbolTableHashes.methodHash = p.getU4();
     auto methodHashSize = p.getU4();
     ret.localSymbolTableHashes.methodHashes.reserve(methodHashSize);
     for (int it = 0; it < methodHashSize; it++) {

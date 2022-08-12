@@ -149,9 +149,11 @@ struct LocalSymbolTableHashes {
     // A fingerprint for the type member symbols contained in the file.
     uint32_t typeMemberHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the fields contained in the file.
-    // TODO(froydnj) would maybe be interesting to split this out into separate
-    // field/static field hashes, or even finer subdivisions on static fields.
     uint32_t fieldHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the non-alias static fields contained in the file.
+    uint32_t staticFieldHash = HASH_STATE_NOT_COMPUTED;
+    // A fingerprint for the type and class alias static fields contained in the file.
+    uint32_t staticFieldAliasHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
 
@@ -185,6 +187,8 @@ struct LocalSymbolTableHashes {
         ret.typeArgumentHash = HASH_STATE_INVALID_PARSE;
         ret.typeMemberHash = HASH_STATE_INVALID_PARSE;
         ret.fieldHash = HASH_STATE_INVALID_PARSE;
+        ret.staticFieldHash = HASH_STATE_INVALID_PARSE;
+        ret.staticFieldAliasHash = HASH_STATE_INVALID_PARSE;
         ret.methodHash = HASH_STATE_INVALID_PARSE;
         return ret;
     }
@@ -196,12 +200,16 @@ struct LocalSymbolTableHashes {
                 ENFORCE(typeArgumentHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(staticFieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(staticFieldAliasHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             } else {
                 ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(typeArgumentHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(staticFieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(staticFieldAliasHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             });
         return hierarchyHash == HASH_STATE_INVALID_PARSE;
