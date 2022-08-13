@@ -2252,7 +2252,7 @@ public:
             elems.emplace_back(elem->type);
         }
 
-        res.returnType = make_type<TupleType>(move(elems));
+        res.returnType = make_type<TupleType>(move(elems)).underlying(gs);
     }
 } Magic_buildArray;
 
