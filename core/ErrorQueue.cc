@@ -50,6 +50,7 @@ void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> 
     if (!error->isSilenced) {
         this->nonSilencedErrorCount.fetch_add(1);
         // Serializing errors is expensive, so we only serialize them if the error isn't silenced.
+        // TODO(jez) It looks like we compute the command-line error string even in LSP mode
         msg.text = error->toString(gs);
     }
     msg.error = move(error);
