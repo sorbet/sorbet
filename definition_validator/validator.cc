@@ -839,7 +839,15 @@ private:
         auto isAbstract = klass.data(gs)->flags.isAbstract;
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
-                if (sym.exists() && sym.isMethod() && sym.asMethodRef().data(gs)->flags.isAbstract) {
+                if (!sym.exists() || !sym.isMethod()) {
+                    continue;
+                }
+                const auto &method = sym.asMethodRef().data(gs);
+                if (method->flags.isAbstract &&
+                    // Ignore mangle renames, because users shouldn't have to create *another*
+                    // mangle rename error in order to implement such an abstract method.
+                    !(method->name.kind() == core::NameKind::UNIQUE &&
+                      method->name.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename)) {
                     abstract.emplace_back(sym.asMethodRef());
                 }
             }
