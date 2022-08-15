@@ -57,6 +57,49 @@ vector<ast::ExpressionPtr> badConst(core::MutableContext ctx, core::LocOffsets h
     return {};
 }
 
+ast::Send *findMagicSelfNew(ast::ExpressionPtr &assignRhs) {
+    auto *rhs = ast::cast_tree<ast::Send>(assignRhs);
+    if (rhs != nullptr) {
+        if (rhs->fun != core::Names::selfNew() && rhs->fun != core::Names::let()) {
+            return nullptr;
+        }
+
+        if (rhs->fun == core::Names::selfNew() && !ast::MK::isMagicClass(rhs->recv)) {
+            return nullptr;
+        }
+
+        auto *magicSelfNew = rhs;
+        if (rhs->fun == core::Names::let()) {
+            auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv);
+            if (recv == nullptr) {
+                return nullptr;
+            }
+
+            if (rhs->numPosArgs() != 2) {
+                return nullptr;
+            }
+
+            auto arg0 = ast::cast_tree<ast::Send>(rhs->getPosArg(0));
+            if (arg0 == nullptr) {
+                return nullptr;
+            }
+
+            if (!ast::MK::isSelfNew(arg0)) {
+                return nullptr;
+            }
+            magicSelfNew = arg0;
+        }
+        return magicSelfNew;
+    }
+
+    auto *cast = ast::cast_tree<ast::Cast>(assignRhs);
+    if (cast == nullptr) {
+        return nullptr;
+    }
+
+    return findMagicSelfNew(cast->arg);
+}
+
 vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
                                        FromWhere fromWhere) {
     auto *asgn = ast::cast_tree<ast::Assign>(stat);
@@ -69,39 +112,9 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         return {};
     }
 
-    auto *rhs = ast::cast_tree<ast::Send>(asgn->rhs);
-    if (rhs == nullptr) {
+    auto *magicSelfNew = findMagicSelfNew(asgn->rhs);
+    if (magicSelfNew == nullptr) {
         return badConst(ctx, stat.loc(), klass->loc);
-    }
-
-    if (rhs->fun != core::Names::selfNew() && rhs->fun != core::Names::let()) {
-        return badConst(ctx, stat.loc(), klass->loc);
-    }
-
-    if (rhs->fun == core::Names::selfNew() && !ast::MK::isMagicClass(rhs->recv)) {
-        return badConst(ctx, stat.loc(), klass->loc);
-    }
-
-    auto *magicSelfNew = rhs;
-    if (rhs->fun == core::Names::let()) {
-        auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv);
-        if (recv == nullptr) {
-            return badConst(ctx, stat.loc(), klass->loc);
-        }
-
-        if (rhs->numPosArgs() != 2) {
-            return badConst(ctx, stat.loc(), klass->loc);
-        }
-
-        auto arg0 = ast::cast_tree<ast::Send>(rhs->getPosArg(0));
-        if (arg0 == nullptr) {
-            return badConst(ctx, stat.loc(), klass->loc);
-        }
-
-        if (!ast::MK::isSelfNew(arg0)) {
-            return badConst(ctx, stat.loc(), klass->loc);
-        }
-        magicSelfNew = arg0;
     }
 
     // By this point, we have something that looks like
