@@ -51,6 +51,29 @@ latest edits:
 
 ![](/img/lsp/typechecking.gif)
 
+For the best experience, Sorbet requires
+[Watchman](https://facebook.github.io/watchman/), which listens for changes to
+the files on disk in addition to edits that happen to files open in the editor.
+For example, without Watchman installed, Sorbet will not detect when files have
+changed on disk due to things like changing the currently checked out branch.
+
+Sorbet simply requires that the `watchman` binary be somewhere visible on the
+`PATH` environment variable. There are installation instructions for various
+platforms in the
+[Watchman docs](https://facebook.github.io/watchman/docs/install.html).
+
+If you cannot install `watchman` to somewhere on the `PATH`, you can use the
+`--watchman-path=...` command line flag to `srb tc` to specify a path to the
+`watchman` binary.
+
+If you cannot install `watchman` at all, pass the `--disable-watchman` flag to
+`srb tc`. This will mean that Sorbet only reads the files from disk at startup,
+and afterwards only ever sees contents of files that have been opened or changed
+in the editor.
+
+You can use the `sorbet.lspConfigs` setting described above to have the VS Code
+extension always pass these command line flags when starting Sorbet.
+
 ## Features
 
 Live error squiggles for Sorbet typechecking errors
