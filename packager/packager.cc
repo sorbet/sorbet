@@ -931,6 +931,15 @@ struct PackageInfoFinder {
     unique_ptr<PackageInfoImpl> info = nullptr;
     vector<Export> exported;
 
+    void postTransformCast(ContextType ctx, ast::ExpressionPtr &tree) {
+        auto &cast = ast::cast_tree_nonnull<ast::Cast>(tree);
+        if (!ast::isa_tree<ast::Literal>(cast.typeExpr)) {
+            if (auto e = ctx.beginError(cast.typeExpr.loc(), core::errors::Packager::InvalidPackageExpression)) {
+                e.setHeader("Invalid expression in package: Arguments to functions must be literals");
+            }
+        }
+    }
+
     void postTransformSend(ContextType ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
