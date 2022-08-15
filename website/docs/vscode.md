@@ -68,7 +68,7 @@ If you cannot install `watchman` to somewhere on the `PATH`, you can use the
 
 If you cannot install `watchman` at all, pass the `--disable-watchman` flag to
 `srb tc`. This will mean that Sorbet only reads the files from disk at startup,
-and afterwords only ever sees contents of files that have been opened or changed
+and afterwards only ever sees contents of files that have been opened or changed
 in the editor.
 
 You can use the `sorbet.lspConfigs` setting described above to have the VS Code
