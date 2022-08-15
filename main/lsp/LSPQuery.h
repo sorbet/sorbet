@@ -17,7 +17,7 @@ public:
     static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
                                           core::SymbolRef symbol, std::vector<core::FileRef> frefs);
     static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
-                                   core::SymbolRef symbol);
+                                   core::SymbolRef symbol, core::NameRef pkgName = core::NameRef::noName());
 };
 
 } // namespace sorbet::realmain::lsp

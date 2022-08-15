@@ -613,6 +613,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("typeDefinitionProvider", makeOptional(JSONBool)),
             makeField("implementationProvider", makeOptional({JSONBool})),
             makeField("referencesProvider", makeOptional(JSONBool)),
+            makeField("referencesInPackageProvider", makeOptional(JSONBool)),
             makeField("documentHighlightProvider", makeOptional(JSONBool)),
             makeField("documentSymbolProvider", makeOptional(JSONBool)),
             makeField("workspaceSymbolProvider", makeOptional(JSONBool)),
@@ -1394,6 +1395,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "window/showMessage",
                                      "workspace/symbol",
                                      "textDocument/implementation",
+                                     "textDocument/referencesInPackage",
                                  },
                                  enumTypes);
 
@@ -1422,6 +1424,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/fence", SorbetFenceParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
                                                 {"sorbet/showSymbol", TextDocumentPositionParams},
+                                                {"textDocument/referencesInPackage", ReferenceParams},
                                             });
     auto RequestMessage =
         makeObject("RequestMessage",
@@ -1466,6 +1469,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"sorbet/error", SorbetErrorParams},
             {"sorbet/readFile", TextDocumentItem},
             {"sorbet/showSymbol", makeVariant({JSONNull, SymbolInformation})},
+            {"textDocument/referencesInPackage", makeVariant({JSONNull, makeArray(Location)})},
         });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.

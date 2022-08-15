@@ -14,6 +14,7 @@
 #include "main/lsp/requests/initialize.h"
 #include "main/lsp/requests/prepare_rename.h"
 #include "main/lsp/requests/references.h"
+#include "main/lsp/requests/references_in_package.h"
 #include "main/lsp/requests/rename.h"
 #include "main/lsp/requests/shutdown.h"
 #include "main/lsp/requests/signature_help.h"

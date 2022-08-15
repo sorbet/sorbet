@@ -30,6 +30,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerInterface &
     serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
     serverCap->hoverProvider = true;
     serverCap->referencesProvider = true;
+    serverCap->referencesInPackageProvider = true;
     serverCap->implementationProvider = true;
     serverCap->documentFormattingProvider = opts.lspDocumentFormatRubyfmtEnabled;
     serverCap->sorbetShowSymbolProvider = true;

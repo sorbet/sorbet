@@ -23,6 +23,7 @@ public:
         SlowPathNonBlocking,
         FastPath,
         References,
+        ReferencesInPackage,
         SymbolSearch,
         Rename,
         MoveMethod,

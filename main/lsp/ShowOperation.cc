@@ -28,6 +28,8 @@ string_view kindToOperationName(ShowOperation::Kind kind) {
             return "FastPath";
         case ShowOperation::Kind::References:
             return "References";
+        case ShowOperation::Kind::ReferencesInPackage:
+            return "ReferencesInPackage";
         case ShowOperation::Kind::SymbolSearch:
             return "SymbolSearch";
         case ShowOperation::Kind::Rename:
@@ -49,6 +51,8 @@ string_view kindToDescription(ShowOperation::Kind kind) {
             return "Typechecking in foreground...";
         case ShowOperation::Kind::References:
             return "Finding all references...";
+        case ShowOperation::Kind::ReferencesInPackage:
+            return "Finding all references in the given package...";
         case ShowOperation::Kind::SymbolSearch:
             return "Workspace symbol search...";
         case ShowOperation::Kind::Rename:

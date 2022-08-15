@@ -235,6 +235,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     CHECK(capabilities.typeDefinitionProvider.value_or(false));
     CHECK(capabilities.implementationProvider.value_or(false));
     CHECK(capabilities.referencesProvider.value_or(false));
+    CHECK(capabilities.referencesInPackageProvider.value_or(false));
     CHECK(capabilities.documentHighlightProvider.has_value());
     CHECK(capabilities.documentSymbolProvider.value_or(false));
     CHECK(capabilities.workspaceSymbolProvider.value_or(false));
