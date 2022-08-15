@@ -110,10 +110,10 @@ bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(MyEnum), <block-pre-call-te
     <cfgAlias>$80: T.class_of(MyEnum::Z) = alias <C Z$1>
     <statTemp>$76: Sorbet::Private::Static::Void = <cfgAlias>$78: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$80: T.class_of(MyEnum::Z))
     <cfgAlias>$83: T.class_of(MyEnum::Z) = alias <C Z$1>
-    <castTemp>$81: MyEnum::Z = <cfgAlias>$83: T.class_of(MyEnum::Z).new(<self>: T.class_of(MyEnum))
+    <castTemp>$81: MyEnum::Z = <cfgAlias>$83: T.class_of(MyEnum::Z).new()
     <C Z>$75: MyEnum::Z = <castTemp>$81
     <blockReturnTemp>$16: NilClass = nil
-    <blockReturnTemp>$85: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
+    <blockReturnTemp>$84: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
     <unconditional> -> bb2
 
 }
@@ -297,10 +297,10 @@ bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(EnumsDoEnum), <block-pre-ca
     <cfgAlias>$80: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
     <statTemp>$76: Sorbet::Private::Static::Void = <cfgAlias>$78: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$80: T.class_of(EnumsDoEnum::Z))
     <cfgAlias>$83: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
-    <castTemp>$81: EnumsDoEnum::Z = <cfgAlias>$83: T.class_of(EnumsDoEnum::Z).new(<self>: T.class_of(EnumsDoEnum))
+    <castTemp>$81: EnumsDoEnum::Z = <cfgAlias>$83: T.class_of(EnumsDoEnum::Z).new()
     <C Z>$75: EnumsDoEnum::Z = <castTemp>$81
     <blockReturnTemp>$16: NilClass = nil
-    <blockReturnTemp>$85: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
+    <blockReturnTemp>$84: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
     <unconditional> -> bb2
 
 }

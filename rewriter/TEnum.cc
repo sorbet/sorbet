@@ -82,6 +82,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         return badConst(ctx, stat.loc(), klass->loc);
     }
 
+    auto *magicSelfNew = rhs;
     if (rhs->fun == core::Names::let()) {
         auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv);
         if (recv == nullptr) {
@@ -100,6 +101,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         if (!ast::MK::isSelfNew(arg0)) {
             return badConst(ctx, stat.loc(), klass->loc);
         }
+        magicSelfNew = arg0;
     }
 
     // By this point, we have something that looks like
@@ -125,15 +127,16 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         ast::MK::Class(stat.loc(), stat.loc(), classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
     // Remove one from the number of positional arguments to account for the self param to <Magic>.<self-new>
-    rhs->removePosArg(0);
+    magicSelfNew->removePosArg(0);
 
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
-    auto singletonAsgn = ast::MK::Assign(
-        stat.loc(), std::move(asgn->lhs),
-        ast::MK::Send2(stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
-                       stat.loc().copyWithZeroLength(),
-                       rhs->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()), std::move(classCnst)));
+    auto singletonAsgn =
+        ast::MK::Assign(stat.loc(), std::move(asgn->lhs),
+                        ast::MK::Send2(stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()),
+                                       core::Names::uncheckedLet(), stat.loc().copyWithZeroLength(),
+                                       magicSelfNew->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()),
+                                       std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));
