@@ -189,6 +189,7 @@ public:
 
         if (auto expr = TypeAssertion::run(ctx, send)) {
             tree = std::move(expr);
+            return;
         }
 
         if (SigRewriter::run(ctx, send)) {
