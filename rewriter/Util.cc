@@ -11,7 +11,6 @@ namespace sorbet::rewriter {
 ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
     auto send = ast::cast_tree<ast::Send>(orig);
     if (send) {
-        ast::Send::ARGS_store args;
         auto dupRecv = dupType(send->recv);
         if (!dupRecv) {
             return nullptr;
@@ -42,6 +41,7 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->funLoc, 0, std::move(args));
         }
 
+        ast::Send::ARGS_store args;
         for (auto &arg : send->nonBlockArgs()) {
             auto dupArg = dupType(arg);
             if (!dupArg) {
