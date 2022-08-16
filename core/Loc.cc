@@ -37,8 +37,11 @@ Loc Loc::join(Loc other) const {
 Loc::Detail Loc::offset2Pos(const File &file, uint32_t off) {
     Loc::Detail pos;
 
-    ENFORCE(off <= file.source().size(), "file offset out of bounds in file: {} @ {} <= {}", string(file.path()),
-            to_string(off), to_string(file.source().size()));
+    if (off > file.source().size()) {
+        fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
+        fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        ENFORCE(false);
+    }
     auto it = absl::c_lower_bound(file.lineBreaks(), off);
     if (it == file.lineBreaks().begin()) {
         pos.line = 1;
@@ -110,7 +113,11 @@ static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
 void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth) {
     printTabs(buf, tabs);
     buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
-    ENFORCE(file.lineBreaks().size() > line + 1);
+    if (file.lineBreaks().size() <= line + 1) {
+        fatalLogger->error(R"(msg="Bad addLocLine line" path="{}" line="{}"")", absl::CEscape(file.path()), line);
+        fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        ENFORCE(false);
+    }
     auto endPos = file.lineBreaks()[line + 1];
     auto numToWrite = endPos - file.lineBreaks()[line] - 1;
     if (numToWrite <= 0) {
