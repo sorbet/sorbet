@@ -1682,7 +1682,6 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     block = MK::Block(loc, std::move(body), std::move(args));
                 }
 
-                Send::ARGS_store noargs;
                 auto res = MK::Send0Block(loc, node2TreeImpl(dctx, std::move(for_->expr)), core::Names::each(),
                                           locZeroLen, std::move(block));
                 result = std::move(res);
