@@ -1779,17 +1779,12 @@ public:
                 }
             }
 
-            if (singlePackageRbiGeneration) {
-                if constexpr (isMutableStateType) {
-                    for (auto &job : todoClassAliases) {
-                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                        for (auto &item : job.items) {
-                            resolveClassAliasJob(ctx, item);
-                        }
+            if constexpr (isMutableStateType) {
+                for (auto &job : todoClassAliases) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    for (auto &item : job.items) {
+                        resolveClassAliasJob(ctx, item);
                     }
-
-                } else {
-                    ENFORCE(false, "Was not expecting non-mutating resolver and single package RBI generation");
                 }
             }
 
