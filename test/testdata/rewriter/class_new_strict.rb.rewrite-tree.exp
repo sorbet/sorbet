@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.make<<todo method>>(&<blk>)
       cls = <emptyTree>::<C Class>.new(<emptyTree>::<C A>) do ||
         begin
-          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C A>))
+          <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C A>))
           <emptyTree>
         end
       end
