@@ -127,7 +127,7 @@ bb0[rubyRegionId=0, firstDead=10]():
     y: T.untyped = load_arg(y)
     <cfgAlias>$5: T.class_of(String) = alias <C String>
     keep_for_ide$4: T.class_of(String) = <cfgAlias>$5
-    keep_for_ide$4: T.untyped = <volatile-read> keep_for_ide$4
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
     <castTemp>$6: T.untyped = x
     <statTemp>$3: String = cast(<castTemp>$6: T.untyped, String);
     <returnMethodTemp>$2: String = <statTemp>$3: String.+(y: T.untyped)

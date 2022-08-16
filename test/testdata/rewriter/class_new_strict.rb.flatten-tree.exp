@@ -13,12 +13,12 @@ begin
     def self.make(<blk>)
       cls = ::Class.new(::A) do ||
         begin
-          T.<synthetic bind>(<self>, AppliedType {
+          <cast:<synthetic bind>>(<self>, AppliedType {
             klass = <S <C <U A>> $1>
             targs = [
               <C <U <AttachedClass>>> = A
             ]
-          })
+          }, ::T.class_of(::A))
           <emptyTree>
         end
       end

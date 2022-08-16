@@ -33,7 +33,7 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <statTemp>$29: Sorbet::Private::Static::Void = <cfgAlias>$31: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$33: T.class_of(Parent))
     <cfgAlias>$36: T.class_of(Normal) = alias <C Normal>
     keep_for_ide$35: T.class_of(Normal) = <cfgAlias>$36
-    keep_for_ide$35: T.untyped = <volatile-read> keep_for_ide$35
+    keep_for_ide$35: T.untyped = <keep-alive> keep_for_ide$35
     <cfgAlias>$40: T.class_of(Normal) = alias <C Normal>
     <statTemp>$38: Normal = <cfgAlias>$40: T.class_of(Normal).new()
     <castTemp>$37: Normal = <statTemp>$38: Normal.returns_self()
@@ -41,7 +41,7 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$44: T.class_of(Generic) = alias <C Generic>
     <cfgAlias>$46: T.class_of(String) = alias <C String>
     keep_for_ide$42: Runtime object representing type: Generic[String] = <cfgAlias>$44: T.class_of(Generic).[](<cfgAlias>$46: T.class_of(String))
-    keep_for_ide$42: T.untyped = <volatile-read> keep_for_ide$42
+    keep_for_ide$42: T.untyped = <keep-alive> keep_for_ide$42
     <cfgAlias>$51: T.class_of(Generic) = alias <C Generic>
     <cfgAlias>$53: T.class_of(String) = alias <C String>
     <statTemp>$49: Runtime object representing type: Generic[String] = <cfgAlias>$51: T.class_of(Generic).[](<cfgAlias>$53: T.class_of(String))
@@ -73,7 +73,7 @@ bb2[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), a: T.all(Generic[S
     <statTemp>$75: Runtime object representing type: Generic[String] = <cfgAlias>$77: T.class_of(Generic).[](<cfgAlias>$79: T.class_of(String))
     <cfgAlias>$81: T.class_of(B) = alias <C B>
     keep_for_ide$72: Runtime object representing type: T.all(Generic[String], B) = <cfgAlias>$74: T.class_of(T).all(<statTemp>$75: Runtime object representing type: Generic[String], <cfgAlias>$81: T.class_of(B))
-    keep_for_ide$72: T.untyped = <volatile-read> keep_for_ide$72
+    keep_for_ide$72: T.untyped = <keep-alive> keep_for_ide$72
     <castTemp>$82: T.all(Generic[String], B) = a: T.all(Generic[String], B).returns_self()
     <statTemp>$67: T.all(Generic[String], B) = cast(<castTemp>$82: T.all(Generic[String], B), T.all(Generic[String], B));
     <unconditional> -> bb4
@@ -89,7 +89,7 @@ bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
     <cfgAlias>$96: T.class_of(Integer) = alias <C Integer>
     <magic>$97: T.class_of(<Magic>) = alias <C <Magic>>
     keep_for_ide$92: [T.class_of(Integer), T.class_of(Integer)] = <magic>$97: T.class_of(<Magic>).<build-array>(<cfgAlias>$94: T.class_of(Integer), <cfgAlias>$96: T.class_of(Integer))
-    keep_for_ide$92: T.untyped = <volatile-read> keep_for_ide$92
+    keep_for_ide$92: T.untyped = <keep-alive> keep_for_ide$92
     <arrayTemp>$100: Integer(1) = 1
     <arrayTemp>$101: Integer(2) = 2
     <magic>$102: T.class_of(<Magic>) = alias <C <Magic>>

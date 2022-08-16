@@ -11,7 +11,7 @@ begin
   end
   class ::C<<C C>> < (::<todo sym>)
     def self.<static-init>(<blk>)
-      ::C::L = T.let(<self>.lambda() do |x$1|
+      ::C::L = <cast:let>(<self>.lambda() do |x$1|
         x$1.*(x$1)
       end, AppliedType {
         klass = <C <U Proc1>>
@@ -19,7 +19,7 @@ begin
           <C <U Return>> = Integer
           <C <U Arg0>> = Integer
         ]
-      })
+      }, ::T.proc().params(:x, ::Integer).returns(::Integer))
     end
   end
   <emptyTree>

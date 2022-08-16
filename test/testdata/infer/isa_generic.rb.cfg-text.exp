@@ -17,7 +17,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb2[rubyRegionId=0, firstDead=-1](x: Concrete):
     <cfgAlias>$10: T.class_of(Concrete) = alias <C Concrete>
     keep_for_ide$9: T.class_of(Concrete) = <cfgAlias>$10
-    keep_for_ide$9: T.untyped = <volatile-read> keep_for_ide$9
+    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
     <castTemp>$11: Concrete = x
     <statTemp>$3: Concrete = cast(<castTemp>$11: Concrete, Concrete);
     <unconditional> -> bb7
@@ -34,7 +34,7 @@ bb3[rubyRegionId=0, firstDead=-1](x: Other):
 bb4[rubyRegionId=0, firstDead=-1](x: Other):
     <cfgAlias>$17: T.class_of(Other) = alias <C Other>
     keep_for_ide$16: T.class_of(Other) = <cfgAlias>$17
-    keep_for_ide$16: T.untyped = <volatile-read> keep_for_ide$16
+    keep_for_ide$16: T.untyped = <keep-alive> keep_for_ide$16
     <castTemp>$18: Other = x
     <statTemp>$3: Other = cast(<castTemp>$18: Other, Other);
     <unconditional> -> bb7
@@ -53,7 +53,7 @@ bb7[rubyRegionId=0, firstDead=-1](x: T.any(Concrete, Other)):
 bb8[rubyRegionId=0, firstDead=-1](x: Concrete):
     <cfgAlias>$25: T.class_of(Concrete) = alias <C Concrete>
     keep_for_ide$24: T.class_of(Concrete) = <cfgAlias>$25
-    keep_for_ide$24: T.untyped = <volatile-read> keep_for_ide$24
+    keep_for_ide$24: T.untyped = <keep-alive> keep_for_ide$24
     <castTemp>$26: Concrete = x
     <statTemp>$19: Concrete = cast(<castTemp>$26: Concrete, Concrete);
     <unconditional> -> bb10
@@ -71,7 +71,7 @@ bb10[rubyRegionId=0, firstDead=-1](x: T.any(Other, Concrete)):
 bb12[rubyRegionId=0, firstDead=-1](x: Concrete):
     <cfgAlias>$32: T.class_of(Concrete) = alias <C Concrete>
     keep_for_ide$31: T.class_of(Concrete) = <cfgAlias>$32
-    keep_for_ide$31: T.untyped = <volatile-read> keep_for_ide$31
+    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
     <castTemp>$33: Concrete = x
     <returnMethodTemp>$2: Concrete = cast(<castTemp>$33: Concrete, Concrete);
     <unconditional> -> bb13

@@ -81,7 +81,7 @@ bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(<root>), <block-pre-call-te
     <self>: T.class_of(<root>) = loadSelf(class_helper)
     <cfgAlias>$85: T.class_of(B) = alias <C B>
     keep_for_ide$84: T.class_of(B) = <cfgAlias>$85
-    keep_for_ide$84: T.untyped = <volatile-read> keep_for_ide$84
+    keep_for_ide$84: T.untyped = <keep-alive> keep_for_ide$84
     <castTemp>$86: T.class_of(<root>) = <self>
     <self>: B = cast(<castTemp>$86: T.class_of(<root>), B);
     <cfgAlias>$89: T.class_of(T) = alias <C T>
@@ -250,7 +250,7 @@ bb5[rubyRegionId=1, firstDead=15](<self>: T.class_of(Writable), <block-pre-call-
     <cfgAlias>$26: T.class_of(Post) = alias <C Post>
     <statTemp>$22: Runtime object representing type: T.class_of(Post) = <cfgAlias>$24: T.class_of(T).class_of(<cfgAlias>$26: T.class_of(Post))
     keep_for_ide$14: Runtime object representing type: T.any(T.class_of(Article), T.class_of(Post)) = <cfgAlias>$16: T.class_of(T).any(<statTemp>$17: Runtime object representing type: T.class_of(Article), <statTemp>$22: Runtime object representing type: T.class_of(Post))
-    keep_for_ide$14: T.untyped = <volatile-read> keep_for_ide$14
+    keep_for_ide$14: T.untyped = <keep-alive> keep_for_ide$14
     <castTemp>$27: T.class_of(Writable) = <self>
     <self>: T.any(T.class_of(Article), T.class_of(Post)) = cast(<castTemp>$27: T.class_of(Writable), T.any(T.class_of(Article), T.class_of(Post)));
     <statTemp>$29: Symbol(:name) = :name
@@ -297,7 +297,7 @@ bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(Shareable), <block-pre-call
     <cfgAlias>$16: T.class_of(T) = alias <C T>
     <cfgAlias>$18: T.class_of(Article) = alias <C Article>
     keep_for_ide$14: Runtime object representing type: T.class_of(Article) = <cfgAlias>$16: T.class_of(T).class_of(<cfgAlias>$18: T.class_of(Article))
-    keep_for_ide$14: T.untyped = <volatile-read> keep_for_ide$14
+    keep_for_ide$14: T.untyped = <keep-alive> keep_for_ide$14
     <castTemp>$19: T.class_of(Shareable) = <self>
     <self>: T.class_of(Article) = cast(<castTemp>$19: T.class_of(Shareable), T.class_of(Article));
     <statTemp>$21: Symbol(:do_this) = :do_this
@@ -356,7 +356,7 @@ bb0[rubyRegionId=0, firstDead=5]():
     <self>: Post = cast(<self>: NilClass, Post);
     <cfgAlias>$4: T.class_of(Integer) = alias <C Integer>
     keep_for_ide$3: T.class_of(Integer) = <cfgAlias>$4
-    keep_for_ide$3: T.untyped = <volatile-read> keep_for_ide$3
+    keep_for_ide$3: T.untyped = <keep-alive> keep_for_ide$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -486,7 +486,7 @@ bb5[rubyRegionId=1, firstDead=8](<self>: T.class_of(Article), <statTemp>$12: T.c
     <self>: T.class_of(Article) = loadSelf(lambda)
     <cfgAlias>$24: T.class_of(Article) = alias <C Article>
     keep_for_ide$23: T.class_of(Article) = <cfgAlias>$24
-    keep_for_ide$23: T.untyped = <volatile-read> keep_for_ide$23
+    keep_for_ide$23: T.untyped = <keep-alive> keep_for_ide$23
     <castTemp>$25: T.class_of(Article) = <self>
     <self>: Article = cast(<castTemp>$25: T.class_of(Article), Article);
     <blockReturnTemp>$21: T.untyped = <self>: Article.should_run_callback?()
@@ -548,7 +548,7 @@ bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$7
     <self>: T.class_of(A) = loadSelf(lambda)
     <cfgAlias>$13: T.class_of(A) = alias <C A>
     keep_for_ide$12: T.class_of(A) = <cfgAlias>$13
-    keep_for_ide$12: T.untyped = <volatile-read> keep_for_ide$12
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
     <castTemp>$14: T.class_of(A) = <self>
     <self>: A = cast(<castTemp>$14: T.class_of(A), A);
     <cfgAlias>$17: T.class_of(T) = alias <C T>
@@ -686,7 +686,7 @@ bb0[rubyRegionId=0, firstDead=13]():
     <cfgAlias>$8: T.class_of(M) = alias <C M>
     <cfgAlias>$10: T.class_of(N) = alias <C N>
     keep_for_ide$4: Runtime object representing type: T.all(M, N) = <cfgAlias>$6: T.class_of(T).all(<cfgAlias>$8: T.class_of(M), <cfgAlias>$10: T.class_of(N))
-    keep_for_ide$4: T.untyped = <volatile-read> keep_for_ide$4
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
     <castTemp>$11: M = <self>
     <self>: T.all(M, N) = cast(<castTemp>$11: M, T.all(M, N));
     <cfgAlias>$14: T.class_of(T) = alias <C T>
@@ -726,7 +726,7 @@ bb0[rubyRegionId=0, firstDead=11]():
     <self>: ThisSelf = cast(<self>: NilClass, ThisSelf);
     <cfgAlias>$5: T.class_of(Kernel) = alias <C Kernel>
     keep_for_ide$4: T.class_of(Kernel) = <cfgAlias>$5
-    keep_for_ide$4: T.untyped = <volatile-read> keep_for_ide$4
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
     <castTemp>$6: ThisSelf = <self>
     <self>: Kernel = cast(<castTemp>$6: ThisSelf, Kernel);
     this: Kernel = <self>
@@ -802,7 +802,7 @@ bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilabl
 bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$11: T.class_of(<Magic>)):
     <cfgAlias>$6: T.class_of(String) = alias <C String>
     keep_for_ide$5: T.class_of(String) = <cfgAlias>$6
-    keep_for_ide$5: T.untyped = <volatile-read> keep_for_ide$5
+    keep_for_ide$5: T.untyped = <keep-alive> keep_for_ide$5
     <castTemp>$7: String = <self>
     <self>: String = cast(<castTemp>$7: String, String);
     <cfgAlias>$9: T.class_of(T) = alias <C T>
@@ -877,7 +877,7 @@ bb3[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTem
 bb4[rubyRegionId=1, firstDead=-1](<self>: Float, <magic>$11: T.class_of(<Magic>)):
     <cfgAlias>$6: T.class_of(String) = alias <C String>
     keep_for_ide$5: T.class_of(String) = <cfgAlias>$6
-    keep_for_ide$5: T.untyped = <volatile-read> keep_for_ide$5
+    keep_for_ide$5: T.untyped = <keep-alive> keep_for_ide$5
     <castTemp>$7: Float = <self>
     <self>: String = cast(<castTemp>$7: Float, String);
     <cfgAlias>$9: T.class_of(T) = alias <C T>
@@ -897,7 +897,7 @@ bb5[rubyRegionId=4, firstDead=-1](<self>: String, <returnMethodTemp>$2: String):
 bb6[rubyRegionId=3, firstDead=-1](<self>: T.any(Float, String, Integer), <returnMethodTemp>$2: T.nilable(T.any(String, Integer)), <gotoDeadTemp>$23: T.nilable(TrueClass)):
     <cfgAlias>$27: T.class_of(Float) = alias <C Float>
     keep_for_ide$26: T.class_of(Float) = <cfgAlias>$27
-    keep_for_ide$26: T.untyped = <volatile-read> keep_for_ide$26
+    keep_for_ide$26: T.untyped = <keep-alive> keep_for_ide$26
     <castTemp>$28: T.any(Float, String, Integer) = <self>
     <self>: Float = cast(<castTemp>$28: T.any(Float, String, Integer), Float);
     <cfgAlias>$30: T.class_of(T) = alias <C T>
@@ -911,7 +911,7 @@ bb7[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <magic>$11: T.cl
     <keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <cfgAlias>$18: T.class_of(Integer) = alias <C Integer>
     keep_for_ide$17: T.class_of(Integer) = <cfgAlias>$18
-    keep_for_ide$17: T.untyped = <volatile-read> keep_for_ide$17
+    keep_for_ide$17: T.untyped = <keep-alive> keep_for_ide$17
     <castTemp>$19: T.any(Float, String) = <self>
     <self>: Integer = cast(<castTemp>$19: T.any(Float, String), Integer);
     <cfgAlias>$21: T.class_of(T) = alias <C T>
@@ -962,7 +962,7 @@ bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilabl
 bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$15: T.class_of(<Magic>)):
     <cfgAlias>$10: T.class_of(String) = alias <C String>
     keep_for_ide$9: T.class_of(String) = <cfgAlias>$10
-    keep_for_ide$9: T.untyped = <volatile-read> keep_for_ide$9
+    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
     <castTemp>$11: String = <self>
     <self>: String = cast(<castTemp>$11: String, String);
     <cfgAlias>$13: T.class_of(T) = alias <C T>
@@ -1058,7 +1058,7 @@ bb8[rubyRegionId=2, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorb
     # outerLoops: 1
     <cfgAlias>$13: T.class_of(Integer) = alias <C Integer>
     keep_for_ide$12: T.class_of(Integer) = <cfgAlias>$13
-    keep_for_ide$12: T.untyped = <volatile-read> keep_for_ide$12
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
     <castTemp>$14: Integer = <self>
     <self>: Integer = cast(<castTemp>$14: Integer, Integer);
     <cfgAlias>$16: T.class_of(T) = alias <C T>

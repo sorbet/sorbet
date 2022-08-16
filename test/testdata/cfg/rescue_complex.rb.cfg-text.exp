@@ -99,7 +99,7 @@ bb0[rubyRegionId=0, firstDead=10]():
     <cfgAlias>$6: T.class_of(T) = alias <C T>
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     keep_for_ide$4: Runtime object representing type: T.nilable(StandardError) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(StandardError))
-    keep_for_ide$4: T.untyped = <volatile-read> keep_for_ide$4
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
     <castTemp>$9: NilClass = nil
     @ex$3: T.nilable(StandardError) = cast(<castTemp>$9: NilClass, T.nilable(StandardError));
     <returnMethodTemp>$2: T.nilable(StandardError) = @ex$3

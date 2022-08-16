@@ -53,7 +53,7 @@ bb5[rubyRegionId=1, firstDead=8](<self>: T.class_of(A), <block-pre-call-temp>$7:
     <cfgAlias>$14: T.class_of(T) = alias <C T>
     <cfgAlias>$16: T.class_of(A) = alias <C A>
     keep_for_ide$12: Runtime object representing type: T.class_of(A) = <cfgAlias>$14: T.class_of(T).class_of(<cfgAlias>$16: T.class_of(A))
-    keep_for_ide$12: T.untyped = <volatile-read> keep_for_ide$12
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
     <castTemp>$17: T.class_of(A) = <self>
     <self>: T.class_of(A) = cast(<castTemp>$17: T.class_of(A), T.class_of(A));
     <blockReturnTemp>$18: T.noreturn = blockreturn<new> <blockReturnTemp>$10: NilClass

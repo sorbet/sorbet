@@ -5,7 +5,7 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$6: T.class_of(T) = alias <C T>
     <cfgAlias>$8: T.class_of(String) = alias <C String>
     keep_for_ide$4: Runtime object representing type: T.nilable(String) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(String))
-    keep_for_ide$4: T.untyped = <volatile-read> keep_for_ide$4
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
     <castTemp>$9: NilClass = nil
     name: T.nilable(String) = cast(<castTemp>$9: NilClass, T.nilable(String));
     <ifTemp>$11: T::Boolean = name: T.nilable(String).nil?()

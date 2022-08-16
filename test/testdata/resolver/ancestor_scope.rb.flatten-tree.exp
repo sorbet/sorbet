@@ -14,9 +14,9 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::Other)
           <emptyTree>
         end
-        T.assert_type!(::Test.new(), Test::Mixin)
-        T.assert_type!(::Test.new(), Test::Other)
-        T.assert_type!(::Test.new(), Other)
+        <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
+        <cast:assert_type!>(::Test.new(), Test::Other, ::Test::Other)
+        <cast:assert_type!>(::Test.new(), Other, ::Other)
         <emptyTree>
       end
     end
