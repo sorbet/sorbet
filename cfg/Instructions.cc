@@ -44,7 +44,7 @@ string spacesForTabLevel(int tabs) {
         CASE_STATEMENT(body, YieldLoadArg)        \
         CASE_STATEMENT(body, Cast)                \
         CASE_STATEMENT(body, TAbsurd)             \
-        CASE_STATEMENT(body, KeepAlive)        \
+        CASE_STATEMENT(body, KeepAlive)           \
     }
 
 std::string InstructionPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
