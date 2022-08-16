@@ -21,8 +21,8 @@ void ErrorFlusherStdout::flushErrors(spdlog::logger &logger, const GlobalState &
             if (out.size() != 0) {
                 fmt::format_to(std::back_inserter(out), "\n\n");
             }
-            ENFORCE(error->text.has_value());
-            fmt::format_to(std::back_inserter(out), "{}", error->text.value_or(""));
+            auto text = error->error->toString(gs);
+            fmt::format_to(std::back_inserter(out), "{}", text);
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));

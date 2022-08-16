@@ -11,8 +11,6 @@ struct ErrorQueueMessage {
     enum class Kind { Error, Flush, QueryResponse };
     Kind kind;
     core::FileRef whatFile;
-    // The text of the error. Is a `nullopt` if the error is silenced.
-    std::optional<std::string> text;
     std::unique_ptr<Error> error;
     std::unique_ptr<lsp::QueryResponse> queryResponse;
 };
