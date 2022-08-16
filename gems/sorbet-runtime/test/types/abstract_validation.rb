@@ -513,7 +513,9 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
   it "calls super abstract! if such a method exists" do
     mod = Module.new do
-      def abstract!; raise "Called abstract! in parent"; end
+      def abstract!
+        raise "Called abstract! in parent"
+      end
     end
     exn = assert_raises(RuntimeError) do
       Class.new do
