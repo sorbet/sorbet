@@ -11,6 +11,13 @@ module T::Helpers
   ### Class/Module Helpers ###
 
   def abstract!
+    if defined?(super)
+      # This is to play nicely with Rails' AbstractController::Base,
+      # which also defines an `abstract!` method.
+      # https://api.rubyonrails.org/classes/AbstractController/Base.html#method-c-abstract-21
+      super
+    end
+
     Private::Abstract::Declare.declare_abstract(self, type: :abstract)
   end
 
