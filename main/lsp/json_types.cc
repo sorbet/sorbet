@@ -14,7 +14,7 @@ string stringify(const rapidjson::Value &value) {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     value.Accept(writer);
-    return buffer.GetString();
+    return string(buffer.GetString(), buffer.GetLength());
 }
 
 DeserializationError::DeserializationError(string_view message)
@@ -81,9 +81,14 @@ InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedTy
 const std::string JSONBaseType::defaultFieldName = "root";
 
 string JSONBaseType::toJSON(bool prettyPrint) const {
+    auto buffer = toJSONBuffer(prettyPrint);
+    return string(buffer.GetString(), buffer.GetLength());
+}
+
+rapidjson::StringBuffer JSONBaseType::toJSONBuffer(bool prettyPrint) const {
+    rapidjson::StringBuffer buffer;
     rapidjson::MemoryPoolAllocator<> alloc;
     auto v = toJSONValue(alloc);
-    rapidjson::StringBuffer buffer;
     if (!prettyPrint) {
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         v->Accept(writer);
@@ -91,7 +96,7 @@ string JSONBaseType::toJSON(bool prettyPrint) const {
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
         v->Accept(writer);
     }
-    return buffer.GetString();
+    return buffer;
 }
 
 // Object-specific helpers

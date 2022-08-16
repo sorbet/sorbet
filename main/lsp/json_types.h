@@ -6,6 +6,7 @@
 #include "core/core.h"
 #include "main/lsp/json_enums.h"
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
 
 #include <optional>
 #include <variant>
@@ -97,6 +98,8 @@ public:
      * Converts C++ object into a string containing a stringified JSON object.
      */
     std::string toJSON(bool prettyPrint = false) const;
+
+    rapidjson::StringBuffer toJSONBuffer(bool prettyPrint = false) const;
 
     /**
      * Converts C++ object into a RapidJSON JSON value owned by the given rapidjson allocator.
