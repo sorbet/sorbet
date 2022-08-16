@@ -98,7 +98,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo2<<todo method>>(&<blk>)
-      <emptyTree>::<C T>.cast(<emptyTree>::<C T>.unsafe(nil), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+      <cast:cast>(<emptyTree>::<C T>.unsafe(nil), <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -106,7 +106,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo2=<<todo method>>(arg0, &<blk>)
-      <emptyTree>::<C T>.cast(nil, <emptyTree>::<C String>)
+      <cast:cast>(nil, <todo sym>, <emptyTree>::<C String>)
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)

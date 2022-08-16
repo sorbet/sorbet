@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.enums() do ||
       begin
         <emptyTree>::<C X> = ::<Magic>.<self-new>(<self>)
-        <emptyTree>::<C Y> = <emptyTree>::<C T>.let(::<Magic>.<self-new>(<self>), <self>)
+        <emptyTree>::<C Y> = <cast:let>(::<Magic>.<self-new>(<self>), <todo sym>, <self>)
       end
     end
   end
@@ -91,6 +91,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C StaticField3> = 3
 
-    <emptyTree>::<C StaticField4> = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+    <emptyTree>::<C StaticField4> = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
   end
 end

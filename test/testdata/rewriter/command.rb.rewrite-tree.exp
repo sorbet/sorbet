@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of call>
   end
 
-  <emptyTree>::<C T>.assert_type!(<emptyTree>::<C MyCommand>.call(7), <emptyTree>::<C String>)
+  <cast:assert_type!>(<emptyTree>::<C MyCommand>.call(7), <todo sym>, <emptyTree>::<C String>)
 
   class <emptyTree>::<C OtherCommand><<C <todo sym>>> < (::<root>::<C Opus>::<C Command>)
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of call>
   end
 
-  <emptyTree>::<C T>.assert_type!(<emptyTree>::<C OtherCommand>.call("8"), <emptyTree>::<C Integer>)
+  <cast:assert_type!>(<emptyTree>::<C OtherCommand>.call("8"), <todo sym>, <emptyTree>::<C Integer>)
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (<emptyTree>::<C Llamas>::<C Opus>::<C Command>)
     ::Sorbet::Private::Static.sig(<self>) do ||
