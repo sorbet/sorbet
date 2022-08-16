@@ -2,15 +2,14 @@ method ::Object#main {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(T) = alias <C T>
-    <cfgAlias>$11: T.class_of(String) = alias <C String>
-    <statTemp>$7: Runtime object representing type: T.nilable(String) = <cfgAlias>$9: T.class_of(T).nilable(<cfgAlias>$11: T.class_of(String))
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: Runtime object representing type: T.nilable(String))
-    <castTemp>$12: NilClass = nil
-    name: T.nilable(String) = cast(<castTemp>$12: NilClass, T.nilable(String));
-    <ifTemp>$14: T::Boolean = name: T.nilable(String).nil?()
-    <ifTemp>$14 -> (T::Boolean ? bb2 : bb3)
+    <cfgAlias>$6: T.class_of(T) = alias <C T>
+    <cfgAlias>$8: T.class_of(String) = alias <C String>
+    keep_for_ide$4: Runtime object representing type: T.nilable(String) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(String))
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <castTemp>$9: NilClass = nil
+    name: T.nilable(String) = cast(<castTemp>$9: NilClass, T.nilable(String));
+    <ifTemp>$11: T::Boolean = name: T.nilable(String).nil?()
+    <ifTemp>$11 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
 # - bb2(rubyRegionId=0)
@@ -21,15 +20,15 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 bb2[rubyRegionId=0, firstDead=2]():
-    <returnTemp>$16: String("missing name") = "missing name"
-    <statTemp>$13: T.noreturn = return <returnTemp>$16: String("missing name")
+    <returnTemp>$13: String("missing name") = "missing name"
+    <statTemp>$10: T.noreturn = return <returnTemp>$13: String("missing name")
     <unconditional> -> bb1
 
 # backedges
 # - bb0(rubyRegionId=0)
 bb3[rubyRegionId=0, firstDead=3](name: String):
-    <statTemp>$18: String("foo") = "foo"
-    <returnMethodTemp>$2: T::Boolean = name: String.include?(<statTemp>$18: String("foo"))
+    <statTemp>$15: String("foo") = "foo"
+    <returnMethodTemp>$2: T::Boolean = name: String.include?(<statTemp>$15: String("foo"))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Boolean
     <unconditional> -> bb1
 

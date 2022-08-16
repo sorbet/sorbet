@@ -11,18 +11,15 @@ begin
   end
   class ::C<<C C>> < (::<todo sym>)
     def self.<static-init>(<blk>)
-      ::C::L = begin
-        ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params(:x, ::Integer).returns(::Integer))
-        T.let(<self>.lambda() do |x$1|
-          x$1.*(x$1)
-        end, AppliedType {
-          klass = <C <U Proc1>>
-          targs = [
-            <C <U Return>> = Integer
-            <C <U Arg0>> = Integer
-          ]
-        })
-      end
+      ::C::L = <cast:let>(<self>.lambda() do |x$1|
+        x$1.*(x$1)
+      end, AppliedType {
+        klass = <C <U Proc1>>
+        targs = [
+          <C <U Return>> = Integer
+          <C <U Arg0>> = Integer
+        ]
+      }, ::T.proc().params(:x, ::Integer).returns(::Integer))
     end
   end
   <emptyTree>

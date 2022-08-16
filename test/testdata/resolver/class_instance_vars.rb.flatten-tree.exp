@@ -33,14 +33,8 @@ begin
   class ::Parent<<C Parent>> < (::<todo sym>)
     def initialize(<blk>)
       begin
-        @ivar = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.let(1, Integer)
-        end
-        @ivar2 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.let(2, Integer)
-        end
+        @ivar = <cast:let>(1, Integer, ::Integer)
+        @ivar2 = <cast:let>(2, Integer, ::Integer)
       end
     end
 
@@ -54,10 +48,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <runtime method definition of initialize>
-        @@class_var = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.let("hi", String)
-        end
+        @@class_var = <cast:let>("hi", String, ::String)
         <runtime method definition of hi>
         <emptyTree>
       end
@@ -66,10 +57,7 @@ begin
   module ::Mixin<<C Mixin>> < ()
     def self.<static-init>(<blk>)
       begin
-        @@mixin_cvar = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.let(3, Integer)
-        end
+        @@mixin_cvar = <cast:let>(3, Integer, ::Integer)
         @@mixin_cvar
         <emptyTree>
       end

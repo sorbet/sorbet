@@ -57,20 +57,20 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-te
 bb3[rubyRegionId=0, firstDead=17](<block-pre-call-temp>$79: Sorbet::Private::Static::Void, <selfRestore>$80: T.class_of(<root>)):
     <statTemp>$76: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$79, class_helper>
     <self>: T.class_of(<root>) = <selfRestore>$80
-    <cfgAlias>$98: T.class_of(T) = alias <C T>
-    <statTemp>$96: T.class_of(<root>) = <cfgAlias>$98: T.class_of(T).reveal_type(<self>: T.class_of(<root>))
-    <cfgAlias>$104: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$106: T.class_of(N) = alias <C N>
-    <statTemp>$102: Sorbet::Private::Static::Void = <cfgAlias>$104: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$106: T.class_of(N))
-    <cfgAlias>$111: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$113: T.class_of(M) = alias <C M>
-    <statTemp>$109: Sorbet::Private::Static::Void = <cfgAlias>$111: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$113: T.class_of(M))
-    <cfgAlias>$118: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$120: T.class_of(ThisSelf) = alias <C ThisSelf>
-    <statTemp>$116: Sorbet::Private::Static::Void = <cfgAlias>$118: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$120: T.class_of(ThisSelf))
-    <cfgAlias>$125: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$127: T.class_of(Rescues) = alias <C Rescues>
-    <statTemp>$123: Sorbet::Private::Static::Void = <cfgAlias>$125: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$127: T.class_of(Rescues))
+    <cfgAlias>$95: T.class_of(T) = alias <C T>
+    <statTemp>$93: T.class_of(<root>) = <cfgAlias>$95: T.class_of(T).reveal_type(<self>: T.class_of(<root>))
+    <cfgAlias>$101: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$103: T.class_of(N) = alias <C N>
+    <statTemp>$99: Sorbet::Private::Static::Void = <cfgAlias>$101: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$103: T.class_of(N))
+    <cfgAlias>$108: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$110: T.class_of(M) = alias <C M>
+    <statTemp>$106: Sorbet::Private::Static::Void = <cfgAlias>$108: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$110: T.class_of(M))
+    <cfgAlias>$115: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$117: T.class_of(ThisSelf) = alias <C ThisSelf>
+    <statTemp>$113: Sorbet::Private::Static::Void = <cfgAlias>$115: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$117: T.class_of(ThisSelf))
+    <cfgAlias>$122: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$124: T.class_of(Rescues) = alias <C Rescues>
+    <statTemp>$120: Sorbet::Private::Static::Void = <cfgAlias>$122: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$124: T.class_of(Rescues))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -79,15 +79,15 @@ bb3[rubyRegionId=0, firstDead=17](<block-pre-call-temp>$79: Sorbet::Private::Sta
 bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(<root>), <block-pre-call-temp>$79: Sorbet::Private::Static::Void, <selfRestore>$80: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(class_helper)
-    <cfgAlias>$86: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$88: T.class_of(B) = alias <C B>
-    <statTemp>$84: Sorbet::Private::Static::Void = <cfgAlias>$86: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$88: T.class_of(B))
-    <castTemp>$89: T.class_of(<root>) = <self>
-    <self>: B = cast(<castTemp>$89: T.class_of(<root>), B);
-    <cfgAlias>$92: T.class_of(T) = alias <C T>
-    <statTemp>$90: B = <cfgAlias>$92: T.class_of(T).reveal_type(<self>: B)
+    <cfgAlias>$85: T.class_of(B) = alias <C B>
+    keep_for_ide$84: T.class_of(B) = <cfgAlias>$85
+    keep_for_ide$84: T.untyped = <keep-alive> keep_for_ide$84
+    <castTemp>$86: T.class_of(<root>) = <self>
+    <self>: B = cast(<castTemp>$86: T.class_of(<root>), B);
+    <cfgAlias>$89: T.class_of(T) = alias <C T>
+    <statTemp>$87: B = <cfgAlias>$89: T.class_of(T).reveal_type(<self>: B)
     <blockReturnTemp>$82: T.untyped = <self>: B.instance_helper()
-    <blockReturnTemp>$95: T.noreturn = blockreturn<class_helper> <blockReturnTemp>$82: T.untyped
+    <blockReturnTemp>$92: T.noreturn = blockreturn<class_helper> <blockReturnTemp>$82: T.untyped
     <unconditional> -> bb2
 
 }
@@ -239,24 +239,23 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$9: Sorbet::Private::Stati
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=16](<self>: T.class_of(Writable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Writable)):
+bb5[rubyRegionId=1, firstDead=15](<self>: T.class_of(Writable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Writable)):
     # outerLoops: 1
     <self>: T.class_of(Writable) = loadSelf(included)
-    <cfgAlias>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$16: T.class_of(T) = alias <C T>
     <cfgAlias>$19: T.class_of(T) = alias <C T>
-    <cfgAlias>$22: T.class_of(T) = alias <C T>
-    <cfgAlias>$24: T.class_of(Article) = alias <C Article>
-    <statTemp>$20: Runtime object representing type: T.class_of(Article) = <cfgAlias>$22: T.class_of(T).class_of(<cfgAlias>$24: T.class_of(Article))
-    <cfgAlias>$27: T.class_of(T) = alias <C T>
-    <cfgAlias>$29: T.class_of(Post) = alias <C Post>
-    <statTemp>$25: Runtime object representing type: T.class_of(Post) = <cfgAlias>$27: T.class_of(T).class_of(<cfgAlias>$29: T.class_of(Post))
-    <statTemp>$17: Runtime object representing type: T.any(T.class_of(Article), T.class_of(Post)) = <cfgAlias>$19: T.class_of(T).any(<statTemp>$20: Runtime object representing type: T.class_of(Article), <statTemp>$25: Runtime object representing type: T.class_of(Post))
-    <statTemp>$14: Sorbet::Private::Static::Void = <cfgAlias>$16: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$17: Runtime object representing type: T.any(T.class_of(Article), T.class_of(Post)))
-    <castTemp>$30: T.class_of(Writable) = <self>
-    <self>: T.any(T.class_of(Article), T.class_of(Post)) = cast(<castTemp>$30: T.class_of(Writable), T.any(T.class_of(Article), T.class_of(Post)));
-    <statTemp>$32: Symbol(:name) = :name
-    <blockReturnTemp>$12: T.untyped = <self>: T.any(T.class_of(Article), T.class_of(Post)).some_class_method(<statTemp>$32: Symbol(:name))
-    <blockReturnTemp>$33: T.noreturn = blockreturn<included> <blockReturnTemp>$12: T.untyped
+    <cfgAlias>$21: T.class_of(Article) = alias <C Article>
+    <statTemp>$17: Runtime object representing type: T.class_of(Article) = <cfgAlias>$19: T.class_of(T).class_of(<cfgAlias>$21: T.class_of(Article))
+    <cfgAlias>$24: T.class_of(T) = alias <C T>
+    <cfgAlias>$26: T.class_of(Post) = alias <C Post>
+    <statTemp>$22: Runtime object representing type: T.class_of(Post) = <cfgAlias>$24: T.class_of(T).class_of(<cfgAlias>$26: T.class_of(Post))
+    keep_for_ide$14: Runtime object representing type: T.any(T.class_of(Article), T.class_of(Post)) = <cfgAlias>$16: T.class_of(T).any(<statTemp>$17: Runtime object representing type: T.class_of(Article), <statTemp>$22: Runtime object representing type: T.class_of(Post))
+    keep_for_ide$14: T.untyped = <keep-alive> keep_for_ide$14
+    <castTemp>$27: T.class_of(Writable) = <self>
+    <self>: T.any(T.class_of(Article), T.class_of(Post)) = cast(<castTemp>$27: T.class_of(Writable), T.any(T.class_of(Article), T.class_of(Post)));
+    <statTemp>$29: Symbol(:name) = :name
+    <blockReturnTemp>$12: T.untyped = <self>: T.any(T.class_of(Article), T.class_of(Post)).some_class_method(<statTemp>$29: Symbol(:name))
+    <blockReturnTemp>$30: T.noreturn = blockreturn<included> <blockReturnTemp>$12: T.untyped
     <unconditional> -> bb2
 
 }
@@ -292,19 +291,18 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$9: Sorbet::Private::Stati
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=11](<self>: T.class_of(Shareable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Shareable)):
+bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(Shareable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Shareable)):
     # outerLoops: 1
     <self>: T.class_of(Shareable) = loadSelf(included)
-    <cfgAlias>$16: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$19: T.class_of(T) = alias <C T>
-    <cfgAlias>$21: T.class_of(Article) = alias <C Article>
-    <statTemp>$17: Runtime object representing type: T.class_of(Article) = <cfgAlias>$19: T.class_of(T).class_of(<cfgAlias>$21: T.class_of(Article))
-    <statTemp>$14: Sorbet::Private::Static::Void = <cfgAlias>$16: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$17: Runtime object representing type: T.class_of(Article))
-    <castTemp>$22: T.class_of(Shareable) = <self>
-    <self>: T.class_of(Article) = cast(<castTemp>$22: T.class_of(Shareable), T.class_of(Article));
-    <statTemp>$24: Symbol(:do_this) = :do_this
-    <blockReturnTemp>$12: T.untyped = <self>: T.class_of(Article).before_save(<statTemp>$24: Symbol(:do_this))
-    <blockReturnTemp>$25: T.noreturn = blockreturn<included> <blockReturnTemp>$12: T.untyped
+    <cfgAlias>$16: T.class_of(T) = alias <C T>
+    <cfgAlias>$18: T.class_of(Article) = alias <C Article>
+    keep_for_ide$14: Runtime object representing type: T.class_of(Article) = <cfgAlias>$16: T.class_of(T).class_of(<cfgAlias>$18: T.class_of(Article))
+    keep_for_ide$14: T.untyped = <keep-alive> keep_for_ide$14
+    <castTemp>$19: T.class_of(Shareable) = <self>
+    <self>: T.class_of(Article) = cast(<castTemp>$19: T.class_of(Shareable), T.class_of(Article));
+    <statTemp>$21: Symbol(:do_this) = :do_this
+    <blockReturnTemp>$12: T.untyped = <self>: T.class_of(Article).before_save(<statTemp>$21: Symbol(:do_this))
+    <blockReturnTemp>$22: T.noreturn = blockreturn<included> <blockReturnTemp>$12: T.untyped
     <unconditional> -> bb2
 
 }
@@ -356,9 +354,9 @@ method ::Post#score {
 
 bb0[rubyRegionId=0, firstDead=5]():
     <self>: Post = cast(<self>: NilClass, Post);
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$7: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$7: T.class_of(Integer))
+    <cfgAlias>$4: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$3: T.class_of(Integer) = <cfgAlias>$4
+    keep_for_ide$3: T.untyped = <keep-alive> keep_for_ide$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -486,13 +484,13 @@ bb3[rubyRegionId=0, firstDead=3](<statTemp>$12: T.class_of(Article), <statTemp>$
 bb5[rubyRegionId=1, firstDead=8](<self>: T.class_of(Article), <statTemp>$12: T.class_of(Article), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Article)):
     # outerLoops: 1
     <self>: T.class_of(Article) = loadSelf(lambda)
-    <cfgAlias>$25: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$27: T.class_of(Article) = alias <C Article>
-    <statTemp>$23: Sorbet::Private::Static::Void = <cfgAlias>$25: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$27: T.class_of(Article))
-    <castTemp>$28: T.class_of(Article) = <self>
-    <self>: Article = cast(<castTemp>$28: T.class_of(Article), Article);
+    <cfgAlias>$24: T.class_of(Article) = alias <C Article>
+    keep_for_ide$23: T.class_of(Article) = <cfgAlias>$24
+    keep_for_ide$23: T.untyped = <keep-alive> keep_for_ide$23
+    <castTemp>$25: T.class_of(Article) = <self>
+    <self>: Article = cast(<castTemp>$25: T.class_of(Article), Article);
     <blockReturnTemp>$21: T.untyped = <self>: Article.should_run_callback?()
-    <blockReturnTemp>$29: T.noreturn = blockreturn<lambda> <blockReturnTemp>$21: T.untyped
+    <blockReturnTemp>$26: T.noreturn = blockreturn<lambda> <blockReturnTemp>$21: T.untyped
     <unconditional> -> bb2
 
 }
@@ -537,9 +535,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$7
 bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     f: T.proc.returns(T.untyped) = Solve<<block-pre-call-temp>$7, lambda>
     <self>: T.class_of(A) = <selfRestore>$8
-    <cfgAlias>$26: T.class_of(T) = alias <C T>
-    <statTemp>$24: T.class_of(A) = <cfgAlias>$26: T.class_of(T).reveal_type(<self>: T.class_of(A))
-    <statTemp>$28: NilClass = <self>: T.class_of(A).puts(f: T.proc.returns(T.untyped))
+    <cfgAlias>$23: T.class_of(T) = alias <C T>
+    <statTemp>$21: T.class_of(A) = <cfgAlias>$23: T.class_of(T).reveal_type(<self>: T.class_of(A))
+    <statTemp>$25: NilClass = <self>: T.class_of(A).puts(f: T.proc.returns(T.untyped))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -548,15 +546,15 @@ bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Stati
 bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     # outerLoops: 1
     <self>: T.class_of(A) = loadSelf(lambda)
-    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$16: T.class_of(A) = alias <C A>
-    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$16: T.class_of(A))
-    <castTemp>$17: T.class_of(A) = <self>
-    <self>: A = cast(<castTemp>$17: T.class_of(A), A);
-    <cfgAlias>$20: T.class_of(T) = alias <C T>
-    <statTemp>$18: A = <cfgAlias>$20: T.class_of(T).reveal_type(<self>: A)
+    <cfgAlias>$13: T.class_of(A) = alias <C A>
+    keep_for_ide$12: T.class_of(A) = <cfgAlias>$13
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
+    <castTemp>$14: T.class_of(A) = <self>
+    <self>: A = cast(<castTemp>$14: T.class_of(A), A);
+    <cfgAlias>$17: T.class_of(T) = alias <C T>
+    <statTemp>$15: A = <cfgAlias>$17: T.class_of(T).reveal_type(<self>: A)
     <blockReturnTemp>$10: T.untyped = <self>: A.instance_helper()
-    <blockReturnTemp>$23: T.noreturn = blockreturn<lambda> <blockReturnTemp>$10: T.untyped
+    <blockReturnTemp>$20: T.noreturn = blockreturn<lambda> <blockReturnTemp>$10: T.untyped
     <unconditional> -> bb2
 
 }
@@ -682,19 +680,18 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 method ::M#main {
 
-bb0[rubyRegionId=0, firstDead=14]():
+bb0[rubyRegionId=0, firstDead=13]():
     <self>: M = cast(<self>: NilClass, M);
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(T) = alias <C T>
-    <cfgAlias>$11: T.class_of(M) = alias <C M>
-    <cfgAlias>$13: T.class_of(N) = alias <C N>
-    <statTemp>$7: Runtime object representing type: T.all(M, N) = <cfgAlias>$9: T.class_of(T).all(<cfgAlias>$11: T.class_of(M), <cfgAlias>$13: T.class_of(N))
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: Runtime object representing type: T.all(M, N))
-    <castTemp>$14: M = <self>
-    <self>: T.all(M, N) = cast(<castTemp>$14: M, T.all(M, N));
-    <cfgAlias>$17: T.class_of(T) = alias <C T>
-    <statTemp>$15: T.all(M, N) = <cfgAlias>$17: T.class_of(T).reveal_type(<self>: T.all(M, N))
-    <statTemp>$19: T.untyped = <self>: T.all(M, N).helper_from_M()
+    <cfgAlias>$6: T.class_of(T) = alias <C T>
+    <cfgAlias>$8: T.class_of(M) = alias <C M>
+    <cfgAlias>$10: T.class_of(N) = alias <C N>
+    keep_for_ide$4: Runtime object representing type: T.all(M, N) = <cfgAlias>$6: T.class_of(T).all(<cfgAlias>$8: T.class_of(M), <cfgAlias>$10: T.class_of(N))
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <castTemp>$11: M = <self>
+    <self>: T.all(M, N) = cast(<castTemp>$11: M, T.all(M, N));
+    <cfgAlias>$14: T.class_of(T) = alias <C T>
+    <statTemp>$12: T.all(M, N) = <cfgAlias>$14: T.class_of(T).reveal_type(<self>: T.all(M, N))
+    <statTemp>$16: T.untyped = <self>: T.all(M, N).helper_from_M()
     <returnMethodTemp>$2: T.untyped = <self>: T.all(M, N).helper_from_N()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -727,14 +724,14 @@ method ::ThisSelf#main {
 
 bb0[rubyRegionId=0, firstDead=11]():
     <self>: ThisSelf = cast(<self>: NilClass, ThisSelf);
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$8: T.class_of(Kernel) = alias <C Kernel>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$8: T.class_of(Kernel))
-    <castTemp>$9: ThisSelf = <self>
-    <self>: Kernel = cast(<castTemp>$9: ThisSelf, Kernel);
+    <cfgAlias>$5: T.class_of(Kernel) = alias <C Kernel>
+    keep_for_ide$4: T.class_of(Kernel) = <cfgAlias>$5
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <castTemp>$6: ThisSelf = <self>
+    <self>: Kernel = cast(<castTemp>$6: ThisSelf, Kernel);
     this: Kernel = <self>
-    <cfgAlias>$12: T.class_of(T) = alias <C T>
-    <statTemp>$10: Kernel = <cfgAlias>$12: T.class_of(T).reveal_type(this: Kernel)
+    <cfgAlias>$9: T.class_of(T) = alias <C T>
+    <statTemp>$7: Kernel = <cfgAlias>$9: T.class_of(T).reveal_type(this: Kernel)
     <returnMethodTemp>$2: NilClass = this: Kernel.puts()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
@@ -781,9 +778,9 @@ method ::Rescues#foo {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Rescues = cast(<self>: NilClass, Rescues);
-    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
+    <magic>$11: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.untyped = <get-current-exception>
-    <self>: String = cast(<castTemp>$10: NilClass, String);
+    <self>: String = cast(<castTemp>$7: NilClass, String);
     <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
 
 # backedges
@@ -795,21 +792,21 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$14: T.class_of(<Magic>)):
-    <cfgAlias>$17: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$18: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$17: T.class_of(StandardError))
-    <isaCheckTemp>$18 -> (T.untyped ? bb7 : bb8)
+bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$11: T.class_of(<Magic>)):
+    <cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$15: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$14: T.class_of(StandardError))
+    <isaCheckTemp>$15 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$14: T.class_of(<Magic>)):
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(String) = alias <C String>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$9: T.class_of(String))
-    <castTemp>$10: String = <self>
-    <self>: String = cast(<castTemp>$10: String, String);
-    <cfgAlias>$12: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: String = <cfgAlias>$12: T.class_of(T).reveal_type(<self>: String)
+bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$11: T.class_of(<Magic>)):
+    <cfgAlias>$6: T.class_of(String) = alias <C String>
+    keep_for_ide$5: T.class_of(String) = <cfgAlias>$6
+    keep_for_ide$5: T.untyped = <keep-alive> keep_for_ide$5
+    <castTemp>$7: String = <self>
+    <self>: String = cast(<castTemp>$7: String, String);
+    <cfgAlias>$9: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$9: T.class_of(T).reveal_type(<self>: String)
     <exceptionValue>$3: T.untyped = <get-current-exception>
     <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
 
@@ -822,24 +819,24 @@ bb5[rubyRegionId=4, firstDead=-1](<self>: String, <returnMethodTemp>$2: String):
 # - bb5(rubyRegionId=4)
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$22: T.nilable(TrueClass)):
-    <cfgAlias>$25: T.class_of(T) = alias <C T>
-    <throwAwayTemp>$23: String = <cfgAlias>$25: T.class_of(T).reveal_type(<self>: String)
-    <gotoDeadTemp>$22 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[rubyRegionId=3, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$19: T.nilable(TrueClass)):
+    <cfgAlias>$22: T.class_of(T) = alias <C T>
+    <throwAwayTemp>$20: String = <cfgAlias>$22: T.class_of(T).reveal_type(<self>: String)
+    <gotoDeadTemp>$19 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: String, <magic>$14: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: String, <magic>$11: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$15: Sorbet::Private::Static::Void = <magic>$14: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <cfgAlias>$20: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: String = <cfgAlias>$20: T.class_of(T).reveal_type(<self>: String)
+    <keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <cfgAlias>$17: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$17: T.class_of(T).reveal_type(<self>: String)
     <unconditional> -> bb6
 
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String)):
-    <gotoDeadTemp>$22: TrueClass = true
+    <gotoDeadTemp>$19: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
@@ -854,11 +851,11 @@ method ::Rescues#bar {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Rescues = cast(<self>: NilClass, Rescues);
-    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
+    <magic>$11: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.untyped = <get-current-exception>
-    <self>: String = cast(<castTemp>$10: NilClass, String);
-    <self>: Integer = cast(<castTemp>$25: NilClass, Integer);
-    <self>: Float = cast(<castTemp>$37: NilClass, Float);
+    <self>: String = cast(<castTemp>$7: NilClass, String);
+    <self>: Integer = cast(<castTemp>$19: NilClass, Integer);
+    <self>: Float = cast(<castTemp>$28: NilClass, Float);
     <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
 
 # backedges
@@ -870,21 +867,21 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$14: T.class_of(<Magic>)):
-    <cfgAlias>$17: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$18: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$17: T.class_of(StandardError))
-    <isaCheckTemp>$18 -> (T.untyped ? bb7 : bb8)
+bb3[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$11: T.class_of(<Magic>)):
+    <cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$15: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$14: T.class_of(StandardError))
+    <isaCheckTemp>$15 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb4[rubyRegionId=1, firstDead=-1](<self>: Float, <magic>$14: T.class_of(<Magic>)):
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(String) = alias <C String>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$9: T.class_of(String))
-    <castTemp>$10: Float = <self>
-    <self>: String = cast(<castTemp>$10: Float, String);
-    <cfgAlias>$12: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: String = <cfgAlias>$12: T.class_of(T).reveal_type(<self>: String)
+bb4[rubyRegionId=1, firstDead=-1](<self>: Float, <magic>$11: T.class_of(<Magic>)):
+    <cfgAlias>$6: T.class_of(String) = alias <C String>
+    keep_for_ide$5: T.class_of(String) = <cfgAlias>$6
+    keep_for_ide$5: T.untyped = <keep-alive> keep_for_ide$5
+    <castTemp>$7: Float = <self>
+    <self>: String = cast(<castTemp>$7: Float, String);
+    <cfgAlias>$9: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$9: T.class_of(T).reveal_type(<self>: String)
     <exceptionValue>$3: T.untyped = <get-current-exception>
     <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
 
@@ -897,34 +894,34 @@ bb5[rubyRegionId=4, firstDead=-1](<self>: String, <returnMethodTemp>$2: String):
 # - bb5(rubyRegionId=4)
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](<self>: T.any(Float, String, Integer), <returnMethodTemp>$2: T.nilable(T.any(String, Integer)), <gotoDeadTemp>$29: T.nilable(TrueClass)):
-    <cfgAlias>$34: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$36: T.class_of(Float) = alias <C Float>
-    <statTemp>$32: Sorbet::Private::Static::Void = <cfgAlias>$34: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$36: T.class_of(Float))
-    <castTemp>$37: T.any(Float, String, Integer) = <self>
-    <self>: Float = cast(<castTemp>$37: T.any(Float, String, Integer), Float);
-    <cfgAlias>$39: T.class_of(T) = alias <C T>
-    <throwAwayTemp>$30: Float = <cfgAlias>$39: T.class_of(T).reveal_type(<self>: Float)
-    <gotoDeadTemp>$29 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[rubyRegionId=3, firstDead=-1](<self>: T.any(Float, String, Integer), <returnMethodTemp>$2: T.nilable(T.any(String, Integer)), <gotoDeadTemp>$23: T.nilable(TrueClass)):
+    <cfgAlias>$27: T.class_of(Float) = alias <C Float>
+    keep_for_ide$26: T.class_of(Float) = <cfgAlias>$27
+    keep_for_ide$26: T.untyped = <keep-alive> keep_for_ide$26
+    <castTemp>$28: T.any(Float, String, Integer) = <self>
+    <self>: Float = cast(<castTemp>$28: T.any(Float, String, Integer), Float);
+    <cfgAlias>$30: T.class_of(T) = alias <C T>
+    <throwAwayTemp>$24: Float = <cfgAlias>$30: T.class_of(T).reveal_type(<self>: Float)
+    <gotoDeadTemp>$23 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <magic>$14: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <magic>$11: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$15: Sorbet::Private::Static::Void = <magic>$14: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$24: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$24: T.class_of(Integer))
-    <castTemp>$25: T.any(Float, String) = <self>
-    <self>: Integer = cast(<castTemp>$25: T.any(Float, String), Integer);
-    <cfgAlias>$27: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: Integer = <cfgAlias>$27: T.class_of(T).reveal_type(<self>: Integer)
+    <keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <cfgAlias>$18: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$17: T.class_of(Integer) = <cfgAlias>$18
+    keep_for_ide$17: T.untyped = <keep-alive> keep_for_ide$17
+    <castTemp>$19: T.any(Float, String) = <self>
+    <self>: Integer = cast(<castTemp>$19: T.any(Float, String), Integer);
+    <cfgAlias>$21: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Integer = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: Integer)
     <unconditional> -> bb6
 
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String)):
-    <gotoDeadTemp>$29: TrueClass = true
+    <gotoDeadTemp>$23: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
@@ -941,9 +938,9 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Rescues = cast(<self>: NilClass, Rescues);
     <cfgAlias>$5: T.class_of(T) = alias <C T>
     <statTemp>$3: Rescues = <cfgAlias>$5: T.class_of(T).reveal_type(<self>: Rescues)
-    <magic>$18: T.class_of(<Magic>) = alias <C <Magic>>
+    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$7: T.untyped = <get-current-exception>
-    <self>: String = cast(<castTemp>$14: NilClass, String);
+    <self>: String = cast(<castTemp>$11: NilClass, String);
     <exceptionValue>$7 -> (T.untyped ? bb3 : bb4)
 
 # backedges
@@ -955,21 +952,21 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$7: T.untyped, <magic>$18: T.class_of(<Magic>)):
-    <cfgAlias>$21: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$22: T.untyped = <exceptionValue>$7: T.untyped.is_a?(<cfgAlias>$21: T.class_of(StandardError))
-    <isaCheckTemp>$22 -> (T.untyped ? bb7 : bb8)
+bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$7: T.untyped, <magic>$15: T.class_of(<Magic>)):
+    <cfgAlias>$18: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$19: T.untyped = <exceptionValue>$7: T.untyped.is_a?(<cfgAlias>$18: T.class_of(StandardError))
+    <isaCheckTemp>$19 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$18: T.class_of(<Magic>)):
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$13: T.class_of(String) = alias <C String>
-    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$13: T.class_of(String))
-    <castTemp>$14: String = <self>
-    <self>: String = cast(<castTemp>$14: String, String);
-    <cfgAlias>$16: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: String = <cfgAlias>$16: T.class_of(T).reveal_type(<self>: String)
+bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$15: T.class_of(<Magic>)):
+    <cfgAlias>$10: T.class_of(String) = alias <C String>
+    keep_for_ide$9: T.class_of(String) = <cfgAlias>$10
+    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
+    <castTemp>$11: String = <self>
+    <self>: String = cast(<castTemp>$11: String, String);
+    <cfgAlias>$13: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$13: T.class_of(T).reveal_type(<self>: String)
     <exceptionValue>$7: T.untyped = <get-current-exception>
     <exceptionValue>$7 -> (T.untyped ? bb3 : bb5)
 
@@ -982,22 +979,22 @@ bb5[rubyRegionId=4, firstDead=-1](<returnMethodTemp>$2: String):
 # - bb5(rubyRegionId=4)
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$26: T.nilable(TrueClass)):
-    <gotoDeadTemp>$26 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$23: T.nilable(TrueClass)):
+    <gotoDeadTemp>$23 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: String, <magic>$18: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: String, <magic>$15: T.class_of(<Magic>)):
     <exceptionValue>$7: NilClass = nil
-    <keepForCfgTemp>$19: Sorbet::Private::Static::Void = <magic>$18: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$7: NilClass)
-    <cfgAlias>$24: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: String = <cfgAlias>$24: T.class_of(T).reveal_type(<self>: String)
+    <keepForCfgTemp>$16: Sorbet::Private::Static::Void = <magic>$15: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$7: NilClass)
+    <cfgAlias>$21: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: String = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: String)
     <unconditional> -> bb6
 
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(String)):
-    <gotoDeadTemp>$26: TrueClass = true
+    <gotoDeadTemp>$23: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
@@ -1025,7 +1022,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb13(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: NilClass, <castTemp>$17: NilClass, <gotoDeadTemp>$29: NilClass):
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: NilClass, <castTemp>$14: NilClass, <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
@@ -1038,40 +1035,40 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$6: Sorbet::Private::Stati
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: NilClass, <castTemp>$17: NilClass, <gotoDeadTemp>$29: NilClass):
+bb5[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: NilClass, <castTemp>$14: NilClass, <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
     <self>: T.class_of(Rescues) = loadSelf(takes_block)
-    <magic>$21: T.class_of(<Magic>) = alias <C <Magic>>
+    <magic>$18: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$10: T.untyped = <get-current-exception>
-    <self>: Integer = cast(<castTemp>$17: NilClass, Integer);
+    <self>: Integer = cast(<castTemp>$14: NilClass, Integer);
     <exceptionValue>$10 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb5(rubyRegionId=1)
 # - bb8(rubyRegionId=2)
-bb7[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: T.nilable(Integer), <exceptionValue>$10: T.untyped, <castTemp>$17: T.nilable(Integer), <magic>$21: T.class_of(<Magic>), <gotoDeadTemp>$29: NilClass):
+bb7[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: T.nilable(Integer), <exceptionValue>$10: T.untyped, <castTemp>$14: T.nilable(Integer), <magic>$18: T.class_of(<Magic>), <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
-    <cfgAlias>$24: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$25: T.untyped = <exceptionValue>$10: T.untyped.is_a?(<cfgAlias>$24: T.class_of(StandardError))
-    <isaCheckTemp>$25 -> (T.untyped ? bb11 : bb12)
+    <cfgAlias>$21: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$22: T.untyped = <exceptionValue>$10: T.untyped.is_a?(<cfgAlias>$21: T.class_of(StandardError))
+    <isaCheckTemp>$22 -> (T.untyped ? bb11 : bb12)
 
 # backedges
 # - bb5(rubyRegionId=1)
-bb8[rubyRegionId=2, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <magic>$21: T.class_of(<Magic>), <gotoDeadTemp>$29: NilClass):
+bb8[rubyRegionId=2, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <magic>$18: T.class_of(<Magic>), <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
-    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$16: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$16: T.class_of(Integer))
-    <castTemp>$17: Integer = <self>
-    <self>: Integer = cast(<castTemp>$17: Integer, Integer);
-    <cfgAlias>$19: T.class_of(T) = alias <C T>
-    <blockReturnTemp>$9: Integer = <cfgAlias>$19: T.class_of(T).reveal_type(<self>: Integer)
+    <cfgAlias>$13: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$12: T.class_of(Integer) = <cfgAlias>$13
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
+    <castTemp>$14: Integer = <self>
+    <self>: Integer = cast(<castTemp>$14: Integer, Integer);
+    <cfgAlias>$16: T.class_of(T) = alias <C T>
+    <blockReturnTemp>$9: Integer = <cfgAlias>$16: T.class_of(T).reveal_type(<self>: Integer)
     <exceptionValue>$10: T.untyped = <get-current-exception>
     <exceptionValue>$10 -> (T.untyped ? bb7 : bb9)
 
 # backedges
 # - bb8(rubyRegionId=2)
-bb9[rubyRegionId=5, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: Integer, <castTemp>$17: Integer, <gotoDeadTemp>$29: NilClass):
+bb9[rubyRegionId=5, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: Integer, <castTemp>$14: Integer, <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
     <unconditional> -> bb10
 
@@ -1079,32 +1076,32 @@ bb9[rubyRegionId=5, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorb
 # - bb9(rubyRegionId=5)
 # - bb11(rubyRegionId=3)
 # - bb12(rubyRegionId=3)
-bb10[rubyRegionId=4, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: T.nilable(Integer), <castTemp>$17: T.nilable(Integer), <gotoDeadTemp>$29: T.nilable(TrueClass)):
+bb10[rubyRegionId=4, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: T.nilable(Integer), <castTemp>$14: T.nilable(Integer), <gotoDeadTemp>$26: T.nilable(TrueClass)):
     # outerLoops: 1
-    <gotoDeadTemp>$29 -> (T.nilable(TrueClass) ? bb1 : bb13)
+    <gotoDeadTemp>$26 -> (T.nilable(TrueClass) ? bb1 : bb13)
 
 # backedges
 # - bb7(rubyRegionId=3)
-bb11[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <castTemp>$17: T.nilable(Integer), <magic>$21: T.class_of(<Magic>), <gotoDeadTemp>$29: NilClass):
+bb11[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <castTemp>$14: T.nilable(Integer), <magic>$18: T.class_of(<Magic>), <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
     <exceptionValue>$10: NilClass = nil
-    <keepForCfgTemp>$22: Sorbet::Private::Static::Void = <magic>$21: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$10: NilClass)
-    <cfgAlias>$27: T.class_of(T) = alias <C T>
-    <blockReturnTemp>$9: Integer = <cfgAlias>$27: T.class_of(T).reveal_type(<self>: Integer)
+    <keepForCfgTemp>$19: Sorbet::Private::Static::Void = <magic>$18: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$10: NilClass)
+    <cfgAlias>$24: T.class_of(T) = alias <C T>
+    <blockReturnTemp>$9: Integer = <cfgAlias>$24: T.class_of(T).reveal_type(<self>: Integer)
     <unconditional> -> bb10
 
 # backedges
 # - bb7(rubyRegionId=3)
-bb12[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: T.nilable(Integer), <castTemp>$17: T.nilable(Integer)):
+bb12[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: T.nilable(Integer), <castTemp>$14: T.nilable(Integer)):
     # outerLoops: 1
-    <gotoDeadTemp>$29: TrueClass = true
+    <gotoDeadTemp>$26: TrueClass = true
     <unconditional> -> bb10
 
 # backedges
 # - bb10(rubyRegionId=4)
-bb13[rubyRegionId=1, firstDead=1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: Integer, <castTemp>$17: T.nilable(Integer), <gotoDeadTemp>$29: NilClass):
+bb13[rubyRegionId=1, firstDead=1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$9: Integer, <castTemp>$14: T.nilable(Integer), <gotoDeadTemp>$26: NilClass):
     # outerLoops: 1
-    <blockReturnTemp>$31: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$9: Integer
+    <blockReturnTemp>$28: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$9: Integer
     <unconditional> -> bb2
 
 }

@@ -20,11 +20,11 @@ method ::TestIVar#initialize {
 bb0[rubyRegionId=0, firstDead=9]():
     @foo$3: Integer = alias @foo
     <self>: TestIVar = cast(<self>: NilClass, TestIVar);
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$8: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$8: T.class_of(Integer))
-    <castTemp>$9: Integer(0) = 0
-    @foo$3: Integer = cast(<castTemp>$9: Integer(0), Integer);
+    <cfgAlias>$5: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$4: T.class_of(Integer) = <cfgAlias>$5
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <castTemp>$6: Integer(0) = 0
+    @foo$3: Integer = cast(<castTemp>$6: Integer(0), Integer);
     <returnMethodTemp>$2: Integer = @foo$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
     <unconditional> -> bb1

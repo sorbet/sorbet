@@ -16,53 +16,23 @@ begin
 
     def test_casts(<blk>)
       begin
-        t = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.assert_type!(<self>.untyped(), Integer)
-        end
+        t = <cast:assert_type!>(<self>.untyped(), Integer, ::Integer)
         t.+(4)
-        t1 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.assert_type!("hi", Integer)
-        end
+        t1 = <cast:assert_type!>("hi", Integer, ::Integer)
         t1.+(1)
-        s = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.cast(<self>.untyped(), String)
-        end
+        s = <cast:cast>(<self>.untyped(), String, ::String)
         s.+("hi")
-        s = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.cast(6, String)
-        end
+        s = <cast:cast>(6, String, ::String)
         s.+("hi")
         s.+(3)
-        s = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.cast(6, Integer)
-        end
-        s = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::T.untyped())
-          T.cast(6, T.untyped)
-        end
-        s = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(7)
-          T.cast(6, Integer)
-        end
+        s = <cast:cast>(6, Integer, ::Integer)
+        s = <cast:cast>(6, T.untyped, ::T.untyped())
+        s = <cast:cast>(6, Integer, 7)
         s.+("hi")
         s.+(3)
-        f = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(7.000000)
-          T.cast(6.000000, Float)
-        end
-        str = begin
-          ::Sorbet::Private::Static.keep_for_typechecking("y")
-          T.cast("x", String)
-        end
-        sym = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(:y)
-          T.cast(:x, Symbol)
-        end
+        f = <cast:cast>(6.000000, Float, 7.000000)
+        str = <cast:cast>("x", String, "y")
+        sym = <cast:cast>(:x, Symbol, :y)
       end
     end
 

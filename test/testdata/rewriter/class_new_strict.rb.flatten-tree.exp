@@ -13,15 +13,12 @@ begin
     def self.make(<blk>)
       cls = ::Class.new(::A) do ||
         begin
-          begin
-            ::Sorbet::Private::Static.keep_for_typechecking(::T.class_of(::A))
-            T.<synthetic bind>(<self>, AppliedType {
-              klass = <S <C <U A>> $1>
-              targs = [
-                <C <U <AttachedClass>>> = A
-              ]
-            })
-          end
+          <cast:<synthetic bind>>(<self>, AppliedType {
+            klass = <S <C <U A>> $1>
+            targs = [
+              <C <U <AttachedClass>>> = A
+            ]
+          }, ::T.class_of(::A))
           <emptyTree>
         end
       end

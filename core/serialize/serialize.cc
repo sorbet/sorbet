@@ -1208,6 +1208,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             p.putU4(c.cast.rawId());
             pickle(p, c.type);
             pickle(p, c.arg);
+            pickle(p, c.typeExpr);
             break;
         }
 
@@ -1480,7 +1481,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             NameRef kind = NameRef::fromRaw(gs, p.getU4());
             auto type = unpickleType(p, &gs);
             auto arg = unpickleExpr(p, gs);
-            return ast::make_expression<ast::Cast>(loc, std::move(type), std::move(arg), kind);
+            auto typeExpr = unpickleExpr(p, gs);
+            return ast::make_expression<ast::Cast>(loc, std::move(type), std::move(arg), kind, std::move(typeExpr));
         }
         case ast::Tag::EmptyTree:
             return ast::MK::EmptyTree();

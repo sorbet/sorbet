@@ -12,30 +12,12 @@ begin
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)
     def initialize(<blk>)
       begin
-        @v1 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-          T.let(0, Integer)
-        end
-        @v2 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.let("", String)
-        end
-        @v6 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::String)
-          T.let("", String)
-        end
-        @strv7 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Float)
-          T.let(0.000000, Float)
-        end
-        @strv8 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Float)
-          T.let(0.000000, Float)
-        end
-        @strv9 = begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Float)
-          T.let(0.000000, Float)
-        end
+        @v1 = <cast:let>(0, Integer, ::Integer)
+        @v2 = <cast:let>("", String, ::String)
+        @v6 = <cast:let>("", String, ::String)
+        @strv7 = <cast:let>(0.000000, Float, ::Float)
+        @strv8 = <cast:let>(0.000000, Float, ::Float)
+        @strv9 = <cast:let>(0.000000, Float, ::Float)
       end
     end
 

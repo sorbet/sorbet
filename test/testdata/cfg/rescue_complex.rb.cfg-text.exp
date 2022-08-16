@@ -93,16 +93,15 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 method ::TestRescue#initialize {
 
-bb0[rubyRegionId=0, firstDead=11]():
+bb0[rubyRegionId=0, firstDead=10]():
     @ex$3: T.nilable(StandardError) = alias @ex
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(T) = alias <C T>
-    <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
-    <statTemp>$7: Runtime object representing type: T.nilable(StandardError) = <cfgAlias>$9: T.class_of(T).nilable(<cfgAlias>$11: T.class_of(StandardError))
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: Runtime object representing type: T.nilable(StandardError))
-    <castTemp>$12: NilClass = nil
-    @ex$3: T.nilable(StandardError) = cast(<castTemp>$12: NilClass, T.nilable(StandardError));
+    <cfgAlias>$6: T.class_of(T) = alias <C T>
+    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
+    keep_for_ide$4: Runtime object representing type: T.nilable(StandardError) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(StandardError))
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <castTemp>$9: NilClass = nil
+    @ex$3: T.nilable(StandardError) = cast(<castTemp>$9: NilClass, T.nilable(StandardError));
     <returnMethodTemp>$2: T.nilable(StandardError) = @ex$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(StandardError)
     <unconditional> -> bb1

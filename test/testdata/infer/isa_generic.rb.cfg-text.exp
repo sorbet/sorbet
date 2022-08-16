@@ -15,28 +15,28 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 bb2[rubyRegionId=0, firstDead=-1](x: Concrete):
-    <cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$13: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$13: T.class_of(Concrete))
-    <castTemp>$14: Concrete = x
-    <statTemp>$3: Concrete = cast(<castTemp>$14: Concrete, Concrete);
+    <cfgAlias>$10: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$9: T.class_of(Concrete) = <cfgAlias>$10
+    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
+    <castTemp>$11: Concrete = x
+    <statTemp>$3: Concrete = cast(<castTemp>$11: Concrete, Concrete);
     <unconditional> -> bb7
 
 # backedges
 # - bb0(rubyRegionId=0)
 bb3[rubyRegionId=0, firstDead=-1](x: Other):
-    <cfgAlias>$17: T.class_of(Other) = alias <C Other>
-    <ifTemp>$15: TrueClass = <cfgAlias>$17: T.class_of(Other).===(x: Other)
-    <ifTemp>$15 -> (TrueClass ? bb4 : bb7)
+    <cfgAlias>$14: T.class_of(Other) = alias <C Other>
+    <ifTemp>$12: TrueClass = <cfgAlias>$14: T.class_of(Other).===(x: Other)
+    <ifTemp>$12 -> (TrueClass ? bb4 : bb7)
 
 # backedges
 # - bb3(rubyRegionId=0)
 bb4[rubyRegionId=0, firstDead=-1](x: Other):
-    <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$23: T.class_of(Other) = alias <C Other>
-    <statTemp>$19: Sorbet::Private::Static::Void = <cfgAlias>$21: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$23: T.class_of(Other))
-    <castTemp>$24: Other = x
-    <statTemp>$3: Other = cast(<castTemp>$24: Other, Other);
+    <cfgAlias>$17: T.class_of(Other) = alias <C Other>
+    keep_for_ide$16: T.class_of(Other) = <cfgAlias>$17
+    keep_for_ide$16: T.untyped = <keep-alive> keep_for_ide$16
+    <castTemp>$18: Other = x
+    <statTemp>$3: Other = cast(<castTemp>$18: Other, Other);
     <unconditional> -> bb7
 
 # backedges
@@ -44,36 +44,36 @@ bb4[rubyRegionId=0, firstDead=-1](x: Other):
 # - bb3(rubyRegionId=0)
 # - bb4(rubyRegionId=0)
 bb7[rubyRegionId=0, firstDead=-1](x: T.any(Concrete, Other)):
-    <cfgAlias>$29: T.class_of(Concrete) = alias <C Concrete>
-    <ifTemp>$26: T::Boolean = x: T.any(Concrete, Other).is_a?(<cfgAlias>$29: T.class_of(Concrete))
-    <ifTemp>$26 -> (T::Boolean ? bb8 : bb10)
+    <cfgAlias>$23: T.class_of(Concrete) = alias <C Concrete>
+    <ifTemp>$20: T::Boolean = x: T.any(Concrete, Other).is_a?(<cfgAlias>$23: T.class_of(Concrete))
+    <ifTemp>$20 -> (T::Boolean ? bb8 : bb10)
 
 # backedges
 # - bb7(rubyRegionId=0)
 bb8[rubyRegionId=0, firstDead=-1](x: Concrete):
-    <cfgAlias>$32: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$34: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$30: Sorbet::Private::Static::Void = <cfgAlias>$32: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$34: T.class_of(Concrete))
-    <castTemp>$35: Concrete = x
-    <statTemp>$25: Concrete = cast(<castTemp>$35: Concrete, Concrete);
+    <cfgAlias>$25: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$24: T.class_of(Concrete) = <cfgAlias>$25
+    keep_for_ide$24: T.untyped = <keep-alive> keep_for_ide$24
+    <castTemp>$26: Concrete = x
+    <statTemp>$19: Concrete = cast(<castTemp>$26: Concrete, Concrete);
     <unconditional> -> bb10
 
 # backedges
 # - bb7(rubyRegionId=0)
 # - bb8(rubyRegionId=0)
 bb10[rubyRegionId=0, firstDead=-1](x: T.any(Other, Concrete)):
-    <cfgAlias>$39: T.class_of(Other) = alias <C Other>
-    <ifTemp>$36: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$39: T.class_of(Other))
-    <ifTemp>$36 -> (T::Boolean ? bb13 : bb12)
+    <cfgAlias>$30: T.class_of(Other) = alias <C Other>
+    <ifTemp>$27: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$30: T.class_of(Other))
+    <ifTemp>$27 -> (T::Boolean ? bb13 : bb12)
 
 # backedges
 # - bb10(rubyRegionId=0)
 bb12[rubyRegionId=0, firstDead=-1](x: Concrete):
-    <cfgAlias>$42: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$44: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$40: Sorbet::Private::Static::Void = <cfgAlias>$42: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$44: T.class_of(Concrete))
-    <castTemp>$45: Concrete = x
-    <returnMethodTemp>$2: Concrete = cast(<castTemp>$45: Concrete, Concrete);
+    <cfgAlias>$32: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$31: T.class_of(Concrete) = <cfgAlias>$32
+    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
+    <castTemp>$33: Concrete = x
+    <returnMethodTemp>$2: Concrete = cast(<castTemp>$33: Concrete, Concrete);
     <unconditional> -> bb13
 
 # backedges

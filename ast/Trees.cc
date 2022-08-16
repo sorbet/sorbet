@@ -250,8 +250,8 @@ Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::Lo
     _sanityCheck();
 }
 
-Cast::Cast(core::LocOffsets loc, core::TypePtr ty, ExpressionPtr arg, core::NameRef cast)
-    : loc(loc), cast(cast), type(std::move(ty)), arg(std::move(arg)) {
+Cast::Cast(core::LocOffsets loc, core::TypePtr ty, ExpressionPtr arg, core::NameRef cast, ExpressionPtr typeExpr)
+    : loc(loc), cast(cast), type(std::move(ty)), arg(std::move(arg)), typeExpr(std::move(typeExpr)) {
     categoryCounterInc("trees", "cast");
     _sanityCheck();
 }
@@ -1107,9 +1107,9 @@ ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::
 
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "T.{}", this->cast.toString(gs));
-    fmt::format_to(std::back_inserter(buf), "({}, {})", this->arg.toStringWithTabs(gs, tabs),
-                   this->type.toStringWithTabs(gs, tabs));
+    fmt::format_to(std::back_inserter(buf), "<cast:{}>", this->cast.toString(gs));
+    fmt::format_to(std::back_inserter(buf), "({}, {}, {})", this->arg.toStringWithTabs(gs, tabs),
+                   this->type.toStringWithTabs(gs, tabs), this->typeExpr.toStringWithTabs(gs, tabs));
 
     return fmt::to_string(buf);
 }
@@ -1122,7 +1122,9 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 2);
     fmt::format_to(std::back_inserter(buf), "arg = {}\n", this->arg.showRaw(gs, tabs + 2));
     printTabs(buf, tabs + 2);
-    fmt::format_to(std::back_inserter(buf), "type = {},\n", this->type.toString(gs));
+    fmt::format_to(std::back_inserter(buf), "type = {},\n", this->type.showWithMoreInfo(gs));
+    printTabs(buf, tabs + 2);
+    fmt::format_to(std::back_inserter(buf), "typeExpr = {},\n", this->typeExpr.showRaw(gs, tabs + 2));
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}\n");
 

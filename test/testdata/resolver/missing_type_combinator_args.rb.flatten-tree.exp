@@ -3,28 +3,13 @@ begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::T.nilable())
-          T.cast(nil, T.untyped)
-        end
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::T.nilable(::Integer, ::Integer))
-          T.cast(nil, T.untyped)
-        end
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::T.any())
-          T.cast(nil, T.untyped)
-        end
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::T.all())
-          T.cast(nil, T.untyped)
-        end
+        <cast:cast>(nil, T.untyped, ::T.nilable())
+        <cast:cast>(nil, T.untyped, ::T.nilable(::Integer, ::Integer))
+        <cast:cast>(nil, T.untyped, ::T.any())
+        <cast:cast>(nil, T.untyped, ::T.all())
         ::T.must()
         ::T.let(1)
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(2)
-          T.let(1, Integer)
-        end
+        <cast:let>(1, Integer, 2)
         ::T.reveal_type()
         ::T.reveal_type(1, 2)
         <emptyTree>

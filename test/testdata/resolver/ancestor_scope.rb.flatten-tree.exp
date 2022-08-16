@@ -14,18 +14,9 @@ begin
           ::Sorbet::Private::Static.keep_for_ide(::Other)
           <emptyTree>
         end
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Test::Mixin)
-          T.assert_type!(::Test.new(), Test::Mixin)
-        end
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Test::Other)
-          T.assert_type!(::Test.new(), Test::Other)
-        end
-        begin
-          ::Sorbet::Private::Static.keep_for_typechecking(::Other)
-          T.assert_type!(::Test.new(), Other)
-        end
+        <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
+        <cast:assert_type!>(::Test.new(), Test::Other, ::Test::Other)
+        <cast:assert_type!>(::Test.new(), Other, ::Other)
         <emptyTree>
       end
     end

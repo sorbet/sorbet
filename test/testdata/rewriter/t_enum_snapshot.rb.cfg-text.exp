@@ -40,8 +40,8 @@ method ::<Class:MyEnum>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <C X>$30: MyEnum::X = alias <C X>
-    <C Y>$52: MyEnum::Y = alias <C Y>
-    <C Z>$75: MyEnum::Z = alias <C Z>
+    <C Y>$49: MyEnum::Y = alias <C Y>
+    <C Z>$69: MyEnum::Z = alias <C Z>
     <self>: T.class_of(MyEnum) = cast(<self>: NilClass, T.class_of(MyEnum));
     <cfgAlias>$6: T.class_of(T::Helpers) = alias <C Helpers>
     <statTemp>$3: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).extend(<cfgAlias>$6: T.class_of(T::Helpers))
@@ -59,7 +59,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$52: MyEnum::Y, <C Z>$75: MyEnum::Z):
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$49: MyEnum::Y, <C Z>$69: MyEnum::Z):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
@@ -72,7 +72,7 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$13: Sorbet::Private::Stat
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(MyEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$52: MyEnum::Y, <C Z>$75: MyEnum::Z):
+bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(MyEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$49: MyEnum::Y, <C Z>$69: MyEnum::Z):
     # outerLoops: 1
     <self>: T.class_of(MyEnum) = loadSelf(enums)
     <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
@@ -81,39 +81,39 @@ bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(MyEnum), <block-pre-call-te
     <cfgAlias>$26: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$28: T.class_of(MyEnum) = alias <C MyEnum>
     <statTemp>$24: Sorbet::Private::Static::Void = <cfgAlias>$26: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$28: T.class_of(MyEnum))
-    <cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$32: T.class_of(MyEnum::X) = alias <C X$1>
+    keep_for_ide$31: T.class_of(MyEnum::X) = <cfgAlias>$32
+    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
     <cfgAlias>$35: T.class_of(MyEnum::X) = alias <C X$1>
-    <statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$35: T.class_of(MyEnum::X))
-    <cfgAlias>$38: T.class_of(MyEnum::X) = alias <C X$1>
-    <castTemp>$36: MyEnum::X = <cfgAlias>$38: T.class_of(MyEnum::X).new()
-    <C X>$30: MyEnum::X = <castTemp>$36
-    <cfgAlias>$43: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$45: T.class_of(MyEnum::Y) = alias <C Y$1>
-    <statTemp>$41: Sorbet::Private::Static::Void = <cfgAlias>$43: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$45: T.class_of(MyEnum::Y))
-    <cfgAlias>$48: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$50: T.class_of(MyEnum) = alias <C MyEnum>
-    <statTemp>$46: Sorbet::Private::Static::Void = <cfgAlias>$48: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$50: T.class_of(MyEnum))
-    <cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$57: T.class_of(MyEnum::Y) = alias <C Y$1>
-    <statTemp>$53: Sorbet::Private::Static::Void = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$57: T.class_of(MyEnum::Y))
-    <cfgAlias>$60: T.class_of(MyEnum::Y) = alias <C Y$1>
-    <statTemp>$61: String("y") = "y"
-    <castTemp>$58: MyEnum::Y = <cfgAlias>$60: T.class_of(MyEnum::Y).new(<statTemp>$61: String("y"))
-    <C Y>$52: MyEnum::Y = <castTemp>$58
-    <cfgAlias>$66: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$68: T.class_of(MyEnum::Z) = alias <C Z$1>
-    <statTemp>$64: Sorbet::Private::Static::Void = <cfgAlias>$66: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$68: T.class_of(MyEnum::Z))
-    <cfgAlias>$71: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$73: T.class_of(MyEnum) = alias <C MyEnum>
-    <statTemp>$69: Sorbet::Private::Static::Void = <cfgAlias>$71: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$73: T.class_of(MyEnum))
-    <cfgAlias>$78: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$80: T.class_of(MyEnum::Z) = alias <C Z$1>
-    <statTemp>$76: Sorbet::Private::Static::Void = <cfgAlias>$78: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$80: T.class_of(MyEnum::Z))
-    <cfgAlias>$83: T.class_of(MyEnum::Z) = alias <C Z$1>
-    <castTemp>$81: MyEnum::Z = <cfgAlias>$83: T.class_of(MyEnum::Z).new()
-    <C Z>$75: MyEnum::Z = <castTemp>$81
+    <castTemp>$33: MyEnum::X = <cfgAlias>$35: T.class_of(MyEnum::X).new()
+    <C X>$30: MyEnum::X = <castTemp>$33
+    <cfgAlias>$40: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$42: T.class_of(MyEnum::Y) = alias <C Y$1>
+    <statTemp>$38: Sorbet::Private::Static::Void = <cfgAlias>$40: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$42: T.class_of(MyEnum::Y))
+    <cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$47: T.class_of(MyEnum) = alias <C MyEnum>
+    <statTemp>$43: Sorbet::Private::Static::Void = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$47: T.class_of(MyEnum))
+    <cfgAlias>$51: T.class_of(MyEnum::Y) = alias <C Y$1>
+    keep_for_ide$50: T.class_of(MyEnum::Y) = <cfgAlias>$51
+    keep_for_ide$50: T.untyped = <keep-alive> keep_for_ide$50
+    <cfgAlias>$54: T.class_of(MyEnum::Y) = alias <C Y$1>
+    <statTemp>$55: String("y") = "y"
+    <castTemp>$52: MyEnum::Y = <cfgAlias>$54: T.class_of(MyEnum::Y).new(<statTemp>$55: String("y"))
+    <C Y>$49: MyEnum::Y = <castTemp>$52
+    <cfgAlias>$60: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$62: T.class_of(MyEnum::Z) = alias <C Z$1>
+    <statTemp>$58: Sorbet::Private::Static::Void = <cfgAlias>$60: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$62: T.class_of(MyEnum::Z))
+    <cfgAlias>$65: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$67: T.class_of(MyEnum) = alias <C MyEnum>
+    <statTemp>$63: Sorbet::Private::Static::Void = <cfgAlias>$65: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$67: T.class_of(MyEnum))
+    <cfgAlias>$71: T.class_of(MyEnum::Z) = alias <C Z$1>
+    keep_for_ide$70: T.class_of(MyEnum::Z) = <cfgAlias>$71
+    keep_for_ide$70: T.untyped = <keep-alive> keep_for_ide$70
+    <cfgAlias>$74: T.class_of(MyEnum::Z) = alias <C Z$1>
+    <castTemp>$72: MyEnum::Z = <cfgAlias>$74: T.class_of(MyEnum::Z).new()
+    <C Z>$69: MyEnum::Z = <castTemp>$72
     <blockReturnTemp>$16: NilClass = nil
-    <blockReturnTemp>$84: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
+    <blockReturnTemp>$75: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
     <unconditional> -> bb2
 
 }
@@ -198,13 +198,13 @@ bb5[rubyRegionId=1, firstDead=12](<self>: T.class_of(NotAnEnum), <block-pre-call
     <cfgAlias>$14: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$12: T.attached_class (of NotAnEnum) = <cfgAlias>$14: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
     <C X>$9: T.attached_class (of NotAnEnum) = <cfgAlias>$11: T.class_of(<Magic>).<suggest-constant-type>(<statTemp>$12: T.attached_class (of NotAnEnum))
-    <cfgAlias>$19: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <statTemp>$17: Sorbet::Private::Static::Void = <cfgAlias>$19: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<self>: T.class_of(NotAnEnum))
-    <cfgAlias>$23: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$21: T.attached_class (of NotAnEnum) = <cfgAlias>$23: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
-    <C Y>$16: NotAnEnum = cast(<castTemp>$21: T.attached_class (of NotAnEnum), NotAnEnum);
+    keep_for_ide$17: T.class_of(NotAnEnum) = <self>
+    keep_for_ide$17: T.untyped = <keep-alive> keep_for_ide$17
+    <cfgAlias>$20: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$18: T.attached_class (of NotAnEnum) = <cfgAlias>$20: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
+    <C Y>$16: NotAnEnum = cast(<castTemp>$18: T.attached_class (of NotAnEnum), NotAnEnum);
     <blockReturnTemp>$7: NotAnEnum = <C Y>$16
-    <blockReturnTemp>$25: T.noreturn = blockreturn<enums> <blockReturnTemp>$7: NotAnEnum
+    <blockReturnTemp>$22: T.noreturn = blockreturn<enums> <blockReturnTemp>$7: NotAnEnum
     <unconditional> -> bb2
 
 }
@@ -227,8 +227,8 @@ method ::<Class:EnumsDoEnum>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <C X>$30: EnumsDoEnum::X = alias <C X>
-    <C Y>$52: EnumsDoEnum::Y = alias <C Y>
-    <C Z>$75: EnumsDoEnum::Z = alias <C Z>
+    <C Y>$49: EnumsDoEnum::Y = alias <C Y>
+    <C Z>$69: EnumsDoEnum::Z = alias <C Z>
     <self>: T.class_of(EnumsDoEnum) = cast(<self>: NilClass, T.class_of(EnumsDoEnum));
     <cfgAlias>$6: T.class_of(T::Helpers) = alias <C Helpers>
     <statTemp>$3: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).extend(<cfgAlias>$6: T.class_of(T::Helpers))
@@ -246,7 +246,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$52: EnumsDoEnum::Y, <C Z>$75: EnumsDoEnum::Z):
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$49: EnumsDoEnum::Y, <C Z>$69: EnumsDoEnum::Z):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
@@ -259,7 +259,7 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$13: Sorbet::Private::Stat
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$52: EnumsDoEnum::Y, <C Z>$75: EnumsDoEnum::Z):
+bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$49: EnumsDoEnum::Y, <C Z>$69: EnumsDoEnum::Z):
     # outerLoops: 1
     <self>: T.class_of(EnumsDoEnum) = loadSelf(enums)
     <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
@@ -268,39 +268,39 @@ bb5[rubyRegionId=1, firstDead=40](<self>: T.class_of(EnumsDoEnum), <block-pre-ca
     <cfgAlias>$26: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$28: T.class_of(EnumsDoEnum) = alias <C EnumsDoEnum>
     <statTemp>$24: Sorbet::Private::Static::Void = <cfgAlias>$26: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$28: T.class_of(EnumsDoEnum))
-    <cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$32: T.class_of(EnumsDoEnum::X) = alias <C X$1>
+    keep_for_ide$31: T.class_of(EnumsDoEnum::X) = <cfgAlias>$32
+    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
     <cfgAlias>$35: T.class_of(EnumsDoEnum::X) = alias <C X$1>
-    <statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$35: T.class_of(EnumsDoEnum::X))
-    <cfgAlias>$38: T.class_of(EnumsDoEnum::X) = alias <C X$1>
-    <castTemp>$36: EnumsDoEnum::X = <cfgAlias>$38: T.class_of(EnumsDoEnum::X).new()
-    <C X>$30: EnumsDoEnum::X = <castTemp>$36
-    <cfgAlias>$43: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$45: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
-    <statTemp>$41: Sorbet::Private::Static::Void = <cfgAlias>$43: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$45: T.class_of(EnumsDoEnum::Y))
-    <cfgAlias>$48: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$50: T.class_of(EnumsDoEnum) = alias <C EnumsDoEnum>
-    <statTemp>$46: Sorbet::Private::Static::Void = <cfgAlias>$48: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$50: T.class_of(EnumsDoEnum))
-    <cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$57: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
-    <statTemp>$53: Sorbet::Private::Static::Void = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$57: T.class_of(EnumsDoEnum::Y))
-    <cfgAlias>$60: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
-    <statTemp>$61: String("y") = "y"
-    <castTemp>$58: EnumsDoEnum::Y = <cfgAlias>$60: T.class_of(EnumsDoEnum::Y).new(<statTemp>$61: String("y"))
-    <C Y>$52: EnumsDoEnum::Y = <castTemp>$58
-    <cfgAlias>$66: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$68: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
-    <statTemp>$64: Sorbet::Private::Static::Void = <cfgAlias>$66: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$68: T.class_of(EnumsDoEnum::Z))
-    <cfgAlias>$71: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$73: T.class_of(EnumsDoEnum) = alias <C EnumsDoEnum>
-    <statTemp>$69: Sorbet::Private::Static::Void = <cfgAlias>$71: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$73: T.class_of(EnumsDoEnum))
-    <cfgAlias>$78: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$80: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
-    <statTemp>$76: Sorbet::Private::Static::Void = <cfgAlias>$78: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$80: T.class_of(EnumsDoEnum::Z))
-    <cfgAlias>$83: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
-    <castTemp>$81: EnumsDoEnum::Z = <cfgAlias>$83: T.class_of(EnumsDoEnum::Z).new()
-    <C Z>$75: EnumsDoEnum::Z = <castTemp>$81
+    <castTemp>$33: EnumsDoEnum::X = <cfgAlias>$35: T.class_of(EnumsDoEnum::X).new()
+    <C X>$30: EnumsDoEnum::X = <castTemp>$33
+    <cfgAlias>$40: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$42: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
+    <statTemp>$38: Sorbet::Private::Static::Void = <cfgAlias>$40: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$42: T.class_of(EnumsDoEnum::Y))
+    <cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$47: T.class_of(EnumsDoEnum) = alias <C EnumsDoEnum>
+    <statTemp>$43: Sorbet::Private::Static::Void = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$47: T.class_of(EnumsDoEnum))
+    <cfgAlias>$51: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
+    keep_for_ide$50: T.class_of(EnumsDoEnum::Y) = <cfgAlias>$51
+    keep_for_ide$50: T.untyped = <keep-alive> keep_for_ide$50
+    <cfgAlias>$54: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
+    <statTemp>$55: String("y") = "y"
+    <castTemp>$52: EnumsDoEnum::Y = <cfgAlias>$54: T.class_of(EnumsDoEnum::Y).new(<statTemp>$55: String("y"))
+    <C Y>$49: EnumsDoEnum::Y = <castTemp>$52
+    <cfgAlias>$60: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$62: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
+    <statTemp>$58: Sorbet::Private::Static::Void = <cfgAlias>$60: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$62: T.class_of(EnumsDoEnum::Z))
+    <cfgAlias>$65: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$67: T.class_of(EnumsDoEnum) = alias <C EnumsDoEnum>
+    <statTemp>$63: Sorbet::Private::Static::Void = <cfgAlias>$65: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$67: T.class_of(EnumsDoEnum))
+    <cfgAlias>$71: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
+    keep_for_ide$70: T.class_of(EnumsDoEnum::Z) = <cfgAlias>$71
+    keep_for_ide$70: T.untyped = <keep-alive> keep_for_ide$70
+    <cfgAlias>$74: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
+    <castTemp>$72: EnumsDoEnum::Z = <cfgAlias>$74: T.class_of(EnumsDoEnum::Z).new()
+    <C Z>$69: EnumsDoEnum::Z = <castTemp>$72
     <blockReturnTemp>$16: NilClass = nil
-    <blockReturnTemp>$84: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
+    <blockReturnTemp>$75: T.noreturn = blockreturn<enums> <blockReturnTemp>$16: NilClass
     <unconditional> -> bb2
 
 }
@@ -351,12 +351,12 @@ method ::<Class:BadConsts>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <C Before>$24: BadConsts::Before = alias <C Before>
-    <C StaticField1>$34: Integer = alias <C StaticField1>
-    <C Inside>$54: BadConsts::Inside = alias <C Inside>
-    <C StaticField2>$64: Integer = alias <C StaticField2>
-    <C After>$79: BadConsts::After = alias <C After>
-    <C StaticField3>$89: Integer = alias <C StaticField3>
-    <C StaticField4>$91: Integer = alias <C StaticField4>
+    <C StaticField1>$31: Integer = alias <C StaticField1>
+    <C Inside>$51: BadConsts::Inside = alias <C Inside>
+    <C StaticField2>$58: Integer = alias <C StaticField2>
+    <C After>$73: BadConsts::After = alias <C After>
+    <C StaticField3>$80: Integer = alias <C StaticField3>
+    <C StaticField4>$82: Integer = alias <C StaticField4>
     <self>: T.class_of(BadConsts) = cast(<self>: NilClass, T.class_of(BadConsts));
     <cfgAlias>$6: T.class_of(T::Helpers) = alias <C Helpers>
     <statTemp>$3: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).extend(<cfgAlias>$6: T.class_of(T::Helpers))
@@ -368,15 +368,15 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$20: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$22: T.class_of(BadConsts) = alias <C BadConsts>
     <statTemp>$18: Sorbet::Private::Static::Void = <cfgAlias>$20: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$22: T.class_of(BadConsts))
-    <cfgAlias>$27: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$26: T.class_of(BadConsts::Before) = alias <C Before$1>
+    keep_for_ide$25: T.class_of(BadConsts::Before) = <cfgAlias>$26
+    keep_for_ide$25: T.untyped = <keep-alive> keep_for_ide$25
     <cfgAlias>$29: T.class_of(BadConsts::Before) = alias <C Before$1>
-    <statTemp>$25: Sorbet::Private::Static::Void = <cfgAlias>$27: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$29: T.class_of(BadConsts::Before))
-    <cfgAlias>$32: T.class_of(BadConsts::Before) = alias <C Before$1>
-    <castTemp>$30: BadConsts::Before = <cfgAlias>$32: T.class_of(BadConsts::Before).new()
-    <C Before>$24: BadConsts::Before = <castTemp>$30
-    <C StaticField1>$34: Integer(1) = 1
-    <block-pre-call-temp>$37: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).enums()
-    <selfRestore>$38: T.class_of(BadConsts) = <self>
+    <castTemp>$27: BadConsts::Before = <cfgAlias>$29: T.class_of(BadConsts::Before).new()
+    <C Before>$24: BadConsts::Before = <castTemp>$27
+    <C StaticField1>$31: Integer(1) = 1
+    <block-pre-call-temp>$34: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).enums()
+    <selfRestore>$35: T.class_of(BadConsts) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -387,55 +387,55 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$37: Sorbet::Private::Static::Void, <selfRestore>$38: T.class_of(BadConsts), <C Inside>$54: BadConsts::Inside, <C StaticField2>$64: Integer, <C After>$79: BadConsts::After, <C StaticField3>$89: Integer, <C StaticField4>$91: Integer):
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$34: Sorbet::Private::Static::Void, <selfRestore>$35: T.class_of(BadConsts), <C Inside>$51: BadConsts::Inside, <C StaticField2>$58: Integer, <C After>$73: BadConsts::After, <C StaticField3>$80: Integer, <C StaticField4>$82: Integer):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb3[rubyRegionId=0, firstDead=20](<block-pre-call-temp>$37: Sorbet::Private::Static::Void, <selfRestore>$38: T.class_of(BadConsts), <C After>$79: BadConsts::After, <C StaticField3>$89: Integer, <C StaticField4>$91: Integer):
-    <statTemp>$35: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$37, enums>
-    <cfgAlias>$70: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$72: T.class_of(BadConsts::After) = alias <C After$1>
-    <statTemp>$68: Sorbet::Private::Static::Void = <cfgAlias>$70: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$72: T.class_of(BadConsts::After))
-    <cfgAlias>$75: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$77: T.class_of(BadConsts) = alias <C BadConsts>
-    <statTemp>$73: Sorbet::Private::Static::Void = <cfgAlias>$75: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$77: T.class_of(BadConsts))
-    <cfgAlias>$82: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$84: T.class_of(BadConsts::After) = alias <C After$1>
-    <statTemp>$80: Sorbet::Private::Static::Void = <cfgAlias>$82: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$84: T.class_of(BadConsts::After))
-    <cfgAlias>$87: T.class_of(BadConsts::After) = alias <C After$1>
-    <castTemp>$85: BadConsts::After = <cfgAlias>$87: T.class_of(BadConsts::After).new()
-    <C After>$79: BadConsts::After = <castTemp>$85
-    <C StaticField3>$89: Integer(3) = 3
-    <cfgAlias>$94: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$96: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$92: Sorbet::Private::Static::Void = <cfgAlias>$94: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$96: T.class_of(Integer))
-    <castTemp>$97: Integer(1) = 1
-    <C StaticField4>$91: Integer = cast(<castTemp>$97: Integer(1), Integer);
+bb3[rubyRegionId=0, firstDead=20](<block-pre-call-temp>$34: Sorbet::Private::Static::Void, <selfRestore>$35: T.class_of(BadConsts), <C After>$73: BadConsts::After, <C StaticField3>$80: Integer, <C StaticField4>$82: Integer):
+    <statTemp>$32: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$34, enums>
+    <cfgAlias>$64: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$66: T.class_of(BadConsts::After) = alias <C After$1>
+    <statTemp>$62: Sorbet::Private::Static::Void = <cfgAlias>$64: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$66: T.class_of(BadConsts::After))
+    <cfgAlias>$69: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$71: T.class_of(BadConsts) = alias <C BadConsts>
+    <statTemp>$67: Sorbet::Private::Static::Void = <cfgAlias>$69: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$71: T.class_of(BadConsts))
+    <cfgAlias>$75: T.class_of(BadConsts::After) = alias <C After$1>
+    keep_for_ide$74: T.class_of(BadConsts::After) = <cfgAlias>$75
+    keep_for_ide$74: T.untyped = <keep-alive> keep_for_ide$74
+    <cfgAlias>$78: T.class_of(BadConsts::After) = alias <C After$1>
+    <castTemp>$76: BadConsts::After = <cfgAlias>$78: T.class_of(BadConsts::After).new()
+    <C After>$73: BadConsts::After = <castTemp>$76
+    <C StaticField3>$80: Integer(3) = 3
+    <cfgAlias>$84: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$83: T.class_of(Integer) = <cfgAlias>$84
+    keep_for_ide$83: T.untyped = <keep-alive> keep_for_ide$83
+    <castTemp>$85: Integer(1) = 1
+    <C StaticField4>$82: Integer = cast(<castTemp>$85: Integer(1), Integer);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=16](<self>: T.class_of(BadConsts), <block-pre-call-temp>$37: Sorbet::Private::Static::Void, <selfRestore>$38: T.class_of(BadConsts), <C Inside>$54: BadConsts::Inside, <C StaticField2>$64: Integer, <C After>$79: BadConsts::After, <C StaticField3>$89: Integer, <C StaticField4>$91: Integer):
+bb5[rubyRegionId=1, firstDead=16](<self>: T.class_of(BadConsts), <block-pre-call-temp>$34: Sorbet::Private::Static::Void, <selfRestore>$35: T.class_of(BadConsts), <C Inside>$51: BadConsts::Inside, <C StaticField2>$58: Integer, <C After>$73: BadConsts::After, <C StaticField3>$80: Integer, <C StaticField4>$82: Integer):
     # outerLoops: 1
     <self>: T.class_of(BadConsts) = loadSelf(enums)
-    <cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$47: T.class_of(BadConsts::Inside) = alias <C Inside$1>
-    <statTemp>$43: Sorbet::Private::Static::Void = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$47: T.class_of(BadConsts::Inside))
-    <cfgAlias>$50: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$52: T.class_of(BadConsts) = alias <C BadConsts>
-    <statTemp>$48: Sorbet::Private::Static::Void = <cfgAlias>$50: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$52: T.class_of(BadConsts))
-    <cfgAlias>$57: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$59: T.class_of(BadConsts::Inside) = alias <C Inside$1>
-    <statTemp>$55: Sorbet::Private::Static::Void = <cfgAlias>$57: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$59: T.class_of(BadConsts::Inside))
-    <cfgAlias>$62: T.class_of(BadConsts::Inside) = alias <C Inside$1>
-    <castTemp>$60: BadConsts::Inside = <cfgAlias>$62: T.class_of(BadConsts::Inside).new()
-    <C Inside>$54: BadConsts::Inside = <castTemp>$60
-    <C StaticField2>$64: Integer(2) = 2
-    <blockReturnTemp>$40: NilClass = nil
-    <blockReturnTemp>$65: T.noreturn = blockreturn<enums> <blockReturnTemp>$40: NilClass
+    <cfgAlias>$42: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$44: T.class_of(BadConsts::Inside) = alias <C Inside$1>
+    <statTemp>$40: Sorbet::Private::Static::Void = <cfgAlias>$42: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$44: T.class_of(BadConsts::Inside))
+    <cfgAlias>$47: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$49: T.class_of(BadConsts) = alias <C BadConsts>
+    <statTemp>$45: Sorbet::Private::Static::Void = <cfgAlias>$47: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$49: T.class_of(BadConsts))
+    <cfgAlias>$53: T.class_of(BadConsts::Inside) = alias <C Inside$1>
+    keep_for_ide$52: T.class_of(BadConsts::Inside) = <cfgAlias>$53
+    keep_for_ide$52: T.untyped = <keep-alive> keep_for_ide$52
+    <cfgAlias>$56: T.class_of(BadConsts::Inside) = alias <C Inside$1>
+    <castTemp>$54: BadConsts::Inside = <cfgAlias>$56: T.class_of(BadConsts::Inside).new()
+    <C Inside>$51: BadConsts::Inside = <castTemp>$54
+    <C StaticField2>$58: Integer(2) = 2
+    <blockReturnTemp>$37: NilClass = nil
+    <blockReturnTemp>$59: T.noreturn = blockreturn<enums> <blockReturnTemp>$37: NilClass
     <unconditional> -> bb2
 
 }

@@ -182,50 +182,34 @@ InsSeq{
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = InsSeq{
-            stats = [
-              Send{
+          rhs = Cast{
+              cast = <U cast>,
+              arg = Literal{ value = nil }
+              type = T.nilable(Integer),
+              typeExpr = Send{
                 flags = {}
                 recv = ConstantLit{
-                  symbol = (module ::Sorbet::Private::Static)
-                  orig = nullptr
+                  symbol = (module ::T)
+                  orig = UnresolvedConstantLit{
+                    cnst = <C <U T>>
+                    scope = EmptyTree
+                  }
                 }
-                fun = <U keep_for_typechecking>
+                fun = <U nilable>
                 block = nullptr
                 pos_args = 1
                 args = [
-                  Send{
-                    flags = {}
-                    recv = ConstantLit{
-                      symbol = (module ::T)
-                      orig = UnresolvedConstantLit{
-                        cnst = <C <U T>>
-                        scope = EmptyTree
-                      }
+                  ConstantLit{
+                    symbol = (class ::Integer)
+                    orig = UnresolvedConstantLit{
+                      cnst = <C <U Integer>>
+                      scope = EmptyTree
                     }
-                    fun = <U nilable>
-                    block = nullptr
-                    pos_args = 1
-                    args = [
-                      ConstantLit{
-                        symbol = (class ::Integer)
-                        orig = UnresolvedConstantLit{
-                          cnst = <C <U Integer>>
-                          scope = EmptyTree
-                        }
-                      }
-                    ]
                   }
                 ]
-              }
-            ],
-            expr = Cast{
-                cast = <U cast>,
-                arg = Literal{ value = nil }
-                type = Integer | NilClass,
-            }
-
+              },
           }
+
         }
 
         MethodDef{

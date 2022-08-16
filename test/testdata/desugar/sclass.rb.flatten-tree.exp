@@ -140,10 +140,7 @@ begin
   end
   class <singleton class><<Class:F>> < ()
     def initialize(<blk>)
-      @f = begin
-        ::Sorbet::Private::Static.keep_for_typechecking(::Integer)
-        T.let(0, Integer)
-      end
+      @f = <cast:let>(0, Integer, ::Integer)
     end
 
     def f=(f, <blk>)
