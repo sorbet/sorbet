@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       s = <emptyTree>::<C SomeClass>.new()
       wrap = ::T.let(s, <emptyTree>::<C Interface>)
-      <emptyTree>::<C T>.assert_type!(wrap, <emptyTree>::<C Interface>)
+      <cast:assert_type!>(wrap, <todo sym>, <emptyTree>::<C Interface>)
       wrap.other_method()
       wrap.some_method()
       <emptyTree>::<C Other>.wrap_instance("hi", "there")

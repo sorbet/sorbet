@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.static_method>
 
-    @hello = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    @hello = <cast:let>(nil, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
   end
 end
 # -- test/testdata/packager/invalid_package_control_flow/package_spec_additions.rb --

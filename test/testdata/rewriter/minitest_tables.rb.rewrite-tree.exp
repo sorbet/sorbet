@@ -430,7 +430,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of <it 'succeeds with a constant list'>>
     end
 
-    <emptyTree>::<C ANOTHER_CONST_LIST> = <emptyTree>::<C T>.let([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()], <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Parent>))
+    <emptyTree>::<C ANOTHER_CONST_LIST> = <cast:let>([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()], <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Parent>))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST>) do |value|
       <runtime method definition of <it 'succeeds with a typed constant list'>>
@@ -492,7 +492,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of <it 'succeeds with a constant list of tuples and destructuring'>>
     end
 
-    <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE> = <emptyTree>::<C T>.let([[1, "a"], [2, "b"]], <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C Integer>, <emptyTree>::<C String>]))
+    <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE> = <cast:let>([[1, "a"], [2, "b"]], <todo sym>, <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C Integer>, <emptyTree>::<C String>]))
 
     <self>.test_each(<emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>) do |i, s|
       <runtime method definition of <it 'succeeds with a typed constant tuple list'>>

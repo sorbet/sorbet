@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize<<todo method>>(&<blk>)
       begin
-        @a = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+        @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
         <self>.foo()
       end
     end
@@ -181,7 +181,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<todo method>>(&<blk>)
-      @a = <emptyTree>::<C T>.let(1, <emptyTree>::<C Integer>)
+      @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
