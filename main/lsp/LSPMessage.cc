@@ -212,15 +212,8 @@ LSPMethod LSPMessage::method() const {
 }
 
 string LSPMessage::toJSON(bool prettyPrint) const {
-    if (isRequest()) {
-        return asRequest().toJSON(prettyPrint);
-    } else if (isNotification()) {
-        return asNotification().toJSON(prettyPrint);
-    } else if (isResponse()) {
-        return asResponse().toJSON(prettyPrint);
-    } else {
-        Exception::raise("LSPMessage is not a request, notification, or a response.");
-    }
+    auto buffer = this->toJSONBuffer(prettyPrint);
+    return string(buffer.GetString(), buffer.GetLength());
 }
 
 rapidjson::StringBuffer LSPMessage::toJSONBuffer(bool prettyPrint) const {
