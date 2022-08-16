@@ -167,7 +167,7 @@ class LLVMSemanticExtension : public SemanticExtension {
                         refsToDelete.emplace(arg.variable);
                     }
                     refsToDelete.emplace(send->recv.variable);
-                } else if (auto *read = cfg::cast_instruction<cfg::VolatileRead>(binding.value)) {
+                } else if (auto *read = cfg::cast_instruction<cfg::KeepAlive>(binding.value)) {
                     refsToDelete.emplace(read->what);
                 }
             }

@@ -885,7 +885,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
                 current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
                 // Ensure later passes don't delete the results of the typeExpr.
-                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<VolatileRead>(deadSym));
+                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 core::LocOffsets argLoc = c.arg.loc();
                 current = walk(cctx.withTarget(tmp), c.arg, current);
