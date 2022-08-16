@@ -1,6 +1,7 @@
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
 
 clang_tool("llvm-diff")  # depended on by compiler_tests
+
 clang_tool("llvm-symbolizer")
 
 cc_binary(
