@@ -370,8 +370,8 @@ public:
     }
 
     static ExpressionPtr SyntheticBind(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
-                                               core::Names::syntheticBind(), std::move(type));
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::syntheticBind(),
+                                               std::move(type));
     }
 
     static ExpressionPtr ClassOf(core::LocOffsets loc, ExpressionPtr value) {
@@ -379,13 +379,13 @@ public:
     }
 
     static ExpressionPtr Let(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
-                                               core::Names::let(), std::move(type));
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::let(),
+                                               std::move(type));
     }
 
     static ExpressionPtr AssertType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
-                                               core::Names::assertType(), std::move(type));
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::assertType(),
+                                               std::move(type));
     }
 
     static ExpressionPtr Unsafe(core::LocOffsets loc, ExpressionPtr inner) {

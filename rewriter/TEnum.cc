@@ -146,10 +146,10 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     flags.isPrivateOk = true;
     auto singletonAsgn =
         ast::MK::Assign(stat.loc(), std::move(asgn->lhs),
-                        ast::make_expression<ast::Cast>(stat.loc(), core::Types::todo(),
-                                                        magicSelfNew->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()),
-                                                        core::Names::uncheckedLet(),
-                                                        std::move(classCnst)));
+                        ast::make_expression<ast::Cast>(
+                            stat.loc(), core::Types::todo(),
+                            magicSelfNew->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()),
+                            core::Names::uncheckedLet(), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));
