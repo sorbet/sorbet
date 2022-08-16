@@ -41,8 +41,7 @@ ast::ExpressionPtr TypeAssertion::run(core::MutableContext ctx, ast::Send *send)
     auto typeExpr = std::move(send->getPosArg(1));
 
     return ast::make_expression<ast::Cast>(send->loc, core::Types::todo(), std::move(expr), send->fun,
-                                          std::move(typeExpr));
+                                           std::move(typeExpr));
 }
 
 } // namespace sorbet::rewriter
-
