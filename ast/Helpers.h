@@ -369,9 +369,9 @@ public:
         return Constant(loc, core::Symbols::T());
     }
 
-    static ExpressionPtr Bind(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+    static ExpressionPtr SyntheticBind(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
-                                               core::Names::bind(), std::move(type));
+                                               core::Names::syntheticBind(), std::move(type));
     }
 
     static ExpressionPtr ClassOf(core::LocOffsets loc, ExpressionPtr value) {

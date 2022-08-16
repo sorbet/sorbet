@@ -12,16 +12,12 @@ namespace sorbet::rewriter {
 
 // Is this expression a synthetic `T.bind` call we added from the `ClassNew` rewriter on sends?
 bool isRewrittenBind(ast::ExpressionPtr &expr) {
-    auto send = ast::cast_tree<ast::Send>(expr);
-    if (send == nullptr) {
+    auto cast = ast::cast_tree<ast::Cast>(expr);
+    if (cast == nullptr) {
         return false;
     }
 
-    if (send->fun != core::Names::bind()) {
-        return false;
-    }
-
-    return send->flags.isRewriterSynthesized;
+    return cast->cast == core::Names::syntheticBind();
 }
 
 vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) {
@@ -135,10 +131,7 @@ bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
         type = ast::MK::ClassOf(send->loc, std::move(target));
     }
 
-    auto bind = ast::MK::Bind(send->loc, ast::MK::Self(send->loc), std::move(type));
-
-    // Mark the bind as synthetic so we can spot it from the `ClassNew` rewriter on assigns and remove it from the tree.
-    ast::cast_tree<ast::Send>(bind)->flags.isRewriterSynthesized = true;
+    auto bind = ast::MK::SyntheticBind(send->loc, ast::MK::Self(send->loc), std::move(type));
 
     ast::InsSeq::STATS_store blockStats;
     blockStats.emplace_back(std::move(bind));
