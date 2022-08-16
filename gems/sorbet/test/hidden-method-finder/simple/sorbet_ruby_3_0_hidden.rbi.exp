@@ -3253,10 +3253,6 @@ class TrueClass
   include ::JSON::Ext::Generator::GeneratorMethods::TrueClass
 end
 
-class UnboundMethod
-  def bind_call_experimental_optimized(*arg); end
-end
-
 module UnicodeNormalize
 end
 
