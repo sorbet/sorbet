@@ -370,7 +370,8 @@ public:
     }
 
     static ExpressionPtr Bind(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return Send2(loc, T(loc), core::Names::bind(), loc, std::move(value), std::move(type));
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
+                                               core::Names::bind(), std::move(type));
     }
 
     static ExpressionPtr ClassOf(core::LocOffsets loc, ExpressionPtr value) {
@@ -378,11 +379,13 @@ public:
     }
 
     static ExpressionPtr Let(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return Send2(loc, T(loc), core::Names::let(), loc, std::move(value), std::move(type));
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
+                                               core::Names::let(), std::move(type));
     }
 
     static ExpressionPtr AssertType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
-        return Send2(loc, T(loc), core::Names::assertType(), loc, std::move(value), std::move(type));
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value),
+                                               core::Names::assertType(), std::move(type));
     }
 
     static ExpressionPtr Unsafe(core::LocOffsets loc, ExpressionPtr inner) {
