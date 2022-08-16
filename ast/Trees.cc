@@ -1107,14 +1107,9 @@ ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::
 
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "T.{}", this->cast.toString(gs));
-    fmt::format_to(std::back_inserter(buf), "({}, ", this->arg.toStringWithTabs(gs, tabs));
-    if (this->type != core::Types::todo()) {
-        fmt::format_to(std::back_inserter(buf), "{}", this->type.toStringWithTabs(gs, tabs));
-    } else {
-        fmt::format_to(std::back_inserter(buf), "{}", this->typeExpr.toStringWithTabs(gs, tabs));
-    }
-    fmt::format_to(std::back_inserter(buf), ")");
+    fmt::format_to(std::back_inserter(buf), "<cast:{}>", this->cast.toString(gs));
+    fmt::format_to(std::back_inserter(buf), "({}, {}, {})", this->arg.toStringWithTabs(gs, tabs),
+                   this->type.toStringWithTabs(gs, tabs), this->typeExpr.toStringWithTabs(gs, tabs));
 
     return fmt::to_string(buf);
 }
