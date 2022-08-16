@@ -109,13 +109,6 @@ requires: []
  is_defining_ref=0
 [ref id=2]
  scope=[FromRBI]
- name=[T]
- nesting=[[FromRBI]]
- resolved=[T]
- loc=test/cli/autogen_print_rbi/b.rbi:4
- is_defining_ref=0
-[ref id=3]
- scope=[FromRBI]
  name=[Integer]
  nesting=[[FromRBI]]
  resolved=[Integer]
@@ -123,9 +116,9 @@ requires: []
  is_defining_ref=0
 
 f3b9f8c31a343a60665c06f959a48dbdceef757c  autogen3.msgpack
-a20ed01b8a7646141440ba39b60b247bd13a4388  autogen4.msgpack
+2305b0d8f2c81fbb946e4f1dbec6230386925456  autogen4.msgpack
 
-39a40,80
+39a40,73
 > # ParsedFile: test/cli/autogen_print_rbi/b.rbi
 > requires: []
 > ## defs:
@@ -154,13 +147,6 @@ a20ed01b8a7646141440ba39b60b247bd13a4388  autogen4.msgpack
 >  loc=test/cli/autogen_print_rbi/b.rbi:4
 >  is_defining_ref=0
 > [ref id=2]
->  scope=[FromRBI]
->  name=[T]
->  nesting=[[FromRBI]]
->  resolved=[T]
->  loc=test/cli/autogen_print_rbi/b.rbi:4
->  is_defining_ref=0
-> [ref id=3]
 >  scope=[FromRBI]
 >  name=[Integer]
 >  nesting=[[FromRBI]]
