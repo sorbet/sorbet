@@ -21,9 +21,9 @@ public:
     ast::ExpressionPtr createConstAssign(ast::Assign &asgn) {
         auto loc = asgn.loc;
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
-        if (auto send = ast::cast_tree<ast::Send>(asgn.rhs)) {
-            if (send->fun == core::Names::let() && send->numPosArgs() == 2) {
-                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), send->getPosArg(1).deepCopy());
+        if (auto cast = ast::cast_tree<ast::Cast>(asgn.rhs)) {
+            if (cast->cast == core::Names::let()) {
+                auto rhs = ast::MK::Let(loc, move(raiseUnimplemented), cast->typeExpr.deepCopy());
                 return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(rhs));
             }
         }
