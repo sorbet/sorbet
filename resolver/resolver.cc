@@ -2803,7 +2803,7 @@ public:
         item.owner = ctx.owner;
         item.cast = ast::cast_tree<ast::Cast>(tree);
         item.inFieldAssign = this->inFieldAssign.back();
-        if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
+        if (!tryResolveSimpleClassCastItem(ctx.state, item)) {
             todoResolveCastItems_.emplace_back(move(item));
         }
     }
