@@ -1,3 +1,9 @@
+load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
+
+clang_tool("llvm-diff")  # depended on by compiler_tests
+
+clang_tool("llvm-symbolizer")
+
 cc_binary(
     name = "pipeline_test_runner",
     testonly = 1,
@@ -278,9 +284,6 @@ test_suite(
 )
 
 load(":compiler_tests.bzl", "compiler_tests")
-load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
-
-clang_tool("llvm-diff")  # depended on by compiler_tests
 
 compiler_tests(
     "compiler",

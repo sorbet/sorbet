@@ -13,7 +13,7 @@ def dropExtension(p):
     return p.partition(".")[0]
 
 _TEST_SCRIPT = """#!/usr/bin/env bash
-set -x
+export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_12_0_0/bin/llvm-symbolizer
 exec {runner} --single_test="{test}"
 """
 
@@ -27,6 +27,7 @@ def _exp_test_impl(ctx):
     )
 
     runfiles = ctx.runfiles(files = ctx.files.runner + ctx.files.test + ctx.files.data)
+    runfiles = runfiles.merge(ctx.attr._llvm_symbolizer[DefaultInfo].default_runfiles)
 
     return [DefaultInfo(runfiles = runfiles)]
 
@@ -44,6 +45,9 @@ exp_test = rule(
             executable = True,
             cfg = "target",
             allow_files = True,
+        ),
+        "_llvm_symbolizer": attr.label(
+            default = "//test:llvm-symbolizer",
         ),
     },
 )
