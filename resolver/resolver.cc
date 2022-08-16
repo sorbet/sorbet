@@ -2840,29 +2840,7 @@ public:
                         return;
                     }
 
-                    ResolveCastItem item;
-                    item.file = ctx.file;
-                    item.owner = ctx.owner;
-                    item.inFieldAssign = this->inFieldAssign.back();
-
-                    auto expr = std::move(send.getPosArg(0));
-                    auto typeExpr = std::move(send.getPosArg(1));
-                    // We only do this for `bind` because `bind` doesn't participate in the same
-                    // sort of pinning decisions that the other casts do. Hiding pinning errors from
-                    // arbitrary synthetic lets and casts would push confusing behavior downstream.
-                    auto fun = (send.fun == core::Names::bind() && send.flags.isRewriterSynthesized)
-                                   ? core::Names::syntheticBind()
-                                   : send.fun;
-                    auto cast = ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), fun,
-                                                                std::move(typeExpr));
-                    item.cast = ast::cast_tree<ast::Cast>(cast);
-
-                    // We should be able to resolve simple casts immediately.
-                    if (!tryResolveSimpleClassCastItem(ctx.state, item)) {
-                        todoResolveCastItems_.emplace_back(move(item));
-                    }
-
-                    tree = std::move(cast);
+                    ENFORCE(false, "should have converted these to cast nodes");
                     return;
                 }
                 case core::Names::revealType().rawId():
