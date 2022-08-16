@@ -36,7 +36,6 @@ ast::ExpressionPtr TypeAssertion::run(core::MutableContext ctx, ast::Send *send)
         return nullptr;
     }
 
-    // FIXME(froydnj): handle bind/syntheticBind
     auto expr = std::move(send->getPosArg(0));
     auto typeExpr = std::move(send->getPosArg(1));
 
