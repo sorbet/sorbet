@@ -506,7 +506,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("rename", makeOptional(RenameCapabilities)),
                        makeField("publishDiagnostics", makeOptional(PublishDiagnosticsCapabilities)),
                        makeField("foldingRange", makeOptional(FoldingRangeCapabilities)),
-                       makeField("inlayHint", makeOptional(InlayHintClientCapabilities)),
+                       makeField("inlayHint", makeOptional(DynamicRegistrationOption)),
                    },
                    classTypes);
 
