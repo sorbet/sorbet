@@ -140,10 +140,6 @@ class UnboundMethod
   sig {params(recv: BasicObject, args: T.untyped, blk: T.untyped).returns(T.untyped)}
   def bind_call(recv, *args, &blk); end
 
-  # for our experimental procc patch
-  sig {params(recv: BasicObject, args: T.untyped, blk: T.untyped).returns(T.untyped)}
-  def bind_call_experimental_optimized(recv, *args, &blk); end
-
   # Returns a clone of this method.
   #
   # ```ruby
