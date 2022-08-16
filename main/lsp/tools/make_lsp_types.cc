@@ -476,12 +476,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                               },
                                               classTypes);
 
-    auto InlayHintClientCapabilities = makeObject("InlayHintClientCapabilities",
-                                                  {
-                                                      makeField("dynamicRegistration", makeOptional(JSONBool)),
-                                                      makeField("resolveSupport", makeOptional(InlayHintResolveSupport)),
-                                                  },
-                                                  classTypes);
+    auto InlayHintClientCapabilities =
+        makeObject("InlayHintClientCapabilities",
+                   {
+                       makeField("dynamicRegistration", makeOptional(JSONBool)),
+                       makeField("resolveSupport", makeOptional(InlayHintResolveSupport)),
+                   },
+                   classTypes);
 
     auto TextDocumentClientCapabilities =
         makeObject("TextDocumentClientCapabilities",
@@ -1285,8 +1286,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                 {
                                     makeField("position", Position),
                                     // TODO(froydnj): also allow InlayHintLabelPart[] here
-                                    makeField("label", JSONString),
-                                    makeField("kind", makeOptional(InlayHintKind)),
+                                    makeField("label", JSONString), makeField("kind", makeOptional(InlayHintKind)),
                                     makeField("textEdits", makeOptional(makeArray(TextEdit))),
                                     makeField("tooltip", makeOptional(makeVariant({JSONString, MarkupContent}))),
                                     makeField("paddingLeft", makeOptional(JSONBool)),

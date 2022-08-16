@@ -57,11 +57,11 @@ core::lsp::Query queryFrom(const Range &, core::Loc loc) {
     return core::lsp::Query::createRangeQuery(loc);
 }
 
-core::lsp::Query queryFrom(const Position&, core::Loc loc) {
+core::lsp::Query queryFrom(const Position &, core::Loc loc) {
     return core::lsp::Query::createLocQuery(loc);
 }
 
-template<typename T>
+template <typename T>
 LSPQueryResult queryByLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, string_view uri,
                           const T &lspPos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQueryByLoc");
@@ -105,7 +105,7 @@ LSPQueryResult queryByLoc(const LSPConfiguration &config, LSPTypecheckerInterfac
 
     return typechecker.query(queryFrom(lspPos, loc.value()), {fref});
 }
-}
+} // namespace
 
 LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
                                std::string_view uri, const Position &pos, LSPMethod forMethod,

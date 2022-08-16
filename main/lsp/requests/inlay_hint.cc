@@ -10,8 +10,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-InlayHintTask::InlayHintTask(const LSPConfiguration &config, MessageId id,
-                             std::unique_ptr<InlayHintParams> params)
+InlayHintTask::InlayHintTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<InlayHintParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentInlayHint), params(move(params)) {}
 
 bool InlayHintTask::isDelayable() const {
@@ -29,8 +28,7 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerInterface &t
 
     const core::GlobalState &gs = typechecker.state();
     auto &uri = params->textDocument->uri;
-    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->range,
-                                  LSPMethod::TextDocumentInlayHint);
+    auto result = LSPQuery::byLoc(config, typechecker, uri, *params->range, LSPMethod::TextDocumentInlayHint);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -69,4 +67,4 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerInterface &t
     response->result = move(hints);
     return response;
 }
-}
+} // namespace sorbet::realmain::lsp
