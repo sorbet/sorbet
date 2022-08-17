@@ -1,0 +1,20 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/resolver/field_nonexistent_type.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/resolver/field_nonexistent_type.rb start=??? end=???}
+  class ::A < ::Object () @ test/testdata/resolver/field_nonexistent_type.rb:3
+    static-field ::A::@@bar -> A::Bar (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:8
+    static-field ::A::@@baz -> A::Baz1 (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:11
+    static-field ::A::@@biz -> T.untyped @ test/testdata/resolver/field_nonexistent_type.rb:15
+    static-field ::A::@@foo -> A::Foo (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:6
+    field ::A#@bar -> A::Bar (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:22
+    field ::A#@baz -> A::Baz1 (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:25
+    field ::A#@biz -> T.untyped @ test/testdata/resolver/field_nonexistent_type.rb:29
+    field ::A#@foo -> A::Foo (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:20
+    method ::A#initialize (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/field_nonexistent_type.rb:19
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/field_nonexistent_type.rb start=??? end=???}
+  class ::<Class:A>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/resolver/field_nonexistent_type.rb:3
+    type-member(+) ::<Class:A>::<AttachedClass> -> T.attached_class (of A) @ test/testdata/resolver/field_nonexistent_type.rb:3
+    method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/field_nonexistent_type.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/resolver/field_nonexistent_type.rb start=??? end=???}
+
