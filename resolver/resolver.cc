@@ -3699,11 +3699,6 @@ private:
                     handleAbstractMethod(ctx, mdef);
                 }
             },
-            [&](const ast::ClassDef &cdef) {
-                // Leave in place
-            },
-
-            [&](const ast::EmptyTree &e) { stat.reset(nullptr); },
 
             [&](const ast::ExpressionPtr &e) {});
     }
