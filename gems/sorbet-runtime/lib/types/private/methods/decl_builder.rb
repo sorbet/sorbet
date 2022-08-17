@@ -19,7 +19,7 @@ module T::Private::Methods
 
   class DeclBuilder
     # The signature declaration the builder is composing (class `Declaration`)
-    attr_reader :decl
+    attr_accessor :decl
 
     class BuilderError < StandardError; end
 
