@@ -9,6 +9,6 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/unresolved_via_alias.rb start=??? end=???}
   static-field ::AliasToA -> <Alias: ::A > @ test/testdata/resolver/unresolved_via_alias.rb:6
   class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#LCENSORED
-    method ::Object#example : private (<blk>) -> A::B (unresolved) @ test/testdata/resolver/unresolved_via_alias.rb:9
+    method ::Object#example : private (<blk>) -> AliasToA::B (unresolved) @ test/testdata/resolver/unresolved_via_alias.rb:9
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/unresolved_via_alias.rb start=??? end=???}
 
