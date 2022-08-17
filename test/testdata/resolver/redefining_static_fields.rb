@@ -9,6 +9,6 @@ Alias = Integer
 Alias = String
 
 BadAlias = 1 + 1
-#          ^^^^^ error: Expected `T.class_of(Sorbet::Private::Static::StubModule)` but found `Integer` for field
+
 BadAlias = DoesNotExist
 #          ^^^^^^^^^^^^ error: Unable to resolve constant `DoesNotExist`
