@@ -4,6 +4,18 @@ about: This is for minimal, reproducible bug reports.
 labels: bug, unconfirmed
 ---
 
+<!--
+
+To make filling out this form faster:
+
+1. Create a program showing the bug on https://sorbet.run
+2. Find the "Examples ..." button in the top right
+3. Click "Create issue with example" in the dropdown menu
+
+This will pre-populate most of the form below.
+
+-->
+
 #### Input
 
 [→ View on sorbet.run](TODO_replace_this_with_your_sorbet_run_link)

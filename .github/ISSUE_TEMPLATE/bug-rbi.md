@@ -16,6 +16,14 @@ https://sorbet.org/docs/faq#it-looks-like-sorbet-s-types-for-the-stdlib-are-wron
 Feel free to open an issue! But the issue will likely get fixed faster if you
 change the RBI files yourself.
 
+To make filling out this form faster:
+
+1. Create a program showing the bug on https://sorbet.run
+2. Find the "Examples ..." button in the top right
+3. Click "Create issue with example" in the dropdown menu
+
+This will pre-populate most of the form below.
+
 -->
 
 

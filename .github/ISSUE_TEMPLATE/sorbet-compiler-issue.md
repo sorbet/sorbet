@@ -10,6 +10,14 @@ The Sorbet Compiler is largely a Stripe-internal experiment as of now. The
 Sorbet team makes no promises about whether or when we will respond to reported
 issues in the Sorbet Compiler.
 
+To make filling out this form faster:
+
+1. Create a program showing the bug on https://sorbet.run
+2. Find the "Examples ..." button in the top right
+3. Click "Create issue with example" in the dropdown menu
+
+This will pre-populate most of the form below.
+
 -->
 
 #### Input
