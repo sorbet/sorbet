@@ -228,12 +228,12 @@ class FoundDefinitions final {
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
-            case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::StaticField:
             case FoundDefinitionRef::Kind::TypeMember:
-            case FoundDefinitionRef::Kind::Field:
                 break;
+            case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::Method:
+            case FoundDefinitionRef::Kind::Field:
             case FoundDefinitionRef::Kind::ClassRef:
             case FoundDefinitionRef::Kind::Empty:
             case FoundDefinitionRef::Kind::Symbol:
@@ -252,7 +252,7 @@ public:
     FoundDefinitionRef addClass(FoundClass &&klass) {
         const uint32_t idx = _klasses.size();
         _klasses.emplace_back(std::move(klass));
-        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx));
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx);
     }
 
     FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
