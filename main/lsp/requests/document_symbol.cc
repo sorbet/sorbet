@@ -304,7 +304,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterfa
     core::Context ctx{gs, core::Symbols::root(), fref};
     auto resolved = typechecker.getResolved({fref});
     for (auto &f : resolved) {
-        ast::TreeWalk::apply(ctx, saver, f.tree);
+        ast::ShallowWalk::apply(ctx, saver, f.tree);
     }
 
     for (auto ref : candidates) {
