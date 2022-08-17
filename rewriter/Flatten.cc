@@ -341,7 +341,7 @@ public:
         // if we get a MethodData back, then we need to move this and replace it with an EmptyTree
         if (auto md = methods.popScope()) {
             methods.addExpr(*md, move(tree));
-            tree = ast::MK::EmptyTree();
+            tree = ast::MK::Nil(send.loc);
             return;
         }
     }

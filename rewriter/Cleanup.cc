@@ -17,9 +17,18 @@ struct CleanupWalk {
 
         ast::InsSeq::STATS_store newStore;
         for (auto &m : insSeq.stats) {
-            if (!ast::isa_tree<ast::EmptyTree>(m)) {
-                newStore.emplace_back(move(m));
+            if (ast::isa_tree<ast::EmptyTree>(m)) {
+                continue;
             }
+
+            if (ast::isa_tree<ast::Literal>(m)) {
+                auto lit = ast::cast_tree_nonnull<ast::Literal>(m);
+                if (lit.isNil(ctx)) {
+                    continue;
+                }
+            }
+
+            newStore.emplace_back(move(m));
         }
         if (newStore.empty()) {
             tree = move(insSeq.expr);
@@ -33,9 +42,18 @@ struct CleanupWalk {
 
         ast::ClassDef::RHS_store newStore;
         for (auto &m : classDef.rhs) {
-            if (!ast::isa_tree<ast::EmptyTree>(m)) {
-                newStore.emplace_back(move(m));
+            if (ast::isa_tree<ast::EmptyTree>(m)) {
+                continue;
             }
+
+            if (ast::isa_tree<ast::Literal>(m)) {
+                auto lit = ast::cast_tree_nonnull<ast::Literal>(m);
+                if (lit.isNil(ctx)) {
+                    continue;
+                }
+            }
+
+            newStore.emplace_back(move(m));
         }
         classDef.rhs = std::move(newStore);
     }
