@@ -1,0 +1,7 @@
+# typed: true
+# exclude-from-file-update: true
+
+# Note that this file does not mention the type_alias that changes at all
+
+x = AliasContainerChild.new.example
+T.reveal_type(x) # error: `T.any(Float, Integer)`

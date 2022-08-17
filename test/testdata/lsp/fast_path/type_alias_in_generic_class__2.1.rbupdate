@@ -1,0 +1,7 @@
+# typed: true
+# exclude-from-file-update: true
+
+class Box
+  extend T::Generic
+  Elem = type_member
+end

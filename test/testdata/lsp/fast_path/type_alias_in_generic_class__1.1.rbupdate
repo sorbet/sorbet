@@ -1,0 +1,5 @@
+# typed: true
+
+class Box
+  MyInteger = T.type_alias {String} # error: Type aliases are not allowed in generic classes
+end

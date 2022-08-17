@@ -1,0 +1,16 @@
+# typed: true
+# assert-fast-path: static_field_type_alias__1.rb,static_field_type_alias__2.rb,static_field_type_alias__3.rb
+
+class AliasContainer
+  extend T::Sig
+
+  ContainedThing = T.type_alias {T.any(Float, Integer)}
+
+  sig {params(x: ContainedThing).returns(ContainedThing)}
+  def example(x=0.0)
+    T.reveal_type(x) # error: `T.any(Float, Integer)`
+  end
+end
+
+class AliasContainerChild < AliasContainer
+end
