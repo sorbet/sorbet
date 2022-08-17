@@ -865,8 +865,8 @@ class SymbolDefiner {
             // When modifyMethod is called later, it won't be able to find the correct method entry.
             // Let's leave the method visibility what it was.
             // TODO(jez) After #5808 lands, can we delete this check?
-            // TODO(jez) The change to only populate oldFoundMethodHashesForFiles means that no, we
-            // actually can't remove this quite yet.
+            // TODO(jez) The change to only populate oldFoundMethodHashesForFiles if something
+            // actually changed means that no, we actually can't remove this quite yet.
             return symbol;
         }
 
@@ -1056,7 +1056,6 @@ class SymbolDefiner {
                                    staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
-        auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
             emitRedefinedConstantError(ctx, ctx.locAt(staticField.asgnLoc), staticField.name.show(ctx),
                                        currSym.loc(ctx));
@@ -1070,6 +1069,7 @@ class SymbolDefiner {
                                            renamedSym.loc(ctx));
             }
         }
+        auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
 
         if (staticField.isTypeAlias) {
@@ -1180,7 +1180,7 @@ class SymbolDefiner {
         return sym;
     }
 
-    void defineNonMethodSingle(core::MutableContext ctx, core::FoundDefinitionRef ref) {
+    void defineNonDeletableSingle(core::MutableContext ctx, core::FoundDefinitionRef ref) {
         switch (ref.kind()) {
             case core::FoundDefinitionRef::Kind::Class: {
                 const auto &klass = ref.klass(foundDefs);
@@ -1260,14 +1260,14 @@ public:
         definedClasses.reserve(foundDefs.klasses().size());
         definedMethods.reserve(foundDefs.methods().size());
 
-        for (auto ref : foundDefs.nonMethodDefinitions()) {
-            defineNonMethodSingle(ctx, ref);
+        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+            defineNonDeletableSingle(ctx, ref);
         }
 
         // This currently interleaves deleting and defining across files.
         // It's possible that this causes problems at some point? Though I haven't found a test case.
         // That being said, if it does cause problems, we should be able to not interleave, and have
-        // all the `nonMethodDefinitions` from all files get defined, then delete all the old
+        // all the `nonDeletableDefinitions` from all files get defined, then delete all the old
         // methods, then define all the methods.
         if (oldFoundMethodHashes.has_value()) {
             for (const auto &oldMethodHash : oldFoundMethodHashes.value()) {
