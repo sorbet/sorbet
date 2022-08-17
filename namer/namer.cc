@@ -555,16 +555,16 @@ class SymbolDefiner {
     }
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, std::string constantName,
-                                    core::Loc prevDefinitionLoc) {
+                                    core::SymbolRef prevSymbol) {
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ModuleKindRedefinition)) {
             e.setHeader("Redefining constant `{}`", constantName);
-            e.addErrorLine(prevDefinitionLoc, "Previous definition");
+            e.addErrorLine(prevSymbol.loc(ctx), "Previous definition");
         }
     }
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::SymbolRef symbol,
-                                    core::SymbolRef renamedSymbol) {
-        emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), renamedSymbol.loc(ctx));
+                                    core::SymbolRef prevSymbol) {
+        emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), prevSymbol);
     }
 
     core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
@@ -942,7 +942,7 @@ class SymbolDefiner {
                 return klassSymbol;
             }
 
-            emitRedefinedConstantError(ctx, klass.loc, symbol.show(ctx), symbol.loc(ctx));
+            emitRedefinedConstantError(ctx, klass.loc, symbol.show(ctx), symbol);
 
             auto origName = symbol.name(ctx);
             ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
@@ -1057,15 +1057,14 @@ class SymbolDefiner {
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, staticField.asgnLoc, staticField.name.show(ctx), currSym.loc(ctx));
+            emitRedefinedConstantError(ctx, staticField.asgnLoc, staticField.name.show(ctx), currSym);
             ctx.state.mangleRenameSymbol(currSym, currSym.name(ctx));
         }
         if (sym.exists()) {
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                emitRedefinedConstantError(ctx, staticField.asgnLoc, renamedSym.name(ctx).show(ctx),
-                                           renamedSym.loc(ctx));
+                emitRedefinedConstantError(ctx, staticField.asgnLoc, renamedSym.name(ctx).show(ctx), renamedSym);
             }
         }
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
@@ -1146,7 +1145,7 @@ class SymbolDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.show(ctx), oldSym.loc(ctx));
+                emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.show(ctx), oldSym);
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
             sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMember.name, variance);
@@ -1160,7 +1159,7 @@ class SymbolDefiner {
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMember.name.show(ctx), oldSym.loc(ctx));
+                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMember.name.show(ctx), oldSym);
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
