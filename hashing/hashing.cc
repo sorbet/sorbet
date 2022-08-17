@@ -34,12 +34,11 @@ bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &t
     }
 
     auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
-    if (classDef == nullptr || classDef->symbol != core::Symbols::root() || classDef->rhs.empty()) {
+    if (classDef == nullptr || classDef->symbol != core::Symbols::root()) {
         return false;
     }
 
-    auto *rhsLiteral = ast::cast_tree<ast::Literal>(classDef->rhs[0]);
-    return rhsLiteral != nullptr && rhsLiteral->isNil(gs);
+    return classDef->rhs.empty();
 }
 
 unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_ptr<core::GlobalState> &lgs,
