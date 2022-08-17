@@ -9,8 +9,8 @@ using namespace std;
 namespace sorbet::rewriter {
 
 // This pass gets rid of some unnecessary nodes that are likely to have gotten created in the course of the rewriter
-// pass, specifically by removing EmptyTree nodes in places where they can be safely removed (i.e. as part of longer
-// sequences of expressions where they are not a return value)
+// pass, specifically by removing EmptyTree nodes and `nil` nodes in places where they can be safely
+// removed (i.e. as part of longer sequences of expressions where they are not a return value)
 struct CleanupWalk {
     void postTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
