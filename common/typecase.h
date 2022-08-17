@@ -57,9 +57,7 @@ GENERATE_HAS_MEMBER(tag)
 template <typename Base, typename... Subclasses> void typecase(Base *base, Subclasses &&...funcs) {
     static_assert(HAS_MEMBER_tag<Base>() != true,
                   "For tagged pointers, please call typecase on a reference to the object not a pointer.");
-    bool done = false;
-
-    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
+    bool done = (false || ... || typecaseHelper<Base>(base, funcs));
 
     if (!done) {
         if (!base) {
@@ -86,9 +84,7 @@ template <typename Base, typename FUNC> bool typecaseHelper(Base &base, FUNC &&f
 template <typename Base, typename... Subclasses> void typecase(Base &base, Subclasses &&...funcs) {
     static_assert(HAS_MEMBER_tag<Base>() == true,
                   "typecase used on reference type without .tag()! Did you mean to use it on a pointer type?");
-    bool done = false;
-
-    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
+    bool done = (false || ... || typecaseHelper<Base>(base, funcs));
 
     if (!done) {
         if (!base) {
