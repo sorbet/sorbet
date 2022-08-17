@@ -1,7 +1,7 @@
 # typed: true
 
 module R; def self.x; end; end
-R = 5 # error: Redefining constant `R`
+R = 5 # error: Redefining constant `R` as a static field
 module R; end
 # even though we've reopened the class here, the constant R still
 # "wins", because the first definition of the class is what counts
