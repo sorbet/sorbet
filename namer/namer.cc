@@ -607,16 +607,16 @@ class SymbolDefiner {
     }
 
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
-    core::ClassOrModuleRef getOrDefineClassSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
+    core::SymbolRef getOrDefineClassSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
         if (name == core::Names::singleton()) {
             return ctx.owner.enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         }
 
         auto scope = ensureScopeIsClass(ctx, ctx.owner, name, loc);
-        auto existing = ctx.state.lookupClassSymbol(scope, name);
+        core::SymbolRef existing = scope.data(ctx)->findMemberNoDealias(ctx, name);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(ctx.locAt(loc), scope, name);
-            existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
+            existing.asClassOrModuleRef().data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
         return existing;
