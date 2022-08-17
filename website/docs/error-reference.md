@@ -1131,6 +1131,72 @@ new syntax:
 srb tc --isolate-error-code=4021 --autocorrect
 ```
 
+## 4022
+
+Sorbet does not model all Ruby constants using the same internal data structure.
+Instead, models constants differently depending on how the constant is defined.
+For example, all three of these constant definitions are treated differently in
+Sorbet:
+
+```ruby
+class A; end      # a class or module constant
+B = 1             # a "normal" constant, which Sorbet calls a "static field"
+C = type_member   # a type member constant, used with generic classes
+```
+
+Sorbet requires that a constant with a given name must have a unique constant
+"kind" throughout all its appearances in a codebase. For example, even though
+code like this is valid Ruby code, it's not allowed in Sorbet:
+
+```ruby
+def method_to_compute_a_Class_object
+  Class.new
+end
+
+MyClass = method_to_compute_a_Class_object()
+
+class MyClass
+  # ... re-open MyClass to add methods to it ...
+  def foo; end
+end
+```
+
+In the snippet above, Sorbet complains that it can see conflicting definitions
+of `MyClass`: one as a static field, and one as a class.
+
+Sorbet imposes this limitation for performance—Sorbet does not do method-level
+type inference until it has a full view of all the constants defined in a
+program.
+
+At the point where the `MyClass = ...` assignment happens, Sorbet must choose
+whether to treat `MyClass` as a class or module (which allows using it as a
+[class or interface type](class-types.md), grants it a singleton class which
+derives from `Module`, lets it own other constants and methods, and more) or
+whether to treat it as a "normal" static field constant, which does not allow
+any of those things.
+
+To workaround issues like this, if you absolutely must have both a constant
+assignment and a class definition for a given constant, you can either:
+
+1.  Use `const_set` to hide the constant assignment from Sorbet:
+
+    ```ruby
+    def method_to_compute_a_Class_object
+      Class.new
+    end
+
+    const_set(:MyClass, method_to_compute_a_Class_object())
+
+    class MyClass
+      def foo; end
+    end
+    ```
+
+2.  Factor the code such that the constant assignment is in a file all by
+    itself, and mark that file `# typed: ignore` (possibly also using an `RBI`
+    file to declare anything that can't be factored out of the ignored file but
+    should still be visible to Sorbet).
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs
