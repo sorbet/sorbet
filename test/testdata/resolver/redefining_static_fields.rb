@@ -9,7 +9,6 @@ Alias = Integer
 Alias = String
 
 BadAlias = 1 + 1
-#          ^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+#          ^^^^^ error: Expected `T.class_of(Sorbet::Private::Static::StubModule)` but found `Integer` for field
 BadAlias = DoesNotExist
 #          ^^^^^^^^^^^^ error: Unable to resolve constant `DoesNotExist`
-#          ^^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
