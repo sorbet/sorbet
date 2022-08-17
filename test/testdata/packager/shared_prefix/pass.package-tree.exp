@@ -7,7 +7,7 @@ end
 # -- test/testdata/packager/shared_prefix/bar/that/that.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Project>::<C Bar>::<C That><<C <todo sym>>> < ()
-    <emptyTree>::<C Thing> = <emptyTree>::<C T>.let(:yeah, <emptyTree>::<C Symbol>)
+    <emptyTree>::<C Thing> = <cast:let>(:yeah, <todo sym>, <emptyTree>::<C Symbol>)
   end
 end
 # -- test/testdata/packager/shared_prefix/bar/this/__package.rb --
@@ -19,7 +19,7 @@ end
 # -- test/testdata/packager/shared_prefix/bar/this/this.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < ()
-    <emptyTree>::<C Thing> = <emptyTree>::<C T>.let(:hey, <emptyTree>::<C Symbol>)
+    <emptyTree>::<C Thing> = <cast:let>(:hey, <todo sym>, <emptyTree>::<C Symbol>)
   end
 end
 # -- test/testdata/packager/shared_prefix/foo/__package.rb --

@@ -34,7 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.include(<emptyTree>::<C M>)
   end
 
-  <emptyTree>::<C T>.let(<emptyTree>::<C C>.new(), <emptyTree>::<C M>)
+  <cast:let>(<emptyTree>::<C C>.new(), <todo sym>, <emptyTree>::<C M>)
 
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C E><<C <todo sym>>> < (<emptyTree>::<C Top>::<C Parent>)
   end
 
-  <emptyTree>::<C T>.let(<emptyTree>::<C E>.new(), <emptyTree>::<C Top>::<C Parent>)
+  <cast:let>(<emptyTree>::<C E>.new(), <todo sym>, <emptyTree>::<C Top>::<C Parent>)
 
   class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
     def self.foo<<todo method>>(&<blk>)
@@ -80,14 +80,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   c1 = <emptyTree>::<C Class>.new() do ||
     begin
-      ::T.bind(<self>, ::Class)
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::Class)
       <emptyTree>::<C T>.reveal_type(<self>)
     end
   end
 
   c2 = <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
     begin
-      ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C Foo>))
       <emptyTree>::<C T>.reveal_type(<self>)
       <self>.foo()
     end
@@ -95,14 +95,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C Class>.new() do ||
     begin
-      ::T.bind(<self>, ::Class)
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::Class)
       <emptyTree>::<C T>.reveal_type(<self>)
     end
   end
 
   <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
     begin
-      ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C Foo>))
       <emptyTree>::<C T>.reveal_type(<self>)
       <self>.foo()
     end
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def bar<<todo method>>(&<blk>)
       <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
         begin
-          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+          <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C Foo>))
           <emptyTree>::<C T>.reveal_type(<self>)
         end
       end
@@ -121,7 +121,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.bar<<todo method>>(&<blk>)
       <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
         begin
-          ::T.bind(<self>, ::T.class_of(<emptyTree>::<C Foo>))
+          <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C Foo>))
           <emptyTree>::<C T>.reveal_type(<self>)
         end
       end

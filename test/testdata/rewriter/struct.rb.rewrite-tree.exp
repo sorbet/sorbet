@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C NotStruct><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C B> = <emptyTree>::<C T>.let(<emptyTree>::<C Foo>::<C Struct>.new(), <emptyTree>::<C Foo>::<C Struct>)
+    <emptyTree>::<C B> = <cast:let>(<emptyTree>::<C Foo>::<C Struct>.new(), <todo sym>, <emptyTree>::<C Foo>::<C Struct>)
 
     var = <emptyTree>::<C Struct>.new(:foo)
   end
@@ -117,7 +117,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def self.new<<todo method>>(foo = nil, bar = nil, &<blk>)
-        <emptyTree>::<C T>.cast(nil, <emptyTree>::<C A>)
+        <cast:cast>(nil, <todo sym>, <emptyTree>::<C A>)
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -375,16 +375,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def main<<todo method>>(&<blk>)
       begin
         a = <emptyTree>::<C Struct>.new(:foo)
-        <emptyTree>::<C T>.assert_type!(a, <emptyTree>::<C Struct>)
-        <emptyTree>::<C T>.assert_type!(a.new(), <emptyTree>::<C Struct>)
-        <emptyTree>::<C T>.assert_type!(a.new(2), <emptyTree>::<C Struct>)
-        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C A>.new(2, 3), <emptyTree>::<C RealStruct>::<C A>)
-        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C A>.new(2), <emptyTree>::<C RealStruct>::<C A>)
-        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(), <emptyTree>::<C RealStruct>::<C KeywordInit>)
-        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(:foo, 1), <emptyTree>::<C RealStruct>::<C KeywordInit>)
-        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(:foo, 2, :bar, 3), <emptyTree>::<C RealStruct>::<C KeywordInit>)
+        <cast:assert_type!>(a, <todo sym>, <emptyTree>::<C Struct>)
+        <cast:assert_type!>(a.new(), <todo sym>, <emptyTree>::<C Struct>)
+        <cast:assert_type!>(a.new(2), <todo sym>, <emptyTree>::<C Struct>)
+        <cast:assert_type!>(<emptyTree>::<C RealStruct>::<C A>.new(2, 3), <todo sym>, <emptyTree>::<C RealStruct>::<C A>)
+        <cast:assert_type!>(<emptyTree>::<C RealStruct>::<C A>.new(2), <todo sym>, <emptyTree>::<C RealStruct>::<C A>)
+        <cast:assert_type!>(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(), <todo sym>, <emptyTree>::<C RealStruct>::<C KeywordInit>)
+        <cast:assert_type!>(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(:foo, 1), <todo sym>, <emptyTree>::<C RealStruct>::<C KeywordInit>)
+        <cast:assert_type!>(<emptyTree>::<C RealStruct>::<C KeywordInit>.new(:foo, 2, :bar, 3), <todo sym>, <emptyTree>::<C RealStruct>::<C KeywordInit>)
         <emptyTree>::<C RealStruct>::<C KeywordInit>.new(1, 2)
-        <emptyTree>::<C T>.assert_type!(<emptyTree>::<C RealStructDesugar>::<C A>.new(2, 3), <emptyTree>::<C RealStructDesugar>::<C A>)
+        <cast:assert_type!>(<emptyTree>::<C RealStructDesugar>::<C A>.new(2, 3), <todo sym>, <emptyTree>::<C RealStructDesugar>::<C A>)
       end
     end
 
@@ -464,7 +464,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize<<todo method>>(b:, &<blk>)
       begin
-        @b = ::T.let(b, <emptyTree>::<C String>)
+        @b = <cast:let>(b, <todo sym>, <emptyTree>::<C String>)
         nil
       end
     end

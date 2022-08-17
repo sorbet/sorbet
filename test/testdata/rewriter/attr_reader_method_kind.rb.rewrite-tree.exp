@@ -46,8 +46,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize<<todo method>>(using_t_struct_prop:, using_t_struct_const:, &<blk>)
       begin
-        @using_t_struct_prop = ::T.let(using_t_struct_prop, <emptyTree>::<C Integer>)
-        @using_t_struct_const = ::T.let(using_t_struct_const, <emptyTree>::<C Integer>)
+        @using_t_struct_prop = <cast:let>(using_t_struct_prop, <todo sym>, <emptyTree>::<C Integer>)
+        @using_t_struct_const = <cast:let>(using_t_struct_const, <todo sym>, <emptyTree>::<C Integer>)
         nil
       end
     end

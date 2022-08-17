@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize<<todo method>>(foo:, &<blk>)
       begin
-        @foo = ::T.let(foo, <emptyTree>::<C String>)
+        @foo = <cast:let>(foo, <todo sym>, <emptyTree>::<C String>)
         nil
       end
     end

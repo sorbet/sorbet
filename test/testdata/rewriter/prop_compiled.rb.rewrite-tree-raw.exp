@@ -1620,17 +1620,9 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            flags = {}
-            recv = UnresolvedConstantLit{
-              cnst = <C <U T>>
-              scope = EmptyTree
-            }
-            fun = <U cast>
-            block = nullptr
-            pos_args = 2
-            args = [
-              Send{
+          rhs = Cast{
+              cast = <U cast>,
+              arg = Send{
                 flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U T>>
@@ -1643,7 +1635,8 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Send{
+              type = <todo sym>,
+              typeExpr = Send{
                 flags = {}
                 recv = UnresolvedConstantLit{
                   cnst = <C <U T>>
@@ -1658,9 +1651,9 @@ ClassDef{
                     scope = EmptyTree
                   }
                 ]
-              }
-            ]
+              },
           }
+
         }
 
         Send{
@@ -1720,23 +1713,16 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            flags = {}
-            recv = UnresolvedConstantLit{
-              cnst = <C <U T>>
-              scope = EmptyTree
-            }
-            fun = <U cast>
-            block = nullptr
-            pos_args = 2
-            args = [
-              Literal{ value = nil }
-              UnresolvedConstantLit{
+          rhs = Cast{
+              cast = <U cast>,
+              arg = Literal{ value = nil }
+              type = <todo sym>,
+              typeExpr = UnresolvedConstantLit{
                 cnst = <C <U String>>
                 scope = EmptyTree
-              }
-            ]
+              },
           }
+
         }
 
         Send{

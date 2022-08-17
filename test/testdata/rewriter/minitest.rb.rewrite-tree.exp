@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'allows let-ed constants inside of IT'><<todo method>>(&<blk>)
-      ::Module.const_set(:C2, <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
+      ::Module.const_set(:C2, <cast:let>(10, <todo sym>, <emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize<<todo method>>(&<blk>)
       begin
-        @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+        @foo = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
         <self>.instance_helper()
       end
     end
@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it 'can read foo'><<todo method>>(&<blk>)
       begin
-        <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
+        <cast:assert_type!>(@foo, <todo sym>, <emptyTree>::<C Integer>)
         <self>.instance_helper()
       end
     end
@@ -109,7 +109,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     begin
-      <emptyTree>::<C C2> = ::T.let(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <emptyTree>::<C Integer>)
+      <emptyTree>::<C C2> = <cast:let>(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <todo sym>, <emptyTree>::<C Integer>)
       begin
         "allows let-ed constants inside of IT"
         <runtime method definition of <it 'allows let-ed constants inside of IT'>>
@@ -168,7 +168,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.random_method>
 
     <self>.random_method() do ||
-      @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
+      @random_method_ivar = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
     end
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)

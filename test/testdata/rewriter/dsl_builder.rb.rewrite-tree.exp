@@ -190,9 +190,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
     def test_instance_methods<<todo method>>(&<blk>)
       begin
-        <emptyTree>::<C T>.assert_type!(<self>.opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
-        <emptyTree>::<C T>.assert_type!(<self>.opt_int_defaulted(), <emptyTree>::<C Integer>)
-        <emptyTree>::<C T>.assert_type!(<self>.req_string(), <emptyTree>::<C String>)
+        <cast:assert_type!>(<self>.opt_string(), <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+        <cast:assert_type!>(<self>.opt_int_defaulted(), <todo sym>, <emptyTree>::<C Integer>)
+        <cast:assert_type!>(<self>.req_string(), <todo sym>, <emptyTree>::<C String>)
         <self>.no_getter()
       end
     end
@@ -217,13 +217,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.class_of(<emptyTree>::<C Integer>)
 
-    <emptyTree>::<C T>.assert_type!(<self>.get_opt_string(), <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    <cast:assert_type!>(<self>.get_opt_string(), <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
 
-    <emptyTree>::<C T>.assert_type!(<self>.get_opt_string(), <emptyTree>::<C String>)
+    <cast:assert_type!>(<self>.get_opt_string(), <todo sym>, <emptyTree>::<C String>)
 
-    <emptyTree>::<C T>.assert_type!(<self>.get_opt_int_defaulted(), <emptyTree>::<C Integer>)
+    <cast:assert_type!>(<self>.get_opt_int_defaulted(), <todo sym>, <emptyTree>::<C Integer>)
 
-    <emptyTree>::<C T>.assert_type!(<self>.get_req_string(), <emptyTree>::<C String>)
+    <cast:assert_type!>(<self>.get_req_string(), <todo sym>, <emptyTree>::<C String>)
 
     <runtime method definition of test_instance_methods>
   end

@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def a=<<todo method>>(a, &<blk>)
-      @a = ::T.let(a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+      @a = <cast:let>(a, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def b=<<todo method>>(b, &<blk>)
-      @b = ::T.let(b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+      @b = <cast:let>(b, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def c=<<todo method>>(c, &<blk>)
-      @c = ::T.let(c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+      @c = <cast:let>(c, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
