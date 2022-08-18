@@ -850,7 +850,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     {
         // namer
         for (auto &tree : trees) {
-            core::UnfreezeNameTable nameTableAccess(*gs);
             core::UnfreezeSymbolTable symbolTableAccess(*gs);
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(tree));
