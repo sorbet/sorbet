@@ -124,7 +124,7 @@ class ChildTwo < T::Struct
 end
 ```
 
-If it is imperative that inheritance must be used (not composition, either):
+If the code absolutely must use inheritance and cannot use composition, either:
 
 - Avoid using `T::Struct`, and instead define a normal class, with things like
   `attr_reader` and an explicit `initialize` method.
