@@ -150,9 +150,9 @@ struct LocalSymbolTableHashes {
     uint32_t typeMemberHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the fields contained in the file.
     uint32_t fieldHash = HASH_STATE_NOT_COMPUTED;
-    // A fingerprint for the non-alias static fields contained in the file.
+    // A fingerprint for the non-class alias static fields contained in the file.
     uint32_t staticFieldHash = HASH_STATE_NOT_COMPUTED;
-    // A fingerprint for the type and class alias static fields contained in the file.
+    // A fingerprint for the class alias static fields contained in the file.
     uint32_t classAliasHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
