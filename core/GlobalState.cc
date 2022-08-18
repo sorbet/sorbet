@@ -2313,7 +2313,14 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             if (needMethodShapeHash) {
                 uint32_t methodShapeHash = sym.methodShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, methodShapeHash);
-                methodHash = mix(methodHash, methodShapeHash);
+                if (this->lspExperimentalFastPathEnabled) {
+                    // With this feature enabled, the only three methods that trigger a method
+                    // change anymore all relate to inheritance. Let's blame this to a change to
+                    // class symbols, not to methods
+                    classModuleHash = mix(classModuleHash, methodShapeHash);
+                } else {
+                    methodHash = mix(methodHash, methodShapeHash);
+                }
             }
 
             counter++;
