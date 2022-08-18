@@ -22,9 +22,7 @@ rbenv install --skip-existing
 
 # we pin to universal-darwin-18 but it shouldn't matter
 # the specific version; we just want one mac binary
-# for platform in universal-darwin-18 x86_64-linux
-# TODO(jez) Disabling macOS builds
-for platform in x86_64-linux
+for platform in universal-darwin-18 x86_64-linux
 do
   gem unpack _out_/gems/sorbet-static-"${release_version}"-${platform}*.gem
 
