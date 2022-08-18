@@ -245,7 +245,7 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     p.putU4(fh->localSymbolTableHashes.typeMemberHash);
     p.putU4(fh->localSymbolTableHashes.fieldHash);
     p.putU4(fh->localSymbolTableHashes.staticFieldHash);
-    p.putU4(fh->localSymbolTableHashes.staticFieldAliasHash);
+    p.putU4(fh->localSymbolTableHashes.classAliasHash);
     p.putU4(fh->localSymbolTableHashes.methodHash);
     p.putU4(fh->localSymbolTableHashes.methodHashes.size());
     for (const auto &[key, value] : fh->localSymbolTableHashes.methodHashes) {
@@ -283,7 +283,7 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     ret.localSymbolTableHashes.typeMemberHash = p.getU4();
     ret.localSymbolTableHashes.fieldHash = p.getU4();
     ret.localSymbolTableHashes.staticFieldHash = p.getU4();
-    ret.localSymbolTableHashes.staticFieldAliasHash = p.getU4();
+    ret.localSymbolTableHashes.classAliasHash = p.getU4();
     ret.localSymbolTableHashes.methodHash = p.getU4();
     auto methodHashSize = p.getU4();
     ret.localSymbolTableHashes.methodHashes.reserve(methodHashSize);

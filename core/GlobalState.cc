@@ -2234,7 +2234,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t staticFieldHash = 0;
-    uint32_t staticFieldAliasHash = 0;
+    uint32_t classAliasHash = 0;
     uint32_t methodHash = 0;
     UnorderedMap<WithoutUniqueNameHash, uint32_t> methodHashesMap;
     UnorderedMap<WithoutUniqueNameHash, uint32_t> staticFieldHashesMap;
@@ -2289,7 +2289,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             staticFieldHash = mix(fieldHash, staticFieldShapeHash);
         } else if (field.flags.isStaticField) {
             hierarchyHash = mix(hierarchyHash, symhash);
-            staticFieldAliasHash = mix(staticFieldAliasHash, symhash);
+            classAliasHash = mix(classAliasHash, symhash);
         } else {
             hierarchyHash = mix(hierarchyHash, symhash);
             fieldHash = mix(fieldHash, symhash);
@@ -2342,7 +2342,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     result->typeMemberHash = LocalSymbolTableHashes::patchHash(typeMemberHash);
     result->fieldHash = LocalSymbolTableHashes::patchHash(fieldHash);
     result->staticFieldHash = LocalSymbolTableHashes::patchHash(staticFieldHash);
-    result->staticFieldAliasHash = LocalSymbolTableHashes::patchHash(staticFieldAliasHash);
+    result->classAliasHash = LocalSymbolTableHashes::patchHash(classAliasHash);
     result->methodHash = LocalSymbolTableHashes::patchHash(methodHash);
     return result;
 }

@@ -153,7 +153,7 @@ struct LocalSymbolTableHashes {
     // A fingerprint for the non-alias static fields contained in the file.
     uint32_t staticFieldHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the type and class alias static fields contained in the file.
-    uint32_t staticFieldAliasHash = HASH_STATE_NOT_COMPUTED;
+    uint32_t classAliasHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
 
@@ -188,7 +188,7 @@ struct LocalSymbolTableHashes {
         ret.typeMemberHash = HASH_STATE_INVALID_PARSE;
         ret.fieldHash = HASH_STATE_INVALID_PARSE;
         ret.staticFieldHash = HASH_STATE_INVALID_PARSE;
-        ret.staticFieldAliasHash = HASH_STATE_INVALID_PARSE;
+        ret.classAliasHash = HASH_STATE_INVALID_PARSE;
         ret.methodHash = HASH_STATE_INVALID_PARSE;
         return ret;
     }
@@ -201,7 +201,7 @@ struct LocalSymbolTableHashes {
                 ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(staticFieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE(staticFieldAliasHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(classAliasHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             } else {
                 ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
@@ -209,7 +209,7 @@ struct LocalSymbolTableHashes {
                 ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(staticFieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE(staticFieldAliasHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(classAliasHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             });
         return hierarchyHash == HASH_STATE_INVALID_PARSE;
