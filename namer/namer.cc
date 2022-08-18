@@ -1095,8 +1095,7 @@ class SymbolDefiner {
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                emitRedefinedConstantError(ctx, staticField.asgnLoc, renamedSym.name(ctx),
-                                           core::SymbolRef::Kind::FieldOrStaticField, renamedSym);
+                emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, renamedSym);
             }
         }
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
@@ -1164,7 +1163,7 @@ class SymbolDefiner {
             // same error
             auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym, existingTypeMember);
+                emitRedefinedConstantError(ctx, typeMember.nameLoc, existingTypeMember, oldSym);
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
             if (::sorbet::debug_mode) {
