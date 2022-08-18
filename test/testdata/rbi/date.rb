@@ -13,6 +13,15 @@ class Test
 
   sig {params(x: Date, y: DateTime).void}
   def test_date(x, y)
+    T.reveal_type(x + 1) # error: Revealed type: `Date`
+    T.reveal_type(y + 1) # error: Revealed type: `DateTime`
+
+    T.reveal_type(x + 1.0) # error: Revealed type: `Date`
+    T.reveal_type(y + 1.0) # error: Revealed type: `DateTime`
+
+    T.reveal_type(x + 5/2) # error: Revealed type: `Date`
+    T.reveal_type(y + 5/2) # error: Revealed type: `DateTime`
+    
     T.reveal_type(x -  x) # error: Revealed type: `Rational`
     T.reveal_type(x - 10) # error: Revealed type: `Date`
 
