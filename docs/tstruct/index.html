@@ -157,7 +157,7 @@ declares some common props, and children structs declare their own props.</p>
   prop <span class="hljs-symbol">:quz</span>, Symbol
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>If it is imperative that inheritance must be used (not composition, either):</p>
+<p>If the code absolutely must use inheritance and cannot use composition, either:</p>
 <ul>
 <li><p>Avoid using <code>T::Struct</code>, and instead define a normal class, with things like
 <code>attr_reader</code> and an explicit <code>initialize</code> method.</p></li>
