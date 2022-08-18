@@ -576,12 +576,13 @@ class SymbolDefiner {
         }
     }
 
-    void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, string constantName,
+    void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
-            e.setHeader("Redefining constant `{}` as a {}", constantName, prettySymbolKind(ctx, kind));
+            e.setHeader("Redefining constant `{}` as a {}", name.show(ctx), prettySymbolKind(ctx, kind));
             e.addErrorLine(prevSymbol.loc(ctx), "Previously defined as a {}", prettySymbolKind(ctx, prevSymbol.kind()));
+
             if ((kind == Kind::ClassOrModule && prevSymbol.kind() == Kind::FieldOrStaticField) ||
                 (kind == Kind::FieldOrStaticField && prevSymbol.kind() == Kind::ClassOrModule)) {
                 e.addErrorNote("Sorbet does not allow treating constant assignments as class or module definitions,\n"
@@ -593,7 +594,7 @@ class SymbolDefiner {
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::SymbolRef symbol,
                                     core::SymbolRef prevSymbol) {
-        emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), symbol.kind(), prevSymbol);
+        emitRedefinedConstantError(ctx, errorLoc, symbol.name(ctx), symbol.kind(), prevSymbol);
     }
 
     core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
@@ -971,7 +972,7 @@ class SymbolDefiner {
                 return klassSymbol;
             }
 
-            emitRedefinedConstantError(ctx, klass.loc, symbol.show(ctx), core::SymbolRef::Kind::ClassOrModule, symbol);
+            emitRedefinedConstantError(ctx, klass.loc, symbol.name(ctx), core::SymbolRef::Kind::ClassOrModule, symbol);
 
             auto origName = symbol.name(ctx);
             ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
@@ -1086,7 +1087,7 @@ class SymbolDefiner {
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, staticField.asgnLoc, staticField.name.show(ctx),
+            emitRedefinedConstantError(ctx, staticField.asgnLoc, staticField.name,
                                        core::SymbolRef::Kind::FieldOrStaticField, currSym);
             ctx.state.mangleRenameSymbol(currSym, currSym.name(ctx));
         }
@@ -1094,7 +1095,7 @@ class SymbolDefiner {
             ENFORCE(currSym.exists());
             auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
             if (renamedSym.exists()) {
-                emitRedefinedConstantError(ctx, staticField.asgnLoc, renamedSym.name(ctx).show(ctx),
+                emitRedefinedConstantError(ctx, staticField.asgnLoc, renamedSym.name(ctx),
                                            core::SymbolRef::Kind::FieldOrStaticField, renamedSym);
             }
         }
@@ -1176,7 +1177,7 @@ class SymbolDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.show(ctx), core::SymbolRef::Kind::TypeMember,
+                emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.name(ctx), core::SymbolRef::Kind::TypeMember,
                                            oldSym);
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
@@ -1191,7 +1192,7 @@ class SymbolDefiner {
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMember.name.show(ctx),
+                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMember.name,
                                                core::SymbolRef::Kind::TypeMember, oldSym);
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
