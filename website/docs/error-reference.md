@@ -545,6 +545,17 @@ This error code is from an old Sorbet version. It's equivalent to error 4023:
 The `has_attached_class!` annotation cannot be given a contravariant `:in`
 annotation because `T.attached_class` is only allowed in output positions.
 
+## 3515
+
+You are using the chained `sig` syntax however it is malformed. Ensure a block
+is passed and there are no duplicate chained methods. You can only chain
+`abstract`, `final`, `override` and `overridable` methods on a `sig`.
+
+```ruby
+sig.final { void }
+def foo; end
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
