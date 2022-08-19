@@ -18,7 +18,7 @@ class AutogenWalk {
     vector<DefinitionRef> nesting;
 
     enum class ScopeType { Class, Block };
-    vector<ast::Send *> ignoring;
+    vector<ast::ExpressionPtr::tagged_storage> ignoring;
     vector<ScopeType> scopeTypes;
 
     UnorderedMap<void *, ReferenceRef> refMap;
@@ -283,13 +283,12 @@ public:
         auto *original = ast::cast_tree<ast::Send>(tree);
 
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
-        // Ignore keepForIde nodes. Also ignore include/extend sends iff they are directly at the
+        // Ignore include/extend sends iff they are directly at the
         // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
         // block scope so that we a ref to the included module is still rendered.
-        if (original->fun == core::Names::keepForIde() ||
-            (!inBlock && original->recv.isSelfReference() &&
-             (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
-            ignoring.emplace_back(original);
+        if (!inBlock && original->recv.isSelfReference() &&
+            (original->fun == core::Names::include() || original->fun == core::Names::extend())) {
+            ignoring.emplace_back(tree.getTagged());
         }
         // This means it's a `require`; mark it as such
         if (original->flags.isPrivateOk && original->fun == core::Names::require() && original->numPosArgs() == 1) {
@@ -301,11 +300,20 @@ public:
     }
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto *original = ast::cast_tree<ast::Send>(tree);
         // if this send was something we were ignoring (i.e. a `keepForIde` or an `include` or `require`) then pop this
-        if (!ignoring.empty() && ignoring.back() == original) {
+        if (!ignoring.empty() && ignoring.back() == tree.getTagged()) {
             ignoring.pop_back();
         }
+    }
+
+    void preTransformKeepForIDE(core::Context ctx, ast::ExpressionPtr &tree) {
+        ignoring.push_back(tree.getTagged());
+    }
+
+    void postTransformKeepForIDE(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(!ignoring.empty());
+        ENFORCE(ignoring.back() == tree.getTagged());
+        ignoring.pop_back();
     }
 
     ParsedFile parsedFile() {
