@@ -23,7 +23,6 @@ namespace sorbet::packager {
 namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
-constexpr core::NameRef TEST_NAME = core::Names::Constants::Test();
 
 bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == TEST_NAME;

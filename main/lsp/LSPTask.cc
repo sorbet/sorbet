@@ -54,7 +54,7 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     // textDocument/documentSymbol
                     return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<Location>>>>) {
-                    // textDocument/definition, textDocument/typeDefinition, textDocument/references, and
+                    // textDocument/definition, textDocument/typeDefinition, textDocument/references and
                     // textDocument/implementation
                     if (const auto *locationsPtr = get_if<vector<unique_ptr<Location>>>(&res)) {
                         return locationsPtr->empty() ? ResponseMessageStatus::EmptyResult
@@ -296,6 +296,17 @@ LSPTask::getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::Symbo
                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, symbol);
+        absl::c_move(run2.responses, back_inserter(priorRefs));
+    }
+    return move(priorRefs);
+}
+
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesInPackageToSymbol(LSPTypecheckerInterface &typechecker, core::NameRef packageName,
+                                        core::SymbolRef symbol,
+                                        vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    if (symbol.exists()) {
+        auto run2 = LSPQuery::bySymbol(config, typechecker, symbol, packageName);
         absl::c_move(run2.responses, back_inserter(priorRefs));
     }
     return move(priorRefs);
