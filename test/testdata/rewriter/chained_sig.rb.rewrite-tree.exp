@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.interface!()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C Override><<C <todo sym>>> < (::<todo sym>)
@@ -38,9 +38,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
   end
 
   class <emptyTree>::<C Incompatible><<C <todo sym>>> < (::<todo sym>)
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
@@ -70,7 +70,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C InvalidInvocationsOnSig><<C <todo sym>>> < (::<todo sym>)
@@ -112,29 +112,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    <emptyTree>.params(:a, <emptyTree>::<C Integer>)
+    nil.params(:a, <emptyTree>::<C Integer>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    <emptyTree>.returns(<emptyTree>::<C Integer>)
+    nil.returns(<emptyTree>::<C Integer>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    <emptyTree>.void()
+    nil.void()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    <runtime method definition of baz>
 
-    <emptyTree>.checked(:never)
+    nil.checked(:never)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :blah, :normal)
+    <runtime method definition of blah>
 
-    <emptyTree>.on_failure(:soft, :notify, "me")
+    nil.on_failure(:soft, :notify, "me")
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bip, :normal)
+    <runtime method definition of bip>
 
-    <emptyTree>.type_parameters(:T)
+    nil.type_parameters(:T)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bop, :normal)
+    <runtime method definition of bop>
   end
 
   module <emptyTree>::<C Interface><<C <todo sym>>> < ()
@@ -152,7 +152,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.interface!()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C DuplicateBlock><<C <todo sym>>> < (::<todo sym>)
@@ -168,7 +168,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C WithoutRuntime><<C <todo sym>>> < (::<todo sym>)
@@ -198,13 +198,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    <runtime method definition of baz>
 
-    <emptyTree>.params(:a, <emptyTree>::<C Integer>)
+    nil.params(:a, <emptyTree>::<C Integer>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C MissingBlocks><<C <todo sym>>> < (::<todo sym>)
@@ -222,11 +222,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    <emptyTree>.final()
+    nil.final()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
   end
 
   class <emptyTree>::<C InstructionSequenceInSig><<C <todo sym>>> < (::<todo sym>)
@@ -238,14 +238,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    <emptyTree>.final() do ||
+    nil.final() do ||
       begin
         <emptyTree>::<C Kernel>.puts("")
         <self>.void()
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C DuplicateInvocations><<C <todo sym>>> < (::<todo sym>)
@@ -281,11 +281,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.abstract!()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+    <runtime method definition of baz>
   end
 
   class <emptyTree>::<C DuplicateButMissingBlock><<C <todo sym>>> < (::<todo sym>)
@@ -301,9 +301,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    <emptyTree>.override()
+    nil.override()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C InvalidInvocationAfterBlock><<C <todo sym>>> < (::<todo sym>)
@@ -317,9 +317,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    <emptyTree>.checked(:never)
+    nil.checked(:never)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 
   class <emptyTree>::<C ValidDoubleChain><<C <todo sym>>> < (::<todo sym>)
@@ -335,6 +335,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C Interface>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
   end
 end

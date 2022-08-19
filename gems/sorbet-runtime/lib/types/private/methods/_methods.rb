@@ -364,7 +364,7 @@ module T::Private::Methods
     builder.decl
   end
 
-  def self.build_sig(hook_mod, method_name, original_method, current_declaration, loc)
+  def self.build_sig(hook_mod, method_name, original_method, current_declaration)
     begin
       # We allow `sig` in the current module's context (normal case) and
       if hook_mod != current_declaration.mod &&
