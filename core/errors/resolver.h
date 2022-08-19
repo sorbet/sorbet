@@ -77,6 +77,7 @@ constexpr ErrorClass MultipleStatementsInSig{5069, StrictLevel::False};
 constexpr ErrorClass NilableUntyped{5070, StrictLevel::False};
 constexpr ErrorClass BindNonBlockParameter{5071, StrictLevel::False};
 constexpr ErrorClass TypeMemberScopeMismatch{5072, StrictLevel::False};
+constexpr ErrorClass AbstractClassInstantiated{5073, StrictLevel::True};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

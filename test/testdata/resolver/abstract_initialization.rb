@@ -50,20 +50,23 @@ end
 
 Bar.new
 
-# Common Ruby pattern
-class A
-  extend T::Helpers
-  abstract!
-end
+class CommonRubyPattern
+  extend T::Sig
 
-class B < A; end
+  class A
+    extend T::Helpers
+    abstract!
+  end
 
-sig{ params(a: T.class_of(A)).void }
-def takesA(a)
-  a.new
-end
+  class B < A; end
 
-def assignsA
-  a = T.let(B, T.class_of(A))
-  a.new
+  sig{ params(a: T.class_of(A)).void }
+  def takesA(a)
+    a.new
+  end
+
+  def assignsA
+    a = T.let(B, T.class_of(A))
+    a.new
+  end
 end
