@@ -50,6 +50,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, Block)                   \
         CASE_STATEMENT(CASE_BODY, InsSeq)                  \
         CASE_STATEMENT(CASE_BODY, RuntimeMethodDefinition) \
+        CASE_STATEMENT(CASE_BODY, KeepForIDE)              \
     }
 
 void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {
@@ -362,6 +363,12 @@ InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, ExpressionPtr expr)
 RuntimeMethodDefinition::RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod)
     : loc(loc), name(name), isSelfMethod(isSelfMethod) {
     categoryCounterInc("trees", "runtimemethoddefinition");
+    _sanityCheck();
+}
+
+KeepForIDE::KeepForIDE(core::LocOffsets loc, ExpressionPtr expr)
+    : loc(loc), expr(std::move(expr)) {
+    categoryCounterInc("trees", "keepforide");
     _sanityCheck();
 }
 
@@ -982,6 +989,14 @@ std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int ta
     return this->toStringWithTabs(gs, tabs);
 }
 
+std::string KeepForIDE::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+    return fmt::format("<keep-for-ide>({})", this->expr.toStringWithTabs(gs, tabs));
+}
+
+std::string KeepForIDE::showRaw(const core::GlobalState &gs, int tabs) {
+    return this->toStringWithTabs(gs, tabs);
+}
+
 const ast::Block *Send::block() const {
     if (hasBlock()) {
         auto block = ast::cast_tree<ast::Block>(this->args.back());
@@ -1444,6 +1459,10 @@ string BlockArg::nodeName() {
 
 string RuntimeMethodDefinition::nodeName() {
     return "RuntimeMethodDefinition";
+}
+
+string KeepForIDE::nodeName() {
+    return "KeepForIDE";
 }
 
 ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};

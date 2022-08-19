@@ -65,6 +65,9 @@ public:
 
     ExpressionPtr postTransformRuntimeMethodDefinition(core::MutableContext ctx, ExpressionPtr original);
 
+    ExpressionPtr preTransformKeepForIDE(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformKeepForIDE(core::MutableContext ctx, ExpressionPtr original);
+
     ExpressionPtr preTransformBlock(core::MutableContext ctx, ExpressionPtr original);
     ExpressionPtr postTransformBlock(core::MutableContext ctx, ExpressionPtr original);
 
@@ -112,6 +115,7 @@ public:
     GENERATE_POSTPONE_PRECLASS(Block, arg_types);                                \
     GENERATE_POSTPONE_PRECLASS(InsSeq, arg_types);                               \
     GENERATE_POSTPONE_PRECLASS(Cast, arg_types);                                 \
+    GENERATE_POSTPONE_PRECLASS(KeepForIDE, arg_types);                           \
                                                                                  \
     GENERATE_POSTPONE_POSTCLASS(ClassDef, arg_types);                            \
     GENERATE_POSTPONE_POSTCLASS(MethodDef, arg_types);                           \
@@ -135,7 +139,8 @@ public:
     GENERATE_POSTPONE_POSTCLASS(Block, arg_types);                               \
     GENERATE_POSTPONE_POSTCLASS(InsSeq, arg_types);                              \
     GENERATE_POSTPONE_POSTCLASS(Cast, arg_types);                                \
-    GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types);
+    GENERATE_POSTPONE_POSTCLASS(RuntimeMethodDefinition, arg_types);             \
+    GENERATE_POSTPONE_POSTCLASS(KeepForIDE, arg_types);
 
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
@@ -460,6 +465,14 @@ private:
         CALL_POST(RuntimeMethodDefinition);
     }
 
+    return_type mapKeepForIDE(arg_type v, CTX ctx) {
+        CALL_PRE(KeepForIDE);
+
+        CALL_MAP(cast_tree_nonnull<KeepForIDE>(v).expr, ctx);
+
+        CALL_POST(KeepForIDE);
+    }
+
     return_type mapIt(arg_type what, CTX ctx) {
         if (what == nullptr) {
             if constexpr (Kind == TreeMapKind::Map) {
@@ -583,6 +596,9 @@ private:
 
                 case Tag::RuntimeMethodDefinition:
                     return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
+
+                case Tag::KeepForIDE:
+                    return mapKeepForIDE(Funcs::pass(what), ctx);
             }
         } catch (SorbetException &e) {
             auto loc = what.loc();

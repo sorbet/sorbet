@@ -929,6 +929,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
+            [&](ast::KeepForIDE &keep) {
+                // Like ast::Cast's expansion, this is the only way to ensure that the
+                // constant expression here makes it into the CFG for LSP to hit on
+                // its location.
+                LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+                current = walk(cctx.withTarget(deadSym), keep.expr, current);
+                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+                ret = current;
+            },
+
             [&](const ast::EmptyTree &n) { ret = current; },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },

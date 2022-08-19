@@ -78,7 +78,7 @@ bool BehaviorHelpers::checkEmptyDeep(const ExpressionPtr &expr) {
         expr,
 
         [&](const ast::Send &send) {
-            result = send.fun == core::Names::keepForIde() || send.fun == core::Names::keepDef() ||
+            result = send.fun == core::Names::keepDef() ||
                      send.fun == core::Names::keepSelfDef() || send.fun == core::Names::include() ||
                      send.fun == core::Names::extend();
         },
@@ -89,6 +89,10 @@ bool BehaviorHelpers::checkEmptyDeep(const ExpressionPtr &expr) {
             result = absl::c_all_of(seq.stats, [](auto &child) { return checkEmptyDeep(child); }) &&
                      checkEmptyDeep(seq.expr);
         },
+
+        [&](const ast::RuntimeMethodDefinition &) { result = true; },
+
+        [&](const ast::KeepForIDE &) { result = true; },
 
         [&](const ExpressionPtr &klass) { result = false; });
     return result;
