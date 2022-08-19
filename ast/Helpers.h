@@ -414,12 +414,6 @@ public:
                      std::move(arg));
     }
 
-    static ExpressionPtr KeepForTypechecking(ExpressionPtr arg) {
-        auto loc = core::LocOffsets::none();
-        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForTypechecking(),
-                     loc, std::move(arg));
-    }
-
     static ExpressionPtr ZSuper(core::LocOffsets loc) {
         Send::Flags flags;
         flags.isPrivateOk = true;

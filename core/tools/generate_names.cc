@@ -380,7 +380,6 @@ NameDef names[] = {
     {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
-    {"keepForTypechecking", "keep_for_typechecking"},
     {"keepDef", "keep_def"},
     {"keepSelfDef", "keep_self_def"},
     {"keepForCfg", "<keep-for-cfg>"},

@@ -56,7 +56,7 @@ public:
                         "Emitting intrinsic that should have been deleted!");
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::keepForIde(), core::Names::keepForTypechecking()};
+        return {core::Names::keepForIde()};
     }
 } ShouldNeverSeeIntrinsic;
 
