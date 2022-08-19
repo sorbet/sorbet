@@ -815,6 +815,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
+                bool suggestedDotNew = false;
                 for (auto alternative : alternatives) {
                     auto possibleSymbol = alternative.symbol;
                     if (!possibleSymbol.isClassOrModule() &&
@@ -832,8 +833,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
 
                     if (possibleSymbol.isClassOrModule()) {
-                        e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
-                        e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                        if (!suggestedDotNew) {
+                            suggestedDotNew = true;
+                            e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                            e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                        }
                         continue;
                     }
 
