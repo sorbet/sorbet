@@ -2238,6 +2238,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t methodHash = 0;
     UnorderedMap<WithoutUniqueNameHash, uint32_t> methodHashesMap;
     UnorderedMap<WithoutUniqueNameHash, uint32_t> staticFieldHashesMap;
+    UnorderedMap<WithoutUniqueNameHash, uint32_t> fieldHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2291,8 +2292,11 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             hierarchyHash = mix(hierarchyHash, symhash);
             classAliasHash = mix(classAliasHash, symhash);
         } else {
-            hierarchyHash = mix(hierarchyHash, symhash);
-            fieldHash = mix(fieldHash, symhash);
+            auto &target = fieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            target = mix(target, symhash);
+            uint32_t fieldShapeHash = field.fieldShapeHash(*this);
+            hierarchyHash = mix(hierarchyHash, fieldShapeHash);
+            fieldHash = mix(fieldHash, fieldShapeHash);
         }
 
         if (DEBUG_HASHING_TAIL && counter > this->fields.size() - 15) {
@@ -2333,15 +2337,20 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
     result->methodHashes.reserve(methodHashesMap.size());
     result->staticFieldHashes.reserve(staticFieldHashesMap.size());
+    result->fieldHashes.reserve(fieldHashesMap.size());
     for (const auto &[nameHash, symbolHash] : methodHashesMap) {
         result->methodHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
     for (const auto &[nameHash, symbolHash] : staticFieldHashesMap) {
         result->staticFieldHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
+    for (const auto &[nameHash, symbolHash] : fieldHashesMap) {
+        result->fieldHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
+    }
     // Sort the hashes. Semantically important for quickly diffing hashes.
     fast_sort(result->methodHashes);
     fast_sort(result->staticFieldHashes);
+    fast_sort(result->fieldHashes);
 
     result->hierarchyHash = LocalSymbolTableHashes::patchHash(hierarchyHash);
     result->classModuleHash = LocalSymbolTableHashes::patchHash(classModuleHash);

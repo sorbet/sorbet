@@ -2365,7 +2365,7 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
     // straightforward to take the fast path for changes to regular fields by changing
     // this and the corresponding code in GlobalState, but one step at a time.
     // Only normal static fields are ok (no type aliases, no class aliases).
-    ENFORCE(this->flags.isStaticField && !this->isClassAlias());
+    ENFORCE(!this->flags.isStaticField || (this->flags.isStaticField && !this->isClassAlias()));
     uint32_t result = _hash(name.shortName(gs));
 
     result = mix(result, 1 + (this->resultType != nullptr));
