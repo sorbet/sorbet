@@ -119,7 +119,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         }
 
         auto ref = core::FileRef(i);
-        if (pkgName.exists() && gs.packageDB().getPackageForFile(gs, ref).mangledName() != pkgName) {
+        if (pkgName.exists() && gs.packageDB().getPackageNameForFile(ref) != pkgName) {
             continue;
         }
 
