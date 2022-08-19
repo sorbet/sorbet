@@ -321,13 +321,12 @@ public:
     // to become a stack.
     bool ignoreConstant = false;
 
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
-        this->ignoreConstant = send.fun == core::Names::keepForIde();
+    void preTransformKeepForIDE(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(!this->ignoreConstant, "KeepForIDE has nested expressions");
+        this->ignoreConstant = true;
     }
 
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformKeepForIDE(core::Context ctx, ast::ExpressionPtr &tree) {
         this->ignoreConstant = false;
     }
 
