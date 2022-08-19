@@ -7,12 +7,12 @@ class Simpsons < PackageSpec
     # go-to-def on a reference to Bart within the package goes here, but go-to-def on Bart in `import Bart` goes to the
     # package.
     import Bart
-    #      ^^^^ usage: bartpkg
+    #      ^^^^ import: bartpkg
     #      ^^^^ hover: Bart package description
     #      ^    show-symbol: Bart
 
     test_import Krabappel
-    #           ^^^^^^^^^ usage: krabappel-pkg
+    #           ^^^^^^^^^ import: krabappel-pkg
     #           ^^^^^^^^^ hover: Bart's teacher
     #           ^         show-symbol: Krabappel
 

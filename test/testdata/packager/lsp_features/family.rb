@@ -17,11 +17,13 @@ module Simpsons
           #     ^^^^^^^^^^^ hover: String
           #     ^           show-symbol: Bart::CatchPhrase
         # ^^^^ usage: bartmod
+        # ^^^^ importusage: bartpkg
       end
 
       sig {returns(Bart::Character)}
       #                  ^^^^^^^^^ usage: character
       #            ^^^^ usage: bartmod
+      #            ^^^^ importusage: bartpkg
       def son
           Bart::Character.new
           #     ^^^^^^^^^ usage: character
@@ -30,9 +32,11 @@ module Simpsons
           #     ^^^^^^^^^ hover: Character class description
           #               ^^^ hover: Description of Character initialize
         # ^^^^ usage: bartmod
+        # ^^^^ importusage: bartpkg
           Bart::C # error: Unable to resolve constant `C`
           #      ^ completion: CatchPhrase, Character
         # ^^^^ usage: bartmod
+        # ^^^^ importusage: bartpkg
       end
   end
 
@@ -40,6 +44,7 @@ module Simpsons
 # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Krabappel::Popquiz` in non-test file
 # ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` is defined in a test namespace
   #                ^^^^^^^ usage: popquiz
+# ^^^^^^^^^^^^^^^ importusage: krabappel-pkg
 
   class Private
     #   ^^^^^^^ def: s-private
