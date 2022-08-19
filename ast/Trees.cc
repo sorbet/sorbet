@@ -366,8 +366,7 @@ RuntimeMethodDefinition::RuntimeMethodDefinition(core::LocOffsets loc, core::Nam
     _sanityCheck();
 }
 
-KeepForIDE::KeepForIDE(core::LocOffsets loc, ExpressionPtr expr)
-    : loc(loc), expr(std::move(expr)) {
+KeepForIDE::KeepForIDE(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "keepforide");
     _sanityCheck();
 }

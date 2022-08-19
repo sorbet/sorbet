@@ -78,9 +78,8 @@ bool BehaviorHelpers::checkEmptyDeep(const ExpressionPtr &expr) {
         expr,
 
         [&](const ast::Send &send) {
-            result = send.fun == core::Names::keepDef() ||
-                     send.fun == core::Names::keepSelfDef() || send.fun == core::Names::include() ||
-                     send.fun == core::Names::extend();
+            result = send.fun == core::Names::keepDef() || send.fun == core::Names::keepSelfDef() ||
+                     send.fun == core::Names::include() || send.fun == core::Names::extend();
         },
 
         [&](const ast::EmptyTree &) { result = true; },
