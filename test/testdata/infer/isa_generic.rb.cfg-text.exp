@@ -176,18 +176,18 @@ bb7[rubyRegionId=0, firstDead=18](<block-pre-call-temp>$26: Sorbet::Private::Sta
     <cfgAlias>$44: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$46: T.class_of(T) = alias <C T>
     <statTemp>$41: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$44: T.class_of(T::Sig))
-    <cfgAlias>$51: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$53: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$49: Sorbet::Private::Static::Void = <cfgAlias>$51: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$53: T.class_of(Base)[T.untyped])
-    <cfgAlias>$58: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$60: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$56: Sorbet::Private::Static::Void = <cfgAlias>$58: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$60: T.class_of(Concrete))
-    <cfgAlias>$63: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$65: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$61: Sorbet::Private::Static::Void = <cfgAlias>$63: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$65: T.class_of(Base)[T.untyped])
-    <cfgAlias>$70: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$72: T.class_of(Other) = alias <C Other>
-    <statTemp>$68: Sorbet::Private::Static::Void = <cfgAlias>$70: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$72: T.class_of(Other))
+    <cfgAlias>$51: T.class_of(Base)[T.untyped] = alias <C Base>
+    keep_for_ide$50: T.class_of(Base)[T.untyped] = <cfgAlias>$51
+    keep_for_ide$50: T.untyped = <keep-alive> keep_for_ide$50
+    <cfgAlias>$56: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$55: T.class_of(Concrete) = <cfgAlias>$56
+    keep_for_ide$55: T.untyped = <keep-alive> keep_for_ide$55
+    <cfgAlias>$59: T.class_of(Base)[T.untyped] = alias <C Base>
+    keep_for_ide$58: T.class_of(Base)[T.untyped] = <cfgAlias>$59
+    keep_for_ide$58: T.untyped = <keep-alive> keep_for_ide$58
+    <cfgAlias>$64: T.class_of(Other) = alias <C Other>
+    keep_for_ide$63: T.class_of(Other) = <cfgAlias>$64
+    keep_for_ide$63: T.untyped = <keep-alive> keep_for_ide$63
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

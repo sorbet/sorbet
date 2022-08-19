@@ -2,12 +2,12 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=8]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(Funcs) = alias <C Funcs>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(Funcs))
-    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$16: T.class_of(C) = alias <C C>
-    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$16: T.class_of(C))
+    <cfgAlias>$7: T.class_of(Funcs) = alias <C Funcs>
+    keep_for_ide$6: T.class_of(Funcs) = <cfgAlias>$7
+    keep_for_ide$6: T.untyped = <keep-alive> keep_for_ide$6
+    <cfgAlias>$12: T.class_of(C) = alias <C C>
+    keep_for_ide$11: T.class_of(C) = <cfgAlias>$12
+    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

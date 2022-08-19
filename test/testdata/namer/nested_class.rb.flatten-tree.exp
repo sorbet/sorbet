@@ -5,12 +5,12 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::C)
+          <keep-for-ide>(::C)
           <emptyTree>
         end
         <emptyTree>
@@ -21,7 +21,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::A::B)
+        <keep-for-ide>(::A::B)
         <emptyTree>
       end
     end

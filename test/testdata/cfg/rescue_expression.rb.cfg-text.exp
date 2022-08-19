@@ -70,14 +70,14 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=10]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(MyException) = alias <C MyException>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(MyException))
-    <cfgAlias>$12: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$14: T.class_of(Exception) = alias <C Exception>
-    <statTemp>$10: Sorbet::Private::Static::Void = <cfgAlias>$12: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$14: T.class_of(Exception))
-    <statTemp>$18: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$16: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: T.untyped)
+    <cfgAlias>$7: T.class_of(MyException) = alias <C MyException>
+    keep_for_ide$6: T.class_of(MyException) = <cfgAlias>$7
+    keep_for_ide$6: T.untyped = <keep-alive> keep_for_ide$6
+    <cfgAlias>$10: T.class_of(Exception) = alias <C Exception>
+    keep_for_ide$9: T.class_of(Exception) = <cfgAlias>$10
+    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
+    <statTemp>$14: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$12: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$14: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
