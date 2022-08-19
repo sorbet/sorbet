@@ -186,6 +186,11 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             auto *exp = reinterpret_cast<const RuntimeMethodDefinition *>(tree);
             return make_expression<RuntimeMethodDefinition>(exp->loc, exp->name, exp->isSelfMethod);
         }
+
+        case Tag::KeepForIDE: {
+            auto *exp = reinterpret_cast<const KeepForIDE *>(tree);
+            return make_expression<KeepForIDE>(exp->loc, deepCopy(avoid, exp->expr));
+        }
     }
 }
 
@@ -244,5 +249,6 @@ COPY_IMPL(ZSuperArgs);
 COPY_IMPL(Block);
 COPY_IMPL(InsSeq);
 COPY_IMPL(RuntimeMethodDefinition);
+COPY_IMPL(KeepForIDE);
 
 } // namespace sorbet::ast
