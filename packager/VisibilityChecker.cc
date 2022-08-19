@@ -298,16 +298,6 @@ public:
 };
 
 class VisibilityCheckerPass final {
-    bool nameMatchesPackage(const std::vector<core::NameRef> &revNameParts) {
-        const auto &packageName = this->package.fullName();
-
-        if (revNameParts.size() < packageName.size()) {
-            return false;
-        }
-
-        return std::equal(packageName.begin(), packageName.end(), revNameParts.rbegin());
-    }
-
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
