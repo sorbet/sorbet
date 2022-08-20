@@ -176,7 +176,7 @@ def f(x); ...; end</code></pre>
       <td>
         Ruby has only <code>nil</code>, while JavaScript has both
         <code>null</code> and <code>undefined</code>. See <a
-        href="/docs/nilable">Nilable Types</a> for more.
+        href="/docs/nilable-types">Nilable Types</a> for more.
       </td>
     </tr>
     <tr>
