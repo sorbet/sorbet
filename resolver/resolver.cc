@@ -671,7 +671,7 @@ private:
         bool alreadyReported = false;
         job.out->resolutionScopes = make_unique<ast::ConstantLit::ResolutionScopes>();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            auto originalScope = id->symbol.dealias(ctx);
+            auto originalScope = id->symbol;
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
                 // no need to also report that `D` is missing.
@@ -1755,8 +1755,6 @@ public:
             });
         }
 
-        // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
-
         {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
 
@@ -1779,17 +1777,12 @@ public:
                 }
             }
 
-            if (singlePackageRbiGeneration) {
-                if constexpr (isMutableStateType) {
-                    for (auto &job : todoClassAliases) {
-                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                        for (auto &item : job.items) {
-                            resolveClassAliasJob(ctx, item);
-                        }
+            if constexpr (isMutableStateType) {
+                for (auto &job : todoClassAliases) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    for (auto &item : job.items) {
+                        resolveClassAliasJob(ctx, item);
                     }
-
-                } else {
-                    ENFORCE(false, "Was not expecting non-mutating resolver and single package RBI generation");
                 }
             }
 

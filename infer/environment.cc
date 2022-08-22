@@ -1175,7 +1175,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             },
             [&](cfg::Alias &a) {
                 core::SymbolRef symbol = a.what.dealias(ctx);
-                if (symbol.isClassOrModule()) {
+                if (symbol == core::Symbols::StubModule()) {
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
+                    tp.type = core::Types::untyped(ctx, a.what);
+                } else if (symbol.isClassOrModule()) {
                     auto singletonClass = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType();

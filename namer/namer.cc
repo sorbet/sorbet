@@ -525,7 +525,7 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::ClassRef: {
                 auto &klassRef = ref.klassRef(foundDefs);
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
-                return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
+                return getOrDefineClassSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
             case core::FoundDefinitionRef::Kind::Class:
             case core::FoundDefinitionRef::Kind::Method:
@@ -573,8 +573,8 @@ class SymbolDefiner {
         emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), renamedSymbol.loc(ctx));
     }
 
-    core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
-                                         core::LocOffsets loc) {
+    core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
+                                              core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
@@ -613,13 +613,13 @@ class SymbolDefiner {
     }
 
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
-    core::SymbolRef getOrDefineSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
+    core::SymbolRef getOrDefineClassSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
         if (name == core::Names::singleton()) {
             return ctx.owner.enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         }
 
-        auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
-        core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
+        auto scope = ensureScopeIsClass(ctx, ctx.owner, name, loc);
+        core::SymbolRef existing = scope.data(ctx)->findMemberNoDealias(ctx, name);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(ctx.locAt(loc), scope, name);
             existing.asClassOrModuleRef().data(ctx)->singletonClass(ctx); // force singleton class into existance
@@ -1058,8 +1058,8 @@ class SymbolDefiner {
     core::FieldRef insertStaticField(core::MutableContext ctx, const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
-        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
-                                   staticField.name, staticField.asgnLoc);
+        auto scope = ensureScopeIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
+                                        staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         if (!sym.exists() && currSym.exists()) {
