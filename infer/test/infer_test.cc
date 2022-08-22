@@ -41,8 +41,8 @@ void processSource(core::GlobalState &cb, string str) {
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
-    core::FoundMethodHashes foundMethodHashes; // compute this just for test coverage
-    trees = move(namer::Namer::run(cb, move(trees), *workers, &foundMethodHashes).result());
+    core::FoundDefHashes foundHashes; // compute this just for test coverage
+    trees = move(namer::Namer::run(cb, move(trees), *workers, &foundHashes).result());
     auto resolved = resolver::Resolver::run(cb, move(trees), *workers);
     for (auto &tree : resolved.result()) {
         sorbet::core::MutableContext ctx(cb, core::Symbols::root(), tree.file);

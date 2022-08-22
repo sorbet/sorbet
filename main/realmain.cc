@@ -770,9 +770,9 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autoloaderCfg, *workers, indexed);
 #endif
         } else {
-            // Only need to compute FoundMethodHashes when running to compute a FileHash
-            auto foundMethodHashes = nullptr;
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundMethodHashes).result());
+            // Only need to compute hashes when running to compute a FileHash
+            auto foundHashes = nullptr;
+            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

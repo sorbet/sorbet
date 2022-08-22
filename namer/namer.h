@@ -14,19 +14,19 @@ class Namer final {
     static ast::ParsedFilesOrCancelled
     runInternal(core::GlobalState &gs, std::vector<ast::ParsedFile> trees, WorkerPool &workers,
                 UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
-                core::FoundMethodHashes *foundMethodHashesOut);
+                core::FoundDefHashes *foundHashesOut);
 
 public:
     static ast::ParsedFilesOrCancelled
     symbolizeTreesBestEffort(const core::GlobalState &gs, std::vector<ast::ParsedFile> trees, WorkerPool &workers);
 
-    // Note: foundMethodHashes is an optional out parameter.
+    // Note: foundHashes is an optional out parameter.
     //
     // Setting it to a non-nullptr requests that Namer compute a fingerprint of the FoundDefinitions
     // it found while running. (Thus, it's usually nullptr except when pipeline::resolve is called
     // for the purpose of computing a FileHash.)
     static ast::ParsedFilesOrCancelled run(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                                           WorkerPool &workers, core::FoundMethodHashes *foundMethodHashesOut);
+                                           WorkerPool &workers, core::FoundDefHashes *foundHashesOut);
 
     // Version of Namer that accepts the old FoundMethodHashes for each file to run Namer, which
     // it uses to figure out how to mutate the already-populated GlobalState into the right shape

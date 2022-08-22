@@ -488,8 +488,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             {
                 core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // creates singletons and class names
                 core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters symbols
-                auto foundMethodHashes = nullptr;
-                trees = move(namer::Namer::run(*rbiGenGs, move(trees), *workers, foundMethodHashes).result());
+                auto foundHashes = nullptr;
+                trees = move(namer::Namer::run(*rbiGenGs, move(trees), *workers, foundHashes).result());
             }
 
             // Resolver
@@ -526,8 +526,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(tree));
-            core::FoundMethodHashes foundMethodHashes; // compute this just for test coverage
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundMethodHashes).result());
+            core::FoundDefHashes foundHashes; // compute this just for test coverage
+            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
 
@@ -852,14 +852,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs);
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(tree));
-            core::FoundMethodHashes foundMethodHashes; // out param, compute this just for test coverage
+            core::FoundDefHashes foundHashes; // out param, compute this just for test coverage
             // The lsp_test_runner will turn every testdata test into a test of
             // Namer::runIncremental by way of creating a file update with leading whitespace.
             //
             // Here, to complement those tests, we just run Namer::run (not Namer::runIncremental)
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundMethodHashes).result());
+            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
             tree = testSerialize(*gs, move(vTmp[0]));
 
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });

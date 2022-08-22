@@ -261,8 +261,8 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     for (const auto &e : fh->usages.nameHashes) {
         p.putU4(e._hashValue);
     }
-    p.putU4(fh->foundMethodHashes.size());
-    for (const auto &fdh : fh->foundMethodHashes) {
+    p.putU4(fh->foundHashes.methodHashes.size());
+    for (const auto &fdh : fh->foundHashes.methodHashes) {
         p.putU4(fdh.owner.idx);
         p.putU1(fdh.owner.useSingletonClass);
         p.putU4(fdh.nameHash._hashValue);
@@ -307,7 +307,7 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         ret.usages.nameHashes.emplace_back(key);
     }
     auto foundMethodHashesSize = p.getU4();
-    ret.foundMethodHashes.reserve(foundMethodHashesSize);
+    ret.foundHashes.methodHashes.reserve(foundMethodHashesSize);
     for (int it = 0; it < foundMethodHashesSize; it++) {
         auto ownerIdx = p.getU4();
         auto useSingletonClass = p.getU1();
@@ -315,7 +315,7 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         fullNameHash._hashValue = p.getU4();
         ArityHash arityHash;
         arityHash._hashValue = p.getU4();
-        ret.foundMethodHashes.emplace_back(ownerIdx, useSingletonClass, fullNameHash, arityHash);
+        ret.foundHashes.methodHashes.emplace_back(ownerIdx, useSingletonClass, fullNameHash, arityHash);
     }
     return make_unique<const FileHash>(move(ret));
 }
