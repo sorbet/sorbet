@@ -9,13 +9,13 @@ end
 class B
   extend T::Generic
   R = type_member # error: Expected `Integer` but found `T::Types::TypeMember` for field
-  R = 1 # error: Redefining constant `R`
+  R = 1 # error: Redefining constant `R` as a static field
 end
 
 class C
   extend T::Generic
   R = 1
-  R = type_member # error: Redefining constant `C::R`
+  R = type_member # error: Redefining constant `R` as a type member or type template
 end
 
 class D

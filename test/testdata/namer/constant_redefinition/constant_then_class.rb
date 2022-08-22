@@ -1,7 +1,7 @@
 # typed: true
 
 R = 5
-class R; end # error: Redefining constant `R`
+class R; end # error: Redefining constant `R` as a class or module
 
 # this should resolve as a class, so this would not be an error
 x = R.new

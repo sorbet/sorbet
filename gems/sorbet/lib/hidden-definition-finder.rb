@@ -141,6 +141,8 @@ class Sorbet::Private::HiddenMethodFinder
         # Redefining constant is needed because we serialize things both as
         # aliases and in-class constants.
         '--suppress-error-code=4012',
+        # At one point we split 4012 into 4012/4022
+        '--suppress-error-code=4022',
         # Invalid nesting is ok because we don't generate all the intermediate
         # namespaces for aliases
         '--suppress-error-code=4015',
