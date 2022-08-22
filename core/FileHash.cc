@@ -103,7 +103,7 @@ string FoundMethodHash::toString() const {
                        owner.idx, owner.useSingletonClass, nameHash._hashValue, arityHash._hashValue);
 }
 
-FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundHashes &&foundHashes)
+FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundDefHashes &&foundHashes)
     : localSymbolTableHashes(move(localSymbolTableHashes)), usages(move(usages)), foundHashes(move(foundHashes)) {}
 
 } // namespace sorbet::core

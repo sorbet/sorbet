@@ -216,7 +216,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     auto toTypecheck = move(result.extraFiles);
     for (auto [fref, idx] : result.changedFiles) {
         if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
-            // Only set oldFoundHashesForFiles if symbols actually changed
+            // Only set oldFoundDefHashesForFiles if symbols actually changed
             // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
             // methods only to redefine them with different IDs.
 

@@ -116,7 +116,7 @@ CheckSize(FoundMethodHash, 12, 4);
 
 using FoundMethodHashes = std::vector<FoundMethodHash>;
 
-struct FoundHashes {
+struct FoundDefHashes {
     FoundMethodHashes methodHashes;
 };
 
@@ -249,10 +249,10 @@ struct UsageHash {
 struct FileHash {
     LocalSymbolTableHashes localSymbolTableHashes;
     UsageHash usages;
-    FoundHashes foundHashes;
+    FoundDefHashes foundHashes;
 
     FileHash() = default;
-    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundHashes &&foundHashes);
+    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundDefHashes &&foundHashes);
 };
 
 }; // namespace sorbet::core

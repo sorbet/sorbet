@@ -69,7 +69,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
             logger.debug(view);
 
             return make_unique<core::FileHash>(core::LocalSymbolTableHashes::invalidParse(), move(usageHash),
-                                               core::FoundHashes{});
+                                               core::FoundDefHashes{});
         }
     }
 
@@ -77,7 +77,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
     single.emplace_back(move(file));
 
     auto workers = WorkerPool::create(0, lgs->tracer());
-    core::FoundHashes foundHashes; // out parameter
+    core::FoundDefHashes foundHashes; // out parameter
     realmain::pipeline::resolve(lgs, move(single), opts(), *workers, &foundHashes);
 
     return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash), move(foundHashes));

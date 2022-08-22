@@ -418,7 +418,7 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
 
-    // Only need to compute FoundHashes when running to compute a FileHash
+    // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
     rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers, foundHashes).result());
     if (rbiGS->hadCriticalError()) {

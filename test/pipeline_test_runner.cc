@@ -526,7 +526,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(tree));
-            core::FoundHashes foundHashes; // compute this just for test coverage
+            core::FoundDefHashes foundHashes; // compute this just for test coverage
             vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
@@ -852,7 +852,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeSymbolTable symbolTableAccess(*gs);
             vector<ast::ParsedFile> vTmp;
             vTmp.emplace_back(move(tree));
-            core::FoundHashes foundHashes; // out param, compute this just for test coverage
+            core::FoundDefHashes foundHashes; // out param, compute this just for test coverage
             // The lsp_test_runner will turn every testdata test into a test of
             // Namer::runIncremental by way of creating a file update with leading whitespace.
             //

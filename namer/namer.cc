@@ -1304,7 +1304,7 @@ public:
         }
     }
 
-    void populateFoundHashes(core::Context ctx, core::FoundHashes &foundHashesOut) {
+    void populateFoundDefHashes(core::Context ctx, core::FoundDefHashes &foundHashesOut) {
         ENFORCE(foundHashesOut.methodHashes.empty());
         foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
         for (const auto &method : foundDefs.methods()) {
@@ -1936,7 +1936,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 ast::ParsedFilesOrCancelled
 defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions, WorkerPool &workers,
               UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
-              core::FoundHashes *foundHashesOut) {
+              core::FoundDefHashes *foundHashesOut) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
@@ -1963,7 +1963,7 @@ defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefiniti
         output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
-            symbolDefiner.populateFoundHashes(ctx, *foundHashesOut);
+            symbolDefiner.populateFoundDefHashes(ctx, *foundHashesOut);
         }
     }
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
@@ -2089,7 +2089,7 @@ ast::ParsedFilesOrCancelled Namer::symbolizeTreesBestEffort(const core::GlobalSt
 ast::ParsedFilesOrCancelled
 Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
                    UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
-                   core::FoundHashes *foundHashesOut) {
+                   core::FoundDefHashes *foundHashesOut) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         trees.reserve(foundDefs.size());
@@ -2112,7 +2112,7 @@ Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerP
 }
 
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-                                       core::FoundHashes *foundHashesOut) {
+                                       core::FoundDefHashes *foundHashesOut) {
     // In non-incremental namer, there are no old FoundMethodHashes; just defineSymbols like normal.
     auto oldFoundMethodHashesForFiles = UnorderedMap<core::FileRef, core::FoundMethodHashes>{};
     return runInternal(gs, move(trees), workers, std::move(oldFoundMethodHashesForFiles), foundHashesOut);

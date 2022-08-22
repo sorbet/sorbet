@@ -761,7 +761,7 @@ ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, vec
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers, core::FoundHashes *foundHashes) {
+                                 WorkerPool &workers, core::FoundDefHashes *foundHashes) {
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
@@ -846,7 +846,7 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 }
 
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers, core::FoundHashes *foundHashes) {
+                                    const options::Options &opts, WorkerPool &workers, core::FoundDefHashes *foundHashes) {
     try {
         // packager intentionally runs outside of rewriter so that its output does not get cached.
         what = package(*gs, move(what), opts, workers);

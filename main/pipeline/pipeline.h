@@ -26,7 +26,7 @@ std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::Par
                                      const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers, core::FoundHashes *foundHashes);
+                                    const options::Options &opts, WorkerPool &workers, core::FoundDefHashes *foundHashes);
 
 // If `foundMethodHashesForFiles` is non-nullopt, incrementalResolve invokes Namer in runIncremental mode.
 //
@@ -46,7 +46,7 @@ std::vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalStat
                                                           const options::Options &opts);
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers, core::FoundHashes *foundHashes);
+                                 WorkerPool &workers, core::FoundDefHashes *foundHashes);
 
 ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                                 WorkerPool &workers);
