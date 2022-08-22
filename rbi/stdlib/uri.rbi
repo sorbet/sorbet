@@ -21,290 +21,7 @@
 # sprintf "%.1f", 1.234 #=> "1.2"
 # ```
 #
-# ## What's Here
-#
-# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html)
-# [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) provides methods
-# that are useful for:
-#
-# *   [Converting](#module-Kernel-label-Converting)
-# *   [Querying](#module-Kernel-label-Querying)
-# *   [Exiting](#module-Kernel-label-Exiting)
-# *   [Exceptions](#module-Kernel-label-Exceptions)
-# *   [IO](#module-Kernel-label-IO)
-# *   [Procs](#module-Kernel-label-Procs)
-# *   [Tracing](#module-Kernel-label-Tracing)
-# *   [Subprocesses](#module-Kernel-label-Subprocesses)
-# *   [Loading](#module-Kernel-label-Loading)
-# *   [Yielding](#module-Kernel-label-Yielding)
-# *   [Random Values](#module-Kernel-label-Random+Values)
-# *   [Other](#module-Kernel-label-Other)
-#
-#
-# ### Converting
-#
-#     [#Array](#method-i-Array)
-# :       Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
-#         based on the given argument.
-#
-#     [#Complex](#method-i-Complex)
-# :       Returns a
-#         [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html) based on
-#         the given arguments.
-#
-#     [#Float](#method-i-Float)
-# :       Returns a [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
-#         based on the given arguments.
-#
-#     [#Hash](#method-i-Hash)
-# :       Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
-#         based on the given argument.
-#
-#     [#Integer](#method-i-Integer)
-# :       Returns an
-#         [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) based on
-#         the given arguments.
-#
-#     [#Rational](#method-i-Rational)
-# :       Returns a
-#         [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html) based
-#         on the given arguments.
-#
-#     [#String](#method-i-String)
-# :       Returns a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
-#         based on the given argument.
-#
-#
-#
-# ### Querying
-#
-#     [#__callee__](#method-i-__callee__)
-# :       Returns the called name of the current method as a symbol.
-#
-#     [#__dir__](#method-i-__dir__)
-# :       Returns the path to the directory from which the current method is
-#         called.
-#
-#     [#__method__](#method-i-__method__)
-# :       Returns the name of the current method as a symbol.
-#
-#     [`autoload?`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-autoload-3F)
-# :       Returns the file to be loaded when the given module is referenced.
-#
-#     [`binding`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-binding)
-# :       Returns a
-#         [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html) for the
-#         context at the point of call.
-#
-#     [`block_given?`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-block_given-3F)
-# :       Returns `true` if a block was passed to the calling method.
-#
-#     [`caller`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-caller)
-# :       Returns the current execution stack as an array of strings.
-#
-#     [`caller_locations`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-caller_locations)
-# :       Returns the current execution stack as an array of
-#         [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html)
-#         objects.
-#
-#     [`class`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-class)
-# :       Returns the class of `self`.
-#
-#     [`frozen?`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-frozen-3F)
-# :       Returns whether `self` is frozen.
-#
-#     [`global_variables`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-global_variables)
-# :       Returns an array of global variables as symbols.
-#
-#     [`local_variables`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-local_variables)
-# :       Returns an array of local variables as symbols.
-#
-#     [`test`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-test)
-# :       Performs specified tests on the given single file or pair of files.
-#
-#
-#
-# ### Exiting
-#
-#     [`abort`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-abort)
-# :       Exits the current process after printing the given arguments.
-#
-#     [`at_exit`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-at_exit)
-# :       Executes the given block when the process exits.
-#
-#     [`exit`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exit)
-# :       Exits the current process after calling any registered `at_exit`
-#         handlers.
-#
-#     [`exit!`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exit-21)
-# :       Exits the current process without calling any registered `at_exit`
-#         handlers.
-#
-#
-#
-# ### Exceptions
-#
-#     [`catch`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-catch)
-# :       Executes the given block, possibly catching a thrown object.
-#
-#     [`raise`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-raise) (aliased as [`fail`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-fail))
-# :       Raises an exception based on the given arguments.
-#
-#     [`throw`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-throw)
-# :       Returns from the active catch block waiting for the given tag.
-#
-#
-#
-# ### [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
-#
-#     [`gets`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gets)
-# :       Returns and assigns to `$_` the next line from the current input.
-#
-#     [`open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open)
-# :       Creates an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object
-#         connected to the given stream, file, or subprocess.
-#
-#     [`p`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-p)
-# :       Prints the given objects' inspect output to the standard output.
-#
-#     [`pp`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-pp)
-# :       Prints the given objects in pretty form.
-#
-#     [`print`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-print)
-# :       Prints the given objects to standard output without a newline.
-#
-#     [`printf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-printf)
-# :       Prints the string resulting from applying the given format string to
-#         any additional arguments.
-#
-#     [`putc`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-putc)
-# :       Equivalent to <tt.$stdout.putc(object)</tt> for the given object.
-#
-#     [`puts`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-puts)
-# :       Equivalent to `$stdout.puts(*objects)` for the given objects.
-#
-#     [`readline`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-readline)
-# :       Similar to
-#         [`gets`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gets),
-#         but raises an exception at the end of file.
-#
-#     [`readlines`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-readlines)
-# :       Returns an array of the remaining lines from the current input.
-#
-#     [`select`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-select)
-# :       Same as
-#         [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select).
-#
-#
-#
-# ### Procs
-#
-#     [`lambda`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-lambda)
-# :       Returns a lambda proc for the given block.
-#
-#     [`proc`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-proc)
-# :       Returns a new [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html);
-#         equivalent to
-#         [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new).
-#
-#
-#
-# ### Tracing
-#
-#     [`set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-set_trace_func)
-# :       Sets the given proc as the handler for tracing, or disables tracing if
-#         given `nil`.
-#
-#     [`trace_var`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-trace_var)
-# :       Starts tracing assignments to the given global variable.
-#
-#     [`untrace_var`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-untrace_var)
-# :       Disables tracing of assignments to the given global variable.
-#
-#
-#
-# ### Subprocesses
-#
-#     #`cmd`
-# :       Returns the standard output of running `cmd` in a subshell.
-#
-#     [`exec`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exec)
-# :       Replaces current process with a new process.
-#
-#     [`fork`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-fork)
-# :       Forks the current process into two processes.
-#
-#     [`spawn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-spawn)
-# :       Executes the given command and returns its pid without waiting for
-#         completion.
-#
-#     [`system`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-system)
-# :       Executes the given command in a subshell.
-#
-#
-#
-# ### Loading
-#
-#     [`autoload`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-autoload)
-# :       Registers the given file to be loaded when the given constant is first
-#         referenced.
-#
-#     [`load`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-load)
-# :       Loads the given Ruby file.
-#
-#     [`require`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require)
-# :       Loads the given Ruby file unless it has already been loaded.
-#
-#     [`require_relative`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require_relative)
-# :       Loads the Ruby file path relative to the calling file, unless it has
-#         already been loaded.
-#
-#
-#
-# ### Yielding
-#
-#     [`tap`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-tap)
-# :       Yields `self` to the given block; returns `self`.
-#
-#     [`then`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-then) (aliased as [`yield_self`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-yield_self))
-# :       Yields `self` to the block and returns the result of the block.
-#
-#
-#
-# ### [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) Values
-#
-#     [`rand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-rand)
-# :       Returns a pseudo-random floating point number strictly between 0.0 and
-#         1.0.
-#
-#     [`srand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-srand)
-# :       Seeds the pseudo-random number generator with the given number.
-#
-#
-#
-# ### Other
-#
-#     [`eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
-# :       Evaluates the given string as Ruby code.
-#
-#     [`loop`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-loop)
-# :       Repeatedly executes the given block.
-#
-#     [`sleep`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sleep)
-# :       Suspends the current thread for the given number of seconds.
-#
-#     [`sprintf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sprintf) (aliased as [`format`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-format))
-# :       Returns the string resulting from applying the given format string to
-#         any additional arguments.
-#
-#     [`syscall`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-syscall)
-# :       Runs an operating system call.
-#
-#     [`trap`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-trap)
-# :       Specifies the handling of system signals.
-#
-#     [`warn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-warn)
-# :       Issue a warning based on the given messages and options.
+# fronzen-string-literal: true
 module Kernel
   # Returns `uri` converted to an
   # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) object.
@@ -350,7 +67,7 @@ end
 #   class RSYNC < Generic
 #     DEFAULT_PORT = 873
 #   end
-#   register_scheme 'RSYNC', RSYNC
+#   @@schemes['RSYNC'] = RSYNC
 # end
 # #=> URI::RSYNC
 #
@@ -406,6 +123,8 @@ end
 #     *   URI::REGEXP::PATTERN - (in uri/common.rb)
 #
 # *   URI::Util - (in uri/common.rb)
+# *   [`URI::Escape`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html) - (in
+#     uri/common.rb)
 # *   [`URI::Error`](https://docs.ruby-lang.org/en/2.7.0/URI/Error.html) - (in
 #     uri/common.rb)
 #     *   [`URI::InvalidURIError`](https://docs.ruby-lang.org/en/2.7.0/URI/InvalidURIError.html)
@@ -427,6 +146,8 @@ end
 # License
 # :   Copyright (c) 2001 akira yamada <akira@ruby-lang.org> You can redistribute
 #     it and/or modify it under the same term as Ruby.
+# Revision
+# :   $Id$
 module URI
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
@@ -519,7 +240,7 @@ module URI
   # This method doesn't handle files. When you send a file, use
   # multipart/form-data.
   #
-  # This refers https://url.spec.whatwg.org/#concept-urlencoded-serializer
+  # This refers http://url.spec.whatwg.org/#concept-urlencoded-serializer
   #
   # ```ruby
   # URI.encode_www_form([["q", "ruby"], ["lang", "en"]])
@@ -551,7 +272,7 @@ module URI
   # If `enc` is given, convert `str` to the encoding before percent encoding.
   #
   # This is an implementation of
-  # https://www.w3.org/TR/2013/CR-html5-20130806/forms.html#url-encoded-form-data.
+  # http://www.w3.org/TR/2013/CR-html5-20130806/forms.html#url-encoded-form-data.
   #
   # See
   # [`URI.decode_www_form_component`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-decode_www_form_component),
@@ -731,7 +452,7 @@ module URI
   # which matches to URI-like strings. The
   # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) object returned
   # by this method includes arbitrary number of capture group (parentheses).
-  # Never rely on its number.
+  # Never rely on it's number.
   #
   # ## Usage
   #
@@ -1945,9 +1666,10 @@ class URI::Generic < Object
   # [`URI::Generic::build`](https://docs.ruby-lang.org/en/2.7.0/URI/Generic.html#method-c-build).
   # But, if exception
   # [`URI::InvalidComponentError`](https://docs.ruby-lang.org/en/2.7.0/URI/InvalidComponentError.html)
-  # is raised, then it does URI::Escape.escape all
-  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) components and tries
-  # again.
+  # is raised, then it does
+  # [`URI::Escape.escape`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html#method-i-escape)
+  # all [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) components and
+  # tries again.
   sig {params(args: T.untyped).returns(T.untyped)}
   def self.build2(args); end
 
@@ -2540,7 +2262,7 @@ class URI::RFC2396_Parser < Object
   # :   [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) to make safe
   # `unsafe`
   # :   [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) to apply.
-  #     Defaults to `self.regexp[:UNSAFE]`
+  #     Defaults to [self.regexp](:UNSAFE)
   #
   #
   # ## Description
@@ -2581,10 +2303,10 @@ class URI::RFC2396_Parser < Object
   def join(*uris); end
 
   # Returns [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) that is
-  # default `self.regexp[:ABS_URI_REF]`, unless `schemes` is provided. Then it
+  # default [self.regexp](:ABS\_URI\_REF), unless `schemes` is provided. Then it
   # is a
   # [`Regexp.union`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html#method-c-union)
-  # with `self.pattern[:X_ABS_URI]`.
+  # with [self.pattern](:X\_ABS\_URI).
   def make_regexp(schemes = _); end
 
   # ## Args
@@ -2624,7 +2346,7 @@ class URI::RFC2396_Parser < Object
   def regexp; end
 
   # Returns a split [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
-  # against `regexp[:ABS_URI]`.
+  # against [regexp](:ABS_URI).
   def split(uri); end
 
   # ## Args
@@ -2634,7 +2356,7 @@ class URI::RFC2396_Parser < Object
   #     escapes from
   # `escaped`
   # :   [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) to apply.
-  #     Defaults to `self.regexp[:ESCAPED]`
+  #     Defaults to [self.regexp](:ESCAPED)
   #
   #
   # ## Description
