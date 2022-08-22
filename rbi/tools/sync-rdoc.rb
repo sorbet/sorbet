@@ -444,6 +444,10 @@ class SyncRDoc
     "Kernel#require",
   ]
 
+  ONLY_IN_FILE = {
+    "Kernel" => "rbi/core/kernel.rbi"
+  }
+
   private def driver
     @driver ||= RDoc::RI::Driver.new
   end
@@ -516,8 +520,10 @@ class SyncRDoc
 
   def process_file!(file)
     to_replace = []
+    puts file.path
     DocParser.new(file).each_doc do |path, def_node, doc_range, indentation|
       next if SKIP.any? {|s| s.is_a?(String) ? path == s : path =~ s}
+      next unless ONLY_IN_FILE[path] == file.path
       namespace, separator, name = path.rpartition(/::|\.|\#/)
       code_obj = case separator
       when ""
