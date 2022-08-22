@@ -750,6 +750,7 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
             gs->suppressErrorClass(core::errors::Namer::InvalidClassOwner.code);
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
+            gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
             gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
 
