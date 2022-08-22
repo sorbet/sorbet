@@ -25,44 +25,60 @@ test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementati
             ^^^^^^^^^^^^^
 Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_override.rb ---------------------
-test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining constant `B` https://srb.help/4012
+test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining constant `B` as a class or module https://srb.help/4022
      3 |module B
      4 |  extend T::Sig
      5 |  sig { returns(T.all(B,T)) }
      6 |  def foo; T.unsafe(nil); end
      7 |end
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:2: Previous definition
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:2: Previously defined as a static field
      2 |B = e
         ^
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+even if the initializer computes a value of type `Module`. See the docs for more.
 
-test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefining constant `B` https://srb.help/4012
+
+test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefining constant `B` as a class or module https://srb.help/4022
      111 |module B
      112 |  extend T::Sig
      113 |  sig { returns(T.all(B,T)) }
      114 |  def foo; T.unsafe(nil); end
      115 |end
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: Previous definition
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: Previously defined as a static field
     13 |
     14 |
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+even if the initializer computes a value of type `Module`. See the docs for more.
+
 
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
 Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_redefinition.rb ---------------------
-test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefining constant `A` https://srb.help/4012
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefining constant `A` as a static field https://srb.help/4022
      4 |  A = nil
           ^^^^^^^
-    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:3: Previous definition
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:3: Previously defined as a class or module
      3 |  class A; end
           ^^^^^^^
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+even if the initializer computes a value of type `Module`. See the docs for more.
 
-test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redefining constant `A` https://srb.help/4012
+
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redefining constant `A` as a static field https://srb.help/4022
     59 |  A = nil
           ^^^^^^^
-    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:58: Previous definition
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:58: Previously defined as a class or module
     58 |  class A; end
           ^^^^^^^
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+even if the initializer computes a value of type `Module`. See the docs for more.
+
 Errors: 2
 ----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Unused type annotation. No method def before next annotation https://srb.help/5040
