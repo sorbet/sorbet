@@ -20,7 +20,7 @@ public:
     static ast::ParsedFilesOrCancelled
     symbolizeTreesBestEffort(const core::GlobalState &gs, std::vector<ast::ParsedFile> trees, WorkerPool &workers);
 
-    // Note: foundMethodHashes is an optional out parameter.
+    // Note: foundHashes is an optional out parameter.
     //
     // Setting it to a non-nullptr requests that Namer compute a fingerprint of the FoundDefinitions
     // it found while running. (Thus, it's usually nullptr except when pipeline::resolve is called
