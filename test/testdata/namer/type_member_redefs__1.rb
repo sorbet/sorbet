@@ -15,7 +15,7 @@ end
 class C
   extend T::Generic
   R = 1
-  R = type_member # error: Redefining constant `C::R` as a type member or type template
+  R = type_member # error: Redefining constant `R` as a type member or type template
 end
 
 class D
