@@ -592,7 +592,7 @@ class SymbolDefiner {
             if ((kind == Kind::ClassOrModule && prevSymbol.kind() == Kind::FieldOrStaticField) ||
                 (kind == Kind::FieldOrStaticField && prevSymbol.kind() == Kind::ClassOrModule)) {
                 e.addErrorNote("Sorbet does not allow treating constant assignments as class or module definitions,\n"
-                               "even if the initializer computes a value of type `{}`. See the docs for more.\n",
+                               "    even if the initializer computes a value of type `{}`. See the docs for more.\n",
                                "Module");
             }
         }
