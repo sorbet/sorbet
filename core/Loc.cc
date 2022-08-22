@@ -110,9 +110,15 @@ constexpr unsigned int WINDOW_SIZE = 10; // how many lines of source to print
 constexpr unsigned int WINDOW_HALF_SIZE = WINDOW_SIZE / 2;
 static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
 
-void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth) {
+void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth, bool censorForSnapshotTests) {
     printTabs(buf, tabs);
-    buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
+    buf << rang::fgB::black;
+    if (censorForSnapshotTests) {
+        buf << leftPad("NN", posWidth);
+    } else {
+        buf << leftPad(to_string(line + 1), posWidth);
+    }
+    buf << " |" << rang::style::reset;
     if (file.lineBreaks().size() <= line + 1) {
         fatalLogger->error(R"(msg="Bad addLocLine line" path="{}" line="{}"")", absl::CEscape(file.path()), line);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
@@ -143,6 +149,7 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int pos
 string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &file = this->file().data(gs);
+    auto censorForSnapshotTests = gs.censorForSnapshotTests && file.isPayload();
     auto pos = this->position(gs);
     int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
 
@@ -154,7 +161,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
             buf << '\n';
         }
         first = false;
-        addLocLine(buf, lineIt, file, tabs, posWidth);
+        addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
         lineIt++;
     }
     if (lineIt != pos.second.line && lineIt < pos.second.line - WINDOW_HALF_SIZE) {
@@ -166,7 +173,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
     }
     while (lineIt != pos.second.line) {
         buf << '\n';
-        addLocLine(buf, lineIt, file, tabs, posWidth);
+        addLocLine(buf, lineIt, file, tabs, posWidth, censorForSnapshotTests);
         lineIt++;
     }
 
