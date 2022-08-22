@@ -196,8 +196,7 @@ public:
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         core::FoundMethod foundMethod;
-        core::FoundDefinitionRef owner = getOwner();
-        foundMethod.owner = owner;
+        foundMethod.owner = getOwner();
         foundMethod.name = method.name;
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
