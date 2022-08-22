@@ -3,7 +3,7 @@ test/cli/at/at.rb:2: Expected `Integer` but found `String("s")` for argument `ar
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
     test/cli/at/at.rb:2:

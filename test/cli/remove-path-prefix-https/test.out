@@ -3,7 +3,7 @@ test/cli/remove-path-prefix-https/remove-path-prefix-https.rb:2: Expected `Integ
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
     test/cli/remove-path-prefix-https/remove-path-prefix-https.rb:2:

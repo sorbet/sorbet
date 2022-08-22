@@ -10,7 +10,7 @@ test/cli/suggest-not-stub/suggest-not-stub.rb:6: Unable to resolve constant `B` 
      6 |B
         ^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T` defined here
-    16 |module T
+    NN |module T
         ^^^^^^^^
   Did you mean `A`? Use `-a` to autocorrect
     test/cli/suggest-not-stub/suggest-not-stub.rb:6: Replace with `A`

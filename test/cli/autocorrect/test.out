@@ -39,7 +39,7 @@ autocorrect.rb:6: Expected `String` but found `T.nilable(String)` for argument `
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
-    68 |        arg0: String,
+    NN |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
@@ -94,7 +94,7 @@ autocorrect.rb:12: Method `bar=` does not exist on `String` component of `T.nila
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-    3076 |  def warn(*msg); end
+      NN |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
 autocorrect.rb:12: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
@@ -137,7 +137,7 @@ autocorrect.rb:13: Method `bar=` does not exist on `String` component of `T.nila
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-    3076 |  def warn(*msg); end
+      NN |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
 autocorrect.rb:13: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
@@ -180,7 +180,7 @@ autocorrect.rb:14: Method `bar=` does not exist on `String` component of `T.nila
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-    3076 |  def warn(*msg); end
+      NN |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
 autocorrect.rb:14: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
@@ -223,7 +223,7 @@ autocorrect.rb:15: Method `bar=` does not exist on `String` component of `T.nila
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-    3076 |  def warn(*msg); end
+      NN |  def warn(*msg); end
             ^^^^^^^^^^^^^^
 
 autocorrect.rb:15: Method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
@@ -267,7 +267,7 @@ autocorrect.rb:26: Expected `Integer` but found `NilClass` for argument `arg1` h
                 ^^^
   Expected `Integer` for argument `arg1` of method `Hash#[]=`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/hash.rbi#LCENSORED:
-     285 |        arg1: V,
+      NN |        arg1: V,
                   ^^^^
   Got `NilClass` originating from:
     autocorrect.rb:26:

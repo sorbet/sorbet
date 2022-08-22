@@ -279,7 +279,7 @@ test/cli/flow-sensitivity-hint/test.rb:144: Method `even?` does not exist on `T.
     or accept the autocorrect to silence this error.
   Autocorrect: Use `-a` to autocorrect
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED: Insert `self.`
-     704 |  def even?(); end
+      NN |  def even?(); end
                 ^
 
 test/cli/flow-sensitivity-hint/test.rb:144: Method `even?` does not exist on `NilClass` component of `T.nilable(T.class_of(Integer))` https://srb.help/7003

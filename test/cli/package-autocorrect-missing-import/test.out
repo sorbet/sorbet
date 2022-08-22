@@ -6,14 +6,14 @@ foo_class.rb:15: Unable to resolve constant `MyClass` https://srb.help/5002
     15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
-    71 |class Class < Module
+    NN |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     foo_class.rb:15: Replaced with `Digest::Class`
     15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/digest.rbi#LCENSORED: `Digest::Class` defined here
-     176 |class Digest::Class
+      NN |class Digest::Class
           ^^^^^^^^^^^^^^^^^^^
 
 foo_class.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
