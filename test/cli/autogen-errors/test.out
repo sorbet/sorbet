@@ -1,3 +1,25 @@
+test/cli/autogen-errors/autogen-errors.rb:12: Redefining constant `ProtobufGeneratedClass1` as a static field https://srb.help/4022
+    12 |  ProtobufGeneratedClass1 = T.unsafe(Class).new
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/autogen-errors/autogen-errors.rb:8: Previously defined as a class or module
+     8 |class Opus::Autogen::Proto::ProtobufGeneratedClass1
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+even if the initializer computes a value of type `Module`. See the docs for more.
+
+
+test/cli/autogen-errors/autogen-errors.rb:19: Redefining constant `ProtobufGeneratedClass2` as a class or module https://srb.help/4022
+    19 |class Opus::Autogen::Proto::ProtobufGeneratedClass2
+    20 |end
+    test/cli/autogen-errors/autogen-errors.rb:16: Previously defined as a static field
+    16 |  ProtobufGeneratedClass2 = T.unsafe(Class).new
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+even if the initializer computes a value of type `Module`. See the docs for more.
+
+
 test/cli/autogen-errors/autogen-errors.rb:5: Circular dependency: `Bar` and `Foo` are declared as parents of each other https://srb.help/5011
      5 |class Bar < Foo
                     ^^^
@@ -7,4 +29,4 @@ test/cli/autogen-errors/autogen-errors.rb:5: Circular dependency: `Bar` and `Foo
     test/cli/autogen-errors/autogen-errors.rb:3: Other definition
      3 |class Foo < Bar
         ^^^^^^^^^^^^^^^
-Errors: 1
+Errors: 3
