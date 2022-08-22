@@ -116,6 +116,10 @@ CheckSize(FoundMethodHash, 12, 4);
 
 using FoundMethodHashes = std::vector<FoundMethodHash>;
 
+struct FoundHashes {
+    FoundMethodHashes methodHashes;
+};
+
 // When a file is edited, we run index and resolve it using an local (empty) GlobalState.
 // We then hash the symbols defined in that local GlobalState, and use the result to quickly decide
 // whether "something" changed, or whether nothing changed (and thus we can take the fast path).
@@ -245,11 +249,10 @@ struct UsageHash {
 struct FileHash {
     LocalSymbolTableHashes localSymbolTableHashes;
     UsageHash usages;
-    FoundMethodHashes foundMethodHashes;
+    FoundHashes foundHashes;
 
     FileHash() = default;
-    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages,
-             FoundMethodHashes &&foundMethodHashes);
+    FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundHashes &&foundHashes);
 };
 
 }; // namespace sorbet::core

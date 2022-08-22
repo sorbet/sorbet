@@ -216,13 +216,13 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     auto toTypecheck = move(result.extraFiles);
     for (auto [fref, idx] : result.changedFiles) {
         if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
-            // Only set oldFoundMethodHashesForFiles if symbols actually changed
+            // Only set oldFoundHashesForFiles if symbols actually changed
             // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
             // methods only to redefine them with different IDs.
 
             // Okay to `move` here (steals component of getFileHash) because we're about to use
             // replaceFile to clobber fref.data(gs) anyways.
-            oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundMethodHashes));
+            oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes.methodHashes));
         }
 
         gs->replaceFile(fref, updates.updatedFiles[idx]);
@@ -256,7 +256,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
             // whole file).
-            oldFoundMethodHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundMethodHashes);
+            oldFoundMethodHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundHashes.methodHashes);
         }
     }
 
@@ -645,9 +645,9 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     // There are two incrementalResolve modes: one when running for the purpose of processing a file update,
     // and one for running an LSP query on an already-resolved file.
     // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
-    auto foundMethodHashesForFiles = nullopt;
+    auto foundHashesForFiles = nullopt;
 
-    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundMethodHashesForFiles), config->opts);
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts);
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
