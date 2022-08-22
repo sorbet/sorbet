@@ -36,7 +36,7 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining
         ^
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-even if the initializer computes a value of type `Module`. See the docs for more.
+    even if the initializer computes a value of type `Module`. See the docs for more.
 
 
 test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefining constant `B` as a class or module https://srb.help/4022
@@ -50,7 +50,7 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefini
     14 |
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-even if the initializer computes a value of type `Module`. See the docs for more.
+    even if the initializer computes a value of type `Module`. See the docs for more.
 
 
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
@@ -66,7 +66,7 @@ test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefi
           ^^^^^^^
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-even if the initializer computes a value of type `Module`. See the docs for more.
+    even if the initializer computes a value of type `Module`. See the docs for more.
 
 
 test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redefining constant `A` as a static field https://srb.help/4022
@@ -77,7 +77,7 @@ test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redef
           ^^^^^^^
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-even if the initializer computes a value of type `Module`. See the docs for more.
+    even if the initializer computes a value of type `Module`. See the docs for more.
 
 Errors: 2
 ----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
