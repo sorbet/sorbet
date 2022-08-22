@@ -527,8 +527,11 @@ class SymbolDefiner {
                 auto newOwner = squashNames(ctx, klassRef.owner, owner);
                 return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
             }
-            default:
-                Exception::raise("Invalid name reference");
+            case core::FoundDefinitionRef::Kind::Class:
+            case core::FoundDefinitionRef::Kind::Method:
+            case core::FoundDefinitionRef::Kind::StaticField:
+            case core::FoundDefinitionRef::Kind::TypeMember:
+                Exception::raise("Invalid name reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
         }
     }
 
@@ -543,8 +546,11 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::Method:
                 ENFORCE(ref.idx() < definedMethods.size());
                 return definedMethods[ref.idx()];
-            default:
-                Exception::raise("Invalid owner reference");
+            case core::FoundDefinitionRef::Kind::Empty:
+            case core::FoundDefinitionRef::Kind::ClassRef:
+            case core::FoundDefinitionRef::Kind::StaticField:
+            case core::FoundDefinitionRef::Kind::TypeMember:
+                Exception::raise("Invalid owner reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
         }
     }
 
@@ -1198,8 +1204,11 @@ class SymbolDefiner {
                 insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
                 break;
             }
-            default:
-                ENFORCE(false);
+            case core::FoundDefinitionRef::Kind::Empty:
+            case core::FoundDefinitionRef::Kind::ClassRef:
+            case core::FoundDefinitionRef::Kind::Method:
+            case core::FoundDefinitionRef::Kind::Symbol:
+                ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
                 break;
         }
     }
