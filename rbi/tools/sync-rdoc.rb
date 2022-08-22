@@ -9,6 +9,7 @@ gemfile do
   gem 'nokogiri'
   gem 'diff-lcs', require: 'diff/lcs'
   gem 'paint'
+  gem 'pry'
 end
 
 class RBIFile
@@ -185,9 +186,19 @@ class DocParser
       namespace = namespace.empty? ? "Object" : namespace
       yield "#{namespace}.#{name}", node, scope_stack.consume! || node
 
-    when :FCALL, # extend Foo
-         :VCALL # private
+    when :VCALL # private
       assert_clean!
+    when :FCALL # extend Foo, module_function def foo; end, private def foo; end
+      name, args = node.children
+      if ![:module_function, :private].include?(name) ||
+          args.type != :LIST ||
+          args.children.length == 0 ||
+          ![:DEFS, :DEFN].include?(args.children[0].type)
+        assert_clean!
+        return
+      end
+
+      walk_scope(args.children[0], &blk)
     else
       unexpected!(node)
     end
