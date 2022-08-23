@@ -13,7 +13,7 @@ namespace sorbet::realmain::lsp::watchman {
 WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
                                  vector<string> extensions,
                                  function<void(unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate,
-                                 std::function<void(int, string const &)> processExit)
+                                 std::function<void(int, const std::optional<std::string> &)> processExit)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)), processUpdate(std::move(processUpdate)), processExit(std::move(processExit)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
@@ -75,7 +75,7 @@ void WatchmanProcess::start() {
                 }
 
                 // Exit loop; unable to read from Watchman process.
-                exitWithCode(1, "Unknown error while reading from Watchman process");
+                exitWithCode(1, nullopt);
                 break;
             }
 
@@ -125,11 +125,11 @@ bool WatchmanProcess::isStopped() {
     return stopped;
 }
 
-void WatchmanProcess::exitWithCode(int code, string const &message) {
+void WatchmanProcess::exitWithCode(int code, const std::optional<std::string> &msg) {
     absl::MutexLock lck(&mutex);
     if (!stopped) {
         stopped = true;
-        processExit(code, message);
+        processExit(code, msg);
     }
 }
 
