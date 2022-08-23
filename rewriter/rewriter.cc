@@ -21,6 +21,7 @@
 #include "rewriter/ModuleFunction.h"
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
+#include "rewriter/ProtobufDescriptorPool.h"
 #include "rewriter/Rails.h"
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
@@ -80,6 +81,12 @@ public:
                     }
 
                     nodes = Regexp::run(ctx, &assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = ProtobufDescriptorPool::run(ctx, &assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
