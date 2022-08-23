@@ -125,7 +125,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &
                     for (auto &symToCheck : symsToCheck) {
                         for (auto &location :
                              extractLocations(typechecker.state(),
-                                              getReferencesInPackageToSymbol(typechecker, packageName, symToCheck))) {
+                                              getReferencesToSymbolInPackage(typechecker, packageName, symToCheck))) {
                             locations.emplace_back(std::move(location));
                         }
                     }
