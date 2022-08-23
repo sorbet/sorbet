@@ -502,8 +502,8 @@ public:
         }
 
         core::FoundField found;
-        found.kind = uid->kind == ast::UnresolvedIdent::Kind::Instance ? core::FoundField::Kind::Instance
-                                                                       : core::FoundField::Kind::Class;
+        found.kind = uid->kind == ast::UnresolvedIdent::Kind::Instance ? core::FoundField::Kind::InstanceVariable
+                                                                       : core::FoundField::Kind::ClassVariable;
         found.owner = getOwner();
         found.loc = uid->loc;
         found.name = uid->name;
@@ -1136,7 +1136,7 @@ class SymbolDefiner {
 
         // resolver checks a whole bunch of various error conditions here; we just want to
         // know where to define the field.
-        if (field.kind == core::FoundField::Kind::Class) {
+        if (field.kind == core::FoundField::Kind::ClassVariable) {
             scope = ctx.owner.enclosingClass(ctx);
         } else {
             scope = ctx.selfClass();
@@ -1157,7 +1157,7 @@ class SymbolDefiner {
         }
 
         core::FieldRef sym;
-        if (field.kind == core::FoundField::Kind::Instance) {
+        if (field.kind == core::FoundField::Kind::InstanceVariable) {
             sym = ctx.state.enterFieldSymbol(ctx.locAt(field.loc), scope, field.name);
         } else {
             sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(field.loc), scope, field.name);
