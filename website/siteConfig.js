@@ -165,8 +165,8 @@ const siteConfig = {
 
   // Open Graph and Twitter card images.
   // (these images can't be SVGs)
-  ogImage: 'img/sorbet-logo-card@2x.png',
-  twitterImage: 'img/sorbet-logo-card@2x.png',
+  // ogImage: 'img/sorbet-logo-card@2x.png',
+  // twitterImage: 'img/sorbet-logo-card@2x.png',
 
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
