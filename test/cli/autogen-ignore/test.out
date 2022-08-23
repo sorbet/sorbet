@@ -46,12 +46,12 @@ requires: []
  is_empty=0
  defining_ref=[Privacy]
 [def id=9]
- type=casgn
+ type=class
  defines_behavior=1
  is_empty=0
  defining_ref=[NewDeletionManifest]
 [def id=10]
- type=casgn
+ type=module
  defines_behavior=1
  is_empty=0
  defining_ref=[NewDeletionManifest RootType]
