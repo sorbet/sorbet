@@ -54,7 +54,7 @@ requires: []
  type=module
  defines_behavior=1
  is_empty=0
- defining_ref=[NewDeletionManifest RootType]
+ defining_ref=[NewDeletionManifest RootType1]
 ## refs:
 [ref id=0]
  scope=[]
@@ -128,9 +128,9 @@ requires: []
  is_defining_ref=0
 [ref id=10]
  scope=[Opus Autogen Proto Com Stripe Payserver Events Privacy]
- name=[NewDeletionManifest RootType]
+ name=[NewDeletionManifest RootType1]
  nesting=[[Opus Autogen Proto Com Stripe Payserver Events Privacy] [Opus Autogen Proto Com Stripe Payserver Events] [Opus Autogen Proto Com Stripe Payserver] [Opus Autogen Proto Com Stripe] [Opus Autogen Proto Com] [Opus Autogen Proto] [Opus Autogen] [Opus]]
- resolved=[Opus Autogen Proto Com Stripe Payserver Events Privacy NewDeletionManifest RootType]
+ resolved=[Opus Autogen Proto Com Stripe Payserver Events Privacy NewDeletionManifest RootType1]
  loc=test/cli/autogen-ignore/autogen-ignore.rb:12
  is_defining_ref=1
 [ref id=11]

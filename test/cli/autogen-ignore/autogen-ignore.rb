@@ -9,7 +9,7 @@ module Opus
             module Events
               module Privacy
                 NewDeletionManifest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("com.stripe.payserver.events.privacy.NewDeletionManifest").msgclass
-                NewDeletionManifest::RootType = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("com.stripe.payserver.events.privacy.NewDeletionManifest.RootType").enummodule
+                NewDeletionManifest::RootType1 = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("com.stripe.payserver.events.privacy.NewDeletionManifest.RootType1").enummodule
               end
             end
           end
