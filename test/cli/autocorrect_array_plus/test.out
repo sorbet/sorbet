@@ -3,7 +3,7 @@ autocorrect_array_plus.rb:6: Expected `T::Enumerable[Integer]` but found `T::Arr
                ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -21,7 +21,7 @@ autocorrect_array_plus.rb:8: Expected `T::Enumerable[Integer]` but found `T::Arr
                 ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -39,7 +39,7 @@ autocorrect_array_plus.rb:9: Expected `T::Enumerable[Integer]` but found `T::Arr
                  ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -57,7 +57,7 @@ autocorrect_array_plus.rb:10: Expected `T::Enumerable[Integer]` but found `T::Ar
                ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -75,7 +75,7 @@ autocorrect_array_plus.rb:13: Expected `T::Enumerable[Integer]` but found `T::Ar
           ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -94,7 +94,7 @@ autocorrect_array_plus.rb:16: Expected `T::Enumerable[Integer]` but found `T::Ar
                ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -112,7 +112,7 @@ autocorrect_array_plus.rb:18: Expected `T::Enumerable[Integer]` but found `T::Ar
                 ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -130,7 +130,7 @@ autocorrect_array_plus.rb:19: Expected `T::Enumerable[Integer]` but found `T::Ar
                 ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -148,7 +148,7 @@ autocorrect_array_plus.rb:20: Expected `T::Enumerable[Integer]` but found `T::Ar
                 ^^^^^^^
   Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `T::Array[String]` originating from:
     autocorrect_array_plus.rb:4:
@@ -166,7 +166,7 @@ autocorrect_array_plus.rb:22: Expected `T::Enumerable[{String("foo") => String("
                              ^^^^
   Expected `T::Enumerable[{String("foo") => String("bar")}]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `[{}] (1-tuple)` originating from:
     autocorrect_array_plus.rb:22:
@@ -184,7 +184,7 @@ autocorrect_array_plus.rb:24: Expected `T::Enumerable[String]` but found `String
                   ^^
   Expected `T::Enumerable[String]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-     448 |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[Elem],
                   ^^^^
   Got `String("")` originating from:
     autocorrect_array_plus.rb:24:

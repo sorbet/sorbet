@@ -139,7 +139,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void`
     68 |  sig {void}
                ^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
-    1909 |  def load(filename, arg0=T.unsafe(nil)); end
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
@@ -158,6 +158,6 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void`
     69 |  sig {void}
                ^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
-    1909 |  def load(filename, arg0=T.unsafe(nil)); end
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 10

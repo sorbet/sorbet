@@ -3,7 +3,7 @@ test/cli/folder-input-dir-and-file/foo.rb:4: Expected `Integer` but found `Strin
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("foo.rb")` originating from:
     test/cli/folder-input-dir-and-file/foo.rb:4:
@@ -15,7 +15,7 @@ test/cli/folder-input-dir-and-file/input/subfolder/baz.rb:4: Expected `Integer` 
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("baz.rb")` originating from:
     test/cli/folder-input-dir-and-file/input/subfolder/baz.rb:4:
@@ -27,7 +27,7 @@ test/cli/folder-input-dir-and-file/input/bar.rb:3: Expected `Integer` but found 
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("bar.rb")` originating from:
     test/cli/folder-input-dir-and-file/input/bar.rb:3:

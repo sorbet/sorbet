@@ -5,7 +5,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
     test/cli/override-typed-bad/override-typed-bad.rb:2:
@@ -18,7 +18,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
     test/cli/override-typed-bad/override-typed-bad.rb:2:
@@ -31,7 +31,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("s")` originating from:
     test/cli/override-typed-bad/override-typed-bad.rb:2:

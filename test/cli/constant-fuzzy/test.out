@@ -6,21 +6,21 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#LCENSORED: `Enumerator::Yielder` defined here
-     992 |class Enumerator::Yielder < Object
+      NN |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Did you mean `File`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `File`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/file.rbi#LCENSORED: `File` defined here
-    33 |class File < IO
+    NN |class File < IO
         ^^^^^^^^^^^^^^^
   Did you mean `Dir`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Dir`
      3 |Yieldr.foo(Intege, Int)
         ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    11 |class Dir < Object
+    NN |class Dir < Object
         ^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
@@ -31,7 +31,7 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED: `Integer` defined here
-     8 |class Integer < Numeric
+    NN |class Integer < Numeric
         ^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://srb.help/5002
@@ -42,21 +42,21 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` ht
      3 |Yieldr.foo(Intege, Int)
                            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
-     400 |class Set < Object
+      NN |class Set < Object
           ^^^^^^^^^^^^^^^^^^
   Did you mean `Net`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Net`
      3 |Yieldr.foo(Intege, Int)
                            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
-     3 |module Net
+    NN |module Net
         ^^^^^^^^^^
   Did you mean `IO`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `IO`
      3 |Yieldr.foo(Intege, Int)
                            ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#LCENSORED: `IO` defined here
-     771 |class IO < Object
+      NN |class IO < Object
           ^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://srb.help/5002

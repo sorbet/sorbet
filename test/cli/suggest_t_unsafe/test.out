@@ -31,7 +31,7 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
-    68 |        arg0: String,
+    NN |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
     suggest_t_unsafe.rb:7:
@@ -59,7 +59,7 @@ suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `a
                ^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
-    68 |        arg0: String,
+    NN |        arg0: String,
                 ^^^^
   Got `Integer(1)` originating from:
     suggest_t_unsafe.rb:15:
@@ -147,7 +147,7 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
-    68 |        arg0: String,
+    NN |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
     suggest_t_unsafe.rb:7:
@@ -175,7 +175,7 @@ suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `a
                ^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#LCENSORED:
-    68 |        arg0: String,
+    NN |        arg0: String,
                 ^^^^
   Got `Integer(1)` originating from:
     suggest_t_unsafe.rb:15:

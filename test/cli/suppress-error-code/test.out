@@ -3,7 +3,7 @@ test/cli/suppress-error-code/suppress-error-code.rb:3: Expected `Integer` but fo
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("1")` originating from:
     test/cli/suppress-error-code/suppress-error-code.rb:3:

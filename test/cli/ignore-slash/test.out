@@ -3,7 +3,7 @@ bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` ht
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED:
-     148 |        arg0: Integer,
+      NN |        arg0: Integer,
                   ^^^^
   Got `String("bar.rb")` originating from:
     bar.rb:4:

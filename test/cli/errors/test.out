@@ -14,7 +14,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
                   ^^^
   Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-    .. |        arg0: String,
+      NN |        arg0: String,
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
@@ -71,7 +71,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
                   ^^^
   Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-    .. |        arg0: String,
+      NN |        arg0: String,
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
@@ -128,7 +128,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
                   ^^^
   Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-    .. |        arg0: String,
+      NN |        arg0: String,
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:

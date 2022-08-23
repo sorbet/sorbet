@@ -10,6 +10,6 @@
      1 |1.to_
           ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED: Defined here
-    1116 |  def to_c(); end
+      NN |  def to_c(); end
             ^^^^^^^^^^
 Errors: 1

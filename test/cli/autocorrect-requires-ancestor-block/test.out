@@ -29,7 +29,7 @@ autocorrect-requires-ancestor-block.rb:12: Too many arguments provided for metho
     12 |  requires_ancestor RA1
                             ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `requires_ancestor` defined here
-     291 |  def requires_ancestor(&block); end
+      NN |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-requires-ancestor-block.rb:12: Deleted
@@ -40,14 +40,14 @@ autocorrect-requires-ancestor-block.rb:12: `requires_ancestor` requires a block 
     12 |  requires_ancestor RA1
                                ^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: defined here
-     291 |  def requires_ancestor(&block); end
+      NN |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-requires-ancestor-block.rb:13: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `2` https://srb.help/7004
     13 |  requires_ancestor RA2, RA3
                             ^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `requires_ancestor` defined here
-     291 |  def requires_ancestor(&block); end
+      NN |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-requires-ancestor-block.rb:13: Deleted
@@ -58,14 +58,14 @@ autocorrect-requires-ancestor-block.rb:13: `requires_ancestor` requires a block 
     13 |  requires_ancestor RA2, RA3
                                     ^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: defined here
-     291 |  def requires_ancestor(&block); end
+      NN |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 autocorrect-requires-ancestor-block.rb:14: Too many arguments provided for method `T::Helpers#requires_ancestor`. Expected: `0`, got: `1` https://srb.help/7004
     14 |  requires_ancestor(RA4) { RA5 }
                             ^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `requires_ancestor` defined here
-     291 |  def requires_ancestor(&block); end
+      NN |  def requires_ancestor(&block); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-requires-ancestor-block.rb:14: Deleted
