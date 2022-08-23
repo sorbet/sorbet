@@ -140,3 +140,5 @@ requires: []
  resolved=[]
  loc=test/cli/autogen-ignore/autogen-ignore.rb:12
  is_defining_ref=0
+--------------------------------------------------------------------------
+No errors! Great job.
