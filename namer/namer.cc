@@ -691,14 +691,26 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
+        ENFORCE(
+            kind != Kind::ClassOrModule,
+            "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
-            e.setHeader("Redefining constant `{}` as a {}", name.show(ctx), prettySymbolKind(ctx, kind));
-            e.addErrorLine(prevSymbol.loc(ctx), "Previously defined as a {}", prettySymbolKind(ctx, prevSymbol.kind()));
+            auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
+            if (prevSymbol.kind() == Kind::ClassOrModule &&
+                prevSymbol.asClassOrModuleRef().data(ctx)->isClassModuleSet()) {
+                prevSymbolKind = prevSymbol.asClassOrModuleRef().showKind(ctx);
+            }
 
-            if ((kind == Kind::ClassOrModule && prevSymbol.kind() == Kind::FieldOrStaticField) ||
-                (kind == Kind::FieldOrStaticField && prevSymbol.kind() == Kind::ClassOrModule)) {
+            if (prevSymbol.kind() == Kind::ClassOrModule && kind == Kind::FieldOrStaticField) {
+                e.setHeader("Cannot initialize the {} `{}` by constant assignment", prevSymbolKind, name.show(ctx));
+            } else {
+                e.setHeader("Redefining constant `{}` as a {}", name.show(ctx), prettySymbolKind(ctx, kind));
+            }
+            e.addErrorLine(prevSymbol.loc(ctx), "Previously defined as a {} here", prevSymbolKind);
+
+            if (kind == Kind::FieldOrStaticField && prevSymbol.kind() == Kind::ClassOrModule) {
                 e.addErrorNote("Sorbet does not allow treating constant assignments as class or module definitions,\n"
-                               "    even if the initializer computes a value of type `{}`. See the docs for more.\n",
+                               "    even if the initializer computes a `{}` object at runtime. See the docs for more.",
                                "Module");
             }
         }
