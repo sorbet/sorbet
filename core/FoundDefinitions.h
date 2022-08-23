@@ -191,8 +191,8 @@ CheckSize(FoundModifier, 24, 4);
 
 struct FoundField {
     enum class Kind : uint8_t {
-        Class,
-        Instance,
+        ClassVariable,
+        InstanceVariable,
     };
     Kind kind;
     FoundDefinitionRef owner;
