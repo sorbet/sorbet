@@ -157,15 +157,15 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     messageQueue.pendingRequests.push_back(move(msg));
                 }
             },
-            [&messageQueue, &messageQueueMutex, logger = logger, config = this->config](int watchmanExitCode,
-                                                                                        string const &msg) {
+            [&messageQueue, &messageQueueMutex, logger = logger,
+             config = this->config](int watchmanExitCode, const optional<string> &msg) -> void {
                 {
                     absl::MutexLock lck(&messageQueueMutex);
                     if (!messageQueue.terminate) {
                         messageQueue.terminate = true;
                         messageQueue.errorCode = watchmanExitCode;
-                        if (watchmanExitCode != 0) {
-                            auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
+                        if (watchmanExitCode != 0 && msg.has_value()) {
+                            auto params = make_unique<ShowMessageParams>(MessageType::Error, msg.value());
                             config->output->write(make_unique<LSPMessage>(
                                 make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
                         }
