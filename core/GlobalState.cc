@@ -1771,6 +1771,18 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 
+void GlobalState::deleteFieldSymbol(FieldRef what) {
+    ENFORCE(what.data(*this)->flags.isField);
+    const auto &whatData = what.data(*this);
+    auto owner = whatData->owner;
+    auto &ownerMembers = owner.data(*this)->members();
+    auto fnd = ownerMembers.find(whatData->name);
+    ENFORCE(fnd != ownerMembers.end());
+    ENFORCE(fnd->second == what);
+    ownerMembers.erase(fnd);
+    this->fields[what.id()] = this->fields[0].deepCopy(*this);
+}
+
 unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
 }
