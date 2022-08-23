@@ -1,11 +1,11 @@
 # typed: false
 class A
-  B = T.unsafe(nil)
-  class B::C; end # error: Can't nest `C` under `A::B` because `A::B` is not a class or module
+  B = T.unsafe(nil) # error: Cannot initialize the class or module `B` by constant assignment
+  class B::C; end
 
   E = T.unsafe(nil)
   E::F = T.unsafe(nil) # error: Can't nest `F` under `A::E` because `A::E` is not a class or module
 
-  B::C
+  B::C # error: Unable to resolve constant `C`
   E::F
 end

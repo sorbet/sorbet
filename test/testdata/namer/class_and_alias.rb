@@ -1,8 +1,8 @@
 # typed: true
-A = 91
-class A # error: Redefining constant `A` as a class or module
+A = 91 # error: Cannot initialize the class `A` by constant assignment
+class A
 end
 
 class B
 end
-B = 91 # error: Redefining constant `B` as a static field
+B = 91 # error: Cannot initialize the class `B` by constant assignment

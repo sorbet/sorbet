@@ -1,9 +1,9 @@
 # typed: true
 
-R = 5
-module R; def self.x; end; end # error: Redefining constant `R` as a class or module
+R = 5 # error: Cannot initialize the module `R` by constant assignment
+module R; def self.x; end; end
 
 # this should resolve as a class, so this would not be an error
-x = R.x
+x = R.x # error: Method `x` does not exist on `Integer`
 # this should not resolve as the constant, so this will be an error
-puts R + 1 # error: Method `+` does not exist on `T.class_of(R)`
+puts R + 1

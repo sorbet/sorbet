@@ -4,4 +4,4 @@ module A::B::C
   def foo; end
 end
 
-A::B = 1 # error: Redefining constant `B` as a static field
+A::B = 1 # error: Cannot initialize the class or module `B` by constant assignment
