@@ -1,5 +1,4 @@
 # typed: true
-# disable-fast-path: true
 extend T::Sig
 
 class MyEnum < T::Enum
