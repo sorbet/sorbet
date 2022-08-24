@@ -1428,7 +1428,7 @@ class TreeSymbolizer {
         return result.exists() ? make_optional<core::SymbolRef>(result) : nullopt;
     }
 
-    ast::ExpressionPtr arg2Symbol(int pos, core::ParsedArg parsedArg, ast::ExpressionPtr arg) {
+    ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedArg &parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
@@ -1623,7 +1623,7 @@ public:
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(i < oldArgs.size());
-                auto expr = arg2Symbol(i, move(arg), move(oldArgs[i]));
+                auto expr = arg2Symbol(i, arg, move(oldArgs[i]));
                 args.emplace_back(move(expr));
             }
         }
