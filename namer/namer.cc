@@ -966,10 +966,13 @@ class SymbolDefiner {
     void modifyMethod(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
-        auto owner = ctx.owner.enclosingClass(ctx);
+        core::ClassOrModuleRef owner;
         if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::packagePrivateClassMethod()) {
-            owner = owner.data(ctx)->singletonClass(ctx);
+            owner = ctx.selfClass();
+        } else {
+            owner = ctx.owner.enclosingClass(ctx);
         }
+
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
             switch (mod.name.rawId()) {
