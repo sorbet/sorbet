@@ -340,7 +340,7 @@ class Date
   # DateTime.jd(0,12) + DateTime.new(2001,2,3).ajd
   #                           #=> #<DateTime: 2001-02-03T00:00:00+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.self_type)}
+  sig {params(arg0: T.any(Integer, Float, Rational)).returns(T.self_type)}
   def +(arg0); end
 
   # Returns the value as a string for inspection.
