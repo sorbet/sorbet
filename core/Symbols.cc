@@ -2488,6 +2488,11 @@ void Field::addLoc(const core::GlobalState &gs, core::Loc loc) {
     addLocInternal(gs, loc, this->loc(), locs_);
 }
 
+void Field::removeLocsForFile(core::FileRef file) {
+    auto it = remove_if(locs_.begin(), locs_.end(), [&](const auto loc) { return loc.file() == file; });
+    locs_.erase(it, locs_.end());
+}
+
 void TypeParameter::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (!loc.file().exists()) {
         return;
