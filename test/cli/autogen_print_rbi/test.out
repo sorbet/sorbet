@@ -114,11 +114,31 @@ requires: []
  resolved=[Integer]
  loc=test/cli/autogen_print_rbi/b.rbi:4
  is_defining_ref=0
+# ParsedFile: test/cli/autogen_print_rbi/behavior_allowed.rbi
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[BehaviorRBI]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[BehaviorRBI]
+ nesting=[]
+ resolved=[BehaviorRBI]
+ loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:3
+ is_defining_ref=1
 
 f3b9f8c31a343a60665c06f959a48dbdceef757c  autogen3.msgpack
-2305b0d8f2c81fbb946e4f1dbec6230386925456  autogen4.msgpack
+bd4da471dd4868384af366a23bed507c32c6f98b  autogen4.msgpack
 
-39a40,73
+39a40,93
 > # ParsedFile: test/cli/autogen_print_rbi/b.rbi
 > requires: []
 > ## defs:
@@ -153,3 +173,23 @@ f3b9f8c31a343a60665c06f959a48dbdceef757c  autogen3.msgpack
 >  resolved=[Integer]
 >  loc=test/cli/autogen_print_rbi/b.rbi:4
 >  is_defining_ref=0
+> # ParsedFile: test/cli/autogen_print_rbi/behavior_allowed.rbi
+> requires: []
+> ## defs:
+> [def id=0]
+>  type=module
+>  defines_behavior=0
+>  is_empty=0
+> [def id=1]
+>  type=class
+>  defines_behavior=1
+>  is_empty=0
+>  defining_ref=[BehaviorRBI]
+> ## refs:
+> [ref id=0]
+>  scope=[]
+>  name=[BehaviorRBI]
+>  nesting=[]
+>  resolved=[BehaviorRBI]
+>  loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:3
+>  is_defining_ref=1

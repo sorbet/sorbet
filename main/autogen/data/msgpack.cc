@@ -1,6 +1,7 @@
 // has to go first because it violates our poisons
 #include "mpack/mpack.h"
 
+#include "absl/strings/match.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/msgpack.h"
@@ -61,7 +62,8 @@ void MsgpackWriter::packRange(uint32_t begin, uint32_t end) {
     mpack_write_u64(&writer, ((uint64_t)begin << 32) | end);
 }
 
-void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition &def) {
+void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition &def,
+                                   const AutogenConfig &autogenCfg) {
     mpack_start_array(&writer, defAttrs[version].size());
 
     // raw_full_name
@@ -77,7 +79,11 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
 
     // defines_behavior
     packBool(def.defines_behavior);
-    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI(), "RBI files should never define behavior");
+    const auto &filePath = ctx.file.data(ctx).path();
+    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI() ||
+                absl::c_any_of(autogenCfg.behaviorAllowedInRBIsPaths,
+                               [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); }),
+            "RBI files should never define behavior");
 
     // isEmpty
     packBool(def.is_empty);
@@ -135,7 +141,7 @@ MsgpackWriter::MsgpackWriter(int version)
     : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
       symbols(typeCount.at(version)) {}
 
-string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
+string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
     char *data;
     size_t size;
     mpack_writer_init_growable(&writer, &data, &size);
@@ -154,7 +160,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
 
     mpack_start_array(&writer, pf.defs.size());
     for (auto &def : pf.defs) {
-        packDefinition(ctx, pf, def);
+        packDefinition(ctx, pf, def, autogenCfg);
     }
 
     mpack_finish_array(&writer);
