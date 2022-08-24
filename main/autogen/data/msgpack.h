@@ -30,7 +30,7 @@ private:
     void packReferenceRef(ReferenceRef ref);
     void packDefinitionRef(DefinitionRef ref);
     void packRange(uint32_t begin, uint32_t end);
-    void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def);
+    void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def, const AutogenConfig &autogenCfg);
     void packReference(core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {
         if (version < AutogenVersion::MIN_VERSION || version > AutogenVersion::MAX_VERSION) {
@@ -43,7 +43,7 @@ private:
 public:
     MsgpackWriter(int version);
 
-    std::string pack(core::Context ctx, ParsedFile &pf);
+    std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
 };
 
 } // namespace sorbet::autogen

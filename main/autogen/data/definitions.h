@@ -148,6 +148,10 @@ struct Reference {
     DefinitionRef parent_of;
 };
 
+struct AutogenConfig {
+    const std::vector<std::string> behaviorAllowedInRBIsPaths;
+};
+
 // A `ParsedFile` contains all the `Definition`s and `References` used in a particular file
 struct ParsedFile {
     friend class MsgpackWriter;
@@ -166,7 +170,7 @@ struct ParsedFile {
     std::vector<core::NameRef> requireStatements;
 
     std::string toString(const core::GlobalState &gs, int version) const;
-    std::string toMsgpack(core::Context ctx, int version);
+    std::string toMsgpack(core::Context ctx, int version, const AutogenConfig &autogenCfg);
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);

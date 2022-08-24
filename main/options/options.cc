@@ -442,6 +442,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("autogen-subclasses-ignore",
                                "Like --ignore, but it only affects `-p autogen-subclasses`.",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("autogen-behavior-allowed-in-rbi-files-paths",
+                               "RBI files defined in these paths can be considered by autogen as behavior-defining.",
+                               cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
@@ -844,6 +847,16 @@ void readOptions(Options &opts,
                     opts.autogenSubclassesRelativeIgnorePatterns.emplace_back(fmt::format("/{}", pNormalized));
                 }
             }
+        }
+
+        if (raw.count("autogen-behavior-allowed-in-rbi-files-paths") > 0) {
+            if (!opts.print.isAutogen() || opts.print.AutogenAutoloader.enabled) {
+                logger->error("autogen-behavior-allowed-in-rbi-files-paths can only be used with -p autogen or -p "
+                              "autogen-msgpack");
+                throw EarlyReturnWithCode(1);
+            }
+            opts.autogenBehaviorAllowedInRBIFilesPaths =
+                raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
         }
 
         extractAutogenConstCacheConfig(raw, opts.autogenConstantCacheConfig);

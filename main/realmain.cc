@@ -204,7 +204,7 @@ struct AutogenResult {
 };
 
 void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
-                WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+                const autogen::AutogenConfig &autogenCfg, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
     // extract all the packages we can find. (This ought to be pretty fast: if it's not, then we can move this into the
@@ -226,61 +226,62 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
     auto crcBuilder = autogen::CRCBuilder::create();
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, crcBuilder, fileq, resultq]() {
-        AutogenResult out;
-        int n = 0;
-        int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
-        {
-            Timer timeit(logger, "autogenWorker");
-            int idx = 0;
+    workers.multiplexJob(
+        "runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, &autogenCfg, crcBuilder, fileq, resultq]() {
+            AutogenResult out;
+            int n = 0;
+            int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
+            {
+                Timer timeit(logger, "autogenWorker");
+                int idx = 0;
 
-            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
-                ++n;
-                auto &tree = indexed[idx];
-                if (tree.file.data(gs).isPackage()) {
-                    continue;
-                }
-                if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
-                    continue;
-                }
-
-                core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
-                tree = move(pf.tree);
-
-                AutogenResult::Serialized serialized;
-
-                if (opts.print.Autogen.enabled) {
-                    Timer timeit(logger, "autogenToString");
-                    serialized.strval = pf.toString(ctx, autogenVersion);
-                }
-                if (opts.print.AutogenMsgPack.enabled) {
-                    Timer timeit(logger, "autogenToMsgpack");
-                    serialized.msgpack = pf.toMsgpack(ctx, autogenVersion);
-                }
-
-                if (!tree.file.data(gs).isRBI()) {
-                    // Exclude RBI files because they are not loadable and should not appear in
-                    // auto-loader related output.
-                    if (opts.print.AutogenSubclasses.enabled) {
-                        Timer timeit(logger, "autogenSubclasses");
-                        serialized.subclasses = autogen::Subclasses::listAllSubclasses(
-                            ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                            opts.autogenSubclassesRelativeIgnorePatterns);
+                for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+                    ++n;
+                    auto &tree = indexed[idx];
+                    if (tree.file.data(gs).isPackage()) {
+                        continue;
                     }
-                    if (opts.print.AutogenAutoloader.enabled) {
-                        Timer timeit(logger, "autogenNamedDefs");
-                        autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
+                    if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
+                        continue;
                     }
-                }
 
-                out.prints.emplace_back(make_pair(idx, serialized));
+                    core::Context ctx(gs, core::Symbols::root(), tree.file);
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
+                    tree = move(pf.tree);
+
+                    AutogenResult::Serialized serialized;
+
+                    if (opts.print.Autogen.enabled) {
+                        Timer timeit(logger, "autogenToString");
+                        serialized.strval = pf.toString(ctx, autogenVersion);
+                    }
+                    if (opts.print.AutogenMsgPack.enabled) {
+                        Timer timeit(logger, "autogenToMsgpack");
+                        serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
+                    }
+
+                    if (!tree.file.data(gs).isRBI()) {
+                        // Exclude RBI files because they are not loadable and should not appear in
+                        // auto-loader related output.
+                        if (opts.print.AutogenSubclasses.enabled) {
+                            Timer timeit(logger, "autogenSubclasses");
+                            serialized.subclasses = autogen::Subclasses::listAllSubclasses(
+                                ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                opts.autogenSubclassesRelativeIgnorePatterns);
+                        }
+                        if (opts.print.AutogenAutoloader.enabled) {
+                            Timer timeit(logger, "autogenNamedDefs");
+                            autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
+                        }
+                    }
+
+                    out.prints.emplace_back(make_pair(idx, serialized));
+                }
             }
-        }
 
-        out.counters = getAndClearThreadCounters();
-        resultq->push(move(out), n);
-    });
+            out.counters = getAndClearThreadCounters();
+            resultq->push(move(out), n);
+        });
 
     autogen::DefTree root;
     AutogenResult out;
@@ -768,7 +769,10 @@ int realmain(int argc, char *argv[]) {
                 autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
             }
 
-            runAutogen(*gs, opts, autoloaderCfg, *workers, indexed);
+            autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
+                                                     std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
+
+            runAutogen(*gs, opts, autoloaderCfg, autogenCfg, *workers, indexed);
 #endif
         } else {
             // Only need to compute hashes when running to compute a FileHash

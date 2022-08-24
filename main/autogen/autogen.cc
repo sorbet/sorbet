@@ -1,4 +1,5 @@
 #include "main/autogen/autogen.h"
+#include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
@@ -16,6 +17,7 @@ class AutogenWalk {
     vector<Reference> refs;
     vector<core::NameRef> requireStatements;
     vector<DefinitionRef> nesting;
+    const AutogenConfig *autogenCfg;
 
     enum class ScopeType { Class, Block };
     vector<ast::Send *> ignoring;
@@ -48,13 +50,14 @@ class AutogenWalk {
     }
 
 public:
-    AutogenWalk() {
+    AutogenWalk(const AutogenConfig &autogenConfig) {
         auto &def = defs.emplace_back();
         def.id = 0;
         def.type = Definition::Type::Module;
         def.defines_behavior = false;
         def.is_empty = false;
         nesting.emplace_back(def.id);
+        autogenCfg = &autogenConfig;
     }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -79,9 +82,15 @@ public:
         // is it (recursively) empty?
         def.is_empty =
             absl::c_all_of(original.rhs, [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
-        // does it define behavior? It is impossible for .rbi files to define behavior.
-        def.defines_behavior =
-            !ctx.file.data(ctx).isRBI() && sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
+
+        // does it define behavior? It is impossible for .rbi files to define behavior (unless they are from the
+        // allow-listed set of RBI paths).
+        std::string_view filePath = ctx.file.data(ctx).path();
+        bool ignoreRBI = ctx.file.data(ctx).isRBI() &&
+                         !absl::c_any_of(autogenCfg->behaviorAllowedInRBIsPaths,
+                                         [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); });
+
+        def.defines_behavior = !ignoreRBI && sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(tree);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
@@ -321,8 +330,9 @@ public:
 
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
-ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder) {
-    AutogenWalk walk;
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
+                             const CRCBuilder &crcBuilder) {
+    AutogenWalk walk(autogenCfg);
     ast::TreeWalk::apply(ctx, walk, tree.tree);
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());
