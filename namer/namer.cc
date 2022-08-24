@@ -1152,8 +1152,6 @@ class SymbolDefiner {
             }
 
             // We are on the fast path and there was a previous declaration.
-            // TODO(froydnj) apparently incremental resolve can't add new symbols?!
-            // ctx.state.mangleRenameSymbol(existing, existing.data(ctx)->name);
             prior.data(ctx)->resultType = core::Types::todo();
             return prior;
         }
