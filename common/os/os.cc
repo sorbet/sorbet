@@ -20,6 +20,16 @@ void *Joinable::trampoline(void *ptr) {
     return ptr;
 }
 
+void Joinable::setPriorityLevel(int priority) {
+    int policy;
+    struct sched_param param;
+    pthread_getschedparam(handle, &policy, &param);
+    param.sched_priority = priority;
+
+    pthread_setschedparam(handle, policy, &param);
+}
+
+
 unique_ptr<Joinable> runInAThread(string_view threadName, function<void()> function, optional<int> bindToCore) {
 #ifdef EMSCRIPTEN
     sorbet::Exception::raise("Creating threads in unsupported in EMSCRIPTEN");

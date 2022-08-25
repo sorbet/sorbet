@@ -209,6 +209,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
     // Bridges the gap between the {reader, watchman} threads and the typechecking thread.
     auto preprocessingThread = preprocessor.runPreprocessor(messageQueue, messageQueueMutex);
+    preprocessingThread->setPriorityLevel(19);
 
     mainThreadId = this_thread::get_id();
     {

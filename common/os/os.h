@@ -30,6 +30,8 @@ public:
     Joinable() = default;
     Joinable(const Joinable &) = delete;
     Joinable(Joinable &&) = delete;
+
+    void setPriorityLevel(int priority);
 };
 
 // run function in a thread. Return thread handle that you can join on
