@@ -14,6 +14,7 @@ def dropExtension(p):
 
 _TEST_SCRIPT = """#!/usr/bin/env bash
 export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_12_0_0/bin/llvm-symbolizer
+set -x
 exec {runner} --single_test="{test}"
 """
 
