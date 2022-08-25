@@ -496,10 +496,9 @@ public:
             return false;
         }
 
-        // This is an error in resolver, but just ignore this here.
-        if (cast->cast != core::Names::let()) {
-            return false;
-        }
+        // Resolver will issues errors about non-let declarations of variables, but
+        // will still associate types with the variables; we need to ensure that
+        // there are entries in the symbol table for those variables.
 
         core::FoundField found;
         found.kind = uid->kind == ast::UnresolvedIdent::Kind::Instance ? core::FoundField::Kind::InstanceVariable
