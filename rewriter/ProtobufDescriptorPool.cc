@@ -46,9 +46,9 @@ ast::ExpressionPtr ProtobufDescriptorPool::run(core::MutableContext ctx, ast::As
     }
 
     // Put the actual send in the tree too to require that the Protobuf constant / methods are actually there.
-    // (also needed for autogen to be able to see the )
+    // (also needed for autogen to be able to see the behavior)
     ast::ClassDef::RHS_store rhs;
-    rhs.emplace_back(asgn->rhs.deepCopy());
+    rhs.emplace_back(std::move(asgn->rhs));
 
     if (sendMsgclass->fun == core::Names::msgclass()) {
         auto arg0 = ast::MK::Local(asgn->loc, core::Names::arg0());
