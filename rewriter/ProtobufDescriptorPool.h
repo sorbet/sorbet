@@ -27,7 +27,7 @@ namespace sorbet::rewriter {
  */
 class ProtobufDescriptorPool final {
 public:
-    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Assign *asgn);
+    static ast::ExpressionPtr run(core::MutableContext ctx, ast::Assign *asgn);
 
     ProtobufDescriptorPool() = delete;
 };

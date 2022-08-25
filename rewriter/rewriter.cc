@@ -85,12 +85,6 @@ public:
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
-
-                    nodes = ProtobufDescriptorPool::run(ctx, &assign);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
                 },
 
                 [&](ast::Send &send) {
@@ -200,6 +194,17 @@ public:
         }
 
         if (SigRewriter::run(ctx, send)) {
+            return;
+        }
+    }
+
+    // NOTE: this case differs from the `Assign` typecase branch in `postTransformClassDef` above,
+    // as it will apply to all assigns, not just those that are present in the RHS of a `ClassDef`.
+    void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        auto *assign = ast::cast_tree<ast::Assign>(tree);
+
+        if (auto expr = ProtobufDescriptorPool::run(ctx, assign)) {
+            tree = std::move(expr);
             return;
         }
     }
