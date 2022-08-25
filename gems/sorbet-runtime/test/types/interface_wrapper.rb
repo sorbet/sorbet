@@ -16,6 +16,10 @@ class Opus::Types::Test::InterfaceWrapperTest < Critic::Unit::UnitTest
     private def priv
       42
     end
+
+    def kwarg(bar:)
+      bar + 1
+    end
   end
 
   module Mixin2
@@ -128,6 +132,35 @@ class Opus::Types::Test::InterfaceWrapperTest < Critic::Unit::UnitTest
       assert_raises(RuntimeError) {T::InterfaceWrapper.wrap_instances([@obj, nil], Mixin)}
       assert_raises(RuntimeError) {T::InterfaceWrapper.wrap_instances([@obj, "foo"], Mixin)}
       assert_raises(RuntimeError) {T::InterfaceWrapper.wrap_instances([@obj, 5], Mixin)}
+    end
+  end
+
+  describe "argument forwarding" do
+    it "does not cause Ruby keyword argument warnings" do
+      # this test has a few different failure modes:
+      # - on 2.6 and below, we want to make sure we don't call the
+      #   `ruby2_keywords` helper method because it doesn't exist yet
+      # - on 2.7, we want to make sure we don't get warnings about
+      #   bad kwarg usage: to do this, we enable the relevant deprecation
+      #   warnings for the duration of the test and assert that the warn
+      #   method is never called
+      # - on 3 and above, simply calling a wrapped kwarg method is
+      #   sufficient to show that the behavior is correct: if we didn't
+      #   specify `ruby2_keywords`, then it would fail with a "wrong
+      #   number of arguments" error.
+
+      if RUBY_VERSION.start_with?("2.7")
+        Warning[:deprecated] = true
+        replaced = T::Private::ClassUtils.replace_method(Warning, :warn) do |warning|
+          raise "Found kwarg warning: #{warning}"
+        end
+      end
+      @wrapper.kwarg(bar: 5)
+    ensure
+      if RUBY_VERSION.start_with?("2.7")
+        replaced&.restore
+        Warning[:deprecated] = false
+      end
     end
   end
 end

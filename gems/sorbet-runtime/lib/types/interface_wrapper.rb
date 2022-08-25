@@ -71,6 +71,10 @@ class T::InterfaceWrapper
         target_obj.send(method_name, *args, &blk)
       end
 
+      if singleton_class.respond_to?(:ruby2_keywords, true)
+        singleton_class.send(:ruby2_keywords, method_name)
+      end
+
       if target_obj.singleton_class.public_method_defined?(method_name)
         # no-op, it's already public
       elsif target_obj.singleton_class.protected_method_defined?(method_name)
