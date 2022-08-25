@@ -1,12 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C ProtocMsgClass><<C <todo sym>>> < ()
-    def initialize<<C <todo sym>>>(arg0 = {}, &<blk>)
-      <emptyTree>
-    end
-
     <emptyTree>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
-
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
   end
 
   module <emptyTree>::<C ProtocMsgClass>::<C ProtocEnumModule><<C <todo sym>>> < ()
@@ -14,13 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C StripeMsgClass><<C <todo sym>>> < ()
-    def initialize<<C <todo sym>>>(arg0 = {}, &<blk>)
-      <emptyTree>
-    end
-
     ::<root>::<C Google>::<C Protobuf>::<C DescriptorPool>.generated_pool().lookup("...").msgclass()
-
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
   end
 
   module <emptyTree>::<C StripeMsgClass>::<C StripeEnumModule><<C <todo sym>>> < ()
