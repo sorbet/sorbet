@@ -7,6 +7,10 @@ using namespace std;
 namespace sorbet::rewriter {
 
 ast::ExpressionPtr ProtobufDescriptorPool::run(core::MutableContext ctx, ast::Assign *asgn) {
+    if (!ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
+        return nullptr;
+    }
+
     auto sendMsgclass = ast::cast_tree<ast::Send>(asgn->rhs);
     if (sendMsgclass == nullptr) {
         return nullptr;
@@ -38,10 +42,6 @@ ast::ExpressionPtr ProtobufDescriptorPool::run(core::MutableContext ctx, ast::As
 
     auto cnstGoogle = ast::cast_tree<ast::UnresolvedConstantLit>(cnstProtobuf->scope);
     if (cnstGoogle == nullptr || cnstGoogle->cnst != core::Names::Constants::Google()) {
-        return nullptr;
-    }
-
-    if (!ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
         return nullptr;
     }
 
