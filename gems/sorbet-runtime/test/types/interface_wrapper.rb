@@ -17,8 +17,8 @@ class Opus::Types::Test::InterfaceWrapperTest < Critic::Unit::UnitTest
       42
     end
 
-    def kwarg(x:)
-      x + 1
+    def kwarg(bar:)
+      bar + 1
     end
   end
 
@@ -149,19 +149,17 @@ class Opus::Types::Test::InterfaceWrapperTest < Critic::Unit::UnitTest
       #   specify `ruby2_keywords`, then it would fail with a "wrong
       #   number of arguments" error.
 
-      begin
-        if RUBY_VERSION.start_with?("2.7")
-          Warning[:deprecated] = true
-          replaced = T::Private::ClassUtils.replace_method(Warning, :warn) do |warning|
-            raise "Found kwarg warning: #{warning}"
-          end
+      if RUBY_VERSION.start_with?("2.7")
+        Warning[:deprecated] = true
+        replaced = T::Private::ClassUtils.replace_method(Warning, :warn) do |warning|
+          raise "Found kwarg warning: #{warning}"
         end
-        @wrapper.kwarg(x: 5)
-      ensure
-        if RUBY_VERSION.start_with?("2.7")
-          replaced&.restore
-          Warning[:deprecated] = false
-        end
+      end
+      @wrapper.kwarg(bar: 5)
+    ensure
+      if RUBY_VERSION.start_with?("2.7")
+        replaced&.restore
+        Warning[:deprecated] = false
       end
     end
   end
