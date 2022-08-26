@@ -2266,6 +2266,12 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
+            if (e.second.isFieldOrStaticField() &&
+                e.second.asFieldRef().data(gs)->flags.isField &&
+                gs.lspExperimentalFastPathEnabled) {
+                continue;
+            }
+
             if (e.second.isClassOrModule() && e.second.asClassOrModuleRef().data(gs)->ignoreInHashing(gs)) {
                 continue;
             }
