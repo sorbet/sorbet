@@ -1424,7 +1424,7 @@ class SymbolDefiner {
         auto ownerSymbol = getOwnerSymbol(ownerRef);
         ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = ownerSymbol.asClassOrModuleRef();
-        if (oldDefHash.owner.useSingletonClass) {
+        if (oldDefHash.owner.onSingletonClass) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
 
@@ -1484,6 +1484,12 @@ public:
         // all the `nonDeletableDefinitions` from all files get defined, then delete all the old
         // methods, then define all the methods.
         if (oldFoundHashes.has_value()) {
+            for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
+                deleteViaFullNameHash(ctx, oldFieldHash);
+            }
+
+            // TODO(froydnj): what happens if methods are deleted in one file but reappear
+            // in another?  It seems like this should be OK, but need to verify.
             for (const auto &oldMethodHash : oldFoundHashes.value().methodHashes) {
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
