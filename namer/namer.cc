@@ -1106,6 +1106,9 @@ class SymbolDefiner {
         }
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
+        // Reset resultType to nullptr for idempotency on the fast path--it will always be
+        // re-entered in resolver.
+        sym.data(ctx)->resultType = nullptr;
 
         if (staticField.isTypeAlias) {
             sym.data(ctx)->flags.isStaticFieldTypeAlias = true;
