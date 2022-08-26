@@ -147,7 +147,11 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
 
         ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes), "definitionHash should have failed");
 
-        absl::c_set_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
+        if (config.opts.lspExperimentalFastPathEnabled) {
+            absl::c_set_symmetric_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
+        } else {
+            absl::c_set_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
+        }
 
         result.changedFiles.emplace(fref, idx);
     }
