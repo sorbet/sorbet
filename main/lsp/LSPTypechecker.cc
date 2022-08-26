@@ -212,17 +212,17 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
     auto result = updates.fastPathFilesToTypecheck(*gs, *config);
     config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
-    UnorderedMap<core::FileRef, core::FoundMethodHashes> oldFoundMethodHashesForFiles;
+    UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
     for (auto [fref, idx] : result.changedFiles) {
         if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
-            // Only set oldFoundDefHashesForFiles if symbols actually changed
+            // Only set oldFoundHashesForFiles if symbols actually changed
             // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
             // methods only to redefine them with different IDs.
 
             // Okay to `move` here (steals component of getFileHash) because we're about to use
             // replaceFile to clobber fref.data(gs) anyways.
-            oldFoundMethodHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes.methodHashes));
+            oldFoundHashesForFiles.emplace(fref, move(fref.data(*gs).getFileHash()->foundHashes));
         }
 
         gs->replaceFile(fref, updates.updatedFiles[idx]);
@@ -251,20 +251,20 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
         // See earlier in the method for an explanation of the .empty() check here.
         if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty() &&
-            oldFoundMethodHashesForFiles.find(f) == oldFoundMethodHashesForFiles.end()) {
+            oldFoundHashesForFiles.find(f) == oldFoundHashesForFiles.end()) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
             // whole file).
-            oldFoundMethodHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundHashes.methodHashes);
+            oldFoundHashesForFiles.emplace(f, f.data(*gs).getFileHash()->foundHashes);
         }
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved = config->opts.lspExperimentalFastPathEnabled
-                        ? pipeline::incrementalResolve(*gs, move(updatedIndexed),
-                                                       std::move(oldFoundMethodHashesForFiles), config->opts)
-                        : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
+    auto resolved =
+        config->opts.lspExperimentalFastPathEnabled
+            ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles), config->opts)
+            : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
@@ -409,9 +409,9 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 }
             }
         }
-        // Only need to compute FoundMethodHashes when running to compute a FileHash
-        auto foundMethodHashes = nullptr;
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundMethodHashes);
+        // Only need to compute FoundDefHashes when running to compute a FileHash
+        auto foundHashes = nullptr;
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundHashes);
         if (!maybeResolved.hasResult()) {
             return;
         }
