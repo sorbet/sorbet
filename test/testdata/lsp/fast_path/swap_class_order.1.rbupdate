@@ -1,0 +1,12 @@
+# typed: true
+# assert-slow-path: true
+
+module A
+  class C
+    def bar; end
+  end
+
+  class B
+    def foo; end
+  end
+end
