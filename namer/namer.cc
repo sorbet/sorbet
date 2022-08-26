@@ -507,7 +507,7 @@ public:
  */
 class SymbolDefiner {
     const core::FoundDefinitions foundDefs;
-    const optional<core::FoundMethodHashes> oldFoundMethodHashes;
+    const optional<core::FoundDefHashes> oldFoundHashes;
     // See getOwnerSymbol
     vector<core::ClassOrModuleRef> definedClasses;
     // See getOwnerSymbol
@@ -901,7 +901,7 @@ class SymbolDefiner {
             // When modifyMethod is called later, it won't be able to find the correct method entry.
             // Let's leave the method visibility what it was.
             // TODO(jez) After #5808 lands, can we delete this check?
-            // TODO(jez) The change to only populate oldFoundMethodHashesForFiles if something
+            // TODO(jez) The change to only populate oldFoundHashesForFiles if something
             // actually changed means that no, we actually can't remove this quite yet.
             return symbol;
         }
@@ -1292,8 +1292,8 @@ class SymbolDefiner {
     }
 
 public:
-    SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs, optional<core::FoundMethodHashes> oldFoundMethodHashes)
-        : foundDefs(move(*foundDefs)), oldFoundMethodHashes(move(oldFoundMethodHashes)) {}
+    SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+        : foundDefs(move(*foundDefs)), oldFoundHashes(move(oldFoundHashes)) {}
 
     void run(core::MutableContext ctx) {
         definedClasses.reserve(foundDefs.klasses().size());
@@ -1308,8 +1308,8 @@ public:
         // That being said, if it does cause problems, we should be able to not interleave, and have
         // all the `nonDeletableDefinitions` from all files get defined, then delete all the old
         // methods, then define all the methods.
-        if (oldFoundMethodHashes.has_value()) {
-            for (const auto &oldMethodHash : oldFoundMethodHashes.value()) {
+        if (oldFoundHashes.has_value()) {
+            for (const auto &oldMethodHash : oldFoundHashes.value().methodHashes) {
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
                 // ref in the new definedClasses vector.
@@ -1968,10 +1968,10 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     return allFoundDefinitions;
 }
 
-ast::ParsedFilesOrCancelled
-defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions, WorkerPool &workers,
-              UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
-              core::FoundDefHashes *foundHashesOut) {
+ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
+                                          WorkerPool &workers,
+                                          UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
+                                          core::FoundDefHashes *foundHashesOut) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     vector<ast::ParsedFile> output;
     output.reserve(allFoundDefinitions.size());
@@ -1991,10 +1991,10 @@ defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefiniti
         auto fref = fileFoundDefinitions.tree.file;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        auto frefIt = oldFoundMethodHashesForFiles.find(fref);
-        auto oldFoundMethodHashes = frefIt == oldFoundMethodHashesForFiles.end() ? optional<core::FoundMethodHashes>()
-                                                                                 : std::move(frefIt->second);
-        SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names), move(oldFoundMethodHashes));
+        auto frefIt = oldFoundHashesForFiles.find(fref);
+        auto oldFoundHashes =
+            frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
+        SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names), move(oldFoundHashes));
         output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
@@ -2123,7 +2123,7 @@ ast::ParsedFilesOrCancelled Namer::symbolizeTreesBestEffort(const core::GlobalSt
 
 ast::ParsedFilesOrCancelled
 Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-                   UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
+                   UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
                    core::FoundDefHashes *foundHashesOut) {
     auto foundDefs = findSymbols(gs, move(trees), workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
@@ -2137,7 +2137,7 @@ Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerP
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    auto result = defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundMethodHashesForFiles), foundHashesOut);
+    auto result = defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
     if (!result.hasResult()) {
         return result;
     }
@@ -2148,19 +2148,18 @@ Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerP
 
 ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
                                        core::FoundDefHashes *foundHashesOut) {
-    // In non-incremental namer, there are no old FoundMethodHashes; just defineSymbols like normal.
-    auto oldFoundMethodHashesForFiles = UnorderedMap<core::FileRef, core::FoundMethodHashes>{};
-    return runInternal(gs, move(trees), workers, std::move(oldFoundMethodHashesForFiles), foundHashesOut);
+    // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
+    auto oldFoundHashesForFiles = UnorderedMap<core::FileRef, core::FoundDefHashes>{};
+    return runInternal(gs, move(trees), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
 }
 
 ast::ParsedFilesOrCancelled
 Namer::runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                      UnorderedMap<core::FileRef, core::FoundMethodHashes> &&oldFoundMethodHashesForFiles,
-                      WorkerPool &workers) {
+                      UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles, WorkerPool &workers) {
     // foundHashesOut is only used when namer is run via hashing.cc to compute a FileHash for each file
     // The incremental namer mode should never be used for hashing.
     auto foundHashesOut = nullptr;
-    return runInternal(gs, move(trees), workers, std::move(oldFoundMethodHashesForFiles), foundHashesOut);
+    return runInternal(gs, move(trees), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
 }
 
 }; // namespace sorbet::namer
