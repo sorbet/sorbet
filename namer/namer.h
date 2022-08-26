@@ -32,8 +32,8 @@ public:
     // it uses to figure out how to mutate the already-populated GlobalState into the right shape
     // when considering that only the files in `trees` were edited.
     //
-    // `trees` and `foundMethodHashesForFiles` should have the same number of elements, and
-    // `foundMethodHashesForFiles[i]` should be the `FoundDefHashes` for `trees[i]`.
+    // `trees` and `foundDef` should have the same number of elements, and
+    // `foundDefHashesForFiles[i]` should be the `FoundDefHashes` for `trees[i]`.
     // (Done this way, instead of using something like a `std::pair`, to avoid intermediate
     // allocations for phases that don't actually need to operate on the `FoundDefHashes`.)
     static ast::ParsedFilesOrCancelled
