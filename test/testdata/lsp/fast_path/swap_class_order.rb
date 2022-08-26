@@ -2,10 +2,10 @@
 
 module A
   class B
-    def foo; end
+    def method_on_b; end
   end
 
   class C
-    def bar; end
+    def method_on_c; end
   end
 end
