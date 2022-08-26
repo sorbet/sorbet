@@ -156,9 +156,14 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       assert_equal(CardSuit::CLUB, suit)
     end
 
-    it 'returns nil for an invalid serialization' do
+    it 'returns nil for an invalid serialization when the default_value is not passed' do
       suit = CardSuit.try_deserialize('blerg')
       assert_nil(suit)
+    end
+
+    it 'returns the default value for an invalid serialization' do
+      suit = CardSuit.try_deserialize('blerg', CardSuit::CLUB)
+      assert_equal(CardSuit::CLUB, suit)
     end
   end
 

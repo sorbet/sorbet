@@ -16,8 +16,8 @@ class T::Enum
   #
   # Note: It would have been nice to make this method final before people started overriding it.
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig {overridable.params(serialized_val: T.untyped).returns(T.nilable(T.attached_class)).checked(:never)}
-  def self.try_deserialize(serialized_val); end
+  sig {overridable.params(serialized_val: T.untyped, default_value: T.nilable(T::Enum)).returns(T.nilable(T.any(T::Enum, T.attached_class))).checked(:never)}
+  def self.try_deserialize(serialized_val, default_value: nil); end
 
   # Convert from serialized value to enum instance.
   #

@@ -208,6 +208,13 @@ Suit.try_deserialize('bad value')
 # => nil
 ```
 
+You can also specify a default value in case the value doesn't deserialize:
+
+```ruby
+Suit.try_deserialize('bad value', Suit::Spades)
+# => Suit::Spades
+```
+
 You can also ask whether a specific serialized value exists for an enum:
 
 ```ruby
