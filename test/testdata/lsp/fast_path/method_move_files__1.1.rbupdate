@@ -4,10 +4,10 @@
 class A
   extend T::Sig
 
-  sig {returns(String)}
-  def m
+  sig {params(x: Integer).returns(String)}
+  def m(x) # error: Method `A#m` redefined without matching argument count
     ""
   end
 end
 
-T.reveal_type(A.new.m) # error: Revealed type: `String`
+T.reveal_type(A.new.m(0)) # error: Revealed type: `String`
