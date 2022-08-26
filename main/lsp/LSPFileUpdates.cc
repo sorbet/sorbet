@@ -88,6 +88,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedMethodSymbolHashes;
+    vector<core::SymbolHash> changedStaticFieldSymbolHashes;
     vector<core::SymbolHash> changedFieldSymbolHashes;
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
@@ -142,22 +143,33 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             absl::c_set_difference(oldMethodHashes, newMethodHashes, std::back_inserter(changedMethodSymbolHashes));
         }
 
-        const auto &oldFieldHashes = oldSymbolHashes.staticFieldHashes;
-        const auto &newFieldHashes = newSymbolHashes.staticFieldHashes;
+        const auto &oldStaticFieldHashes = oldSymbolHashes.staticFieldHashes;
+        const auto &newStaticFieldHashes = newSymbolHashes.staticFieldHashes;
 
-        ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes), "definitionHash should have failed");
+        ENFORCE(validateIdenticalFingerprints(oldStaticFieldHashes, newStaticFieldHashes), "definitionHash should have failed");
+
+        absl::c_set_difference(oldStaticFieldHashes, newStaticFieldHashes, std::back_inserter(changedFieldSymbolHashes));
+
+        const auto &oldFieldHashes = oldSymbolHashes.fieldHashes;
+        const auto &newFieldHashes = newSymbolHashes.fieldHashes;
 
         if (config.opts.lspExperimentalFastPathEnabled) {
             absl::c_set_symmetric_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
         } else {
+            // Both oldHash and newHash should have the same fields, since this is the fast path!
+            ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes), "definitionHash should have failed");
+
             absl::c_set_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
         }
 
         result.changedFiles.emplace(fref, idx);
     }
 
-    result.changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedFieldSymbolHashes.size());
+    result.changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedStaticFieldSymbolHashes.size()
+                                           + changedFieldSymbolHashes.size());
     absl::c_transform(changedMethodSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
+                      [](const auto &symhash) { return symhash.nameHash; });
+    absl::c_transform(changedStaticFieldSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
                       [](const auto &symhash) { return symhash.nameHash; });
     absl::c_transform(changedFieldSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
                       [](const auto &symhash) { return symhash.nameHash; });
