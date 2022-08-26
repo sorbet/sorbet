@@ -50,7 +50,7 @@ ast::ExpressionPtr ProtobufDescriptorPool::run(core::MutableContext ctx, ast::As
     ast::ClassDef::RHS_store rhs;
     rhs.emplace_back(std::move(asgn->rhs));
 
-    return ast::MK::ClassOrModule(asgn->loc, asgn->loc, asgn->lhs.deepCopy(), {}, std::move(rhs), kind);
+    return ast::MK::ClassOrModule(asgn->loc, asgn->loc, std::move(asgn->lhs), {}, std::move(rhs), kind);
 }
 
 }; // namespace sorbet::rewriter

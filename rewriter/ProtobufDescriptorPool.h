@@ -20,7 +20,7 @@ namespace sorbet::rewriter {
  *     ::Google::Protobuf::DescriptorPool.generated_pool.lookup("...").enummodule
  *   end
  *
- * The idea is that the this way Sorbet will statically see `A` and `B` for what they are:
+ * The idea is that this way Sorbet will statically see `A` and `B` for what they are:
  * class symbols, not static field symbols.
  *
  * The missing method script will then fill in any methods that these classes have.
