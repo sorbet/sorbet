@@ -39,6 +39,12 @@ protected:
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+
+    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+    getReferencesToSymbolInPackage(LSPTypecheckerInterface &typechecker, core::NameRef packageName,
+                                   core::SymbolRef symbol,
+                                   std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef file, core::SymbolRef symbol,
                                 std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;

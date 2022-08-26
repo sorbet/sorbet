@@ -115,7 +115,7 @@ public:
 };
 
 // # ^^^ usage: symbol
-class UsageAssertion final : public RangeAssertion {
+class UsageAssertion : public RangeAssertion {
 public:
     static std::shared_ptr<UsageAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                 int assertionLine, std::string_view assertionContents,
@@ -138,6 +138,28 @@ public:
                    std::vector<int> versions);
 
     std::string toString() const override;
+};
+
+// # ^^^ import: symbol
+class ImportAssertion final : public UsageAssertion {
+public:
+    static std::shared_ptr<ImportAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                 int assertionLine, std::string_view assertionContents,
+                                                 std::string_view assertionType);
+
+    ImportAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                    std::string_view symbol, std::vector<int> versions);
+};
+
+// # ^^^ importusage: symbol
+class ImportUsageAssertion final : public UsageAssertion {
+public:
+    static std::shared_ptr<ImportUsageAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                      int assertionLine, std::string_view assertionContents,
+                                                      std::string_view assertionType);
+
+    ImportUsageAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                         std::string_view symbol, std::vector<int> versions);
 };
 
 // # some-property: foo

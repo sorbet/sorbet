@@ -302,6 +302,17 @@ LSPTask::getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::Symbo
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerInterface &typechecker, core::NameRef packageName,
+                                        core::SymbolRef symbol,
+                                        vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    if (symbol.exists()) {
+        auto run2 = LSPQuery::bySymbol(config, typechecker, symbol, packageName);
+        absl::c_move(run2.responses, back_inserter(priorRefs));
+    }
+    return move(priorRefs);
+}
+
+vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref, core::SymbolRef symbol,
                                      vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists() && fref.exists()) {

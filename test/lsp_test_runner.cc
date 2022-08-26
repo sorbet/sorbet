@@ -729,6 +729,19 @@ TEST_CASE("LSPTest") {
             // Shouldn't be possible to have an entry with 0 assertions, but explicitly check anyway.
             CHECK_GE(entryAssertions.size(), 1);
 
+            // Collect importUsageAssertions into a separate collection to handle them differently.
+            std::vector<shared_ptr<RangeAssertion>> importUsageAssertions;
+            entryAssertions.erase(std::remove_if(entryAssertions.begin(), entryAssertions.end(),
+                                                 [&](auto &assertion) -> bool {
+                                                     if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
+                                                         importUsageAssertions.emplace_back(assertion);
+                                                         return true;
+                                                     }
+
+                                                     return false;
+                                                 }),
+                                  entryAssertions.end());
+
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
                 vector<int> versions;
@@ -768,20 +781,30 @@ TEST_CASE("LSPTest") {
                 }
 
                 auto queryLoc = assertion->getLocation(config);
+
                 // Check that a definition request at this location returns defs.
                 DefAssertion::check(test.sourceFileContents, *lspWrapper, nextId, *queryLoc, defs);
-                // Check that a reference request at this location returns entryAssertions.
-                UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc, entryAssertions);
-                // Check that a highlight request at this location returns all of the entryAssertions for the same
-                // file as the request.
-                vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
-                for (auto &e : entryAssertions) {
-                    if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
-                        filteredEntryAssertions.push_back(e);
+                if (dynamic_pointer_cast<ImportAssertion>(assertion)) {
+                    // For an ImportAssertion, check that a reference request at this location returns
+                    // importUsageAssertions.
+                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                          importUsageAssertions);
+                } else {
+                    // For a regular UsageAssertion, check that a reference request at this location returns
+                    // entryAssertions.
+                    UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                          entryAssertions);
+                    // Check that a highlight request at this location returns all of the entryAssertions for the same
+                    // file as the request.
+                    vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
+                    for (auto &e : entryAssertions) {
+                        if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
+                            filteredEntryAssertions.push_back(e);
+                        }
                     }
+                    UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
+                                                    filteredEntryAssertions);
                 }
-                UsageAssertion::checkHighlights(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
-                                                filteredEntryAssertions);
             }
         }
 

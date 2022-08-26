@@ -32,6 +32,8 @@ const UnorderedMap<
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
+        {"import", ImportAssertion::make},
+        {"importusage", ImportUsageAssertion::make},
         {"def", DefAssertion::make},
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
@@ -727,6 +729,35 @@ shared_ptr<UsageAssertion> UsageAssertion::make(string_view filename, unique_ptr
                           fmt::format("Unexpected usage assertion option: `{}`", option));
     }
     return make_shared<UsageAssertion>(filename, range, assertionLine, symbol, versions);
+}
+
+ImportAssertion::ImportAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol,
+                                 vector<int> versions)
+    : UsageAssertion(filename, range, assertionLine, symbol, versions) {}
+
+shared_ptr<ImportAssertion> ImportAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                  string_view assertionContents, string_view assertionType) {
+    auto [symbol, versions, option] = getSymbolVersionAndOption(assertionContents);
+    if (!option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected import assertion option: `{}`", option));
+    }
+    return make_shared<ImportAssertion>(filename, range, assertionLine, symbol, versions);
+}
+
+ImportUsageAssertion::ImportUsageAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                           string_view symbol, vector<int> versions)
+    : UsageAssertion(filename, range, assertionLine, symbol, versions) {}
+
+shared_ptr<ImportUsageAssertion> ImportUsageAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                            int assertionLine, string_view assertionContents,
+                                                            string_view assertionType) {
+    auto [symbol, versions, option] = getSymbolVersionAndOption(assertionContents);
+    if (!option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected importusage assertion option: `{}`", option));
+    }
+    return make_shared<ImportUsageAssertion>(filename, range, assertionLine, symbol, versions);
 }
 
 string UsageAssertion::toString() const {
