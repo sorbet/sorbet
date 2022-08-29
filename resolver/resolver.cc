@@ -1176,7 +1176,7 @@ private:
 
             if(send->numPosArgs() == 1) {
                 if(auto *argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
-                    if(argClass != nullptr && argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
+                    if(argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
                         if constexpr (isMutableStateType) {
                             symbol = argClass->symbol.asClassOrModuleRef().data(gs)->singletonClass(gs);
                         }
