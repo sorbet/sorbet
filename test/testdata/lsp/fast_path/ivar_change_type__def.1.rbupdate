@@ -1,0 +1,8 @@
+# typed: true
+# assert-slow-path: true
+
+class Parent
+  def initialize
+    @x = T.let("", String)
+  end
+end
