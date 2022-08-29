@@ -481,7 +481,7 @@ public:
     }
 
     inline bool isUndeclared() const {
-        if (!flags.isModule && !flags.isClass) {
+        if (!isClassModuleSet()) {
             return true;
         }
         return flags.isUndeclared;
