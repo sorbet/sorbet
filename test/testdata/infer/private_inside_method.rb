@@ -8,10 +8,10 @@ end
 # Sorbet needs a static view of the world. We assume that once a method is
 # defined, that's its visibility always.
 
-# no runtime error, but static error because we saw `private :foo`
-A.foo # error: Non-private call to private method `foo`
+# no runtime error
+A.foo
 
 A.bar
 
-# runtime error (private call), static error because we saw `private :foo`
-A.foo # error: Non-private call to private method `foo`
+# runtime error (private call)
+A.foo
