@@ -239,9 +239,13 @@ public:
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
+        auto ownerIsMethod = getOwnerRaw().kind() == core::FoundDefinitionRef::Kind::Method;
 
         switch (original.fun.rawId()) {
             case core::Names::privateClassMethod().rawId(): {
+                if (ownerIsMethod) {
+                    break;
+                }
                 for (auto &arg : original.posArgs()) {
                     addMethodModifier(ctx, original.fun, arg);
                 }
@@ -252,6 +256,9 @@ public:
             case core::Names::private_().rawId():
             case core::Names::protected_().rawId():
             case core::Names::public_().rawId():
+                if (ownerIsMethod) {
+                    break;
+                }
                 if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
                     methodVisiStack.back() = optional<core::FoundModifier>{core::FoundModifier{
@@ -268,6 +275,9 @@ public:
                 }
                 break;
             case core::Names::privateConstant().rawId(): {
+                if (ownerIsMethod) {
+                    break;
+                }
                 for (auto &arg : original.posArgs()) {
                     addConstantModifier(ctx, original.fun, arg);
                 }
@@ -297,6 +307,9 @@ public:
                 break;
             }
             case core::Names::aliasMethod().rawId(): {
+                if (ownerIsMethod) {
+                    break;
+                }
                 addMethodAlias(ctx, original);
                 break;
             }
