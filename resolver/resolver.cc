@@ -2059,44 +2059,38 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
-        if (prior.exists() && prior.isFieldOrStaticField()) {
-            auto priorField = prior.asFieldRef();
-            if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
-                // We already have a symbol for this field, and it matches what we already saw, so we can short
-                // circuit.
-                return;
-            } else {
-                // We do some normalization here to ensure that the file / line we report the error on doesn't
-                // depend on the order that we traverse files nor the order we traverse within a file.
-                auto priorLoc = priorField.data(ctx)->loc();
-                core::Loc reportOn;
-                core::Loc errorLine;
-                core::Loc thisLoc = core::Loc(job.file, uid->loc);
-                if (thisLoc.file() == priorLoc.file()) {
-                    reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
-                    errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
-                } else {
-                    reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
-                    errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
-                }
-
-                if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
-                    e.addErrorLine(errorLine, "Previous declaration is here:");
-                }
-                return;
-            }
-        }
-        core::FieldRef var;
-
-        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
-            var = ctx.state.enterStaticFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
+        ENFORCE(prior.exists());
+        ENFORCE(prior.isFieldOrStaticField());
+        auto priorField = prior.asFieldRef();
+        if (priorField.data(ctx)->resultType == core::Types::todo()) {
+            // This was previously entered by namer and we are now resolving the type.
+            priorField.data(ctx)->resultType = castType;
+            return;
+        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
+            // We already have a symbol for this field, and it matches what we already saw, so we can short
+            // circuit.
+            return;
         } else {
-            var = ctx.state.enterFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
-        }
+            // We do some normalization here to ensure that the file / line we report the error on doesn't
+            // depend on the order that we traverse files nor the order we traverse within a file.
+            auto priorLoc = priorField.data(ctx)->loc();
+            core::Loc reportOn;
+            core::Loc errorLine;
+            core::Loc thisLoc = core::Loc(job.file, uid->loc);
+            if (thisLoc.file() == priorLoc.file()) {
+                reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
+                errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
+            } else {
+                reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
+                errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
+            }
 
-        var.data(ctx)->resultType = castType;
-        return;
+            if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
+                e.addErrorLine(errorLine, "Previous declaration is here:");
+            }
+            return;
+        }
     }
 
     // Resolve the type of the rhs of a constant declaration. This logic is

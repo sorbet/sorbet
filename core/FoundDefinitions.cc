@@ -59,6 +59,17 @@ const FoundTypeMember &FoundDefinitionRef::typeMember(const FoundDefinitions &fo
     return foundDefs._typeMembers[idx()];
 }
 
+FoundField &FoundDefinitionRef::field(FoundDefinitions &foundDefs) {
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Field);
+    ENFORCE(foundDefs._fields.size() > idx());
+    return foundDefs._fields[idx()];
+}
+const FoundField &FoundDefinitionRef::field(const FoundDefinitions &foundDefs) const {
+    ENFORCE(kind() == FoundDefinitionRef::Kind::Field);
+    ENFORCE(foundDefs._fields.size() > idx());
+    return foundDefs._fields[idx()];
+}
+
 core::SymbolRef FoundDefinitionRef::symbol() const {
     ENFORCE(kind() == FoundDefinitionRef::Kind::Symbol);
     return core::SymbolRef::fromRaw(_storage.id);
@@ -80,6 +91,8 @@ string FoundDefinitionRef::kindToString(Kind kind) {
             return "FoundEmpty";
         case FoundDefinitionRef::Kind::Symbol:
             return "FoundSymbol";
+        case FoundDefinitionRef::Kind::Field:
+            return "FoundField";
     }
 }
 
@@ -107,6 +120,9 @@ string FoundDefinitionRef::toString(const core::GlobalState &gs, const FoundDefi
         case FoundDefinitionRef::Kind::Symbol:
             result = fmt::format("{{ symbol = {} }}", this->symbol().show(gs));
             break;
+        case FoundDefinitionRef::Kind::Field:
+            result = this->field(foundDefs).toString(gs, foundDefs, this->idx());
+            break;
     }
     return fmt::format("{} {}", kindToString(this->kind()), result);
 }
@@ -130,6 +146,10 @@ string FoundTypeMember::toString(const core::GlobalState &gs, const FoundDefinit
 }
 
 std::string FoundMethod::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
+    return fmt::format("{{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
+}
+
+string FoundField::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
     return fmt::format("{{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
 }
 

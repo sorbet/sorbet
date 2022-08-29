@@ -203,11 +203,18 @@ public:
         foundMethod.flags = method.flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
-        foundDefs->addMethod(move(foundMethod));
+        auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
         // visibility modifiers.
+        ownerStack.emplace_back(def);
+        methodVisiStack.emplace_back(nullopt);
+    }
+
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        methodVisiStack.pop_back();
+        ownerStack.pop_back();
     }
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -473,8 +480,42 @@ public:
         return foundRef;
     }
 
+    // Returns `true` if `asgn` is a field declaration.
+    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+        auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
+        if (uid == nullptr) {
+            return false;
+        }
+
+        if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
+            return false;
+        }
+
+        auto *cast = ast::cast_tree<ast::Cast>(asgn.rhs);
+        if (cast == nullptr) {
+            return false;
+        }
+
+        // Resolver will issues errors about non-let declarations of variables, but
+        // will still associate types with the variables; we need to ensure that
+        // there are entries in the symbol table for those variables.
+
+        core::FoundField found;
+        found.kind = uid->kind == ast::UnresolvedIdent::Kind::Instance ? core::FoundField::Kind::InstanceVariable
+                                                                       : core::FoundField::Kind::ClassVariable;
+        found.owner = getOwner();
+        found.loc = uid->loc;
+        found.name = uid->name;
+        foundDefs->addField(move(found));
+        return true;
+    }
+
     void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+
+        if (handleFieldDeclaration(ctx, asgn)) {
+            return;
+        }
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
@@ -531,6 +572,7 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::Method:
             case core::FoundDefinitionRef::Kind::StaticField:
             case core::FoundDefinitionRef::Kind::TypeMember:
+            case core::FoundDefinitionRef::Kind::Field:
                 Exception::raise("Invalid name reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
         }
     }
@@ -545,11 +587,14 @@ class SymbolDefiner {
                 return definedClasses[ref.idx()];
             case core::FoundDefinitionRef::Kind::Method:
                 ENFORCE(ref.idx() < definedMethods.size());
+                // Ensure that nobody is trying to reference alias methods.
+                ENFORCE(definedMethods[ref.idx()].exists());
                 return definedMethods[ref.idx()];
             case core::FoundDefinitionRef::Kind::Empty:
             case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::StaticField:
             case core::FoundDefinitionRef::Kind::TypeMember:
+            case core::FoundDefinitionRef::Kind::Field:
                 Exception::raise("Invalid owner reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
         }
     }
@@ -920,10 +965,13 @@ class SymbolDefiner {
     void modifyMethod(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
-        auto owner = ctx.owner.enclosingClass(ctx);
+        core::ClassOrModuleRef owner;
         if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::packagePrivateClassMethod()) {
-            owner = owner.data(ctx)->singletonClass(ctx);
+            owner = ctx.selfClass();
+        } else {
+            owner = ctx.owner.enclosingClass(ctx);
         }
+
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
             switch (mod.name.rawId()) {
@@ -1085,6 +1133,42 @@ class SymbolDefiner {
         }
     }
 
+    core::FieldRef insertField(core::MutableContext ctx, const core::FoundField &field) {
+        core::ClassOrModuleRef scope;
+
+        // resolver checks a whole bunch of various error conditions here; we just want to
+        // know where to define the field.
+        if (field.kind == core::FoundField::Kind::ClassVariable) {
+            scope = ctx.owner.enclosingClass(ctx);
+        } else {
+            scope = ctx.selfClass();
+        }
+
+        auto existing = scope.data(ctx)->findMember(ctx, field.name);
+        if (existing.exists() && existing.isFieldOrStaticField()) {
+            auto prior = existing.asFieldRef();
+            // There was a previous declaration of this field in this file.  Ignore it;
+            // let resolver deal with issuing the appropriate errors.
+            if (prior.data(ctx)->resultType == core::Types::todo()) {
+                return prior;
+            }
+
+            // We are on the fast path and there was a previous declaration.
+            prior.data(ctx)->resultType = core::Types::todo();
+            return prior;
+        }
+
+        core::FieldRef sym;
+        if (field.kind == core::FoundField::Kind::InstanceVariable) {
+            sym = ctx.state.enterFieldSymbol(ctx.locAt(field.loc), scope, field.name);
+        } else {
+            sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(field.loc), scope, field.name);
+        }
+
+        sym.data(ctx)->resultType = core::Types::todo();
+        return sym;
+    }
+
     core::FieldRef insertStaticField(core::MutableContext ctx, const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
@@ -1237,6 +1321,11 @@ class SymbolDefiner {
                 insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
                 break;
             }
+            case core::FoundDefinitionRef::Kind::Field: {
+                const auto &field = ref.field(foundDefs);
+                insertField(ctx.withOwner(getOwnerSymbol(field.owner)), field);
+                break;
+            }
             case core::FoundDefinitionRef::Kind::Empty:
             case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::Method:
@@ -1303,7 +1392,11 @@ public:
         definedMethods.reserve(foundDefs.methods().size());
 
         for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            defineNonDeletableSingle(ctx, ref);
+            // We say that the "owner" of fields declared in methods is the method itself.
+            // This is consistent with how we define the owner of contexts during treewalks.
+            if (ref.kind() != core::FoundDefinitionRef::Kind::Field) {
+                defineNonDeletableSingle(ctx, ref);
+            }
         }
 
         // This currently interleaves deleting and defining across files.
@@ -1325,9 +1418,19 @@ public:
                 // We need alias methods in the FoundDefinitions list not so that we can actually
                 // create method symbols for them yet, but just so we can know which alias methods
                 // to delete on the fast path. Alias methods will be defined later, in resolver.
+                //
+                // We still need to put something here so that other found definitions that
+                // reference methods will get the correct symbols.
+                definedMethods.emplace_back(core::MethodRef{});
                 continue;
             }
             definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+        }
+
+        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+            if (ref.kind() == core::FoundDefinitionRef::Kind::Field) {
+                defineNonDeletableSingle(ctx, ref);
+            }
         }
 
         for (const auto &modifier : foundDefs.modifiers()) {
@@ -1943,7 +2046,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::ShallowWalk::apply(ctx, finder, job.tree);
+                ast::TreeWalk::apply(ctx, finder, job.tree);
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
@@ -2077,7 +2180,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::ShallowWalk::apply(ctx, inserter, job.tree);
+                ast::TreeWalk::apply(ctx, inserter, job.tree);
                 output.trees.emplace_back(move(job));
             }
         }
