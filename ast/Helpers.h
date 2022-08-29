@@ -317,25 +317,6 @@ public:
         return Hash(loc, std::move(keys), std::move(values));
     }
 
-    static bool isT(ExpressionPtr &expr) {
-        auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
-        return tMod && tMod->symbol == core::Symbols::T();
-    }
-
-    static bool isTClassOf(ExpressionPtr &expr) {
-        auto *send = ast::cast_tree<ast::Send>(expr);
-
-        if(send == nullptr) {
-            return false;
-        }
-
-        if(!isT(send->recv))  {
-            return false;
-        }
-
-        return send->fun == core::Names::classOf();
-    }
-
 private:
     static ExpressionPtr Params(core::LocOffsets loc, ExpressionPtr recv, Send::ARGS_store args) {
         ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");

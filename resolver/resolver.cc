@@ -93,6 +93,25 @@ namespace {
  * the fixed point loop at a high level.
  */
 
+bool isT(ast::ExpressionPtr &expr) {
+    auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
+    return tMod && tMod->symbol == core::Symbols::T();
+}
+
+bool isTClassOf(ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+
+    if(send == nullptr) {
+        return false;
+    }
+
+    if(!isT(send->recv))  {
+        return false;
+    }
+
+    return send->fun == core::Names::classOf();
+}
+
 class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
@@ -1150,7 +1169,7 @@ private:
             if(constant != nullptr && constant->symbol.exists() && constant->symbol.isClassOrModule()) {
                 symbol = constant->symbol.asClassOrModuleRef();
             }
-        } else if(ast::MK::isTClassOf(block->body)) {
+        } else if(isTClassOf(block->body)) {
             send = ast::cast_tree<ast::Send>(block->body);
 
             ENFORCE(send);
@@ -1934,7 +1953,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     void extendClassOfDepth(ast::Send &send) {
         if (trackDependencies_) {
-            classOfDepth_.emplace_back(ast::MK::isT(send.recv) && send.fun == core::Names::classOf());
+            classOfDepth_.emplace_back(isT(send.recv) && send.fun == core::Names::classOf());
         }
     }
 
@@ -2758,7 +2777,7 @@ public:
 
         if (send.fun == core::Names::typeAlias()) {
             // don't track dependencies if this is some other method named `type_alias`
-            if (!ast::MK::isT(send.recv)) {
+            if (!isT(send.recv)) {
                 extendClassOfDepth(send);
                 return;
             }
