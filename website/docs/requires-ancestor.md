@@ -158,7 +158,8 @@ class MyBrokenTest < Test::TestBase # error: `MyBrokenTest` must include `Test::
 end
 ```
 
-`requires_ancestor` can also be used to require a singleton class as an ancestor:
+`requires_ancestor` can also be used to require a singleton class as an
+ancestor:
 
 ```
 module MyHelper

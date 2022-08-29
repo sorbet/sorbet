@@ -101,11 +101,11 @@ bool isT(ast::ExpressionPtr &expr) {
 bool isTClassOf(ast::ExpressionPtr &expr) {
     auto *send = ast::cast_tree<ast::Send>(expr);
 
-    if(send == nullptr) {
+    if (send == nullptr) {
         return false;
     }
 
-    if(!isT(send->recv))  {
+    if (!isT(send->recv)) {
         return false;
     }
 
@@ -1165,18 +1165,18 @@ private:
         auto blockLoc = core::Loc(todo.file, block->body.loc());
         core::ClassOrModuleRef symbol = core::Symbols::StubModule();
 
-        if(auto *constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
-            if(constant->symbol.exists() && constant->symbol.isClassOrModule()) {
+        if (auto *constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
+            if (constant->symbol.exists() && constant->symbol.isClassOrModule()) {
                 symbol = constant->symbol.asClassOrModuleRef();
             }
-        } else if(isTClassOf(block->body)) {
+        } else if (isTClassOf(block->body)) {
             send = ast::cast_tree<ast::Send>(block->body);
 
             ENFORCE(send);
 
-            if(send->numPosArgs() == 1) {
-                if(auto *argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
-                    if(argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
+            if (send->numPosArgs() == 1) {
+                if (auto *argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
+                    if (argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
                         if constexpr (isMutableStateType) {
                             symbol = argClass->symbol.asClassOrModuleRef().data(gs)->singletonClass(gs);
                         }
