@@ -1166,7 +1166,7 @@ private:
         core::ClassOrModuleRef symbol = core::Symbols::StubModule();
 
         if(auto *constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
-            if(constant != nullptr && constant->symbol.exists() && constant->symbol.isClassOrModule()) {
+            if(constant->symbol.exists() && constant->symbol.isClassOrModule()) {
                 symbol = constant->symbol.asClassOrModuleRef();
             }
         } else if(isTClassOf(block->body)) {
