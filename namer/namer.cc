@@ -697,7 +697,7 @@ private:
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
             auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
             if (prevSymbol.kind() == Kind::ClassOrModule &&
-                prevSymbol.asClassOrModuleRef().data(ctx)->isClassModuleSet()) {
+                !prevSymbol.asClassOrModuleRef().data(ctx)->isUndeclared()) {
                 prevSymbolKind = prevSymbol.asClassOrModuleRef().showKind(ctx);
             }
 
