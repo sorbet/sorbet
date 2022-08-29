@@ -6,7 +6,7 @@ class A
 end
 
 # Sorbet needs a static view of the world. We assume that once a method is
-# defined, that's it's visibility always.
+# defined, that's its visibility always.
 
 # no runtime error
 A.foo
