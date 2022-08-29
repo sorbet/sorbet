@@ -1,0 +1,17 @@
+# typed: strict
+# assert-slow-path: true
+
+class A
+  extend T::Sig
+
+  sig {void}
+  def initialize
+    @x = T.let(0, Integer)
+  end
+
+  sig {returns(String)}
+  def y
+    @y
+  # ^^ error: Use of undeclared variable `@y`
+  end
+end

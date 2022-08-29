@@ -1,0 +1,11 @@
+# typed: true
+
+class Child < Parent
+  extend T::Sig
+
+  sig {returns(Integer)}
+  def y
+    @@y
+  # ^^^ error: Expected `Integer` but found `String` for method result type
+  end
+end
