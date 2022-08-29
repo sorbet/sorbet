@@ -523,11 +523,8 @@ public:
         core::FoundField found;
         found.kind = uid->kind == ast::UnresolvedIdent::Kind::Instance ? core::FoundField::Kind::InstanceVariable
                                                                        : core::FoundField::Kind::ClassVariable;
-        auto onSingletonClass = found.kind == core::FoundField::Kind::InstanceVariable;
         auto [owner, isSelfMethod] = getOwnerSkippingMethods();
-        if (isSelfMethod.has_value()) {
-            onSingletonClass = isSelfMethod.value();
-        }
+        auto onSingletonClass = isSelfMethod.value_or(found.kind == core::FoundField::Kind::InstanceVariable);
         found.onSingletonClass = onSingletonClass;
         found.owner = owner;
         found.loc = uid->loc;
