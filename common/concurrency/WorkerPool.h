@@ -16,6 +16,7 @@ public:
     using Task = std::function<void()>;
     static std::unique_ptr<WorkerPool> create(int size, spd::logger &logger);
     virtual void multiplexJob(std::string_view taskName, Task t) = 0;
+    virtual void multiplexAndWaitForJob(std::string_view taskName, Task t) = 0;
     virtual ~WorkerPool() = 0;
     virtual int size() = 0;
     WorkerPool() = default;

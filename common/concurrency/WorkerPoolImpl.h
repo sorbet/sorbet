@@ -90,6 +90,7 @@ public:
     ~WorkerPoolImpl();
 
     void multiplexJob(std::string_view taskName, Task t) override;
+    void multiplexAndWaitForJob(std::string_view taskName, Task t) override;
     int size() override;
 };
 };     // namespace sorbet

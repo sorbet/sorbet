@@ -1498,20 +1498,18 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
-        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
-        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
-        for (auto &file : files) {
-            fileq->push(move(file), 1);
+        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+
+        for (size_t i = 0; i < files.size(); ++i) {
+            taskq->push(i, 1);
         }
 
-        workers.multiplexJob("rewritePackagesAndFiles", [&gs, fileq, resultq]() {
+        workers.multiplexAndWaitForJob("rewritePackagesAndFiles", [&gs, &files, taskq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
-            vector<ast::ParsedFile> results;
-            uint32_t filesProcessed = 0;
-            ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            size_t idx;
+            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+                ast::ParsedFile &job = files[idx];
                 if (result.gotItem()) {
-                    filesProcessed++;
                     auto &file = job.file.data(gs);
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
@@ -1520,30 +1518,10 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                     } else {
                         job = rewritePackagedFile(ctx, move(job));
                     }
-
-                    results.emplace_back(move(job));
                 }
-            }
-            if (filesProcessed > 0) {
-                resultq->push(move(results), filesProcessed);
             }
         });
-        files.clear();
-
-        {
-            vector<ast::ParsedFile> threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem()) {
-                    files.insert(files.end(), make_move_iterator(threadResult.begin()),
-                                 make_move_iterator(threadResult.end()));
-                }
-            }
-        }
     }
-
-    fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
     return files;
 }

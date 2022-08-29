@@ -1,5 +1,6 @@
 #include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "common/concurrency/WorkerPool.h"
 
 using namespace std;
@@ -62,6 +63,22 @@ void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
             t();
             return true;
         });
+    } else {
+        // main thread is the worker.
+        t();
+    }
+}
+
+void WorkerPoolImpl::multiplexAndWaitForJob(string_view taskName, WorkerPool::Task t) {
+    if (_size > 0) {
+        absl::BlockingCounter barrier(_size);
+
+        multiplexJob(taskName, [&barrier, t{move(t)}]() {
+            t();
+            barrier.DecrementCount();
+        });
+
+        barrier.Wait();
     } else {
         // main thread is the worker.
         t();
