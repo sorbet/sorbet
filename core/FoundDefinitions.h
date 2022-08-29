@@ -195,6 +195,7 @@ struct FoundField {
         InstanceVariable,
     };
     Kind kind;
+    bool onSingletonClass;
     FoundDefinitionRef owner;
     core::LocOffsets loc;
     core::NameRef name;

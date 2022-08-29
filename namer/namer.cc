@@ -108,11 +108,31 @@ class SymbolFinder {
         }
     }
 
-    core::FoundDefinitionRef getOwner() {
+    core::FoundDefinitionRef getOwnerRaw() {
         if (ownerStack.empty()) {
             return core::FoundDefinitionRef::root();
         }
         return ownerStack.back();
+    }
+
+    pair<core::FoundDefinitionRef, optional<bool>> getOwnerSkippingMethods() {
+        auto owner = getOwnerRaw();
+        if (owner.kind() != core::FoundDefinitionRef::Kind::Method) {
+            return {owner, nullopt};
+        }
+
+        bool isSelfMethod = owner.method(*foundDefs).flags.isSelfMethod;
+        ENFORCE(!ownerStack.empty());
+        auto it = ownerStack.rbegin() + 1;
+        if (it == ownerStack.rend()) {
+            return {core::FoundDefinitionRef::root(), isSelfMethod};
+        }
+        ENFORCE(it->kind() != core::FoundDefinitionRef::Kind::Method);
+        return {*it, isSelfMethod};
+    }
+
+    core::FoundDefinitionRef getOwner() {
+        return getOwnerSkippingMethods().first;
     }
 
     // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
@@ -503,7 +523,13 @@ public:
         core::FoundField found;
         found.kind = uid->kind == ast::UnresolvedIdent::Kind::Instance ? core::FoundField::Kind::InstanceVariable
                                                                        : core::FoundField::Kind::ClassVariable;
-        found.owner = getOwner();
+        auto onSingletonClass = found.kind == core::FoundField::Kind::InstanceVariable;
+        auto [owner, isSelfMethod] = getOwnerSkippingMethods();
+        if (isSelfMethod.has_value()) {
+            onSingletonClass = isSelfMethod.value();
+        }
+        found.onSingletonClass = onSingletonClass;
+        found.owner = owner;
         found.loc = uid->loc;
         found.name = uid->name;
         foundDefs->addField(move(found));
@@ -586,10 +612,6 @@ class SymbolDefiner {
                 ENFORCE(ref.idx() < definedClasses.size());
                 return definedClasses[ref.idx()];
             case core::FoundDefinitionRef::Kind::Method:
-                ENFORCE(ref.idx() < definedMethods.size());
-                // Ensure that nobody is trying to reference alias methods.
-                ENFORCE(definedMethods[ref.idx()].exists());
-                return definedMethods[ref.idx()];
             case core::FoundDefinitionRef::Kind::Empty:
             case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::StaticField:
@@ -1134,14 +1156,13 @@ class SymbolDefiner {
     }
 
     core::FieldRef insertField(core::MutableContext ctx, const core::FoundField &field) {
-        core::ClassOrModuleRef scope;
-
         // resolver checks a whole bunch of various error conditions here; we just want to
         // know where to define the field.
-        if (field.kind == core::FoundField::Kind::ClassVariable) {
-            scope = ctx.owner.enclosingClass(ctx);
-        } else {
-            scope = ctx.selfClass();
+        ENFORCE(ctx.owner.isClassOrModule(), "Actual {}", ctx.owner.show(ctx));
+        core::ClassOrModuleRef scope = ctx.owner.enclosingClass(ctx);
+
+        if (field.onSingletonClass) {
+            scope = scope.data(ctx)->singletonClass(ctx);
         }
 
         auto existing = scope.data(ctx)->findMember(ctx, field.name);
@@ -1392,11 +1413,7 @@ public:
         definedMethods.reserve(foundDefs.methods().size());
 
         for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            // We say that the "owner" of fields declared in methods is the method itself.
-            // This is consistent with how we define the owner of contexts during treewalks.
-            if (ref.kind() != core::FoundDefinitionRef::Kind::Field) {
-                defineNonDeletableSingle(ctx, ref);
-            }
+            defineNonDeletableSingle(ctx, ref);
         }
 
         // This currently interleaves deleting and defining across files.
@@ -1425,12 +1442,6 @@ public:
                 continue;
             }
             definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
-        }
-
-        for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            if (ref.kind() == core::FoundDefinitionRef::Kind::Field) {
-                defineNonDeletableSingle(ctx, ref);
-            }
         }
 
         for (const auto &modifier : foundDefs.modifiers()) {
