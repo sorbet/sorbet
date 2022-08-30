@@ -1,0 +1,6 @@
+# typed: true
+# assert-slow-path: true
+
+class Parent
+  @x = T.let("", String)
+end
