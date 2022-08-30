@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: ivar_change_type__def.rb,ivar_change_type__use.rb
 
 class Parent
   def initialize

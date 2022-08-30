@@ -1,5 +1,5 @@
 # typed: strict
-# assert-slow-path: true
+# assert-fast-path: class_ivar_delete.rb
 
 class A
   extend T::Sig
