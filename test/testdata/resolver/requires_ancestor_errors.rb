@@ -18,6 +18,10 @@ module Helper3
   requires_ancestor { NotFound }
   #                   ^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
   #                   ^^^^^^^^ error: Unable to resolve constant `NotFound`
+
+  requires_ancestor { T.class_of(NotFound) }
+  #                   ^^^^^^^^^^^^^^^^^^^^ error: Argument to `class_of` must be statically resolvable to a class or a module
+  #                              ^^^^^^^^ error: Unable to resolve constant `NotFound`
 end
 
 class Helper4
@@ -37,7 +41,8 @@ module Helper5
   requires_ancestor { "Object" }
   #                   ^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
 
-  requires_ancestor { T.class_of(Object) }
+  requires_ancestor { Object.superclass }
+  #                   ^^^^^^^^^^^^^^^^^ error: Argument to `requires_ancestor` must be statically resolvable to a class or a module
 end
 
 module Helper6
@@ -45,6 +50,9 @@ module Helper6
 
   requires_ancestor { Helper6 }
   #                   ^^^^^^^ error: Must not pass yourself to `requires_ancestor`
+
+  requires_ancestor { T.class_of(Helper6) }
+  #                   ^^^^^^^^^^^^^^^^^^^ error: Must not pass yourself to `class_of` inside of `requires_ancestor`
 end
 
 module Helper7

@@ -1177,6 +1177,14 @@ private:
             if (send->numPosArgs() == 1) {
                 if (auto *argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
                     if (argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
+                        if (argClass->symbol == owner) {
+                            if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                                e.setHeader("Must not pass yourself to `{}` inside of `requires_ancestor`",
+                                            send->fun.show(gs));
+                            }
+                            return;
+                        }
+
                         if constexpr (isMutableStateType) {
                             symbol = argClass->symbol.asClassOrModuleRef().data(gs)->singletonClass(gs);
                         }
