@@ -1270,13 +1270,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
-                    Send::ARGS_store definedArgs;
-                    definedArgs.emplace_back(recv.deepCopy());
-                    auto defined = MK::defined_p(recv.loc(), 1, std::move(definedArgs));
-                    auto body = recv.deepCopy();
-                    auto elsep = MK::Assign(loc, std::move(recv), std::move(arg));
-                    auto iff = MK::If(loc, std::move(defined), std::move(body), std::move(elsep));
-                    result = std::move(iff);
+                    if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                        e.setHeader("Constant reassignment is not supported");
+                    }
+                    ExpressionPtr res = MK::EmptyTree();
+                    result = std::move(res);
                 } else if (auto i = cast_tree<InsSeq>(recv)) {
                     // The logic below is explained more fully in the OpAsgn case
                     auto ifExpr = cast_tree<If>(i->expr);
@@ -2169,7 +2167,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 absl::c_reverse(args);
 
                 auto numPosArgs = args.size();
-                auto res = MK::defined_p(loc, numPosArgs, std::move(args));
+                auto res =
+                    MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, std::move(args));
                 result = std::move(res);
             },
             [&](parser::LineLiteral *line) {

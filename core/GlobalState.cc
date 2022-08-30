@@ -657,7 +657,7 @@ void GlobalState::initEmpty() {
 
     // Synthesize <Magic>.<defined>(*arg0: String) => Boolean
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::defined_p())
-                 .repeatedTypedArg(Names::arg0(), Types::top())
+                 .repeatedTypedArg(Names::arg0(), Types::String())
                  .buildWithResult(Types::any(*this, Types::nilClass(), Types::String()));
 
     // Synthesize <Magic>.<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
