@@ -1485,7 +1485,9 @@ public:
         // methods, then define all the methods.
         if (oldFoundHashes.has_value()) {
             for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
-                deleteViaFullNameHash(ctx, oldFieldHash);
+                if (oldFieldHash.owner.isInstanceVariable) {
+                    deleteViaFullNameHash(ctx, oldFieldHash);
+                }
             }
 
             // TODO(froydnj): what happens if methods are deleted in one file but reappear
