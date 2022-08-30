@@ -74,7 +74,7 @@ export function shimLanguageClient(
  * Handles short-circuiting format-on-save requests when either the client or server is
  * configured to turn them off.
  */
-export function shimFormatOnSaveRequests(lc: LanguageClient) {
+export function shimDocumentFormattingRequests(lc: LanguageClient) {
   const originalSendRequest = lc.sendRequest;
   lc.sendRequest = function(this: LanguageClient, method: any, ...args: any[]) {
     const requestName = typeof method === "string" ? method : method.method;
@@ -162,19 +162,20 @@ export default class SorbetLanguageClient implements ErrorHandler {
         this._updateStatus(ServerStatus.RUNNING);
       }
 
-      const serverConfigSupportsFormatOnSave =
+      const serverConfigSupportsDocumentFormatting =
         this._languageClient.initializeResult?.config === undefined
           ? true
-          : this._languageClient.initializeResult?.config?.formatOnSave;
-      const extensionConfigSupportsFormatOnSave = this._sorbetExtensionConfig
-        .formatOnSave;
+          : this._languageClient.initializeResult?.config
+              ?.enableDocumentFormatting;
+      const extensionConfigSupportsDocumentFormatting = this
+        ._sorbetExtensionConfig.enableDocumentFormatting;
       if (
         !(
-          serverConfigSupportsFormatOnSave &&
-          extensionConfigSupportsFormatOnSave
+          serverConfigSupportsDocumentFormatting &&
+          extensionConfigSupportsDocumentFormatting
         )
       ) {
-        shimFormatOnSaveRequests(this._languageClient);
+        shimDocumentFormattingRequests(this._languageClient);
       }
 
       const caps: any = this._languageClient.initializeResult?.capabilities;

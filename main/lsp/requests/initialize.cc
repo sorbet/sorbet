@@ -52,7 +52,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerInterface &
     serverCap->completionProvider = move(completionProvider);
 
     auto extensionConfig = make_unique<VSCodeExtensionConfig>();
-    extensionConfig->formatOnSave = opts.rubyfmtFormatOnSave;
+    extensionConfig->enableDocumentFormatting = opts.enableVscodeDocumentFormatting;
 
     response->result = make_unique<InitializeResult>(move(serverCap), move(extensionConfig));
     return response;

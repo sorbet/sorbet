@@ -1252,7 +1252,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto VSCodeExtensionConfig = makeObject("VSCodeExtensionConfig",
                                             {
-                                                makeField("formatOnSave", makeOptional(JSONBool)),
+                                                makeField("enableDocumentFormatting", makeOptional(JSONBool)),
                                             },
                                             classTypes);
 

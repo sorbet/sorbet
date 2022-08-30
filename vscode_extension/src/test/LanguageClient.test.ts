@@ -7,7 +7,7 @@ import {
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
 import {
-  shimFormatOnSaveRequests,
+  shimDocumentFormattingRequests,
   shimLanguageClient,
 } from "../LanguageClient";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
@@ -102,10 +102,8 @@ suite("LanguageClient", () => {
     test("Shims formatting requests to return null", async () => {
       const client = createLanguageClient();
       await client.onReady();
-      shimFormatOnSaveRequests(client);
+      shimDocumentFormattingRequests(client);
       {
-        // We use $ in this case since that's how it's actually
-        // represented in production
         const successResponse = await client.sendRequest(
           "textDocument/formatting",
           {
@@ -124,9 +122,6 @@ suite("LanguageClient", () => {
       const client = createLanguageClient();
       await client.onReady();
       {
-        // We use the actual slash format for the request name
-        // here for tests, despite the fact that in prod
-        // it would come through as a $ instead
         const successResponse = await client.sendRequest(
           "textDocument/formatting",
           {

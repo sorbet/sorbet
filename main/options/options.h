@@ -255,9 +255,9 @@ struct Options {
     std::vector<std::string> lspDirsMissingFromClient;
     // Path to the executable used for document formatting
     std::string rubyfmtPath = "rubyfmt";
-    // Enable format-on-save in the VSCode configuration. This is a command line
-    // equivalent to `sorbet.formatOnSave` in the extension
-    bool rubyfmtFormatOnSave;
+    // Enable document formatting in the VSCode configuration. This is a command line
+    // equivalent to `sorbet.enableDocumentFormatting` in the extension
+    bool enableVscodeDocumentFormatting;
     // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
     bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.

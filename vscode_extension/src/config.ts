@@ -217,7 +217,7 @@ export class SorbetExtensionConfig implements Disposable {
   private _selectedLspConfigId: string | undefined = undefined;
 
   private _enabled: boolean;
-  private _formatOnSave: boolean = true;
+  private _enableDocumentFormatting: boolean = true;
   private _revealOutputOnError: boolean = false;
   private _configFilePatterns: ReadonlyArray<string> = [];
   private _configFileWatchers: ReadonlyArray<FileSystemWatcher> = [];
@@ -246,7 +246,10 @@ export class SorbetExtensionConfig implements Disposable {
     const oldLspConfig = this.activeLspConfig;
     const workspaceContext = this._sorbetWorkspaceContext;
     this._enabled = workspaceContext.get("enabled", this._enabled);
-    this._formatOnSave = workspaceContext.get("formatOnSave", true);
+    this._enableDocumentFormatting = workspaceContext.get(
+      "enableDocumentFormatting",
+      true,
+    );
     this._revealOutputOnError = workspaceContext.get(
       "revealOutputOnError",
       this.revealOutputOnError,
@@ -374,8 +377,8 @@ export class SorbetExtensionConfig implements Disposable {
     return this._enabled;
   }
 
-  public get formatOnSave(): boolean {
-    return this._formatOnSave;
+  public get enableDocumentFormatting(): boolean {
+    return this._enableDocumentFormatting;
   }
 
   public setEnabled(b: boolean): Thenable<void> {

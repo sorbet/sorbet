@@ -90,8 +90,8 @@
           "description": "Enable Sorbet Ruby IDE features",
           "type": "boolean"
         },
-        "sorbet.formatOnSave": {
-          "description": "Enable format-on-save with `rubyfmt`. This defaults to true and relies on format-on-save also being turned on in VSCode.",
+        "sorbet.enableDocumentFormatting": {
+          "description": "Enable document formatting with `rubyfmt`.",
           "type": "boolean",
           "default": true
         },
