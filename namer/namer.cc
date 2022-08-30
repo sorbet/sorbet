@@ -1547,7 +1547,8 @@ public:
             auto owner = field.owner;
             auto fullNameHash = core::FullNameHash(ctx, field.name);
             foundHashesOut.fieldHashes.emplace_back(owner.idx(), field.onSingletonClass,
-                                                    field.kind == core::FoundField::Kind::InstanceVariable, fullNameHash);
+                                                    field.kind == core::FoundField::Kind::InstanceVariable,
+                                                    fullNameHash);
         }
     }
 };
