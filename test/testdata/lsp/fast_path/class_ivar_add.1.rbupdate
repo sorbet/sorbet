@@ -1,0 +1,15 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  extend T::Sig
+
+  @x = T.let("", String)
+  @y = T.let(0, Integer)
+
+  sig {void}
+  def self.example
+    T.reveal_type(@x) # error: Revealed type: `String`
+    T.reveal_type(@y) # error: Revealed type: `Integer`
+  end
+end

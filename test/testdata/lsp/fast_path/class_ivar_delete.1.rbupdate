@@ -1,0 +1,15 @@
+# typed: strict
+# assert-slow-path: true
+
+class A
+  extend T::Sig
+
+  @x = T.let(0, Integer)
+
+  sig {returns(String)}
+  def y
+    T.reveal_type(@y) # error: Revealed type: `T.untyped`
+                # ^^ error: Use of undeclared variable `@y`
+    @y
+  end
+end
