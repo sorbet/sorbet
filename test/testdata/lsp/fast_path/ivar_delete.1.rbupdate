@@ -11,7 +11,8 @@ class A
 
   sig {returns(String)}
   def y
+    T.reveal_type(@y) # error: Revealed type: `T.untyped`
+                # ^^ error: Use of undeclared variable `@y`
     @y
-  # ^^ error: Use of undeclared variable `@y`
   end
 end
