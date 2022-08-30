@@ -14,6 +14,7 @@ connection.onInitialize((_: InitializeParams) => {
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Full,
+      documentFormattingProvider: true,
       // Tell the client that the server supports code completion
       completionProvider: {
         resolveProvider: true,
@@ -23,6 +24,15 @@ connection.onInitialize((_: InitializeParams) => {
 });
 
 connection.onInitialized(() => {});
+
+connection.onDocumentFormatting((e) => {
+  switch (e.textDocument.uri) {
+    case TestLanguageServerSpecialURIs.SUCCESS:
+      return [];
+    default:
+      throw new Error("Invalid request.");
+  }
+});
 
 connection.onHover((e) => {
   switch (e.textDocument.uri) {

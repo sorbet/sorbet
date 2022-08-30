@@ -90,6 +90,11 @@
           "description": "Enable Sorbet Ruby IDE features",
           "type": "boolean"
         },
+        "sorbet.formatOnSave": {
+          "description": "Enable format-on-save with `rubyfmt`. This defaults to true and relies on format-on-save also being turned on in VSCode.",
+          "type": "boolean",
+          "default": true
+        },
         "sorbet.selectedLspConfigId": {
           "description": "The default configuration to use from `sorbet.userLspConfigs` or `sorbet.lspConfigs`.  If unset, defaults to the first item in `sorbet.userLspConfigs` or `sorbet.lspConfigs`.",
           "type": "string"

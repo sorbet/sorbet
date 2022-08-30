@@ -6,7 +6,10 @@ import {
 } from "vscode-languageclient/node";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
-import { shimLanguageClient } from "../LanguageClient";
+import {
+  shimFormatOnSaveRequests,
+  shimLanguageClient,
+} from "../LanguageClient";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
 import { setSorbetMetricsApi, Tags, MetricsEmitter } from "../veneur";
 
@@ -95,6 +98,50 @@ function createLanguageClient(): LanguageClient {
 
 let metricsEmitter = new RecordingMetricsEmitter();
 suite("LanguageClient", () => {
+  suite("Format On Save", () => {
+    test("Shims formatting requests to return null", async () => {
+      const client = createLanguageClient();
+      await client.onReady();
+      shimFormatOnSaveRequests(client);
+      {
+        // We use $ in this case since that's how it's actually
+        // represented in production
+        const successResponse = await client.sendRequest(
+          "textDocument/formatting",
+          {
+            textDocument: {
+              uri: TestLanguageServerSpecialURIs.SUCCESS,
+            },
+            options: { tabSize: 4, insertSpaces: false },
+          },
+        );
+
+        assert.equal(successResponse, null);
+      }
+    });
+
+    test("Successfully formats when not shimmed", async () => {
+      const client = createLanguageClient();
+      await client.onReady();
+      {
+        // We use the actual slash format for the request name
+        // here for tests, despite the fact that in prod
+        // it would come through as a $ instead
+        const successResponse = await client.sendRequest(
+          "textDocument/formatting",
+          {
+            textDocument: {
+              uri: TestLanguageServerSpecialURIs.SUCCESS,
+            },
+            options: { tabSize: 4, insertSpaces: false },
+          },
+        );
+
+        assert.deepStrictEqual(successResponse as any, []);
+      }
+    });
+  });
+
   suite("Metrics", () => {
     suiteSetup(() => {
       metricsEmitter = new RecordingMetricsEmitter();
