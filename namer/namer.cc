@@ -1415,6 +1415,57 @@ class SymbolDefiner {
         }
     }
 
+    void deleteViaFullNameHash(core::MutableContext ctx, const core::FoundFieldHash &oldDefHash) {
+        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+
+        // Because a change to classes would have take the slow path, should be safe
+        // to look up old owner in current foundDefs.
+        auto ownerSymbol = getOwnerSymbol(ownerRef);
+        ENFORCE(ownerSymbol.isClassOrModule());
+        auto owner = ownerSymbol.asClassOrModuleRef();
+        if (oldDefHash.owner.useSingletonClass) {
+            owner = owner.data(ctx)->singletonClass(ctx);
+        }
+
+        // We have to accumulate a list of fields to delete, instead of deleting them in the loop
+        // below, because deleting a field invalidates the members() iterator.
+        vector<core::FieldRef> toDelete;
+
+        // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per field
+        // previously defined in this file, then in each call look at each of that field's class's members
+        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
+            if (!memberSym.isFieldOrStaticField()) {
+                continue;
+            }
+            auto memberField = memberSym.asFieldRef();
+
+            auto fieldNameToHash = memberName;
+            if (fieldNameToHash.kind() == core::NameKind::UNIQUE) {
+                auto &uniqueData = fieldNameToHash.dataUnique(ctx);
+                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
+                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
+                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
+                    fieldNameToHash = uniqueData->original;
+                }
+            }
+
+            auto fieldFullNameHash = core::FullNameHash(ctx, fieldNameToHash);
+            if (fieldFullNameHash != oldDefHash.nameHash) {
+                continue;
+            }
+
+            toDelete.emplace_back(memberField);
+        }
+
+        for (auto oldField : toDelete) {
+            oldField.data(ctx)->removeLocsForFile(ctx.file);
+            if (oldField.data(ctx)->locs().empty()) {
+                ctx.state.deleteFieldSymbol(oldField);
+            }
+        }
+    }
+
 public:
     SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
         : foundDefs(move(*foundDefs)), oldFoundHashes(move(oldFoundHashes)) {}
