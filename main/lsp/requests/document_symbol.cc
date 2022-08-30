@@ -1,4 +1,5 @@
 #include "main/lsp/requests/document_symbol.h"
+#include "absl/strings/match.h"
 #include "ast/treemap/treemap.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
@@ -134,13 +135,23 @@ symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, co
     }
     auto kind = symbolRef2SymbolKind(gs, symRef);
 
-    string prefix;
+    string name;
     auto owner = symRef.owner(gs);
     if (owner.exists() && owner.isClassOrModule() && owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
-        prefix = "self.";
+        name = "self.";
     }
-    auto result = make_unique<DocumentSymbol>(prefix + symRef.name(gs).show(gs), kind, move(info->range),
-                                              move(info->selectionRange));
+    auto symName = symRef.name(gs).show(gs);
+    string_view view{symName};
+    if (absl::StartsWith(view, "<") && view.size() > 1) {
+        string_view describeStr = "<describe '";
+        string_view itStr = "<it '";
+        if (absl::StartsWith(view, describeStr) || absl::StartsWith(view, itStr)) {
+            view.remove_prefix(1);
+            view.remove_suffix(1);
+        }
+    }
+    name += view;
+    auto result = make_unique<DocumentSymbol>(move(name), kind, move(info->range), move(info->selectionRange));
 
     // Previous versions of VSCode have a bug that requires this non-optional field to be present.
     // This previously tried to include the method signature but due to issues where large signatures were not readable

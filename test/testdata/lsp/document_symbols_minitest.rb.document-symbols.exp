@@ -29,7 +29,7 @@
             },
             "children": [
                 {
-                    "name": "<describe 'with this block'>",
+                    "name": "describe 'with this block'",
                     "detail": "",
                     "kind": 5,
                     "range": {
@@ -54,7 +54,7 @@
                     },
                     "children": [
                         {
-                            "name": "<it 'runs another test'>",
+                            "name": "it 'runs another test'",
                             "detail": "",
                             "kind": 6,
                             "range": {
@@ -80,7 +80,7 @@
                             "children": []
                         },
                         {
-                            "name": "<it 'runs one test'>",
+                            "name": "it 'runs one test'",
                             "detail": "",
                             "kind": 6,
                             "range": {
