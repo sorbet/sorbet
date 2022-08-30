@@ -162,13 +162,14 @@ export default class SorbetLanguageClient implements ErrorHandler {
         this._updateStatus(ServerStatus.RUNNING);
       }
 
-      const serverConfigSupportsDocumentFormatting =
-        this._languageClient.initializeResult?.config === undefined
-          ? true
-          : this._languageClient.initializeResult?.config
-              ?.enableDocumentFormatting;
+      let serverConfigSupportsDocumentFormatting = true;
+      if (this._languageClient.initializeResult?.config !== undefined) {
+        serverConfigSupportsDocumentFormatting = this._languageClient
+          .initializeResult.config.enableDocumentFormatting;
+      }
       const extensionConfigSupportsDocumentFormatting = this
         ._sorbetExtensionConfig.enableDocumentFormatting;
+
       if (
         !(
           serverConfigSupportsDocumentFormatting &&
