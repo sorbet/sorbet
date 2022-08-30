@@ -77,11 +77,6 @@ public:
                     SendArgs(std::move(arg1), std::move(arg2), std::move(arg3), std::move(arg4)));
     }
 
-    static ExpressionPtr defined_p(core::LocOffsets loc, uint16_t numPosArgs, Send::ARGS_store &&args) {
-        return MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), loc.copyWithZeroLength(), numPosArgs,
-                        std::move(args));
-    }
-
     static ExpressionPtr Literal(core::LocOffsets loc, const core::TypePtr &tpe) {
         return make_expression<ast::Literal>(loc, tpe);
     }
