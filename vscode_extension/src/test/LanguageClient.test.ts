@@ -6,10 +6,7 @@ import {
 } from "vscode-languageclient/node";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
-import {
-  shimDocumentFormattingRequests,
-  shimLanguageClient,
-} from "../LanguageClient";
+import { shimLanguageClient } from "../LanguageClient";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
 import { setSorbetMetricsApi, Tags, MetricsEmitter } from "../veneur";
 
@@ -98,45 +95,6 @@ function createLanguageClient(): LanguageClient {
 
 let metricsEmitter = new RecordingMetricsEmitter();
 suite("LanguageClient", () => {
-  suite("Format On Save", () => {
-    test("Shims formatting requests to return null", async () => {
-      const client = createLanguageClient();
-      await client.onReady();
-      shimDocumentFormattingRequests(client);
-      {
-        const successResponse = await client.sendRequest(
-          "textDocument/formatting",
-          {
-            textDocument: {
-              uri: TestLanguageServerSpecialURIs.SUCCESS,
-            },
-            options: { tabSize: 4, insertSpaces: false },
-          },
-        );
-
-        assert.equal(successResponse, null);
-      }
-    });
-
-    test("Successfully formats when not shimmed", async () => {
-      const client = createLanguageClient();
-      await client.onReady();
-      {
-        const successResponse = await client.sendRequest(
-          "textDocument/formatting",
-          {
-            textDocument: {
-              uri: TestLanguageServerSpecialURIs.SUCCESS,
-            },
-            options: { tabSize: 4, insertSpaces: false },
-          },
-        );
-
-        assert.deepStrictEqual(successResponse as any, []);
-      }
-    });
-  });
-
   suite("Metrics", () => {
     suiteSetup(() => {
       metricsEmitter = new RecordingMetricsEmitter();

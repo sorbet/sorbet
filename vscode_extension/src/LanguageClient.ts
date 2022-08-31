@@ -70,24 +70,6 @@ export function shimLanguageClient(
   };
 }
 
-/**
- * Handles short-circuiting format-on-save requests when either the client or server is
- * configured to turn them off.
- */
-export function shimDocumentFormattingRequests(lc: LanguageClient) {
-  const originalSendRequest = lc.sendRequest;
-  lc.sendRequest = function(this: LanguageClient, method: any, ...args: any[]) {
-    const requestName = typeof method === "string" ? method : method.method;
-    // Turn document formatting requests into no-ops
-    if (requestName === "textDocument/formatting") {
-      return Promise.resolve(null);
-    }
-
-    args.unshift(method);
-    return originalSendRequest.apply(this, args as any);
-  };
-}
-
 export default class SorbetLanguageClient implements ErrorHandler {
   private _languageClient: LanguageClient;
   public get languageClient(): LanguageClient {
@@ -192,10 +174,6 @@ export default class SorbetLanguageClient implements ErrorHandler {
             console.log(`Copied ${response.name} to the clipboard.`);
           }),
         );
-      }
-
-      if (!caps.documentFormattingProvider) {
-        shimDocumentFormattingRequests(this._languageClient);
       }
 
       // Unfortunately, we need this command as a wrapper around `editor.action.rename`,
