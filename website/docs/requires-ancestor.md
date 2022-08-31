@@ -157,3 +157,26 @@ class MyBrokenTest < Test::TestBase # error: `MyBrokenTest` must include `Test::
   include MyTestHelper
 end
 ```
+
+`requires_ancestor` can also be used to require a singleton class as an
+ancestor:
+
+```
+module MyHelper
+  extend T::Helpers
+
+  requires_ancestor { T.class_of(MyBaseClass) }
+
+  def helper
+    my_singleton_method
+  end
+end
+
+class MyBaseClass
+  class << self
+    include MyHelper
+
+    def my_singleton_method; end
+  end
+end
+```

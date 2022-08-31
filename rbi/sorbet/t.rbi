@@ -287,7 +287,7 @@ module T::Helpers
   # given type of module.
   #
   # For more information, see https://sorbet.org/docs/requires-ancestor
-  sig { params(block: T.proc.returns(Module)).void }
+  sig { params(block: T.proc.void).void }
   def requires_ancestor(&block); end
 end
 

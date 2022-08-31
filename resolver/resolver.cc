@@ -93,6 +93,25 @@ namespace {
  * the fixed point loop at a high level.
  */
 
+bool isT(ast::ExpressionPtr &expr) {
+    auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
+    return tMod && tMod->symbol == core::Symbols::T();
+}
+
+bool isTClassOf(ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+
+    if (send == nullptr) {
+        return false;
+    }
+
+    if (!isT(send->recv)) {
+        return false;
+    }
+
+    return send->fun == core::Names::classOf();
+}
+
 class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
@@ -1143,9 +1162,37 @@ private:
         ENFORCE(block->body);
 
         auto blockLoc = core::Loc(todo.file, block->body.loc());
-        auto *id = ast::cast_tree<ast::ConstantLit>(block->body);
+        core::ClassOrModuleRef symbol = core::Symbols::StubModule();
 
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
+        if (auto *constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
+            if (constant->symbol.exists() && constant->symbol.isClassOrModule()) {
+                symbol = constant->symbol.asClassOrModuleRef();
+            }
+        } else if (isTClassOf(block->body)) {
+            send = ast::cast_tree<ast::Send>(block->body);
+
+            ENFORCE(send);
+
+            if (send->numPosArgs() == 1) {
+                if (auto *argClass = ast::cast_tree<ast::ConstantLit>(send->getPosArg(0))) {
+                    if (argClass->symbol.exists() && argClass->symbol.isClassOrModule()) {
+                        if (argClass->symbol == owner) {
+                            if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                                e.setHeader("Must not pass yourself to `{}` inside of `requires_ancestor`",
+                                            send->fun.show(gs));
+                            }
+                            return;
+                        }
+
+                        if constexpr (isMutableStateType) {
+                            symbol = argClass->symbol.asClassOrModuleRef().data(gs)->singletonClass(gs);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (symbol == core::Symbols::StubModule()) {
             if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
                             send->fun.show(gs));
@@ -1153,7 +1200,7 @@ private:
             return;
         }
 
-        if (id->symbol == owner) {
+        if (symbol == owner) {
             if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
             }
@@ -1161,7 +1208,7 @@ private:
         }
 
         if constexpr (isMutableStateType) {
-            owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), blockLoc);
+            owner.data(gs)->recordRequiredAncestor(gs, symbol, blockLoc);
         }
     }
 
@@ -1913,11 +1960,6 @@ class ResolveTypeMembersAndFieldsWalk {
         if (trackDependencies_) {
             classOfDepth_.emplace_back(isT(send.recv) && send.fun == core::Names::classOf());
         }
-    }
-
-    static bool isT(const ast::ExpressionPtr &expr) {
-        auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
-        return tMod && tMod->symbol == core::Symbols::T();
     }
 
     static bool isTodo(const core::TypePtr &type) {
