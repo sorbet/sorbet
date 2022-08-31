@@ -4401,7 +4401,7 @@ end
 class RDoc::Markup::Document
   include(::Enumerable)
 
-  Elem = type_member(:out)
+  Elem = type_member(:out) {{fixed: T.untyped}}
 
   # Creates a new
   # [`Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
