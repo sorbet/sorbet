@@ -333,9 +333,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
                                     "Enable experimental LSP feature: Document Formatting with Rubyfmt");
-    options.add_options("advanced")("enable-vscode-document-formatting",
-                                    "Enable document formatting in the VSCode extension",
-                                    cxxopts::value<bool>()->default_value("true"));
     options.add_options("advanced")(
         "rubyfmt-path",
         "Path to the rubyfmt executable used for document formatting. Defaults to using `rubyfmt` on your PATH.",
@@ -778,8 +775,6 @@ void readOptions(Options &opts,
         opts.lspDocumentFormatRubyfmtEnabled =
             FileOps::exists(opts.rubyfmtPath) &&
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
-        opts.enableVscodeDocumentFormatting =
-            opts.lspDocumentFormatRubyfmtEnabled && raw["enable-vscode-document-formatting"].as<bool>();
 
         // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
         // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers

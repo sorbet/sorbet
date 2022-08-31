@@ -51,10 +51,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerInterface &
     completionProvider->triggerCharacters = TRIGGER_CHARACTERS;
     serverCap->completionProvider = move(completionProvider);
 
-    auto extensionConfig = make_unique<VSCodeExtensionConfig>();
-    extensionConfig->enableDocumentFormatting = opts.enableVscodeDocumentFormatting;
-
-    response->result = make_unique<InitializeResult>(move(serverCap), move(extensionConfig));
+    response->result = make_unique<InitializeResult>(move(serverCap));
     return response;
 }
 } // namespace sorbet::realmain::lsp
