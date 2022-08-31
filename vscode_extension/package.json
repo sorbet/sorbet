@@ -90,11 +90,6 @@
           "description": "Enable Sorbet Ruby IDE features",
           "type": "boolean"
         },
-        "sorbet.enableDocumentFormatting": {
-          "description": "Enable document formatting with `rubyfmt`.",
-          "type": "boolean",
-          "default": true
-        },
         "sorbet.selectedLspConfigId": {
           "description": "The default configuration to use from `sorbet.userLspConfigs` or `sorbet.lspConfigs`.  If unset, defaults to the first item in `sorbet.userLspConfigs` or `sorbet.lspConfigs`.",
           "type": "string"
@@ -255,6 +250,11 @@
             "**/Gemfile.lock"
           ]
         }
+      }
+    },
+    "configurationDefaults": {
+      "[ruby]": {
+        "editor.formatOnSave": true
       }
     },
     "menus": {

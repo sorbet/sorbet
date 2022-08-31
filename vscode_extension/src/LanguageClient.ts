@@ -162,23 +162,6 @@ export default class SorbetLanguageClient implements ErrorHandler {
         this._updateStatus(ServerStatus.RUNNING);
       }
 
-      let serverConfigSupportsDocumentFormatting = true;
-      if (this._languageClient.initializeResult?.config !== undefined) {
-        serverConfigSupportsDocumentFormatting = this._languageClient
-          .initializeResult.config.enableDocumentFormatting;
-      }
-      const extensionConfigSupportsDocumentFormatting = this
-        ._sorbetExtensionConfig.enableDocumentFormatting;
-
-      if (
-        !(
-          serverConfigSupportsDocumentFormatting &&
-          extensionConfigSupportsDocumentFormatting
-        )
-      ) {
-        shimDocumentFormattingRequests(this._languageClient);
-      }
-
       const caps: any = this._languageClient.initializeResult?.capabilities;
       if (caps.sorbetShowSymbolProvider) {
         this._subscriptions.push(
@@ -209,6 +192,10 @@ export default class SorbetLanguageClient implements ErrorHandler {
             console.log(`Copied ${response.name} to the clipboard.`);
           }),
         );
+      }
+
+      if (!caps.documentFormattingProvider) {
+        shimDocumentFormattingRequests(this._languageClient);
       }
 
       // Unfortunately, we need this command as a wrapper around `editor.action.rename`,
