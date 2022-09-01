@@ -66,9 +66,9 @@ def register_ruby_dependencies():
 
     http_archive(
         name = "sorbet_ruby_3_0",
-        urls = _ruby_urls("3.0/ruby-3.0.3.tar.gz"),
-        sha256 = "3586861cb2df56970287f0fd83f274bd92058872d830d15570b36def7f1a92ac",
-        strip_prefix = "ruby-3.0.3",
+        urls = _ruby_urls("3.0/ruby-3.0.4.tar.gz"),
+        sha256 = "70b47c207af04bce9acea262308fb42893d3e244f39a4abc586920a1c723722b",
+        strip_prefix = "ruby-3.0.4",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
