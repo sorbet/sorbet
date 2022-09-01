@@ -51,47 +51,12 @@ index 0c8889f04b..0f231efa8b 100644
  
      struct METHOD *bound;
      method = TypedData_Make_Struct(rb_cMethod, struct METHOD, &method_data_type, bound);
-@@ -2479,7 +2492,34 @@ umethod_bind_call(int argc, VALUE *argv, VALUE method)
+@@ -2479,7 +2492,7 @@ umethod_bind_call(int argc, VALUE *argv, VALUE method)
  
      VALUE methclass, klass, iclass;
      const rb_method_entry_t *me;
 -    convert_umethod_to_method_components(method, recv, &methclass, &klass, &iclass, &me);
-+    convert_umethod_to_method_components(method, recv, &methclass, &klass, &iclass, &me, ME_CLONE_CLONE);
-+    struct METHOD bound = { recv, klass, 0, me };
-+
-+    VALUE passed_procval = rb_block_given_p() ? rb_block_proc() : Qnil;
-+
-+    rb_execution_context_t *ec = GET_EC();
-+    return call_method_data(ec, &bound, argc, argv, passed_procval, RB_PASS_CALLED_KEYWORDS);
-+}
-+
-+/*
-+ *  call-seq:
-+ *     umeth.bind_call(recv, args, ...) -> obj
-+ *
-+ *  Bind <i>umeth</i> to <i>recv</i> and then invokes the method with the
-+ *  specified arguments.
-+ *  This is semantically equivalent to <code>umeth.bind(recv).call(args, ...)</code>.
-+ */
-+static VALUE
-+umethod_bind_call_experimental_optimized(int argc, VALUE *argv, VALUE method)
-+{
-+    rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
-+    VALUE recv = argv[0];
-+    argc--;
-+    argv++;
-+
-+    VALUE methclass, klass, iclass;
-+    const rb_method_entry_t *me;
 +    convert_umethod_to_method_components(method, recv, &methclass, &klass, &iclass, &me, ME_CLONE_DO_NOT_CLONE);
      struct METHOD bound = { recv, klass, 0, me };
  
      VALUE passed_procval = rb_block_given_p() ? rb_block_proc() : Qnil;
-@@ -4011,6 +4051,7 @@ Init_Proc(void)
-     rb_define_method(rb_cUnboundMethod, "owner", method_owner, 0);
-     rb_define_method(rb_cUnboundMethod, "bind", umethod_bind, 1);
-     rb_define_method(rb_cUnboundMethod, "bind_call", umethod_bind_call, -1);
-+    rb_define_method(rb_cUnboundMethod, "bind_call_experimental_optimized", umethod_bind_call_experimental_optimized, -1);
-     rb_define_method(rb_cUnboundMethod, "source_location", rb_method_location, 0);
-     rb_define_method(rb_cUnboundMethod, "parameters", rb_method_parameters, 0);
-     rb_define_method(rb_cUnboundMethod, "super_method", method_super_method, 0);
