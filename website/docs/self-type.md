@@ -64,3 +64,28 @@ class Generic < Parent
   end
 end
 ```
+
+Note that `T.self_type` declares that the type should be **exactly** what the
+receiver of the method is. It is **not** useful for declaring the type of
+factory methods. For these types of methods, use
+[`T.attached_class`](attached-class.md) instead:
+
+```ruby
+class Parent
+  # sig {returns(T.self_type)} # WRONG
+  sig {returns(T.attached_class)}
+  def self.make
+    new
+  end
+end
+
+class Child < Parent; end
+
+T.reveal_type(Parent.make) # => `Parent`
+T.reveal_type(Child.make)  # => `Child`
+```
+
+If the above example was declared using `T.self_type`, Sorbet would expect to
+see the `make` method return a value of type `T.class_of(Parent)`, but `new`
+returns a value of type `Parent` (an instance of the class, not the class object
+itself).
