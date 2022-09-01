@@ -137,8 +137,10 @@ module URI
   HOST = T.let(T.unsafe(nil), Regexp)
   HTML5ASCIIINCOMPAT = T.let(T.unsafe(nil), String)
   OPAQUE = T.let(T.unsafe(nil), Regexp)
+  Parser = URI::RFC2396_Parser
   PORT = T.let(T.unsafe(nil), Regexp)
   QUERY = T.let(T.unsafe(nil), Regexp)
+  REGEXP = URI::RFC2396_REGEXP
   REGISTRY = T.let(T.unsafe(nil), Regexp)
   REL_PATH = T.let(T.unsafe(nil), Regexp)
   REL_URI = T.let(T.unsafe(nil), Regexp)
