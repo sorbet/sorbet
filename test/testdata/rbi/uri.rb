@@ -8,3 +8,13 @@ def validate_http(uri_string)
   raise 'Must be an HTTP URI' unless uri.is_a?(URI::HTTP)
   uri
 end
+
+sig {returns(Class)}
+def uri_parser
+  URI::Parser
+end
+
+sig {returns(Module)}
+def uri_regexp
+  URI::REGEXP
+end
