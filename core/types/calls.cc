@@ -3320,6 +3320,19 @@ public:
     }
 } Tuple_concat;
 
+class Tuple_plus : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto *tuple = cast_type<TupleType>(args.thisType);
+        ENFORCE(tuple != nullptr);
+
+        res = dispatchCallProxyType(gs, args.thisType.underlying(gs), args);
+        if (tuple->elems.empty() && args.args.size() == 1) {
+            res.returnType = args.args[0]->type;
+        }
+    }
+} Tuple_plus;
+
 namespace {
 
 optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
@@ -4170,6 +4183,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::sample(), &Tuple_sample},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::plus(), &Tuple_plus},
 
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
