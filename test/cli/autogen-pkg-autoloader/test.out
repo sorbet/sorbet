@@ -15,8 +15,6 @@ Opus::Require.autoload_map(RootPackage, {
   Yabba: "autoloader/RootPackage/Yabba.rb",
 })
 
-Opus::Require.register_package(RootPackage, 'RootPackage')
-
 --- output/RootPackage/Foo.rb
 # frozen_string_literal: true
 # typed: true
@@ -151,8 +149,6 @@ Opus::Require.on_autoload('RootPackage::Nested')
 
 module RootPackage::Nested
 end
-
-Opus::Require.register_package(RootPackage::Nested, 'RootPackage_Nested')
 
 Opus::Require.for_autoload(RootPackage::Nested, "test/cli/autogen-pkg-autoloader/nested/nested.rb")
 

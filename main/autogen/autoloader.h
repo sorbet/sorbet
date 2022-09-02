@@ -85,7 +85,6 @@ public:
     std::vector<NamedDefinition> namedDefs;
     std::unique_ptr<NamedDefinition> nonBehaviorDef;
     QualifiedName qname;
-    core::NameRef pkgName;
 
     bool root() const;
     core::NameRef name() const;
@@ -109,7 +108,6 @@ private:
     bool hasDef() const;
     const NamedDefinition &definition(const core::GlobalState &) const;
     Definition::Type definitionType(const core::GlobalState &) const;
-    void markPackageNamespace(core::NameRef mangledName, const std::vector<core::NameRef> &nameParts);
 
     friend class DefTreeBuilder;
 };
@@ -123,7 +121,6 @@ public:
                              NamedDefinition);
 
     static DefTree merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs);
-    static void markPackages(const core::GlobalState &gs, DefTree &root);
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
