@@ -1,6 +1,7 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/formatting.h"
@@ -8,6 +9,7 @@
 #include "core/Context.h"
 #include "core/errors/packager.h"
 #include "core/errors/resolver.h"
+#include <algorithm>
 #include <iterator>
 
 using namespace std::literals::string_view_literals;
@@ -434,17 +436,17 @@ public:
     static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        auto resultq = std::make_shared<BlockingBoundedQueue<ast::ParsedFile>>(files.size());
-        auto fileq = std::make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
+        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
-        for (auto &file : files) {
-            fileq->push(std::move(file), 1);
+        for (size_t i = 0; i < files.size(); ++i) {
+            taskq->push(i, 1);
         }
-        files.clear();
 
-        workers.multiplexJob("VisibilityChecker", [&gs, fileq, resultq]() {
-            ast::ParsedFile f;
-            for (auto result = fileq->try_pop(f); !result.done(); result = fileq->try_pop(f)) {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+            size_t idx;
+            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+                ast::ParsedFile &f = files[idx];
                 if (!f.file.data(gs).isPackage()) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
@@ -453,19 +455,12 @@ public:
                         ast::TreeWalk::apply(ctx, pass, f.tree);
                     }
                 }
-
-                resultq->push(std::move(f), 1);
             }
+
+            barrier.DecrementCount();
         });
 
-        ast::ParsedFile threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            files.emplace_back(std::move(threadResult));
-        }
-
-        fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
+        barrier.Wait();
 
         return files;
     }
@@ -550,19 +545,20 @@ public:
     static std::vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_imports");
-        auto resultq = std::make_shared<BlockingBoundedQueue<ast::ParsedFile>>(files.size());
-        auto fileq = std::make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
+        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+        absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
-        for (auto &file : files) {
-            fileq->push(std::move(file), 1);
+        for (size_t i = 0; i < files.size(); ++i) {
+            taskq->push(i, 1);
         }
-        files.clear();
 
-        workers.multiplexJob("ImportChecker", [&gs, fileq, resultq]() {
-            ast::ParsedFile f;
+        workers.multiplexJob("ImportChecker", [&gs, &files, &barrier, taskq]() {
+            Timer timeit(gs.tracer(), "ImportCheckerWorker");
+            size_t idx;
             ImportCheckerPass pass;
 
-            for (auto result = fileq->try_pop(f); !result.done(); result = fileq->try_pop(f)) {
+            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+                ast::ParsedFile &f = files[idx];
                 if (f.file.data(gs).isPackage()) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
@@ -571,19 +567,12 @@ public:
                         pass.checkImports(ctx);
                     }
                 }
-
-                resultq->push(std::move(f), 1);
             }
+
+            barrier.DecrementCount();
         });
 
-        ast::ParsedFile threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            files.emplace_back(std::move(threadResult));
-        }
-
-        fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
+        barrier.Wait();
 
         return files;
     }
