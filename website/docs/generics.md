@@ -673,7 +673,7 @@ also in output position (`+1 × +1 = +1`).
 
 ### Why does tracking variance matter?
 
-To get a sense for why these Sorbet places constraints on where covariant and
+To get a sense for why Sorbet places constraints on where covariant and
 contravariant type members can appear within signatures, consider this example,
 which continues the example from the [covariance section](#covariance) above:
 
