@@ -1,0 +1,10 @@
+# typed: true
+# assert-fast-path: ivar_redeclare.rb
+
+class A
+  def initialize
+    @var = T.let(0, Integer) # error: Redeclaring variable `@var` with mismatching type
+    @var = T.let("", String)
+    T.reveal_type(@var) # error: Revealed type: `String`
+  end
+end
