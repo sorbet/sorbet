@@ -1381,7 +1381,7 @@ class SymbolDefiner {
         vector<core::MethodRef> toDelete;
 
         // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per method
-        // previously defined in this file, then in each call look at each of that method's class's members
+        // previously defined in this file, then in each call look at each member of that method's owner.
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
             if (!memberSym.isMethod()) {
                 continue;
