@@ -26,3 +26,34 @@ module Test2
     requires_ancestor { RA }
   end
 end
+
+module Test3
+  class RA
+    class << self
+      extend T::Sig
+      extend T::Generic
+
+      Elem = type_member
+
+      sig {returns(T.nilable(Elem))}
+      attr_accessor :elem
+
+      sig { params(elem: T.nilable(Elem)).void }
+      def initialize(elem)
+        @elem = T.let(elem, T.nilable(Elem))
+      end
+    end
+  end
+
+  module M # error: `Test3::M` can't require generic ancestor `T.class_of(Test3::RA)` (unsupported)
+    extend T::Sig
+    extend T::Helpers
+
+    requires_ancestor { T.class_of(RA) }
+
+    sig { void }
+    def elem
+      self.elem
+    end
+  end
+end
