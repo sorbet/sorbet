@@ -1,0 +1,8 @@
+# typed: true
+# assert-slow-path: true
+class A
+  def wherein_we_add_an_ivar
+    @var = T.let(0, Integer) # error: The instance variable `@var` must be declared inside `initialize` or declared nilable
+    T.reveal_type(@var) # error: Revealed type: `Integer`
+  end
+end

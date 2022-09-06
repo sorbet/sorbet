@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  def self.wherein_we_add_an_ivar
+    @var = T.let(0, Integer) # error: The singleton instance variable `@var` must be declared inside the class body or declared nilable
+    T.reveal_type(@var) # error: Revealed type: `Integer`
+  end
+end
