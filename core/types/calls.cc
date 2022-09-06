@@ -3326,8 +3326,14 @@ public:
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple != nullptr);
 
-        res = dispatchCallProxyType(gs, args.thisType.underlying(gs), args);
-        if (tuple->elems.empty() && args.args.size() == 1) {
+        auto specialEmptyTupleCase = tuple->elems.empty() && args.args.size() == 1 &&
+                                     (isa_type<TupleType>(args.args[0]->type) ||
+                                      Types::isSubType(gs, Types::arrayOfUntyped(), args.args[0]->type));
+        auto underlying =
+            specialEmptyTupleCase ? core::Types::arrayOf(gs, core::Types::bottom()) : args.thisType.underlying(gs);
+
+        res = dispatchCallProxyType(gs, underlying, args);
+        if (specialEmptyTupleCase) {
             res.returnType = args.args[0]->type;
         }
     }
