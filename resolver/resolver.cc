@@ -2057,7 +2057,6 @@ class ResolveTypeMembersAndFieldsWalk {
         return castType;
     }
 
-    // Attempts to resolve the type of the given field. Returns `false` if the cast is not yet resolved.
     static void resolveField(core::MutableContext ctx, ResolveFieldItem &job) {
         auto cast = job.cast;
 
