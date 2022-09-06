@@ -1185,7 +1185,7 @@ private:
                         }
 
                         if constexpr (isMutableStateType) {
-                            symbol = argClass->symbol.asClassOrModuleRef().data(gs)->singletonClass(gs);
+                            symbol = argClass->symbol.asClassOrModuleRef().data(gs)->lookupSingletonClass(gs);
                         }
                     }
                 }
