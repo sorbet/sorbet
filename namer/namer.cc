@@ -1186,6 +1186,7 @@ class SymbolDefiner {
 
             // We are on the fast path and there was a previous declaration.
             prior.data(ctx)->resultType = core::Types::todo();
+            prior.data(ctx)->addLoc(ctx, ctx.locAt(field.loc));
             return prior;
         }
 
