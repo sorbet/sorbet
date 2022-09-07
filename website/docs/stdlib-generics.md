@@ -45,7 +45,7 @@ Array[1, 2, 3]
 # => evaluates to the array `[1, 2, 3]`
 
 Set[1, 2, 3]
-# => evaluates to the set containing 1, 2, and 3o
+# => evaluates to the set containing 1, 2, and 3
 
 Hash[:key1, 1, :key2, 2]
 # => evaluates to the hash `{key1: 1, key2: 2}`
