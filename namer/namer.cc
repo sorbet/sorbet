@@ -1490,8 +1490,6 @@ public:
                 }
             }
 
-            // TODO(froydnj): what happens if methods are deleted in one file but reappear
-            // in another?  It seems like this should be OK, but need to verify.
             for (const auto &oldMethodHash : oldFoundHashes.value().methodHashes) {
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
