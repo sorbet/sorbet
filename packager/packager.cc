@@ -1134,6 +1134,7 @@ struct PackageInfoFinder {
             case core::Names::test_import().rawId():
             case core::Names::export_().rawId():
             case core::Names::restrict_to_service().rawId():
+            case core::Names::autoloader_compatibility().rawId():
                 return true;
             default:
                 return false;

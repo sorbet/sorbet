@@ -652,6 +652,7 @@ void parseIgnorePatterns(const vector<string> &rawIgnorePatterns, vector<string>
 }
 
 bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog::logger> logger) {
+    Timer timeit(*logger, "extractAutoloaderConfig");
     AutoloaderConfig &cfg = opts.autoloaderConfig;
     if (raw.count("autogen-autoloader-exclude-require") > 0) {
         cfg.requireExcludes = raw["autogen-autoloader-exclude-require"].as<vector<string>>();
@@ -721,8 +722,10 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("ignore") > 0) {
-            auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
-            parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+            {
+                auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
+                parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+            }
         }
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
