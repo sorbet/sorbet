@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C Opus>::<C Autogen>::<C Tokens><<C <todo sym>>> < ()
-    class <emptyTree>::<C AccountModelMerchantToken><<C <todo sym>>> < (::<todo sym>)
+  module <emptyTree>::<C Opus>::<C Autogen>::<C Tokens>::<C AccountModelMerchant><<C <todo sym>>> < ()
+    class <emptyTree>::<C Token><<C <todo sym>>> < (::<todo sym>)
     end
   end
 
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C MerchantTokenPropModel><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(<emptyTree>::<C Opus>::<C Autogen>::<C Tokens>::<C AccountModelMerchantToken>)
+      <self>.returns(<emptyTree>::<C Opus>::<C Autogen>::<C Tokens>::<C AccountModelMerchant>::<C Token>)
     end
 
     def merchant<<todo method>>(&<blk>)
