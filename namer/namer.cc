@@ -1367,7 +1367,7 @@ class SymbolDefiner {
         }
     }
 
-    void deleteViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
+    void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
@@ -1381,7 +1381,7 @@ class SymbolDefiner {
         // below, because deleting a method invalidates the members() iterator.
         vector<core::MethodRef> toDelete;
 
-        // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per method
+        // Note: this loop is accidentally quadratic. We run deleteMethodViaFullNameHash once per method
         // previously defined in this file, then in each call look at each member of that method's owner.
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
             if (!memberSym.isMethod()) {
@@ -1415,7 +1415,7 @@ class SymbolDefiner {
         }
     }
 
-    void deleteViaFullNameHash(core::MutableContext ctx, const core::FoundFieldHash &oldDefHash) {
+    void deleteFieldViaFullNameHash(core::MutableContext ctx, const core::FoundFieldHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
@@ -1432,7 +1432,7 @@ class SymbolDefiner {
         // below, because deleting a field invalidates the members() iterator.
         vector<core::FieldRef> toDelete;
 
-        // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per field
+        // Note: this loop is accidentally quadratic. We run deleteFieldViaFullNameHash once per field
         // previously defined in this file, then in each call look at each member of that field's owner.
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
             if (!memberSym.isFieldOrStaticField()) {
@@ -1486,7 +1486,7 @@ public:
         if (oldFoundHashes.has_value()) {
             for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
-                    deleteViaFullNameHash(ctx, oldFieldHash);
+                    deleteFieldViaFullNameHash(ctx, oldFieldHash);
                 }
             }
 
@@ -1496,7 +1496,7 @@ public:
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
                 // ref in the new definedClasses vector.
-                deleteViaFullNameHash(ctx, oldMethodHash);
+                deleteMethodViaFullNameHash(ctx, oldMethodHash);
             }
         }
 
