@@ -1771,6 +1771,7 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 
+// Before using this method, double check the disclaimer on GlobalState::deleteMethodSymbol above.
 void GlobalState::deleteFieldSymbol(FieldRef what) {
     ENFORCE(what.data(*this)->flags.isField);
     const auto &whatData = what.data(*this);
