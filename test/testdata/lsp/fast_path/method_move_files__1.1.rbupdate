@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: method_move_files__1.rb,method_move_files__2.rb
+
+class A
+  extend T::Sig
+
+  # TODO(froydnj): this error shouldn't be here on the fast path.
+  sig {params(x: Integer).returns(String)}
+  def m(x) # error: Method `A#m` redefined without matching argument count
+    ""
+  end
+end
+
+T.reveal_type(A.new.m(0)) # error: Revealed type: `String`

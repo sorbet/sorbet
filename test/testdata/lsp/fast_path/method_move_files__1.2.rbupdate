@@ -1,0 +1,6 @@
+# typed: true
+# assert-fast-path: method_move_files__1.rb,method_move_files__2.rb
+
+class A
+  extend T::Sig
+end
