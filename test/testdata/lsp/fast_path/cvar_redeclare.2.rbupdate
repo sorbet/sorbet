@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  @@var = T.let(0, Integer)
+  @@van = T.let("", String)
+  T.reveal_type(@@var) # error: Revealed type: `Integer`
+  T.reveal_type(@@van) # error: Revealed type: `String`
+end
