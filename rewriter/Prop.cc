@@ -197,10 +197,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                     send->loc,
                     ast::MK::UnresolvedConstant(
                         send->loc,
-                        ast::MK::UnresolvedConstant(
-                            send->loc,
-                            ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Opus()),
-                            core::Names::Constants::Autogen()),
+                        ast::MK::UnresolvedConstant(send->loc,
+                                                    ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(),
+                                                                                core::Names::Constants::Opus()),
+                                                    core::Names::Constants::Autogen()),
                         core::Names::Constants::Tokens()),
                     core::Names::Constants::AccountModelMerchant()),
                 core::Names::Constants::Token());
