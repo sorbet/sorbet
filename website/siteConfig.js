@@ -74,7 +74,7 @@ const users = [
   {
     caption: 'TriumphPay',
     image: 'img/triumphpay-logo.svg',
-    infoLink: 'https://triumphpay.com'
+    infoLink: 'https://triumphpay.com',
   },
   {
     caption: 'TaskRabbit',
