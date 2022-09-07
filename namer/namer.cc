@@ -1433,7 +1433,7 @@ class SymbolDefiner {
         vector<core::FieldRef> toDelete;
 
         // Note: this loop is accidentally quadratic. We run deleteViaFullNameHash once per field
-        // previously defined in this file, then in each call look at each of that field's class's members
+        // previously defined in this file, then in each call look at each member of that field's owner.
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
             if (!memberSym.isFieldOrStaticField()) {
                 continue;
