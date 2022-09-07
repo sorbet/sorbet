@@ -4,6 +4,7 @@
 class A
   extend T::Sig
 
+  # TODO(froydnj): this error shouldn't be here on the fast path.
   sig {params(x: Integer).returns(String)}
   def m(x) # error: Method `A#m` redefined without matching argument count
     ""
