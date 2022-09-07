@@ -72,14 +72,14 @@ const users = [
     infoLink: 'https://phishsafety.com',
   },
   {
-    caption: 'TriumphPay',
-    image: 'img/triumphpay-logo.svg',
-    infoLink: 'https://triumphpay.com',
-  },
-  {
     caption: 'TaskRabbit',
     image: 'img/taskrabbit-logo.svg',
     infoLink: 'https://www.taskrabbit.com/',
+  },
+  {
+    caption: 'TriumphPay',
+    image: 'img/triumphpay-logo.svg',
+    infoLink: 'https://triumphpay.com',
   },
   {
     caption: 'Vonage',
