@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("//third_party:ruby_externals.bzl", "register_ruby_dependencies")
+load("//third_party/openssl:openssl_repo_rule.bzl", "system_openssl_finder")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
@@ -285,11 +286,12 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
-    native.new_local_repository(
-        name = "system_ssl_darwin",
-        path = "/usr/local/opt/openssl",
-        build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
-    )
+    # native.new_local_repository(
+    #     name = "system_ssl_darwin",
+    #     path = "/usr/local/opt/openssl",
+    #     build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
+    # )
+    system_openssl_finder(name = "system_ssl_darwin")
 
     native.new_local_repository(
         name = "system_ssl_linux",
