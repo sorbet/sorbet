@@ -23,5 +23,8 @@ system_openssl_repository = repository_rule(
             allow_single_file = True,
             mandatory = True,
         ),
+        "openssl_dirs": attr.string_list(
+            mandatory = True,
+        ),
     },
 )
