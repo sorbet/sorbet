@@ -1,6 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("//third_party:ruby_externals.bzl", "register_ruby_dependencies")
-load("//third_party/openssl:openssl_repo_rule.bzl", "system_openssl_repository")
+load("//third_party/openssl:system_openssl_repository.bzl", "system_openssl_repository")
 
 # We define our externals here instead of directly in WORKSPACE
 def register_sorbet_dependencies():
