@@ -286,16 +286,21 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
-    # native.new_local_repository(
-    #     name = "system_ssl_darwin",
-    #     path = "/usr/local/opt/openssl",
-    #     build_file = ,
-    # )
     system_openssl_repository(
         name = "system_ssl_darwin",
         build_file = "@com_stripe_ruby_typer//third_party/openssl:darwin.BUILD",
+        openssl_dirs = [
+            "/usr/local/opt/openssl@1.1",
+            "/opt/homebrew/opt/openssl@1.1",
+            "/usr/local/opt/openssl",
+            "/opt/homebrew/opt/openssl",
+        ],
     )
 
+    # If we ever want to search multiple paths, we can likely use the
+    # `system_openssl_repository` repository rule like above. But I figure that
+    # right now if it ain't broke don't fix it, so I've left this using
+    # new_local_repository.
     native.new_local_repository(
         name = "system_ssl_linux",
         path = "/usr",
