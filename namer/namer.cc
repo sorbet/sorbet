@@ -1354,7 +1354,7 @@ class SymbolDefiner {
                 break;
             }
             case core::FoundDefinitionRef::Kind::Field: {
-                const auto &field = ref.field(foundDefs);
+                const auto &field = ref.field(*foundDefs);
                 insertField(ctx.withOwner(getOwnerSymbol(field.owner)), field);
                 break;
             }
