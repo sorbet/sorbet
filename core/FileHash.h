@@ -116,8 +116,35 @@ CheckSize(FoundMethodHash, 12, 4);
 
 using FoundMethodHashes = std::vector<FoundMethodHash>;
 
+struct FoundFieldHash {
+    struct {
+        // The owner of this field.
+        uint32_t idx : 30;
+        // Whether the field was defined on instances of the class or on the singleton class.
+        bool onSingletonClass : 1;
+        // Whether the field was a class or instance variable.
+        // TODO(froydnj) we should just subsume class variables into the more
+        // general static fields, since that's how we represent them internally.
+        bool isInstanceVariable : 1;
+    } owner;
+
+    // Hash of this field's name.
+    const FullNameHash nameHash;
+
+    FoundFieldHash(uint32_t ownerIdx, bool onSingletonClass, bool isInstanceVariable, FullNameHash nameHash)
+        : owner({ownerIdx, onSingletonClass, isInstanceVariable}), nameHash(nameHash) {
+        sanityCheck();
+    }
+
+    void sanityCheck() const;
+};
+CheckSize(FoundFieldHash, 8, 4);
+
+using FoundFieldHashes = std::vector<FoundFieldHash>;
+
 struct FoundDefHashes {
     FoundMethodHashes methodHashes;
+    FoundFieldHashes fieldHashes;
 };
 
 // When a file is edited, we run index and resolve it using an local (empty) GlobalState.
@@ -174,6 +201,7 @@ struct LocalSymbolTableHashes {
     // TODO(jez) Is it worth having two of these? After http://go/srbi/5808 lands, re-evaluate
     // whether we should merge these into one vector like "symbolShapeHashes" or something
     std::vector<SymbolHash> staticFieldHashes;
+    std::vector<SymbolHash> fieldHashes;
 
     static uint32_t patchHash(uint32_t hash) {
         if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {

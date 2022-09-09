@@ -257,6 +257,11 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
+    p.putU4(fh->localSymbolTableHashes.fieldHashes.size());
+    for (const auto &[key, value] : fh->localSymbolTableHashes.fieldHashes) {
+        p.putU4(key._hashValue);
+        p.putU4(value);
+    }
     p.putU4(fh->usages.nameHashes.size());
     for (const auto &e : fh->usages.nameHashes) {
         p.putU4(e._hashValue);
@@ -267,6 +272,13 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU1(fdh.owner.useSingletonClass);
         p.putU4(fdh.nameHash._hashValue);
         p.putU4(fdh.arityHash._hashValue);
+    }
+    p.putU4(fh->foundHashes.fieldHashes.size());
+    for (const auto &ffh : fh->foundHashes.fieldHashes) {
+        p.putU4(ffh.owner.idx);
+        p.putU1(ffh.owner.onSingletonClass);
+        p.putU1(ffh.owner.isInstanceVariable);
+        p.putU4(ffh.nameHash._hashValue);
     }
 }
 
@@ -299,6 +311,13 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         key._hashValue = p.getU4();
         ret.localSymbolTableHashes.staticFieldHashes.emplace_back(key, p.getU4());
     }
+    auto fieldHashSize = p.getU4();
+    ret.localSymbolTableHashes.fieldHashes.reserve(fieldHashSize);
+    for (int it = 0; it < fieldHashSize; it++) {
+        WithoutUniqueNameHash key;
+        key._hashValue = p.getU4();
+        ret.localSymbolTableHashes.fieldHashes.emplace_back(key, p.getU4());
+    }
     auto constantsSize = p.getU4();
     ret.usages.nameHashes.reserve(constantsSize);
     for (int it = 0; it < constantsSize; it++) {
@@ -316,6 +335,16 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         ArityHash arityHash;
         arityHash._hashValue = p.getU4();
         ret.foundHashes.methodHashes.emplace_back(ownerIdx, useSingletonClass, fullNameHash, arityHash);
+    }
+    auto foundFieldHashesSize = p.getU4();
+    ret.foundHashes.fieldHashes.reserve(foundFieldHashesSize);
+    for (int it = 0; it < foundFieldHashesSize; it++) {
+        auto ownerIdx = p.getU4();
+        auto onSingletonClass = p.getU1();
+        auto isInstanceVariable = p.getU1();
+        FullNameHash fullNameHash;
+        fullNameHash._hashValue = p.getU4();
+        ret.foundHashes.fieldHashes.emplace_back(ownerIdx, onSingletonClass, isInstanceVariable, fullNameHash);
     }
     return make_unique<const FileHash>(move(ret));
 }

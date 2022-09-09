@@ -202,10 +202,15 @@ CheckSize(Method, 136, 8);
 
 // Contains a field or a static field
 class Field final {
+    friend class GlobalState;
     friend class serialize::SerializerImpl;
+
+    // This is to allow updating `GlobalState::fields` in place with a new field, over top of an existing field
+    Field &operator=(Field &&) = default;
 
 public:
     Field(const Field &) = delete;
+    Field &operator=(const Field &) = delete;
     Field() = default;
     Field(Field &&) noexcept = default;
 
@@ -240,6 +245,7 @@ public:
     Loc loc() const;
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
+    void removeLocsForFile(core::FileRef file);
 
     bool isClassAlias() const;
 

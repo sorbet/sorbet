@@ -172,6 +172,7 @@ public:
     // NOTE: You likely want to use mangleRenameSymbol not deleteMethodSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
+    void deleteFieldSymbol(FieldRef what);
     spdlog::logger &tracer() const;
     unsigned int namesUsedTotal() const;
     unsigned int utf8NamesUsed() const;

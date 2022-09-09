@@ -103,6 +103,10 @@ string FoundMethodHash::toString() const {
                        owner.idx, owner.useSingletonClass, nameHash._hashValue, arityHash._hashValue);
 }
 
+void FoundFieldHash::sanityCheck() const {
+    ENFORCE(nameHash.isDefined());
+}
+
 FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundDefHashes &&foundHashes)
     : localSymbolTableHashes(move(localSymbolTableHashes)), usages(move(usages)), foundHashes(move(foundHashes)) {}
 

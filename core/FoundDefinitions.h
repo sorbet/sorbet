@@ -281,7 +281,7 @@ public:
     FoundDefinitionRef addField(FoundField &&field) {
         const uint32_t idx = _fields.size();
         _fields.emplace_back(std::move(field));
-        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Field, idx));
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Field, idx);
     }
 
     FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
