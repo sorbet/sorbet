@@ -836,13 +836,19 @@ public:
             return;
         }
         auto &pkgName = requiredNamespace(ctx);
-        if (namespaces.packageForNamespace() != pkg.mangledName()) {
+        auto packageForNamespace = namespaces.packageForNamespace();
+        if (packageForNamespace != pkg.mangledName()) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
                     fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                if (packageForNamespace.exists()) {
+                    auto &namespaceParts = ctx.state.packageDB().getPackageInfo(packageForNamespace).fullName();
+                    e.addErrorNote("Attempting to define class or method behavior in package namespace `{}`",
+                                   fmt::map_join(namespaceParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                }
             }
         }
     }
