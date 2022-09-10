@@ -1378,7 +1378,7 @@ class IO < Object
   # ```
   sig do
     params(
-        sep: String,
+        sep: T.nilable(String),
         limit: Integer,
     )
     .returns(T.nilable(String))
