@@ -185,7 +185,6 @@ core::NameRef DefTree::name() const {
 
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
 
     core::FileRef definingFile;
     if (!namedDefs.empty()) {
@@ -193,34 +192,23 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     } else if (children.empty() && hasDef()) {
         definingFile = file();
     }
-    if (definingFile.exists()) {
-        requireStatements(gs, alCfg, buf);
-    }
 
     string fullName = "nil";
     string casgnArg;
     auto type = definitionType(gs);
+
+    if (definingFile.exists() || type == Definition::Type::Class) {
+        fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
+        requireStatements(gs, alCfg, buf);
+    }
+
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
         fullName = root() ? alCfg.rootObject
                           : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
                                             return nr.show(gs);
                                         }));
-        if (!root()) {
-            fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
+        if (definingFile.exists() || type == Definition::Type::Class) {
             predeclare(gs, fullName, buf);
-        }
-
-        if (!children.empty()) {
-            fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
-            vector<pair<core::NameRef, string>> childNames;
-            std::transform(children.begin(), children.end(), back_inserter(childNames),
-                           [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
-            fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
-            for (const auto &pair : childNames) {
-                fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
-                               children.at(pair.first)->path(gs));
-            }
-            fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
                type == Definition::Type::TypeAlias) {
@@ -460,7 +448,18 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
                 for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
                     ++n;
                     auto &task = tasks[idx];
-                    bool rewritten = FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
+                    std::string output = task.node.renderAutoloadSrc(gs, alCfg);
+
+                    bool rewritten = false;
+
+                    if (output.empty()) {
+                        if (FileOps::exists(task.filePath)) {
+                            FileOps::removeFile(task.filePath);
+                            rewritten = true;
+                        }
+                    } else {
+                        rewritten = FileOps::writeIfDifferent(task.filePath, std::move(output));
+                    }
 
                     // Initial read should be cheap, read outside mutex
                     if (rewritten && !modificationState.modified) {
