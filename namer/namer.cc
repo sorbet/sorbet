@@ -583,7 +583,7 @@ public:
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
-    const core::FoundDefinitions foundDefs;
+    const core::FoundDefinitions &foundDefs;
     const optional<core::FoundDefHashes> oldFoundHashes;
     // See getOwnerSymbol
     vector<core::ClassOrModuleRef> definedClasses;
@@ -1463,8 +1463,8 @@ class SymbolDefiner {
     }
 
 public:
-    SymbolDefiner(unique_ptr<core::FoundDefinitions> foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
-        : foundDefs(move(*foundDefs)), oldFoundHashes(move(oldFoundHashes)) {}
+    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+        : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
     void run(core::MutableContext ctx) {
         definedClasses.reserve(foundDefs.klasses().size());
@@ -2188,7 +2188,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto frefIt = oldFoundHashesForFiles.find(fref);
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
-        SymbolDefiner symbolDefiner(move(fileFoundDefinitions.names), move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
         output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
