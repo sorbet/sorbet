@@ -237,6 +237,12 @@ public:
         ownerStack.pop_back();
     }
 
+    void addMethodModifiers(core::Context ctx, core::NameRef modifierName, absl::Span<const ast::ExpressionPtr> sendArgs) {
+        for (auto &arg : sendArgs) {
+            addMethodModifier(ctx, modifierName, arg);
+        }
+    }
+
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         auto ownerIsMethod = getOwnerRaw().kind() == core::FoundDefinitionRef::Kind::Method;
@@ -246,9 +252,7 @@ public:
                 if (ownerIsMethod) {
                     break;
                 }
-                for (auto &arg : original.posArgs()) {
-                    addMethodModifier(ctx, original.fun, arg);
-                }
+                addMethodModifiers(ctx, original.fun, original.posArgs());
                 break;
             }
             case core::Names::packagePrivate().rawId():
@@ -269,9 +273,7 @@ public:
                         core::NameRef::noName(),
                     }};
                 } else {
-                    for (auto &arg : original.posArgs()) {
-                        addMethodModifier(ctx, original.fun, arg);
-                    }
+                    addMethodModifiers(ctx, original.fun, original.posArgs());
                 }
                 break;
             case core::Names::privateConstant().rawId(): {
