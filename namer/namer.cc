@@ -1480,7 +1480,7 @@ public:
     SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
         : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
-    void run(core::MutableContext ctx) {
+    SymbolDefiner::State run(core::MutableContext ctx) {
         state.definedClasses.reserve(foundDefs.klasses().size());
         state.definedMethods.reserve(foundDefs.methods().size());
 
@@ -1540,6 +1540,10 @@ public:
                     break;
             }
         }
+
+        state.definedClasses.clear();
+        state.definedMethods.clear();
+        return move(state);
     }
 };
 
@@ -2186,6 +2190,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     uint32_t foundMethods = 0;
+    SymbolDefiner::State state;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions.names->methods().size();
         count++;
@@ -2202,10 +2207,9 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto frefIt = oldFoundHashesForFiles.find(fref);
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
-        SymbolDefiner::State state;
         SymbolDefiner symbolDefiner(move(state), *fileFoundDefinitions.names, move(oldFoundHashes));
         output.emplace_back(move(fileFoundDefinitions.tree));
-        symbolDefiner.run(ctx);
+        state = symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
             populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
