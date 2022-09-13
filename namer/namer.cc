@@ -1169,7 +1169,11 @@ class SymbolDefiner {
         // resolver checks a whole bunch of various error conditions here; we just want to
         // know where to define the field.
         ENFORCE(ctx.owner.isClassOrModule(), "Actual {}", ctx.owner.show(ctx));
-        auto scope = methodOwner(ctx, ctx.owner, field.onSingletonClass);
+        auto scope = ctx.owner.enclosingClass(ctx);
+        if (field.onSingletonClass) {
+            scope = scope.data(ctx)->lookupSingletonClass(ctx);
+        }
+        ENFORCE(scope.exists());
 
         auto existing = scope.data(ctx)->findMember(ctx, field.name);
         if (existing.exists() && existing.isFieldOrStaticField()) {
