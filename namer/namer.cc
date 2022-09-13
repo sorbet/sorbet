@@ -583,12 +583,23 @@ public:
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
+public:
+    struct State {
+        // See getOwnerSymbol for how both of these work.
+        vector<core::ClassOrModuleRef> definedClasses;
+        vector<core::MethodRef> definedMethods;
+
+        State() = default;
+        State(const State &) = delete;
+        State &operator=(const State &) = delete;
+        State(State &&) = default;
+        State &operator=(State &&) = default;
+    };
+
+private:
+    State state;
     const core::FoundDefinitions &foundDefs;
     const optional<core::FoundDefHashes> oldFoundHashes;
-    // See getOwnerSymbol
-    vector<core::ClassOrModuleRef> definedClasses;
-    // See getOwnerSymbol
-    vector<core::MethodRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
     // Prerequisite: Owner is a class or module.
@@ -619,8 +630,8 @@ class SymbolDefiner {
             case core::FoundDefinitionRef::Kind::Symbol:
                 return ref.symbol();
             case core::FoundDefinitionRef::Kind::Class:
-                ENFORCE(ref.idx() < definedClasses.size());
-                return definedClasses[ref.idx()];
+                ENFORCE(ref.idx() < state.definedClasses.size());
+                return state.definedClasses[ref.idx()];
             case core::FoundDefinitionRef::Kind::Method:
             case core::FoundDefinitionRef::Kind::Empty:
             case core::FoundDefinitionRef::Kind::ClassRef:
@@ -1339,8 +1350,8 @@ class SymbolDefiner {
         switch (ref.kind()) {
             case core::FoundDefinitionRef::Kind::Class: {
                 const auto &klass = ref.klass(foundDefs);
-                ENFORCE(definedClasses.size() == ref.idx());
-                definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
+                ENFORCE(state.definedClasses.size() == ref.idx());
+                state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
                 break;
             }
             case core::FoundDefinitionRef::Kind::StaticField: {
@@ -1467,12 +1478,12 @@ class SymbolDefiner {
     }
 
 public:
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
-        : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
+    SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+        : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
-    void run(core::MutableContext ctx) {
-        definedClasses.reserve(foundDefs.klasses().size());
-        definedMethods.reserve(foundDefs.methods().size());
+    SymbolDefiner::State run(core::MutableContext ctx) {
+        state.definedClasses.reserve(foundDefs.klasses().size());
+        state.definedMethods.reserve(foundDefs.methods().size());
 
         for (auto ref : foundDefs.nonDeletableDefinitions()) {
             defineNonDeletableSingle(ctx, ref);
@@ -1506,10 +1517,10 @@ public:
                 //
                 // We still need to put something here so that other found definitions that
                 // reference methods will get the correct symbols.
-                definedMethods.emplace_back(core::MethodRef{});
+                state.definedMethods.emplace_back(core::MethodRef{});
                 continue;
             }
-            definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+            state.definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
         }
 
         for (auto &field : foundDefs.fields()) {
@@ -1530,6 +1541,10 @@ public:
                     break;
             }
         }
+
+        state.definedClasses.clear();
+        state.definedMethods.clear();
+        return move(state);
     }
 };
 
@@ -2176,6 +2191,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     uint32_t foundMethods = 0;
+    SymbolDefiner::State state;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions.names->methods().size();
         count++;
@@ -2192,9 +2208,9 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto frefIt = oldFoundHashesForFiles.find(fref);
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(move(state), *fileFoundDefinitions.names, move(oldFoundHashes));
         output.emplace_back(move(fileFoundDefinitions.tree));
-        symbolDefiner.run(ctx);
+        state = symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
             populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
