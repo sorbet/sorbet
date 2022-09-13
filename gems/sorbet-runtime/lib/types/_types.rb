@@ -130,7 +130,7 @@ module T
   def self.cast(value, type, checked: true)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.cast")
+    Private::Casts.cast(value, type, "T.cast")
   end
 
   # Tells the typechecker to declare a variable of type `type`. Use
@@ -145,7 +145,7 @@ module T
   def self.let(value, type, checked: true)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.let")
+    Private::Casts.cast(value, type, "T.let")
   end
 
   # Tells the type checker to treat `self` in the current block as `type`.
@@ -164,7 +164,7 @@ module T
   def self.bind(value, type, checked: true)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.bind")
+    Private::Casts.cast(value, type, "T.bind")
   end
 
   # Tells the typechecker to ensure that `value` is of type `type` (if not, the typechecker will
@@ -174,7 +174,7 @@ module T
   def self.assert_type!(value, type, checked: true)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.assert_type!")
+    Private::Casts.cast(value, type, "T.assert_type!")
   end
 
   # For the static type checker, strips all type information from a value

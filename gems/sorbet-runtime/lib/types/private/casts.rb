@@ -3,7 +3,7 @@
 
 module T::Private
   module Casts
-    def self.cast(value, type, cast_method:)
+    def self.cast(value, type, cast_method)
       begin
         error = T::Utils.coerce(type).error_message_for_obj(value)
         return value unless error
@@ -22,7 +22,7 @@ module T::Private
     # there's a lot of shared logic with the above one, but factoring
     # it out like this makes it easier to hopefully one day delete
     # this one
-    def self.cast_recursive(value, type, cast_method:)
+    def self.cast_recursive(value, type, cast_method)
       begin
         error = T::Utils.coerce(type).error_message_for_obj_recursive(value)
         return value unless error
