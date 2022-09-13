@@ -595,6 +595,7 @@ public:
         State(State &&) = default;
         State &operator=(State &&) = default;
     };
+
 private:
     State state;
     const core::FoundDefinitions &foundDefs;
