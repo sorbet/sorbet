@@ -7,6 +7,7 @@
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/initialized.h"
+#include "LSPPathType.h"
 
 namespace sorbet {
 class WorkerPool;
@@ -17,6 +18,7 @@ namespace sorbet::realmain::lsp {
 
 class SorbetWorkspaceEditParams;
 class LSPConfiguration;
+
 /**
  * The indexer keeps a GlobalState object up-to-date with the latest edits, maintains a set of FileHashes for
  * every file in the workspace, and uses said hashes to decide if edits can be incrementally typechecked on the
@@ -49,12 +51,12 @@ class LSPIndexer final {
      * Determines if the given edit can take the fast path relative to the most recently committed edit.
      * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `initialGS` (in that order).
      */
-    bool canTakeFastPath(const LSPFileUpdates &edit,
+    PathType getTypecheckingPath(const LSPFileUpdates &edit,
                          const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
     /**
      * INVARIANT: `changedFiles` must have hashes computed.
      */
-    bool canTakeFastPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+    PathType getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                                  const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
@@ -65,7 +67,7 @@ public:
     /**
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
-    bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    PathType getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
