@@ -1527,26 +1527,6 @@ public:
             }
         }
     }
-
-    void populateFoundDefHashes(core::Context ctx, core::FoundDefHashes &foundHashesOut) {
-        ENFORCE(foundHashesOut.methodHashes.empty());
-        ENFORCE(foundHashesOut.fieldHashes.empty());
-        foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
-        foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
-        for (const auto &method : foundDefs.methods()) {
-            auto owner = method.owner;
-            auto fullNameHash = core::FullNameHash(ctx, method.name);
-            foundHashesOut.methodHashes.emplace_back(owner.idx(), method.flags.isSelfMethod, fullNameHash,
-                                                     method.arityHash);
-        }
-        for (const auto &field : foundDefs.fields()) {
-            auto owner = field.owner;
-            auto fullNameHash = core::FullNameHash(ctx, field.name);
-            foundHashesOut.fieldHashes.emplace_back(owner.idx(), field.onSingletonClass,
-                                                    field.kind == core::FoundField::Kind::InstanceVariable,
-                                                    fullNameHash);
-        }
-    }
 };
 
 using BehaviorLocs = InlinedVector<core::Loc, 1>;
@@ -2162,6 +2142,26 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     return allFoundDefinitions;
 }
 
+void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
+                            core::FoundDefHashes &foundHashesOut) {
+    ENFORCE(foundHashesOut.methodHashes.empty());
+    ENFORCE(foundHashesOut.fieldHashes.empty());
+    foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
+    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
+    for (const auto &method : foundDefs.methods()) {
+        auto owner = method.owner;
+        auto fullNameHash = core::FullNameHash(ctx, method.name);
+        foundHashesOut.methodHashes.emplace_back(owner.idx(), method.flags.isSelfMethod, fullNameHash,
+                                                 method.arityHash);
+    }
+    for (const auto &field : foundDefs.fields()) {
+        auto owner = field.owner;
+        auto fullNameHash = core::FullNameHash(ctx, field.name);
+        foundHashesOut.fieldHashes.emplace_back(owner.idx(), field.onSingletonClass,
+                                                field.kind == core::FoundField::Kind::InstanceVariable, fullNameHash);
+    }
+}
+
 ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
                                           WorkerPool &workers,
                                           UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
@@ -2192,7 +2192,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         output.emplace_back(move(fileFoundDefinitions.tree));
         symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
-            symbolDefiner.populateFoundDefHashes(ctx, *foundHashesOut);
+            populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
     }
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
