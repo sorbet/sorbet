@@ -1,0 +1,7 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/toplevel_instance_variable.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/namer/toplevel_instance_variable.rb start=??? end=???}
+    field ::<Class:<root>>#@a -> T.nilable(Integer) @ test/testdata/namer/toplevel_instance_variable.rb:3
+  static-field ::@@b -> T.nilable(String) @ test/testdata/namer/toplevel_instance_variable.rb:5
+
