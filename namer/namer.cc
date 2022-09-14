@@ -237,7 +237,8 @@ public:
         ownerStack.pop_back();
     }
 
-    void addMethodModifiers(core::Context ctx, core::NameRef modifierName, absl::Span<const ast::ExpressionPtr> sendArgs) {
+    void addMethodModifiers(core::Context ctx, core::NameRef modifierName,
+                            absl::Span<const ast::ExpressionPtr> sendArgs) {
         for (auto &arg : sendArgs) {
             if (auto *array = ast::cast_tree<ast::Array>(arg)) {
                 for (auto &e : array->elems) {
