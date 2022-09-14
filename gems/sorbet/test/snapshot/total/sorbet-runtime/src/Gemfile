@@ -1,5 +1,0 @@
-source 'https://rubygems.org'
-
-# This test ensures that there is not a sorbet-runtime.rbi in the output
-# directory, which is why it's currently written as a total test.
-gem 'sorbet-runtime'
