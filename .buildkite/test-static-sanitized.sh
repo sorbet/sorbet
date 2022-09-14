@@ -36,7 +36,6 @@ test_args+=(
   "--test_tag_filters=-compiler"
   "--build_tag_filters=-compiler"
   "--build_tests_only"
-  "@gems//..."
   "//..."
 )
 
