@@ -1485,11 +1485,6 @@ private:
             defineNonDeletableSingle(ctx, ref);
         }
 
-        // This currently interleaves deleting and defining across files.
-        // It's possible that this causes problems at some point? Though I haven't found a test case.
-        // That being said, if it does cause problems, we should be able to not interleave, and have
-        // all the `nonDeletableDefinitions` from all files get defined, then delete all the old
-        // methods, then define all the methods.
         if (oldFoundHashes.has_value()) {
             for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
