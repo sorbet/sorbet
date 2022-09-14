@@ -239,14 +239,21 @@ public:
 
     void addMethodModifiers(core::Context ctx, core::NameRef modifierName,
                             absl::Span<const ast::ExpressionPtr> sendArgs) {
-        for (auto &arg : sendArgs) {
-            if (auto *array = ast::cast_tree<ast::Array>(arg)) {
+        if (sendArgs.empty()) {
+            return;
+        }
+
+        if (sendArgs.size() == 1) {
+            if (auto *array = ast::cast_tree<ast::Array>(sendArgs[0])) {
                 for (auto &e : array->elems) {
                     addMethodModifier(ctx, modifierName, e);
                 }
-            } else {
-                addMethodModifier(ctx, modifierName, arg);
+                return;
             }
+        }
+
+        for (auto &arg : sendArgs) {
+            addMethodModifier(ctx, modifierName, arg);
         }
     }
 
