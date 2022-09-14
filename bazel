@@ -67,7 +67,8 @@ case "$bazel_installer_platform" in
 esac
 
 bazel_installer_platform_var="$(echo "$bazel_installer_platform" | tr 'a-z-' 'A-Z_')"
-bazel_installer_sha_regex="BAZEL_INSTALLER_VERSION_${bazel_installer_platform_var}_SHA = \"([^\"]+)\""
+bazel_installer_sha_variable="BAZEL_INSTALLER_VERSION_${bazel_installer_platform_var}_SHA"
+bazel_installer_sha_regex="$bazel_installer_sha_variable = \"([^\"]+)\""
 if [[ $workspace_contents =~ $bazel_installer_sha_regex ]]; then
   export expected_sha="${BASH_REMATCH[1]}"
 else
@@ -95,7 +96,7 @@ mkdir -p "$BUILD_DIR"
     echo >&2 "Installer checksum mismatch:"
     echo >&2 "  Expected: $expected_sha"
     echo >&2 "  Actual:   $actual_sha"
-    echo >&2 "To accept this mismatch, update the SHA in the WORKSPACE file and re-run."
+    echo >&2 "To accept this mismatch, update $bazel_installer_sha_variable in the WORKSPACE file and re-run."
     exit 1
   fi
 
