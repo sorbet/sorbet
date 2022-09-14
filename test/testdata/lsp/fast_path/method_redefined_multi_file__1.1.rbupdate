@@ -2,7 +2,7 @@
 # assert-fast-path: method_redefined_multi_file__1.rb,method_redefined_multi_file__2.rb
 
 class A
-  def foo(x) # error: Method `A#foo` redefined without matching argument count. Expected: `0`, got: `1`
+  def foo(x)
     x
   end
 end
