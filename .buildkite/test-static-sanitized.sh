@@ -37,8 +37,6 @@ test_args+=(
   "--build_tag_filters=-compiler"
   "--build_tests_only"
   "@gems//..."
-  "//gems/sorbet/test/snapshot"
-  "//gems/sorbet/test/hidden-method-finder"
   "//..."
 )
 
