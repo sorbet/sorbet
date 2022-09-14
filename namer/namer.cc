@@ -1477,11 +1477,7 @@ private:
         }
     }
 
-public:
-    SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
-        : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
-
-    SymbolDefiner::State run(core::MutableContext ctx) {
+    void beginIncrementalDefinitionInternal(core::MutableContext ctx) {
         state.definedClasses.reserve(foundDefs.klasses().size());
         state.definedMethods.reserve(foundDefs.methods().size());
 
@@ -1508,7 +1504,18 @@ public:
                 deleteMethodViaFullNameHash(ctx, oldMethodHash);
             }
         }
+    }
 
+public:
+    SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+        : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
+
+    SymbolDefiner::State beginIncrementalDefinition(core::MutableContext ctx) {
+        beginIncrementalDefinitionInternal(ctx);
+        return move(state);
+    }
+
+    void finishIncrementalDefinition(core::MutableContext ctx) {
         for (auto &method : foundDefs.methods()) {
             if (method.arityHash.isAliasMethod()) {
                 // We need alias methods in the FoundDefinitions list not so that we can actually
@@ -1541,6 +1548,11 @@ public:
                     break;
             }
         }
+    }
+
+    SymbolDefiner::State run(core::MutableContext ctx) {
+        beginIncrementalDefinitionInternal(ctx);
+        finishIncrementalDefinition(ctx);
 
         state.definedClasses.clear();
         state.definedMethods.clear();
@@ -2192,6 +2204,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     uint32_t count = 0;
     uint32_t foundMethods = 0;
     SymbolDefiner::State state;
+    UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions.names->methods().size();
         count++;
@@ -2209,13 +2222,37 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
         SymbolDefiner symbolDefiner(move(state), *fileFoundDefinitions.names, move(oldFoundHashes));
+        if (!oldFoundHashesForFiles.empty()) {
+            state = symbolDefiner.beginIncrementalDefinition(ctx);
+            incrementalDefinitions[fref] = move(state);
+        } else {
+            state = symbolDefiner.run(ctx);
+        }
         output.emplace_back(move(fileFoundDefinitions.tree));
-        state = symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
             populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
     }
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
+    if (!incrementalDefinitions.empty()) {
+        ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
+        count = 0;
+        for (auto &fileFoundDefinitions : allFoundDefinitions) {
+            count++;
+            if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
+                return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
+            }
+
+            auto fref = fileFoundDefinitions.tree.file;
+            // The contents of this don't matter for incremental definition.
+            optional<core::FoundDefHashes> oldFoundHashes;
+            core::MutableContext ctx(gs, core::Symbols::root(), fref);
+
+            SymbolDefiner symbolDefiner(move(incrementalDefinitions[fref]), *fileFoundDefinitions.names,
+                                        oldFoundHashes);
+            symbolDefiner.finishIncrementalDefinition(ctx);
+        }
+    }
     return output;
 }
 
