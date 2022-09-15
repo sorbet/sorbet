@@ -1,4 +1,0 @@
-[
-    {"assertion": "contains", "substring": "class Foo\n  def bar()"},
-    {"assertion": "omits", "substring": "ClassOverride"}
-]

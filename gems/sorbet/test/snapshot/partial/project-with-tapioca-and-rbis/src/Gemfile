@@ -1,2 +1,0 @@
-gem 'tapioca', path: '../gems/0.0.0/gems/tapioca-0.0.0'
-gem 'parlour', path: '../gems/0.0.0/gems/parlour-0.0.0'

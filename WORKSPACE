@@ -51,38 +51,6 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-load("//third_party/gems:rules.bzl", "gemfile_lock_deps")
-
-gemfile_lock_deps(
-    name = "gems",
-
-    # TODO: figure out how to discover these labels during the loading phase,
-    # rather that listing them out explicitly. `glob` doesn't work here, so
-    # we'll need to do something special within the `gemfile_lock_deps`
-    # repository rule.
-    gemfile_locks = [
-        "//gems/sorbet/test/snapshot:{}/src/Gemfile.lock".format(test)
-        for test in [
-            "partial/bad-hash",
-            "partial/bad-t",
-            "partial/create-config",
-            "partial/explosive-object",
-            "partial/fake-object",
-            "partial/fake-rails",
-            "partial/local_gem",
-            "partial/non-utf-8-file",
-            "partial/real_singleton_class",
-            "partial/rspec-lots",
-            "partial/stack_master",
-            "partial/stupidedi",
-            "partial/typed-ignore",
-            "partial/webmock",
-            "total/empty",
-            "total/sorbet-runtime",
-        ]
-    ],
-)
-
 load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
 
 node_repositories()

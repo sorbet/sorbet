@@ -1,2 +1,0 @@
-# include the gem locally
-gem "bad-gem", path: "./"

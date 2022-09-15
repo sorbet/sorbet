@@ -1,9 +1,0 @@
-# This path hard-codes version numbers because specific versions don't matter.
-#
-# The first version number is the Ruby version, and the second version number
-# is the gem's version.
-#
-# This path is crafted to match the path that a gem *would have been* installed
-# at had it been installed through Bundler. Apart from the gem name, it must be
-# reproduced exactly in any test wishing to use local gems.
-gem 'my_gem', path: '../gems/0.0.0/gems/my_gem-0.0.0'
