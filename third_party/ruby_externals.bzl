@@ -72,6 +72,14 @@ def register_ruby_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
     )
 
+    http_archive(
+        name = "sorbet_ruby_3_1",
+        urls = _ruby_urls("3.1/ruby-3.1.2.tar.gz"),
+        sha256 = "61843112389f02b735428b53bb64cf988ad9fb81858b8248e22e57336f24a83e",
+        strip_prefix = "ruby-3.1.2",
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
+    )
+
 def _rubygems_urls(gem):
     """
     Produce a url list that works both with rubygems, and stripe's internal gem cache.
