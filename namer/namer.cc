@@ -1511,6 +1511,10 @@ public:
     }
 
     void finishIncrementalDefinition(core::MutableContext ctx) {
+        // We have to defer defining "deletable" symbols until the "finish" phase of
+        // incremental namer so that we don't delete and immediately re-enter a
+        // symbol (possibly keeping it alive, if it had multiple locs at the time
+        // of deletion) before SymbolDefiner has had a chance to process _all_ files.
         for (auto &method : foundDefs.methods()) {
             if (method.arityHash.isAliasMethod()) {
                 // We need alias methods in the FoundDefinitions list not so that we can actually
@@ -2239,7 +2243,10 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
             }
 
             auto fref = fileFoundDefinitions.tree.file;
-            // The contents of this don't matter for incremental definition.
+            // The contents of this don't matter for incremental definition.  The
+            // old definitions should only matter when deleting old symbols (which
+            // happened in the previous phase of incremental namer), not here when
+            // entering symbols.
             optional<core::FoundDefHashes> oldFoundHashes;
             core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
