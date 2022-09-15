@@ -228,7 +228,8 @@ in `T::Array[Integer]`), the argument and return types of
 
 These assertions are also subject to the `T::Configuration` hooks that
 `sorbet-runtime` provides for controlling runtime type checking. See
-[Runtime Configuration](tconfiguration.md) for more.
+[Runtime Configuration](tconfiguration.md) for more. By default, all of these
+assertions will raise a `TypeError` if they are violated at runtime.
 
 ## Comparison of type assertions
 
