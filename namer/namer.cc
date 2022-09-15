@@ -1477,14 +1477,7 @@ private:
         }
     }
 
-    void beginIncrementalDefinitionInternal(core::MutableContext ctx) {
-        state.definedClasses.reserve(foundDefs.klasses().size());
-        state.definedMethods.reserve(foundDefs.methods().size());
-
-        for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            defineNonDeletableSingle(ctx, ref);
-        }
-
+    void deleteOldDefinitionsInternal(core::MutableContext ctx) {
         if (oldFoundHashes.has_value()) {
             for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
@@ -1505,12 +1498,21 @@ public:
     SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
         : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
-    SymbolDefiner::State beginIncrementalDefinition(core::MutableContext ctx) {
-        beginIncrementalDefinitionInternal(ctx);
+    void enterNonDeletableDefinitions(core::MutableContext ctx) {
+        state.definedClasses.reserve(foundDefs.klasses().size());
+        state.definedMethods.reserve(foundDefs.methods().size());
+
+        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+            defineNonDeletableSingle(ctx, ref);
+        }
+    }
+
+    SymbolDefiner::State deleteOldDefinitions(core::MutableContext ctx) {
+        deleteOldDefinitionsInternal(ctx);
         return move(state);
     }
 
-    void finishIncrementalDefinition(core::MutableContext ctx) {
+    void enterNewDefinitions(core::MutableContext ctx) {
         // We have to defer defining "deletable" symbols until the "finish" phase of
         // incremental namer so that we don't delete and immediately re-enter a
         // symbol (possibly keeping it alive, if it had multiple locs at the time
@@ -1550,8 +1552,8 @@ public:
     }
 
     SymbolDefiner::State run(core::MutableContext ctx) {
-        beginIncrementalDefinitionInternal(ctx);
-        finishIncrementalDefinition(ctx);
+        enterNonDeletableDefinitions(ctx);
+        enterNewDefinitions(ctx);
 
         state.definedClasses.clear();
         state.definedMethods.clear();
@@ -2222,7 +2224,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
         SymbolDefiner symbolDefiner(move(state), *fileFoundDefinitions.names, move(oldFoundHashes));
         if (!oldFoundHashesForFiles.empty()) {
-            state = symbolDefiner.beginIncrementalDefinition(ctx);
+            symbolDefiner.enterNonDeletableDefinitions(ctx);
+            state = symbolDefiner.deleteOldDefinitions(ctx);
             incrementalDefinitions[fref] = move(state);
         } else {
             state = symbolDefiner.run(ctx);
@@ -2252,7 +2255,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
 
             SymbolDefiner symbolDefiner(move(incrementalDefinitions[fref]), *fileFoundDefinitions.names,
                                         oldFoundHashes);
-            symbolDefiner.finishIncrementalDefinition(ctx);
+            symbolDefiner.enterNewDefinitions(ctx);
         }
     }
     return output;
