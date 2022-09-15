@@ -1498,23 +1498,7 @@ private:
         }
     }
 
-public:
-    SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
-        : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
-
-    SymbolDefiner::State run(core::MutableContext ctx) {
-        state.definedClasses.reserve(foundDefs.klasses().size());
-        state.definedMethods.reserve(foundDefs.methods().size());
-
-        for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            defineNonDeletableSingle(ctx, ref);
-        }
-
-        // This currently interleaves deleting and defining across files.
-        // It's possible that this causes problems at some point? Though I haven't found a test case.
-        // That being said, if it does cause problems, we should be able to not interleave, and have
-        // all the `nonDeletableDefinitions` from all files get defined, then delete all the old
-        // methods, then define all the methods.
+    void deleteOldDefinitionsInternal(core::MutableContext ctx) {
         if (oldFoundHashes.has_value()) {
             for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
@@ -1529,7 +1513,31 @@ public:
                 deleteMethodViaFullNameHash(ctx, oldMethodHash);
             }
         }
+    }
 
+public:
+    SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+        : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
+
+    void enterNonDeletableDefinitions(core::MutableContext ctx) {
+        state.definedClasses.reserve(foundDefs.klasses().size());
+        state.definedMethods.reserve(foundDefs.methods().size());
+
+        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+            defineNonDeletableSingle(ctx, ref);
+        }
+    }
+
+    SymbolDefiner::State deleteOldDefinitions(core::MutableContext ctx) {
+        deleteOldDefinitionsInternal(ctx);
+        return move(state);
+    }
+
+    void enterNewDefinitions(core::MutableContext ctx) {
+        // We have to defer defining "deletable" symbols until the "finish" phase of
+        // incremental namer so that we don't delete and immediately re-enter a
+        // symbol (possibly keeping it alive, if it had multiple locs at the time
+        // of deletion) before SymbolDefiner has had a chance to process _all_ files.
         for (auto &method : foundDefs.methods()) {
             if (method.arityHash.isAliasMethod()) {
                 // We need alias methods in the FoundDefinitions list not so that we can actually
@@ -1562,6 +1570,11 @@ public:
                     break;
             }
         }
+    }
+
+    SymbolDefiner::State run(core::MutableContext ctx) {
+        enterNonDeletableDefinitions(ctx);
+        enterNewDefinitions(ctx);
 
         state.definedClasses.clear();
         state.definedMethods.clear();
@@ -2214,6 +2227,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     uint32_t count = 0;
     uint32_t foundMethods = 0;
     SymbolDefiner::State state;
+    UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions.names->methods().size();
         count++;
@@ -2231,13 +2245,41 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
         SymbolDefiner symbolDefiner(move(state), *fileFoundDefinitions.names, move(oldFoundHashes));
+        if (!oldFoundHashesForFiles.empty()) {
+            symbolDefiner.enterNonDeletableDefinitions(ctx);
+            state = symbolDefiner.deleteOldDefinitions(ctx);
+            incrementalDefinitions[fref] = move(state);
+        } else {
+            state = symbolDefiner.run(ctx);
+        }
         output.emplace_back(move(fileFoundDefinitions.tree));
-        state = symbolDefiner.run(ctx);
         if (foundHashesOut != nullptr) {
             populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
     }
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
+    if (!incrementalDefinitions.empty()) {
+        ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
+        count = 0;
+        for (auto &fileFoundDefinitions : allFoundDefinitions) {
+            count++;
+            if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
+                return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
+            }
+
+            auto fref = fileFoundDefinitions.tree.file;
+            // The contents of this don't matter for incremental definition.  The
+            // old definitions should only matter when deleting old symbols (which
+            // happened in the previous phase of incremental namer), not here when
+            // entering symbols.
+            optional<core::FoundDefHashes> oldFoundHashes;
+            core::MutableContext ctx(gs, core::Symbols::root(), fref);
+
+            SymbolDefiner symbolDefiner(move(incrementalDefinitions[fref]), *fileFoundDefinitions.names,
+                                        oldFoundHashes);
+            symbolDefiner.enterNewDefinitions(ctx);
+        }
+    }
     return output;
 }
 
