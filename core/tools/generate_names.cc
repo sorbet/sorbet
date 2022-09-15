@@ -543,6 +543,7 @@ NameDef names[] = {
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},
+    {"Minitest", "Minitest", true},
     {"Token", "Token", true},
 
     // used by the compiler

@@ -2072,12 +2072,28 @@ class ResolveTypeMembersAndFieldsWalk {
 
             scope = ctx.owner.enclosingClass(ctx);
         } else {
+            scope = ctx.selfClass();
+
+            auto isMinitestTestClass = false;
+            auto minitest = ctx.state.lookupClassSymbol(core::Symbols::root(), core::Names::Constants::Minitest());
+
+            if (minitest.exists()) {
+                core::ClassOrModuleRef minitestTest =
+                    ctx.state.lookupClassSymbol(minitest, core::Names::Constants::Test());
+
+                if (scope.data(ctx)->derivesFrom(ctx, minitestTest)) {
+                    isMinitestTestClass = true;
+                }
+            }
+
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.isClassOrModule()) {
                 // Declaring a class instance variable
             } else if (job.atTopLevel && ctx.owner.name(ctx) == core::Names::initialize()) {
-                // Declaring a instance variable
+                // Declaring an instance variable
+            } else if (job.atTopLevel && isMinitestTestClass && ctx.owner.name(ctx) == core::Names::setup()) {
+                // Declaring an instance variable inside a Minitest::Test#setup method
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
                        !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
