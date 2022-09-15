@@ -262,7 +262,8 @@ public:
         auto ownerIsMethod = getOwnerRaw().kind() == core::FoundDefinitionRef::Kind::Method;
 
         switch (original.fun.rawId()) {
-            case core::Names::privateClassMethod().rawId(): {
+            case core::Names::privateClassMethod().rawId():
+            case core::Names::publicClassMethod().rawId(): {
                 if (ownerIsMethod) {
                     break;
                 }
@@ -1026,7 +1027,8 @@ private:
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
         core::ClassOrModuleRef owner;
-        if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::packagePrivateClassMethod()) {
+        if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::publicClassMethod() ||
+            mod.name == core::Names::packagePrivateClassMethod()) {
             owner = ctx.selfClass();
         } else {
             owner = ctx.owner.enclosingClass(ctx);
@@ -1047,6 +1049,7 @@ private:
                     method.data(ctx)->flags.isProtected = true;
                     break;
                 case core::Names::public_().rawId():
+                case core::Names::publicClassMethod().rawId():
                     method.data(ctx)->setMethodPublic();
                     break;
                 default:
