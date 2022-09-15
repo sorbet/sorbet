@@ -278,6 +278,7 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU4(ffh.owner.idx);
         p.putU1(ffh.owner.onSingletonClass);
         p.putU1(ffh.owner.isInstanceVariable);
+        p.putU1(ffh.owner.fromWithinMethod);
         p.putU4(ffh.nameHash._hashValue);
     }
 }
@@ -342,9 +343,11 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         auto ownerIdx = p.getU4();
         auto onSingletonClass = p.getU1();
         auto isInstanceVariable = p.getU1();
+        auto fromWithinMethod = p.getU1();
         FullNameHash fullNameHash;
         fullNameHash._hashValue = p.getU4();
-        ret.foundHashes.fieldHashes.emplace_back(ownerIdx, onSingletonClass, isInstanceVariable, fullNameHash);
+        ret.foundHashes.fieldHashes.emplace_back(ownerIdx, onSingletonClass, isInstanceVariable, fromWithinMethod,
+                                                 fullNameHash);
     }
     return make_unique<const FileHash>(move(ret));
 }
