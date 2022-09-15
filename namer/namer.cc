@@ -1537,10 +1537,10 @@ public:
     }
 
     void enterNewDefinitions(core::MutableContext ctx) {
-        // We have to defer defining "deletable" symbols until the "finish" phase of
-        // incremental namer so that we don't delete and immediately re-enter a
-        // symbol (possibly keeping it alive, if it had multiple locs at the time
-        // of deletion) before SymbolDefiner has had a chance to process _all_ files.
+        // We have to defer defining "deletable" symbols until this (second) phase of incremental
+        // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
+        // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
+        // chance to process _all_ files.
         for (auto &method : foundDefs.methods()) {
             if (method.arityHash.isAliasMethod()) {
                 // We need alias methods in the FoundDefinitions list not so that we can actually
