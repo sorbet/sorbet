@@ -119,20 +119,23 @@ using FoundMethodHashes = std::vector<FoundMethodHash>;
 struct FoundFieldHash {
     struct {
         // The owner of this field.
-        uint32_t idx : 30;
+        uint32_t idx : 29;
         // Whether the field was defined on instances of the class or on the singleton class.
         bool onSingletonClass : 1;
         // Whether the field was a class or instance variable.
         // TODO(froydnj) we should just subsume class variables into the more
         // general static fields, since that's how we represent them internally.
         bool isInstanceVariable : 1;
+        // Whether the definition of the field comes from inside a method.
+        bool fromWithinMethod : 1;
     } owner;
 
     // Hash of this field's name.
     const FullNameHash nameHash;
 
-    FoundFieldHash(uint32_t ownerIdx, bool onSingletonClass, bool isInstanceVariable, FullNameHash nameHash)
-        : owner({ownerIdx, onSingletonClass, isInstanceVariable}), nameHash(nameHash) {
+    FoundFieldHash(uint32_t ownerIdx, bool onSingletonClass, bool isInstanceVariable, bool fromWithinMethod,
+                   FullNameHash nameHash)
+        : owner({ownerIdx, onSingletonClass, isInstanceVariable, fromWithinMethod}), nameHash(nameHash) {
         sanityCheck();
     }
 

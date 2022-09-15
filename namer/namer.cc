@@ -555,6 +555,7 @@ public:
         auto [owner, isSelfMethod] = getOwnerSkippingMethods();
         auto onSingletonClass = isSelfMethod.value_or(found.kind == core::FoundField::Kind::InstanceVariable);
         found.onSingletonClass = onSingletonClass;
+        found.fromWithinMethod = isSelfMethod.has_value();
         found.owner = owner;
         found.loc = uid->loc;
         found.name = uid->name;
@@ -1197,6 +1198,10 @@ private:
         // know where to define the field.
         ENFORCE(ctx.owner.isClassOrModule(), "Actual {}", ctx.owner.show(ctx));
         auto scope = ctx.owner.enclosingClass(ctx);
+        // cf. methodOwner in this file.
+        if (field.fromWithinMethod && scope == core::Symbols::root()) {
+            scope = core::Symbols::Object();
+        }
         if (field.onSingletonClass) {
             scope = scope.data(ctx)->lookupSingletonClass(ctx);
         }
@@ -2193,7 +2198,8 @@ void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs
         auto owner = field.owner;
         auto fullNameHash = core::FullNameHash(ctx, field.name);
         foundHashesOut.fieldHashes.emplace_back(owner.idx(), field.onSingletonClass,
-                                                field.kind == core::FoundField::Kind::InstanceVariable, fullNameHash);
+                                                field.kind == core::FoundField::Kind::InstanceVariable,
+                                                field.fromWithinMethod, fullNameHash);
     }
 }
 
