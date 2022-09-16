@@ -1825,9 +1825,14 @@ public:
         if (args.args.empty()) {
             return;
         }
+
+        auto methodName = args.name == Names::mustBecause()
+            ? "T.must_because"
+            : "T.must"
+
         if (!args.args[0]->type.isFullyDefined()) {
             if (auto e = gs.beginError(args.argLoc(0), errors::Infer::BareTypeUsage)) {
-                e.setHeader("`{}` applied to incomplete type `{}`", "T.must", args.args[0]->type.show(gs));
+                e.setHeader("`{}` applied to incomplete type `{}`", methodName, args.args[0]->type.show(gs));
             }
             return;
         }
@@ -1835,55 +1840,22 @@ public:
         if (ret == args.args[0]->type) {
             if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
                 if (args.args[0]->type.isUntyped()) {
-                    e.setHeader("`{}` called on `{}`, which is redundant", "T.must", args.args[0]->type.show(gs));
+                    e.setHeader("`{}` called on `{}`, which is redundant", methodName, args.args[0]->type.show(gs));
                 } else {
-                    e.setHeader("`{}` called on `{}`, which is never `{}`", "T.must", args.args[0]->type.show(gs),
+                    e.setHeader("`{}` called on `{}`, which is never `{}`", methodName, args.args[0]->type.show(gs),
                                 "nil");
                 }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
                 auto replaceLoc = args.callLoc();
-                const auto locWithoutTMust = args.callLoc().adjust(gs, 7, -1);
+                const auto locWithoutTMust = args.argLoc(0);
                 if (replaceLoc.exists() && locWithoutTMust.exists()) {
-                    e.replaceWith("Remove `T.must`", replaceLoc, "{}", locWithoutTMust.source(gs).value());
+                    e.replaceWith(fmt::format("Remove `{}`", methodName), replaceLoc, "{}", locWithoutTMust.source(gs).value());
                 }
             }
         }
         res.returnType = move(ret);
     }
 } T_must;
-
-// T.must_because has handling equivalent to T.must for its first argument
-class T_must_because : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.args.empty()) {
-            return;
-        }
-        if (!args.args[0]->type.isFullyDefined()) {
-            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::BareTypeUsage)) {
-                e.setHeader("`{}` applied to incomplete type `{}`", "T.must_because", args.args[0]->type.show(gs));
-            }
-            return;
-        }
-        auto ret = Types::dropNil(gs, args.args[0]->type);
-        if (ret == args.args[0]->type) {
-            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
-                if (args.args[0]->type.isUntyped()) {
-                    e.setHeader("`{}` called on `{}`, which is redundant", "T.must_because", args.args[0]->type.show(gs));
-                } else {
-                    e.setHeader("`{}` called on `{}`, which is never `{}`", "T.must_because", args.args[0]->type.show(gs),
-                                "nil");
-                }
-                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                auto replaceLoc = args.callLoc();
-                if (replaceLoc.exists()) {
-                    e.replaceWith("Remove `T.must_because`", replaceLoc, "{}", args.argLoc(0).source(gs).value());
-                }
-            }
-        }
-        res.returnType = move(ret);
-    }
-} T_must_because;
 
 class T_any : public IntrinsicMethod {
 public:
@@ -4140,7 +4112,7 @@ public:
 const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::must(), &T_must},
-    {Symbols::T(), Intrinsic::Kind::Singleton, Names::mustBecause(), &T_must_because},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::mustBecause(), &T_must},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::all(), &T_all},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::any(), &T_any},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
