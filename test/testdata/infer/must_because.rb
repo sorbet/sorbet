@@ -5,9 +5,9 @@ def test_must_because # error: does not have a `sig`
   T.assert_type!(T.must_because(x) {'reason'}, String)
 
   T.must_because(x) {'reason'}
-  T.must_because()  # error: Not enough arguments
+  T.must_because()  # error-with-dupes: Not enough arguments
   T.must_because(x) # error: requires a block parameter
   T.must_because(x, 0)
-  #                 ^ error: Expected: `1`, got: `2`
-  T.must_because(x) {0} # error: Expected String
+  #                 ^ error-with-dupes: Expected: `1`, got: `2`
+  T.must_because(x) {0} # error: Expected `String`
 end
