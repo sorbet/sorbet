@@ -1828,7 +1828,7 @@ public:
 
         auto methodName = args.name == Names::mustBecause()
             ? "T.must_because"
-            : "T.must"
+            : "T.must";
 
         if (!args.args[0]->type.isFullyDefined()) {
             if (auto e = gs.beginError(args.argLoc(0), errors::Infer::BareTypeUsage)) {
