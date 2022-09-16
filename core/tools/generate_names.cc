@@ -150,6 +150,7 @@ NameDef names[] = {
     {"syntheticBind", "<synthetic bind>"},
     {"unsafe"},
     {"must"},
+    {"mustBecause", "must_because"},
     {"declareInterface", "interface!"},
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
