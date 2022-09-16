@@ -1876,9 +1876,8 @@ public:
                 }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
                 auto replaceLoc = args.callLoc();
-                const auto locWithoutTMustBecause = args.callLoc().adjust(gs, 7, -1);
-                if (replaceLoc.exists() && locWithoutTMustBecause.exists()) {
-                    e.replaceWith("Remove `T.must_because`", replaceLoc, "{}", locWithoutTMustBecause.source(gs).value());
+                if (replaceLoc.exists()) {
+                    e.replaceWith("Remove `T.must_because`", replaceLoc, "{}", args.argLoc(0).source(gs).value());
                 }
             }
         }
