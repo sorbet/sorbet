@@ -1847,7 +1847,8 @@ public:
                 auto replaceLoc = args.callLoc();
                 const auto locWithoutTMust = args.argLoc(0);
                 if (replaceLoc.exists() && locWithoutTMust.exists()) {
-                    e.replaceWith(fmt::format("Remove `{}`", methodName), replaceLoc, "{}", locWithoutTMust.source(gs).value());
+                    e.replaceWith(fmt::format("Remove `{}`", methodName), replaceLoc, "{}",
+                                  locWithoutTMust.source(gs).value());
                 }
             }
         }
