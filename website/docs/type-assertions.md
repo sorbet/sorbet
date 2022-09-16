@@ -138,6 +138,40 @@ end
   → View on sorbet.run
 </a>
 
+## `T.must_because`
+
+`T.must_because`, like `T.must`, is for asserting a value of a
+[nilable type](nilable-types.md) is not `nil`. It also takes a reason why the
+value is not expected to be `nil`.
+
+If the value is `nil` at runtime, the provided reason is included in the raised
+exception's error message.
+
+```rb
+class A
+  extend T::Sig
+
+  sig {void}
+  def foo
+    y = T.must_because(nil) {'reason'}
+    puts y # error: This code is unreachable
+  end
+
+  sig {void}
+  def bar
+    vals = T.let([], T::Array[Integer])
+    x = vals.find {|a| a > 0}
+    T.reveal_type(x) # Revealed type: T.nilable(Integer)
+    y = T.must_because(x) {'reason'}
+    puts y # no static error
+  end
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20foo%0A%20%20%20%20y%20%3D%20T.must_because%28nil%29%20%7B'reason'%7D%0A%20%20%20%20puts%20y%20%23%20error%3A%20This%20code%20is%20unreachable%0A%20%20end%0A%0A%20%20sig%20%7Bvoid%7D%0A%20%20def%20bar%0A%20%20%20%20vals%20%3D%20T.let%28%5B%5D%2C%20T%3A%3AArray%5BInteger%5D%29%0A%20%20%20%20x%20%3D%20vals.find%20%7B%7Ca%7C%20a%20%3E%200%7D%0A%20%20%20%20T.reveal_type%28x%29%20%23%20Revealed%20type%3A%20T.nilable%28Integer%29%0A%20%20%20%20y%20%3D%20T.must_because%28x%29%20%7B'reason'%7D%0A%20%20%20%20puts%20y%20%23%20no%20static%20error%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
+
 ## `T.assert_type!`
 
 `T.assert_type!` is similar to `T.let`: it is checked statically **and** at
