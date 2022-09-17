@@ -1,13 +1,13 @@
 #ifndef RUBY_TYPER_LSP_LSPINDEXER_H
 #define RUBY_TYPER_LSP_LSPINDEXER_H
 
+#include "LSPPathType.h"
 #include "core/core.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/initialized.h"
-#include "LSPPathType.h"
 
 namespace sorbet {
 class WorkerPool;
@@ -52,12 +52,13 @@ class LSPIndexer final {
      * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `initialGS` (in that order).
      */
     PathType getTypecheckingPath(const LSPFileUpdates &edit,
-                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
     /**
      * INVARIANT: `changedFiles` must have hashes computed.
      */
-    PathType getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+    PathType
+    getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                                const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS,

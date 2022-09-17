@@ -2,7 +2,6 @@
 #ifndef SORBET_LSP_PATH_TYPE_H
 #define SORBET_LSP_PATH_TYPE_H
 
-
 namespace sorbet::realmain::lsp {
 
 /**
@@ -18,6 +17,6 @@ enum class PathType {
     // Incremental typecheck
     Fast,
 };
-};
+}; // namespace sorbet::realmain::lsp
 
 #endif

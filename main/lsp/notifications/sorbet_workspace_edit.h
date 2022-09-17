@@ -2,8 +2,8 @@
 #define RUBY_TYPER_LSP_NOTIFICATIONS_SORBET_WORKSPACE_EDIT_H
 
 #include "absl/synchronization/notification.h"
-#include "main/lsp/LSPTask.h"
 #include "main/lsp/LSPIndexer.h"
+#include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
 class LSPFileUpdates;

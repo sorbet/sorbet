@@ -75,9 +75,9 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
     computeFileHashes(files, *emptyWorkers);
 }
 
-PathType LSPIndexer::getTypecheckingPathInternal(
-    const vector<shared_ptr<core::File>> &changedFiles,
-    const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+PathType
+LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
+                                        const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
@@ -218,8 +218,9 @@ PathType LSPIndexer::getTypecheckingPathInternal(
     return PathType::Fast;
 }
 
-PathType LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
-                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+PathType
+LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
+                                const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (edit.hasNewFiles) {
