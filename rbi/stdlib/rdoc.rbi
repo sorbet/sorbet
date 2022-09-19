@@ -9336,7 +9336,7 @@ end
 # ```
 #
 # This will create the tasks `:rdoc`, `:rdoc:clean` and `:rdoc:force`.
-class RDoc::Task
+class RDoc::Task < Rake::TaskLib
   # Whether to run the rdoc process as an external shell (default is false)
   def external; end
 
