@@ -2354,5 +2354,5 @@ end
 
 # The "file" [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) is defined by
 # RFC8089.
-class URI::File
+class URI::File < URI::Generic
 end
