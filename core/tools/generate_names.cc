@@ -550,6 +550,7 @@ NameDef names[] = {
     // Typos
     {"Int", "Int", true},
     {"Timestamp", "Timestamp", true},
+    {"Bool", "Bool", true},
 
     // used by the compiler
     {"returnValue", "<returnValue>"},

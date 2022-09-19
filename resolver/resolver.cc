@@ -112,9 +112,11 @@ bool isTClassOf(ast::ExpressionPtr &expr) {
     return send->fun == core::Names::classOf();
 }
 
-const UnorderedMap<core::NameRef, core::NameRef> COMMON_TYPOS = {
-    {core::Names::Constants::Int(), core::Names::Constants::Integer()},
-    {core::Names::Constants::Timestamp(), core::Names::Constants::Time()},
+const UnorderedMap<core::NameRef, string> COMMON_TYPOS = {
+    {core::Names::Constants::Int(), "Integer"s},
+    {core::Names::Constants::Timestamp(), "Time"s},
+    {core::Names::Constants::Bool(), "T::Boolean"s},
+    {core::Names::Constants::Boolean(), "T::Boolean"s},
 };
 
 class ResolveConstantsWalk {
@@ -733,12 +735,10 @@ private:
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
                 auto foundCommonTypo = false;
                 if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
-                    for (const auto [from, to] : COMMON_TYPOS) {
-                        if (original.cnst == from && core::Symbols::root().data(ctx)->findMember(ctx, to).exists()) {
-                            e.didYouMean(to.show(ctx), ctx.locAt(job.out->loc));
-                            foundCommonTypo = true;
-                            break;
-                        }
+                    for (const auto &[from, to] : COMMON_TYPOS) {
+                        e.didYouMean(to, ctx.locAt(job.out->loc));
+                        foundCommonTypo = true;
+                        break;
                     }
                 }
 
