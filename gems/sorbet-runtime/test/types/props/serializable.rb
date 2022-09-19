@@ -1346,7 +1346,9 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'round-trip serializes' do
       h = {'still_required_prop' => 5}
       x = ConstDefault.from_hash!(h)
+      assert_nil(x.required_at_some_point)
       x = x.with(still_required_prop: 6)
+      assert_nil(x.required_at_some_point)
     end
   end
 
