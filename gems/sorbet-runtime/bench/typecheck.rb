@@ -130,21 +130,18 @@ module SorbetBenchmarks
         arg_plus_kwargs(:bar, x: 1)
       end
 
-      time_block(".bind(example).call") do
-        Object.instance_method(:class).bind(example).call
+      time_block("direct call Object#class") do
+        example.class
+      end
+
+      class_method = Object.instance_method(:class)
+      time_block(".bind(example).call Object#class") do
+        class_method.bind(example).call
       end
 
       if T::Configuration::AT_LEAST_RUBY_2_7
-        time_block(".bind_call(example)") do
-          Object.instance_method(:class).bind_call(example)
-        end
-
-        time_block("if AT_LEAST_RUBY_2_7; .bind_call(example); end") do
-          if T::Configuration::AT_LEAST_RUBY_2_7
-            Object.instance_method(:class).bind_call(example)
-          else
-            raise "must be run on 2.7"
-          end
+        time_block(".bind_call(example) Object#class") do
+          class_method.bind_call(example)
         end
       else
         puts 'skipping UnboundMethod#bind_call tests (re-run on Ruby 2.7+)'
