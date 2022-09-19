@@ -1337,6 +1337,19 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class ConstDefault < T::Struct
+    const :required_at_some_point, NilClass, default: nil
+    const :still_required_prop, Integer
+  end
+
+  describe 'const NilClass' do
+    it 'round-trip serializes' do
+      h = {'still_required_prop' => 5}
+      x = ConstDefault.from_hash!(h)
+      x = x.with(still_required_prop: 6)
+    end
+  end
+
   class MuckAboutWithPropInternals
     include T::Props::Serializable
     include T::Props::WeakConstructor
