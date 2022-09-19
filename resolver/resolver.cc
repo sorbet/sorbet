@@ -736,9 +736,11 @@ private:
                 auto foundCommonTypo = false;
                 if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
-                        e.didYouMean(to, ctx.locAt(job.out->loc));
-                        foundCommonTypo = true;
-                        break;
+                        if (from == original.cnst) {
+                            e.didYouMean(to, ctx.locAt(job.out->loc));
+                            foundCommonTypo = true;
+                            break;
+                        }
                     }
                 }
 
