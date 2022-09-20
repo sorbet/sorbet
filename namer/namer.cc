@@ -1974,12 +1974,13 @@ public:
         });
     }
 
-    ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
-                                                  const ast::UnresolvedConstantLit *typeName) {
+    ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        ENFORCE(send != nullptr);
+        const auto *typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        ENFORCE(typeName != nullptr);
 
-        ENFORCE(asgn.lhs.get() == typeName &&
-                asgn.rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
         if (!ctx.owner.isClassOrModule()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
@@ -2133,7 +2134,7 @@ public:
         switch (send->fun.rawId()) {
             case core::Names::typeTemplate().rawId():
             case core::Names::typeMember().rawId(): {
-                tree = handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
+                tree = handleTypeMemberDefinition(ctx, std::move(tree));
                 return;
             }
             default: {
