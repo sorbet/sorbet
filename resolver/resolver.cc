@@ -112,6 +112,13 @@ bool isTClassOf(ast::ExpressionPtr &expr) {
     return send->fun == core::Names::classOf();
 }
 
+const UnorderedMap<core::NameRef, string> COMMON_TYPOS = {
+    {core::Names::Constants::Int(), "Integer"s},
+    {core::Names::Constants::Timestamp(), "Time"s},
+    {core::Names::Constants::Bool(), "T::Boolean"s},
+    {core::Names::Constants::Boolean(), "T::Boolean"s},
+};
+
 class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
@@ -726,9 +733,20 @@ private:
         if (!constantNameMissing && !alreadyReported) {
             if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+                auto foundCommonTypo = false;
+                if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                    for (const auto &[from, to] : COMMON_TYPOS) {
+                        if (from == original.cnst) {
+                            e.didYouMean(to, ctx.locAt(job.out->loc));
+                            foundCommonTypo = true;
+                            break;
+                        }
+                    }
+                }
 
                 auto suggestScope = job.out->resolutionScopes->front();
-                if (suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() && suggestScope.isClassOrModule()) {
+                if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
+                    suggestScope.isClassOrModule()) {
                     suggestionCount++;
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
