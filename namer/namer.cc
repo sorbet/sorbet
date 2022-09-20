@@ -1999,6 +1999,19 @@ public:
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
+        bool isTypeTemplate = send->fun == core::Names::typeTemplate();
+        auto onSymbol =
+            isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
+        if (!onSymbol.exists()) {
+            ENFORCE(this->bestEffort);
+            return ast::MK::EmptyTree();
+        }
+        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
+        if (!sym.exists()) {
+            ENFORCE(this->bestEffort);
+            return ast::MK::EmptyTree();
+        }
+
         if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             if (send->numPosArgs() > 1) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
@@ -2008,19 +2021,6 @@ public:
                                            asgn.loc.copyWithZeroLength(), ast::MK::Untyped(asgn.loc));
                 return handleAssignment(
                     ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
-            }
-
-            bool isTypeTemplate = send->fun == core::Names::typeTemplate();
-            auto onSymbol =
-                isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
-            if (!onSymbol.exists()) {
-                ENFORCE(this->bestEffort);
-                return ast::MK::EmptyTree();
-            }
-            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
-            if (!sym.exists()) {
-                ENFORCE(this->bestEffort);
-                return ast::MK::EmptyTree();
             }
 
             if (send->hasKwArgs()) {
