@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {

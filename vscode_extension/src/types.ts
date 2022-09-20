@@ -9,8 +9,22 @@ export interface ShowOperationParams {
 
 // Reasons why Sorbet might be restarted.
 export enum RestartReason {
+  // Command manuallyinvoked from command palette
   COMMAND = "command",
-  CRASH = "crash",
+  // Manually invoked from the user clicking on "Restart Sorbet" in status bar popup
+  STATUS_BAR_BUTTON = "status_bar_button",
+  // For environments where a wrapper script protects the `sorbet` invocation,
+  // and fails to start it under certain circumstances (for example, an rsync
+  // client not running in the background, or a VPN not being connected).
+  WRAPPER_REFUSED_SPAWN = "wrapper_refused_spawn",
+  // For situations where `sorbet` died because it was sent the TERM signal
+  FORCIBLY_TERMINATED = "forcibly_terminated",
+  // LanguageClient closed callback
+  CRASH_LC_CLOSED = "crash_lc_closed",
+  // LanguageClient error callback
+  CRASH_LC_ERROR = "crash_lc_error",
+  // Extension (non-LanguageClient) error
+  CRASH_EXT_ERROR = "crash_ext_error",
   CONFIG_CHANGE = "config_change",
 }
 
