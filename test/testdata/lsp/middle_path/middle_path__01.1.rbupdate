@@ -1,0 +1,12 @@
+# typed: true
+# assert-middle-path: true
+
+class A_01
+  extend T::Sig
+
+  sig {returns(String)}
+  def foo()
+    42 # error: Expected `String` but found `Integer(42)` for method result type
+  end
+end
+

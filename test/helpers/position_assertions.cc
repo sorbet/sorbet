@@ -48,6 +48,7 @@ const UnorderedMap<
         {"assert-no-code-action", StringPropertyAssertions::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
+        {"assert-middle-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
         {"completion", CompletionAssertion::make},
         {"apply-completion", ApplyCompletionAssertion::make},

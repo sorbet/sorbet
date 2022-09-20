@@ -211,7 +211,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
             "Taking slow path because too many extra files would be typechecked on the fast path ({} files > {} files)",
             filesToTypecheck, config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_extra_files");
-        return PathType::Slow;
+        return PathType::SlowWithIncrementalResolver;
     }
 
     logger.debug("Taking fast path");
@@ -367,7 +367,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
             pendingTypecheckUpdates.committedEditCount += update.editCount;
         }
         mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
-    } else {
+    } else if (update.typecheckingPath == PathType::Slow) {
         // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
         update.updatedGS = initialGS->deepCopy();
         pendingTypecheckUpdates = update.copy();

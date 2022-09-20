@@ -11,6 +11,9 @@ enum class PathType {
     // Full typecheck
     Slow,
 
+    // Slow path (cancelable and parallel), but with incremental namer and resolver
+    SlowWithIncrementalResolver,
+
     // Incremental typecheck
     Fast,
 };

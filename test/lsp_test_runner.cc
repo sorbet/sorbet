@@ -890,6 +890,7 @@ TEST_CASE("LSPTest") {
             }
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
+            auto assertMiddlePath = BooleanPropertyAssertion::getValue("assert-middle-path", assertions);
 
             // TODO(aprocter): There's probably more code duplication than necessary between the 'if' and the 'else'
             // here.
@@ -937,7 +938,7 @@ TEST_CASE("LSPTest") {
                 // in this codepath since we are running in single-threaded mode.
                 verifyTypecheckRunInfo(
                     errorPrefix, responses, SorbetTypecheckRunStatus::Ended, ExpectDiagnosticMessages::Yes,
-                    [&errorPrefix, assertSlowPath, &assertFastPath, &test,
+                    [&errorPrefix, assertSlowPath, assertMiddlePath, &assertFastPath, &test,
                      &version](unique_ptr<SorbetTypecheckRunInfo> &params) -> void {
                         auto validateAssertions = [&params, &errorPrefix](TypecheckingPath path, string actualPath,
                                                                           bool assertValue, string expectedPath) {
@@ -954,8 +955,16 @@ TEST_CASE("LSPTest") {
                                 CHECK_NE(isSelectedPath, assertValue);
                             }
                         };
+                        auto middlePathName = "slow with incremental namer and resolver";
                         if (assertSlowPath.has_value()) {
                             validateAssertions(TypecheckingPath::Fast, "fast", assertSlowPath.value(), "slow");
+                            validateAssertions(TypecheckingPath::Fast, "fast", assertSlowPath.value(), "slow");
+                        }
+                        if (assertMiddlePath.has_value()) {
+                            validateAssertions(TypecheckingPath::Fast, "fast", assertMiddlePath.value(),
+                                               middlePathName);
+                            validateAssertions(TypecheckingPath::Slow, "slow", assertMiddlePath.value(),
+                                               middlePathName);
                         }
                         if (assertFastPath.has_value()) {
                             (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
