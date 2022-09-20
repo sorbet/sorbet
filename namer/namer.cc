@@ -2012,6 +2012,11 @@ public:
             return ast::MK::EmptyTree();
         }
 
+        // Simulates how squashNames in handleAssignment also creates a ConstantLit
+        // (simpler than squashNames, because type members are not allowed to use any sort of
+        // `A::B = type_member` syntax)
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym, move(asgn.lhs));
+
         if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             if (send->numPosArgs() > 1) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
