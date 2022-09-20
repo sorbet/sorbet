@@ -1388,14 +1388,10 @@ private:
                 insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
                 break;
             }
-            case core::FoundDefinitionRef::Kind::Field: {
-                const auto &field = ref.field(foundDefs);
-                insertField(ctx.withOwner(getOwnerSymbol(field.owner)), field);
-                break;
-            }
             case core::FoundDefinitionRef::Kind::Empty:
             case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::Method:
+            case core::FoundDefinitionRef::Kind::Field:
             case core::FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
                 break;
