@@ -89,6 +89,9 @@ export default class SorbetLanguageClient implements ErrorHandler {
 
   // Contains the Sorbet process.
   private _sorbetProcess: ChildProcess | null = null;
+  // Note: sometimes this is actually an errno, not a process exit code.
+  // This happens when set via the `.on("error")` handler, instead of the
+  // `.on("exit")` handler.
   private _sorbetProcessExitCode: number | null = null;
 
   // Tracks disposable subscriptions so we can clean them up when language client is disposed.
@@ -325,7 +328,12 @@ export default class SorbetLanguageClient implements ErrorHandler {
       this._updateStatus(ServerStatus.RESTARTING);
       let reason = RestartReason.CRASH_LC_CLOSED;
       if (this._sorbetProcessExitCode === 11) {
-        // 11 is EAGAIN
+        // 11 number chosen somewhat arbitrarily. Most important is that this doesn't
+        // clobber the exit code of Sorbet itself (which means Sorbet cannot return 11).
+        //
+        // The only thing that matters is that this value is kept in sync with any
+        // wrapper scripts that people use with Sorbet. If this number has to
+        // change for some reason, we should announce that.
         reason = RestartReason.WRAPPER_REFUSED_SPAWN;
       } else if (this._sorbetProcessExitCode === 143) {
         // 143 = 128 + 15 and 15 is TERM signal
