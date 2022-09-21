@@ -24,6 +24,7 @@ end
 class TypeMemberWithTypeAlias
   extend T::Generic
   ::X = type_member
+  #     ^^^^^^^^^^^ error: Expected `Runtime object representing type: Integer` but found `T::Types::TypeMember` for field
   ::X = T.type_alias {Integer}
 end
 
@@ -31,4 +32,5 @@ class TypeAliasWithTypeMember
   extend T::Generic
   ::Y = T.type_alias {Integer}
   ::Y = type_member
+  #     ^^^^^^^^^^^ error: Expected `Runtime object representing type: Integer` but found `T::Types::TypeMember` for field
 end

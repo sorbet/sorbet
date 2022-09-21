@@ -581,6 +581,8 @@ public:
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+            handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
                 case core::Names::typeTemplate().rawId():
@@ -2127,6 +2129,8 @@ public:
         if (send == nullptr) {
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!send->recv.isSelfReference()) {
+            tree = handleAssignment(ctx, std::move(tree));
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
             tree = handleAssignment(ctx, std::move(tree));
         } else {
             switch (send->fun.rawId()) {
