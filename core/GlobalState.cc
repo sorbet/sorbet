@@ -2307,8 +2307,8 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         } else {
             auto &target = fieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
-            uint32_t fieldShapeHash = field.fieldShapeHash(*this);
             if (!this->lspExperimentalFastPathEnabled) {
+                uint32_t fieldShapeHash = field.fieldShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, fieldShapeHash);
                 fieldHash = mix(fieldHash, fieldShapeHash);
             }
