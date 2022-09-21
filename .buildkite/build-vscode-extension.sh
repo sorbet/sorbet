@@ -3,8 +3,14 @@
 set -euo pipefail
 
 pushd vscode_extension
-yarn
+
+source .buildkite/tools/with_backoff.sh
+
+# Sometimes requests to https://registry.yarnpkg.com hit transient errors.
+with_backoff yarn
+
 yarn generate-package
+
 popd
 
 rm -rf _out_
