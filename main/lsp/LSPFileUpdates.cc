@@ -87,9 +87,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
                                          const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
-    vector<core::SymbolHash> changedMethodSymbolHashes;
-    vector<core::SymbolHash> changedStaticFieldSymbolHashes;
-    vector<core::SymbolHash> changedFieldSymbolHashes;
+    vector<core::SymbolHash> changedDeletableSymbolHashes;
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;
@@ -119,62 +117,30 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // fastPathFilesToTypecheck is called (it will be evicted later on that thread, right
         // before calling into the pipeline). On that thread, `updatedFile` represents the new
         // File, and the thing in GlobalState is the old File.
-        const auto &oldSymbolHashes = evictedFiles.empty()
-                                          ? fref.data(gs).getFileHash()->localSymbolTableHashes
-                                          : evictedFiles.at(fref)->getFileHash()->localSymbolTableHashes;
-        const auto &newSymbolHashes = updatedFile->getFileHash()->localSymbolTableHashes;
-        const auto &oldMethodHashes = oldSymbolHashes.methodHashes;
-        const auto &newMethodHashes = newSymbolHashes.methodHashes;
+        const auto &oldLocalSymbolTableHashes = evictedFiles.empty()
+                                                    ? fref.data(gs).getFileHash()->localSymbolTableHashes
+                                                    : evictedFiles.at(fref)->getFileHash()->localSymbolTableHashes;
+        const auto &newLocalSymbolTableHashes = updatedFile->getFileHash()->localSymbolTableHashes;
+        const auto &oldDeletableSymbolHashes = oldLocalSymbolTableHashes.deletableSymbolHashes;
+        const auto &newDeletableSymbolHashes = newLocalSymbolTableHashes.deletableSymbolHashes;
 
-        if (config.opts.lspExperimentalFastPathEnabled) {
-            // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
-            // This will insert two entries into `changedMethodHashes` for each changed method, but they
-            // will get deduped later.
-            absl::c_set_symmetric_difference(oldMethodHashes, newMethodHashes,
-                                             std::back_inserter(changedMethodSymbolHashes));
-        } else {
+        if (!config.opts.lspExperimentalFastPathEnabled) {
             // Both oldHash and newHash should have the same methods, since this is the fast path!
-            ENFORCE(validateIdenticalFingerprints(oldMethodHashes, newMethodHashes),
+            ENFORCE(validateIdenticalFingerprints(oldDeletableSymbolHashes, newDeletableSymbolHashes),
                     "definitionHash should have failed");
-
-            // Find which hashes changed. Note: methodHashes are sorted, so set_difference should work.
-            // This will insert two entries into `changedMethodHashes` for each changed method, but they
-            // will get deduped later.
-            absl::c_set_difference(oldMethodHashes, newMethodHashes, std::back_inserter(changedMethodSymbolHashes));
         }
 
-        const auto &oldStaticFieldHashes = oldSymbolHashes.staticFieldHashes;
-        const auto &newStaticFieldHashes = newSymbolHashes.staticFieldHashes;
-
-        ENFORCE(validateIdenticalFingerprints(oldStaticFieldHashes, newStaticFieldHashes),
-                "definitionHash should have failed");
-
-        absl::c_set_difference(oldStaticFieldHashes, newStaticFieldHashes,
-                               std::back_inserter(changedFieldSymbolHashes));
-
-        const auto &oldFieldHashes = oldSymbolHashes.fieldHashes;
-        const auto &newFieldHashes = newSymbolHashes.fieldHashes;
-
-        if (config.opts.lspExperimentalFastPathEnabled) {
-            absl::c_set_symmetric_difference(oldFieldHashes, newFieldHashes,
-                                             std::back_inserter(changedFieldSymbolHashes));
-        } else {
-            // Both oldHash and newHash should have the same fields, since this is the fast path!
-            ENFORCE(validateIdenticalFingerprints(oldFieldHashes, newFieldHashes), "definitionHash should have failed");
-
-            absl::c_set_difference(oldFieldHashes, newFieldHashes, std::back_inserter(changedFieldSymbolHashes));
-        }
+        // Find which hashes changed. Note: deletableSymbolHashes are pre-sorted, so set_difference should work.
+        // This will insert two entries into `deletableSymbolHashes` for each changed method, but they
+        // will get deduped later.
+        absl::c_set_symmetric_difference(oldDeletableSymbolHashes, newDeletableSymbolHashes,
+                                         std::back_inserter(changedDeletableSymbolHashes));
 
         result.changedFiles.emplace(fref, idx);
     }
 
-    result.changedSymbolNameHashes.reserve(changedMethodSymbolHashes.size() + changedStaticFieldSymbolHashes.size() +
-                                           changedFieldSymbolHashes.size());
-    absl::c_transform(changedMethodSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
-                      [](const auto &symhash) { return symhash.nameHash; });
-    absl::c_transform(changedStaticFieldSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
-                      [](const auto &symhash) { return symhash.nameHash; });
-    absl::c_transform(changedFieldSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
+    result.changedSymbolNameHashes.reserve(changedDeletableSymbolHashes.size());
+    absl::c_transform(changedDeletableSymbolHashes, std::back_inserter(result.changedSymbolNameHashes),
                       [](const auto &symhash) { return symhash.nameHash; });
     core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 

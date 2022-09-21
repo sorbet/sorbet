@@ -191,20 +191,19 @@ struct LocalSymbolTableHashes {
     // A fingerprint for the methods contained in the file.
     uint32_t methodHash = HASH_STATE_NOT_COMPUTED;
 
-    // Essentially a map from WithoutUniqueNameHash -> uint32_t, where keys are names of methods and values are
-    // Symbol hashes for all methods defined in the file with that name (on any owner).
+    // SymbolHash is a pair of WithoutUniqueNameHash and uint32_t, which makes this vector
+    // essentially a map from WithoutUniqueNameHash -> uint32_t, where keys are names of symbols and
+    // values are Symbol hashes for all symbols defined in the file with that name (on any owner).
+    // Since WithoutUniqueNameHash is sensitive to constant name kinds, `class Foo` and `def Foo`
+    // are different names.
     //
-    // Stored as a vector instead of a map to optimize for set_difference and compact storage
+    // It's stored as a vector instead of a map to optimize for set_difference and compact storage
     // representation.
     //
-    // While the hierarchyHash stores only the methodShapeHash of the method symbol (which ignores
-    // things like types for the fast/slow path decision), this stores the complete method symbol
-    // hash, so that if anything including types change for a method we know what their names are.
-    std::vector<SymbolHash> methodHashes;
-    // TODO(jez) Is it worth having two of these? After http://go/srbi/5808 lands, re-evaluate
-    // whether we should merge these into one vector like "symbolShapeHashes" or something
-    std::vector<SymbolHash> staticFieldHashes;
-    std::vector<SymbolHash> fieldHashes;
+    // The hierarchyHash stores only enough information to know whether to take the fast path or not.
+    // These symbol hashes store enough to know whether _anything_ changed, which lets us use a set
+    // difference to know the name hashes of any deletable symbols that changed in any way.
+    std::vector<SymbolHash> deletableSymbolHashes;
 
     static uint32_t patchHash(uint32_t hash) {
         if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {
