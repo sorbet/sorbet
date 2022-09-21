@@ -206,9 +206,8 @@ struct FoundField {
 CheckSize(FoundField, 20, 4);
 
 class FoundDefinitions final {
-    // Contains references to items in _klasses, _staticFields, and _typeMembers.
-    // Used to determine the order in which symbols are defined in SymbolDefiner.
-    // (All non-deletable definitions are defined before all deletable definitions)
+    // Contains references to items in _staticFields and _typeMembers.
+    // Used so there is a consistent definition & redefinition ordering.
     std::vector<FoundDefinitionRef> _nonDeletableDefinitions;
     // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
     // Symbols for classes that are referenced from but not present in the given file.
