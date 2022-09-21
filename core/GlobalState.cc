@@ -2247,7 +2247,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
     uint32_t classModuleHash = 0;
-    uint32_t typeArgumentHash = 0;
+    uint32_t typeArgumentHash = 0; // TODO(jez) Delete at same times as lspExperimentalFastPathEnabled
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t staticFieldHash = 0;
