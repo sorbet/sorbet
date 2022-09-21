@@ -1768,6 +1768,10 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
     ownerMembers.erase(fnd);
+    for (const auto typeArgument : whatData->typeArguments()) {
+        this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
+    }
+    // This drops the core::Method, which drops the ArgInfo's the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 
@@ -2266,15 +2270,20 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         }
     }
 
-    counter = 0;
-    for (const auto &typeArg : this->typeArguments) {
-        counter++;
-        // No type arguments are ignored in hashing.
-        uint32_t symhash = typeArg.hash(*this);
-        hierarchyHash = mix(hierarchyHash, symhash);
-        typeArgumentHash = mix(typeArgumentHash, symhash);
-        if (DEBUG_HASHING_TAIL && counter > this->typeArguments.size() - 15) {
-            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeArg.name.show(*this));
+    // Type arguments are included in Method::hash. If only a type argument changes, the method's
+    // hash will change but the hierarchyHash will not change, so Sorbet will take the fast path and
+    // delete the method and all its arguments
+    if (!this->lspExperimentalFastPathEnabled) {
+        counter = 0;
+        for (const auto &typeArg : this->typeArguments) {
+            counter++;
+            // No type arguments are ignored in hashing.
+            uint32_t symhash = typeArg.hash(*this);
+            hierarchyHash = mix(hierarchyHash, symhash);
+            typeArgumentHash = mix(typeArgumentHash, symhash);
+            if (DEBUG_HASHING_TAIL && counter > this->typeArguments.size() - 15) {
+                errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeArg.name.show(*this));
+            }
         }
     }
 
