@@ -584,8 +584,6 @@ public:
         } else {
             switch (send->fun.rawId()) {
                 case core::Names::typeTemplate().rawId():
-                    handleTypeMemberDefinition(ctx, send, asgn, lhs);
-                    break;
                 case core::Names::typeMember().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
@@ -2128,23 +2126,19 @@ public:
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             tree = handleAssignment(ctx, std::move(tree));
-            return;
-        }
-
-        if (!send->recv.isSelfReference()) {
+        } else if (!send->recv.isSelfReference()) {
             tree = handleAssignment(ctx, std::move(tree));
-            return;
-        }
-
-        switch (send->fun.rawId()) {
-            case core::Names::typeTemplate().rawId():
-            case core::Names::typeMember().rawId(): {
-                tree = handleTypeMemberDefinition(ctx, std::move(tree));
-                return;
-            }
-            default: {
-                tree = handleAssignment(ctx, std::move(tree));
-                return;
+        } else {
+            switch (send->fun.rawId()) {
+                case core::Names::typeTemplate().rawId():
+                case core::Names::typeMember().rawId(): {
+                    tree = handleTypeMemberDefinition(ctx, std::move(tree));
+                    break;
+                }
+                default: {
+                    tree = handleAssignment(ctx, std::move(tree));
+                    break;
+                }
             }
         }
     }
