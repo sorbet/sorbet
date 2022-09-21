@@ -10,11 +10,11 @@ class ::<root> < ::Object ()
     type-member(+) ::<Class:Parent>::<AttachedClass> -> T.attached_class (of Parent) @ test/testdata/infer/bad_child_class.rb:12
     method ::<Class:Parent>#<static-init> (<blk>) @ test/testdata/infer/bad_child_class.rb:12
       argument <blk><block> @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
-  class ::PreChild[V] < ::Parent () @ test/testdata/infer/bad_child_class.rb:6
+  class ::PreChild < ::Parent () @ test/testdata/infer/bad_child_class.rb:6
     type-member(=) ::PreChild::K -> PreChild::K @ test/testdata/infer/bad_child_class.rb:6
-    type-member(=) ::PreChild::V -> PreChild::V @ test/testdata/infer/bad_child_class.rb:8
   class ::<Class:PreChild>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/infer/bad_child_class.rb:6
     type-member(+) ::<Class:PreChild>::<AttachedClass> -> T.attached_class (of PreChild) @ test/testdata/infer/bad_child_class.rb:6
     method ::<Class:PreChild>#<static-init> (<blk>) @ test/testdata/infer/bad_child_class.rb:6
       argument <blk><block> @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
+  static-field ::V @ test/testdata/infer/bad_child_class.rb:8
 

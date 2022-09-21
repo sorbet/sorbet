@@ -6,7 +6,7 @@
 class PreChild <Parent # error: Type `K` declared by parent `Parent` must be re-declared in `PreChild`
   extend T::Generic
   ::V = type_member
-# ^^^ error: Unable to resolve constant `V`
+
 end
 
 class Parent
