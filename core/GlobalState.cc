@@ -2296,15 +2296,18 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
         if (field.flags.isStaticField && !field.isClassAlias()) {
+            // Either normal static-field or static-field-type-alias
             auto &target = staticFieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
             hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
             staticFieldHash = mix(fieldHash, staticFieldShapeHash);
         } else if (field.flags.isStaticField) {
+            // static-field class alias
             hierarchyHash = mix(hierarchyHash, symhash);
             classAliasHash = mix(classAliasHash, symhash);
         } else {
+            ENFORCE(field.flags.isField);
             auto &target = fieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             if (!this->lspExperimentalFastPathEnabled) {
