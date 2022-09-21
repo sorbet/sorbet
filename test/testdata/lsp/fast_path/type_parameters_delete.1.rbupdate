@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: type_parameters_add.rb
+# assert-fast-path: type_parameters_delete.rb
 class A
   extend T::Sig
 
