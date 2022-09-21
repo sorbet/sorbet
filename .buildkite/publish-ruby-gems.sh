@@ -22,29 +22,7 @@ mkdir -p "$HOME/.gem"
 printf -- $'---\n:rubygems_api_key: %s\n' "$SORBET_RUBYGEMS_API_KEY" > "$HOME/.gem/credentials"
 chmod 600 "$HOME/.gem/credentials"
 
-# https://stackoverflow.com/a/8351489
-with_backoff() {
-  local attempts=5
-  local timeout=1 # doubles each failure
-
-  local attempt=0
-  while true; do
-    attempt=$(( attempt + 1 ))
-    echo "Attempt $attempt"
-    if "$@"; then
-      return 0
-    fi
-
-    if (( attempt >= attempts )); then
-      echo "'$1' failed $attempts times. Quitting." 1>&2
-      exit 1
-    fi
-
-    echo "'$1' failed. Retrying in ${timeout}s..." 1>&2
-    sleep $timeout
-    timeout=$(( timeout * 2 ))
-  done
-}
+source .buildkite/tools/with_backoff.sh
 
 rbenv install --skip-existing
 
