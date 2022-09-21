@@ -1,30 +1,29 @@
 # typed: strict
-# disable-fast-path: true
 
 module Wrapper
   extend T::Generic
 
   class A; end
-  A = 1 # error: Redefining constant `A` as a static field
+  A = 1 # error: Cannot initialize the class `A` by constant assignment
   A = type_member # error: Redefining constant `A` as a type member or type template
 
-  B = 1
-  class B; end # error: Redefining constant `B` as a class or module
+  B = 1 # error: Cannot initialize the class `B` by constant assignment
+  class B; end
   B = type_member # error: Redefining constant `B` as a type member or type template
 
-  C = 1
+  C = 1 # error: Cannot initialize the class `C` by constant assignment
   C = type_member # error: Redefining constant `C` as a type member or type template
-  class C; end # error: Redefining constant `C` as a class or module
+  class C; end
 
   class D; end
   D = type_member # error: Redefining constant `D` as a type member or type template
   D = 1 # error: Redefining constant `D` as a static field
 
-  E = type_member
-  class E; end  # error: Redefining constant `E` as a class or module
+  E = type_member # error: Redefining constant `E` as a type member or type template
+  class E; end
   E = 1 # error: Redefining constant `E` as a static field
 
-  F = type_member
+  F = type_member # error: Redefining constant `F` as a type member or type template
   F = 1 # error: Redefining constant `F` as a static field
-  class F; end # error: Redefining constant `F` as a class or module
+  class F; end
 end
