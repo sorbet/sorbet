@@ -1433,7 +1433,7 @@ public:
     }
 
     SymbolDefiner::State enterNonDeletableDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
-        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+        for (auto ref : foundDefs.deletableDefinitions()) {
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);

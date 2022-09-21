@@ -210,7 +210,7 @@ CheckSize(FoundField, 20, 4);
 class FoundDefinitions final {
     // Contains references to items in _staticFields and _typeMembers.
     // Used so there is a consistent definition & redefinition ordering.
-    std::vector<FoundDefinitionRef> _nonDeletableDefinitions;
+    std::vector<FoundDefinitionRef> _deletableDefinitions;
     // Contains all classes defined in the file.
     std::vector<FoundClass> _klasses;
     // Contains all methods defined in the file.
@@ -236,7 +236,7 @@ class FoundDefinitions final {
             case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
         });
-        _nonDeletableDefinitions.emplace_back(ref);
+        _deletableDefinitions.emplace_back(ref);
         return ref;
     }
 
@@ -284,9 +284,9 @@ public:
         _modifiers.emplace_back(std::move(mod));
     }
 
-    // See documentation on _nonDeletableDefinitions
-    const std::vector<FoundDefinitionRef> &nonDeletableDefinitions() const {
-        return _nonDeletableDefinitions;
+    // See documentation on _deletableDefinitions
+    const std::vector<FoundDefinitionRef> &deletableDefinitions() const {
+        return _deletableDefinitions;
     }
 
     // See documentation on _klasses
