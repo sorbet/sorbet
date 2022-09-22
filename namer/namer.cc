@@ -2057,6 +2057,18 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
 void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
                             core::FoundDefHashes &foundHashesOut) {
+    ENFORCE(foundHashesOut.staticFieldHashes.empty());
+    foundHashesOut.staticFieldHashes.reserve(foundDefs.staticFields().size());
+    for (const auto &staticField : foundDefs.staticFields()) {
+        auto owner = staticField.owner;
+        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                    owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+        auto fullNameHash = core::FullNameHash(ctx, staticField.name);
+        foundHashesOut.staticFieldHashes.emplace_back(owner.idx(), ownerIsSymbol, fullNameHash);
+    }
+
     ENFORCE(foundHashesOut.typeMemberHashes.empty());
     foundHashesOut.typeMemberHashes.reserve(foundDefs.typeMembers().size());
     for (const auto &typeMember : foundDefs.typeMembers()) {

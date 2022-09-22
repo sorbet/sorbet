@@ -105,6 +105,26 @@ private:                                    \
 public:                                     \
     FoundDefinitionRef owner() const;
 
+struct FoundStaticFieldHash {
+    // The owner of this static field (index into namer's definedClasses vector)
+    FOUND_HASH_OWNER_INFO();
+    // Hash of this static field's name
+    const FullNameHash nameHash;
+
+    FoundStaticFieldHash(uint32_t ownerIdx, bool ownerIsSymbol, FullNameHash nameHash)
+        : ownerIdx(ownerIdx), ownerIsSymbol(ownerIsSymbol), nameHash(nameHash) {
+        sanityCheck();
+    }
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundStaticFieldHash, 8, 4);
+
+using FoundStaticFieldHashes = std::vector<FoundStaticFieldHash>;
+
 struct FoundTypeMemberHash {
     // The owner of this type member (index into namer's definedClasses vector)
     FOUND_HASH_OWNER_INFO();
@@ -192,6 +212,7 @@ CheckSize(FoundFieldHash, 8, 4);
 using FoundFieldHashes = std::vector<FoundFieldHash>;
 
 struct FoundDefHashes {
+    FoundStaticFieldHashes staticFieldHashes;
     FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
     FoundFieldHashes fieldHashes;
