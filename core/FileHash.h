@@ -140,6 +140,9 @@ struct FoundFieldHash {
     }
 
     void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
 };
 CheckSize(FoundFieldHash, 8, 4);
 

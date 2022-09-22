@@ -107,6 +107,13 @@ void FoundFieldHash::sanityCheck() const {
     ENFORCE(nameHash.isDefined());
 }
 
+string FoundFieldHash::toString() const {
+    return fmt::format("FoundFieldHash {{ owner.idx = {}, owner.onSingletonClass = {}, owner.isInstanceVariable = {}, "
+                       "owner.fromWithinMethod = {}, nameHash = {} }}",
+                       owner.idx, owner.onSingletonClass, owner.isInstanceVariable, owner.fromWithinMethod,
+                       nameHash._hashValue);
+}
+
 FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundDefHashes &&foundHashes)
     : localSymbolTableHashes(move(localSymbolTableHashes)), usages(move(usages)), foundHashes(move(foundHashes)) {}
 
