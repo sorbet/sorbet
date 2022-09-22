@@ -5,5 +5,5 @@ module A::B::C
 end
 
   A::B = A::D
-# ^^^^^^^^^^^ error: Redefining constant `B` as a static field
+# ^^^^^^^^^^^ error: Cannot initialize the class or module `B` by constant assignment
        # ^^^^ error: Unable to resolve constant `D`

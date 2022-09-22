@@ -206,9 +206,8 @@ struct FoundField {
 CheckSize(FoundField, 20, 4);
 
 class FoundDefinitions final {
-    // Contains references to items in _klasses, _staticFields, and _typeMembers.
-    // Used to determine the order in which symbols are defined in SymbolDefiner.
-    // (All non-deletable definitions are defined before all deletable definitions)
+    // Contains references to items in _staticFields and _typeMembers.
+    // Used so there is a consistent definition & redefinition ordering.
     std::vector<FoundDefinitionRef> _nonDeletableDefinitions;
     // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
     // Symbols for classes that are referenced from but not present in the given file.
@@ -228,12 +227,12 @@ class FoundDefinitions final {
 
     FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
-            case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::StaticField:
             case FoundDefinitionRef::Kind::TypeMember:
-            case FoundDefinitionRef::Kind::Field:
                 break;
+            case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::Method:
+            case FoundDefinitionRef::Kind::Field:
             case FoundDefinitionRef::Kind::ClassRef:
             case FoundDefinitionRef::Kind::Empty:
             case FoundDefinitionRef::Kind::Symbol:
@@ -252,7 +251,7 @@ public:
     FoundDefinitionRef addClass(FoundClass &&klass) {
         const uint32_t idx = _klasses.size();
         _klasses.emplace_back(std::move(klass));
-        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx));
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx);
     }
 
     FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {

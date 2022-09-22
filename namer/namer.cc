@@ -691,14 +691,26 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
+        ENFORCE(
+            kind != Kind::ClassOrModule,
+            "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
-            e.setHeader("Redefining constant `{}` as a {}", name.show(ctx), prettySymbolKind(ctx, kind));
-            e.addErrorLine(prevSymbol.loc(ctx), "Previously defined as a {}", prettySymbolKind(ctx, prevSymbol.kind()));
+            auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
+            if (prevSymbol.kind() == Kind::ClassOrModule &&
+                !prevSymbol.asClassOrModuleRef().data(ctx)->isUndeclared()) {
+                prevSymbolKind = prevSymbol.asClassOrModuleRef().showKind(ctx);
+            }
 
-            if ((kind == Kind::ClassOrModule && prevSymbol.kind() == Kind::FieldOrStaticField) ||
-                (kind == Kind::FieldOrStaticField && prevSymbol.kind() == Kind::ClassOrModule)) {
+            if (prevSymbol.kind() == Kind::ClassOrModule && kind == Kind::FieldOrStaticField) {
+                e.setHeader("Cannot initialize the {} `{}` by constant assignment", prevSymbolKind, name.show(ctx));
+            } else {
+                e.setHeader("Redefining constant `{}` as a {}", name.show(ctx), prettySymbolKind(ctx, kind));
+            }
+            e.addErrorLine(prevSymbol.loc(ctx), "Previously defined as a {} here", prevSymbolKind);
+
+            if (kind == Kind::FieldOrStaticField && prevSymbol.kind() == Kind::ClassOrModule) {
                 e.addErrorNote("Sorbet does not allow treating constant assignments as class or module definitions,\n"
-                               "    even if the initializer computes a value of type `{}`. See the docs for more.\n",
+                               "    even if the initializer computes a `{}` object at runtime. See the docs for more.",
                                "Module");
             }
         }
@@ -1370,34 +1382,6 @@ private:
         return sym;
     }
 
-    void defineNonDeletableSingle(core::MutableContext ctx, core::FoundDefinitionRef ref) {
-        switch (ref.kind()) {
-            case core::FoundDefinitionRef::Kind::Class: {
-                const auto &klass = ref.klass(foundDefs);
-                ENFORCE(state.definedClasses.size() == ref.idx());
-                state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
-                break;
-            }
-            case core::FoundDefinitionRef::Kind::StaticField: {
-                const auto &staticField = ref.staticField(foundDefs);
-                insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
-                break;
-            }
-            case core::FoundDefinitionRef::Kind::TypeMember: {
-                const auto &typeMember = ref.typeMember(foundDefs);
-                insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
-                break;
-            }
-            case core::FoundDefinitionRef::Kind::Empty:
-            case core::FoundDefinitionRef::Kind::ClassRef:
-            case core::FoundDefinitionRef::Kind::Method:
-            case core::FoundDefinitionRef::Kind::Field:
-            case core::FoundDefinitionRef::Kind::Symbol:
-                ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
-                break;
-        }
-    }
-
     void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
@@ -1522,8 +1506,31 @@ public:
         state.definedClasses.reserve(foundDefs.klasses().size());
         state.definedMethods.reserve(foundDefs.methods().size());
 
+        for (const auto &klass : foundDefs.klasses()) {
+            state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
+        }
+
         for (auto ref : foundDefs.nonDeletableDefinitions()) {
-            defineNonDeletableSingle(ctx, ref);
+            switch (ref.kind()) {
+                case core::FoundDefinitionRef::Kind::StaticField: {
+                    const auto &staticField = ref.staticField(foundDefs);
+                    insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
+                    break;
+                }
+                case core::FoundDefinitionRef::Kind::TypeMember: {
+                    const auto &typeMember = ref.typeMember(foundDefs);
+                    insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
+                    break;
+                }
+                case core::FoundDefinitionRef::Kind::Class:
+                case core::FoundDefinitionRef::Kind::Empty:
+                case core::FoundDefinitionRef::Kind::ClassRef:
+                case core::FoundDefinitionRef::Kind::Method:
+                case core::FoundDefinitionRef::Kind::Field:
+                case core::FoundDefinitionRef::Kind::Symbol:
+                    ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
+                    break;
+            }
         }
     }
 
@@ -1533,6 +1540,10 @@ public:
     }
 
     void enterNewDefinitions(core::MutableContext ctx) {
+        // TODO(jez) After everything but classes is handled on the fast path, I think we can go
+        // back to having a single list of (non-class) definitions with a switch statement, like how
+        // namer used to work.
+
         // We have to defer defining "deletable" symbols until this (second) phase of incremental
         // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
         // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a

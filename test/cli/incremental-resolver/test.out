@@ -25,60 +25,64 @@ test/cli/incremental-resolver/expect-failures/abstract_impl.rb:126: Implementati
             ^^^^^^^^^^^^^
 Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_override.rb ---------------------
-test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Redefining constant `B` as a class or module https://srb.help/4022
+test/cli/incremental-resolver/expect-failures/constant_override.rb:2: Cannot initialize the module `B` by constant assignment https://srb.help/4022
+     2 |B = e
+        ^^^^^
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:3: Previously defined as a module here
      3 |module B
-     4 |  extend T::Sig
+        ^^^^^^^^
+  Note:
+    Sorbet does not allow treating constant assignments as class or module definitions,
+    even if the initializer computes a `Module` object at runtime. See the docs for more.
+
+test/cli/incremental-resolver/expect-failures/constant_override.rb:5: Constant `B` is not a class or type alias https://srb.help/5004
      5 |  sig { returns(T.all(B,T)) }
-     6 |  def foo; T.unsafe(nil); end
-     7 |end
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:2: Previously defined as a static field
+                              ^
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:2: If you are trying to define a type alias, you should use `T.type_alias` here
      2 |B = e
         ^
+
+test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Cannot initialize the module `B` by constant assignment https://srb.help/4022
+     110 |B = e
+          ^^^^^
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Previously defined as a module here
+     111 |module B
+          ^^^^^^^^
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a value of type `Module`. See the docs for more.
+    even if the initializer computes a `Module` object at runtime. See the docs for more.
 
-
-test/cli/incremental-resolver/expect-failures/constant_override.rb:111: Redefining constant `B` as a class or module https://srb.help/4022
-     111 |module B
-     112 |  extend T::Sig
+test/cli/incremental-resolver/expect-failures/constant_override.rb:113: Constant `B` is not a class or type alias https://srb.help/5004
      113 |  sig { returns(T.all(B,T)) }
-     114 |  def foo; T.unsafe(nil); end
-     115 |end
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: Previously defined as a static field
+                                ^
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: If you are trying to define a type alias, you should use `T.type_alias` here
     13 |
     14 |
-  Note:
-    Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a value of type `Module`. See the docs for more.
-
 
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
-Errors: 3
+Errors: 5
 ----- test/cli/incremental-resolver/expect-failures/constant_redefinition.rb ---------------------
-test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Redefining constant `A` as a static field https://srb.help/4022
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Cannot initialize the class `A` by constant assignment https://srb.help/4022
      4 |  A = nil
           ^^^^^^^
-    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:3: Previously defined as a class or module
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:3: Previously defined as a class here
      3 |  class A; end
           ^^^^^^^
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a value of type `Module`. See the docs for more.
+    even if the initializer computes a `Module` object at runtime. See the docs for more.
 
-
-test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Redefining constant `A` as a static field https://srb.help/4022
+test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:59: Cannot initialize the class `A` by constant assignment https://srb.help/4022
     59 |  A = nil
           ^^^^^^^
-    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:58: Previously defined as a class or module
+    test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:58: Previously defined as a class here
     58 |  class A; end
           ^^^^^^^
   Note:
     Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a value of type `Module`. See the docs for more.
-
+    even if the initializer computes a `Module` object at runtime. See the docs for more.
 Errors: 2
 ----- test/cli/incremental-resolver/expect-failures/multiple_sigs.rb ---------------------
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Unused type annotation. No method def before next annotation https://srb.help/5040
