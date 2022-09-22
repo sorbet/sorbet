@@ -1484,5 +1484,25 @@ module Opus::Types::Test
         assert_equal(:sym, GenericSingletonChild.foo(:sym))
       end
     end
+
+    describe "names" do
+      it 'can name T.any with runtime-created classes' do
+        klass = Class.new
+        name = T.any(klass, String).name
+        assert_equal(name, "T.any(String)")
+
+        name = T.any(String, klass).name
+        assert_equal(name, "T.any(String)")
+      end
+
+      it 'can name T.all with runtime-created classes' do
+        klass = Class.new
+        name = T.all(klass, String).name
+        assert_equal(name, "T.all(String)")
+
+        name = T.all(String, klass).name
+        assert_equal(name, "T.all(String)")
+      end
+    end
   end
 end

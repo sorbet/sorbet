@@ -175,6 +175,7 @@ NameDef names[] = {
     {"protected_", "protected"},
     {"public_", "public"},
     {"privateClassMethod", "private_class_method"},
+    {"publicClassMethod", "public_class_method"},
     {"privateConstant", "private_constant"},
     {"moduleFunction", "module_function"},
     {"aliasMethod", "alias_method"},
@@ -469,6 +470,7 @@ NameDef names[] = {
     {"NilClass", "NilClass", true},
     {"Class", "Class", true},
     {"Module", "Module", true},
+    {"Time", "Time", true},
     {"Todo", "<todo sym>", true},
     {"TodoMethod", "<todo method>", false},
     {"TodoTypeArgument", "<todo typeargument>", true},
@@ -544,6 +546,11 @@ NameDef names[] = {
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},
     {"Token", "Token", true},
+
+    // Typos
+    {"Int", "Int", true},
+    {"Timestamp", "Timestamp", true},
+    {"Bool", "Bool", true},
 
     // used by the compiler
     {"returnValue", "<returnValue>"},

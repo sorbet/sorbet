@@ -3686,6 +3686,168 @@ end
 class OpenSSL::Digest::DigestError < OpenSSL::OpenSSLError
 end
 
+# Provides functionality of various KDFs (key derivation function).
+#
+# KDF is typically used for securely deriving arbitrary length symmetric
+# keys to be used with an OpenSSL::Cipher from passwords. Another use case
+# is for storing passwords: Due to the ability to tweak the effort of
+# computation by increasing the iteration count, computation can be slowed
+# down artificially in order to render possible attacks infeasible.
+#
+# Currently, OpenSSL::KDF provides implementations for the following KDF:
+#
+# * PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in
+#   combination with HMAC
+# * scrypt
+# * HKDF
+#
+# == Examples
+# === Generating a 128 bit key for a Cipher (e.g. AES)
+#   pass = "secret"
+#   salt = OpenSSL::Random.random_bytes(16)
+#   iter = 20_000
+#   key_len = 16
+#   key = OpenSSL::KDF.pbkdf2_hmac(pass, salt: salt, iterations: iter,
+#                                  length: key_len, hash: "sha1")
+#
+# === Storing Passwords
+#   pass = "secret"
+#   # store this with the generated value
+#   salt = OpenSSL::Random.random_bytes(16)
+#   iter = 20_000
+#   hash = OpenSSL::Digest::SHA256.new
+#   len = hash.digest_length
+#   # the final value to be stored
+#   value = OpenSSL::KDF.pbkdf2_hmac(pass, salt: salt, iterations: iter,
+#                                    length: len, hash: hash)
+#
+# == Important Note on Checking Passwords
+# When comparing passwords provided by the user with previously stored
+# values, a common mistake made is comparing the two values using "==".
+# Typically, "==" short-circuits on evaluation, and is therefore
+# vulnerable to timing attacks. The proper way is to use a method that
+# always takes the same amount of time when comparing two values, thus
+# not leaking any information to potential attackers. To compare two
+# values, the following could be used:
+#
+#   def eql_time_cmp(a, b)
+#     unless a.length == b.length
+#       return false
+#     end
+#     cmp = b.bytes
+#     result = 0
+#     a.bytes.each_with_index {|c,i|
+#       result |= c ^ cmp[i]
+#     }
+#     result == 0
+#   end
+#
+# Please note that the premature return in case of differing lengths
+# typically does not leak valuable information - when using PBKDF2, the
+# length of the values to be compared is of fixed size.
+module OpenSSL::KDF
+  # PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination
+  # with HMAC. Takes _pass_, _salt_ and _iterations_, and then derives a key
+  # of _length_ bytes.
+  #
+  # For more information about PBKDF2, see RFC 2898 Section 5.2
+  # (https://tools.ietf.org/html/rfc2898#section-5.2).
+  #
+  # === Parameters
+  # pass       :: The passphrase.
+  # salt       :: The salt. Salts prevent attacks based on dictionaries of common
+  #               passwords and attacks based on rainbow tables. It is a public
+  #               value that can be safely stored along with the password (e.g.
+  #               if the derived value is used for password storage).
+  # iterations :: The iteration count. This provides the ability to tune the
+  #               algorithm. It is better to use the highest count possible for
+  #               the maximum resistance to brute-force attacks.
+  # length     :: The desired length of the derived key in octets.
+  # hash       :: The hash algorithm used with HMAC for the PRF. May be a String
+  #               representing the algorithm name, or an instance of
+  #               OpenSSL::Digest.
+  sig do
+    params(
+      pass: String,
+      salt: String,
+      iterations: Integer,
+      length: Integer,
+      hash: T.any(String, OpenSSL::Digest)
+    )
+    .returns(String)
+  end
+  def self.pbkdf2_hmac(pass, salt:, iterations:, length:, hash:); end
+
+  # Derives a key from _pass_ using given parameters with the scrypt
+  # password-based key derivation function. The result can be used for password
+  # storage.
+  #
+  # scrypt is designed to be memory-hard and more secure against brute-force
+  # attacks using custom hardwares than alternative KDFs such as PBKDF2 or
+  # bcrypt.
+  #
+  # The keyword arguments _N_, _r_ and _p_ can be used to tune scrypt. RFC 7914
+  # (published on 2016-08, https://tools.ietf.org/html/rfc7914#section-2) states
+  # that using values r=8 and p=1 appears to yield good results.
+  #
+  # See RFC 7914 (https://tools.ietf.org/html/rfc7914) for more information.
+  #
+  # === Parameters
+  # pass   :: Passphrase.
+  # salt   :: Salt.
+  # N      :: CPU/memory cost parameter. This must be a power of 2.
+  # r      :: Block size parameter.
+  # p      :: Parallelization parameter.
+  # length :: Length in octets of the derived key.
+  #
+  # === Example
+  #   pass = "password"
+  #   salt = SecureRandom.random_bytes(16)
+  #   dk = OpenSSL::KDF.scrypt(pass, salt: salt, N: 2**14, r: 8, p: 1, length: 32)
+  #   p dk #=> "\xDA\xE4\xE2...\x7F\xA1\x01T"
+  sig do
+    params(
+      pass: String,
+      kwargs: T.untyped
+    )
+    .returns(String)
+  end
+  def self.scrypt(pass, **kwargs); end
+
+  # HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as specified in
+  # {RFC 5869}[https://tools.ietf.org/html/rfc5869].
+  #
+  # New in OpenSSL 1.1.0.
+  #
+  # === Parameters
+  # _ikm_::
+  #   The input keying material.
+  # _salt_::
+  #   The salt.
+  # _info_::
+  #   The context and application specific information.
+  # _length_::
+  #   The output length in octets. Must be <= <tt>255 * HashLen</tt>, where
+  #   HashLen is the length of the hash function output in octets.
+  # _hash_::
+  #   The hash function.
+  sig do
+      params(
+        ikm: String,
+        salt: String,
+        info: String,
+        length: Integer,
+        hash: T.any(String, OpenSSL::Digest)
+      )
+      .returns(String)
+    end
+    def self.hkdf(ikm, salt:, info:, length:, hash:); end
+end
+
+# Generic exception class raised if an error occurs in OpenSSL::KDF module.
+class OpenSSL::KDF::KDFError < OpenSSL::OpenSSLError
+end
+
 class OpenSSL::Digest::MD2 < OpenSSL::Digest
   sig do
     params(

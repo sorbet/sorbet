@@ -59,7 +59,7 @@ export default class SorbetStatusBarEntry {
         this._sorbetExtensionConfig.setEnabled(false);
         break;
       case Action.RestartSorbet:
-        this._restartSorbet(RestartReason.CRASH);
+        this._restartSorbet(RestartReason.STATUS_BAR_BUTTON);
         break;
       default:
         // Nothing selected.
@@ -112,7 +112,7 @@ export default class SorbetStatusBarEntry {
     this._lastError = lastError;
     this._render();
     if (isError) {
-      this._restartSorbet(RestartReason.CRASH);
+      this._restartSorbet(RestartReason.CRASH_EXT_ERROR);
     }
   }
 

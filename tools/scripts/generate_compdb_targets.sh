@@ -9,6 +9,9 @@ buildifier=$(mktemp -t buildifier.XXXXXX)
 cleanup() {
     rm -rf "tools/BUILD.tmp"
     rm "$buildifier"
+    if [ -e diff.output ]; then
+      rm -f diff.output
+    fi
 }
 trap cleanup exit
 
@@ -25,7 +28,6 @@ bazel run \
 ) | "$buildifier" > tools/BUILD.tmp
 
 if [ "$1" == "-t" ]; then
-    trap "rm diff.output" exit
     if ! diff -u tools/BUILD tools/BUILD.tmp > diff.output; then
         echo "The tools/BUILD file needs to be updated."
         echo "\`\`\`"

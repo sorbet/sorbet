@@ -1768,6 +1768,10 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
     ownerMembers.erase(fnd);
+    for (const auto typeArgument : whatData->typeArguments()) {
+        this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
+    }
+    // This drops the existing core::Method, which drops the `ArgInfo`s the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 
@@ -2243,15 +2247,13 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
     uint32_t classModuleHash = 0;
-    uint32_t typeArgumentHash = 0;
+    uint32_t typeArgumentHash = 0; // TODO(jez) Delete at same times as lspExperimentalFastPathEnabled
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t staticFieldHash = 0;
     uint32_t classAliasHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> methodHashesMap;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> staticFieldHashesMap;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> fieldHashesMap;
+    UnorderedMap<WithoutUniqueNameHash, uint32_t> deletableSymbolHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2266,15 +2268,20 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         }
     }
 
-    counter = 0;
-    for (const auto &typeArg : this->typeArguments) {
-        counter++;
-        // No type arguments are ignored in hashing.
-        uint32_t symhash = typeArg.hash(*this);
-        hierarchyHash = mix(hierarchyHash, symhash);
-        typeArgumentHash = mix(typeArgumentHash, symhash);
-        if (DEBUG_HASHING_TAIL && counter > this->typeArguments.size() - 15) {
-            errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeArg.name.show(*this));
+    // Type arguments are included in Method::hash. If only a type argument changes, the method's
+    // hash will change but the hierarchyHash will not change, so Sorbet will take the fast path and
+    // delete the method and all its arguments
+    if (!this->lspExperimentalFastPathEnabled) {
+        counter = 0;
+        for (const auto &typeArg : this->typeArguments) {
+            counter++;
+            // No type arguments are ignored in hashing.
+            uint32_t symhash = typeArg.hash(*this);
+            hierarchyHash = mix(hierarchyHash, symhash);
+            typeArgumentHash = mix(typeArgumentHash, symhash);
+            if (DEBUG_HASHING_TAIL && counter > this->typeArguments.size() - 15) {
+                errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeArg.name.show(*this));
+            }
         }
     }
 
@@ -2296,19 +2303,22 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
         if (field.flags.isStaticField && !field.isClassAlias()) {
-            auto &target = staticFieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            // Either normal static-field or static-field-type-alias
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
             hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
             staticFieldHash = mix(fieldHash, staticFieldShapeHash);
         } else if (field.flags.isStaticField) {
+            // static-field class alias
             hierarchyHash = mix(hierarchyHash, symhash);
             classAliasHash = mix(classAliasHash, symhash);
         } else {
-            auto &target = fieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            ENFORCE(field.flags.isField);
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
-            uint32_t fieldShapeHash = field.fieldShapeHash(*this);
             if (!this->lspExperimentalFastPathEnabled) {
+                uint32_t fieldShapeHash = field.fieldShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, fieldShapeHash);
                 fieldHash = mix(fieldHash, fieldShapeHash);
             }
@@ -2322,7 +2332,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashesMap[WithoutUniqueNameHash(*this, sym.name)];
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
             auto needMethodShapeHash =
                 this->lspExperimentalFastPathEnabled
@@ -2350,22 +2360,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     }
 
     unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
-    result->methodHashes.reserve(methodHashesMap.size());
-    result->staticFieldHashes.reserve(staticFieldHashesMap.size());
-    result->fieldHashes.reserve(fieldHashesMap.size());
-    for (const auto &[nameHash, symbolHash] : methodHashesMap) {
-        result->methodHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
-    }
-    for (const auto &[nameHash, symbolHash] : staticFieldHashesMap) {
-        result->staticFieldHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
-    }
-    for (const auto &[nameHash, symbolHash] : fieldHashesMap) {
-        result->fieldHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
+    result->deletableSymbolHashes.reserve(deletableSymbolHashesMap.size());
+    for (const auto &[nameHash, symbolHash] : deletableSymbolHashesMap) {
+        result->deletableSymbolHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
-    fast_sort(result->methodHashes);
-    fast_sort(result->staticFieldHashes);
-    fast_sort(result->fieldHashes);
+    fast_sort(result->deletableSymbolHashes);
 
     result->hierarchyHash = LocalSymbolTableHashes::patchHash(hierarchyHash);
     result->classModuleHash = LocalSymbolTableHashes::patchHash(classModuleHash);

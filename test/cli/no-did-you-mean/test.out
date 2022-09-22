@@ -1007,4 +1007,36 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:403: Unable to resolve constant `MyC
 test/cli/no-did-you-mean/no-did-you-mean.rb:404: Unable to resolve constant `MyClass` https://srb.help/5002
      404 |p MyClass
             ^^^^^^^
-Errors: 200
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:409: Unable to resolve constant `Int` https://srb.help/5002
+     409 |  p Int
+              ^^^
+  Did you mean `Integer`? Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:409: Replace with `Integer`
+     409 |  p Int
+              ^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:410: Unable to resolve constant `Timestamp` https://srb.help/5002
+     410 |  p Timestamp
+              ^^^^^^^^^
+  Did you mean `Time`? Use `-a` to autocorrect
+    test/cli/no-did-you-mean/no-did-you-mean.rb:410: Replace with `Time`
+     410 |  p Timestamp
+              ^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:411: Unable to resolve constant `Int` https://srb.help/5002
+     411 |  p Object::Int
+              ^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:412: Unable to resolve constant `Timestamp` https://srb.help/5002
+     412 |  p Object::Timestamp
+              ^^^^^^^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:413: Unable to resolve constant `Int` https://srb.help/5002
+     413 |  p String::Int
+              ^^^^^^^^^^^
+
+test/cli/no-did-you-mean/no-did-you-mean.rb:414: Unable to resolve constant `Timestamp` https://srb.help/5002
+     414 |  p String::Timestamp
+              ^^^^^^^^^^^^^^^^^
+Errors: 206

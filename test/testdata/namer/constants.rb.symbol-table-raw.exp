@@ -6,8 +6,8 @@ class <C <U <root>>> < <C <U Object>> ()
     module <C <U A>>::<C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/constants.rb start=5:3 end=5:11}
       static-field <C <U A>>::<C <U B>>::<C <U C>> -> Integer @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:7}
       static-field <C <U A>>::<C <U B>>::<C <U D>> -> Integer @ Loc {file=test/testdata/namer/constants.rb start=8:5 end=8:6}
-    class <C <U A>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:4}
-      type-member(+) <C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B) @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:4}
+    class <C <U A>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constants.rb start=5:10 end=5:11}
+      type-member(+) <C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B) @ Loc {file=test/testdata/namer/constants.rb start=5:10 end=5:11}
       method <C <U A>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/constants.rb start=5:3 end=9:6}
         argument <blk><block> @ Loc {file=test/testdata/namer/constants.rb start=??? end=???}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constants.rb start=2:8 end=2:9}

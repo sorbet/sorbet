@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: type_parameters_rename.rb
+class A
+  extend T::Sig
+
+  sig do
+    type_parameters(:V)
+      .params(x: T.type_parameter(:V))
+      .returns(T.type_parameter(:V))
+  end
+  def id(x)
+    T.reveal_type(x) # error: `T.type_parameter(:V) (of A#id)`
+  end
+end

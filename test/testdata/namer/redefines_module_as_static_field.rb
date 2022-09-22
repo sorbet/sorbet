@@ -33,7 +33,7 @@ end
   T::AbstractUtils::Methods::Modes = T::Private::Methods::Modes # error: Can't nest `Modes` under `T::AbstractUtils::Methods`
   T::AbstractUtils::Methods::CallValidation::Modes = T::Private::Methods::Modes # error: Can't nest `CallValidation` under `T::AbstractUtils::Methods`
   T::AbstractUtils::Methods::CallValidation = T::Private::Methods::CallValidation 
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Redefining constant `CallValidation` as a static field
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot initialize the class or module `CallValidation` by constant assignment
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Can't nest `CallValidation` under `T::AbstractUtils::Methods`
   # Defines a property on what was just previously a field.
   T::AbstractUtils::Methods::CallValidation::CallValidation = T::Private::Methods::CallValidation

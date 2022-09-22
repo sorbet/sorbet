@@ -53,7 +53,11 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
     if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
         auto loc = rhs->loc;
         auto type = (*typeExpr->second).deepCopy();
-        switch (argKindMap.at(rhs->name)) {
+        auto it = argKindMap.find(rhs->name);
+        if (it == argKindMap.end()) {
+            return;
+        }
+        switch (it->second) {
             case ArgKind::Plain:
                 break;
             case ArgKind::RestArg: {

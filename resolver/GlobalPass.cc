@@ -101,38 +101,39 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         auto parent = sym.data(gs)->superClass();
         resolveTypeMembers(gs, parent, typeAliases, resolved);
 
-        auto tps = parent.data(gs)->typeMembers();
+        auto parentTypeMembers = parent.data(gs)->typeMembers();
         bool foundAll = true;
-        for (auto tp : tps) {
-            bool foundThis = resolveTypeMember(gs, parent, tp, sym, typeAliases);
+        for (auto parentTypeMember : parentTypeMembers) {
+            bool foundThis = resolveTypeMember(gs, parent, parentTypeMember, sym, typeAliases);
             foundAll = foundAll && foundThis;
         }
         if (foundAll) {
-            int i = 0;
+            int parentIdx = 0;
             // check that type params are in the same order.
-            for (auto tp : tps) {
-                auto my = dealiasAt(gs, tp, sym, typeAliases);
+            for (auto parentTypeMember : parentTypeMembers) {
+                auto my = dealiasAt(gs, parentTypeMember, sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
-                if (sym.data(gs)->typeMembers()[i] != my) {
+                if (sym.data(gs)->typeMembers()[parentIdx] != my) {
                     if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
                         e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`",
                                        my.data(gs)->name.show(gs));
-                        e.addErrorLine(sym.data(gs)->typeMembers()[i].data(gs)->loc(),
+                        e.addErrorLine(sym.data(gs)->typeMembers()[parentIdx].data(gs)->loc(),
                                        "Expected type member with name `{}`",
-                                       sym.data(gs)->typeMembers()[i].data(gs)->name.show(gs));
-                        e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.data(gs)->name.show(gs));
+                                       sym.data(gs)->typeMembers()[parentIdx].data(gs)->name.show(gs));
+                        e.addErrorLine(parentTypeMember.data(gs)->loc(),
+                                       "`{}` defined in parent here:", parentTypeMember.data(gs)->name.show(gs));
                     }
-                    int foundIdx = 0;
-                    while (foundIdx < sym.data(gs)->typeMembers().size() &&
-                           sym.data(gs)->typeMembers()[foundIdx] != my) {
-                        foundIdx++;
+                    int childIdx = 0;
+                    while (childIdx < sym.data(gs)->typeMembers().size() &&
+                           sym.data(gs)->typeMembers()[childIdx] != my) {
+                        childIdx++;
                     }
-                    ENFORCE(foundIdx < sym.data(gs)->typeMembers().size());
+                    ENFORCE(childIdx < sym.data(gs)->typeMembers().size());
                     // quadratic
-                    swap(sym.data(gs)->existingTypeMembers()[foundIdx], sym.data(gs)->existingTypeMembers()[i]);
+                    swap(sym.data(gs)->existingTypeMembers()[childIdx], sym.data(gs)->existingTypeMembers()[parentIdx]);
                 }
-                i++;
+                parentIdx++;
             }
         }
     }

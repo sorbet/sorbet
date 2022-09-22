@@ -402,3 +402,14 @@ p MyClass
 p MyClass
 p MyClass
 p MyClass
+
+# These print even though the others don't because they're more likely to be
+# relevant and aren't slow like the global state fuzzy match search is.
+class Wrapper
+  p Int
+  p Timestamp
+  p Object::Int
+  p Object::Timestamp
+  p String::Int
+  p String::Timestamp
+end

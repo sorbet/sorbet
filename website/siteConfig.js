@@ -57,6 +57,11 @@ const users = [
     infoLink: 'https://hummingbird.co/',
   },
   {
+    caption: 'Instacart',
+    image: 'img/instacart-logo.svg',
+    infoLink: 'https://instacart.com/',
+  },
+  {
     caption: 'Kickstarter',
     image: 'img/kickstarter-logo.png',
     infoLink: 'https://www.kickstarter.com/',

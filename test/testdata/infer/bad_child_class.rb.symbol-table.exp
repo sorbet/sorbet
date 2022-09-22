@@ -1,0 +1,20 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/bad_child_class.rb:6
+      argument <blk><block> @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
+  class ::Parent[K] < ::Object () @ test/testdata/infer/bad_child_class.rb:12
+    type-member(=) ::Parent::K -> Parent::K @ test/testdata/infer/bad_child_class.rb:15
+    method ::Parent#foo (<blk>) -> Parent::K @ test/testdata/infer/bad_child_class.rb:17
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
+  class ::<Class:Parent>[<AttachedClass>] < ::<Class:Object> (Generic, Helpers, Sig) @ test/testdata/infer/bad_child_class.rb:12
+    type-member(+) ::<Class:Parent>::<AttachedClass> -> T.attached_class (of Parent) @ test/testdata/infer/bad_child_class.rb:12
+    method ::<Class:Parent>#<static-init> (<blk>) @ test/testdata/infer/bad_child_class.rb:12
+      argument <blk><block> @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
+  class ::PreChild < ::Parent () @ test/testdata/infer/bad_child_class.rb:6
+    type-member(=) ::PreChild::K -> PreChild::K @ test/testdata/infer/bad_child_class.rb:6
+  class ::<Class:PreChild>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/infer/bad_child_class.rb:6
+    type-member(+) ::<Class:PreChild>::<AttachedClass> -> T.attached_class (of PreChild) @ test/testdata/infer/bad_child_class.rb:6
+    method ::<Class:PreChild>#<static-init> (<blk>) @ test/testdata/infer/bad_child_class.rb:6
+      argument <blk><block> @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
+  static-field ::V @ test/testdata/infer/bad_child_class.rb:8
+

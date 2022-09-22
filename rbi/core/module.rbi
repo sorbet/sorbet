@@ -1371,7 +1371,7 @@ class Module < Object
   # ```
   sig do
     params(
-        arg0: T.any(Symbol, String),
+        arg0: T.any(T::Array[Symbol], T::Array[String], Symbol, String),
     )
     .returns(T.self_type)
   end
@@ -1536,7 +1536,7 @@ class Module < Object
   # Strings is also accepted.
   sig do
     params(
-        arg0: T.any(Symbol, String),
+        arg0: T.any(T::Array[Symbol], T::Array[String], Symbol, String),
     )
     .returns(T.self_type)
   end

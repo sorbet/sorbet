@@ -37,27 +37,10 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-  Did you mean `Set`? Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Set`
+  Did you mean `Integer`? Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Integer`
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
-      NN |class Set < Object
-          ^^^^^^^^^^^^^^^^^^
-  Did you mean `Net`? Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Net`
-     3 |Yieldr.foo(Intege, Int)
-                           ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
-    NN |module Net
-        ^^^^^^^^^^
-  Did you mean `IO`? Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `IO`
-     3 |Yieldr.foo(Intege, Int)
-                           ^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/io.rbi#LCENSORED: `IO` defined here
-      NN |class IO < Object
-          ^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` https://srb.help/5002
      7 |module A::B; Constant; end

@@ -1,3 +1,0 @@
-# typed: true
-
-FOO = Parlour

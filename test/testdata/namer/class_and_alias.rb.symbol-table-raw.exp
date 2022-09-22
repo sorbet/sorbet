@@ -2,11 +2,11 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/class_and_alias.rb start=2:1 end=8:7}
       argument <blk><block> @ Loc {file=test/testdata/namer/class_and_alias.rb start=??? end=???}
-  class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=3:8}
-  static-field <M <C <U A>> $1> -> Integer @ Loc {file=test/testdata/namer/class_and_alias.rb start=2:1 end=2:2}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=3:8}
-    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=3:8}
-    method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=4:4}
+  static-field <C <U A>> -> Integer @ Loc {file=test/testdata/namer/class_and_alias.rb start=2:1 end=2:2}
+  class <M <C <U A>> $1> < <C <U Object>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=3:8}
+  class <M <S <C <U A>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:7 end=3:8}
+    type-member(+) <M <S <C <U A>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <S <C <U A>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:7 end=3:8}
+    method <M <S <C <U A>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/class_and_alias.rb start=3:1 end=4:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/class_and_alias.rb start=??? end=???}
   static-field <C <U B>> -> Integer @ Loc {file=test/testdata/namer/class_and_alias.rb start=8:1 end=8:2}
   class <M <C <U B>> $1> < <C <U Object>> () @ Loc {file=test/testdata/namer/class_and_alias.rb start=6:1 end=6:8}

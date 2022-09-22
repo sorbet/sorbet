@@ -51,46 +51,14 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-load("//third_party/gems:rules.bzl", "gemfile_lock_deps")
-
-gemfile_lock_deps(
-    name = "gems",
-
-    # TODO: figure out how to discover these labels during the loading phase,
-    # rather that listing them out explicitly. `glob` doesn't work here, so
-    # we'll need to do something special within the `gemfile_lock_deps`
-    # repository rule.
-    gemfile_locks = [
-        "//gems/sorbet/test/snapshot:{}/src/Gemfile.lock".format(test)
-        for test in [
-            "partial/bad-hash",
-            "partial/bad-t",
-            "partial/create-config",
-            "partial/explosive-object",
-            "partial/fake-object",
-            "partial/fake-rails",
-            "partial/local_gem",
-            "partial/non-utf-8-file",
-            "partial/real_singleton_class",
-            "partial/rspec-lots",
-            "partial/stack_master",
-            "partial/stupidedi",
-            "partial/typed-ignore",
-            "partial/webmock",
-            "total/empty",
-            "total/sorbet-runtime",
-        ]
-    ],
-)
-
 load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
 
 node_repositories()
 
-BAZEL_VERSION = "5.0.0"
+BAZEL_VERSION = "5.2.0"
 
-BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "42cfb37d2834d075996b9d02698674be7f322f0acd864b17c3191301329845f9"
+BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "7d9ef51beab5726c55725fb36675c6fed0518576d3ba51fb4067580ddf7627c4"
 
-BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "f7e8d1eac85ec125c430f9553e35d522c057895262956201ccea8a27d87054cc"
+BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "645e7c335efc3207905e98f0c56a598b7cb0282d54d9470e80f38fb698064fb3"
 
-BAZEL_INSTALLER_VERSION_DARWIN_ARM64_SHA = "785900dfadb14b20db4edc76019cd1c9048c4216ed8052c34e72816b7ed358e9"
+BAZEL_INSTALLER_VERSION_DARWIN_ARM64_SHA = "bc018ee7980cdf1c3f0099ec1568847a1756a3c00f1f9440bca44c26ceb3d90f"

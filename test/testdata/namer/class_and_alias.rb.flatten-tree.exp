@@ -19,7 +19,7 @@ begin
       end
     end
   end
-  class ::A<<C A>> < (::<todo sym>)
+  class ::A<A$1> < (::<todo sym>)
     def self.<static-init>(<blk>)
       <emptyTree>
     end

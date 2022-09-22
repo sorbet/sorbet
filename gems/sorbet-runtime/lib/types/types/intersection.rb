@@ -20,7 +20,7 @@ module T::Types
 
     # overrides Base
     def name
-      "T.all(#{@types.map(&:name).sort.join(', ')})"
+      "T.all(#{@types.map(&:name).compact.sort.join(', ')})"
     end
 
     # overrides Base

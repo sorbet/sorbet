@@ -1,9 +1,9 @@
 # typed: true
 
-R = 5
-class R; end # error: Redefining constant `R` as a class or module
+R = 5 # error: Cannot initialize the class `R` by constant assignment
+class R; end
 
-# this should resolve as a class, so this would not be an error
-x = R.new
+# The static field always mangles the class definition, so this is not allowed
+x = R.new # error: Method `new` does not exist on `Integer`
 # this should not resolve as the constant, so this will be an error
-puts R + 1 # error: Method `+` does not exist on `T.class_of(R)`
+puts R + 1
