@@ -1771,7 +1771,7 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     for (const auto typeArgument : whatData->typeArguments()) {
         this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
     }
-    // This drops the core::Method, which drops the ArgInfo's the method owned.
+    // This drops the existing core::Method, which drops the `ArgInfo`s the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 
