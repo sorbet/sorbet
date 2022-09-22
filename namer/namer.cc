@@ -2057,10 +2057,21 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
 void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
                             core::FoundDefHashes &foundHashesOut) {
+    ENFORCE(foundHashesOut.typeMemberHashes.empty());
+    foundHashesOut.typeMemberHashes.reserve(foundDefs.typeMembers().size());
+    for (const auto &typeMember : foundDefs.typeMembers()) {
+        auto owner = typeMember.owner;
+        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                    owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+        auto fullNameHash = core::FullNameHash(ctx, typeMember.name);
+        foundHashesOut.typeMemberHashes.emplace_back(owner.idx(), ownerIsSymbol, typeMember.isTypeTemplate,
+                                                     fullNameHash);
+    }
+
     ENFORCE(foundHashesOut.methodHashes.empty());
-    ENFORCE(foundHashesOut.fieldHashes.empty());
     foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
-    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &method : foundDefs.methods()) {
         auto owner = method.owner;
         ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
@@ -2070,6 +2081,9 @@ void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs
         foundHashesOut.methodHashes.emplace_back(owner.idx(), ownerIsSymbol, method.flags.isSelfMethod, fullNameHash,
                                                  method.arityHash);
     }
+
+    ENFORCE(foundHashesOut.fieldHashes.empty());
+    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &field : foundDefs.fields()) {
         auto owner = field.owner;
         ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",

@@ -256,6 +256,13 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     for (const auto &e : fh->usages.nameHashes) {
         p.putU4(e._hashValue);
     }
+    p.putU4(fh->foundHashes.typeMemberHashes.size());
+    for (const auto &ffh : fh->foundHashes.typeMemberHashes) {
+        p.putU4(ffh.ownerIdx);
+        p.putU1(ffh.ownerIsSymbol);
+        p.putU1(ffh.isTypeTemplate);
+        p.putU4(ffh.nameHash._hashValue);
+    }
     p.putU4(fh->foundHashes.methodHashes.size());
     for (const auto &fdh : fh->foundHashes.methodHashes) {
         p.putU4(fdh.ownerIdx);
@@ -303,6 +310,16 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         WithoutUniqueNameHash key;
         key._hashValue = p.getU4();
         ret.usages.nameHashes.emplace_back(key);
+    }
+    auto foundTypeMemberHashesSize = p.getU4();
+    ret.foundHashes.typeMemberHashes.reserve(foundTypeMemberHashesSize);
+    for (int it = 0; it < foundTypeMemberHashesSize; it++) {
+        auto ownerIdx = p.getU4();
+        auto ownerIsSymbol = p.getU1();
+        auto isTypeTemplate = p.getU1();
+        FullNameHash fullNameHash;
+        fullNameHash._hashValue = p.getU4();
+        ret.foundHashes.typeMemberHashes.emplace_back(ownerIdx, ownerIsSymbol, isTypeTemplate, fullNameHash);
     }
     auto foundMethodHashesSize = p.getU4();
     ret.foundHashes.methodHashes.reserve(foundMethodHashesSize);

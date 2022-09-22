@@ -309,6 +309,11 @@ public:
         return _fields;
     }
 
+    // See documentation on _typeMembers
+    const std::vector<FoundTypeMember> &typeMembers() const {
+        return _typeMembers;
+    }
+
     friend FoundDefinitionRef;
 };
 

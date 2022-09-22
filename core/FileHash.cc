@@ -94,6 +94,24 @@ void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
 
+FoundDefinitionRef FoundTypeMemberHash::owner() const {
+    if (this->ownerIsSymbol) {
+        return {FoundDefinitionRef::Kind::Symbol, this->ownerIdx};
+    } else {
+        return {FoundDefinitionRef::Kind::Class, this->ownerIdx};
+    }
+}
+
+void FoundTypeMemberHash::sanityCheck() const {
+    ENFORCE(nameHash.isDefined());
+}
+
+string FoundTypeMemberHash::toString() const {
+    return fmt::format(
+        "FoundTypeMemberHash {{ ownerIdx = {}, ownerIsSymbol = {}, isTypeTemplate = {}, nameHash = {} }}", ownerIdx,
+        ownerIsSymbol, isTypeTemplate, nameHash._hashValue);
+}
+
 FoundDefinitionRef FoundMethodHash::owner() const {
     if (this->ownerIsSymbol) {
         return {FoundDefinitionRef::Kind::Symbol, this->ownerIdx};
