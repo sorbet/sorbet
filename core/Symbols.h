@@ -53,7 +53,8 @@ class Method final {
     friend class GlobalState;
     friend class serialize::SerializerImpl;
 
-    // This is to allow updating `GlobalState::methods` in place with a new method, over top of an existing method
+    // This is to allow updating `GlobalState::methods` in place with a new method,
+    // over top of an existing method
     Method &operator=(Method &&) = default;
 
 public:
@@ -275,7 +276,12 @@ public:
 CheckSize(Field, 56, 8);
 
 class TypeParameter final {
+    friend class GlobalState;
     friend class serialize::SerializerImpl;
+
+    // This is to allow updating `GlobalState::typeArguments` in place with a new type argument,
+    // over top of an existing method
+    TypeParameter &operator=(TypeParameter &&) = default;
 
 public:
     TypeParameter(const TypeParameter &) = delete;

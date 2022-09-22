@@ -1,0 +1,10 @@
+# typed: true
+# assert-fast-path: type_parameters_delete.rb
+class A
+  extend T::Sig
+
+  sig {params(x: Integer).returns(Integer)}
+  def id(x)
+    T.reveal_type(x) # error: `Integer`
+  end
+end
