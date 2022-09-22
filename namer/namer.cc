@@ -483,7 +483,7 @@ public:
         found.isTypeTemplate = send->fun == core::Names::typeTemplate();
 
         if (send->numPosArgs() > 1) {
-            // Too many arguments. Define a static field that we'll use for this type åmember later.
+            // Too many arguments. Define a static field that we'll use for this type member later.
             core::FoundStaticField staticField;
             staticField.owner = found.owner;
             staticField.name = found.name;
