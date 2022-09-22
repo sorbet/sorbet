@@ -2253,9 +2253,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t staticFieldHash = 0;
     uint32_t classAliasHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> methodHashesMap;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> staticFieldHashesMap;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> fieldHashesMap;
+    UnorderedMap<WithoutUniqueNameHash, uint32_t> deletableSymbolHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
@@ -2305,16 +2303,19 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         // No fields are ignored in hashing.
         uint32_t symhash = field.hash(*this);
         if (field.flags.isStaticField && !field.isClassAlias()) {
-            auto &target = staticFieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            // Either normal static-field or static-field-type-alias
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
             hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
             staticFieldHash = mix(fieldHash, staticFieldShapeHash);
         } else if (field.flags.isStaticField) {
+            // static-field class alias
             hierarchyHash = mix(hierarchyHash, symhash);
             classAliasHash = mix(classAliasHash, symhash);
         } else {
-            auto &target = fieldHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            ENFORCE(field.flags.isField);
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             if (!this->lspExperimentalFastPathEnabled) {
                 uint32_t fieldShapeHash = field.fieldShapeHash(*this);
@@ -2331,7 +2332,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashesMap[WithoutUniqueNameHash(*this, sym.name)];
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
             auto needMethodShapeHash =
                 this->lspExperimentalFastPathEnabled
@@ -2359,22 +2360,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     }
 
     unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
-    result->methodHashes.reserve(methodHashesMap.size());
-    result->staticFieldHashes.reserve(staticFieldHashesMap.size());
-    result->fieldHashes.reserve(fieldHashesMap.size());
-    for (const auto &[nameHash, symbolHash] : methodHashesMap) {
-        result->methodHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
-    }
-    for (const auto &[nameHash, symbolHash] : staticFieldHashesMap) {
-        result->staticFieldHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
-    }
-    for (const auto &[nameHash, symbolHash] : fieldHashesMap) {
-        result->fieldHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
+    result->deletableSymbolHashes.reserve(deletableSymbolHashesMap.size());
+    for (const auto &[nameHash, symbolHash] : deletableSymbolHashesMap) {
+        result->deletableSymbolHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
-    fast_sort(result->methodHashes);
-    fast_sort(result->staticFieldHashes);
-    fast_sort(result->fieldHashes);
+    fast_sort(result->deletableSymbolHashes);
 
     result->hierarchyHash = LocalSymbolTableHashes::patchHash(hierarchyHash);
     result->classModuleHash = LocalSymbolTableHashes::patchHash(classModuleHash);
