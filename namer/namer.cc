@@ -581,11 +581,11 @@ public:
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+            handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
                 case core::Names::typeTemplate().rawId():
-                    handleTypeMemberDefinition(ctx, send, asgn, lhs);
-                    break;
                 case core::Names::typeMember().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
@@ -1974,12 +1974,13 @@ public:
         });
     }
 
-    ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
-                                                  const ast::UnresolvedConstantLit *typeName) {
+    ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        ENFORCE(send != nullptr);
+        const auto *typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        ENFORCE(typeName != nullptr);
 
-        ENFORCE(asgn.lhs.get() == typeName &&
-                asgn.rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
         if (!ctx.owner.isClassOrModule()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
@@ -1998,6 +1999,24 @@ public:
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
+        bool isTypeTemplate = send->fun == core::Names::typeTemplate();
+        auto onSymbol =
+            isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
+        if (!onSymbol.exists()) {
+            ENFORCE(this->bestEffort);
+            return ast::MK::EmptyTree();
+        }
+        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
+        if (!sym.exists()) {
+            ENFORCE(this->bestEffort);
+            return ast::MK::EmptyTree();
+        }
+
+        // Simulates how squashNames in handleAssignment also creates a ConstantLit
+        // (simpler than squashNames, because type members are not allowed to use any sort of
+        // `A::B = type_member` syntax)
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(asgn.lhs.loc(), sym, move(asgn.lhs));
+
         if (send->hasPosArgs() || send->hasKwArgs() || send->block() != nullptr) {
             if (send->numPosArgs() > 1) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
@@ -2007,19 +2026,6 @@ public:
                                            asgn.loc.copyWithZeroLength(), ast::MK::Untyped(asgn.loc));
                 return handleAssignment(
                     ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
-            }
-
-            bool isTypeTemplate = send->fun == core::Names::typeTemplate();
-            auto onSymbol =
-                isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
-            if (!onSymbol.exists()) {
-                ENFORCE(this->bestEffort);
-                return ast::MK::EmptyTree();
-            }
-            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
-            if (!sym.exists()) {
-                ENFORCE(this->bestEffort);
-                return ast::MK::EmptyTree();
             }
 
             if (send->hasKwArgs()) {
@@ -2122,23 +2128,21 @@ public:
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             tree = handleAssignment(ctx, std::move(tree));
-            return;
-        }
-
-        if (!send->recv.isSelfReference()) {
+        } else if (!send->recv.isSelfReference()) {
             tree = handleAssignment(ctx, std::move(tree));
-            return;
-        }
-
-        switch (send->fun.rawId()) {
-            case core::Names::typeTemplate().rawId():
-            case core::Names::typeMember().rawId(): {
-                tree = handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
-                return;
-            }
-            default: {
-                tree = handleAssignment(ctx, std::move(tree));
-                return;
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+            tree = handleAssignment(ctx, std::move(tree));
+        } else {
+            switch (send->fun.rawId()) {
+                case core::Names::typeTemplate().rawId():
+                case core::Names::typeMember().rawId(): {
+                    tree = handleTypeMemberDefinition(ctx, std::move(tree));
+                    break;
+                }
+                default: {
+                    tree = handleAssignment(ctx, std::move(tree));
+                    break;
+                }
             }
         }
     }

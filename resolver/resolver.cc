@@ -3000,8 +3000,13 @@ public:
                 return;
             }
 
-            ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
-                    send->fun == core::Names::typeTemplate());
+            if ((sym.isTypeAlias(ctx) && send->fun != core::Names::typeAlias()) ||
+                (sym.isTypeMember() && send->fun != core::Names::typeMember() &&
+                 send->fun != core::Names::typeTemplate())) {
+                // This is a reassignment of a constant that was declared as a type member or a type alias.
+                // The redefinition error is reported elsewhere.
+                return;
+            }
 
             auto owner = sym.owner(ctx).asClassOrModuleRef();
 

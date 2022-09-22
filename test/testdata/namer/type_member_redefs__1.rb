@@ -8,7 +8,7 @@ end
 
 class B
   extend T::Generic
-  R = type_member # error: Expected `Integer` but found `T::Types::TypeMember` for field
+  R = type_member
   R = 1 # error: Redefining constant `R` as a static field
 end
 
