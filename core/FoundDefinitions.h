@@ -118,7 +118,7 @@ CheckSize(FoundClass, 28, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
-    FoundDefinitionRef klass;
+    FoundDefinitionRef scopeClass;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;

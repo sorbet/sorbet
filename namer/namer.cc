@@ -459,7 +459,7 @@ public:
 
         core::FoundStaticField found;
         found.owner = getOwner();
-        found.klass = squashNames(ctx, lhs.scope);
+        found.scopeClass = squashNames(ctx, lhs.scope);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -1251,7 +1251,7 @@ private:
     core::FieldRef insertStaticField(core::MutableContext ctx, const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
-        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
+        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
                                    staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
