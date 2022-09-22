@@ -222,7 +222,7 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &builde
 }
 
 llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
-                                                     const IREmitterContext &irctx, llvm::Value *returnValue) {
+                                                     const IREmitterContext &irctx, int rubyRegionId, llvm::Value *returnValue) {
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
         return returnValue;
@@ -236,7 +236,7 @@ llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG
     // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
     // TODO(froydnj): we should check this type.
     if (!cfg.symbol.data(cs)->flags.isAbstract) {
-        IREmitterHelpers::emitTypeTest(cs, builder, returnValue, expectedType, "Return value");
+        IREmitterHelpers::emitTypeTest(cs, builder, irctx, rubyRegionId, returnValue, expectedType, "Return value");
     }
 
     return returnValue;
@@ -261,14 +261,14 @@ void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &builder
 }
 } // namespace
 
-void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
-                                    const core::TypePtr &expectedType, std::string_view description) {
-    auto *typeTest = Payload::typeTest(cs, builder, value, expectedType);
+void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                    int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType, std::string_view description) {
+    auto *typeTest = Payload::sorbetRuntimeTypeTest(cs, builder, irctx, rubyRegionId, value, expectedType);
     buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
-void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
-                                              const core::TypePtr &expectedType, std::string_view description) {
+void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                              int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType, std::string_view description) {
     auto *fun = builder.GetInsertBlock()->getParent();
     auto *initBlock = llvm::BasicBlock::Create(cs, "restTypeTestInit", fun);
     auto *headerBlock = llvm::BasicBlock::Create(cs, "restTypeTestHeader", fun);
@@ -288,7 +288,7 @@ void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilder
 
     builder.SetInsertPoint(bodyBlock);
     auto *element = builder.CreateCall(cs.getFunction("sorbet_rubyArrayArefUnchecked"), {value, indexPhi}, "element");
-    auto *typeTest = Payload::typeTest(cs, builder, element, expectedType);
+    auto *typeTest = Payload::sorbetRuntimeTypeTest(cs, builder, irctx, rubyRegionId, element, expectedType);
     buildTypeTestPassFailBlocks(cs, builder, element, typeTest, expectedType, description);
     auto *incrementedIndex = builder.CreateAdd(indexPhi, buildS4(cs, 1));
     indexPhi->addIncoming(loopIndex, initBlock);

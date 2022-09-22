@@ -254,10 +254,36 @@ static bool isProc(core::ClassOrModuleRef sym) {
     return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
 }
 
-} // namespace
+struct TypeTestContext {
+    enum class Kind {
+        SorbetRuntime,
+        CompilerInternal,
+    };
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
-                               core::ClassOrModuleRef sym) {
+private:
+    TypeTestContext(Kind kind) : kind(kind) {}
+    TypeTestContext() = delete;
+
+public:
+    Kind kind;
+    int rubyRegionId = 0;
+    const IREmitterContext *irctx = nullptr;
+
+    static TypeTestContext sorbetRuntime(const IREmitterContext &irctx, int rubyRegionId) {
+        TypeTestContext ctx(Kind::SorbetRuntime);
+        ctx.rubyRegionId = rubyRegionId;
+        ctx.irctx = &irctx;
+        return ctx;
+    }
+
+    static TypeTestContext compilerInternal() {
+        TypeTestContext ctx(Kind::CompilerInternal);
+        return ctx;
+    }
+};
+
+llvm::Value *emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const TypeTestContext &ttctx,
+                          llvm::Value *val, core::ClassOrModuleRef sym) {
     for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
         if (sym == candidate) {
             return builder.CreateCall(cs.getFunction(specializedCall), {val});
@@ -282,13 +308,13 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
                               {val, Payload::getRubyConstant(cs, sym, builder)});
 }
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
-                               const core::TypePtr &type) {
+llvm::Value *emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const TypeTestContext &ttctx,
+                          llvm::Value *val, const core::TypePtr &type) {
     llvm::Value *ret = nullptr;
     typecase(
-        type, [&](const core::ClassType &ct) { ret = Payload::typeTest(cs, builder, val, ct.symbol); },
+        type, [&](const core::ClassType &ct) { ret = emitTypeTest(cs, builder, ttctx, val, ct.symbol); },
         [&](const core::AppliedType &at) {
-            ret = Payload::typeTest(cs, builder, val, at.klass);
+            ret = emitTypeTest(cs, builder, ttctx, val, at.klass);
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },
         [&](const core::OrType &ct) {
@@ -318,7 +344,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
                     builder.SetInsertPoint(block);
                 }
 
-                testResult = typeTest(cs, builder, val, part);
+                testResult = emitTypeTest(cs, builder, ttctx, val, part);
                 phi->addIncoming(testResult, builder.GetInsertBlock());
             }
 
@@ -354,7 +380,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
                     builder.SetInsertPoint(block);
                 }
 
-                testResult = typeTest(cs, builder, val, part);
+                testResult = emitTypeTest(cs, builder, ttctx, val, part);
                 phi->addIncoming(testResult, builder.GetInsertBlock());
             }
 
@@ -368,6 +394,21 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
     return ret;
 }
 
+} // namespace
+
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, core::ClassOrModuleRef sym) {
+    return emitTypeTest(cs, builder, TypeTestContext::compilerInternal(), val, sym);
+}
+
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, const core::TypePtr &type) {
+    return emitTypeTest(cs, builder, TypeTestContext::compilerInternal(), val, type);
+}
+
+llvm::Value *Payload::sorbetRuntimeTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                            int rubyRegionId, llvm::Value *val, const core::TypePtr &type) {
+    return emitTypeTest(cs, builder, TypeTestContext::sorbetRuntime(irctx, rubyRegionId), val, type);
+}
+
 // Emit an `llvm.assume` intrinsic with the result of a `Payload::typeTest` with the given symbol. For example, this can
 // be used assert that a value will be an array.
 //
@@ -376,13 +417,13 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, 
 // adding an assertion.
 void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                          core::ClassOrModuleRef sym) {
-    auto *cond = Payload::typeTest(cs, builder, val, sym);
+    auto *cond = emitTypeTest(cs, builder, TypeTestContext::compilerInternal(), val, sym);
     builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
     return;
 }
 
 void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, const core::TypePtr &type) {
-    auto *cond = Payload::typeTest(cs, builder, val, type);
+    auto *cond = emitTypeTest(cs, builder, TypeTestContext::compilerInternal(), val, type);
     builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
     return;
 }
