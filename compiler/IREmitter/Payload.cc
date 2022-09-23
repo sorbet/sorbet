@@ -304,8 +304,19 @@ llvm::Value *emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const
                                   {val, Payload::getRubyConstant(cs, attachedClass, builder)});
     }
     sym = isProc(sym) ? core::Symbols::Proc() : sym;
-    return builder.CreateCall(cs.getFunction("sorbet_i_objIsKindOf"),
-                              {val, Payload::getRubyConstant(cs, sym, builder)});
+    if (ttctx.kind == TypeTestContext::Kind::CompilerInternal) {
+        return builder.CreateCall(cs.getFunction("sorbet_i_objIsKindOf"),
+                                  {val, Payload::getRubyConstant(cs, sym, builder)});
+    }
+
+    CallCacheFlags flags;
+    flags.args_simple = true;
+
+    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, "is_a?", flags, 1, {});
+    auto *cfp = Payload::getCFPForBlock(cs, builder, *ttctx.irctx, ttctx.rubyRegionId);
+
+    auto *isa_result = builder.CreateCall(cs.getFunction("sorbet_vm_isa_p"), {cache, cfp, val, Payload::getRubyConstant(cs, sym, builder)});
+    return Payload::testIsTruthy(cs, builder, isa_result);
 }
 
 llvm::Value *emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const TypeTestContext &ttctx,
