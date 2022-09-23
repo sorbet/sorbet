@@ -222,7 +222,8 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &builde
 }
 
 llvm::Value *IREmitterHelpers::maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &builder,
-                                                     const IREmitterContext &irctx, int rubyRegionId, llvm::Value *returnValue) {
+                                                     const IREmitterContext &irctx, int rubyRegionId,
+                                                     llvm::Value *returnValue) {
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
         return returnValue;
@@ -262,13 +263,15 @@ void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &builder
 } // namespace
 
 void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                    int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType, std::string_view description) {
+                                    int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType,
+                                    std::string_view description) {
     auto *typeTest = Payload::sorbetRuntimeTypeTest(cs, builder, irctx, rubyRegionId, value, expectedType);
     buildTypeTestPassFailBlocks(cs, builder, value, typeTest, expectedType, description);
 }
 
-void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                              int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType, std::string_view description) {
+void IREmitterHelpers::emitTypeTestForRestArg(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                              const IREmitterContext &irctx, int rubyRegionId, llvm::Value *value,
+                                              const core::TypePtr &expectedType, std::string_view description) {
     auto *fun = builder.GetInsertBlock()->getParent();
     auto *initBlock = llvm::BasicBlock::Create(cs, "restTypeTestInit", fun);
     auto *headerBlock = llvm::BasicBlock::Create(cs, "restTypeTestHeader", fun);

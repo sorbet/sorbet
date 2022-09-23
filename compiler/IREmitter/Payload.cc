@@ -315,7 +315,8 @@ llvm::Value *emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const
     auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, "is_a?", flags, 1, {});
     auto *cfp = Payload::getCFPForBlock(cs, builder, *ttctx.irctx, ttctx.rubyRegionId);
 
-    auto *isa_result = builder.CreateCall(cs.getFunction("sorbet_vm_isa_p"), {cache, cfp, val, Payload::getRubyConstant(cs, sym, builder)});
+    auto *isa_result = builder.CreateCall(cs.getFunction("sorbet_vm_isa_p"),
+                                          {cache, cfp, val, Payload::getRubyConstant(cs, sym, builder)});
     return Payload::testIsTruthy(cs, builder, isa_result);
 }
 
@@ -407,16 +408,19 @@ llvm::Value *emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const
 
 } // namespace
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, core::ClassOrModuleRef sym) {
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                               core::ClassOrModuleRef sym) {
     return emitTypeTest(cs, builder, TypeTestContext::compilerInternal(), val, sym);
 }
 
-llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, const core::TypePtr &type) {
+llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                               const core::TypePtr &type) {
     return emitTypeTest(cs, builder, TypeTestContext::compilerInternal(), val, type);
 }
 
-llvm::Value *Payload::sorbetRuntimeTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
-                                            int rubyRegionId, llvm::Value *val, const core::TypePtr &type) {
+llvm::Value *Payload::sorbetRuntimeTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                            const IREmitterContext &irctx, int rubyRegionId, llvm::Value *val,
+                                            const core::TypePtr &type) {
     return emitTypeTest(cs, builder, TypeTestContext::sorbetRuntime(irctx, rubyRegionId), val, type);
 }
 

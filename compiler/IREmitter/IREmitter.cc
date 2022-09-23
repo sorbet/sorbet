@@ -756,9 +756,11 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         if (argInfo.flags.isRepeated && !argInfo.flags.isKeyword) {
                             // Signature types for rest arguments apply to each individual element of
                             // the rest arg, not the actual argument itself.
-                            IREmitterHelpers::emitTypeTestForRestArg(cs, builder, irctx, rubyRegionId, var, expectedType, description);
+                            IREmitterHelpers::emitTypeTestForRestArg(cs, builder, irctx, rubyRegionId, var,
+                                                                     expectedType, description);
                         } else {
-                            IREmitterHelpers::emitTypeTest(cs, builder, irctx, rubyRegionId, var, expectedType, description);
+                            IREmitterHelpers::emitTypeTest(cs, builder, irctx, rubyRegionId, var, expectedType,
+                                                           description);
                         }
                     }
                 },
