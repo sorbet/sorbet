@@ -28,6 +28,7 @@ module SorbetBenchmarks
       puts "#{name}: #{duration_str}"
     end
 
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def self.run
       example = Example.new
 
@@ -105,6 +106,21 @@ module SorbetBenchmarks
         nilable_integer_param(1)
       end
 
+      time_block("T.let(..., T.nilable(T.any(Integer, String)))") do
+        T.let(nil, T.nilable(T.any(Integer, String)))
+        T.let(1, T.nilable(T.any(Integer, String)))
+      end
+
+      time_block("T.let(..., T.nilable(T.any(Integer, String)), checked: false)") do
+        T.let(nil, T.nilable(T.any(Integer, String)), checked: false)
+        T.let(1, T.nilable(T.any(Integer, String)), checked: false)
+      end
+
+      time_block("sig {params(x: T.nilable(T.any(Integer, String))).void}") do
+        nilable_integer_or_string_param(nil)
+        nilable_integer_or_string_param(1)
+      end
+
       time_block("T.let(..., Example)") do
         T.let(example, Example)
         T.let(example, Example)
@@ -147,6 +163,7 @@ module SorbetBenchmarks
         puts 'skipping UnboundMethod#bind_call tests (re-run on Ruby 2.7+)'
       end
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     sig {params(x: Integer).void.checked(:never)}
     def self.unchecked_param(x); end
@@ -156,6 +173,9 @@ module SorbetBenchmarks
 
     sig {params(x: T.nilable(Integer)).void}
     def self.nilable_integer_param(x); end
+
+    sig {params(x: T.nilable(T.any(Integer, String))).void}
+    def self.nilable_integer_or_string_param(x); end
 
     sig {params(x: Example).void}
     def self.application_class_param(x); end
