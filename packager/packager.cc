@@ -164,6 +164,12 @@ public:
 };
 
 class PackageInfoImpl final : public core::packages::PackageInfo {
+    // The names of each package imported by this package.
+    vector<Import> importedPackageNames;
+    // The same information as the above, but mapping mangled names to import types
+    // to make `importsPackage` fast.
+    UnorderedMap<core::NameRef, ImportType> importedPackageMap;
+
 public:
     core::NameRef mangledName() const {
         return name.mangledName;
@@ -193,8 +199,6 @@ public:
     core::Loc loc;
     // loc for the package definition. Single line (just the class def). Used for error messages.
     core::Loc declLoc_;
-    // The names of each package imported by this package.
-    vector<Import> importedPackageNames;
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<Export> exports_;
@@ -214,6 +218,12 @@ public:
         return make_unique<PackageInfoImpl>(*this);
     }
 
+    void addImport(PackageName &&name, ImportType type) {
+        ENFORCE(name.mangledName.exists());
+        auto mangledName = name.mangledName;
+        importedPackageNames.emplace_back(move(name), type);
+        importedPackageMap[mangledName] = type;
+    }
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
         auto file = symbol.loc(gs).file();
         auto &pkg = gs.packageDB().getPackageForFile(gs, file);
@@ -351,13 +361,12 @@ public:
             return std::nullopt;
         }
 
-        auto imp =
-            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.name.mangledName == mangledName; });
-        if (imp == importedPackageNames.end()) {
+        auto it = importedPackageMap.find(mangledName);
+        if (it == importedPackageMap.end()) {
             return nullopt;
         }
 
-        switch (imp->type) {
+        switch (it->second) {
             case ImportType::Normal:
                 return core::packages::ImportType::Normal;
             case ImportType::Test:
@@ -1011,7 +1020,7 @@ struct PackageInfoFinder {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->importedPackageNames.emplace_back(move(name.value()), method2ImportType(send));
+                info->addImport(move(name.value()), method2ImportType(send));
             }
         }
         if (send.fun == core::Names::restrict_to_service() && send.numPosArgs() == 1) {
