@@ -514,7 +514,7 @@ class Logger
       severity: T.nilable(Integer),
       message: T.untyped,
       progname: T.untyped,
-      blk: T.proc.returns(T.untyped)
+      blk: T.nilable(T.proc.returns(T.untyped))
     ).returns(TrueClass)
   end
   def add(severity, message = nil, progname = nil, &blk); end
@@ -526,7 +526,7 @@ class Logger
       severity: T.nilable(Integer),
       message: T.untyped,
       progname: T.untyped,
-      blk: T.proc.returns(T.untyped)
+      blk: T.nilable(T.proc.returns(T.untyped))
     ).returns(TrueClass)
   end
   def log(severity, message = nil, progname = nil, &blk); end
