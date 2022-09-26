@@ -1085,10 +1085,11 @@ class Pathname < Object
         sep: String,
         limit: Integer,
         open_args: Integer,
+        chomp: T::Boolean
     )
     .returns(T::Array[String])
   end
-  def readlines(sep=T.unsafe(nil), limit=T.unsafe(nil), open_args=T.unsafe(nil)); end
+  def readlines(sep=T.unsafe(nil), limit=T.unsafe(nil), open_args=T.unsafe(nil), chomp: false); end
 
   # Read symbolic link.
   #
