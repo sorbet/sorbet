@@ -1303,8 +1303,6 @@ private:
                 variance = core::Variance::CoVariant;
             } else if (foundVariance == core::Names::contravariant()) {
                 variance = core::Variance::ContraVariant;
-            } else if (foundVariance == core::Names::invariant()) {
-                variance = core::Variance::Invariant;
             } else {
                 if (auto e = ctx.beginError(typeMember.litLoc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Invalid variance kind, only `{}` and `{}` are supported",

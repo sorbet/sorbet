@@ -191,7 +191,6 @@ NameDef names[] = {
     {"typeTemplate", "type_template"},
     {"covariant", "out"},
     {"contravariant", "in"},
-    {"invariant", "<invariant>"},
     {"fixed"},
     {"lower"},
     {"upper"},
