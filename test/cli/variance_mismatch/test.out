@@ -1,0 +1,7 @@
+test/cli/variance_mismatch/test.rb:11: Type variance mismatch for `Elem` with parent `Parent`. Child `Child` should be `:out` or invariant, but it is `:in` https://srb.help/5015
+    11 |  Elem = type_member(:in)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/variance_mismatch/test.rb:5: Parent `Parent` declared here
+     5 |  Elem = type_member(:out)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

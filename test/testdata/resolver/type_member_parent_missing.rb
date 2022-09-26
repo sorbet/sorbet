@@ -11,7 +11,7 @@
 # ^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Enumerable#each`
     Elem = type_member(:out)
   # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Classes can only have invariant type members
-  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Type variance mismatch with parent `Foo1`
+  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Type variance mismatch for `Elem` with parent `Foo1`. Child `Bar1` should be `invariant`, but it is `:out`
     #      ^^^^^^^^^^^ error: Method `type_member` does not exist on `T.class_of(Bar1)`
   end
 

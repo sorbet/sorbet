@@ -25,7 +25,7 @@ public:
             case Polarity::Positive:
                 return ":out";
             case Polarity::Neutral:
-                return ":invariant";
+                return "invariant";
             case Polarity::Negative:
                 return ":in";
         }
@@ -47,7 +47,7 @@ public:
             case core::Variance::CoVariant:
                 return ":out";
             case core::Variance::Invariant:
-                return ":invariant";
+                return "invariant";
             case core::Variance::ContraVariant:
                 return ":in";
         }
