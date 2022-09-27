@@ -1380,54 +1380,6 @@ private:
         return sym;
     }
 
-    void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
-        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
-        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
-
-        // Because a change to classes would have take the slow path, should be safe
-        // to look up old owner in current foundDefs.
-        auto ownerSymbol = getOwnerSymbol(ownerRef);
-        ENFORCE(ownerSymbol.isClassOrModule());
-        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
-
-        // We have to accumulate a list of methods to delete, instead of deleting them in the loop
-        // below, because deleting a method invalidates the members() iterator.
-        vector<core::MethodRef> toDelete;
-
-        // Note: this loop is accidentally quadratic. We run deleteMethodViaFullNameHash once per method
-        // previously defined in this file, then in each call look at each member of that method's owner.
-        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
-            if (!memberSym.isMethod()) {
-                continue;
-            }
-            auto memberMethod = memberSym.asMethodRef();
-
-            auto memberNameToHash = memberName;
-            if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
-                auto &uniqueData = memberNameToHash.dataUnique(ctx);
-                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
-                    memberNameToHash = uniqueData->original;
-                }
-            }
-
-            auto memberFullNameHash = core::FullNameHash(ctx, memberNameToHash);
-            if (memberFullNameHash != oldDefHash.nameHash) {
-                continue;
-            }
-
-            toDelete.emplace_back(memberMethod);
-        }
-
-        for (auto oldMethod : toDelete) {
-            oldMethod.data(ctx)->removeLocsForFile(ctx.file);
-            if (oldMethod.data(ctx)->locs().empty()) {
-                ctx.state.deleteMethodSymbol(oldMethod);
-            }
-        }
-    }
-
     void deleteFieldViaFullNameHash(core::MutableContext ctx, const core::FoundFieldHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
@@ -1475,6 +1427,54 @@ private:
             oldField.data(ctx)->removeLocsForFile(ctx.file);
             if (oldField.data(ctx)->locs().empty()) {
                 ctx.state.deleteFieldSymbol(oldField);
+            }
+        }
+    }
+
+    void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
+        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+
+        // Because a change to classes would have take the slow path, should be safe
+        // to look up old owner in current foundDefs.
+        auto ownerSymbol = getOwnerSymbol(ownerRef);
+        ENFORCE(ownerSymbol.isClassOrModule());
+        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
+
+        // We have to accumulate a list of methods to delete, instead of deleting them in the loop
+        // below, because deleting a method invalidates the members() iterator.
+        vector<core::MethodRef> toDelete;
+
+        // Note: this loop is accidentally quadratic. We run deleteMethodViaFullNameHash once per method
+        // previously defined in this file, then in each call look at each member of that method's owner.
+        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
+            if (!memberSym.isMethod()) {
+                continue;
+            }
+            auto memberMethod = memberSym.asMethodRef();
+
+            auto memberNameToHash = memberName;
+            if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
+                auto &uniqueData = memberNameToHash.dataUnique(ctx);
+                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
+                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
+                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
+                    memberNameToHash = uniqueData->original;
+                }
+            }
+
+            auto memberFullNameHash = core::FullNameHash(ctx, memberNameToHash);
+            if (memberFullNameHash != oldDefHash.nameHash) {
+                continue;
+            }
+
+            toDelete.emplace_back(memberMethod);
+        }
+
+        for (auto oldMethod : toDelete) {
+            oldMethod.data(ctx)->removeLocsForFile(ctx.file);
+            if (oldMethod.data(ctx)->locs().empty()) {
+                ctx.state.deleteMethodSymbol(oldMethod);
             }
         }
     }
