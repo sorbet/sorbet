@@ -196,7 +196,11 @@ module T
   # argument is ever `nil`.
   #
   # For more, see https://sorbet.org/docs/type-assertions#tmust_because
-  sig {params(arg: T.untyped, reason_blk: T.proc.returns(String)).returns(T.untyped)}
+  sig do
+    type_parameters(:A)
+      .params(arg: T.nilable(T.type_parameter(:A)), reason_blk: T.proc.returns(String))
+      .returns(T.type_parameter(:A))
+  end
   def self.must_because(arg, &reason_blk); end
 
   # A way to assert that a given branch of control flow is unreachable.
