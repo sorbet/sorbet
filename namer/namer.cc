@@ -1380,6 +1380,20 @@ private:
         return sym;
     }
 
+    bool matchesFullNameHash(core::Context ctx, core::NameRef memberNameToHash, core::FullNameHash oldNameHash) {
+        if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
+            auto &uniqueData = memberNameToHash.dataUnique(ctx);
+            if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
+                uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
+                uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
+                memberNameToHash = uniqueData->original;
+            }
+        }
+
+        auto fieldFullNameHash = core::FullNameHash(ctx, memberNameToHash);
+        return fieldFullNameHash == oldNameHash;
+    }
+
     void deleteFieldViaFullNameHash(core::MutableContext ctx, const core::FoundFieldHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
@@ -1405,18 +1419,7 @@ private:
             }
             auto memberField = memberSym.asFieldRef();
 
-            auto fieldNameToHash = memberName;
-            if (fieldNameToHash.kind() == core::NameKind::UNIQUE) {
-                auto &uniqueData = fieldNameToHash.dataUnique(ctx);
-                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
-                    fieldNameToHash = uniqueData->original;
-                }
-            }
-
-            auto fieldFullNameHash = core::FullNameHash(ctx, fieldNameToHash);
-            if (fieldFullNameHash != oldDefHash.nameHash) {
+            if (!matchesFullNameHash(ctx, memberName, oldDefHash.nameHash)) {
                 continue;
             }
 
@@ -1453,18 +1456,7 @@ private:
             }
             auto memberMethod = memberSym.asMethodRef();
 
-            auto memberNameToHash = memberName;
-            if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
-                auto &uniqueData = memberNameToHash.dataUnique(ctx);
-                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
-                    memberNameToHash = uniqueData->original;
-                }
-            }
-
-            auto memberFullNameHash = core::FullNameHash(ctx, memberNameToHash);
-            if (memberFullNameHash != oldDefHash.nameHash) {
+            if (!matchesFullNameHash(ctx, memberName, oldDefHash.nameHash)) {
                 continue;
             }
 
