@@ -21,7 +21,7 @@ namespace {
 
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
-const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z-]+): (.*)$");
+const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z0-9-]+): (.*)$");
 
 const regex whitespaceRegex("^[ ]*$");
 
