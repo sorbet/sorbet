@@ -323,6 +323,7 @@ public:
     Loc loc() const;
     const SymbolRef::LOC_store &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
+    void removeLocsForFile(core::FileRef file);
 
     uint32_t hash(const GlobalState &gs) const;
 
@@ -398,6 +399,7 @@ public:
     Loc loc() const;
     const SymbolRef::LOC_store &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
+    void removeLocsForFile(core::FileRef file);
 
     uint32_t hash(const GlobalState &gs) const;
 
