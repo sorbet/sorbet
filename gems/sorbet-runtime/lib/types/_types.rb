@@ -238,7 +238,7 @@ module T
   # to contain a non-nil value at this point.
   #
   # `sig {params(arg: T.nilable(A), reason_blk: T.proc.returns(String)).returns(A)}`
-  def self.must_because(arg, &reason_blk)
+  def self.must_because(arg)
     return arg if arg
     return arg if arg == false
 
