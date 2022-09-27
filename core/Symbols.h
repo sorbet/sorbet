@@ -96,7 +96,7 @@ public:
     CheckSize(Flags, 2, 1);
 
     Loc loc() const;
-    const InlinedVector<Loc, 2> &locs() const;
+    const SymbolRef::LOC_store &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
     uint32_t hash(const GlobalState &gs) const;
@@ -196,7 +196,7 @@ public:
     }
 
 private:
-    InlinedVector<Loc, 2> locs_;
+    SymbolRef::LOC_store locs_;
     std::unique_ptr<InlinedVector<TypeArgumentRef, 4>> typeArgs;
 };
 CheckSize(Method, 136, 8);
@@ -244,7 +244,7 @@ public:
     CheckSize(Flags, 1, 1);
 
     Loc loc() const;
-    const InlinedVector<Loc, 2> &locs() const;
+    const SymbolRef::LOC_store &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
 
@@ -268,7 +268,7 @@ public:
     TypePtr resultType;
 
 private:
-    InlinedVector<Loc, 2> locs_;
+    SymbolRef::LOC_store locs_;
 
 public:
     Flags flags;
@@ -321,7 +321,7 @@ public:
     CheckSize(Flags, 1, 1);
 
     Loc loc() const;
-    const InlinedVector<Loc, 2> &locs() const;
+    const SymbolRef::LOC_store &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
     uint32_t hash(const GlobalState &gs) const;
@@ -356,7 +356,7 @@ public:
     TypePtr resultType;
 
 private:
-    InlinedVector<Loc, 2> locs_;
+    SymbolRef::LOC_store locs_;
 };
 CheckSize(TypeParameter, 56, 8);
 
@@ -396,7 +396,7 @@ public:
     CheckSize(Flags, 2, 1);
 
     Loc loc() const;
-    const InlinedVector<Loc, 2> &locs() const;
+    const SymbolRef::LOC_store &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
     uint32_t hash(const GlobalState &gs) const;
@@ -536,7 +536,7 @@ public:
     void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
 
     // Returns the locations that are allowed to subclass the sealed class.
-    const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
+    const SymbolRef::LOC_store &sealedLocs(const GlobalState &gs) const;
 
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
@@ -619,7 +619,7 @@ private:
     /** For Class or module - ordered type members of the class,
      */
     std::unique_ptr<InlinedVector<TypeMemberRef, 4>> typeParams;
-    InlinedVector<Loc, 2> locs_;
+    SymbolRef::LOC_store locs_;
 
     // Record a required ancestor for this class of module in a magic property
     void recordRequiredAncestorInternal(GlobalState &gs, RequiredAncestor &ancestor, NameRef prop);
