@@ -1321,6 +1321,25 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
+    auto WatchmanStateEnter = makeObject("WatchmanStateEnter",
+                                         {
+                                             makeField("subscription", JSONString),
+                                             makeField("root", JSONString),
+                                             makeField("state-enter", "stateEnter", JSONString),
+                                             makeField("clock", JSONString),
+                                         },
+                                         classTypes);
+
+    auto WatchmanStateLeave = makeObject("WatchmanStateLeave",
+                                         {
+                                             makeField("subscription", JSONString),
+                                             makeField("root", JSONString),
+                                             makeField("state-leave", "stateLeave", JSONString),
+                                             makeField("clock", JSONString),
+                                             makeField("abandoned", makeOptional(JSONBool)),
+                                         },
+                                         classTypes);
+
     auto SorbetWorkspaceEditParams =
         makeObject("SorbetWorkspaceEditParams", {}, classTypes,
                    {
