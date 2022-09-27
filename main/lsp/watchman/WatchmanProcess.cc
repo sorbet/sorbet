@@ -46,7 +46,6 @@ void WatchmanProcess::start() {
             // Exclude rsync tmpfiles
             "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
             "], "
-            "\"defer_vcs\": false, "
             "\"fields\": [\"name\"], "
             "\"empty_on_fresh_instance\": true"
             "}}]",
