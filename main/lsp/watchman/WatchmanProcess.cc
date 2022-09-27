@@ -95,8 +95,12 @@ void WatchmanProcess::start() {
                     // Gracefully handle deserialization errors, since they could be our fault.
                     logger->error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
                 }
+            } else if (d.HasMember("state-enter")) {
+                // Deliberately keep these from "Unknown response" logging.
+            } else if (d.HasMember("state-leave")) {
+                // Deliberately keep these from "Unknown response" logging.
             } else if (!d.HasMember("subscribe")) {
-                // Not a subscription response, or a file update.
+                // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);
             }
         }
