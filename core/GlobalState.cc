@@ -1782,7 +1782,6 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
 //
 // NOTE: This method does double duty, deleting both static-field and field symbols.
 void GlobalState::deleteFieldSymbol(FieldRef what) {
-    ENFORCE(what.data(*this)->flags.isField);
     const auto &whatData = what.data(*this);
     auto owner = whatData->owner;
     auto &ownerMembers = owner.data(*this)->members();
@@ -1791,6 +1790,26 @@ void GlobalState::deleteFieldSymbol(FieldRef what) {
     ENFORCE(fnd->second == what);
     ownerMembers.erase(fnd);
     this->fields[what.id()] = this->fields[0].deepCopy(*this);
+}
+
+// Before using this method, double check the disclaimer on GlobalState::deleteMethodSymbol above.
+void GlobalState::deleteTypeMemberSymbol(TypeMemberRef what) {
+    const auto &whatData = what.data(*this);
+    // Should always be a class or module for type members, but we use core::TypeParameter to model both
+    // `type_members` and `type_parameters` (which are owned by `Method` symbols).
+    auto owner = whatData->owner.asClassOrModuleRef();
+
+    auto &ownerMembers = owner.data(*this)->members();
+    auto fndMember = ownerMembers.find(whatData->name);
+    ENFORCE(fndMember != ownerMembers.end());
+    ENFORCE(fndMember->second == what);
+    ownerMembers.erase(fndMember);
+
+    auto &ownerTypeMembers = owner.data(*this)->existingTypeMembers();
+    auto fndTypeMember = absl::c_find(ownerTypeMembers, what);
+    ownerTypeMembers.erase(fndTypeMember);
+
+    this->typeMembers[what.id()] = this->typeMembers[0].deepCopy(*this);
 }
 
 unsigned int GlobalState::classAndModulesUsed() const {
@@ -2297,8 +2316,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         counter++;
         // No type members are ignored in hashing.
         uint32_t symhash = typeMember.hash(*this);
-        hierarchyHash = mix(hierarchyHash, symhash);
-        typeMemberHash = mix(typeMemberHash, symhash);
+        auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, typeMember.name)];
+        target = mix(target, symhash);
+        if (!this->lspExperimentalFastPathEnabled) {
+            hierarchyHash = mix(hierarchyHash, symhash);
+            typeMemberHash = mix(typeMemberHash, symhash);
+        }
         if (DEBUG_HASHING_TAIL && counter > this->typeMembers.size() - 15) {
             errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, typeMember.name.show(*this));
         }
@@ -2313,9 +2336,11 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             // Either normal static-field or static-field-type-alias
             auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
-            uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
-            hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
-            staticFieldHash = mix(fieldHash, staticFieldShapeHash);
+            if (!this->lspExperimentalFastPathEnabled) {
+                uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
+                hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
+                staticFieldHash = mix(fieldHash, staticFieldShapeHash);
+            }
         } else if (field.flags.isStaticField) {
             // static-field class alias
             hierarchyHash = mix(hierarchyHash, symhash);

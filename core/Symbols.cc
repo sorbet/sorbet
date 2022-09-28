@@ -2281,8 +2281,19 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
-            if (e.second.isFieldOrStaticField() && e.second.asFieldRef().data(gs)->flags.isField &&
-                gs.lspExperimentalFastPathEnabled) {
+            if (gs.lspExperimentalFastPathEnabled && e.second.isFieldOrStaticField()) {
+                const auto &field = e.second.asFieldRef().data(gs);
+                if (field->flags.isStaticField && !field->isClassAlias()) {
+                    continue;
+                } else if (field->flags.isField) {
+                    continue;
+                } else {
+                    // Currently only static field class aliases must take the slow path
+                    ENFORCE(field->flags.isStaticField && field->isClassAlias());
+                }
+            }
+
+            if (gs.lspExperimentalFastPathEnabled && e.second.isTypeMember()) {
                 continue;
             }
 
@@ -2302,9 +2313,11 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
-    for (const auto &e : typeMembers()) {
-        if (e.exists()) {
-            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
+    if (!gs.lspExperimentalFastPathEnabled) {
+        for (const auto &e : typeMembers()) {
+            if (e.exists()) {
+                result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
+            }
         }
     }
 
