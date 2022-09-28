@@ -95,8 +95,18 @@ void WatchmanProcess::start() {
                     // Gracefully handle deserialization errors, since they could be our fault.
                     logger->error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
                 }
+            } else if (d.HasMember("state-enter")) {
+                // We know that these are messages from "state-enter" commands, but we are
+                // deliberately not doing anything with them.  See
+                // https://facebook.github.io/watchman/docs/cmd/state-enter.html
+                // for more information.
+            } else if (d.HasMember("state-leave")) {
+                // We know that these are messages from "state-leave" commands, but we are
+                // deliberately not doing anything with them.  See
+                // https://facebook.github.io/watchman/docs/cmd/state-leave.html
+                // for more information.
             } else if (!d.HasMember("subscribe")) {
-                // Not a subscription response, or a file update.
+                // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);
             }
         }
