@@ -459,7 +459,7 @@ public:
 
         core::FoundStaticField found;
         found.owner = getOwner();
-        found.klass = squashNames(ctx, lhs.scope);
+        found.scopeClass = squashNames(ctx, lhs.scope);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -483,7 +483,7 @@ public:
         found.isTypeTemplate = send->fun == core::Names::typeTemplate();
 
         if (send->numPosArgs() > 1) {
-            // Too many arguments. Define a static field that we'll use for this type åmember later.
+            // Too many arguments. Define a static field that we'll use for this type member later.
             core::FoundStaticField staticField;
             staticField.owner = found.owner;
             staticField.name = found.name;
@@ -1251,7 +1251,7 @@ private:
     core::FieldRef insertStaticField(core::MutableContext ctx, const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
-        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
+        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
                                    staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
@@ -1380,50 +1380,63 @@ private:
         return sym;
     }
 
-    void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
-        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
-        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
-
-        // Because a change to classes would have take the slow path, should be safe
-        // to look up old owner in current foundDefs.
-        auto ownerSymbol = getOwnerSymbol(ownerRef);
-        ENFORCE(ownerSymbol.isClassOrModule());
-        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
-
-        // We have to accumulate a list of methods to delete, instead of deleting them in the loop
-        // below, because deleting a method invalidates the members() iterator.
-        vector<core::MethodRef> toDelete;
-
-        // Note: this loop is accidentally quadratic. We run deleteMethodViaFullNameHash once per method
-        // previously defined in this file, then in each call look at each member of that method's owner.
-        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
-            if (!memberSym.isMethod()) {
-                continue;
+    bool matchesFullNameHash(core::Context ctx, core::NameRef memberNameToHash, core::FullNameHash oldNameHash) {
+        if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
+            auto &uniqueData = memberNameToHash.dataUnique(ctx);
+            if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
+                uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
+                uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
+                memberNameToHash = uniqueData->original;
             }
-            auto memberMethod = memberSym.asMethodRef();
-
-            auto memberNameToHash = memberName;
-            if (memberNameToHash.kind() == core::NameKind::UNIQUE) {
-                auto &uniqueData = memberNameToHash.dataUnique(ctx);
-                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
-                    memberNameToHash = uniqueData->original;
-                }
-            }
-
-            auto memberFullNameHash = core::FullNameHash(ctx, memberNameToHash);
-            if (memberFullNameHash != oldDefHash.nameHash) {
-                continue;
-            }
-
-            toDelete.emplace_back(memberMethod);
         }
 
-        for (auto oldMethod : toDelete) {
-            oldMethod.data(ctx)->removeLocsForFile(ctx.file);
-            if (oldMethod.data(ctx)->locs().empty()) {
-                ctx.state.deleteMethodSymbol(oldMethod);
+        auto fieldFullNameHash = core::FullNameHash(ctx, memberNameToHash);
+        return fieldFullNameHash == oldNameHash;
+    }
+
+    void deleteSymbolViaFullNameHash(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                     core::FullNameHash oldNameHash) {
+        // We have to accumulate a list of fields to delete, instead of deleting them in the loop
+        // below, because deleting a field invalidates the members() iterator.
+        vector<core::SymbolRef> toDelete;
+
+        // Note: this loop is accidentally quadratic. We run deleteFieldViaFullNameHash once per field
+        // previously defined in this file, then in each call look at each member of that field's owner.
+        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
+            if (memberSym.isClassOrModule()) {
+                // Safeguard against a collision function in our `FullNameHash` function (e.g., what
+                // if `foo()` and `::Foo` have the same `FullNameHash`, but were given two different
+                // `NameRef` IDs and thus don't collide in the `members` list?).
+                //
+                // Any other collisions are fine, because we will already be re-entering the new
+                // definitions later on in incremental namer. It's only classes that we definitely
+                // never want to delete accidentally.
+                continue;
+            }
+
+            if (!matchesFullNameHash(ctx, memberName, oldNameHash)) {
+                continue;
+            }
+
+            toDelete.emplace_back(memberSym);
+        }
+
+        for (auto oldSymbol : toDelete) {
+            oldSymbol.removeLocsForFile(ctx, ctx.file);
+            if (oldSymbol.locs(ctx).empty()) {
+                switch (oldSymbol.kind()) {
+                    case core::SymbolRef::Kind::Method:
+                        ctx.state.deleteMethodSymbol(oldSymbol.asMethodRef());
+                        break;
+                    case core::SymbolRef::Kind::FieldOrStaticField:
+                        ctx.state.deleteFieldSymbol(oldSymbol.asFieldRef());
+                        break;
+                    case core::SymbolRef::Kind::TypeMember:
+                    case core::SymbolRef::Kind::ClassOrModule:
+                    case core::SymbolRef::Kind::TypeArgument:
+                        ENFORCE(false);
+                        break;
+                }
             }
         }
     }
@@ -1432,62 +1445,39 @@ private:
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
-        // Because a change to classes would have take the slow path, should be safe
-        // to look up old owner in current foundDefs.
+        // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
         auto ownerSymbol = getOwnerSymbol(ownerRef);
-        ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = ownerSymbol.asClassOrModuleRef();
         if (oldDefHash.owner.onSingletonClass) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
 
-        // We have to accumulate a list of fields to delete, instead of deleting them in the loop
-        // below, because deleting a field invalidates the members() iterator.
-        vector<core::FieldRef> toDelete;
+        deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
+    }
 
-        // Note: this loop is accidentally quadratic. We run deleteFieldViaFullNameHash once per field
-        // previously defined in this file, then in each call look at each member of that field's owner.
-        for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
-            if (!memberSym.isFieldOrStaticField()) {
-                continue;
-            }
-            auto memberField = memberSym.asFieldRef();
+    void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
+        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
-            auto fieldNameToHash = memberName;
-            if (fieldNameToHash.kind() == core::NameKind::UNIQUE) {
-                auto &uniqueData = fieldNameToHash.dataUnique(ctx);
-                if (uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRename ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload ||
-                    uniqueData->uniqueNameKind == core::UniqueNameKind::Overload) {
-                    fieldNameToHash = uniqueData->original;
-                }
-            }
+        // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
+        auto ownerSymbol = getOwnerSymbol(ownerRef);
+        ENFORCE(ownerSymbol.isClassOrModule());
+        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
 
-            auto fieldFullNameHash = core::FullNameHash(ctx, fieldNameToHash);
-            if (fieldFullNameHash != oldDefHash.nameHash) {
-                continue;
-            }
-
-            toDelete.emplace_back(memberField);
-        }
-
-        for (auto oldField : toDelete) {
-            oldField.data(ctx)->removeLocsForFile(ctx.file);
-            if (oldField.data(ctx)->locs().empty()) {
-                ctx.state.deleteFieldSymbol(oldField);
-            }
-        }
+        deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
     }
 
     void deleteOldDefinitionsInternal(core::MutableContext ctx) {
         if (oldFoundHashes.has_value()) {
-            for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
+            const auto &oldFoundHashesVal = oldFoundHashes.value();
+
+            for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
                     deleteFieldViaFullNameHash(ctx, oldFieldHash);
                 }
             }
 
-            for (const auto &oldMethodHash : oldFoundHashes.value().methodHashes) {
+            for (const auto &oldMethodHash : oldFoundHashesVal.methodHashes) {
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
                 // ref in the new definedClasses vector.

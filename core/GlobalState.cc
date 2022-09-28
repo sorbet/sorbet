@@ -1776,6 +1776,8 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
 }
 
 // Before using this method, double check the disclaimer on GlobalState::deleteMethodSymbol above.
+//
+// NOTE: This method does double duty, deleting both static-field and field symbols.
 void GlobalState::deleteFieldSymbol(FieldRef what) {
     ENFORCE(what.data(*this)->flags.isField);
     const auto &whatData = what.data(*this);

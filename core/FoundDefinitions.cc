@@ -137,7 +137,7 @@ string FoundClass::toString(const core::GlobalState &gs, const FoundDefinitions 
 }
 
 string FoundStaticField::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
-    return fmt::format("{{ id = {}, owner = {}, klass = {}, name = {} }}", id, owner.idx(), klass.idx(),
+    return fmt::format("{{ id = {}, owner = {}, scopeClass = {}, name = {} }}", id, owner.idx(), scopeClass.idx(),
                        name.toString(gs));
 }
 

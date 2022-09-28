@@ -3,6 +3,7 @@
 
 #include "common/common.h"
 #include "core/DebugOnlyCheck.h"
+#include "core/FileRef.h"
 #include "core/ShowOptions.h"
 
 namespace sorbet::core {
@@ -535,7 +536,9 @@ public:
     core::SymbolRef owner(const GlobalState &gs) const;
     core::Loc loc(const GlobalState &gs) const;
     bool isPrintable(const GlobalState &gs) const;
-    const InlinedVector<Loc, 2> &locs(const GlobalState &gs) const;
+    using LOC_store = InlinedVector<Loc, 2>;
+    const LOC_store &locs(const GlobalState &gs) const;
+    void removeLocsForFile(GlobalState &gs, core::FileRef file) const;
     const TypePtr &resultType(const GlobalState &gs) const;
     void setResultType(GlobalState &gs, const TypePtr &typePtr) const;
     SymbolRef dealias(const GlobalState &gs) const;
