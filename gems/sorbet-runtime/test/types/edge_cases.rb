@@ -60,13 +60,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
   end
 
-  private def assert_less_than(actual, expected, msg=nil)
-    unless msg
-      msg = "Expected #{actual} to be less than #{expected}"
-    end
-    assert(actual < expected, msg)
-  end
-
   private def check_alloc_counts
     @check_alloc_counts = Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.0')
   end
@@ -94,7 +87,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations {obj.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias_method without runtime checking' do
@@ -137,7 +130,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations {obj.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias without runtime checking' do
@@ -185,7 +178,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = subclass.new
         allocs = counting_allocations {obj.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias to superclass method without runtime checking' do
@@ -238,7 +231,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations {obj.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias_method to included method without runtime checking' do
@@ -289,7 +282,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations {klass.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias_method without runtime checking' do
@@ -335,7 +328,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations {klass.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias without runtime checking' do
@@ -386,7 +379,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations {subclass.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias_method to superclass method without runtime checking' do
@@ -442,7 +435,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations {klass.bar}
-        assert_less_than(allocs, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
       it 'handles alias_method to extended method without runtime checking' do
