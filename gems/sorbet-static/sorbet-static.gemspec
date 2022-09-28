@@ -16,5 +16,5 @@ Gem::Specification.new do |s|
   # We include a pre-built binary (in libexec/), making us platform dependent.
   s.platform = Gem::Platform::CURRENT
 
-  s.required_ruby_version = ['>= 2.3.0']
+  s.required_ruby_version = ['>= 2.7.0']
 end
