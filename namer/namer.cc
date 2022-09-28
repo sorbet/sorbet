@@ -1398,10 +1398,8 @@ private:
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
-        // Because a change to classes would have take the slow path, should be safe
-        // to look up old owner in current foundDefs.
+        // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
         auto ownerSymbol = getOwnerSymbol(ownerRef);
-        ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = ownerSymbol.asClassOrModuleRef();
         if (oldDefHash.owner.onSingletonClass) {
             owner = owner.data(ctx)->singletonClass(ctx);
@@ -1438,8 +1436,7 @@ private:
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
-        // Because a change to classes would have take the slow path, should be safe
-        // to look up old owner in current foundDefs.
+        // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
         auto ownerSymbol = getOwnerSymbol(ownerRef);
         ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
