@@ -25,6 +25,24 @@ string readFile(string_view path, const FileSystem &fs) {
     }
 }
 
+class TerminateOnDestruction final {
+    TaskQueue &queue;
+
+public:
+    TerminateOnDestruction(TaskQueue &queue) : queue{queue} {}
+    ~TerminateOnDestruction() {
+        absl::MutexLock lck(queue.getMutex());
+        queue.terminate();
+    }
+};
+
+CounterState mergeCounters(CounterState counters) {
+    if (!counters.hasNullCounters()) {
+        counterConsume(move(counters));
+    }
+    return getAndClearThreadCounters();
+}
+
 } // namespace
 
 bool TaskQueue::isTerminated() const {
@@ -358,6 +376,50 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
     } else {
         prodCategoryCounterInc("lsp.messages.processed", task->methodString());
     }
+}
+
+unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex) {
+    return runInAThread("lspPreprocess", [this, &messageQueue, &messageQueueMutex] {
+        // Propagate the termination flag across the two queues.
+        MessageQueueState::NotifyOnDestruction notify(messageQueue, messageQueueMutex);
+        TerminateOnDestruction notifyProcessing(*taskQueue);
+        owner = this_thread::get_id();
+        while (true) {
+            unique_ptr<LSPMessage> msg;
+            {
+                absl::MutexLock lck(&messageQueueMutex);
+                messageQueueMutex.Await(absl::Condition(
+                    +[](MessageQueueState *messageQueue) -> bool {
+                        return messageQueue->terminate || !messageQueue->pendingRequests.empty();
+                    },
+                    &messageQueue));
+                // Only terminate once incoming queue is drained.
+                if (messageQueue.terminate && messageQueue.pendingRequests.empty()) {
+                    config->logger->debug("Preprocessor terminating");
+                    return;
+                }
+                msg = move(messageQueue.pendingRequests.front());
+                messageQueue.pendingRequests.pop_front();
+                // Combine counters with this thread's counters.
+                if (!messageQueue.counters.hasNullCounters()) {
+                    counterConsume(move(messageQueue.counters));
+                }
+            }
+
+            preprocessAndEnqueue(move(msg));
+
+            {
+                absl::MutexLock lck(taskQueue->getMutex());
+                // Merge the counters from all of the worker threads with those stored in
+                // taskQueue.
+                taskQueue->getCounters() = mergeCounters(move(taskQueue->getCounters()));
+                if (taskQueue->isTerminated()) {
+                    // We must have processed an exit notification, or one of the downstream threads exited.
+                    return;
+                }
+            }
+        }
+    });
 }
 
 unique_ptr<SorbetWorkspaceEditParams>

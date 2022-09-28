@@ -19,17 +19,6 @@ namespace spd = spdlog;
 namespace sorbet::realmain::lsp {
 
 namespace {
-class TerminateOnDestruction final {
-    TaskQueue &queue;
-
-public:
-    TerminateOnDestruction(TaskQueue &queue) : queue{queue} {}
-    ~TerminateOnDestruction() {
-        absl::MutexLock lck(queue.getMutex());
-        queue.terminate();
-    }
-};
-
 class NotifyNotificationOnDestruction {
     absl::Notification &notification;
 
@@ -100,50 +89,6 @@ public:
     }
 };
 } // namespace
-
-unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex) {
-    return runInAThread("lspPreprocess", [this, &messageQueue, &messageQueueMutex] {
-        // Propagate the termination flag across the two queues.
-        MessageQueueState::NotifyOnDestruction notify(messageQueue, messageQueueMutex);
-        TerminateOnDestruction notifyProcessing(*taskQueue);
-        owner = this_thread::get_id();
-        while (true) {
-            unique_ptr<LSPMessage> msg;
-            {
-                absl::MutexLock lck(&messageQueueMutex);
-                messageQueueMutex.Await(absl::Condition(
-                    +[](MessageQueueState *messageQueue) -> bool {
-                        return messageQueue->terminate || !messageQueue->pendingRequests.empty();
-                    },
-                    &messageQueue));
-                // Only terminate once incoming queue is drained.
-                if (messageQueue.terminate && messageQueue.pendingRequests.empty()) {
-                    config->logger->debug("Preprocessor terminating");
-                    return;
-                }
-                msg = move(messageQueue.pendingRequests.front());
-                messageQueue.pendingRequests.pop_front();
-                // Combine counters with this thread's counters.
-                if (!messageQueue.counters.hasNullCounters()) {
-                    counterConsume(move(messageQueue.counters));
-                }
-            }
-
-            preprocessAndEnqueue(move(msg));
-
-            {
-                absl::MutexLock lck(taskQueue->getMutex());
-                // Merge the counters from all of the worker threads with those stored in
-                // taskQueue.
-                taskQueue->getCounters() = mergeCounters(move(taskQueue->getCounters()));
-                if (taskQueue->isTerminated()) {
-                    // We must have processed an exit notification, or one of the downstream threads exited.
-                    return;
-                }
-            }
-        }
-    });
-}
 
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> input) {
     // Naming convention: thread that executes this function is called processing thread
