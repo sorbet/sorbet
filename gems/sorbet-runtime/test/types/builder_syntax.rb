@@ -209,7 +209,7 @@ module Opus::Types::Test
             mod = Module.new do
               extend T::Sig
               sig do
-                params({x: Integer})
+                params(x: Integer)
                 .returns(String)
                 .checked(:always)
               end
@@ -225,7 +225,7 @@ module Opus::Types::Test
             mod = Module.new do
               extend T::Sig
               sig do
-                params({x: Integer})
+                params(x: Integer)
                 .returns(String)
                 .checked(:never)
               end
@@ -239,7 +239,7 @@ module Opus::Types::Test
             mod = Module.new do
               extend T::Sig
               sig do
-                params({x: Integer})
+                params(x: Integer)
                 .returns(String)
                 .checked(:compiled)
               end
@@ -253,7 +253,7 @@ module Opus::Types::Test
             Module.new do
               extend T::Sig
               sig do
-                params({x: Integer})
+                params(x: Integer)
                 .returns(String)
                 .checked(:tests)
               end
