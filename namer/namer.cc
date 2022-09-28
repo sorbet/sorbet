@@ -1481,13 +1481,15 @@ private:
 
     void deleteOldDefinitionsInternal(core::MutableContext ctx) {
         if (oldFoundHashes.has_value()) {
-            for (const auto &oldFieldHash : oldFoundHashes.value().fieldHashes) {
+            const auto &oldFoundHashesVal = oldFoundHashes.value();
+
+            for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
                     deleteFieldViaFullNameHash(ctx, oldFieldHash);
                 }
             }
 
-            for (const auto &oldMethodHash : oldFoundHashes.value().methodHashes) {
+            for (const auto &oldMethodHash : oldFoundHashesVal.methodHashes) {
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
                 // ref in the new definedClasses vector.
