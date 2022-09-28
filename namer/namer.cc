@@ -1435,6 +1435,7 @@ private:
                     case core::SymbolRef::Kind::ClassOrModule:
                     case core::SymbolRef::Kind::TypeArgument:
                         ENFORCE(false);
+                        break;
                 }
             }
         }
