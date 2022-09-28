@@ -551,6 +551,8 @@ TEST_CASE("LSPTest") {
     {
         shared_ptr<realmain::options::Options> opts = make_shared<realmain::options::Options>();
         opts->noStdlib = BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false);
+        opts->ruby3KeywordArgs =
+            BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
         opts->requiresAncestorEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
