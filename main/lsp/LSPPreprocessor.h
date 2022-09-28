@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_LSPPREPROCESSOR_H
 #define RUBY_TYPER_LSP_LSPPREPROCESSOR_H
 
+#include "absl/synchronization/mutex.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include <deque>
@@ -21,6 +22,18 @@ struct MessageQueueState {
     int errorCode = 0;
     // Counters collected from other threads.
     CounterState counters;
+
+    class NotifyOnDestruction {
+        absl::Mutex &mutex;
+        bool &flag;
+
+    public:
+        NotifyOnDestruction(MessageQueueState &state, absl::Mutex &mutex) : mutex(mutex), flag(state.terminate){};
+        ~NotifyOnDestruction() {
+            absl::MutexLock lck(&mutex);
+            flag = true;
+        }
+    };
 };
 
 class TaskQueue final {
