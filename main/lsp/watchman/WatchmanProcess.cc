@@ -96,9 +96,15 @@ void WatchmanProcess::start() {
                     logger->error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
                 }
             } else if (d.HasMember("state-enter")) {
-                // Deliberately keep these from "Unknown response" logging.
+                // We know that these are messages from "state-enter" commands, but we are
+                // deliberately not doing anything with them.  See
+                // https://facebook.github.io/watchman/docs/cmd/state-enter.html
+                // for more information.
             } else if (d.HasMember("state-leave")) {
-                // Deliberately keep these from "Unknown response" logging.
+                // We know that these are messages from "state-leave" commands, but we are
+                // deliberately not doing anything with them.  See
+                // https://facebook.github.io/watchman/docs/cmd/state-leave.html
+                // for more information.
             } else if (!d.HasMember("subscribe")) {
                 // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);
