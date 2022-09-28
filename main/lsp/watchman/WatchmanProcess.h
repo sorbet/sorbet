@@ -12,13 +12,13 @@ class WatchmanQueryResponse;
 
 namespace sorbet::realmain::lsp::watchman {
 class WatchmanProcess {
-private:
+protected:
     std::shared_ptr<spdlog::logger> logger;
+
+private:
     const std::string watchmanPath;
     const std::string workSpace;
     const std::vector<std::string> extensions;
-    const std::function<void(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate;
-    const std::function<void(int, const std::optional<std::string> &)> processExit;
     const std::unique_ptr<Joinable> thread;
     // Mutex that must be held before reading or writing stopped.
     absl::Mutex mutex;
@@ -34,17 +34,20 @@ private:
 
     bool isStopped();
 
+protected:
+    virtual void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>) = 0;
+
+    virtual void processExit(int core, const std::optional<std::string> &) = 0;
+
 public:
     /**
      * Immediately starts a Watchman subprocess and begins processing file updates in the provided
      * workspace folder. Passes file updates to `processUpdate` function.
      */
     WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath, std::string_view workSpace,
-                    std::vector<std::string> extensions,
-                    std::function<void(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate,
-                    std::function<void(int, const std::optional<std::string> &)> processExit);
+                    std::vector<std::string> extensions);
 
-    ~WatchmanProcess();
+    virtual ~WatchmanProcess();
 
     WatchmanProcess(const WatchmanProcess &&) = delete;
     WatchmanProcess(WatchmanProcess &) = delete;
