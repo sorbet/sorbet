@@ -369,7 +369,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'string value conversion assertions' do
-    ENUM_CONVERSION_MSG = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./
+    ENUM_CONVERSION_MSG = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./.freeze
     before do
       T::Configuration.expects(:soft_assert_handler).never
     end
