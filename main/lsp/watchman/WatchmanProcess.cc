@@ -13,7 +13,8 @@ namespace sorbet::realmain::lsp::watchman {
 WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
                                  vector<string> extensions)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
-      extensions(std::move(extensions)), thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
+      extensions(std::move(extensions)),
+      thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
 
 WatchmanProcess::~WatchmanProcess() {
     exitWithCode(0, "");
