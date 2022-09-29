@@ -263,7 +263,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                         }
                     }
 
-                    out.prints.emplace_back(make_pair(idx, serialized));
+                    out.prints.emplace_back(make_pair(idx, move(serialized)));
                 }
             }
 
