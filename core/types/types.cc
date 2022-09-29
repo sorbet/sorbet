@@ -614,7 +614,7 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
  * inWhat   - where the generic type is observed
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
-                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+                                    ClassOrModuleRef inWhat, absl::Span<const TypePtr> targs) {
     auto originalOwner = fromWhat;
 
     // TODO: the ENFORCE below should be above this conditional, but there is

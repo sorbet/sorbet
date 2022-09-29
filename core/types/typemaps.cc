@@ -10,7 +10,7 @@ using namespace std;
 namespace sorbet::core {
 
 TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, absl::Span<const TypeMemberRef> params,
-                           const vector<TypePtr> &targs) {
+                           absl::Span<const TypePtr> targs) {
     ENFORCE(what != nullptr);
     auto t = what._instantiate(gs, params, targs);
     if (t) {
@@ -142,7 +142,7 @@ optional<vector<TypePtr>> approximateElems(absl::Span<const TypePtr> elems, cons
 } // anonymous namespace
 
 TypePtr TupleType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                const vector<TypePtr> &targs) const {
+                                absl::Span<const TypePtr> targs) const {
     optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, params, targs);
     if (!newElems) {
         return nullptr;
@@ -168,7 +168,7 @@ TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc,
 };
 
 TypePtr ShapeType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                const vector<TypePtr> &targs) const {
+                                absl::Span<const TypePtr> targs) const {
     optional<vector<TypePtr>> newValues = instantiateElems(this->values, gs, params, targs);
     if (!newValues) {
         return nullptr;
@@ -194,7 +194,7 @@ TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc,
 }
 
 TypePtr OrType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                             const vector<TypePtr> &targs) const {
+                             absl::Span<const TypePtr> targs) const {
     auto left = this->left._instantiate(gs, params, targs);
     auto right = this->right._instantiate(gs, params, targs);
     if (left || right) {
@@ -240,7 +240,7 @@ TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc, co
 }
 
 TypePtr AndType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const vector<TypePtr> &targs) const {
+                              absl::Span<const TypePtr> targs) const {
     auto left = this->left._instantiate(gs, params, targs);
     auto right = this->right._instantiate(gs, params, targs);
     if (left || right) {
@@ -286,7 +286,7 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
 }
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                  const vector<TypePtr> &targs) const {
+                                  absl::Span<const TypePtr> targs) const {
     optional<vector<TypePtr>> newTargs = instantiateElems(this->targs, gs, params, targs);
     if (!newTargs) {
         return nullptr;
@@ -324,7 +324,7 @@ TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &t
 }
 
 TypePtr LambdaParam::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                  const vector<TypePtr> &targs) const {
+                                  absl::Span<const TypePtr> targs) const {
     ENFORCE(params.size() == targs.size());
     for (auto &el : params) {
         if (el == this->definition) {
