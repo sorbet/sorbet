@@ -363,8 +363,12 @@ void DefTreeBuilder::updateNonBehaviorDef(const core::GlobalState &gs, DefTree &
         // need to continue tracking it.
         return;
     }
-    if ((node.nonBehaviorDef == nullptr) || NamedDefinition::preferredTo(gs, ndef, *node.nonBehaviorDef)) {
+    if (node.nonBehaviorDef == nullptr) {
         node.nonBehaviorDef = make_unique<NamedDefinition>(move(ndef));
+        return;
+    }
+    if (NamedDefinition::preferredTo(gs, ndef, *node.nonBehaviorDef)) {
+        *node.nonBehaviorDef = move(ndef);
     }
 }
 
