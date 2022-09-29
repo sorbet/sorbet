@@ -124,7 +124,7 @@ public:
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
-    static void updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition ndef);
+    static void updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition &&ndef);
 };
 
 class AutoloadWriter {

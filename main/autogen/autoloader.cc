@@ -343,7 +343,7 @@ DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree 
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
     if (rhs.nonBehaviorDef) {
-        updateNonBehaviorDef(gs, lhs, move(*rhs.nonBehaviorDef.get()));
+        updateNonBehaviorDef(gs, lhs, move(*rhs.nonBehaviorDef));
     }
     for (auto &[rname, rchild] : rhs.children) {
         auto lchild = lhs.children.find(rname);
@@ -356,7 +356,7 @@ DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree 
     return lhs;
 }
 
-void DefTreeBuilder::updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition ndef) {
+void DefTreeBuilder::updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition &&ndef) {
     if (!node.namedDefs.empty()) {
         // Non behavior-defining definitions do not matter for nodes that have behavior. There is no
         // need to continue tracking it.
