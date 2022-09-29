@@ -813,8 +813,9 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
 }
 
 namespace {
-vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
-    std::vector<TypePtr> unwrapped;
+template <typename VectorType>
+VectorType unwrapTypeVector(Context ctx, absl::Span<const TypePtr> elems) {
+    VectorType unwrapped;
     unwrapped.reserve(elems.size());
     for (auto &e : elems) {
         unwrapped.emplace_back(Types::unwrapSelfTypeParam(ctx, e));
@@ -838,11 +839,11 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         [&](const OrType &orType) {
             ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType.left), unwrapSelfTypeParam(ctx, orType.right));
         },
-        [&](const ShapeType &shape) { ret = make_type<ShapeType>(shape.keys, unwrapTypeVector(ctx, shape.values)); },
-        [&](const TupleType &tuple) { ret = make_type<TupleType>(unwrapTypeVector(ctx, tuple.elems)); },
+        [&](const ShapeType &shape) { ret = make_type<ShapeType>(shape.keys, unwrapTypeVector<vector<TypePtr>>(ctx, shape.values)); },
+        [&](const TupleType &tuple) { ret = make_type<TupleType>(unwrapTypeVector<vector<TypePtr>>(ctx, tuple.elems)); },
         [&](const MetaType &meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta.wrapped)); },
         [&](const AppliedType &appliedType) {
-            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector(ctx, appliedType.targs));
+            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector<vector<TypePtr>>(ctx, appliedType.targs));
         },
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
