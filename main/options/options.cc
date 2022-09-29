@@ -98,7 +98,7 @@ void PrinterConfig::flush() {
         return;
     }
     absl::MutexLock lck(&state->mutex);
-    FileOps::write(outputPath, to_string(state->buf));
+    FileOps::write(outputPath, string_view(&state->buf[0], state->buf.size()));
 };
 
 string PrinterConfig::flushToString() {
