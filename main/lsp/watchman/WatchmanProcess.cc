@@ -103,15 +103,21 @@ void WatchmanProcess::start() {
                     processQueryResponse(move(queryResponse));
                 });
             } else if (d.HasMember("state-enter")) {
-                // We know that these are messages from "state-enter" commands, but we are
-                // deliberately not doing anything with them.  See
+                // These are messages from "state-enter" commands.  See
                 // https://facebook.github.io/watchman/docs/cmd/state-enter.html
                 // for more information.
+                catchDeserializationError(*logger, line, [&d, this]() {
+                    auto stateEnter = sorbet::realmain::lsp::WatchmanStateEnter::fromJSONValue(d);
+                    processStateEnter(move(stateEnter));
+                });
             } else if (d.HasMember("state-leave")) {
-                // We know that these are messages from "state-leave" commands, but we are
-                // deliberately not doing anything with them.  See
+                // These are messages from "state-leave" commands.  See
                 // https://facebook.github.io/watchman/docs/cmd/state-leave.html
                 // for more information.
+                catchDeserializationError(*logger, line, [&d, this]() {
+                    auto stateLeave = sorbet::realmain::lsp::WatchmanStateLeave::fromJSONValue(d);
+                    processStateLeave(move(stateLeave));
+                });
             } else if (!d.HasMember("subscribe")) {
                 // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);

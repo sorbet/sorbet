@@ -140,6 +140,12 @@ public:
         }
     }
 
+    virtual void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
+    }
+
+    virtual void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
+    }
+
     virtual void processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
         {
             absl::MutexLock lck(&messageQueueMutex);
