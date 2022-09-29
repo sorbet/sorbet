@@ -10,6 +10,12 @@ namespace sorbet::autogen {
 
 // A `QualifiedName` is a vector of namerefs that includes the fully-qualified name
 struct QualifiedName {
+private:
+    QualifiedName(std::vector<core::NameRef> &&nameParts) : nameParts(std::move(nameParts)) {}
+
+public:
+    QualifiedName() = default;
+
     std::vector<core::NameRef> nameParts;
 
     static QualifiedName fromFullName(std::vector<core::NameRef> &&fullName);
