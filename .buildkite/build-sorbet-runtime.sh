@@ -7,7 +7,7 @@ pushd gems/sorbet-runtime
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
 
-runtime_versions=(2.6.3 2.7.2)
+runtime_versions=(2.7.2 3.1.2)
 
 for runtime_version in "${runtime_versions[@]}"; do
   rbenv install --skip-existing "$runtime_version"
@@ -23,9 +23,12 @@ for runtime_version in "${runtime_versions[@]}"; do
 
   failed=
 
-  echo "+++ rubocop ($runtime_version)"
-  if ! rbenv exec bundle exec rake rubocop; then
-    failed=1
+  if [ "$runtime_version" = "2.7.2" ]; then
+    # Our Rubocop version doesn't understand Ruby 3.1 as a valid Ruby version
+    echo "+++ rubocop ($runtime_version)"
+    if ! rbenv exec bundle exec rake rubocop; then
+      failed=1
+    fi
   fi
 
   echo "+++ tests ($runtime_version)"

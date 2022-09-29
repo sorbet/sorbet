@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
     "source_code_uri" => "https://github.com/sorbet/sorbet",
   }
 
-  s.required_ruby_version = ['>= 2.3.0']
+  s.required_ruby_version = ['>= 2.7.0']
 
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 1.7'

@@ -16,6 +16,10 @@ module Opus::Types::Test
       GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
     end
 
+    private def check_alloc_counts
+      @check_alloc_counts = Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.0')
+    end
+
     # this checks that both the recursive and nonrecursive path should
     # have the same behavior
     private def check_error_message_for_obj(type, value)
@@ -66,6 +70,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         allocs_when_valid = counting_allocations {@type.valid?(0)}
         assert_equal(0, allocs_when_valid)
 
@@ -169,6 +174,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         allocs_when_valid = counting_allocations {@type.valid?(0)}
         assert_equal(0, allocs_when_valid)
 
@@ -243,6 +249,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         @klass.include(Mixin1)
         @klass.include(Mixin2)
 
@@ -280,6 +287,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         arr = ["foo", false]
         allocs_when_valid = counting_allocations {@type.valid?(arr)}
         assert_equal(0, allocs_when_valid)
@@ -331,6 +339,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         h = {a: 'foo', b: false, c: nil}
         allocs_when_valid = counting_allocations {@type.valid?(h)}
         assert_equal(0, allocs_when_valid)
@@ -477,6 +486,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         type = T::Array[Integer]
         valid = [1]
         invalid = {}
@@ -559,6 +569,7 @@ module Opus::Types::Test
       end
 
       it 'valid? does not allocate' do
+        skip unless check_alloc_counts
         type = T::Hash[String, Integer]
         valid = {'one' => 1}
         invalid = []
