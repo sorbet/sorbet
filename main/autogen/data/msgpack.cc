@@ -143,9 +143,9 @@ MsgpackWriter::MsgpackWriter(int version)
       symbols(typeCount.at(version)) {}
 
 string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
-    char *data;
-    size_t size;
-    mpack_writer_init_growable(&writer, &data, &size);
+    char *body;
+    size_t bodySize;
+    mpack_writer_init_growable(&writer, &body, &bodySize);
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
@@ -173,11 +173,11 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_finish_array(&writer);
 
     mpack_writer_destroy(&writer);
-    auto body = string(data, size);
-    MPACK_FREE(data);
 
     // write header
-    mpack_writer_init_growable(&writer, &data, &size);
+    char *header;
+    size_t headerSize;
+    mpack_writer_init_growable(&writer, &header, &headerSize);
 
     mpack_start_map(&writer, 5);
 
@@ -235,12 +235,13 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     }
     mpack_finish_array(&writer);
 
-    mpack_write_object_bytes(&writer, body.data(), body.size());
+    mpack_write_object_bytes(&writer, body, bodySize);
+    MPACK_FREE(body);
 
     mpack_writer_destroy(&writer);
 
-    auto ret = string(data, size);
-    MPACK_FREE(data);
+    auto ret = string(header, headerSize);
+    MPACK_FREE(header);
 
     return ret;
 }
