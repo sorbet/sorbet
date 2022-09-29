@@ -346,11 +346,12 @@ DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree 
         updateNonBehaviorDef(gs, lhs, move(*rhs.nonBehaviorDef));
     }
     for (auto &[rname, rchild] : rhs.children) {
-        auto lchild = lhs.children.find(rname);
-        if (lchild == lhs.children.end()) {
-            lhs.children[rname] = move(rchild);
+        typename decltype(lhs.children)::value_type v{rname, nullptr};
+        auto [lchild, inserted] = lhs.children.insert(move(v));
+        if (inserted) {
+            lchild->second = move(rchild);
         } else {
-            lhs.children[rname] = make_unique<DefTree>(merge(gs, move(*lchild->second), move(*rchild)));
+            lchild->second = make_unique<DefTree>(merge(gs, move(*lchild->second), move(*rchild)));
         }
     }
     return lhs;
