@@ -4,10 +4,10 @@
 #include "common/sort.h"
 #include "core/FileHash.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/LSPLoop.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;

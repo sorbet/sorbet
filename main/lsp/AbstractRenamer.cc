@@ -1,6 +1,6 @@
 #include "AbstractRenamer.h"
-#include "main/lsp/LSPQuery.h"
 #include "main/lsp/LSPLoop.h"
+#include "main/lsp/LSPQuery.h"
 
 using namespace std;
 
