@@ -166,6 +166,10 @@ ConstExprStr LSPTask::methodString() const {
             return "sorbet.showSymbol";
         case LSPMethod::SorbetWatchmanFileChange:
             return "sorbet.watchmanFileChange";
+        case LSPMethod::SorbetWatchmanStateEnter:
+            return "sorbet.watchmanStateEnter";
+        case LSPMethod::SorbetWatchmanStateLeave:
+            return "sorbet.watchmanStateLeave";
         case LSPMethod::SorbetWorkspaceEdit:
         case LSPMethod::TextDocumentDidChange:
         case LSPMethod::TextDocumentDidClose:
