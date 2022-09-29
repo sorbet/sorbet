@@ -12,7 +12,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPTask.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
 #include "payload/payload.h"
 #include "spdlog/sinks/null_sink.h"

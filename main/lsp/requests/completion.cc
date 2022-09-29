@@ -13,7 +13,7 @@
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 #include "rapidjson/writer.h"
 
 using namespace std;

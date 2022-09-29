@@ -3,7 +3,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 
 using namespace std;
 

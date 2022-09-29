@@ -17,7 +17,7 @@
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/LSPTask.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/watchman/WatchmanProcess.h"
 #include "sorbet_version/sorbet_version.h"
 

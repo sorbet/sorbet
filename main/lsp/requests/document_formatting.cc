@@ -4,7 +4,7 @@
 #include "common/common.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 
 using namespace std;
 

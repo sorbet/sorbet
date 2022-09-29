@@ -7,7 +7,7 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;

@@ -5,7 +5,7 @@
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/sig_finder/sig_finder.h"
 
 using namespace std;

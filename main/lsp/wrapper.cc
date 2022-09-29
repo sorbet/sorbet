@@ -6,7 +6,7 @@
 #include "main/cache/cache.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
-#include "main/lsp/lsp.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 #include "sorbet_version/sorbet_version.h"
