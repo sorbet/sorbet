@@ -181,7 +181,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         if (isFastPath) {
-            filesTypechecked = runFastPath(updates, workers, errorFlusher);
+            bool isNoopUpdateForRetypecheck = false;
+            filesTypechecked = runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
@@ -196,7 +197,8 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 }
 
 vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
-                                                  shared_ptr<core::ErrorFlusher> errorFlusher) const {
+                                                  shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                  bool isNoopUpdateForRetypecheck) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
@@ -216,10 +218,21 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
     for (auto [fref, idx] : result.changedFiles) {
-        if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
-            // Only set oldFoundHashesForFiles if symbols actually changed
-            // Means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't blow away
-            // methods only to redefine them with different IDs.
+        if (config->opts.lspExperimentalFastPathEnabled && !isNoopUpdateForRetypecheck) {
+            // Only set oldFoundHashesForFiles if we're processing a real edit.
+            //
+            // This means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't
+            // blow away methods only to redefine them with different IDs. retypecheck powers things
+            // like hover and codeAction and is thus very common.
+            //
+            // A previous approach here was to check whether result.changedSymbolNameHashes is empty.
+            // But the incremental namer is actually the *only* way Sorbet correctly handles fast
+            // path edits to files with type_member's (previously, type_member-related errors would
+            // disappear when making e.g. a fast path edit inside a method body).
+            //
+            // This does mean that runFastPath for retypecheck will fail to report those type member
+            // errors (because no-op edits will not run incremental namer), but that's fine because
+            // GlobalState doesn't change for no-op edits, and retypecheck already drops all errors.
 
             // Okay to `move` here (steals component of getFileHash) because we're about to use
             // replaceFile to clobber fref.data(gs) anyways.
@@ -250,8 +263,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
-        // See earlier in the method for an explanation of the .empty() check here.
-        if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty() &&
+        // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
+        if (config->opts.lspExperimentalFastPathEnabled && !isNoopUpdateForRetypecheck &&
             oldFoundHashesForFiles.find(f) == oldFoundHashesForFiles.end()) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
@@ -612,7 +625,8 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
                                                                       WorkerPool &workers) const {
     LSPFileUpdates updates = getNoopUpdate(move(frefs));
     auto errorCollector = make_shared<core::ErrorCollector>();
-    runFastPath(updates, workers, errorCollector);
+    bool isNoopUpdateForRetypecheck = true;
+    runFastPath(updates, workers, errorCollector, isNoopUpdateForRetypecheck);
 
     return errorCollector->drainErrors();
 }
