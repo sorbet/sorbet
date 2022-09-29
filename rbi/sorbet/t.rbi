@@ -189,6 +189,16 @@ module T
   sig {params(arg: T.untyped).returns(T.untyped)}
   def self.must(arg); end
 
+  # Statically, declares to Sorbet that the argument is never `nil`, despite
+  # what the type system would otherwise infer for the type.
+  #
+  # At runtime, raises an exception contining the provided reason if the
+  # argument is ever `nil`.
+  #
+  # For more, see https://sorbet.org/docs/type-assertions#tmust_because
+  sig {params(arg: T.untyped, reason_blk: T.proc.returns(String)).returns(T.untyped)}
+  def self.must_because(arg, &reason_blk); end
+
   # A way to assert that a given branch of control flow is unreachable.
   #
   # Most commonly used to assert that a `case` or `if` expression exhaustively

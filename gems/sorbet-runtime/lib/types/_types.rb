@@ -221,6 +221,34 @@ module T
     end
   end
 
+  # A convenience method to `raise` with a provided error reason when the argument
+  # is `nil` and return it otherwise.
+  #
+  # Intended to be used as:
+  #
+  #   needs_foo(T.must_because(maybe_gives_foo) {"reason_foo_should_not_be_nil"})
+  #
+  # Equivalent to:
+  #
+  #   foo = maybe_gives_foo
+  #   raise "reason_foo_should_not_be_nil" if foo.nil?
+  #   needs_foo(foo)
+  #
+  # Intended to be used to promise sorbet that a given nilable value happens
+  # to contain a non-nil value at this point.
+  #
+  # `sig {params(arg: T.nilable(A), reason_blk: T.proc.returns(String)).returns(A)}`
+  def self.must_because(arg)
+    return arg if arg
+    return arg if arg == false
+
+    begin
+      raise TypeError.new("Unexpected `nil` because #{yield}")
+    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      T::Configuration.inline_type_error_handler(e, {kind: 'T.must_because', value: arg, type: nil})
+    end
+  end
+
   # A way to ask Sorbet to show what type it thinks an expression has.
   # This can be useful for debugging and checking assumptions.
   # In the runtime, merely returns the value passed in.
