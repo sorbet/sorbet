@@ -187,29 +187,36 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_start_array(&writer, symbols.size());
     for (auto sym : symbols) {
         ++i;
-        string str;
+        string_view str;
         if (i < numTypes) {
             switch ((Definition::Type)i) {
                 case Definition::Type::Module:
-                    str = "module";
+                    str = "module"sv;
                     break;
                 case Definition::Type::Class:
-                    str = "class";
+                    str = "class"sv;
                     break;
                 case Definition::Type::Casgn:
-                    str = "casgn";
+                    str = "casgn"sv;
                     break;
                 case Definition::Type::Alias:
-                    str = "alias";
+                    str = "alias"sv;
                     break;
                 case Definition::Type::TypeAlias:
-                    str = "typealias";
+                    str = "typealias"sv;
                     break;
-                default: // shouldn't happen
-                    str = sym.shortName(ctx);
+                default: {
+                    // shouldn't happen
+                    auto v = sym.shortName(ctx);
+                    static_assert(std::is_same_v<decltype(v), string_view>, "shortName doesn't return the right thing");
+                    str = v;
+                    break;
+                }
             }
         } else {
-            str = sym.shortName(ctx);
+            auto v = sym.shortName(ctx);
+            static_assert(std::is_same_v<decltype(v), string_view>, "shortName doesn't return the right thing");
+            str = v;
         }
 
         packString(str);
