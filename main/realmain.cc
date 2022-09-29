@@ -284,7 +284,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
-            root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
+            autogen::DefTreeBuilder::mergeInto(gs, root, move(*out.defTree));
         }
     }
 

@@ -338,7 +338,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
     }
 }
 
-DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {
+void DefTreeBuilder::mergeInto(const core::GlobalState &gs, DefTree &lhs, DefTree rhs) {
     ENFORCE(lhs.qname == rhs.qname, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
@@ -351,10 +351,9 @@ DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree 
         if (inserted) {
             lchild->second = move(rchild);
         } else {
-            lchild->second = make_unique<DefTree>(merge(gs, move(*lchild->second), move(*rchild)));
+            mergeInto(gs, *lchild->second, move(*rchild));
         }
     }
-    return lhs;
 }
 
 void DefTreeBuilder::updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition &&ndef) {

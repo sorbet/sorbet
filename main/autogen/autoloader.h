@@ -120,7 +120,7 @@ public:
     static void addSingleDef(const core::GlobalState &, const AutoloaderConfig &, std::unique_ptr<DefTree> &root,
                              NamedDefinition);
 
-    static DefTree merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs);
+    static void mergeInto(const core::GlobalState &gs, DefTree &lhs, DefTree rhs);
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
