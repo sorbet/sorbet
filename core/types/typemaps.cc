@@ -288,19 +288,19 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                   absl::Span<const TypePtr> targs) const {
-    optional<vector<TypePtr>> newTargs = instantiateElems<vector<TypePtr>>(this->targs, gs, params, targs);
+    auto newTargs = instantiateElems<InlinedVector<TypePtr, 1>>(this->targs, gs, params, targs);
     if (!newTargs) {
         return nullptr;
     }
-    return make_type<AppliedType>(this->klass, move(*newTargs));
+    return make_type<AppliedType>(this->klass, std::move(*newTargs));
 }
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newTargs = instantiateElems<vector<TypePtr>>(this->targs, gs, tc);
+    auto newTargs = instantiateElems<InlinedVector<TypePtr, 1>>(this->targs, gs, tc);
     if (!newTargs) {
         return nullptr;
     }
-    return make_type<AppliedType>(this->klass, move(*newTargs));
+    return make_type<AppliedType>(this->klass, std::move(*newTargs));
 }
 
 TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
@@ -317,11 +317,11 @@ TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &t
         }
     }
 
-    optional<vector<TypePtr>> newTargs = approximateElems<vector<TypePtr>>(this->targs, gs, tc, polarities);
+    auto newTargs = approximateElems<InlinedVector<TypePtr, 1>>(this->targs, gs, tc, polarities);
     if (!newTargs) {
         return nullptr;
     }
-    return make_type<AppliedType>(this->klass, move(*newTargs));
+    return make_type<AppliedType>(this->klass, std::move(*newTargs));
 }
 
 TypePtr LambdaParam::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,

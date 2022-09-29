@@ -802,8 +802,8 @@ CheckSize(TupleType, 32, 8);
 TYPE(AppliedType) final : public Refcounted {
 public:
     ClassOrModuleRef klass;
-    std::vector<TypePtr> targs;
-    AppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs);
+    InlinedVector<TypePtr, 1> targs;
+    AppliedType(ClassOrModuleRef klass, InlinedVector<TypePtr, 1> targs);
     AppliedType(const AppliedType &) = delete;
     AppliedType &operator=(const AppliedType &) = delete;
 

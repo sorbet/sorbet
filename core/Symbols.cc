@@ -82,8 +82,8 @@ bool TypeArgumentRef::operator!=(const TypeArgumentRef &rhs) const {
     return rhs._id != this->_id;
 }
 
-vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
-    vector<TypePtr> targs;
+InlinedVector<TypePtr, 1> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
+    InlinedVector<TypePtr, 1> targs;
     for (auto tm : typeMembers()) {
         auto tmData = tm.data(gs);
         if (tmData->flags.isFixed) {
@@ -128,7 +128,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
     if (typeMembers().empty()) {
         resultType = make_type<ClassType>(ref);
     } else {
-        vector<TypePtr> targs;
+        InlinedVector<TypePtr, 1> targs;
         targs.reserve(typeMembers().size());
 
         // Special-case covariant stdlib generics to have their types

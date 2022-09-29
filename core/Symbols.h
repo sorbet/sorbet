@@ -403,7 +403,7 @@ public:
 
     uint32_t hash(const GlobalState &gs) const;
 
-    std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
+    InlinedVector<TypePtr, 1> selfTypeArgs(const GlobalState &gs) const;
 
     // selfType and externalType return the type of an instance of this Symbol
     // if instantiated without specific type parameters, as seen from inside or

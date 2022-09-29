@@ -543,11 +543,11 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         case TypePtr::Tag::AppliedType: {
             auto klass = ClassOrModuleRef::fromRaw(p.getU4());
             int sz = p.getU4();
-            vector<TypePtr> targs(sz);
+            InlinedVector<TypePtr, 1> targs(sz);
             for (auto &t : targs) {
                 t = unpickleType(p, gs);
             }
-            return make_type<AppliedType>(klass, move(targs));
+            return make_type<AppliedType>(klass, std::move(targs));
         }
         case TypePtr::Tag::TypeVar: {
             auto sym = TypeArgumentRef::fromRaw(p.getU4());

@@ -84,20 +84,20 @@ TypePtr Types::Float() {
 }
 
 TypePtr Types::arrayOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked()};
-    static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
+    static InlinedVector<TypePtr, 1> targs{Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Array(), std::move(targs));
     return res;
 }
 
 TypePtr Types::rangeOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked()};
-    static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
+    static InlinedVector<TypePtr, 1> targs{Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Range(), std::move(targs));
     return res;
 }
 
 TypePtr Types::hashOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
-    static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
+    static InlinedVector<TypePtr, 1> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Hash(), std::move(targs));
     return res;
 }
 
@@ -289,19 +289,19 @@ TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
 }
 
 TypePtr Types::arrayOf(const GlobalState &gs, const TypePtr &elem) {
-    vector<TypePtr> targs{move(elem)};
-    return make_type<AppliedType>(Symbols::Array(), move(targs));
+    InlinedVector<TypePtr, 1> targs{move(elem)};
+    return make_type<AppliedType>(Symbols::Array(), std::move(targs));
 }
 
 TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
-    vector<TypePtr> targs{move(elem)};
-    return make_type<AppliedType>(Symbols::Range(), move(targs));
+    InlinedVector<TypePtr, 1> targs{move(elem)};
+    return make_type<AppliedType>(Symbols::Range(), std::move(targs));
 }
 
 TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
-    vector<TypePtr> targs{Types::Symbol(), elem, make_type<TupleType>(move(tupleArgs))};
-    return make_type<AppliedType>(Symbols::Hash(), move(targs));
+    InlinedVector<TypePtr, 1> targs{Types::Symbol(), elem, make_type<TupleType>(move(tupleArgs))};
+    return make_type<AppliedType>(Symbols::Hash(), std::move(targs));
 }
 
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
@@ -776,7 +776,7 @@ TypePtr TupleType::elementType(const GlobalState &gs) const {
 SelfType::SelfType() {
     categoryCounterInc("types.allocated", "selftype");
 };
-AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
+AppliedType::AppliedType(ClassOrModuleRef klass, InlinedVector<TypePtr, 1> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
     histogramInc("appliedtype.targs", this->targs.size());
 }
@@ -794,12 +794,12 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
         type, [&](const AndType &andType) { ret = all(gs, widen(gs, andType.left), widen(gs, andType.right)); },
         [&](const OrType &orType) { ret = any(gs, widen(gs, orType.left), widen(gs, orType.right)); },
         [&](const AppliedType &appliedType) {
-            vector<TypePtr> newTargs;
+            InlinedVector<TypePtr, 1> newTargs;
             newTargs.reserve(appliedType.targs.size());
             for (const auto &t : appliedType.targs) {
                 newTargs.emplace_back(widen(gs, t));
             }
-            ret = make_type<AppliedType>(appliedType.klass, move(newTargs));
+            ret = make_type<AppliedType>(appliedType.klass, std::move(newTargs));
         },
         [&](const TypePtr &) {
             if (is_proxy_type(type)) {
@@ -843,7 +843,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         [&](const TupleType &tuple) { ret = make_type<TupleType>(unwrapTypeVector<vector<TypePtr>>(ctx, tuple.elems)); },
         [&](const MetaType &meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta.wrapped)); },
         [&](const AppliedType &appliedType) {
-            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector<vector<TypePtr>>(ctx, appliedType.targs));
+            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector<InlinedVector<TypePtr, 1>>(ctx, appliedType.targs));
         },
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
