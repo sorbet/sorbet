@@ -1,0 +1,11 @@
+# typed: true
+# assert-slow-path: true
+
+Y = Integer
+
+T.reveal_type( # error: `T.untyped`
+  X # error: Unable to resolve constant `X`
+)
+T.reveal_type( # error: `T.class_of(Integer)`
+  Y
+)

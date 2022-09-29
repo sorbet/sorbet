@@ -1,0 +1,8 @@
+# typed: strict
+# assert-fast-path: all_constant_redefinitions.rb
+
+module Wrapper
+  extend T::Generic
+
+  class A; end
+end

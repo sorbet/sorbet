@@ -1,0 +1,16 @@
+# typed: true
+# assert-fast-path: singleton_class_type_member.rb
+
+class Parent
+  class << self
+    extend T::Generic
+
+    ABC = type_member
+  end
+end
+
+class Child < Parent # error: Type `ABC` declared by parent `T.class_of(Parent)` must be re-declared
+  extend T::Generic
+
+  XYZ = type_template
+end

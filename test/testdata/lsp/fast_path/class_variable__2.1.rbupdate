@@ -1,0 +1,9 @@
+# typed: strict
+# exclude-from-file-update: true
+
+class A
+  T.reveal_type(@@foo) # error: `T.untyped`
+  #             ^^^^^ error: Use of undeclared variable `@@foo`
+  T.reveal_type(@@bar) # error: `Integer`
+  # no error
+end

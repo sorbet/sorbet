@@ -1,0 +1,6 @@
+# typed: strict
+# assert-fast-path: class_variable__1.rb,class_variable__2.rb
+
+class A
+  @@bar = T.let(1, Integer)
+end

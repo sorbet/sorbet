@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: type_alias_edit_path.rb
+
+class Example
+  extend T::Sig
+
+  AliasToInteger = T.type_alias {Integer}
+
+  sig {params(x: AliasToInteger).void}
+  def example(x)
+    T.reveal_type(x) # error: `Integer`
+  end
+end

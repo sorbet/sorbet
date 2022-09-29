@@ -1,0 +1,5 @@
+# typed: true
+# assert-fast-path: redef_const_scope.rb
+
+Z = 1 # error: Cannot initialize the class or module `Z` by constant assignment
+Z::X = 1

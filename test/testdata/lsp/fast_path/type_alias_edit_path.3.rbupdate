@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: type_alias_edit_path.rb
+
+class Example
+  extend T::Sig
+
+  AliasToInteger = T.type_alias
+  #                ^^^^^^^^^^^^ error: No block given to `T.type_alias`
+
+  sig {params(x: AliasToInteger).void}
+  def example(x)
+    T.reveal_type(x) # error: `T.untyped`
+  end
+end

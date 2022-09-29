@@ -1,0 +1,8 @@
+# typed: true
+# assert-fast-path: add_static_field_to_generic_class.rb
+
+class IntBox
+  extend T::Generic
+  NotElem = type_member
+  X = 1
+end

@@ -1,0 +1,9 @@
+# typed: strict
+# assert-fast-path: all_constant_redefinitions.rb
+
+module Wrapper
+  extend T::Generic
+
+  A = type_member # error: Redefining constant `A` as a type member or type template
+  class A; end
+end
