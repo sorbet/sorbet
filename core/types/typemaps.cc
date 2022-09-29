@@ -77,7 +77,7 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
 namespace {
 
 template <typename... MethodArgs>
-optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const MethodArgs &...methodArgs) {
+optional<vector<TypePtr>> instantiateElems(absl::Span<const TypePtr> elems, const MethodArgs &...methodArgs) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
@@ -109,7 +109,7 @@ optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const M
 // Matches the 4 used in the vector backing ClassOrModuleRef::typeMembers()
 using PolaritiesStore = InlinedVector<core::Polarity, 4>;
 
-optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const GlobalState &gs,
+optional<vector<TypePtr>> approximateElems(absl::Span<const TypePtr> elems, const GlobalState &gs,
                                            const TypeConstraint &tc, PolaritiesStore &polarities) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
