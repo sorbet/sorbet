@@ -57,7 +57,7 @@ QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, Definit
     auto &ref = def.defining_ref.data(*this);
     auto nameParts = showFullName(gs, ref.scope);
     nameParts.insert(nameParts.end(), ref.name.nameParts.begin(), ref.name.nameParts.end());
-    return QualifiedName{nameParts};
+    return QualifiedName::fromFullName(move(nameParts));
 }
 
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
