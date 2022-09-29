@@ -1,9 +1,9 @@
 #include "main/lsp/requests/workspace_symbols.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
 #include <algorithm>
 #include <cctype>
 #include <iterator>

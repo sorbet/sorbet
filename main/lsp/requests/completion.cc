@@ -9,11 +9,11 @@
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/FieldFinder.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
 #include "rapidjson/writer.h"
 
 using namespace std;

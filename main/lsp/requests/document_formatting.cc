@@ -2,9 +2,9 @@
 #include "common/FileOps.h"
 #include "common/Subprocess.h"
 #include "common/common.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
 
 using namespace std;
 

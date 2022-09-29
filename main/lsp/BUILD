@@ -32,13 +32,13 @@ cc_library(
     hdrs = [
         "LSPConfiguration.h",
         "LSPInput.h",
+        "LSPLoop.h",
         "LSPMessage.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
         "LSPQuery.h",
         "MoveMethod.h",
         "json_types.h",
-        "lsp.h",
         "wrapper.h",
     ],
     linkstatic = select({

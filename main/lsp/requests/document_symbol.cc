@@ -2,8 +2,8 @@
 #include "absl/strings/match.h"
 #include "ast/treemap/treemap.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/json_types.h"
-#include "main/lsp/lsp.h"
 
 #include "absl/algorithm/container.h"
 
