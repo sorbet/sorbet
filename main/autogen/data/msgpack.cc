@@ -11,11 +11,12 @@ namespace sorbet::autogen {
 
 void MsgpackWriter::packName(core::NameRef nm) {
     uint32_t id;
-    auto it = symbolIds.find(nm);
-    if (it == symbolIds.end()) {
+    typename decltype(symbolIds)::value_type v{nm, 0};
+    auto [it, inserted] = symbolIds.insert(v);
+    if (inserted) {
         id = symbols.size();
         symbols.emplace_back(nm);
-        symbolIds[nm] = id;
+        it->second = id;
     } else {
         id = it->second;
     }
