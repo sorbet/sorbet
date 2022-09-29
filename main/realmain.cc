@@ -324,8 +324,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
             for (const auto &[parentName, children] : *el.subclasses) {
                 if (!parentName.empty()) {
-                    childMap[parentName].entries.insert(children.entries.begin(), children.entries.end());
-                    childMap[parentName].classKind = children.classKind;
+                    auto &childEntry = childMap[parentName];
+                    childEntry.entries.insert(children.entries.begin(), children.entries.end());
+                    childEntry.classKind = children.classKind;
                 }
             }
         }
