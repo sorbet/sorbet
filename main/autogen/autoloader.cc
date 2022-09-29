@@ -102,7 +102,7 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
 
     auto fullName = parsedFile.showQualifiedName(gs, def);
 
-    return {def.data(parsedFile), fullName, parentName, parsedFile.requireStatements, parsedFile.tree.file, pathDepth};
+    return {def.data(parsedFile), move(fullName), move(parentName), parsedFile.requireStatements, parsedFile.tree.file, pathDepth};
 }
 
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
