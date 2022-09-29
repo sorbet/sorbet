@@ -110,8 +110,8 @@ optional<VectorType> instantiateElems(absl::Span<const TypePtr> elems, const Met
 using PolaritiesStore = InlinedVector<core::Polarity, 4>;
 
 template <typename VectorType>
-optional<VectorType> approximateElems(absl::Span<const TypePtr> elems, const GlobalState &gs,
-                                           const TypeConstraint &tc, PolaritiesStore &polarities) {
+optional<VectorType> approximateElems(absl::Span<const TypePtr> elems, const GlobalState &gs, const TypeConstraint &tc,
+                                      PolaritiesStore &polarities) {
     optional<VectorType> newElems;
     int i = -1;
     for (auto &e : elems) {

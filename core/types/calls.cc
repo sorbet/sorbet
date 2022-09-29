@@ -326,7 +326,8 @@ int getArity(const GlobalState &gs, MethodRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, absl::Span<const TypePtr> targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, absl::Span<const TypePtr> targs,
+                        bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
@@ -1512,7 +1513,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     return result;
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, absl::Span<const TypePtr> targs) {
+TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name,
+                           absl::Span<const TypePtr> targs) {
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {

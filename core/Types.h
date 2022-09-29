@@ -389,8 +389,8 @@ public:
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         absl::Span<const TypePtr> targs) const;
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params, absl::Span<const TypePtr> targs)
+        const;
 };
 CheckSize(LambdaParam, 24, 8);
 
@@ -650,8 +650,8 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         absl::Span<const TypePtr> targs) const;
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params, absl::Span<const TypePtr> targs)
+        const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
@@ -707,8 +707,8 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         absl::Span<const TypePtr> targs) const;
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params, absl::Span<const TypePtr> targs)
+        const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -753,8 +753,8 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         absl::Span<const TypePtr> targs) const;
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params, absl::Span<const TypePtr> targs)
+        const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
@@ -786,8 +786,8 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         absl::Span<const TypePtr> targs) const;
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params, absl::Span<const TypePtr> targs)
+        const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -815,8 +815,8 @@ public:
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         absl::Span<const TypePtr> targs) const;
+    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params, absl::Span<const TypePtr> targs)
+        const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
