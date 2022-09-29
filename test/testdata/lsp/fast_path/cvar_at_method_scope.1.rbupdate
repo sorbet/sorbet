@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: cvar_at_method_scope.rb
 
 class A
   def self.wherein_we_add_a_cvar

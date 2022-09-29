@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: static_field_name.rb
 
 class X
   #   ^ hover: T.class_of(X)
