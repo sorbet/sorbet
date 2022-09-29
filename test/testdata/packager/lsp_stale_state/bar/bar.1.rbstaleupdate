@@ -15,5 +15,5 @@ class Project::Bar::Bar
   #                  ^ hover: T.class_of(Project::Foo::Foo)
   #                  ^ hover: # note: information may be stale
 
-  X = 1
+  class X; end
 end

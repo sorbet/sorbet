@@ -15,5 +15,5 @@ class Project::Bar::Bar
   #                  ^ hover: T.class_of(Project::Foo::Foo)
   #                  _________________________________________
 
-  # ___
+  # __________
 end

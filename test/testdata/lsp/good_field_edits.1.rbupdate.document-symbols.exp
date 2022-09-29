@@ -13,7 +13,7 @@
                     "character": 0
                 },
                 "end": {
-                    "line": 8,
+                    "line": 11,
                     "character": 3
                 }
             },
@@ -34,21 +34,21 @@
                     "kind": 14,
                     "range": {
                         "start": {
-                            "line": 3,
+                            "line": 5,
                             "character": 2
                         },
                         "end": {
-                            "line": 3,
+                            "line": 5,
                             "character": 8
                         }
                     },
                     "selectionRange": {
                         "start": {
-                            "line": 3,
+                            "line": 5,
                             "character": 2
                         },
                         "end": {
-                            "line": 3,
+                            "line": 5,
                             "character": 8
                         }
                     },
@@ -60,27 +60,53 @@
                     "kind": 6,
                     "range": {
                         "start": {
-                            "line": 5,
+                            "line": 8,
                             "character": 2
                         },
                         "end": {
-                            "line": 7,
+                            "line": 10,
                             "character": 5
                         }
                     },
                     "selectionRange": {
                         "start": {
-                            "line": 5,
+                            "line": 8,
                             "character": 2
                         },
                         "end": {
-                            "line": 5,
+                            "line": 8,
                             "character": 9
                         }
                     },
                     "children": []
                 }
             ]
+        },
+        {
+            "name": "D",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 13,
+                    "character": 0
+                },
+                "end": {
+                    "line": 20,
+                    "character": 3
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 13,
+                    "character": 0
+                },
+                "end": {
+                    "line": 13,
+                    "character": 11
+                }
+            },
+            "children": []
         }
     ]
 }

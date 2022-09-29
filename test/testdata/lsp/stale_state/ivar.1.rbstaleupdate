@@ -8,4 +8,4 @@ class A
   end
 end
 
-X = 1
+class X; end
