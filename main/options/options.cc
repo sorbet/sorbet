@@ -329,6 +329,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("watchman-path",
                                     "Path to watchman executable. Defaults to using `watchman` on your PATH.",
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
+    options.add_options("advanced")("watchman-pause-state-name",
+                                    "Name of watchman state that halts processing for its duration",
+                                    cxxopts::value<string>()->default_value(empty.watchmanPauseStateName));
+
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
                                     "Enable experimental LSP feature: Document Symbol");
     options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
@@ -820,6 +824,12 @@ void readOptions(Options &opts,
         opts.runLSP = raw["lsp"].as<bool>();
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
+        opts.watchmanPauseStateName = raw["watchman-pause-state-name"].as<string>();
+        if (!opts.watchmanPauseStateName.empty() && !opts.disableWatchman) {
+            logger->error("watchman-pause-state-name must be used with watchman enabled");
+            throw EarlyReturnWithCode(1);
+        }
+
         // Certain features only need certain passes
         if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error(
