@@ -1,0 +1,11 @@
+# typed: true
+# exclude-from-file-update: true
+
+class A_05
+  extend T::Sig
+
+  sig {returns(String)}
+  def foo()
+    42
+  end
+end
