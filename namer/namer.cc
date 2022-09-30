@@ -1438,12 +1438,23 @@ public:
                 // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
                 // There won't be an entry in the old typeMemberHashes for these type members, so we have to
                 // delete them manually.
+                auto currentClass = klass;
                 vector<core::TypeMemberRef> toDelete;
-                const auto &typeMembers = klass.data(ctx)->typeMembers();
-                toDelete.reserve(typeMembers.size());
-                for (const auto &typeMember : typeMembers) {
-                    toDelete.emplace_back(typeMember);
-                }
+                do {
+                    const auto &typeMembers = currentClass.data(ctx)->typeMembers();
+                    toDelete.reserve(typeMembers.size());
+                    for (const auto &typeMember : typeMembers) {
+                        if (typeMember.data(ctx)->name == core::Names::Constants::AttachedClass()) {
+                            // <AttachedClass> type templates are created when the singleton class was created.
+                            // Since we don't delete and re-add classes on the fast path, we both can and must leave
+                            // these `<AttachedClass>` type templates alone
+                            continue;
+                        }
+                        toDelete.emplace_back(typeMember);
+                    }
+
+                    currentClass = currentClass.data(ctx)->lookupSingletonClass(ctx);
+                } while (currentClass.exists());
 
                 for (auto oldTypeMember : toDelete) {
                     oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
