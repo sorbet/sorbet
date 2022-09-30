@@ -1157,7 +1157,10 @@ private:
         if (symbol != core::Symbols::root()) {
             symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
-        symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+        auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+        if (symbol != core::Symbols::root()) {
+            singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+        }
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
