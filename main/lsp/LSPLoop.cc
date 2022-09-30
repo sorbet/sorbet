@@ -145,9 +145,13 @@ public:
     }
 
     virtual void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
+        auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateEnter, move(stateEnter));
+        enqueueNotification(move(notification));
     }
 
     virtual void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
+        auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateLeave, move(stateLeave));
+        enqueueNotification(move(notification));
     }
 
     virtual void processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
