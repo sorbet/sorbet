@@ -52,7 +52,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U A>>#<U test_yield_no_block_type> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=70:3 end=70:34}
       argument x<> -> Integer @ Loc {file=test/testdata/resolver/sig_misc.rb start=69:15 end=69:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=5:7 end=5:8}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Helpers>>, <C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=5:1 end=5:8}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/sig_misc.rb start=5:7 end=5:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=5:1 end=115:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
@@ -60,12 +60,12 @@ class <C <U <root>>> < <C <U Object>> ()
       argument x<> -> T1 @ Loc {file=test/testdata/resolver/sig_misc.rb start=58:15 end=58:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=2:9}
-  class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:7 end=2:9}
+  class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=2:9}
     type-member(+) <S <C <U T1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U T1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=T1) @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:7 end=2:9}
     method <S <C <U T1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=2:1 end=2:14}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}
   class <C <U T2>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=3:9}
-  class <S <C <U T2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:7 end=3:9}
+  class <S <C <U T2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=3:9}
     type-member(+) <S <C <U T2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U T2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=T2) @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:7 end=3:9}
     method <S <C <U T2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_misc.rb start=3:1 end=3:14}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_misc.rb start=??? end=???}

@@ -13,7 +13,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_errors.rb start=??? end=???}
     method <C <U LetErrors>>#<U not_initialize> (<blk>) @ Loc {file=test/testdata/resolver/let_errors.rb start=10:3 end=10:21}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_errors.rb start=??? end=???}
-  class <S <C <U LetErrors>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/let_errors.rb start=2:7 end=2:16}
+  class <S <C <U LetErrors>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/let_errors.rb start=2:1 end=2:16}
     type-member(+) <S <C <U LetErrors>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U LetErrors>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=LetErrors) @ Loc {file=test/testdata/resolver/let_errors.rb start=2:7 end=2:16}
     method <S <C <U LetErrors>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/let_errors.rb start=2:1 end=25:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_errors.rb start=??? end=???}

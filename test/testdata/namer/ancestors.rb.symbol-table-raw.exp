@@ -3,27 +3,27 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=2:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
   class <C <U Child>> < <C <U Parent>> (<C <U Mixin2>>) @ Loc {file=test/testdata/namer/ancestors.rb start=9:1 end=9:21}
-  class <S <C <U Child>> $1>[<C <U <AttachedClass>>>] < <S <C <U Parent>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=9:7 end=9:12}
+  class <S <C <U Child>> $1>[<C <U <AttachedClass>>>] < <S <C <U Parent>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=9:1 end=9:21}
     type-member(+) <S <C <U Child>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Child>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child) @ Loc {file=test/testdata/namer/ancestors.rb start=9:7 end=9:12}
     method <S <C <U Child>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=9:1 end=11:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
   module <C <U Mixin1>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/ancestors.rb start=2:1 end=2:14}
-  class <S <C <U Mixin1>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/ancestors.rb start=2:8 end=2:14}
+  class <S <C <U Mixin1>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/ancestors.rb start=2:1 end=2:14}
     type-member(+) <S <C <U Mixin1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin1) @ Loc {file=test/testdata/namer/ancestors.rb start=2:8 end=2:14}
     method <S <C <U Mixin1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=2:1 end=2:19}
       argument <blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
   module <C <U Mixin2>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/ancestors.rb start=3:1 end=3:14}
-  class <S <C <U Mixin2>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/ancestors.rb start=3:8 end=3:14}
+  class <S <C <U Mixin2>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/ancestors.rb start=3:1 end=3:14}
     type-member(+) <S <C <U Mixin2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin2) @ Loc {file=test/testdata/namer/ancestors.rb start=3:8 end=3:14}
     method <S <C <U Mixin2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=3:1 end=3:19}
       argument <blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
   class <C <U MultipleInclude>> < <C <U Object>> (<C <U Mixin1>>, <C <U Mixin2>>) @ Loc {file=test/testdata/namer/ancestors.rb start=13:1 end=13:22}
-  class <S <C <U MultipleInclude>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=13:7 end=13:22}
+  class <S <C <U MultipleInclude>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=13:1 end=13:22}
     type-member(+) <S <C <U MultipleInclude>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U MultipleInclude>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MultipleInclude) @ Loc {file=test/testdata/namer/ancestors.rb start=13:7 end=13:22}
     method <S <C <U MultipleInclude>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=13:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}
   class <C <U Parent>> < <C <U Object>> (<C <U Mixin1>>) @ Loc {file=test/testdata/namer/ancestors.rb start=5:1 end=5:13}
-  class <S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=5:7 end=5:13}
+  class <S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/ancestors.rb start=5:1 end=5:13}
     type-member(+) <S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/namer/ancestors.rb start=5:7 end=5:13}
     method <S <C <U Parent>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/ancestors.rb start=5:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/ancestors.rb start=??? end=???}

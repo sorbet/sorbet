@@ -4,12 +4,12 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/todo/const_in_block.rb start=??? end=???}
   class <C <U Test>> < <C <U Object>> () @ Loc {file=test/testdata/todo/const_in_block.rb start=2:1 end=2:11}
     class <C <U Test>>::<C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/todo/const_in_block.rb start=4:5 end=4:12}
-    class <C <U Test>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/const_in_block.rb start=4:11 end=4:12}
+    class <C <U Test>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/const_in_block.rb start=4:5 end=4:12}
       type-member(+) <C <U Test>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Test>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test::A) @ Loc {file=test/testdata/todo/const_in_block.rb start=4:11 end=4:12}
       method <C <U Test>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/todo/const_in_block.rb start=4:5 end=5:8}
         argument <blk><block> @ Loc {file=test/testdata/todo/const_in_block.rb start=??? end=???}
     static-field <C <U Test>>::<C <U B>> -> Integer @ Loc {file=test/testdata/todo/const_in_block.rb start=7:5 end=7:6}
-  class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/const_in_block.rb start=2:7 end=2:11}
+  class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/const_in_block.rb start=2:1 end=2:11}
     type-member(+) <S <C <U Test>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/todo/const_in_block.rb start=2:7 end=2:11}
     method <S <C <U Test>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/todo/const_in_block.rb start=2:1 end=9:4}
       argument <blk><block> @ Loc {file=test/testdata/todo/const_in_block.rb start=??? end=???}

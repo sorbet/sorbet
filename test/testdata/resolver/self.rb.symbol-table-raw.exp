@@ -8,7 +8,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
     method <C <U TestSelf>>#<U pass> (<blk>) -> TestSelf @ Loc {file=test/testdata/resolver/self.rb start=17:3 end=17:13}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
-  class <S <C <U TestSelf>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/self.rb start=3:7 end=3:15}
+  class <S <C <U TestSelf>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=3:15}
     type-member(+) <S <C <U TestSelf>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestSelf>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestSelf) @ Loc {file=test/testdata/resolver/self.rb start=3:7 end=3:15}
     method <S <C <U TestSelf>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=3:1 end=20:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
@@ -19,7 +19,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
     method <C <U TestSelfGeneric>>#<U pass> (<blk>) -> AppliedType {       klass = <C <U TestSelfGeneric>>       targs = [         <C <U Elem>> = LambdaParam(<C <U TestSelfGeneric>>::<C <U Elem>>, lower=T.noreturn, upper=<top>)       ]     } @ Loc {file=test/testdata/resolver/self.rb start=39:3 end=39:13}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}
-  class <S <C <U TestSelfGeneric>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>, <C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/self.rb start=23:7 end=23:22}
+  class <S <C <U TestSelfGeneric>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>, <C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/self.rb start=23:1 end=23:22}
     type-member(+) <S <C <U TestSelfGeneric>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestSelfGeneric>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U TestSelfGeneric>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/resolver/self.rb start=23:7 end=23:22}
     method <S <C <U TestSelfGeneric>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/self.rb start=23:1 end=42:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/self.rb start=??? end=???}

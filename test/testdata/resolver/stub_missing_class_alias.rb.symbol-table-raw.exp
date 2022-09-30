@@ -7,11 +7,11 @@ class <C <U <root>>> < <C <U Object>> ()
       static-field <C <U O>>::<C <U B>>::<C <U Doc1>> -> Integer @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=9:3 end=9:7}
       static-field <C <U O>>::<C <U B>>::<C <U Document>> @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=8:3 end=8:11}
       class <C <U O>>::<C <U B>>::<C <U J>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=5:3 end=5:10}
-      class <C <U O>>::<C <U B>>::<S <C <U J>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=5:9 end=5:10}
+      class <C <U O>>::<C <U B>>::<S <C <U J>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=5:3 end=5:10}
         type-member(+) <C <U O>>::<C <U B>>::<S <C <U J>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U O>>::<C <U B>>::<S <C <U J>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=O::B::J) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=5:9 end=5:10}
         method <C <U O>>::<C <U B>>::<S <C <U J>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=5:3 end=6:6}
           argument <blk><block> @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=??? end=???}
-    class <C <U O>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:7 end=4:11}
+    class <C <U O>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:1 end=4:11}
       type-member(+) <C <U O>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U O>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=O::B) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:7 end=4:11}
       method <C <U O>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=4:1 end=22:4}
         argument <blk><block> @ Loc {file=test/testdata/resolver/stub_missing_class_alias.rb start=??? end=???}

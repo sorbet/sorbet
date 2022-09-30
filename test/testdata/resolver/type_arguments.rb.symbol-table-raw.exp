@@ -3,7 +3,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/type_arguments.rb start=3:1 end=13:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_arguments.rb start=??? end=???}
   class <C <U Func>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/type_arguments.rb start=3:1 end=3:11}
-  class <S <C <U Func>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/type_arguments.rb start=3:7 end=3:11}
+  class <S <C <U Func>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/type_arguments.rb start=3:1 end=3:11}
     type-member(+) <S <C <U Func>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Func>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Func) @ Loc {file=test/testdata/resolver/type_arguments.rb start=3:7 end=3:11}
     method <S <C <U Func>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_arguments.rb start=3:1 end=13:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_arguments.rb start=??? end=???}

@@ -5,41 +5,41 @@ class <C <U <root>>> < <C <U Object>> ()
   module <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:1 end=34:9}
     static-field <C <U A>>::<C <U AB>> -> AliasType { symbol = <C <U B>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=35:3 end=35:5}
     static-field <C <U A>>::<C <U AV>> -> Integer @ Loc {file=test/testdata/resolver/resolution_order.rb start=37:3 end=37:5}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:8 end=34:9}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:1 end=34:9}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:8 end=34:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=34:1 end=38:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=40:1 end=40:8}
     static-field <C <U B>>::<C <U BC>> -> AliasType { symbol = <C <U C>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=41:3 end=41:5}
-  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=40:7 end=40:8}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=40:1 end=40:8}
     type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/resolver/resolution_order.rb start=40:7 end=40:8}
     method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=40:1 end=42:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <C <U C>> < <C <U B>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=44:1 end=44:12}
-  class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U B>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=44:7 end=44:8}
+  class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U B>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=44:1 end=44:12}
     type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/resolver/resolution_order.rb start=44:7 end=44:8}
     method <S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=44:1 end=45:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   module <C <U D>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=62:1 end=62:9}
     static-field <C <U D>>::<C <U DA>> -> AliasType { symbol = <C <U A>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=63:3 end=63:5}
-  class <S <C <U D>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=62:8 end=62:9}
+  class <S <C <U D>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=62:1 end=62:9}
     type-member(+) <S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D) @ Loc {file=test/testdata/resolver/resolution_order.rb start=62:8 end=62:9}
     method <S <C <U D>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=62:1 end=64:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   module <C <U E>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U D>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=56:1 end=56:9}
     static-field <C <U E>>::<C <U EA>> -> AliasType { symbol = <C <U D>>::<C <U DA>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=58:3 end=58:5}
     static-field <C <U E>>::<C <U EC>> -> AliasType { symbol = <C <U B>>::<C <U BC>> } @ Loc {file=test/testdata/resolver/resolution_order.rb start=59:3 end=59:5}
-  class <S <C <U E>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=56:8 end=56:9}
+  class <S <C <U E>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=56:1 end=56:9}
     type-member(+) <S <C <U E>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U E>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=E) @ Loc {file=test/testdata/resolver/resolution_order.rb start=56:8 end=56:9}
     method <S <C <U E>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=56:1 end=60:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   module <C <U F>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U E>>, <C <U D>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:1 end=47:9}
-  class <S <C <U F>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:8 end=47:9}
+  class <S <C <U F>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:1 end=47:9}
     type-member(+) <S <C <U F>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U F>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=F) @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:8 end=47:9}
     method <S <C <U F>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:1 end=54:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <C <U HasError>> < <C <U Object>> (<C <U StubModule>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=10:15}
-  class <S <C <U HasError>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:7 end=10:15}
+  class <S <C <U HasError>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=10:15}
     type-member(+) <S <C <U HasError>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U HasError>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=HasError) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:7 end=10:15}
     method <S <C <U HasError>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=12:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
@@ -50,17 +50,17 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U IsGood>>#<U foo2> (a, <blk>) -> Integer @ Loc {file=test/testdata/resolver/resolution_order.rb start=23:3 end=23:14}
       argument a<> -> A @ Loc {file=test/testdata/resolver/resolution_order.rb start=22:15 end=22:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
-  class <S <C <U IsGood>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:7 end=14:13}
+  class <S <C <U IsGood>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=14:13}
     type-member(+) <S <C <U IsGood>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U IsGood>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=IsGood) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:7 end=14:13}
     method <S <C <U IsGood>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=26:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <C <U TestInheritace1>> < <C <U B>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:1 end=28:30}
-  class <S <C <U TestInheritace1>> $1>[<C <U <AttachedClass>>>] < <S <C <U B>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:7 end=28:22}
+  class <S <C <U TestInheritace1>> $1>[<C <U <AttachedClass>>>] < <S <C <U B>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:1 end=28:30}
     type-member(+) <S <C <U TestInheritace1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestInheritace1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestInheritace1) @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:7 end=28:22}
     method <S <C <U TestInheritace1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=28:1 end=29:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <C <U TestInheritace2>> < <C <U A>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=31:1 end=31:30}
-  class <S <C <U TestInheritace2>> $1>[<C <U <AttachedClass>>>] < <S <C <U A>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=31:7 end=31:22}
+  class <S <C <U TestInheritace2>> $1>[<C <U <AttachedClass>>>] < <S <C <U A>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=31:1 end=31:30}
     type-member(+) <S <C <U TestInheritace2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestInheritace2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestInheritace2) @ Loc {file=test/testdata/resolver/resolution_order.rb start=31:7 end=31:22}
     method <S <C <U TestInheritace2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=31:1 end=32:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}

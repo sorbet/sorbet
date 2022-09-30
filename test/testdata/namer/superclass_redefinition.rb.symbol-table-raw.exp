@@ -3,12 +3,12 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:1 end=8:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=7:1 end=7:12}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:7 end=2:8}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=7:1 end=7:12}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:7 end=2:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=2:1 end=3:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=??? end=???}
   class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=4:1 end=4:8}
-  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=4:7 end=4:8}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=4:1 end=4:8}
     type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=4:7 end=4:8}
     method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=4:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/superclass_redefinition.rb start=??? end=???}

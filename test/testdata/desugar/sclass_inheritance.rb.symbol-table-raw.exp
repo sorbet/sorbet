@@ -14,7 +14,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <S <C <U A>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=5:5 end=11:8}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=??? end=???}
   class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=14:1 end=14:8}
-  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U MM>>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=14:7 end=14:8}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U MM>>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=14:1 end=14:8}
     type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=14:7 end=14:8}
     method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=14:1 end=20:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=??? end=???}
@@ -32,7 +32,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <S <C <U C>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=23:4 end=27:7}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=??? end=???}
   module <C <U MM>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:1 end=2:10}
-  class <S <C <U MM>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:8 end=2:10}
+  class <S <C <U MM>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:1 end=2:10}
     type-member(+) <S <C <U MM>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U MM>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MM) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:8 end=2:10}
     method <S <C <U MM>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:1 end=2:15}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=??? end=???}
