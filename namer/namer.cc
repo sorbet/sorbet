@@ -1433,6 +1433,26 @@ public:
                 deleteTypeMemberViaFullNameHash(ctx, state, oldTypeMemberHash);
             }
 
+            for (auto klass : state.definedClasses) {
+                // In the process of recovering from "parent type member must be re-declared in child" errors,
+                // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
+                // There won't be an entry in the old typeMemberHashes for these type members, so we have to
+                // delete them manually.
+                vector<core::TypeMemberRef> toDelete;
+                const auto &typeMembers = klass.data(ctx)->typeMembers();
+                toDelete.reserve(typeMembers.size());
+                for (const auto &typeMember : typeMembers) {
+                    toDelete.emplace_back(typeMember);
+                }
+
+                for (auto oldTypeMember : toDelete) {
+                    oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
+                    if (oldTypeMember.data(ctx)->locs().empty()) {
+                        ctx.state.deleteTypeMemberSymbol(oldTypeMember);
+                    }
+                }
+            }
+
             for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
                 deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
             }

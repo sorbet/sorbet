@@ -51,6 +51,16 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
                 : core::errors::Resolver::ParentTypeNotDeclared;
 
         if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
+            // Note having this error is intentional, as it makes it easier to implement Sorbet's incremental mode.
+            //
+            // In the past, we have floated ideas of allowing users to skip redeclaring a parent's type members if
+            // those type members are fixed, and simply copying the fixed type member down onto the child on the
+            // user's behalf.
+            //
+            // But that runs afoul of our (simple) heuristic to retypecheck all files that simply mention a symbol
+            // name on the LSP fast path. If a grandchild class was not forced to redeclare a grandparent's
+            // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
+            // grandchild class's file in the set of files to retypecheck.
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
                         sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
