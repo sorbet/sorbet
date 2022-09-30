@@ -4,7 +4,8 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-WatchmanStateLeaveTask::WatchmanStateLeaveTask(const LSPConfiguration &config, std::unique_ptr<WatchmanStateLeave> params)
+WatchmanStateLeaveTask::WatchmanStateLeaveTask(const LSPConfiguration &config,
+                                               std::unique_ptr<WatchmanStateLeave> params)
     : LSPTask(config, LSPMethod::SorbetWatchmanStateLeave), params(move(params)) {}
 
 LSPTask::Phase WatchmanStateLeaveTask::finalPhase() const {

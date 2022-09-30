@@ -22,8 +22,7 @@ WatchmanProcess::~WatchmanProcess() {
 };
 
 namespace {
-template <typename F>
-void catchDeserializationError(spdlog::logger &logger, const string &line, F &&f) {
+template <typename F> void catchDeserializationError(spdlog::logger &logger, const string &line, F &&f) {
     try {
         f();
     } catch (sorbet::realmain::lsp::DeserializationError e) {
@@ -31,7 +30,7 @@ void catchDeserializationError(spdlog::logger &logger, const string &line, F &&f
         logger.error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
     }
 }
-}
+} // namespace
 
 void WatchmanProcess::start() {
     auto mainPid = getpid();

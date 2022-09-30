@@ -10,7 +10,7 @@ namespace sorbet::realmain::lsp {
 class WatchmanQueryResponse;
 class WatchmanStateEnter;
 class WatchmanStateLeave;
-}
+} // namespace sorbet::realmain::lsp
 
 namespace sorbet::realmain::lsp::watchman {
 class WatchmanProcess {
