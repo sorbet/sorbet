@@ -1390,6 +1390,10 @@ private:
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
         auto owner = getOwnerSymbol(state, oldDefHash.owner());
         if (oldDefHash.isTypeTemplate) {
+            // Also have to delete the static-field-class-alias that forwards from a constant
+            // literal on the attached class to the type template on the singleton class
+            deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
+
             owner = owner.data(ctx)->singletonClass(ctx);
         }
 
