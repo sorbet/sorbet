@@ -2342,9 +2342,18 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
                 staticFieldHash = mix(fieldHash, staticFieldShapeHash);
             }
         } else if (field.flags.isStaticField) {
-            // static-field class alias
-            hierarchyHash = mix(hierarchyHash, symhash);
-            classAliasHash = mix(classAliasHash, symhash);
+            const auto &dealiased = field.dealias(*this);
+            if (this->lspExperimentalFastPathEnabled && dealiased.isTypeMember() &&
+                field.name == dealiased.name(*this) &&
+                dealiased.owner(*this) == field.owner.data(*this)->lookupSingletonClass(*this)) {
+                // This is a static field class alias that forwards to a type_template on the singleton class
+                // (in service of constant literal resolution). Treat this as a type member (which we can
+                // handle on the fast path) and not like other class aliases.
+            } else {
+                // Normal static-field class alias
+                hierarchyHash = mix(hierarchyHash, symhash);
+                classAliasHash = mix(classAliasHash, symhash);
+            }
         } else {
             ENFORCE(field.flags.isField);
             auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];

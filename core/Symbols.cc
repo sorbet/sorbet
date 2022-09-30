@@ -2290,6 +2290,15 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 } else {
                     // Currently only static field class aliases must take the slow path
                     ENFORCE(field->flags.isStaticField && field->isClassAlias());
+
+                    const auto &dealiased = field->dealias(gs);
+                    if (dealiased.isTypeMember() && field->name == dealiased.name(gs) &&
+                        dealiased.owner(gs) == this->lookupSingletonClass(gs)) {
+                        // This is a static field class alias that forwards to a type_template on the singleton class
+                        // (in service of constant literal resolution). Treat this as a type member (which we can
+                        // handle on the fast path) and not like other class aliases.
+                        continue;
+                    }
                 }
             }
 

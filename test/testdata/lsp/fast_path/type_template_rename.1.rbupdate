@@ -1,0 +1,13 @@
+# typed: strict
+# assert-fast-path: type_template_rename.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  AnotherElem = type_template
+end
+
+  class Child < Parent
+# ^^^^^^^^^^^^^^^^^^^^ error: Type `AnotherElem` declared by parent `T.class_of(Parent)` must be re-declared in `T.class_of(Child)`
+  end
