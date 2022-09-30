@@ -167,6 +167,8 @@ Metrics/BlockLength:
 # Configuration parameters: CountComments, CountAsOne.
 Metrics/ClassLength:
   Max: 1098
+  Exclude:
+    - 'test/types/types.rb'
 
 # Offense count: 38
 # Configuration parameters: IgnoredMethods.
