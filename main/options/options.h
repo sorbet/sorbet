@@ -161,6 +161,7 @@ struct Options {
     bool runLSP = false;
     bool disableWatchman = false;
     std::string watchmanPath = "watchman";
+    std::string watchmanPauseStateName;
     bool stressIncrementalResolver = false;
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
     bool traceLexer = false;
