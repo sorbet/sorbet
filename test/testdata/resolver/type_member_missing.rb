@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 class Base
   extend T::Generic
 

@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 
 # found by fuzzer: https://github.com/sorbet/sorbet/issues/1080
 

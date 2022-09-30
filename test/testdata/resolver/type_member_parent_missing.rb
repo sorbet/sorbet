@@ -1,5 +1,5 @@
 # typed: strict
-# disable-fast-path: true
+
 
   class Foo1
 # ^^^^^^^^^^ error: Type `Elem` declared by parent `Enumerable` must be re-declared in `Foo1`
