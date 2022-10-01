@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: type_member_rename_multi__1.rb,type_member_rename_multi__2.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  AnotherElem = type_member
+
+  sig {overridable.params(x: MyElem).void}
+  #                          ^^^^^^ error: Unable to resolve constant `MyElem`
+  def example(x)
+  end
+end
