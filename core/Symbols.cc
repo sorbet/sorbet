@@ -2261,7 +2261,13 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
 
 uint32_t ClassOrModule::hash(const GlobalState &gs) const {
     uint32_t result = _hash(name.shortName(gs));
-    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    if (!gs.lspExperimentalFastPathEnabled) {
+        // resultType on a ClassOrModule is just externalType(), which is a function of this class
+        // (including singletons and attached classes) and its type members. If any of those things
+        // change, either they will be reflected elsewhere in the hash, or they don't need to be
+        // included in the hash at all.
+        result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    }
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     result = mix(result, this->superClass_.id());
