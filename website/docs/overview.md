@@ -44,7 +44,7 @@ def main
 end
 ```
 
-<a href="https://sorbet.run/#class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20Integer).returns(String)%7D%0A%20%20def%20bar(x)%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0Adef%20main%0A%20%20A.new.barr(91)%20%20%20%23%20error%3A%20Typo!%0A%20%20A.new.bar(%2291%22)%20%20%23%20error%3A%20Type%20mismatch!%0Aend">
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Arequire%20'sorbet-runtime'%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams%28x%3A%20Integer%29.returns%28String%29%7D%0A%20%20def%20bar%28x%29%0A%20%20%20%20x.to_s%0A%20%20end%0Aend%0A%0Adef%20main%0A%20%20A.new.barr%2891%29%20%20%20%23%20error%3A%20Typo!%0A%20%20A.new.bar%28%2291%22%29%20%20%23%20error%3A%20Type%20mismatch!%0Aend">
   → View on sorbet.run
 </a>
 
