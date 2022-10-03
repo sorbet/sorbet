@@ -1679,6 +1679,7 @@ FileRef GlobalState::reserveFileRef(string path) {
 }
 
 void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind) {
+    ENFORCE(!what.isClassOrModule(), "Class symbols should take precedence over all other symbols");
     auto owner = what.owner(*this).asClassOrModuleRef();
     auto ownerData = owner.data(*this);
     auto &ownerMembers = ownerData->members();
