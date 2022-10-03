@@ -13,7 +13,7 @@ class <C <U <root>>> < <C <U Object>> ()
             argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
           method <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<C <U NotifySlackBuildComplete>>#<U initialize> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=5:3 end=5:19}
             argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}
-        class <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<S <C <U NotifySlackBuildComplete>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:51}
+        class <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<S <C <U NotifySlackBuildComplete>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:1 end=2:51}
           type-member(+) <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<S <C <U NotifySlackBuildComplete>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<S <C <U NotifySlackBuildComplete>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::CIBot::Tasks::NotifySlackBuildComplete) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:7 end=2:51}
           method <C <U Opus>>::<C <U CIBot>>::<C <U Tasks>>::<S <C <U NotifySlackBuildComplete>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/infer/lub_tuples.rb start=2:1 end=16:4}
             argument <blk><block> @ Loc {file=test/testdata/infer/lub_tuples.rb start=??? end=???}

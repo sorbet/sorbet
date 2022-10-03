@@ -4,14 +4,14 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=??? end=???}
   module <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=2:1 end=2:9}
     class <C <U A>>::<C <U C1>> < <C <U Object>> () @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=5:3 end=5:11}
-    class <C <U A>>::<S <C <U C1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=5:9 end=5:11}
+    class <C <U A>>::<S <C <U C1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=5:3 end=5:11}
       type-member(+) <C <U A>>::<S <C <U C1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U C1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::C1) @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=5:9 end=5:11}
       method <C <U A>>::<S <C <U C1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=5:3 end=5:16}
         argument <blk><block> @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=??? end=???}
     method <C <U A>>#<U f> (x, <blk>) -> NilClass @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=8:3 end=8:11}
       argument x<> -> A::C1 @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=7:15 end=7:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=??? end=???}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=2:8 end=2:9}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=2:1 end=2:9}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=2:8 end=2:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=2:1 end=13:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/type_member_inside_method.rb start=??? end=???}

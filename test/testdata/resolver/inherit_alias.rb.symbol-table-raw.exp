@@ -5,16 +5,16 @@ class <C <U <root>>> < <C <U Object>> ()
   module <C <U NS>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=2:10}
     static-field <C <U NS>>::<C <U Alias>> -> AliasType { symbol = <C <U NS>>::<C <U Dest>> } @ Loc {file=test/testdata/resolver/inherit_alias.rb start=9:3 end=9:8}
     class <C <U NS>>::<C <U C1>> < <C <U NS>>::<C <U Dest>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=3:3 end=3:19}
-    class <C <U NS>>::<S <C <U C1>> $1>[<C <U <AttachedClass>>>] < <C <U NS>>::<S <C <U Dest>> $1> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=3:9 end=3:11}
+    class <C <U NS>>::<S <C <U C1>> $1>[<C <U <AttachedClass>>>] < <C <U NS>>::<S <C <U Dest>> $1> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=3:3 end=3:19}
       type-member(+) <C <U NS>>::<S <C <U C1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U NS>>::<S <C <U C1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NS::C1) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=3:9 end=3:11}
       method <C <U NS>>::<S <C <U C1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=3:3 end=4:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/inherit_alias.rb start=??? end=???}
     class <C <U NS>>::<C <U Dest>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:3 end=6:13}
-    class <C <U NS>>::<S <C <U Dest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:9 end=6:13}
+    class <C <U NS>>::<S <C <U Dest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:3 end=6:13}
       type-member(+) <C <U NS>>::<S <C <U Dest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U NS>>::<S <C <U Dest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NS::Dest) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:9 end=6:13}
       method <C <U NS>>::<S <C <U Dest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:3 end=7:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/inherit_alias.rb start=??? end=???}
-  class <S <C <U NS>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:8 end=2:10}
+  class <S <C <U NS>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=2:10}
     type-member(+) <S <C <U NS>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U NS>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NS) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:8 end=2:10}
     method <S <C <U NS>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/inherit_alias.rb start=??? end=???}

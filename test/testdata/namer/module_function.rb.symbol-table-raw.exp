@@ -5,7 +5,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U C>> < <C <U Object>> (<C <U Funcs>>) @ Loc {file=test/testdata/namer/module_function.rb start=19:1 end=19:8}
     method <C <U C>>#<U test_calls> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=22:3 end=22:17}
       argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
-  class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/module_function.rb start=19:7 end=19:8}
+  class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/module_function.rb start=19:1 end=19:8}
     type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/namer/module_function.rb start=19:7 end=19:8}
     method <S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=19:1 end=33:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
@@ -19,7 +19,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Funcs>>#<U h> : private (s, <blk>) -> String @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
       argument s<> -> String @ Loc {file=test/testdata/namer/module_function.rb start=15:15 end=15:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
-  class <S <C <U Funcs>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:8 end=2:13}
+  class <S <C <U Funcs>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     type-member(+) <S <C <U Funcs>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Funcs>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Funcs) @ Loc {file=test/testdata/namer/module_function.rb start=2:8 end=2:13}
     method <S <C <U Funcs>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=17:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}

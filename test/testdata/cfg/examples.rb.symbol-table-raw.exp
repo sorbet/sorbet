@@ -22,7 +22,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Examples>>#<U variables_loop_if> (cond, <blk>) @ Loc {file=test/testdata/cfg/examples.rb start=72:5 end=72:32}
       argument cond<> @ Loc {file=test/testdata/cfg/examples.rb start=72:27 end=72:31}
       argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}
-  class <S <C <U Examples>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/examples.rb start=2:7 end=2:15}
+  class <S <C <U Examples>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/examples.rb start=2:1 end=2:15}
     type-member(+) <S <C <U Examples>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Examples>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Examples) @ Loc {file=test/testdata/cfg/examples.rb start=2:7 end=2:15}
     method <S <C <U Examples>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/cfg/examples.rb start=2:1 end=92:4}
       argument <blk><block> @ Loc {file=test/testdata/cfg/examples.rb start=??? end=???}

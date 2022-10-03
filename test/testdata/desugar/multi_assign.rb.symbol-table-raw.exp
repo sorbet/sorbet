@@ -9,7 +9,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Test>>#<U some_method> (array, <blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=5:3 end=5:25}
       argument array<> @ Loc {file=test/testdata/desugar/multi_assign.rb start=5:19 end=5:24}
       argument <blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}
-  class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:7 end=4:11}
+  class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=4:11}
     type-member(+) <S <C <U Test>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:7 end=4:11}
     method <S <C <U Test>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/multi_assign.rb start=4:1 end=14:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/multi_assign.rb start=??? end=???}

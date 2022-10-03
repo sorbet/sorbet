@@ -59,8 +59,8 @@ end
 end
 
 # it fails if a class method is unimplemented
-class C3 < AbstractClass
-    # ^^ error: Missing definition for abstract method `AbstractClass.foo`
+  class C3 < AbstractClass
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass.foo`
   extend T::Sig
   extend T::Helpers
   sig { override.returns(Object) }

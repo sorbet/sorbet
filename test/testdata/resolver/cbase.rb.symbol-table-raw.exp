@@ -3,12 +3,12 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/cbase.rb start=2:1 end=8:2}
       argument <blk><block> @ Loc {file=test/testdata/resolver/cbase.rb start=??? end=???}
   module <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/cbase.rb start=2:1 end=2:9}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/cbase.rb start=2:8 end=2:9}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/cbase.rb start=2:1 end=2:9}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/cbase.rb start=2:8 end=2:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/cbase.rb start=2:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/cbase.rb start=??? end=???}
   module <C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/cbase.rb start=3:3 end=3:13}
-  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/cbase.rb start=3:10 end=3:13}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/cbase.rb start=3:3 end=3:13}
     type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/resolver/cbase.rb start=3:10 end=3:13}
     method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/cbase.rb start=3:3 end=4:6}
       argument <blk><block> @ Loc {file=test/testdata/resolver/cbase.rb start=??? end=???}

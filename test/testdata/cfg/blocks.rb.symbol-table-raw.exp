@@ -5,7 +5,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U BlockTest>> < <C <U Object>> () @ Loc {file=test/testdata/cfg/blocks.rb start=2:1 end=2:16}
     method <C <U BlockTest>>#<U blockPass> (<blk>) @ Loc {file=test/testdata/cfg/blocks.rb start=3:3 end=3:16}
       argument <blk><block> @ Loc {file=test/testdata/cfg/blocks.rb start=??? end=???}
-  class <S <C <U BlockTest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/blocks.rb start=2:7 end=2:16}
+  class <S <C <U BlockTest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/cfg/blocks.rb start=2:1 end=2:16}
     type-member(+) <S <C <U BlockTest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U BlockTest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=BlockTest) @ Loc {file=test/testdata/cfg/blocks.rb start=2:7 end=2:16}
     method <S <C <U BlockTest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/cfg/blocks.rb start=2:1 end=8:4}
       argument <blk><block> @ Loc {file=test/testdata/cfg/blocks.rb start=??? end=???}

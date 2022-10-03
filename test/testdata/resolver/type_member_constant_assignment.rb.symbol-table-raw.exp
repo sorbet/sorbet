@@ -4,24 +4,24 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=??? end=???}
   module <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=3:1 end=3:9}
     static-field-type-alias <C <U A>>::<C <U Result>> -> AppliedType {       klass = <C <U C>>::<C <U Result>>       targs = [         <C <U X>> = Integer       ]     } @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=4:3 end=4:9}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=3:8 end=3:9}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=3:1 end=3:9}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=3:8 end=3:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=3:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=??? end=???}
   module <C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=7:1 end=7:9}
     static-field <C <U B>>::<C <U Result>> -> AliasType { symbol = <C <U C>>::<C <U Result>> } @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=8:3 end=8:9}
-  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=7:8 end=7:9}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=7:1 end=7:9}
     type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=7:8 end=7:9}
     method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=7:1 end=9:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=??? end=???}
   module <C <U C>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=11:1 end=11:9}
     module <C <U C>>::<C <U Result>>[<C <U X>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=12:3 end=12:16}
       type-member(+) <C <U C>>::<C <U Result>>::<C <U X>> -> LambdaParam(<C <U C>>::<C <U Result>>::<C <U X>>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=15:5 end=15:26}
-    class <C <U C>>::<S <C <U Result>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=12:10 end=12:16}
+    class <C <U C>>::<S <C <U Result>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=12:3 end=12:16}
       type-member(+) <C <U C>>::<S <C <U Result>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U C>>::<S <C <U Result>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U C>>::<C <U Result>>   targs = [     <C <U X>> = <top>   ] }) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=12:10 end=12:16}
       method <C <U C>>::<S <C <U Result>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=12:3 end=16:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=??? end=???}
-  class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=11:8 end=11:9}
+  class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=11:1 end=11:9}
     type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=11:8 end=11:9}
     method <S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=11:1 end=17:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_constant_assignment.rb start=??? end=???}

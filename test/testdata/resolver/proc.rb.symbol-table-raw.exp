@@ -19,7 +19,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument blk<block> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=7:12 end=7:15}
     method <C <U TestProc>>#<U good2> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=18:3 end=18:18}
       argument blk<block> -> T.proc.params(arg0: T::Array[String]).returns(T::Array[Integer]) @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
-  class <S <C <U TestProc>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
+  class <S <C <U TestProc>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=3:15}
     type-member(+) <S <C <U TestProc>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestProc>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestProc) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
     method <S <C <U TestProc>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=49:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}

@@ -3,7 +3,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=94:5}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=2:8}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:7 end=2:8}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=2:8}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/desugar/sclass.rb start=2:7 end=2:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=2:1 end=3:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
@@ -82,7 +82,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U H>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=74:1 end=82:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     class <S <C <U H>> $1>::<C <U H2>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=76:17}
-    class <S <C <U H>> $1>::<S <C <U H2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:15 end=76:17}
+    class <S <C <U H>> $1>::<S <C <U H2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=76:17}
       type-member(+) <S <C <U H>> $1>::<S <C <U H2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U H>> $1>::<S <C <U H2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=T.class_of(H)::H2) @ Loc {file=test/testdata/desugar/sclass.rb start=76:15 end=76:17}
       method <S <C <U H>> $1>::<S <C <U H2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=76:9 end=80:12}
         argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}

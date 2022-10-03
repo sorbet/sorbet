@@ -20,23 +20,23 @@ class <C <U <root>>> < <C <U Object>> ()
       argument n<> -> {} @ Loc {file=test/testdata/resolver/sig_good.rb start=26:7 end=26:8}
       argument o<> -> {String("hi") => String, bye: String} @ Loc {file=test/testdata/resolver/sig_good.rb start=27:7 end=27:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=7:7 end=7:8}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=7:1 end=7:8}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/sig_good.rb start=7:7 end=7:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_good.rb start=7:1 end=33:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
   static-field <C <U A1>> -> AliasType { symbol = <C <U T1>> } @ Loc {file=test/testdata/resolver/sig_good.rb start=5:1 end=5:3}
   module <C <U M1>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:1 end=4:10}
-  class <S <C <U M1>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:8 end=4:10}
+  class <S <C <U M1>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=4:1 end=4:10}
     type-member(+) <S <C <U M1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U M1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=M1) @ Loc {file=test/testdata/resolver/sig_good.rb start=4:8 end=4:10}
     method <S <C <U M1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_good.rb start=4:1 end=4:15}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=2:1 end=2:9}
-  class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=2:7 end=2:9}
+  class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=2:1 end=2:9}
     type-member(+) <S <C <U T1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U T1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=T1) @ Loc {file=test/testdata/resolver/sig_good.rb start=2:7 end=2:9}
     method <S <C <U T1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_good.rb start=2:1 end=2:14}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}
   class <C <U T2>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/sig_good.rb start=3:1 end=3:9}
-  class <S <C <U T2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=3:7 end=3:9}
+  class <S <C <U T2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/sig_good.rb start=3:1 end=3:9}
     type-member(+) <S <C <U T2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U T2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=T2) @ Loc {file=test/testdata/resolver/sig_good.rb start=3:7 end=3:9}
     method <S <C <U T2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_good.rb start=3:1 end=3:14}
       argument <blk><block> @ Loc {file=test/testdata/resolver/sig_good.rb start=??? end=???}

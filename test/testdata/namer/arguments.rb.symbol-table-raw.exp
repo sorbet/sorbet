@@ -11,7 +11,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument e<optional, keyword> @ Loc {file=test/testdata/namer/arguments.rb start=3:38 end=3:40}
       argument f<keyword, repeated> @ Loc {file=test/testdata/namer/arguments.rb start=3:45 end=3:46}
       argument g<block> @ Loc {file=test/testdata/namer/arguments.rb start=3:49 end=3:50}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/arguments.rb start=2:7 end=2:8}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/arguments.rb start=2:1 end=2:8}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/arguments.rb start=2:7 end=2:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/arguments.rb start=2:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/arguments.rb start=??? end=???}

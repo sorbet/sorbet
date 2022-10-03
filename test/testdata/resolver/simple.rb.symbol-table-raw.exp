@@ -3,37 +3,37 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=2:1 end=28:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
   class <C <U Outer1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/simple.rb start=2:1 end=2:13}
-  class <S <C <U Outer1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=2:7 end=2:13}
+  class <S <C <U Outer1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=2:1 end=2:13}
     type-member(+) <S <C <U Outer1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Outer1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer1) @ Loc {file=test/testdata/resolver/simple.rb start=2:7 end=2:13}
     method <S <C <U Outer1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=2:1 end=3:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
   class <C <U Outer2>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/simple.rb start=5:1 end=5:13}
     class <C <U Outer2>>::<C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/simple.rb start=6:3 end=6:10}
-    class <C <U Outer2>>::<S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=6:9 end=6:10}
+    class <C <U Outer2>>::<S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=6:3 end=6:10}
       type-member(+) <C <U Outer2>>::<S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Outer2>>::<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer2::C) @ Loc {file=test/testdata/resolver/simple.rb start=6:9 end=6:10}
       method <C <U Outer2>>::<S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=6:3 end=7:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
     class <C <U Outer2>>::<C <U Inner1>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/simple.rb start=9:3 end=9:15}
       class <C <U Outer2>>::<C <U Inner1>>::<C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/simple.rb start=10:5 end=10:12}
-      class <C <U Outer2>>::<C <U Inner1>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=10:11 end=10:12}
+      class <C <U Outer2>>::<C <U Inner1>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=10:5 end=10:12}
         type-member(+) <C <U Outer2>>::<C <U Inner1>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Outer2>>::<C <U Inner1>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer2::Inner1::A) @ Loc {file=test/testdata/resolver/simple.rb start=10:11 end=10:12}
         method <C <U Outer2>>::<C <U Inner1>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=10:5 end=11:8}
           argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
       class <C <U Outer2>>::<C <U Inner1>>::<C <U Inner2>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/simple.rb start=21:3 end=21:23}
-      class <C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=13:11 end=13:17}
+      class <C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=21:3 end=21:23}
         type-member(+) <C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer2::Inner1::Inner2) @ Loc {file=test/testdata/resolver/simple.rb start=13:11 end=13:17}
         method <C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=13:5 end=18:8}
           argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
-    class <C <U Outer2>>::<S <C <U Inner1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=9:9 end=9:15}
+    class <C <U Outer2>>::<S <C <U Inner1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=9:3 end=9:15}
       type-member(+) <C <U Outer2>>::<S <C <U Inner1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Outer2>>::<S <C <U Inner1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer2::Inner1) @ Loc {file=test/testdata/resolver/simple.rb start=9:9 end=9:15}
       method <C <U Outer2>>::<S <C <U Inner1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=9:3 end=19:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
     class <C <U Outer2>>::<C <U Other>> < <C <U Outer2>>::<C <U Inner1>>::<C <U Inner2>> () @ Loc {file=test/testdata/resolver/simple.rb start=26:3 end=26:31}
-    class <C <U Outer2>>::<S <C <U Other>> $1>[<C <U <AttachedClass>>>] < <C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=26:9 end=26:14}
+    class <C <U Outer2>>::<S <C <U Other>> $1>[<C <U <AttachedClass>>>] < <C <U Outer2>>::<C <U Inner1>>::<S <C <U Inner2>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=26:3 end=26:31}
       type-member(+) <C <U Outer2>>::<S <C <U Other>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Outer2>>::<S <C <U Other>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer2::Other) @ Loc {file=test/testdata/resolver/simple.rb start=26:9 end=26:14}
       method <C <U Outer2>>::<S <C <U Other>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=26:3 end=27:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}
-  class <S <C <U Outer2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=5:7 end=5:13}
+  class <S <C <U Outer2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/simple.rb start=5:1 end=5:13}
     type-member(+) <S <C <U Outer2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Outer2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Outer2) @ Loc {file=test/testdata/resolver/simple.rb start=5:7 end=5:13}
     method <S <C <U Outer2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/simple.rb start=5:1 end=28:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/simple.rb start=??? end=???}

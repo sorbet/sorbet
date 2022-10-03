@@ -7,7 +7,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument (x,y)<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:9 end=3:14}
       argument z<> @ Loc {file=test/testdata/desugar/destructure.rb start=3:16 end=3:17}
       argument <blk><block> @ Loc {file=test/testdata/desugar/destructure.rb start=??? end=???}
-  class <S <C <U Destructure>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/destructure.rb start=2:7 end=2:18}
+  class <S <C <U Destructure>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=2:18}
     type-member(+) <S <C <U Destructure>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Destructure>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Destructure) @ Loc {file=test/testdata/desugar/destructure.rb start=2:7 end=2:18}
     method <S <C <U Destructure>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/destructure.rb start=2:1 end=9:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/destructure.rb start=??? end=???}

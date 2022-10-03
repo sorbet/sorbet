@@ -5,7 +5,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=2:1 end=3:8}
       argument <blk><block> @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=??? end=???}
   class <C <U T1>> < <C <U Object>> () @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=2:1 end=2:9}
-  class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=2:7 end=2:9}
+  class <S <C <U T1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=2:1 end=2:9}
     type-member(+) <S <C <U T1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U T1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=T1) @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=2:7 end=2:9}
     method <S <C <U T1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=2:1 end=2:14}
       argument <blk><block> @ Loc {file=test/testdata/namer/alias_cross_file__02.rb start=??? end=???}
@@ -13,7 +13,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U TestSig>> < <C <U Object>> () @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=2:1 end=2:14}
     method <C <U TestSig>>#<U test_resolve> (<blk>) -> T1 @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=4:3 end=4:19}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=??? end=???}
-  class <S <C <U TestSig>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=2:7 end=2:14}
+  class <S <C <U TestSig>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=2:1 end=2:14}
     type-member(+) <S <C <U TestSig>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestSig>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestSig) @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=2:7 end=2:14}
     method <S <C <U TestSig>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=2:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/alias_cross_file__01.rb start=??? end=???}
