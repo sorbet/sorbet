@@ -37,7 +37,7 @@ correctly.
   approach is to manually build small examples using the new API that don't type
   check, but don't check the resulting files in (or check them in, but mark them
   `# typed: ignore`, and bump the sigil up temporarily while making changes).
-  The diligent may way to automate this by running Sorbet a second time on a
+  The diligent way to automate this is by running Sorbet a second time on a
   codebase that includes extra files meant to not type check, asserting that
   Sorbet indeed reports errors.)
 
