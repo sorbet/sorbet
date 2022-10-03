@@ -6,5 +6,5 @@ class A
   Elem = type_member
   # ^ hover: A::Elem
 
-  X = 1
+  class X; end
 end
