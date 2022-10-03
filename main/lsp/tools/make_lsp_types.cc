@@ -1321,6 +1321,25 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             },
                                             classTypes);
 
+    auto WatchmanStateEnter = makeObject("WatchmanStateEnter",
+                                         {
+                                             makeField("subscription", JSONString),
+                                             makeField("root", JSONString),
+                                             makeField("state-enter", "stateEnter", JSONString),
+                                             makeField("clock", JSONString),
+                                         },
+                                         classTypes);
+
+    auto WatchmanStateLeave = makeObject("WatchmanStateLeave",
+                                         {
+                                             makeField("subscription", JSONString),
+                                             makeField("root", JSONString),
+                                             makeField("state-leave", "stateLeave", JSONString),
+                                             makeField("clock", JSONString),
+                                             makeField("abandoned", makeOptional(JSONBool)),
+                                         },
+                                         classTypes);
+
     auto SorbetWorkspaceEditParams =
         makeObject("SorbetWorkspaceEditParams", {}, classTypes,
                    {
@@ -1373,6 +1392,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "sorbet/showSymbol",
                                      "sorbet/typecheckRunInfo",
                                      "sorbet/watchmanFileChange",
+                                     "sorbet/watchmanStateEnter",
+                                     "sorbet/watchmanStateLeave",
                                      "sorbet/workspaceEdit",
                                      "textDocument/codeAction",
                                      "codeAction/resolve",
@@ -1492,6 +1513,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"__RESUME__", makeOptional(JSONNull)},
                                                 {"sorbet/indexerInitialization", makeOptional(JSONNull)},
                                                 {"sorbet/watchmanFileChange", WatchmanQueryResponse},
+                                                {"sorbet/watchmanStateEnter", WatchmanStateEnter},
+                                                {"sorbet/watchmanStateLeave", WatchmanStateLeave},
                                                 {"sorbet/showOperation", SorbetShowOperationParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/fence", SorbetFenceParams},

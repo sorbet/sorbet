@@ -8,5 +8,7 @@
 #include "main/lsp/notifications/sorbet_pause.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
+#include "main/lsp/notifications/watchman_state_enter.h"
+#include "main/lsp/notifications/watchman_state_leave.h"
 
 #endif

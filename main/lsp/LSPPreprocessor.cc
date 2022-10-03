@@ -206,6 +206,12 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 auto newParams = canonicalizeEdits(nextVersion++, move(params));
                 return make_unique<SorbetWorkspaceEditTask>(*config, move(newParams));
             }
+            case LSPMethod::SorbetWatchmanStateEnter:
+                return make_unique<WatchmanStateEnterTask>(*config,
+                                                           move(get<unique_ptr<WatchmanStateEnter>>(rawParams)));
+            case LSPMethod::SorbetWatchmanStateLeave:
+                return make_unique<WatchmanStateLeaveTask>(*config,
+                                                           move(get<unique_ptr<WatchmanStateLeave>>(rawParams)));
             case LSPMethod::SorbetWorkspaceEdit:
                 return make_unique<SorbetWorkspaceEditTask>(
                     *config, move(get<unique_ptr<SorbetWorkspaceEditParams>>(rawParams)));

@@ -8,7 +8,9 @@
 
 namespace sorbet::realmain::lsp {
 class WatchmanQueryResponse;
-}
+class WatchmanStateEnter;
+class WatchmanStateLeave;
+} // namespace sorbet::realmain::lsp
 
 namespace sorbet::realmain::lsp::watchman {
 class WatchmanProcess {
@@ -36,6 +38,10 @@ private:
 
 protected:
     virtual void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>) = 0;
+
+    virtual void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter>) = 0;
+
+    virtual void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave>) = 0;
 
     virtual void processExit(int core, const std::optional<std::string> &) = 0;
 

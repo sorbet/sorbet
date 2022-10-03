@@ -21,6 +21,17 @@ WatchmanProcess::~WatchmanProcess() {
     // Destructor of Joinable ensures Watchman thread exits before this destructor finishes.
 };
 
+namespace {
+template <typename F> void catchDeserializationError(spdlog::logger &logger, const string &line, F &&f) {
+    try {
+        f();
+    } catch (sorbet::realmain::lsp::DeserializationError e) {
+        // Gracefully handle deserialization errors, since they could be our fault.
+        logger.error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
+    }
+}
+} // namespace
+
 void WatchmanProcess::start() {
     auto mainPid = getpid();
     try {
@@ -86,23 +97,26 @@ void WatchmanProcess::start() {
             if (d.Parse(line.c_str(), line.size()).HasParseError()) {
                 logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
             } else if (d.HasMember("is_fresh_instance")) {
-                try {
+                catchDeserializationError(*logger, line, [&d, this]() {
                     auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
                     processQueryResponse(move(queryResponse));
-                } catch (sorbet::realmain::lsp::DeserializationError e) {
-                    // Gracefully handle deserialization errors, since they could be our fault.
-                    logger->error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
-                }
+                });
             } else if (d.HasMember("state-enter")) {
-                // We know that these are messages from "state-enter" commands, but we are
-                // deliberately not doing anything with them.  See
+                // These are messages from "state-enter" commands.  See
                 // https://facebook.github.io/watchman/docs/cmd/state-enter.html
                 // for more information.
+                catchDeserializationError(*logger, line, [&d, this]() {
+                    auto stateEnter = sorbet::realmain::lsp::WatchmanStateEnter::fromJSONValue(d);
+                    processStateEnter(move(stateEnter));
+                });
             } else if (d.HasMember("state-leave")) {
-                // We know that these are messages from "state-leave" commands, but we are
-                // deliberately not doing anything with them.  See
+                // These are messages from "state-leave" commands.  See
                 // https://facebook.github.io/watchman/docs/cmd/state-leave.html
                 // for more information.
+                catchDeserializationError(*logger, line, [&d, this]() {
+                    auto stateLeave = sorbet::realmain::lsp::WatchmanStateLeave::fromJSONValue(d);
+                    processStateLeave(move(stateLeave));
+                });
             } else if (!d.HasMember("subscribe")) {
                 // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);

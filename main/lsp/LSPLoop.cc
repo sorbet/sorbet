@@ -119,6 +119,18 @@ class LSPWatchmanProcess final : public watchman::WatchmanProcess {
     absl::Notification &initializedNotification;
     const std::shared_ptr<const LSPConfiguration> config;
 
+    void enqueueNotification(std::unique_ptr<NotificationMessage> notification) {
+        auto msg = make_unique<LSPMessage>(move(notification));
+        // Don't start enqueueing requests until LSP is initialized.
+        initializedNotification.WaitForNotification();
+        {
+            absl::MutexLock lck(&messageQueueMutex);
+            tagNewRequest(*logger, *msg);
+            messageQueue.counters = mergeCounters(move(messageQueue.counters));
+            messageQueue.pendingRequests.push_back(move(msg));
+        }
+    }
+
 public:
     LSPWatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath,
                        std::string_view workSpace, std::vector<std::string> extensions, MessageQueueState &messageQueue,
@@ -130,15 +142,19 @@ public:
 
     virtual void processQueryResponse(std::unique_ptr<WatchmanQueryResponse> response) {
         auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
-        auto msg = make_unique<LSPMessage>(move(notifMsg));
-        // Don't start enqueueing requests until LSP is initialized.
-        initializedNotification.WaitForNotification();
-        {
-            absl::MutexLock lck(&messageQueueMutex);
-            tagNewRequest(*logger, *msg);
-            messageQueue.counters = mergeCounters(move(messageQueue.counters));
-            messageQueue.pendingRequests.push_back(move(msg));
-        }
+        enqueueNotification(move(notifMsg));
+    }
+
+    virtual void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
+        auto notification =
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateEnter, move(stateEnter));
+        enqueueNotification(move(notification));
+    }
+
+    virtual void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
+        auto notification =
+            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateLeave, move(stateLeave));
+        enqueueNotification(move(notification));
     }
 
     virtual void processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
