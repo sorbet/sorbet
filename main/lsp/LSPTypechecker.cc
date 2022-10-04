@@ -376,6 +376,11 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
     ENFORCE(updates.typecheckingPath != PathType::Fast || config->disableFastPath);
+
+    if (updates.typecheckingPath == PathType::SlowWithIncrementalResolver) {
+        updates.updatedGS = gs->deepCopy();
+    }
+
     ENFORCE(updates.updatedGS.has_value());
     if (!updates.updatedGS.has_value()) {
         Exception::raise("runSlowPath called with an update that lacks an updated global state.");
@@ -541,6 +546,8 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
         absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         if (couldBeCanceled) {
             ENFORCE(updates.updatedGS.has_value());
+            ENFORCE(updates.typecheckingPath == PathType::Slow ||
+                    updates.typecheckingPath == PathType::SlowWithIncrementalResolver);
             cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
         }
 
@@ -570,7 +577,8 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     }
 
     if (updates.updatedGS.has_value()) {
-        ENFORCE(updates.typecheckingPath != PathType::Fast);
+        ENFORCE(updates.typecheckingPath == PathType::Slow ||
+                updates.typecheckingPath == PathType::SlowWithIncrementalResolver);
         gs = move(updates.updatedGS.value());
     } else {
         ENFORCE(updates.typecheckingPath == PathType::Fast);

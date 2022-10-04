@@ -367,7 +367,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
             pendingTypecheckUpdates.committedEditCount += update.editCount;
         }
         mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
-    } else {
+    } else if (update.typecheckingPath == PathType::Slow) {
         // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
         update.updatedGS = initialGS->deepCopy();
         pendingTypecheckUpdates = update.copy();
