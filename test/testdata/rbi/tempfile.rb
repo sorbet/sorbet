@@ -37,9 +37,15 @@ Tempfile.open('hello', '/tmp', encoding: 'ascii-8bit') do; end
 Tempfile.open('hello', '/tmp', mode: 0) do; end
 Tempfile.open('hello', '/tmp', mode: 0, encoding: 'ascii-8bit') do; end
 
-# can return any value from block
+# returns the correct type from block
 i = Tempfile.create('hello') { 1 }
-i + 1
+T.assert_type!(i, Integer)
 
 i = Tempfile.open('hello') { 1 }
-i + 1
+T.assert_type!(i, Integer)
+
+f = Tempfile.create('hello')
+T.assert_type!(f, File)
+
+tf = Tempfile.open('hello')
+T.assert_type!(tf, Tempfile)
