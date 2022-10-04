@@ -911,7 +911,7 @@ TEST_CASE("LSPTest") {
                                            INFO(errorPrefix
                                                 << "For stale state tests, we always expect Sorbet to take slow path, "
                                                    "but it took the fast path.");
-                                           CHECK_EQ(params->fastPath, false);
+                                           CHECK_NE(params->typecheckingPath, TypecheckingPath::Fast);
                                        });
 
                 // Check any new HoverAssertions in the updates.
@@ -937,16 +937,25 @@ TEST_CASE("LSPTest") {
                 // in this codepath since we are running in single-threaded mode.
                 verifyTypecheckRunInfo(
                     errorPrefix, responses, SorbetTypecheckRunStatus::Ended, ExpectDiagnosticMessages::Yes,
-                    [&errorPrefix, assertSlowPath, &assertFastPath, &test, &version](auto &params) -> void {
-                        if (assertSlowPath.has_value()) {
-                            if (params->fastPath && assertSlowPath.value()) {
-                                INFO(errorPrefix << "Expected Sorbet to take slow path, but it took the fast path.");
-                                CHECK_NE(params->fastPath, assertSlowPath.value());
-                            } else if (!params->fastPath && !assertSlowPath.value()) {
+                    [&errorPrefix, assertSlowPath, &assertFastPath, &test,
+                     &version](unique_ptr<SorbetTypecheckRunInfo> &params) -> void {
+                        auto validateAssertions = [&params, &errorPrefix](TypecheckingPath path, string actualPath,
+                                                                          bool assertValue, string expectedPath) {
+                            auto isSelectedPath = params->typecheckingPath == path;
+                            if (isSelectedPath && assertValue) {
                                 INFO(errorPrefix
-                                     << "Expected Sorbet to not take slow path, but it took the slow path.");
-                                CHECK_NE(params->fastPath, assertSlowPath.value());
+                                     << fmt::format("Expected Sorbet to take {} path, but it took the {} path.",
+                                                    expectedPath, actualPath));
+                                CHECK_NE(isSelectedPath, assertValue);
+                            } else if (!isSelectedPath && !assertValue) {
+                                INFO(errorPrefix
+                                     << fmt::format("Expected Sorbet to take {} path, but it took the {} path.",
+                                                    expectedPath, actualPath));
+                                CHECK_NE(isSelectedPath, assertValue);
                             }
+                        };
+                        if (assertSlowPath.has_value()) {
+                            validateAssertions(TypecheckingPath::Fast, "fast", assertSlowPath.value(), "slow");
                         }
                         if (assertFastPath.has_value()) {
                             (*assertFastPath)->check(*params, test.folder, version, errorPrefix);

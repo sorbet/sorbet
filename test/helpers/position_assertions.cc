@@ -1121,7 +1121,7 @@ FastPathAssertion::FastPathAssertion(string_view filename, unique_ptr<Range> &ra
 void FastPathAssertion::check(SorbetTypecheckRunInfo &info, string_view folder, int updateVersion,
                               string_view errorPrefix) {
     string updateFile = fmt::format("{}.{}.rbupdate", filename.substr(0, -3), updateVersion);
-    if (!info.fastPath) {
+    if (info.typecheckingPath != TypecheckingPath::Fast) {
         ADD_FAIL_CHECK_AT(updateFile.c_str(), assertionLine,
                           errorPrefix << "Expected file update to take fast path, but it took the slow path.");
     }
