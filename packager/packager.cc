@@ -42,7 +42,6 @@ bool isTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
-    ast::ExpressionPtr toLiteral(core::LocOffsets loc) const;
 
     FullyQualifiedName() = default;
     FullyQualifiedName(vector<core::NameRef> parts, core::Loc loc) : parts(parts), loc(loc) {}
@@ -460,18 +459,6 @@ bool isReferenceToPackageSpec(core::Context ctx, ast::ExpressionPtr &expr) {
 ast::ExpressionPtr name2Expr(core::NameRef name, ast::ExpressionPtr scope = ast::MK::EmptyTree(),
                              core::LocOffsets loc = core::LocOffsets::none()) {
     return ast::MK::UnresolvedConstant(loc, move(scope), name);
-}
-
-ast::ExpressionPtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
-    ast::ExpressionPtr name = ast::MK::EmptyTree();
-    for (auto part : parts) {
-        name = name2Expr(part, move(name));
-    }
-    // Outer name should have the provided loc.
-    if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(name)) {
-        name = ast::MK::UnresolvedConstant(loc, move(lit->scope), lit->cnst);
-    }
-    return name;
 }
 
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
