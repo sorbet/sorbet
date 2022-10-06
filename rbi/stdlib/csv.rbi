@@ -212,7 +212,7 @@ class CSV < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out) {{fixed: T::Array[T.nilable(String)]}}
+  Elem = type_member(:out) {{fixed: CSV::Row}}
 
   # The options used when no overrides are given by calling code. They are:
   #
