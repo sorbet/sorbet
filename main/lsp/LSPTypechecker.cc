@@ -99,8 +99,10 @@ runIncrementalResolver(core::GlobalState &gs, shared_ptr<const LSPConfiguration>
                        vector<core::FileRef> &toTypecheck,
                        UnorderedMap<core::FileRef, core::FoundDefHashes> &oldFoundHashesForFiles,
                        LSPFileUpdates::FastPathFilesToTypecheckResult result) {
-    ENFORCE(updates.typecheckingPath == PathType::Fast || updates.typecheckingPath == PathType::SlowWithIncrementalResolver);
-    auto path = updates.typecheckingPath == PathType::Fast ? "fast path" : "slow path with incremental namer and resolver";
+    ENFORCE(updates.typecheckingPath == PathType::Fast ||
+            updates.typecheckingPath == PathType::SlowWithIncrementalResolver);
+    auto path =
+        updates.typecheckingPath == PathType::Fast ? "fast path" : "slow path with incremental namer and resolver";
     config->logger->debug("Running {} over num_files={}", path, toTypecheck.size());
     unique_ptr<ShowOperation> op;
     if (toTypecheck.size() > config->opts.lspMaxFilesOnFastPath / 2) {
