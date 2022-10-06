@@ -31,11 +31,21 @@
 namespace sorbet::realmain::lsp {
 using namespace std;
 namespace {
+
+TypecheckingPath toTypecheckingPath(PathType pathType) {
+    switch (pathType) {
+        case PathType::Slow:
+            return TypecheckingPath::Slow;
+        case PathType::Fast:
+            return TypecheckingPath::Fast;
+    }
+}
+
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
-                       bool isFastPath, std::vector<core::FileRef> filesTypechecked) {
+                       PathType typecheckingPath, std::vector<core::FileRef> filesTypechecked) {
     if (config.getClientConfig().enableTypecheckInfo) {
-        auto sorbetTypecheckInfo =
-            make_unique<SorbetTypecheckRunInfo>(status, isFastPath, config.frefsToPaths(gs, filesTypechecked));
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(status, toTypecheckingPath(typecheckingPath),
+                                                                       config.frefsToPaths(gs, filesTypechecked));
         config.output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
     }
@@ -174,7 +184,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
     const bool isFastPath = updates.typecheckingPath == PathType::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates.typecheckingPath, {});
     {
         ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
 
@@ -190,7 +200,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      isFastPath, move(filesTypechecked));
+                      updates.typecheckingPath, move(filesTypechecked));
     return committed;
 }
 
