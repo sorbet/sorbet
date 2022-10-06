@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "core/FileHash.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "main/lsp/LSPPathType.h"
 
 namespace sorbet::realmain::lsp {
 /**
@@ -23,7 +24,8 @@ public:
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
-    bool canTakeFastPath = false;
+    PathType typecheckingPath = PathType::Slow;
+
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
     bool hasNewFiles = false;
@@ -41,7 +43,7 @@ public:
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
      *
-     * Resets `canTakeFastPath`.
+     * Resets `getTypecheckingPath`.
      */
     void mergeOlder(const LSPFileUpdates &older);
 

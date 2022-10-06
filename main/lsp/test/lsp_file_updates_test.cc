@@ -145,7 +145,7 @@ TEST_CASE("Copy") {
     updates.editCount = 10;
     updates.epoch = 10;
     updates.cancellationExpected = true;
-    updates.canTakeFastPath = true;
+    updates.typecheckingPath = PathType::Fast;
     updates.hasNewFiles = true;
     updates.updatedGS = unique_ptr<core::GlobalState>(nullptr);
     addFile(updates, core::FileRef(1), "foo.rb", "foo");
@@ -155,7 +155,7 @@ TEST_CASE("Copy") {
     CHECK_EQ(10, copy.epoch);
     CHECK_EQ(10, copy.editCount);
     CHECK(copy.cancellationExpected);
-    CHECK(copy.canTakeFastPath);
+    CHECK(copy.typecheckingPath == PathType::Fast);
     CHECK(copy.hasNewFiles);
     CHECK_FALSE(copy.updatedGS.has_value());
 

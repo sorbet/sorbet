@@ -233,7 +233,7 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
         if (auto *editTask = dynamic_cast<SorbetWorkspaceEditTask *>(dangerousTask)) {
             unique_ptr<SorbetWorkspaceEditTask> edit(editTask);
             (void)task.release();
-            if (edit->canTakeFastPath(indexer)) {
+            if (edit->getTypecheckingPath(indexer) == PathType::Fast) {
                 // Can run on fast path synchronously; it should complete quickly.
                 typecheckerCoord.syncRun(move(edit));
             } else {
