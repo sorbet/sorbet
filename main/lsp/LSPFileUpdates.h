@@ -24,7 +24,6 @@ public:
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
-    // Indicates the quality of typechecking service for the change
     PathType typecheckingPath = PathType::Slow;
 
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
