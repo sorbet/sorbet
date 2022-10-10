@@ -1,4 +1,5 @@
 #include "main/lsp/requests/document_formatting.h"
+#include "absl/strings/match.h"
 #include "common/FileOps.h"
 #include "common/Subprocess.h"
 #include "common/common.h"
@@ -80,7 +81,9 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
         sourceView = sorbet::FileOps::read(path);
     }
 
-    if (!sourceView.empty()) {
+    // Don't format `__package.rb` files, since currently formatting them
+    // can potentially break some pay-server tooling
+    if (!sourceView.empty() && !absl::EndsWith(path, "__package.rb")) {
         auto originalLineCount = findLineBreaks(sourceView).size() - 1;
         auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(), sourceView);
 
