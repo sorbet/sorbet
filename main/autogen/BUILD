@@ -6,6 +6,7 @@ cc_library(
         "cache.cc",
         "constant_hash.cc",
         "crc_builder.cc",
+        "packages.cc",
         "subclasses.cc",
     ],
     hdrs = [
@@ -14,6 +15,7 @@ cc_library(
         "cache.h",
         "constant_hash.h",
         "crc_builder.h",
+        "packages.h",
         "subclasses.h",
     ],
     linkstatic = select({
