@@ -25,3 +25,9 @@ def test_io_gets(io)
   io.gets(nil)
   io.gets(nil, 1)
 end
+
+sig {params(io: IO).void}
+def test_io_read_return(io)
+  T.assert_type!(io.read(1), T.nilable(String))
+  T.assert_type!(io.read, String)
+end

@@ -2038,12 +2038,19 @@ class IO < Object
   # [`sysread`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sysread).
   sig do
     params(
+        length: NilClass,
+        outbuf: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
         length: Integer,
         outbuf: String,
     )
     .returns(T.nilable(String))
   end
-  def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
+  def read(length=nil, outbuf=T.unsafe(nil)); end
 
   # Reads at most *maxlen* bytes from *ios* using the read(2) system call after
   # O\_NONBLOCK is set for the underlying file descriptor.
