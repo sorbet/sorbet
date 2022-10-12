@@ -592,8 +592,7 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     }
 
     if (updates.updatedGS.has_value()) {
-        ENFORCE(updates.typecheckingPath == TypecheckingPath::Slow ||
-                updates.typecheckingPath == TypecheckingPath::SlowWithIncrementalResolver);
+        ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast);
         gs = move(updates.updatedGS.value());
     } else {
         ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
