@@ -406,8 +406,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     auto finalGS = move(updates.updatedGS.value());
     const uint32_t epoch = updates.epoch;
     // Replace error queue with one that is owned by this thread.
-    finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer,
-                                                        make_shared<ErrorFlusherLSP>(epoch, errorReporter));
+    finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher);
     auto &epochManager = *finalGS->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
