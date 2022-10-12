@@ -231,7 +231,7 @@ bool isPackageRBIPath(string_view path) {
     return absl::EndsWith(path, ".package.rbi");
 }
 
-bool isPackagePath(string_view path) {
+bool File::isPackagePath(string_view path) {
     auto pos = path.rfind("/");
     if (pos != string_view::npos) {
         path = path.substr(pos + 1);

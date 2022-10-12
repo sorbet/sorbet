@@ -49,6 +49,8 @@ public:
     bool isStdlib() const;
     bool isPackageRBI() const;
 
+    static bool isPackagePath(std::string_view path);
+
     bool isPackage() const;
     void setIsPackage(bool isPackage);
 
