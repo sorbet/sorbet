@@ -1,5 +1,5 @@
 # typed: true
-# assert-middle-path: true
+# assert-incremental-slow-path: true
 
 class A_01
   extend T::Sig
