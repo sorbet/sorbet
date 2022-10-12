@@ -31,7 +31,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
         auto &ast = older.updatedFileIndexes[i];
         updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
     }
-    typecheckingPath = PathType::Slow;
+    typecheckingPath = TypecheckingPath::Slow;
 }
 
 LSPFileUpdates LSPFileUpdates::copy() const {
