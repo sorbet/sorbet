@@ -1678,6 +1678,17 @@ FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }
 
+NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
+    auto ownerData = owner.data(*this);
+    uint32_t collisionCount = 1;
+    NameRef name;
+    do {
+        name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
+    } while (ownerData->findMember(*this, name).exists());
+
+    return name;
+}
+
 void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind) {
     ENFORCE(!what.isClassOrModule(), "Class symbols should take precedence over all other symbols");
     auto owner = what.owner(*this).asClassOrModuleRef();
@@ -1687,12 +1698,9 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
     ENFORCE(what.name(*this) == origName);
-    uint32_t collisionCount = 1;
     NameRef name;
     if (kind == UniqueNameKind::MangleRename) {
-        do {
-            name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
-        } while (ownerData->findMember(*this, name).exists());
+        name = nextMangledName(owner, origName);
     } else {
         // We don't loop in this case because we're not trying to find an actually unique name, we
         // just want to essentially move the existing, non-overloaded `what` out of the way to allow

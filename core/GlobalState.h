@@ -167,6 +167,7 @@ public:
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
+    NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     void mangleRenameForOverload(SymbolRef what, NameRef origName);
     // NOTE: You likely want to use mangleRenameSymbol not deleteMethodSymbol, unless you know what you're doing.
