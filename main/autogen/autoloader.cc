@@ -222,14 +222,6 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             }
             fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
-
-        if (pkgName.exists()) {
-            ENFORCE(!gs.packageDB().empty());
-            const string_view shortName = pkgName.shortName(gs);
-            const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
-            fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
-                           mungedName);
-        }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
                type == Definition::Type::TypeAlias) {
         ENFORCE(qname.size() > 1);
