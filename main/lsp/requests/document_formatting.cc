@@ -2,6 +2,7 @@
 #include "common/FileOps.h"
 #include "common/Subprocess.h"
 #include "common/common.h"
+#include "core/Files.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
@@ -80,7 +81,9 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
         sourceView = sorbet::FileOps::read(path);
     }
 
-    if (!sourceView.empty()) {
+    // Don't format `__package.rb` files, since currently formatting them
+    // can potentially break some pay-server tooling
+    if (!sourceView.empty() && !core::File::isPackagePath(path)) {
         auto originalLineCount = findLineBreaks(sourceView).size() - 1;
         auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(), sourceView);
 
