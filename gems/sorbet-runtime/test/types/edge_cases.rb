@@ -21,19 +21,37 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       extend T::Helpers
       sig {params(foo: String).returns(String)}
       attr_writer :foo
-      sig {params(bar: Integer).returns(Integer)}
+      sig {returns(Integer)}
       attr_accessor :bar
     end
 
+    # Verify that attr_writer works on the happy path
     assert_equal("foo", klass.new.foo = "foo")
+
+    # Verify that attr_writer does type checking
     err = assert_raises(TypeError) do
       klass.new.foo = 42
     end
     assert_match(/Expected type String, got type Integer/, err.message)
-    assert_equal(42, klass.new.bar = 42)
-    # TODO: This should also raise a type error, but currently doesn't because
-    # the sig only affects the reader part of the attr_accessor, not the writer.
-    assert_equal("foo", klass.new.bar = "foo")
+
+    # Verify that the reader and writer for attr_accessor work on the happy path
+    obj = klass.new
+    assert_equal(42, obj.bar = 42)
+    assert_equal(42, obj.bar)
+
+    # Verify that the writer for attr_accessor does type checking
+    err = assert_raises(TypeError) do
+      klass.new.bar = "bar"
+    end
+    assert_match(/Expected type Integer, got type String/, err.message)
+
+    # Verify that the reader for attr_accessor does type checking
+    obj = klass.new
+    obj.instance_variable_set(:@bar, "bar")
+    err = assert_raises(TypeError) do
+      obj.bar
+    end
+    assert_match(/Expected type Integer, got type String/, err.message)
   end
 
   it 'handles module_function on including class' do
