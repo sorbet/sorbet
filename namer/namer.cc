@@ -69,6 +69,11 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     }
 }
 
+bool isMangleRenameUniqueName(core::GlobalState &gs, core::NameRef name) {
+    return name.kind() == core::NameKind::UNIQUE &&
+           name.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename;
+}
+
 /**
  * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
@@ -725,23 +730,21 @@ private:
                                               core::NameRef nameForErrors, core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
-            // Check if original symbol was mangled away. If so, complain.
-            auto renamedSymbol = ctx.state.findRenamedSymbol(scope.asClassOrModuleRef().data(ctx)->owner, scope);
-            if (renamedSymbol.exists()) {
-                if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = nameForErrors.show(ctx);
-                    auto scopeName = scope.show(ctx);
-                    e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
-                                scopeName, scopeName);
-                    e.addErrorLine(renamedSymbol.loc(ctx), "`{}` defined here", scopeName);
-                }
-            }
+            ENFORCE(!isMangleRenameUniqueName(ctx, scope.name(ctx)));
             return scope.asClassOrModuleRef();
         }
 
         // Check if class was already mangled.
         auto klassSymbol = ctx.state.lookupClassSymbol(scope.owner(ctx).asClassOrModuleRef(), scope.name(ctx));
         if (klassSymbol.exists()) {
+            ENFORCE(isMangleRenameUniqueName(ctx, klassSymbol.data(ctx)->name));
+            if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
+                auto constLitName = nameForErrors.show(ctx);
+                auto scopeName = scope.show(ctx);
+                e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
+                            scopeName);
+                e.addErrorLine(klassSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
+            }
             return klassSymbol;
         }
 
@@ -752,10 +755,9 @@ private:
                         newOwnerName);
             e.addErrorLine(scope.loc(ctx), "`{}` defined here", newOwnerName);
         }
-        // Mangle this one out of the way, and re-enter a symbol with this name as a class.
-        auto scopeName = scope.name(ctx);
-        ctx.state.mangleRenameSymbol(scope, scopeName);
-        auto scopeKlass = ctx.state.enterClassSymbol(ctx.locAt(loc), scope.owner(ctx).asClassOrModuleRef(), scopeName);
+        auto scopeOwner = scope.owner(ctx).asClassOrModuleRef();
+        auto scopeName = ctx.state.nextMangledName(scopeOwner, scope.name(ctx));
+        auto scopeKlass = ctx.state.enterClassSymbol(ctx.locAt(loc), scopeOwner, scopeName);
         scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
         return scopeKlass;
     }
@@ -980,7 +982,7 @@ private:
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
-                    ctx.state.mangleRenameSymbol(sym, method.name);
+                    ctx.state.mangleRenameSymbol(sym, method.name); // Ok, this is a method
                     // Re-enter a new symbol.
                     sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
                 } else {
@@ -991,7 +993,7 @@ private:
             } else {
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
                 // the previously defined equivalent to re-report any errors
-                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
+                auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym); // OK, this is a method
                 if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedArgs) &&
                     !isIntrinsic(replacedSym.asMethodRef().data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
@@ -1091,21 +1093,21 @@ private:
     core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const core::FoundClass &klass) {
         core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.enclosingClass(ctx));
         ENFORCE(symbol.exists());
+        auto owner = symbol.owner(ctx).asClassOrModuleRef();
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
         auto declLoc = ctx.locAt(klass.declLoc);
         if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-            auto klassSymbol = ctx.state.lookupClassSymbol(symbol.owner(ctx).asClassOrModuleRef(), symbol.name(ctx));
+            auto klassSymbol = ctx.state.lookupClassSymbol(owner, symbol.name(ctx));
             if (klassSymbol.exists()) {
                 return klassSymbol;
             }
 
             emitRedefinedConstantError(ctx, klass.loc, symbol.name(ctx), core::SymbolRef::Kind::ClassOrModule, symbol);
 
-            auto origName = symbol.name(ctx);
-            ctx.state.mangleRenameSymbol(symbol, symbol.name(ctx));
-            klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.owner(ctx).asClassOrModuleRef(), origName);
+            auto name = ctx.state.nextMangledName(owner, symbol.name(ctx));
+            klassSymbol = ctx.state.enterClassSymbol(declLoc, owner, name);
             klassSymbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
@@ -1129,8 +1131,10 @@ private:
             }
         } else {
             klassSymbol.data(ctx)->setIsModule(isModule);
-            auto renamed = ctx.state.findRenamedSymbol(klassSymbol.data(ctx)->owner, symbol);
-            if (renamed.exists()) {
+            auto name = klassSymbol.data(ctx)->name;
+            if (isMangleRenameUniqueName(ctx, name)) {
+                // TODO(jez) is `symbol.name(ctx)` the correct name to look up with?
+                auto renamed = ctx.state.lookupSymbol(owner, symbol.name(ctx));
                 emitRedefinedConstantError(ctx, klass.loc, symbol, renamed);
             }
         }
@@ -1256,21 +1260,22 @@ private:
 
         auto scope = ensureScopeIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
                                         staticField.name, staticField.asgnLoc);
+        auto name = staticField.name;
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         if (!sym.exists() && currSym.exists()) {
             emitRedefinedConstantError(ctx, staticField.asgnLoc, staticField.name,
                                        core::SymbolRef::Kind::FieldOrStaticField, currSym);
-            ctx.state.mangleRenameSymbol(currSym, currSym.name(ctx));
+            name = ctx.state.nextMangledName(scope, name);
         }
         if (sym.exists()) {
             ENFORCE(currSym.exists());
-            auto renamedSym = ctx.state.findRenamedSymbol(scope, sym);
-            if (renamedSym.exists()) {
-                emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, renamedSym);
+            name = sym.data(ctx)->name;
+            if (isMangleRenameUniqueName(ctx, name)) {
+                ENFORCE(currSym != sym);
+                emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, currSym);
             }
         }
-        auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
         // Reset resultType to nullptr for idempotency on the fast path--it will always be
         // re-entered in resolver.
@@ -1334,8 +1339,9 @@ private:
             // otherwise, we're looking at a type member defined in this class in the same file, which means all we
             // need to do is find out whether there was a redefinition the first time, and in that case display the
             // same error
-            auto oldSym = ctx.state.findRenamedSymbol(onSymbol, existingTypeMember);
-            if (oldSym.exists()) {
+            auto name = existingTypeMember.data(ctx)->name;
+            if (isMangleRenameUniqueName(ctx, name)) {
+                auto oldSym = ctx.state.lookupSymbol(onSymbol, typeMember.name);
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, existingTypeMember, oldSym);
             }
             // if we have more than one type member with the same name, then we have messed up somewhere
@@ -1352,7 +1358,7 @@ private:
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.name(ctx), core::SymbolRef::Kind::TypeMember,
                                            oldSym);
-                ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
+                name = ctx.state.nextMangledName(onSymbol, name);
             }
             sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, name, variance);
 
@@ -1361,18 +1367,20 @@ private:
             sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
 
             if (isTypeTemplate) {
+                auto typeTemplateAliasName = typeMember.name;
                 auto context = ctx.owner.enclosingClass(ctx);
-                oldSym = context.data(ctx)->findMemberNoDealias(ctx, name);
+                auto oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeTemplateAliasName);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
                     emitRedefinedConstantError(ctx, typeMember.nameLoc, name, core::SymbolRef::Kind::TypeMember,
                                                oldSym);
-                    ctx.state.mangleRenameSymbol(oldSym, name);
+                    typeTemplateAliasName = ctx.state.nextMangledName(context, typeTemplateAliasName);
                 }
                 // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
                 // because resolver does not usually look on the singleton class to resolve constant
                 // literals, but type_template's are only ever entered on the singleton class.
-                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, name);
+                auto alias =
+                    ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeTemplateAliasName);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }

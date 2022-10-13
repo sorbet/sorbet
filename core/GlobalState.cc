@@ -1024,6 +1024,8 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
     // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
+    // The name un-mangling logic described here no longer applies to constant symbols, only methods.
+    ENFORCE(sym.isMethod());
     NameRef name = sym.name(*this);
     auto ownerScope = owner.dataAllowingNone(*this);
 
@@ -1745,7 +1747,17 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
     }
 }
 
+// We have to use this mangle renaming logic to get old methods out of the way, because method
+// redefinitions are not an error at `typed: false`, which means that people can expect that their
+// redefined method will be given precedence when called in another (typed: true) file.
+//
+// (Constant redefinition errors are always enforced at `# typed: false`, so we can afford to simply
+// define a new symbol with a mangled name, instead of mangling AND renaming constant symbols.)
+//
+// TODO(jez) Rename this to mangleRenameMethod?
+// TODO(jez) Update implementation of mangleRenameSymbolInternal to delete all the code that deals with non-methods?
 void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
+    ENFORCE(what.isMethod());
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRename);
 }
 void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
