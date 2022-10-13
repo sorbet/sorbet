@@ -19,12 +19,12 @@ begin
       end
     end
   end
-  class ::A<A$1> < (::<todo sym>)
+  class ::A<<C A>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
-  class ::B<B$1> < (::<todo sym>)
+  class ::B<<C B>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       <emptyTree>
     end
