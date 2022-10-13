@@ -3,7 +3,7 @@
 R = 5 # error: Cannot initialize the class `R` by constant assignment
 class R; end
 
-# The static field always mangles the class definition, so this is not allowed
-x = R.new # error: Method `new` does not exist on `Integer`
-# this should not resolve as the constant, so this will be an error
-puts R + 1
+# The static field never mangles the class definition, so this is allowed
+x = R.new
+# this resolves as the class, so this will be an error
+puts R + 1 # error: Method `+` does not exist on `T.class_of(R)`
