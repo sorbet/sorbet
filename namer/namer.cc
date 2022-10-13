@@ -721,15 +721,15 @@ private:
         emitRedefinedConstantError(ctx, errorLoc, symbol.name(ctx), symbol.kind(), prevSymbol);
     }
 
-    core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
-                                              core::LocOffsets loc) {
+    core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope,
+                                              core::NameRef nameForErrors, core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
             auto renamedSymbol = ctx.state.findRenamedSymbol(scope.asClassOrModuleRef().data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = name.show(ctx);
+                    auto constLitName = nameForErrors.show(ctx);
                     auto scopeName = scope.show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
@@ -746,7 +746,7 @@ private:
         }
 
         if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-            auto constLitName = name.show(ctx);
+            auto constLitName = nameForErrors.show(ctx);
             auto newOwnerName = scope.show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
