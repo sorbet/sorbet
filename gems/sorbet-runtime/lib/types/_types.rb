@@ -324,6 +324,16 @@ module T
         end
       end
     end
+
+    module Chain
+      def self.[](type)
+        if type.is_a?(T::Types::Untyped)
+          T::Types::TypedEnumeratorChain::Untyped.new
+        else
+          T::Types::TypedEnumeratorChain.new(type)
+        end
+      end
+    end
   end
 
   module Range

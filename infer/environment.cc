@@ -921,6 +921,9 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     if (!receiver.isUntyped() && receiver.derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
         return returnType;
     }
+    if (!receiver.isUntyped() && receiver.derivesFrom(ctx, core::Symbols::Enumerator_Chain())) {
+        return returnType;
+    }
 
     int64_t flattenDepth = 1;
     auto mapType = core::Types::arrayOf(ctx, returnType);

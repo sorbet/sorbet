@@ -9,17 +9,18 @@ containers defined in the Ruby standard library looks different from other
 [class types](class-types.md) despite the fact that Ruby uses classes to
 represent these values, too. Here's the syntax Sorbet uses:
 
-| Type                           | Example value                         |
-| ------------------------------ | ------------------------------------- |
-| `T::Array[Integer]`            | `[1, 2, 3]`                           |
-| `T::Array[String]`             | `["hello", "goodbye"]`                |
-| `T::Hash[Symbol, Integer]`     | `{key: 0}`                            |
-| `T::Hash[String, Float]`       | `{"key" => 0.0}`                      |
-| `T::Set[Integer]`              | `Set[1, 2, 3]`                        |
-| `T::Range[Integer]`            | `0..10`                               |
-| `T::Enumerable[Integer]`       | _interface implemented by many types_ |
-| `T::Enumerator[Integer]`       | [1, 2, 3].each                        |
-| `T::Enumerator::Lazy[Integer]` | [1, 2, 3].each.lazy                   |
+| Type                            | Example value                         |
+| ------------------------------- | ------------------------------------- |
+| `T::Array[Integer]`             | `[1, 2, 3]`                           |
+| `T::Array[String]`              | `["hello", "goodbye"]`                |
+| `T::Hash[Symbol, Integer]`      | `{key: 0}`                            |
+| `T::Hash[String, Float]`        | `{"key" => 0.0}`                      |
+| `T::Set[Integer]`               | `Set[1, 2, 3]`                        |
+| `T::Range[Integer]`             | `0..10`                               |
+| `T::Enumerable[Integer]`        | _interface implemented by many types_ |
+| `T::Enumerator[Integer]`        | [1, 2, 3].each                        |
+| `T::Enumerator::Lazy[Integer]`  | [1, 2, 3].each.lazy                   |
+| `T::Enumerator::Chain[Integer]` | [1, 2].chain([3])                     |
 
 ## Why the `T::` prefix?
 

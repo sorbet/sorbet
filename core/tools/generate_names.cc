@@ -504,6 +504,7 @@ NameDef names[] = {
     {"Enumerable", "Enumerable", true},
     {"Enumerator", "Enumerator", true},
     {"Lazy", "Lazy", true},
+    {"Chain", "Chain", true},
     {"Set", "Set", true},
     {"Struct", "Struct", true},
     {"File", "File", true},

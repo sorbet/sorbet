@@ -91,7 +91,9 @@ module Enumerable
   # ```
   sig do
     type_parameters(:U).params(enums: T::Enumerable[T.type_parameter(:U)])
-    .returns(T::Enumerator[T.any(Elem, T.type_parameter(:U))])
+    .returns(
+      T::Enumerator::Chain[T.any(Elem, T.type_parameter(:U))]
+    )
   end
   def chain(*enums); end
 
