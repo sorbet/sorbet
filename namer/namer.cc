@@ -1347,13 +1347,14 @@ private:
             }
             sym = existingTypeMember;
         } else {
-            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
+            auto name = typeMember.name;
+            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, name);
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.name(ctx), core::SymbolRef::Kind::TypeMember,
                                            oldSym);
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
-            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMember.name, variance);
+            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -1361,17 +1362,17 @@ private:
 
             if (isTypeTemplate) {
                 auto context = ctx.owner.enclosingClass(ctx);
-                oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
+                oldSym = context.data(ctx)->findMemberNoDealias(ctx, name);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMember.name,
-                                               core::SymbolRef::Kind::TypeMember, oldSym);
-                    ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
+                    emitRedefinedConstantError(ctx, typeMember.nameLoc, name, core::SymbolRef::Kind::TypeMember,
+                                               oldSym);
+                    ctx.state.mangleRenameSymbol(oldSym, name);
                 }
                 // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
                 // because resolver does not usually look on the singleton class to resolve constant
                 // literals, but type_template's are only ever entered on the singleton class.
-                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
+                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }
