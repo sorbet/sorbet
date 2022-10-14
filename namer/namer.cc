@@ -721,15 +721,15 @@ private:
         emitRedefinedConstantError(ctx, errorLoc, symbol.name(ctx), symbol.kind(), prevSymbol);
     }
 
-    core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
-                                         core::LocOffsets loc) {
+    core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope,
+                                              core::NameRef nameForErrors, core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
             auto renamedSymbol = ctx.state.findRenamedSymbol(scope.asClassOrModuleRef().data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = name.show(ctx);
+                    auto constLitName = nameForErrors.show(ctx);
                     auto scopeName = scope.show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
@@ -746,7 +746,7 @@ private:
         }
 
         if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-            auto constLitName = name.show(ctx);
+            auto constLitName = nameForErrors.show(ctx);
             auto newOwnerName = scope.show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
@@ -766,7 +766,7 @@ private:
             return ctx.owner.enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         }
 
-        auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
+        auto scope = ensureScopeIsClass(ctx, ctx.owner, name, loc);
         core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(ctx.locAt(loc), scope, name);
@@ -1254,8 +1254,8 @@ private:
     core::FieldRef insertStaticField(core::MutableContext ctx, const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
-        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
-                                   staticField.name, staticField.asgnLoc);
+        auto scope = ensureScopeIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
+                                        staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         if (!sym.exists() && currSym.exists()) {
@@ -1347,13 +1347,14 @@ private:
             }
             sym = existingTypeMember;
         } else {
-            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
+            auto name = typeMember.name;
+            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, name);
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.name(ctx), core::SymbolRef::Kind::TypeMember,
                                            oldSym);
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.name(ctx));
             }
-            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMember.name, variance);
+            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
@@ -1361,17 +1362,17 @@ private:
 
             if (isTypeTemplate) {
                 auto context = ctx.owner.enclosingClass(ctx);
-                oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
+                oldSym = context.data(ctx)->findMemberNoDealias(ctx, name);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMember.name,
-                                               core::SymbolRef::Kind::TypeMember, oldSym);
-                    ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
+                    emitRedefinedConstantError(ctx, typeMember.nameLoc, name, core::SymbolRef::Kind::TypeMember,
+                                               oldSym);
+                    ctx.state.mangleRenameSymbol(oldSym, name);
                 }
                 // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
                 // because resolver does not usually look on the singleton class to resolve constant
                 // literals, but type_template's are only ever entered on the singleton class.
-                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeMember.name);
+                auto alias = ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, name);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }
