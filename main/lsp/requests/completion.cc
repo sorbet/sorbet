@@ -561,7 +561,7 @@ vector<core::NameRef> allSimilarFields(const core::GlobalState &gs, core::ClassO
     return result;
 }
 
-vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerInterface &typechecker, const core::ClassOrModuleRef klass,
+vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typechecker, const core::ClassOrModuleRef klass,
                                                const core::Loc queryLoc, ast::UnresolvedIdent::Kind kind,
                                                string_view prefix) {
     const auto &gs = typechecker.state();
@@ -621,7 +621,7 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerInterface &typechec
     return result;
 }
 
-vector<core::NameRef> localNamesForMethod(LSPTypecheckerInterface &typechecker, const core::MethodRef method,
+vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
                                           const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{};
@@ -653,7 +653,7 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerInterface &typechecker, 
     return result;
 }
 
-core::MethodRef firstMethodAfterQuery(LSPTypecheckerInterface &typechecker, const core::Loc queryLoc) {
+core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
@@ -694,7 +694,7 @@ constexpr string_view suggestSigDocs =
     "Sorbet suggests this signature given the method below. Sorbet's suggested sigs are imperfect. It doesn't always "
     "guess the correct types (or any types at all), but they're usually a good starting point."sv;
 
-unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
+unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
                                          const LSPClientConfiguration &clientConfig, core::SymbolRef what,
                                          core::TypePtr receiverType, const core::Loc queryLoc, string_view prefix,
                                          size_t sortIdx) {
@@ -765,7 +765,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerInterface &typechecker,
     return item;
 }
 
-unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerInterface &typechecker,
+unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerDelegate &typechecker,
                                                  const LSPClientConfiguration &clientConfig, core::Loc queryLoc) {
     const auto &gs = typechecker.state();
 
@@ -1008,7 +1008,7 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
 }
 
 unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForMethod(LSPTypecheckerInterface &typechecker, core::DispatchResult &dispatchResult,
+CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
                                            core::MethodRef maybeAlias, const core::TypePtr &receiverType,
                                            const core::TypeConstraint *constraint, core::Loc queryLoc,
                                            string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
@@ -1099,7 +1099,7 @@ CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const co
     };
 }
 
-vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerInterface &typechecker,
+vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypecheckerDelegate &typechecker,
                                                                       SearchParams &params) {
     const auto &gs = typechecker.state();
 
@@ -1216,7 +1216,7 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
     return items;
 }
 
-unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCompletion);
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 

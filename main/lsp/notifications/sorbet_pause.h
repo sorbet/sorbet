@@ -12,7 +12,7 @@ public:
 
     void preprocess(LSPPreprocessor &preprocessor) override;
 
-    void run(LSPTypecheckerInterface &tc) override;
+    void run(LSPTypecheckerDelegate &tc) override;
 };
 } // namespace sorbet::realmain::lsp
 

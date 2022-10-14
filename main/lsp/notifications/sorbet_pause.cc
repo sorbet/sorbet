@@ -12,5 +12,5 @@ void SorbetPauseTask::preprocess(LSPPreprocessor &preprocessor) {
     preprocessor.pause();
 }
 
-void SorbetPauseTask::run(LSPTypecheckerInterface &tc) {}
+void SorbetPauseTask::run(LSPTypecheckerDelegate &tc) {}
 } // namespace sorbet::realmain::lsp

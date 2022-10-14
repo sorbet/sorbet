@@ -22,7 +22,7 @@ void InitializedTask::index(LSPIndexer &indexer) {
     indexer.transferInitializeState(*this);
 }
 
-void InitializedTask::run(LSPTypecheckerInterface &typechecker) {
+void InitializedTask::run(LSPTypecheckerDelegate &typechecker) {
     ENFORCE(this->gs != nullptr);
     typechecker.initialize(*this, std::move(this->gs), std::move(this->kvstore));
     typechecker.resumeTaskQueue(*this);

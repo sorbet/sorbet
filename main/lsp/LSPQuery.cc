@@ -52,7 +52,7 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
     return responses;
 }
 
-LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, string_view uri,
+LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
                                const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
@@ -89,14 +89,14 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
     return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
 }
 
-LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                                    core::SymbolRef symbol, vector<core::FileRef> frefs) {
     Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
     ENFORCE(symbol.exists());
     return typechecker.query(core::lsp::Query::createSymbolQuery(symbol), frefs);
 }
 
-LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                   core::SymbolRef symbol, core::NameRef pkgName) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");
     ENFORCE(symbol.exists());

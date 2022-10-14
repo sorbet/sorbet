@@ -22,7 +22,7 @@ public:
 
     void preprocess(LSPPreprocessor &preprocessor) override;
     void index(LSPIndexer &indexer) override;
-    void run(LSPTypecheckerInterface &typechecker) override;
+    void run(LSPTypecheckerDelegate &typechecker) override;
 
     void setGlobalState(std::unique_ptr<core::GlobalState> gs);
     void setKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);

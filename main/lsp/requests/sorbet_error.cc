@@ -29,6 +29,6 @@ void SorbetErrorTask::preprocess(LSPPreprocessor &preprocessor) {
     }
 }
 
-void SorbetErrorTask::run(LSPTypecheckerInterface &typechecker) {}
+void SorbetErrorTask::run(LSPTypecheckerDelegate &typechecker) {}
 
 } // namespace sorbet::realmain::lsp

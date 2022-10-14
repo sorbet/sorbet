@@ -275,7 +275,7 @@ shared_ptr<AbstractRenamer> makeRenamer(const core::GlobalState &gs,
 RenameTask::RenameTask(const LSPConfiguration &config, MessageId id, unique_ptr<RenameParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentRename), params(move(params)) {}
 
-unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     const core::GlobalState &gs = typechecker.state();
 
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentRename);

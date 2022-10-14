@@ -18,7 +18,7 @@ void InitializeTask::preprocess(LSPPreprocessor &preprocessor) {
     mutableConfig.setClientConfig(make_shared<LSPClientConfiguration>(*params));
 }
 
-unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerInterface &ts) {
+unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &ts) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::Initialize);
     const auto &opts = config.opts;
     auto serverCap = make_unique<ServerCapabilities>();

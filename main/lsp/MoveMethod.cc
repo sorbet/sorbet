@@ -156,7 +156,7 @@ public:
     }
 }; // MethodCallSiteRenamer
 
-vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerInterface &typechecker, const LSPConfiguration &config,
+vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config,
                                         const core::lsp::MethodDefResponse &definition, string_view newModuleName) {
     auto &gs = typechecker.state();
     auto moduleStart =
@@ -200,7 +200,7 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerInterface &typechecker, co
 } // namespace
 
 unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const core::lsp::MethodDefResponse &definition,
-                                          LSPTypecheckerInterface &typechecker) {
+                                          LSPTypecheckerDelegate &typechecker) {
     auto fref = definition.termLoc.file();
 
     auto trees = typechecker.getResolved({fref});
@@ -212,7 +212,7 @@ unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const cor
     return newModuleSymbol;
 }
 
-vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerInterface &typechecker,
+vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                         const LSPConfiguration &config,
                                                         const core::lsp::MethodDefResponse &definition) {
     vector<unique_ptr<TextDocumentEdit>> res;

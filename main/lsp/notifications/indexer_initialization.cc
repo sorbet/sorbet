@@ -15,6 +15,6 @@ void IndexerInitializationTask::index(LSPIndexer &indexer) {
     indexer.initialize(*this, std::move(this->initialGS));
 }
 
-void IndexerInitializationTask::run(LSPTypecheckerInterface &typechecker) {}
+void IndexerInitializationTask::run(LSPTypecheckerDelegate &typechecker) {}
 
 } // namespace sorbet::realmain::lsp

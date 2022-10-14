@@ -75,7 +75,7 @@ public:
         return false;
     }
 
-    void run(LSPTypecheckerInterface &tc) override {
+    void run(LSPTypecheckerDelegate &tc) override {
         count = tc.state().lspTypecheckCount;
     }
 };

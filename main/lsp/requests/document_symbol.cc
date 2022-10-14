@@ -181,7 +181,7 @@ bool DocumentSymbolTask::isDelayable() const {
     return true;
 }
 
-unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDocumentSymbol);
     if (!config.opts.lspDocumentSymbolEnabled) {
         response->error =

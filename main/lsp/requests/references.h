@@ -15,7 +15,7 @@ class ReferencesTask final : public LSPRequestTask {
 public:
     ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 
     bool needsMultithreading(const LSPIndexer &indexer) const override;
 };

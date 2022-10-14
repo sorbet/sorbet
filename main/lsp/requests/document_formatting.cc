@@ -142,7 +142,7 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 // Since finalPhase is `preprocess`, this method should never be called.
-unique_ptr<ResponseMessage> DocumentFormattingTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> DocumentFormattingTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     Exception::raise("Unimplemented and unused");
 }
 

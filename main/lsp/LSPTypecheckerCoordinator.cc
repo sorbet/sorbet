@@ -107,7 +107,7 @@ public:
         return false;
     }
 
-    void run(LSPTypecheckerInterface &_) override {
+    void run(LSPTypecheckerDelegate &_) override {
         shouldTerminate = true;
         gs = typechecker.destroy();
     }

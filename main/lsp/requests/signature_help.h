@@ -11,7 +11,7 @@ class SignatureHelpTask final : public LSPRequestTask {
 public:
     SignatureHelpTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

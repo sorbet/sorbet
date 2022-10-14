@@ -9,7 +9,7 @@ SorbetReadFileTask::SorbetReadFileTask(const LSPConfiguration &config, MessageId
                                        std::unique_ptr<TextDocumentIdentifier> params)
     : LSPRequestTask(config, move(id), LSPMethod::SorbetReadFile), params(move(params)) {}
 
-unique_ptr<ResponseMessage> SorbetReadFileTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> SorbetReadFileTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::SorbetReadFile);
     auto fref = config.uri2FileRef(typechecker.state(), params->uri);
     if (fref.exists()) {
