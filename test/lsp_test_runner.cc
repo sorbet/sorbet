@@ -850,7 +850,7 @@ TEST_CASE("LSPTest") {
         // Apply updates in order.
         for (auto version : sortedUpdates) {
             auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
-            const auto &updates = testUpdates[version];
+            const auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
 
@@ -876,7 +876,6 @@ TEST_CASE("LSPTest") {
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
             auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
-            bool foundTypecheckRunInfo = false;
 
             // Ignore started messages.  Note that cancelation messages cannot occur
             // in this codepath since we are running in single-threaded mode.
@@ -904,29 +903,6 @@ TEST_CASE("LSPTest") {
                         (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
                     }
                 });
-
-            updateDiagnostics(config, testFileUris, responses, diagnostics);
-
-            for (auto &update : updates) {
-                auto originalFile = test.folder + update.first;
-                auto updateFile = test.folder + update.second;
-                testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
-            }
-
-            const bool passed = ErrorAssertion::checkAll(
-                updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
-
-            if (!passed) {
-                // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
-                break;
-            }
-
-            // Check any new HoverAssertions in the updates.
-            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
-
-            if (!foundTypecheckRunInfo) {
-                FAIL_CHECK(errorPrefix << "Sorbet did not send expected typechecking metadata.");
-            }
 
             updateDiagnostics(config, testFileUris, responses, diagnostics);
 
