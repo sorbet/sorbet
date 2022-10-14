@@ -389,8 +389,7 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
 } // namespace
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info,
-                                 core::SymbolRef fallback,
+LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
                                  vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     switch (info.accessorType) {
         case FieldAccessorType::None:
@@ -484,8 +483,8 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref,
-                                       const AccessorInfo info, core::SymbolRef fallback,
+LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
+                                       core::SymbolRef fallback,
                                        vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     switch (info.accessorType) {
         case FieldAccessorType::None:
