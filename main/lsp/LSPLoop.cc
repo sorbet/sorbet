@@ -247,9 +247,6 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
                     break;
                 }
             }
-            if (edit->getTypecheckingPath(indexer) == TypecheckingPath::Fast) {
-            } else {
-            }
         } else {
             // Must be a new type of dangerous task we don't know about.
             // Please do not add new dangerous tasks to the codebase. Try to surface whatever functionality you
