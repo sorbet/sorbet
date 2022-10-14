@@ -890,7 +890,8 @@ TEST_CASE("LSPTest") {
             }
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
-            auto assertIncrementalSlowPath = BooleanPropertyAssertion::getValue("assert-incremental-slow-path", assertions);
+            auto assertIncrementalSlowPath =
+                BooleanPropertyAssertion::getValue("assert-incremental-slow-path", assertions);
 
             // TODO(aprocter): There's probably more code duplication than necessary between the 'if' and the 'else'
             // here.
