@@ -137,7 +137,7 @@ PathType SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) c
         return updates->typecheckingPath;
     }
     if (!cachedFastPathDecisionValid) {
-        cachedFastPathDecision = index.getTypecheckingPath(params->updates);
+        cachedFastPathDecision = index.getTypecheckingPath(*updates, params->updates);
         cachedFastPathDecisionValid = true;
     }
     return cachedFastPathDecision;

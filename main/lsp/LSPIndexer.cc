@@ -76,7 +76,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 }
 
 PathType
-LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
+LSPIndexer::getTypecheckingPathInternal(LSPFileUpdates &edit, const vector<shared_ptr<core::File>> &changedFiles,
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
@@ -197,15 +197,12 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     // foreground..." operation, we also compute how many downstream files (outside of the changed
     // files) would need to be typechecked on the fast path so we can compare that number against
     // `lspMaxFilesOnFastPath` as well.
-
-    // TODO(jez) Currently we compute the full set of information that we would need for the sake of
-    // whether to take the fast path twice--once here and once again in runFastPath on the
-    // typechecking thread.
-    //
-    // As an optimization, we might want to try to store that information on the update itself, so
-    // that the typechecking thread can simply read it instead of having to compute it.
     auto result = LSPFileUpdates::fastPathFilesToTypecheck(*initialGS, *config, changedFiles, evictedFiles);
     auto filesToTypecheck = result.changedFiles.size() + result.extraFiles.size();
+
+    // We will use `result` later in `runIncrementalResolver` as part of fast or incremental slow path
+    edit.cachedFastPathFilesToTypecheck = move(result);
+
     if (filesToTypecheck > config->opts.lspMaxFilesOnFastPath) {
         logger.debug(
             "Taking slow path because too many extra files would be typechecked on the fast path ({} files > {} files)",
@@ -219,7 +216,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
 }
 
 PathType
-LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
+LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
@@ -228,10 +225,11 @@ LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return PathType::Slow;
     }
-    return getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
+    return getTypecheckingPathInternal(edit, edit.updatedFiles, evictedFiles);
 }
 
-PathType LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+PathType LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
+                                         const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
@@ -245,7 +243,7 @@ PathType LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &c
 
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
-    return getTypecheckingPathInternal(changedFiles, emptyMap);
+    return getTypecheckingPathInternal(edit, changedFiles, emptyMap);
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
