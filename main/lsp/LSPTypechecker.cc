@@ -32,21 +32,10 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 namespace {
 
-TypecheckingPath toTypecheckingPath(TypecheckingPath pathType) {
-    switch (pathType) {
-        case TypecheckingPath::Slow:
-            return TypecheckingPath::Slow;
-        case TypecheckingPath::SlowWithIncrementalResolver:
-            return TypecheckingPath::SlowWithIncrementalResolver;
-        case TypecheckingPath::Fast:
-            return TypecheckingPath::Fast;
-    }
-}
-
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
                        TypecheckingPath typecheckingPath, std::vector<core::FileRef> filesTypechecked) {
     if (config.getClientConfig().enableTypecheckInfo) {
-        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(status, toTypecheckingPath(typecheckingPath),
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(status, typecheckingPath,
                                                                        config.frefsToPaths(gs, filesTypechecked));
         config.output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
@@ -376,8 +365,17 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     Timer timeit(logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
 
-    if (updates.typecheckingPath == TypecheckingPath::SlowWithIncrementalResolver) {
-        updates.updatedGS = gs->deepCopy();
+    // We could probably use `if` here,
+    // but `switch` gives us the exhaustiveness check,
+    // which will be useful if we want to add one more typechecking path
+    switch (updates.typecheckingPath) {
+        case TypecheckingPath::SlowWithIncrementalResolver:
+            updates.updatedGS = gs->deepCopy();
+            break;
+
+        case TypecheckingPath::Fast:
+        case TypecheckingPath::Slow:
+            break;
     }
 
     ENFORCE(updates.updatedGS.has_value());
@@ -447,14 +445,22 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         std::vector<ast::ParsedFile> resolved;
         ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast);
 
-        if (updates.typecheckingPath == TypecheckingPath::Slow) {
-            auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundHashes);
-            if (!maybeResolved.hasResult()) {
-                return;
-            }
-            resolved = move(maybeResolved.result());
-        } else if (updates.typecheckingPath == TypecheckingPath::SlowWithIncrementalResolver) {
-            auto [resolved, _] = runIncrementalResolver(*gs, config, updates, workers, errorFlusher);
+        switch (updates.typecheckingPath) {
+            case TypecheckingPath::Slow: {
+                auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundHashes);
+                if (!maybeResolved.hasResult()) {
+                    return;
+                }
+                break;
+            };
+            case TypecheckingPath::SlowWithIncrementalResolver: {
+                auto [resolved, _] = runIncrementalResolver(*gs, config, updates, workers, errorFlusher);
+                break;
+            };
+            case TypecheckingPath::Fast: {
+                ENFORCE(false);
+                break;
+            };
         }
 
         for (auto &tree : resolved) {
@@ -551,8 +557,13 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
         }
 
         // Clear out state associated with old finalGS.
-        if (updates.typecheckingPath != TypecheckingPath::Fast) {
-            indexedFinalGS.clear();
+        switch (updates.typecheckingPath) {
+            case TypecheckingPath::SlowWithIncrementalResolver:
+            case TypecheckingPath::Slow:
+                indexedFinalGS.clear();
+                break;
+            case TypecheckingPath::Fast:
+                break;
         }
 
         int i = -1;

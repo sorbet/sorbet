@@ -359,12 +359,6 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
     }
 
     switch (update.typecheckingPath) {
-        case TypecheckingPath::Slow: {
-            // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
-            update.updatedGS = initialGS->deepCopy();
-            pendingTypecheckUpdates = update.copy();
-            break;
-        }
         case TypecheckingPath::Fast: {
             // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
             auto merged = update.copy();
@@ -378,7 +372,12 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
             break;
         }
         case TypecheckingPath::SlowWithIncrementalResolver:
+        case TypecheckingPath::Slow: {
+            // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
+            update.updatedGS = initialGS->deepCopy();
+            pendingTypecheckUpdates = update.copy();
             break;
+        }
     }
 
     // newlyEvictedFiles contains the changes from this edit + changes from the pending typecheck, if applicable.
