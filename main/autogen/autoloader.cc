@@ -323,23 +323,38 @@ void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const
     }
 }
 
-void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
+DefTree *DefTree::findNode(const vector<core::NameRef> &nameParts) {
     DefTree *node = this;
     for (auto nr : nameParts) {
         auto it = node->children.find(nr);
         if (it == node->children.end()) {
-            return;
+            return nullptr;
         }
         node = it->second.get();
     }
-    ENFORCE(!pkgName.exists(), "Package name should not be already set");
+
+    return node;
+}
+
+void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
+    DefTree *node = this->findNode(nameParts);
+    if (node == nullptr) {
+        return;
+    }
+
+    ENFORCE(!(node->pkgName.exists()), "Package name should not be already set");
     node->pkgName = mangledName;
 }
 
 void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root) {
+    auto testRoot = root.findNode({core::Names::Constants::Test()});
+
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
         root.markPackageNamespace(pkg.mangledName(), pkg.fullName());
+        if (testRoot != nullptr) {
+            testRoot->markPackageNamespace(pkg.mangledName(), pkg.fullName());
+        }
     }
 }
 
