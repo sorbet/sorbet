@@ -960,7 +960,8 @@ TEST_CASE("LSPTest") {
                         auto middlePathName = "slow with incremental namer and resolver";
                         if (assertSlowPath.has_value()) {
                             validateAssertions(TypecheckingPath::Fast, "fast", assertSlowPath.value(), "slow");
-                            validateAssertions(TypecheckingPath::SlowWithIncrementalResolver, middlePathName, assertSlowPath.value(), "slow");
+                            validateAssertions(TypecheckingPath::SlowWithIncrementalResolver, middlePathName,
+                                               assertSlowPath.value(), "slow");
                         }
                         if (assertIncrementalSlowPath.has_value()) {
                             validateAssertions(TypecheckingPath::Fast, "fast", assertIncrementalSlowPath.value(),
