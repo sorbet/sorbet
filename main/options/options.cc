@@ -345,9 +345,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-experimental-lsp-stale-state", "Enable experimental LSP feature: fast "
-                                                                           "but approximate answers from stale "
-                                                                           "typechecker state");
     options.add_options("advanced")("enable-experimental-lsp-fast-path",
                                     "Enable experimental LSP feature: a faster fast path using symbol deletions",
                                     cxxopts::value<bool>()->default_value("true"));
@@ -779,12 +776,6 @@ void readOptions(Options &opts,
         opts.lspDocumentFormatRubyfmtEnabled =
             FileOps::exists(opts.rubyfmtPath) &&
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
-
-        // TODO(aprocter): For the moment, we are not including this flag in the "enableAllLSPFeatures" bundle, because
-        // it's likely to be even less stable than a typical experimental flag, and will be producing stub answers
-        // until we get some other groundwork in place. Once things stabilize a bit more, we can slap
-        // `enableAllLSPFeatures ||` onto the condition here.
-        opts.lspStaleStateEnabled = raw["enable-experimental-lsp-stale-state"].as<bool>();
 
         opts.lspExperimentalFastPathEnabled = raw["enable-experimental-lsp-fast-path"].as<bool>();
 

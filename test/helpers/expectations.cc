@@ -86,11 +86,14 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
         exp.expectations[kind][source_file_path] = filePath;
         return true;
     } else if (absl::EndsWith(filePath, ".rbupdate")) {
-        // Should be `.[number].rbupdate`
-        auto pos = filePath.rfind('.', filePath.length() - 10);
+        int suffixLength = strlen(".rbupdate");
+
+        auto pos = filePath.rfind('.', filePath.length() - suffixLength - 1);
         if (pos != string::npos) {
-            int version = stoi(string(filePath.substr(pos + 1, filePath.length() - 9)));
-            exp.sourceLSPFileUpdates[version].emplace_back(absl::StrCat(filePath.substr(0, pos), ".rb"), filePath);
+            int version = stoi(string(filePath.substr(pos + 1, filePath.length() - suffixLength)));
+
+            auto &updates = exp.sourceLSPFileUpdates[version];
+            updates.emplace_back(absl::StrCat(filePath.substr(0, pos), ".rb"), filePath);
         } else {
             cout << "Ignoring " << filePath << ": No version number provided (expected .[number].rbupdate).\n";
         }

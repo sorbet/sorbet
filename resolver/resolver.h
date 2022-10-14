@@ -23,13 +23,6 @@ public:
      */
     static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
 
-    /**
-     * A version of runIncremental that does a "best effort" mode with a constant GlobalState
-     * (for, e.g., serving stale LSP requests)
-     */
-    static ast::ParsedFilesOrCancelled runIncrementalBestEffort(const core::GlobalState &gs,
-                                                                std::vector<ast::ParsedFile> trees);
-
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                                               WorkerPool &workers);

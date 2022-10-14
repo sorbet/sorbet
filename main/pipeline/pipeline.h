@@ -40,17 +40,8 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                    std::optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
                    const options::Options &opts);
 
-// This function only calls Namer::symbolizeTreesBestEffort, not Namer::defineSymbols, which means
-// there's no point in taking any FoundDefHashes.
-std::vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs,
-                                                          std::vector<ast::ParsedFile> what,
-                                                          const options::Options &opts);
-
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers, core::FoundDefHashes *foundHashes);
-
-ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, std::vector<ast::ParsedFile> what,
-                                                WorkerPool &workers);
 
 std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string_view cachePath,
                                                    std::vector<ast::ParsedFile> what, WorkerPool &workers);

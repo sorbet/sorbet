@@ -138,20 +138,6 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
     wrappedTask->blockUntilComplete();
 }
 
-unique_ptr<LSPTask> LSPTypecheckerCoordinator::syncRunOnStaleState(unique_ptr<LSPTask> task) {
-    auto config = this->config;
-    bool success = typechecker.tryRunOnStaleState([&task, &config](UndoState &undoState) {
-        LSPStaleTypechecker typechecker(config, undoState);
-        task->run(typechecker);
-    });
-
-    if (success) {
-        return nullptr;
-    } else {
-        return task;
-    }
-}
-
 shared_ptr<core::lsp::Task>
 LSPTypecheckerCoordinator::trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask) {
     auto wrappedTask = make_shared<TypecheckerTask>(

@@ -12,8 +12,6 @@ public:
     HoverTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
-
-    bool canUseStaleData() const override;
 };
 
 } // namespace sorbet::realmain::lsp

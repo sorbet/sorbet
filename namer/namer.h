@@ -17,9 +17,6 @@ class Namer final {
                 core::FoundDefHashes *foundHashesOut);
 
 public:
-    static ast::ParsedFilesOrCancelled
-    symbolizeTreesBestEffort(const core::GlobalState &gs, std::vector<ast::ParsedFile> trees, WorkerPool &workers);
-
     // Note: foundHashes is an optional out parameter.
     //
     // Setting it to a non-nullptr requests that Namer compute a fingerprint of the FoundDefinitions

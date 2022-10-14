@@ -273,10 +273,6 @@ bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
     return !needsMultithreading(indexer);
 }
 
-bool LSPTask::canUseStaleData() const {
-    return false;
-}
-
 vector<unique_ptr<Location>>
 LSPTask::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
