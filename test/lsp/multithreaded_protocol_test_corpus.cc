@@ -384,9 +384,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction")
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
     }
 
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
-                                                                       make_unique<SorbetFenceParams>(20)))),
-                      {});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
@@ -812,8 +810,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo"
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence,
-                                                                       make_unique<SorbetFenceParams>(20)))),
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {{"bar.rb", 5, "Expected `String` but found `Integer` for method result type"}});
 }
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyMetrics") {
