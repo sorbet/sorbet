@@ -101,11 +101,6 @@ public:
     void setSlowPathBlocked(bool blocked) {
         typechecker.setSlowPathBlocked(blocked);
     }
-
-    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
-    bool isSlowPathBlocked() const {
-        return typechecker.isSlowPathBlocked();
-    }
 };
 } // namespace sorbet::realmain::lsp
 

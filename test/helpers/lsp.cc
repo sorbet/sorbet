@@ -486,10 +486,9 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
     } else if (auto mtWrapper = dynamic_cast<MultiThreadedLSPWrapper *>(&wrapper)) {
         // Fences are only used in tests. Use an ID that is likely to be unique to this method.
         const int fenceId = 909090;
-        bool advanceIfStaleDataAvailable = wrapper.isSlowPathBlocked();
         // Chase messages with a fence, and wait for a fence response.
-        messages.push_back(make_unique<LSPMessage>(make_unique<NotificationMessage>(
-            "2.0", LSPMethod::SorbetFence, std::make_unique<SorbetFenceParams>(fenceId, advanceIfStaleDataAvailable))));
+        messages.push_back(
+            make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, fenceId)));
         // ASSUMPTION: There are no other messages still being processed. This should be true if the tests are
         // disciplined. Also, even if they aren't, what should we do with stray messages? Passing them on seems most
         // correct.
@@ -508,7 +507,7 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<un
             }
 
             if (msg->isNotification() && msg->method() == LSPMethod::SorbetFence &&
-                get<std::unique_ptr<SorbetFenceParams>>(msg->asNotification().params)->id == fenceId) {
+                get<int>(msg->asNotification().params) == fenceId) {
                 break;
             }
             responses.push_back(move(msg));
