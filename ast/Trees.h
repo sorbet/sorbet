@@ -220,7 +220,7 @@ public:
 
     std::string nodeName() const;
 
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
 
     bool isSelfReference() const;
 
@@ -373,8 +373,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -402,8 +402,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -422,8 +422,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -441,8 +441,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -459,8 +459,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -475,8 +475,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -493,8 +493,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -511,8 +511,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -537,8 +537,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -562,8 +562,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -580,8 +580,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -605,8 +605,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -623,8 +623,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -641,8 +641,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -660,8 +660,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -678,8 +678,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -696,8 +696,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -715,8 +715,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -798,8 +798,8 @@ public:
     void addKwArg(ExpressionPtr key, ExpressionPtr value);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     // Add the given positional argument as the last positional argument.
     void addPosArg(ExpressionPtr ptr);
@@ -961,8 +961,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -983,8 +983,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -1004,8 +1004,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -1022,8 +1022,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
     bool isString() const;
     bool isSymbol() const;
     bool isNil(const core::GlobalState &gs) const;
@@ -1048,8 +1048,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -1072,8 +1072,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
         const core::GlobalState &gs) const;
 
@@ -1091,8 +1091,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -1110,8 +1110,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
     void _sanityCheck();
 };
 CheckSize(Block, 40, 8);
@@ -1133,8 +1133,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -1153,8 +1153,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };
@@ -1169,8 +1169,8 @@ public:
     ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    std::string nodeName();
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
+    std::string nodeName() const;
 
     void _sanityCheck();
 };

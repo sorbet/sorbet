@@ -75,7 +75,7 @@ string ExpressionPtr::nodeName() const {
 #undef NODE_NAME
 }
 
-string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) {
+string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
@@ -446,7 +446,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
+string ClassDef::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -499,7 +499,7 @@ string InsSeq::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string InsSeq::showRaw(const core::GlobalState &gs, int tabs) {
+string InsSeq::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -558,7 +558,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     return fmt::to_string(buf);
 }
 
-string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
+string MethodDef::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -618,7 +618,7 @@ string If::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string If::showRaw(const core::GlobalState &gs, int tabs) {
+string If::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
@@ -633,7 +633,7 @@ string If::showRaw(const core::GlobalState &gs, int tabs) {
     return fmt::to_string(buf);
 }
 
-string Assign::showRaw(const core::GlobalState &gs, int tabs) {
+string Assign::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
@@ -657,7 +657,7 @@ string While::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string While::showRaw(const core::GlobalState &gs, int tabs) {
+string While::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
@@ -678,7 +678,7 @@ string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int 
     return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.toString(gs));
 }
 
-string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
+string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
@@ -698,7 +698,7 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
     return "Unresolved: " + this->original.toStringWithTabs(gs, tabs);
 }
 
-string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
+string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
@@ -725,11 +725,11 @@ string Local::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return this->localVariable.toString(gs);
 }
 
-string Local::nodeName() {
+string Local::nodeName() const {
     return "Local";
 }
 
-string Local::showRaw(const core::GlobalState &gs, int tabs) {
+string Local::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -743,7 +743,7 @@ string UnresolvedIdent::toStringWithTabs(const core::GlobalState &gs, int tabs) 
     return this->name.toString(gs);
 }
 
-string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
+string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -771,19 +771,19 @@ string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     return fmt::to_string(buf);
 }
 
-string Return::showRaw(const core::GlobalState &gs, int tabs) {
+string Return::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + this->expr.showRaw(gs, tabs + 1) + " }";
 }
 
-string Next::showRaw(const core::GlobalState &gs, int tabs) {
+string Next::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + this->expr.showRaw(gs, tabs + 1) + " }";
 }
 
-string Break::showRaw(const core::GlobalState &gs, int tabs) {
+string Break::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + this->expr.showRaw(gs, tabs + 1) + " }";
 }
 
-string Retry::showRaw(const core::GlobalState &gs, int tabs) {
+string Retry::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{}";
 }
 
@@ -803,7 +803,7 @@ string Retry::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "retry";
 }
 
-string Literal::showRaw(const core::GlobalState &gs, int tabs) {
+string Literal::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ value = " + this->toStringWithTabs(gs, 0) + " }";
 }
 
@@ -851,7 +851,7 @@ string RescueCase::toStringWithTabs(const core::GlobalState &gs, int tabs) const
     return fmt::to_string(buf);
 }
 
-string RescueCase::showRaw(const core::GlobalState &gs, int tabs) {
+string RescueCase::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -896,7 +896,7 @@ string Rescue::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string Rescue::showRaw(const core::GlobalState &gs, int tabs) {
+string Rescue::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -929,7 +929,7 @@ string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string Send::showRaw(const core::GlobalState &gs, int tabs) {
+string Send::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
 
@@ -978,7 +978,7 @@ std::string RuntimeMethodDefinition::toStringWithTabs(const core::GlobalState &g
     return fmt::format("<runtime method definition of {}{}>", prefix, this->name.toString(gs));
 }
 
-std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) {
+std::string RuntimeMethodDefinition::showRaw(const core::GlobalState &gs, int tabs) const {
     return this->toStringWithTabs(gs, tabs);
 }
 
@@ -1114,7 +1114,7 @@ string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string Cast::showRaw(const core::GlobalState &gs, int tabs) {
+string Cast::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 2);
@@ -1131,11 +1131,11 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     return fmt::to_string(buf);
 }
 
-string ZSuperArgs::showRaw(const core::GlobalState &gs, int tabs) {
+string ZSuperArgs::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ }";
 }
 
-string Hash::showRaw(const core::GlobalState &gs, int tabs) {
+string Hash::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -1162,7 +1162,7 @@ string Hash::showRaw(const core::GlobalState &gs, int tabs) {
     return fmt::to_string(buf);
 }
 
-string Array::showRaw(const core::GlobalState &gs, int tabs) {
+string Array::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -1223,7 +1223,7 @@ string Block::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string Block::showRaw(const core::GlobalState &gs, int tabs) {
+string Block::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{} {{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -1266,66 +1266,66 @@ string BlockArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "&" + this->expr.toStringWithTabs(gs, tabs);
 }
 
-string RescueCase::nodeName() {
+string RescueCase::nodeName() const {
     return "RescueCase";
 }
-string Rescue::nodeName() {
+string Rescue::nodeName() const {
     return "Rescue";
 }
-string Next::nodeName() {
+string Next::nodeName() const {
     return "Next";
 }
-string ClassDef::nodeName() {
+string ClassDef::nodeName() const {
     return "ClassDef";
 }
 
-string MethodDef::nodeName() {
+string MethodDef::nodeName() const {
     return "MethodDef";
 }
-string If::nodeName() {
+string If::nodeName() const {
     return "If";
 }
-string While::nodeName() {
+string While::nodeName() const {
     return "While";
 }
-string UnresolvedIdent::nodeName() {
+string UnresolvedIdent::nodeName() const {
     return "UnresolvedIdent";
 }
-string Return::nodeName() {
+string Return::nodeName() const {
     return "Return";
 }
-string Break::nodeName() {
+string Break::nodeName() const {
     return "Break";
 }
-string Retry::nodeName() {
+string Retry::nodeName() const {
     return "Retry";
 }
 
-string Assign::nodeName() {
+string Assign::nodeName() const {
     return "Assign";
 }
 
-string Send::nodeName() {
+string Send::nodeName() const {
     return "Send";
 }
 
-string Cast::nodeName() {
+string Cast::nodeName() const {
     return "Cast";
 }
 
-string ZSuperArgs::nodeName() {
+string ZSuperArgs::nodeName() const {
     return "ZSuperArgs";
 }
 
-string Hash::nodeName() {
+string Hash::nodeName() const {
     return "Hash";
 }
 
-string Array::nodeName() {
+string Array::nodeName() const {
     return "Array";
 }
 
-string Literal::nodeName() {
+string Literal::nodeName() const {
     return "Literal";
 }
 
@@ -1367,47 +1367,47 @@ bool Literal::isFalse(const core::GlobalState &gs) const {
     return value.derivesFrom(gs, core::Symbols::FalseClass());
 }
 
-string UnresolvedConstantLit::nodeName() {
+string UnresolvedConstantLit::nodeName() const {
     return "UnresolvedConstantLit";
 }
 
-string ConstantLit::nodeName() {
+string ConstantLit::nodeName() const {
     return "ConstantLit";
 }
 
-string Block::nodeName() {
+string Block::nodeName() const {
     return "Block";
 }
 
-string InsSeq::nodeName() {
+string InsSeq::nodeName() const {
     return "InsSeq";
 }
 
-string EmptyTree::nodeName() {
+string EmptyTree::nodeName() const {
     return "EmptyTree";
 }
 
-string EmptyTree::showRaw(const core::GlobalState &gs, int tabs) {
+string EmptyTree::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName();
 }
 
-string RestArg::showRaw(const core::GlobalState &gs, int tabs) {
+string RestArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string RestArg::nodeName() {
+string RestArg::nodeName() const {
     return "RestArg";
 }
 
-string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) {
+string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string KeywordArg::nodeName() {
+string KeywordArg::nodeName() const {
     return "KeywordArg";
 }
 
-string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) {
+string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -1422,27 +1422,27 @@ string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) {
     return fmt::to_string(buf);
 }
 
-string OptionalArg::nodeName() {
+string OptionalArg::nodeName() const {
     return "OptionalArg";
 }
 
-string ShadowArg::showRaw(const core::GlobalState &gs, int tabs) {
+string ShadowArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string BlockArg::showRaw(const core::GlobalState &gs, int tabs) {
+string BlockArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return nodeName() + "{ expr = " + expr.showRaw(gs, tabs) + " }";
 }
 
-string ShadowArg::nodeName() {
+string ShadowArg::nodeName() const {
     return "ShadowArg";
 }
 
-string BlockArg::nodeName() {
+string BlockArg::nodeName() const {
     return "BlockArg";
 }
 
-string RuntimeMethodDefinition::nodeName() {
+string RuntimeMethodDefinition::nodeName() const {
     return "RuntimeMethodDefinition";
 }
 
