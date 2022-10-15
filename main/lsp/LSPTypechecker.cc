@@ -451,10 +451,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 if (!maybeResolved.hasResult()) {
                     return;
                 }
+                resolved = move(maybeResolved.result());
                 break;
             };
             case TypecheckingPath::SlowWithIncrementalResolver: {
-                auto [resolved, _] = runIncrementalResolver(*gs, config, updates, workers, errorFlusher);
+                auto [incrementallyResolved, _] = runIncrementalResolver(*gs, config, updates, workers, errorFlusher);
+                resolved = move(incrementallyResolved);
                 break;
             };
             case TypecheckingPath::Fast: {
