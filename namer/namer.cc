@@ -1261,11 +1261,11 @@ private:
         auto scope = ensureScopeIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
                                         staticField.name, staticField.asgnLoc);
         auto name = staticField.name;
-        auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
-        auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
+        auto sym = ctx.state.lookupStaticFieldSymbol(scope, name);
+        auto currSym = ctx.state.lookupSymbol(scope, name);
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, staticField.asgnLoc, staticField.name,
-                                       core::SymbolRef::Kind::FieldOrStaticField, currSym);
+            emitRedefinedConstantError(ctx, staticField.asgnLoc, name, core::SymbolRef::Kind::FieldOrStaticField,
+                                       currSym);
             name = ctx.state.nextMangledName(scope, name);
         }
         if (sym.exists()) {
