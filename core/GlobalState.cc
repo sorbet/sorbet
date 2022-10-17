@@ -1761,6 +1761,7 @@ void GlobalState::mangleRenameMethod(SymbolRef what, NameRef origName) {
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRename);
 }
 void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
+    ENFORCE(what.isMethod());
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
