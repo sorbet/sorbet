@@ -982,7 +982,7 @@ private:
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
-                    ctx.state.mangleRenameSymbol(sym, method.name); // Ok, this is a method
+                    ctx.state.mangleRenameMethod(sym, method.name);
                     // Re-enter a new symbol.
                     sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
                 } else {

@@ -168,12 +168,12 @@ public:
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
-    void mangleRenameSymbol(SymbolRef what, NameRef origName);
+    void mangleRenameMethod(SymbolRef what, NameRef origName);
     void mangleRenameForOverload(SymbolRef what, NameRef origName);
-    // NOTE: You likely want to use mangleRenameSymbol not deleteMethodSymbol, unless you know what you're doing.
+    // NOTE: You likely want to use mangleRenameMethod not deleteMethodSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
-    // NOTE: You likely want to use mangleRenameSymbol not deleteFieldSymbol, unless you know what you're doing.
+    // NOTE: You likely want to use mangleRenameMethod not deleteFieldSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteFieldSymbol(FieldRef what);
     spdlog::logger &tracer() const;

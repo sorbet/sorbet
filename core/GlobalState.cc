@@ -1728,7 +1728,7 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
             whatKlass->name = name;
             auto singleton = whatKlass->lookupSingletonClass(*this);
             if (singleton.exists()) {
-                mangleRenameSymbol(singleton, singleton.data(*this)->name);
+                mangleRenameMethod(singleton, singleton.data(*this)->name);
             }
             break;
         }
@@ -1756,7 +1756,7 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
 //
 // TODO(jez) Rename this to mangleRenameMethod?
 // TODO(jez) Update implementation of mangleRenameSymbolInternal to delete all the code that deals with non-methods?
-void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
+void GlobalState::mangleRenameMethod(SymbolRef what, NameRef origName) {
     ENFORCE(what.isMethod());
     mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRename);
 }
@@ -1765,7 +1765,8 @@ void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
 }
 
 // This method should be used sparingly, because using it correctly is tricky.
-// Consider using mangleRenameSymbol instead, unless you absolutely know that you must use this method.
+// Consider using mangleRenameMethod (or defining a new constant with a name produced by nextMangledName)
+// instead, unless you absolutely know that you must use this method.
 //
 // This method's existence can introduce use-after-free style problems, but with Symbol IDs instead of
 // pointers. Importantly, callers of this method assume the burden of ensuring that the deleted
@@ -1779,7 +1780,7 @@ void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
 // In particular, this method should basically be considered a private namer/namer.cc helper
 // function. The only reason why it's a method on GlobalState and not an anonymous helper in Namer
 // is because it requires direct (private) access to `this->methods` (and also because it looks very
-// similar to mangleRenameSymbol, so it's nice to have the implementation in the same file). But in
+// similar to mangleRenameMethod, so it's nice to have the implementation in the same file). But in
 // spirit, this is a private Namer helper function.
 void GlobalState::deleteMethodSymbol(MethodRef what) {
     const auto &whatData = what.data(*this);
