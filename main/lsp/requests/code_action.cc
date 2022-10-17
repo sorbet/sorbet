@@ -75,20 +75,10 @@ hasLoneClassMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<
 CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCodeAction), params(move(params)) {}
 
-unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentCodeAction);
 
     vector<unique_ptr<CodeAction>> result;
-
-    // TODO: In stale-state mode, we're returning an empty result here. The reason is that `hover` requests in vscode
-    // seem typically to be preceded by a `codeAction` request, and if we let that into the queue ahead of the `hover`
-    // request it would block otherwise; so we just stub out the result from `codeAction` for now. Eventually we will
-    // want to have proper support for this.
-    if (typechecker.isStale()) {
-        config.logger->debug("CodeActionTask running on stale, returning empty result");
-        response->result = move(result);
-        return response;
-    }
 
     const core::GlobalState &gs = typechecker.state();
     core::FileRef file = config.uri2FileRef(gs, params->textDocument->uri);
@@ -203,7 +193,4 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerInterface &
     return response;
 }
 
-bool CodeActionTask::canUseStaleData() const {
-    return true;
-}
 } // namespace sorbet::realmain::lsp

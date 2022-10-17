@@ -11,7 +11,7 @@ class CodeActionResolveTask final : public LSPRequestTask {
 public:
     CodeActionResolveTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CodeAction> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

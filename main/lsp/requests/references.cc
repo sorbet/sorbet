@@ -62,7 +62,7 @@ core::SymbolRef ReferencesTask::findSym(const core::GlobalState &gs, const vecto
     return symToCheck;
 }
 
-unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
     ShowOperation op(config, ShowOperation::Kind::References);
 

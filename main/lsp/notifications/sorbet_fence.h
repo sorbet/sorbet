@@ -4,18 +4,15 @@
 #include "main/lsp/LSPTask.h"
 
 namespace sorbet::realmain::lsp {
-class SorbetFenceParams;
 class SorbetFenceTask final : public LSPTask {
-    std::unique_ptr<SorbetFenceParams> params;
+    int id;
 
 public:
-    SorbetFenceTask(const LSPConfiguration &config, std::unique_ptr<SorbetFenceParams> params);
+    SorbetFenceTask(const LSPConfiguration &config, int id);
 
     bool canPreempt(const LSPIndexer &indexer) const override;
 
-    bool canUseStaleData() const override;
-
-    void run(LSPTypecheckerInterface &tc) override;
+    void run(LSPTypecheckerDelegate &tc) override;
 };
 } // namespace sorbet::realmain::lsp
 

@@ -19,7 +19,7 @@ protected:
 
     void preprocess(LSPPreprocessor &preprocessor) override;
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &ts) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &ts) override;
 };
 } // namespace sorbet::realmain::lsp
 

@@ -13,7 +13,7 @@ public:
 
     bool isDelayable() const override;
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

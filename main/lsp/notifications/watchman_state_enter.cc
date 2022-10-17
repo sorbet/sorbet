@@ -14,6 +14,6 @@ LSPTask::Phase WatchmanStateEnterTask::finalPhase() const {
 
 void WatchmanStateEnterTask::preprocess(LSPPreprocessor &preprocessor) {}
 
-void WatchmanStateEnterTask::run(LSPTypecheckerInterface &tc) {}
+void WatchmanStateEnterTask::run(LSPTypecheckerDelegate &tc) {}
 
 } // namespace sorbet::realmain::lsp

@@ -7,13 +7,13 @@
 
 namespace sorbet::realmain::lsp {
 
-std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerInterface &typechecker,
+std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                                   const LSPConfiguration &config,
                                                                   const core::lsp::MethodDefResponse &definition);
 
 std::unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs,
                                                const core::lsp::MethodDefResponse &definition,
-                                               LSPTypecheckerInterface &typechecker);
+                                               LSPTypecheckerDelegate &typechecker);
 
 } // namespace sorbet::realmain::lsp
 

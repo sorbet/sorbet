@@ -59,12 +59,6 @@ public:
     void typecheckOnSlowPath(std::unique_ptr<SorbetWorkspaceEditTask> typecheckTask);
 
     /**
-     * Tries to runs a task on stale state, on the indexing thread. Blocks until it completes. Returns the task back to
-     * the caller if we're unsuccessful, else returns nullptr.
-     */
-    std::unique_ptr<LSPTask> syncRunOnStaleState(std::unique_ptr<LSPTask> task);
-
-    /**
      * Schedules a task to run on the typechecker thread. Blocks until it completes.
      */
     void syncRun(std::unique_ptr<LSPTask> task);
@@ -100,11 +94,6 @@ public:
      */
     void setSlowPathBlocked(bool blocked) {
         typechecker.setSlowPathBlocked(blocked);
-    }
-
-    /** (For tests only) Checks if the `setSlowPathBlocked` flag is set. */
-    bool isSlowPathBlocked() const {
-        return typechecker.isSlowPathBlocked();
     }
 };
 } // namespace sorbet::realmain::lsp

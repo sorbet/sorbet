@@ -37,20 +37,20 @@ protected:
     // Task helper methods.
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
+    getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbolInPackage(LSPTypecheckerInterface &typechecker, core::NameRef packageName,
+    getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::NameRef packageName,
                                    core::SymbolRef symbol,
                                    std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef file, core::SymbolRef symbol,
+    getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file, core::SymbolRef symbol,
                                 std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<DocumentHighlight>>
-    getHighlights(LSPTypecheckerInterface &typechecker,
+    getHighlights(LSPTypecheckerDelegate &typechecker,
                   const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses) const;
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
@@ -64,13 +64,13 @@ protected:
 
     // Get references to the given accessor. If `info.accessorType` is `None`, it returns references to `fallback` only.
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToAccessor(LSPTypecheckerInterface &typechecker, const AccessorInfo info, core::SymbolRef fallback,
+    getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
                             std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     // Get references to the given accessor in the given file. If `info.accessorType` is `None`, it returns highlights
     // to `fallback` only.
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToAccessorInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref, const AccessorInfo info,
+    getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
                                   core::SymbolRef fallback,
                                   std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
@@ -105,9 +105,6 @@ public:
 
     virtual bool canPreempt(const LSPIndexer &) const;
 
-    // Returns true if the task can operate on typechecker stale state.
-    virtual bool canUseStaleData() const;
-
     virtual bool needsMultithreading(const LSPIndexer &) const;
 
     // Returns the phase at which the task is complete. Some tasks only need to interface with the preprocessor or the
@@ -125,7 +122,7 @@ public:
 
     // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to
     // not need to interface with the typechecker, this method must be implemented by all subclasses.
-    virtual void run(LSPTypecheckerInterface &typechecker) = 0;
+    virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
 };
 
 /**
@@ -137,10 +134,10 @@ protected:
 
     LSPRequestTask(const LSPConfiguration &config, MessageId id, LSPMethod method);
 
-    virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) = 0;
+    virtual std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) = 0;
 
 public:
-    void run(LSPTypecheckerInterface &typechecker) override;
+    void run(LSPTypecheckerDelegate &typechecker) override;
 
     // Requests cannot override this method, as runRequest must be run (and it only runs during the RUN phase).
     Phase finalPhase() const override;
@@ -162,7 +159,7 @@ protected:
 
 public:
     // Should never be called; throws an exception. May be overridden by tasks that can be dangerous or not dangerous.
-    virtual void run(LSPTypecheckerInterface &typechecker) override;
+    virtual void run(LSPTypecheckerDelegate &typechecker) override;
     // Performs the actual work on the task.
     virtual void runSpecial(LSPTypechecker &typechecker, WorkerPool &worker) = 0;
     // Tells the scheduler how long to wait before it can schedule more tasks.
@@ -184,7 +181,7 @@ public:
     LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
                            LSPIndexer &indexer);
 
-    void run(LSPTypecheckerInterface &tc) override;
+    void run(LSPTypecheckerDelegate &tc) override;
 };
 
 } // namespace sorbet::realmain::lsp

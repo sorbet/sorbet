@@ -12,7 +12,7 @@ class ImplementationTask final : public LSPRequestTask {
 public:
     ImplementationTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ImplementationParams> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

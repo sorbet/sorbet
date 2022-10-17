@@ -50,12 +50,6 @@ public:
 
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
     static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
-    // Run packager incrementally, but withouut mutating GlobalState. This is used by LSP to serve
-    // certain kinds of requests using stale data. In this mode, if mutating GlobalState would have
-    // been required to make progress, the corresponding part of the tree that triggered the
-    // mutation is simply dropped.
-    static std::vector<ast::ParsedFile> runIncrementalBestEffort(const core::GlobalState &gs,
-                                                                 std::vector<ast::ParsedFile> files);
 
     static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 

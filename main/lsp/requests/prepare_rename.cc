@@ -95,7 +95,7 @@ PrepareRenameTask::PrepareRenameTask(const LSPConfiguration &config, MessageId i
                                      unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentPrepareRename), params(move(params)) {}
 
-unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     const core::GlobalState &gs = typechecker.state();
 
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentPrepareRename);

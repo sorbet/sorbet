@@ -65,7 +65,7 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     }
 }
 
-void SorbetWorkspaceEditTask::run(LSPTypecheckerInterface &typechecker) {
+void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     if (latencyTimer != nullptr) {
         latencyTimer->setTag("path", "fast");
     }

@@ -11,7 +11,7 @@ class SorbetReadFileTask final : public LSPRequestTask {
 public:
     SorbetReadFileTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentIdentifier> params);
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
 } // namespace sorbet::realmain::lsp

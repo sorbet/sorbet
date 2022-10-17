@@ -186,7 +186,6 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
             data += [sentinel]
             data += native.glob(["{}.*.exp".format(prefix)])
             data += native.glob(["{}.*.rbupdate".format(prefix)])
-            data += native.glob(["{}.*.rbstaleupdate".format(prefix)])
             data += native.glob(["{}.*.rbedited".format(prefix)])
             data += native.glob(["{}.*.minimize.rbi".format(prefix)])
 

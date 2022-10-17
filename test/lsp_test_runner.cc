@@ -531,12 +531,6 @@ TEST_CASE("LSPTest") {
     /** Test expectations. */
     Expectations test = Expectations::getExpectations(singleTest);
 
-    /** Currently we cannot mix .rbupdate and .rbstaleupdate files, since the latter requires us to use a multithreaded
-        LSPWrapper and the former requires us to use a single-threaded LSPWrapper. */
-    bool haveSourceUpdates = test.sourceLSPFileUpdates.size() > 0;
-    bool haveStaleUpdates = test.staleLSPFileUpdates.size() > 0;
-    REQUIRE_MESSAGE(!(haveSourceUpdates && haveStaleUpdates), "Cannot mix .rbupdate and .rbstaleupdate files in test");
-
     /** All test assertions ordered by (filename, range, message). */
     std::vector<std::shared_ptr<RangeAssertion>> assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
@@ -573,16 +567,11 @@ TEST_CASE("LSPTest") {
         opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
         opts->lspExperimentalFastPathEnabled = true;
 
-        if (haveStaleUpdates) {
-            opts->lspStaleStateEnabled = true;
-            lspWrapper = MultiThreadedLSPWrapper::create("", move(opts));
-        } else {
-            // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
-            // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
-            // need to be changed as well.
-            opts->lspMaxFilesOnFastPath = 10;
-            lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
-        }
+        // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
+        // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
+        // need to be changed as well.
+        opts->lspMaxFilesOnFastPath = 10;
+        lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
         lspWrapper->enableAllExperimentalFeatures();
     }
 
@@ -849,23 +838,19 @@ TEST_CASE("LSPTest") {
 
     // Fast path tests: Asserts that certain changes take the fast/slow path, and produce any expected diagnostics.
     {
-        // sourceLSPFileUpdates/staleLSPFileUpdates are unordered (and we can't use ordered maps unless we make their
-        // contents `const`)
+        // sourceLSPFileUpdates is unordered (and we can't use an ordered map unless we make its contents `const`)
         // Sort by version.
         vector<int> sortedUpdates;
         const int baseVersion = 4;
-
-        auto &testUpdates = haveStaleUpdates ? test.staleLSPFileUpdates : test.sourceLSPFileUpdates;
-
-        for (auto &update : testUpdates) {
+        for (auto &update : test.sourceLSPFileUpdates) {
             sortedUpdates.push_back(update.first);
         }
         fast_sort(sortedUpdates);
 
         // Apply updates in order.
         for (auto version : sortedUpdates) {
-            auto errorPrefix = fmt::format("[*.{}.{}] ", version, haveStaleUpdates ? "rbstaleupdate" : "rbupdate");
-            const auto &updates = testUpdates[version];
+            auto errorPrefix = fmt::format("[*.{}.rbupdate] ", version);
+            const auto &updates = test.sourceLSPFileUpdates[version];
             vector<unique_ptr<LSPMessage>> lspUpdates;
             UnorderedMap<std::string, std::shared_ptr<core::File>> updatesAndContents;
 
@@ -890,97 +875,53 @@ TEST_CASE("LSPTest") {
             }
             auto assertFastPath = FastPathAssertion::get(assertions);
             auto assertSlowPath = BooleanPropertyAssertion::getValue("assert-slow-path", assertions);
+            auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
 
-            // TODO(aprocter): There's probably more code duplication than necessary between the 'if' and the 'else'
-            // here.
-            if (haveStaleUpdates) {
-                // Wait for a fence, to clear out any pending slow-path operations.
-                (void)getLSPResponsesFor(*lspWrapper, std::vector<std::unique_ptr<LSPMessage>>{});
-
-                // Block the slow path, to force the edit tasks to operate on stale state.
-                lspWrapper->setSlowPathBlocked(true);
-
-                // Send the updates.
-                auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
-
-                // Make sure we get the expected typecheck start message, and nothing unexpected in response to the
-                // edits.
-                verifyTypecheckRunInfo(errorPrefix, responses, SorbetTypecheckRunStatus::Started,
-                                       ExpectDiagnosticMessages::Yes, [&errorPrefix](auto &params) -> void {
-                                           // For stale state, we must take the slow path.
-                                           INFO(errorPrefix
-                                                << "For stale state tests, we always expect Sorbet to take slow path, "
-                                                   "but it took the fast path.");
-                                           CHECK_NE(params->typecheckingPath, TypecheckingPath::Fast);
-                                       });
-
-                // Check any new HoverAssertions in the updates.
-                HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
-
-                // Unblock the slow path.
-                lspWrapper->setSlowPathBlocked(false);
-
-                // Wait for a fence, to clear out the slow path we've just unblocked.
-                responses = getLSPResponsesFor(*lspWrapper, std::vector<std::unique_ptr<LSPMessage>>{});
-
-                // Make sure we get the expected end message for the unblocked slow path, and nothing else that's
-                // unexpected.
-                verifyTypecheckRunInfo(errorPrefix, responses, SorbetTypecheckRunStatus::Ended,
-                                       ExpectDiagnosticMessages::No, [](auto &params) -> void {
-                                           // We could check if the end message is for a slow path, but it's probably
-                                           // not necessary since we already checked that we got a slow-path start
-                                           // message.
-                                       });
-            } else {
-                auto responses = getLSPResponsesFor(*lspWrapper, move(lspUpdates));
-                // Ignore started messages.  Note that cancelation messages cannot occur
-                // in this codepath since we are running in single-threaded mode.
-                verifyTypecheckRunInfo(
-                    errorPrefix, responses, SorbetTypecheckRunStatus::Ended, ExpectDiagnosticMessages::Yes,
-                    [&errorPrefix, assertSlowPath, &assertFastPath, &test,
-                     &version](unique_ptr<SorbetTypecheckRunInfo> &params) -> void {
-                        auto validateAssertions = [&params, &errorPrefix](TypecheckingPath path, string actualPath,
-                                                                          bool assertValue, string expectedPath) {
-                            auto isSelectedPath = params->typecheckingPath == path;
-                            if (isSelectedPath && assertValue) {
-                                INFO(errorPrefix
-                                     << fmt::format("Expected Sorbet to take {} path, but it took the {} path.",
-                                                    expectedPath, actualPath));
-                                CHECK_NE(isSelectedPath, assertValue);
-                            } else if (!isSelectedPath && !assertValue) {
-                                INFO(errorPrefix
-                                     << fmt::format("Expected Sorbet to take {} path, but it took the {} path.",
-                                                    expectedPath, actualPath));
-                                CHECK_NE(isSelectedPath, assertValue);
-                            }
-                        };
-                        if (assertSlowPath.has_value()) {
-                            validateAssertions(TypecheckingPath::Fast, "fast", assertSlowPath.value(), "slow");
+            // Ignore started messages.  Note that cancelation messages cannot occur
+            // in this codepath since we are running in single-threaded mode.
+            verifyTypecheckRunInfo(
+                errorPrefix, responses, SorbetTypecheckRunStatus::Ended, ExpectDiagnosticMessages::Yes,
+                [&errorPrefix, assertSlowPath, &assertFastPath, &test,
+                 &version](unique_ptr<SorbetTypecheckRunInfo> &params) -> void {
+                    auto validateAssertions = [&params, &errorPrefix](TypecheckingPath path, string actualPath,
+                                                                      bool assertValue, string expectedPath) {
+                        auto isSelectedPath = params->typecheckingPath == path;
+                        if (isSelectedPath && assertValue) {
+                            INFO(errorPrefix << fmt::format("Expected Sorbet to take {} path, but it took the {} path.",
+                                                            expectedPath, actualPath));
+                            CHECK_NE(isSelectedPath, assertValue);
+                        } else if (!isSelectedPath && !assertValue) {
+                            INFO(errorPrefix << fmt::format("Expected Sorbet to take {} path, but it took the {} path.",
+                                                            expectedPath, actualPath));
+                            CHECK_NE(isSelectedPath, assertValue);
                         }
-                        if (assertFastPath.has_value()) {
-                            (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
-                        }
-                    });
+                    };
+                    if (assertSlowPath.has_value()) {
+                        validateAssertions(TypecheckingPath::Fast, "fast", assertSlowPath.value(), "slow");
+                    }
+                    if (assertFastPath.has_value()) {
+                        (*assertFastPath)->check(*params, test.folder, version, errorPrefix);
+                    }
+                });
 
-                updateDiagnostics(config, testFileUris, responses, diagnostics);
+            updateDiagnostics(config, testFileUris, responses, diagnostics);
 
-                for (auto &update : updates) {
-                    auto originalFile = test.folder + update.first;
-                    auto updateFile = test.folder + update.second;
-                    testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
-                }
-
-                const bool passed = ErrorAssertion::checkAll(
-                    updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
-
-                if (!passed) {
-                    // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
-                    break;
-                }
-
-                // Check any new HoverAssertions in the updates.
-                HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
+            for (auto &update : updates) {
+                auto originalFile = test.folder + update.first;
+                auto updateFile = test.folder + update.second;
+                testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
             }
+
+            const bool passed = ErrorAssertion::checkAll(
+                updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+
+            if (!passed) {
+                // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
+                break;
+            }
+
+            // Check any new HoverAssertions in the updates.
+            HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
         }
     }
 

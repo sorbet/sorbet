@@ -286,61 +286,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
     return what;
 }
 
-// TODO: Deduplicate implementation with incrementalResolve using is_const_v-ish tricks
-vector<ast::ParsedFile> incrementalResolveBestEffort(const core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                                     const options::Options &opts) {
-    try {
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.stripePackages) {
-            Timer timeit(gs.tracer(), "incremental_packager");
-            what = packager::Packager::runIncrementalBestEffort(gs, move(what));
-        }
-#endif
-        {
-            Timer timeit(gs.tracer(), "incremental_naming");
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-
-            auto result = sorbet::namer::Namer::symbolizeTreesBestEffort(gs, move(what), *emptyWorkers);
-            // Cancellation cannot occur during incremental namer.
-            ENFORCE(result.hasResult());
-            what = move(result.result());
-
-            // Required for autogen tests, which need to control which phase to stop after.
-            if (opts.stopAfterPhase == options::Phase::NAMER) {
-                return what;
-            }
-        }
-
-        {
-            Timer timeit(gs.tracer(), "incremental_resolve");
-            gs.tracer().trace("Resolving (incremental pass)...");
-
-            auto result = sorbet::resolver::Resolver::runIncrementalBestEffort(gs, move(what));
-            // incrementalResolve is not cancelable.
-            ENFORCE(result.hasResult());
-            what = move(result.result());
-
-            // Required for autogen tests, which need to control which phase to stop after.
-            if (opts.stopAfterPhase == options::Phase::RESOLVER) {
-                return what;
-            }
-        }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.stripePackages) {
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-            what = packager::VisibilityChecker::runIncremental(gs, *emptyWorkers, move(what));
-        }
-#endif
-    } catch (SorbetException &) {
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
-            e.setHeader("Exception resolving (backtrace is above)");
-        }
-    }
-
-    return what;
-}
-
 vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
     Timer timeit(gs->tracer(), "reserveFiles");
     vector<core::FileRef> ret;
@@ -750,14 +695,6 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
     }
 #endif
     return what;
-}
-
-ast::ParsedFilesOrCancelled nameBestEffortConst(const core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                                WorkerPool &workers) {
-    Timer timeit(gs.tracer(), "nameBestEffortConst");
-    auto result = namer::Namer::symbolizeTreesBestEffort(gs, move(what), workers);
-
-    return result;
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,

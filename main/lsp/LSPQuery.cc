@@ -52,7 +52,7 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
     return responses;
 }
 
-LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker, string_view uri,
+LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
                                const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
@@ -80,30 +80,23 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerInt
 
     auto loc = pos.toLoc(gs, fref);
     if (!loc.has_value()) {
-        if (typechecker.isStale()) {
-            // File location was not valid, but it's _probably_ not the client's fault--instead it's
-            // likely that we're not running on an up-to-date file yet. Since we don't have a good
-            // way to check, let's just say "no results"
-            return LSPQueryResult{{}, nullptr};
-        } else {
-            auto error = make_unique<ResponseError>(
-                (int)LSPErrorCodes::InvalidParams,
-                fmt::format("Position {} in {} does not correspond to a valid location", pos.showRaw(), uri));
-            return LSPQueryResult{{}, move(error)};
-        }
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Position {} in {} does not correspond to a valid location", pos.showRaw(), uri));
+        return LSPQueryResult{{}, move(error)};
     }
 
     return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
 }
 
-LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                                    core::SymbolRef symbol, vector<core::FileRef> frefs) {
     Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
     ENFORCE(symbol.exists());
     return typechecker.query(core::lsp::Query::createSymbolQuery(symbol), frefs);
 }
 
-LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerInterface &typechecker,
+LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                   core::SymbolRef symbol, core::NameRef pkgName) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");
     ENFORCE(symbol.exists());

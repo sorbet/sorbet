@@ -222,7 +222,7 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
             case LSPMethod::Exit:
                 return make_unique<ExitTask>(*config, 0);
             case LSPMethod::SorbetFence:
-                return make_unique<SorbetFenceTask>(*config, move(get<unique_ptr<SorbetFenceParams>>(rawParams)));
+                return make_unique<SorbetFenceTask>(*config, get<int>(rawParams));
             case LSPMethod::PAUSE:
                 return make_unique<SorbetPauseTask>(*config);
             case LSPMethod::RESUME:

@@ -2,26 +2,20 @@
 
 class X
   #   ^ hover: T.class_of(X)
-  #   ^ hover: # note: information may be stale
   extend T::Sig
   sig {params(x: Integer).void}
   def foo(
     # ^ hover: sig {params(x: Integer).void}
     # ^ hover: def foo(x); end
-    # ^ hover: # note: information may be stale
     x
   # ^ hover: Integer
-  # ^ hover: # note: information may be stale
   )
     puts(x)
     #    ^ hover: Integer
-    #    ^ hover: # note: information may be stale
   end
 end
 
-BB = 123
+AA = 123
 #^ hover: Integer
-#^ hover: # note: information may be stale
-puts BB
+puts AA
 #    ^ hover: Integer
-#    ^ hover: # note: information may be stale

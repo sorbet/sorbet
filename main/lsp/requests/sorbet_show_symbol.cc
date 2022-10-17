@@ -11,7 +11,7 @@ SorbetShowSymbolTask::SorbetShowSymbolTask(const LSPConfiguration &config, Messa
                                            std::unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::SorbetShowSymbol), params(move(params)) {}
 
-unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::SorbetShowSymbol);
 
     const core::GlobalState &gs = typechecker.state();

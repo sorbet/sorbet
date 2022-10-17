@@ -31,7 +31,7 @@ public:
     void mergeNewer(SorbetWorkspaceEditTask &task);
     void preprocess(LSPPreprocessor &preprocess) override;
     void index(LSPIndexer &indexer) override;
-    void run(LSPTypecheckerInterface &typechecker) override;
+    void run(LSPTypecheckerDelegate &typechecker) override;
     void runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) override;
     void schedulerWaitUntilReady() override;
 

@@ -16,7 +16,7 @@ public:
 
     void preprocess(LSPPreprocessor &preprocessor) override;
 
-    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerInterface &typechecker) override;
+    std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 
 private:
     void displayError(std::string errorMessage, std::unique_ptr<ResponseMessage> &response);

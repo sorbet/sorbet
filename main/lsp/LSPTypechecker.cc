@@ -152,7 +152,6 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     if (updates.canceledSlowPath) {
-        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
         // This update canceled the last slow path, so we should have undo state to restore to go to the point _before_
         // that slow path. This should always be the case, but let's not crash release builds.
         ENFORCE(cancellationUndoState != nullptr);
@@ -492,10 +491,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         prodCategoryCounterInc("lsp.updates", "slowpath");
         timeit.setTag("canceled", "false");
         // No need to keep around cancelation state!
-        {
-            absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
-            cancellationUndoState = nullptr;
-        }
+        cancellationUndoState = nullptr;
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
@@ -511,32 +507,29 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
 void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled) {
     // The fast path cannot be canceled.
     ENFORCE(!(updates.typecheckingPath == PathType::Fast && couldBeCanceled));
-    {
-        absl::WriterMutexLock writerLock(&this->cancellationUndoStateRWLock);
-        if (couldBeCanceled) {
-            ENFORCE(updates.updatedGS.has_value());
-            cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
-        }
+    if (couldBeCanceled) {
+        ENFORCE(updates.updatedGS.has_value());
+        cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
+    }
 
-        // Clear out state associated with old finalGS.
-        if (updates.typecheckingPath != PathType::Fast) {
-            indexedFinalGS.clear();
-        }
+    // Clear out state associated with old finalGS.
+    if (updates.typecheckingPath != PathType::Fast) {
+        indexedFinalGS.clear();
+    }
 
-        int i = -1;
-        ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
-        for (auto &ast : updates.updatedFileIndexes) {
-            i++;
-            const int id = ast.file.id();
-            if (id >= indexed.size()) {
-                indexed.resize(id + 1);
-            }
-            if (cancellationUndoState != nullptr) {
-                // Move the evicted values before they get replaced.
-                cancellationUndoState->recordEvictedState(move(indexed[id]));
-            }
-            indexed[id] = move(ast);
+    int i = -1;
+    ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
+    for (auto &ast : updates.updatedFileIndexes) {
+        i++;
+        const int id = ast.file.id();
+        if (id >= indexed.size()) {
+            indexed.resize(id + 1);
         }
+        if (cancellationUndoState != nullptr) {
+            // Move the evicted values before they get replaced.
+            cancellationUndoState->recordEvictedState(move(indexed[id]));
+        }
+        indexed[id] = move(ast);
     }
 
     for (auto &ast : updates.updatedFinalGSFileIndexes) {
@@ -671,24 +664,9 @@ void LSPTypechecker::changeThread() {
     typecheckerThreadId = newId;
 }
 
-bool LSPTypechecker::tryRunOnStaleState(std::function<void(UndoState &)> func) {
-    absl::ReaderMutexLock lock(&cancellationUndoStateRWLock);
-    if (cancellationUndoState == nullptr) {
-        return false;
-    } else {
-        func(*cancellationUndoState);
-        return true;
-    }
-}
-
 void LSPTypechecker::setSlowPathBlocked(bool blocked) {
     absl::MutexLock lck(&slowPathBlockedMutex);
     slowPathBlocked = blocked;
-}
-
-bool LSPTypechecker::isSlowPathBlocked() const {
-    absl::MutexLock lck(&slowPathBlockedMutex);
-    return slowPathBlocked;
 }
 
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
@@ -735,77 +713,5 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
 }
-
-LSPStaleTypechecker::LSPStaleTypechecker(std::shared_ptr<const LSPConfiguration> config, UndoState &undoState)
-    : config(config), undoState(undoState), emptyWorkers(WorkerPool::create(0, undoState.getEvictedGs()->tracer())) {}
-
-void LSPStaleTypechecker::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> initialGS,
-                                     std::unique_ptr<KeyValueStore> kvstore) {
-    ENFORCE(false, "initialize not supported");
-}
-
-void LSPStaleTypechecker::resumeTaskQueue(InitializedTask &task) {
-    ENFORCE(false, "resumeTaskQueue not supported");
-}
-
-void LSPStaleTypechecker::typecheckOnFastPath(LSPFileUpdates updates,
-                                              std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers) {
-    ENFORCE(false, "typecheckOnFastPath not implemented");
-}
-
-std::vector<std::unique_ptr<core::Error>> LSPStaleTypechecker::retypecheck(std::vector<core::FileRef> frefs) const {
-    ENFORCE(false, "retypecheck not implemented");
-    return {};
-}
-
-LSPQueryResult LSPStaleTypechecker::query(const core::lsp::Query &q,
-                                          const std::vector<core::FileRef> &filesForQuery) const {
-    const auto &gs = undoState.getEvictedGs();
-
-    // We assume gs is a copy of initialGS, which has had the inferencer & resolver run.
-    ENFORCE(gs->lspTypecheckCount > 0,
-            "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
-
-    // Replace error queue with one that is owned by this thread.
-    auto queryCollector = make_shared<QueryCollector>();
-    gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
-
-    Timer timeit(config->logger, "query");
-    prodCategoryCounterInc("lsp.updates", "query");
-    ENFORCE(gs->errorQueue->isEmpty());
-    ENFORCE(gs->lspQuery.isEmpty());
-    gs->lspQuery = q;
-    auto resolved = getResolved(filesForQuery);
-    tryApplyDefLocSaver(*gs, resolved);
-    tryApplyLocalVarSaver(*gs, resolved);
-
-    const auto cancelable = true;
-    pipeline::typecheck(*gs, move(resolved), config->opts, *emptyWorkers, cancelable);
-    gs->lspTypecheckCount++;
-    gs->lspQuery = core::lsp::Query::noQuery();
-    return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
-}
-
-const ast::ParsedFile &LSPStaleTypechecker::getIndexed(core::FileRef fref) const {
-    return undoState.getIndexed(fref);
-}
-
-std::vector<ast::ParsedFile> LSPStaleTypechecker::getResolved(const std::vector<core::FileRef> &frefs) const {
-    const auto &gs = *(undoState.getEvictedGs());
-    vector<ast::ParsedFile> updatedIndexed;
-
-    for (auto fref : frefs) {
-        auto &indexed = getIndexed(fref);
-        if (indexed.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
-        }
-    }
-
-    return pipeline::incrementalResolveBestEffort(gs, move(updatedIndexed), config->opts);
-}
-
-const core::GlobalState &LSPStaleTypechecker::state() const {
-    return *(undoState.getEvictedGs());
-};
 
 } // namespace sorbet::realmain::lsp

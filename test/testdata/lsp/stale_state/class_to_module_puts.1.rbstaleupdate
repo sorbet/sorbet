@@ -1,7 +1,0 @@
-# typed: true
-
-module A
-  #    ^ hover: # note: information may be stale
-  #    ^ hover: T.class_of(A)
-  puts(A)
-end

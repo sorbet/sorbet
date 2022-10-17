@@ -133,7 +133,7 @@ void AbstractRenamer::addDispatchRelatedMethods(const core::GlobalState &gs, con
     }
 }
 
-void AbstractRenamer::getRenameEdits(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol, string newName) {
+void AbstractRenamer::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string newName) {
     const core::GlobalState &gs = typechecker.state();
     auto originalName = symbol.name(gs).show(gs);
 

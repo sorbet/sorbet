@@ -61,7 +61,7 @@ ImplementationTask::ImplementationTask(const LSPConfiguration &config, MessageId
                                        std::unique_ptr<ImplementationParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentImplementation), params(move(params)) {}
 
-unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentImplementation);
 
     const core::GlobalState &gs = typechecker.state();

@@ -11,7 +11,7 @@ bool ShutdownTask::canPreempt(const LSPIndexer &indexer) const {
     return true;
 }
 
-unique_ptr<ResponseMessage> ShutdownTask::runRequest(LSPTypecheckerInterface &ts) {
+unique_ptr<ResponseMessage> ShutdownTask::runRequest(LSPTypecheckerDelegate &ts) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::Shutdown);
     response->result = JSONNullObject();
     return response;

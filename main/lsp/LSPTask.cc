@@ -98,9 +98,6 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                 } else if constexpr (is_same_v<T, unique_ptr<SorbetErrorParams>>) {
                     // sorbet/error
                     return ResponseMessageStatus::Unknown;
-                } else if constexpr (is_same_v<T, unique_ptr<SorbetFenceParams>>) {
-                    // sorbet/fence
-                    return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, unique_ptr<TextDocumentItem>>) {
                     // sorbet/readFile
                     return ResponseMessageStatus::Unknown;
@@ -219,7 +216,7 @@ void LSPTask::index(LSPIndexer &indexer) {}
 LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id, LSPMethod method)
     : LSPTask(config, method), id(move(id)) {}
 
-void LSPRequestTask::run(LSPTypecheckerInterface &typechecker) {
+void LSPRequestTask::run(LSPTypecheckerDelegate &typechecker) {
     auto response = runRequest(typechecker);
     ENFORCE(response != nullptr);
 
@@ -276,10 +273,6 @@ bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
     return !needsMultithreading(indexer);
 }
 
-bool LSPTask::canUseStaleData() const {
-    return false;
-}
-
 vector<unique_ptr<Location>>
 LSPTask::extractLocations(const core::GlobalState &gs,
                           const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
@@ -296,7 +289,7 @@ LSPTask::extractLocations(const core::GlobalState &gs,
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::SymbolRef symbol,
+LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, symbol);
@@ -306,7 +299,7 @@ LSPTask::getReferencesToSymbol(LSPTypecheckerInterface &typechecker, core::Symbo
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerInterface &typechecker, core::NameRef packageName,
+LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::NameRef packageName,
                                         core::SymbolRef symbol,
                                         vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
@@ -317,7 +310,7 @@ LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerInterface &typechecker, co
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref, core::SymbolRef symbol,
+LSPTask::getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, core::SymbolRef symbol,
                                      vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists() && fref.exists()) {
         auto run2 = LSPQuery::bySymbolInFiles(config, typechecker, symbol, {fref});
@@ -332,7 +325,7 @@ LSPTask::getReferencesToSymbolInFile(LSPTypecheckerInterface &typechecker, core:
 }
 
 vector<unique_ptr<DocumentHighlight>>
-LSPTask::getHighlights(LSPTypecheckerInterface &typechecker,
+LSPTask::getHighlights(LSPTypecheckerDelegate &typechecker,
                        const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) const {
     vector<unique_ptr<DocumentHighlight>> highlights;
     auto locations = extractLocations(typechecker.state(), queryResponses);
@@ -396,8 +389,7 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
 } // namespace
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToAccessor(LSPTypecheckerInterface &typechecker, const AccessorInfo info,
-                                 core::SymbolRef fallback,
+LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
                                  vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     switch (info.accessorType) {
         case FieldAccessorType::None:
@@ -491,8 +483,8 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToAccessorInFile(LSPTypecheckerInterface &typechecker, core::FileRef fref,
-                                       const AccessorInfo info, core::SymbolRef fallback,
+LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
+                                       core::SymbolRef fallback,
                                        vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     switch (info.accessorType) {
         case FieldAccessorType::None:
@@ -526,7 +518,7 @@ LSPQueuePreemptionTask::LSPQueuePreemptionTask(const LSPConfiguration &config, a
                                                TaskQueue &taskQueue, LSPIndexer &indexer)
     : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueue(taskQueue), indexer(indexer) {}
 
-void LSPQueuePreemptionTask::run(LSPTypecheckerInterface &tc) {
+void LSPQueuePreemptionTask::run(LSPTypecheckerDelegate &tc) {
     for (;;) {
         unique_ptr<LSPTask> task;
         {
@@ -559,7 +551,7 @@ void LSPQueuePreemptionTask::run(LSPTypecheckerInterface &tc) {
 LSPDangerousTypecheckerTask::LSPDangerousTypecheckerTask(const LSPConfiguration &config, LSPMethod method)
     : LSPTask(config, method) {}
 
-void LSPDangerousTypecheckerTask::run(LSPTypecheckerInterface &tc) {
+void LSPDangerousTypecheckerTask::run(LSPTypecheckerDelegate &tc) {
     Exception::raise("Bug: Dangerous typechecker tasks are expected to run specially");
 }
 

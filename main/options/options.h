@@ -263,7 +263,6 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspStaleStateEnabled = false;
     bool lspExperimentalFastPathEnabled = false;
 
     // Experimental feature `requires_ancestor`

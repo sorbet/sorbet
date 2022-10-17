@@ -9,7 +9,7 @@ CodeActionResolveTask::CodeActionResolveTask(const LSPConfiguration &config, Mes
                                              unique_ptr<CodeAction> params)
     : LSPRequestTask(config, move(id), LSPMethod::CodeActionResolve), params(move(params)) {}
 
-unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::CodeActionResolve);
     if (params->kind != CodeActionKind::RefactorExtract || !params->data.has_value()) {
         response->error =

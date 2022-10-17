@@ -35,12 +35,8 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
 HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentHover), params(move(params)) {}
 
-unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typechecker) {
+unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentHover);
-
-    if (typechecker.isStale()) {
-        config.logger->debug("HoverTask running on stale data");
-    }
 
     const core::GlobalState &gs = typechecker.state();
     auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
@@ -144,18 +140,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerInterface &typec
         docString = absl::StrJoin(documentation, "\n\n");
     }
 
-    // If we've served this request from stale state, add a little indicator to that effect. (TODO(aprocter): This is
-    // debugging aid for an experimental feature. We probably don't actually want to surface this to users, so delete
-    // this when stale state stuff goes "GA".)
-    if (typechecker.isStale()) {
-        typeString = "# note: information may be stale\n" + typeString;
-    }
-
     response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));
     return response;
 }
 
-bool HoverTask::canUseStaleData() const {
-    return true;
-}
 } // namespace sorbet::realmain::lsp

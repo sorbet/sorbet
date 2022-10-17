@@ -1,7 +1,8 @@
 # typed: true
+# assert-slow-path: true
 
 module A
+  #    ^ hover: T.class_of(A)
   puts(A)
-  #    ^ hover: # note: information may be stale
   #    ^ hover: T.class_of(A)
 end
