@@ -444,6 +444,9 @@ NameDef names[] = {
     {"test_import"},
     {"export_", "export"},
     {"restrict_to_service"},
+    {"autoloader_compatibility"},
+    {"legacy"},
+    {"strict"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 

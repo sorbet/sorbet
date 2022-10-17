@@ -531,7 +531,7 @@ public:
             std::advance(it, 1);
 
             for (; it != end; ++it) {
-                if (auto e = ctx.beginError(it->importLoc, core::errors::Packager::InvalidImportOrExport)) {
+                if (auto e = ctx.beginError(it->importLoc, core::errors::Packager::InvalidConfiguration)) {
                     e.setHeader("Duplicate package import `{}`", it->package.show(ctx));
                     e.addErrorLine(ctx.locAt(first->importLoc), "Previous package import found here");
                     e.replaceWith("Remove import", ctx.locAt(it->importLoc), "");
