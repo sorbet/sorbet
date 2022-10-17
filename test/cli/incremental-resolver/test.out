@@ -35,13 +35,6 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:2: Cannot ini
     Sorbet does not allow treating constant assignments as class or module definitions,
     even if the initializer computes a `Module` object at runtime. See the docs for more.
 
-test/cli/incremental-resolver/expect-failures/constant_override.rb:5: Constant `B` is not a class or type alias https://srb.help/5004
-     5 |  sig { returns(T.all(B,T)) }
-                              ^
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:2: If you are trying to define a type alias, you should use `T.type_alias` here
-     2 |B = e
-        ^
-
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Cannot initialize the module `B` by constant assignment https://srb.help/4022
      110 |B = e
           ^^^^^
@@ -52,17 +45,10 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Cannot i
     Sorbet does not allow treating constant assignments as class or module definitions,
     even if the initializer computes a `Module` object at runtime. See the docs for more.
 
-test/cli/incremental-resolver/expect-failures/constant_override.rb:113: Constant `B` is not a class or type alias https://srb.help/5004
-     113 |  sig { returns(T.all(B,T)) }
-                                ^
-    test/cli/incremental-resolver/expect-failures/constant_override.rb:13: If you are trying to define a type alias, you should use `T.type_alias` here
-    13 |
-    14 |
-
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
-Errors: 5
+Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_redefinition.rb ---------------------
 test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Cannot initialize the class `A` by constant assignment https://srb.help/4022
      4 |  A = nil

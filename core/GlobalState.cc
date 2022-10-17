@@ -1024,6 +1024,8 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     // the previous name was: for `x$n` where `n` is larger than 2, it'll be `x$(n-1)`, for bare `x`,
     // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
+    // The name un-mangling logic described here no longer applies to constant symbols, only methods.
+    ENFORCE(sym.isMethod());
     NameRef name = sym.name(*this);
     auto ownerScope = owner.dataAllowingNone(*this);
 
@@ -1678,20 +1680,28 @@ FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }
 
-void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind) {
-    auto owner = what.owner(*this).asClassOrModuleRef();
+NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
+    auto ownerData = owner.data(*this);
+    uint32_t collisionCount = 1;
+    NameRef name;
+    do {
+        name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
+    } while (ownerData->findMember(*this, name).exists());
+
+    return name;
+}
+
+void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind) {
+    auto owner = what.data(*this)->owner;
     auto ownerData = owner.data(*this);
     auto &ownerMembers = ownerData->members();
     auto fnd = ownerMembers.find(origName);
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
-    ENFORCE(what.name(*this) == origName);
-    uint32_t collisionCount = 1;
+    ENFORCE(what.data(*this)->name == origName);
     NameRef name;
     if (kind == UniqueNameKind::MangleRename) {
-        do {
-            name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
-        } while (ownerData->findMember(*this, name).exists());
+        name = nextMangledName(owner, origName);
     } else {
         // We don't loop in this case because we're not trying to find an actually unique name, we
         // just want to essentially move the existing, non-overloaded `what` out of the way to allow
@@ -1702,7 +1712,6 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
         // We know that there is no method with this name, because otherwise resolver would not have
         // called mangleRenameForOverload.
         ENFORCE(kind == UniqueNameKind::MangleRenameOverload);
-        ENFORCE(what.isMethod());
         name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
     }
     // Both branches of the above `if` condition should ENFORCE this (either due to the loop post
@@ -1711,40 +1720,25 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
             name.showRaw(*this));
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
-    switch (what.kind()) {
-        case SymbolRef::Kind::ClassOrModule: {
-            auto whatKlass = what.asClassOrModuleRef().data(*this);
-            whatKlass->name = name;
-            auto singleton = whatKlass->lookupSingletonClass(*this);
-            if (singleton.exists()) {
-                mangleRenameSymbol(singleton, singleton.data(*this)->name);
-            }
-            break;
-        }
-        case SymbolRef::Kind::Method:
-            what.asMethodRef().data(*this)->name = name;
-            break;
-        case SymbolRef::Kind::FieldOrStaticField:
-            what.asFieldRef().data(*this)->name = name;
-            break;
-        case SymbolRef::Kind::TypeArgument:
-            what.asTypeArgumentRef().data(*this)->name = name;
-            break;
-        case SymbolRef::Kind::TypeMember:
-            what.asTypeMemberRef().data(*this)->name = name;
-            break;
-    }
+    what.data(*this)->name = name;
 }
 
-void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName) {
-    mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRename);
+// We have to use this mangle renaming logic to get old methods out of the way, because method
+// redefinitions are not an error at `typed: false`, which means that people can expect that their
+// redefined method will be given precedence when called in another (typed: true) file.
+//
+// (Constant redefinition errors are always enforced at `# typed: false`, so we can afford to simply
+// define a new symbol with a mangled name, instead of mangling AND renaming constant symbols.)
+void GlobalState::mangleRenameMethod(MethodRef what, NameRef origName) {
+    mangleRenameMethodInternal(what, origName, UniqueNameKind::MangleRename);
 }
-void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
-    mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
+void GlobalState::mangleRenameForOverload(MethodRef what, NameRef origName) {
+    mangleRenameMethodInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
 // This method should be used sparingly, because using it correctly is tricky.
-// Consider using mangleRenameSymbol instead, unless you absolutely know that you must use this method.
+// Consider using mangleRenameMethod (or defining a new constant with a name produced by nextMangledName)
+// instead, unless you absolutely know that you must use this method.
 //
 // This method's existence can introduce use-after-free style problems, but with Symbol IDs instead of
 // pointers. Importantly, callers of this method assume the burden of ensuring that the deleted
@@ -1758,7 +1752,7 @@ void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
 // In particular, this method should basically be considered a private namer/namer.cc helper
 // function. The only reason why it's a method on GlobalState and not an anonymous helper in Namer
 // is because it requires direct (private) access to `this->methods` (and also because it looks very
-// similar to mangleRenameSymbol, so it's nice to have the implementation in the same file). But in
+// similar to mangleRenameMethod, so it's nice to have the implementation in the same file). But in
 // spirit, this is a private Namer helper function.
 void GlobalState::deleteMethodSymbol(MethodRef what) {
     const auto &whatData = what.data(*this);

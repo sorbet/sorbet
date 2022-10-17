@@ -17,13 +17,13 @@ module Wrapper
 
   class D; end
   D = type_member # error: Redefining constant `D` as a type member or type template
-  D = 1 # error: Redefining constant `D` as a static field
+  D = 1 # error: Cannot initialize the class `D` by constant assignment
 
   E = type_member # error: Redefining constant `E` as a type member or type template
   class E; end
-  E = 1 # error: Redefining constant `E` as a static field
+  E = 1 # error: Cannot initialize the class `E` by constant assignment
 
   F = type_member # error: Redefining constant `F` as a type member or type template
-  F = 1 # error: Redefining constant `F` as a static field
+  F = 1 # error: Cannot initialize the class `F` by constant assignment
   class F; end
 end

@@ -167,12 +167,13 @@ public:
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
-    void mangleRenameSymbol(SymbolRef what, NameRef origName);
-    void mangleRenameForOverload(SymbolRef what, NameRef origName);
-    // NOTE: You likely want to use mangleRenameSymbol not deleteMethodSymbol, unless you know what you're doing.
+    NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
+    void mangleRenameMethod(MethodRef what, NameRef origName);
+    void mangleRenameForOverload(MethodRef what, NameRef origName);
+    // NOTE: You likely want to use mangleRenameMethod not deleteMethodSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
-    // NOTE: You likely want to use mangleRenameSymbol not deleteFieldSymbol, unless you know what you're doing.
+    // NOTE: You likely want to use mangleRenameMethod not deleteFieldSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteFieldSymbol(FieldRef what);
     spdlog::logger &tracer() const;
@@ -356,7 +357,7 @@ private:
     SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
-    void mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind);
+    void mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };
