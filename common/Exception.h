@@ -16,7 +16,7 @@ public:
     SorbetException(const char *message) : logic_error(message) {}
 };
 
-class FileNotFoundException : SorbetException {
+class FileNotFoundException : public SorbetException {
 public:
     FileNotFoundException(const std::string &message) : SorbetException(message) {}
 };
