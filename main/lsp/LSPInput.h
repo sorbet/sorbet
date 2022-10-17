@@ -38,8 +38,6 @@ public:
 
 /**
  * Reads messages from a file descriptor (like stdin).
- *
- * Throws a FileReadException on error or EOF.
  */
 class LSPFDInput final : public LSPInput {
     // Contains unparsed strings containing a partial message read from file descriptor.
@@ -56,8 +54,6 @@ public:
 
 /**
  * Input is provided programmatically via the `write` method. Threadsafe.
- *
- * Throws a FileReadException when stream has been closed.
  */
 class LSPProgrammaticInput final : public LSPInput {
     absl::Mutex mtx;
