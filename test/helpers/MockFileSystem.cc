@@ -22,7 +22,7 @@ void MockFileSystem::writeFiles(const vector<pair<string, string>> &initialFiles
 string MockFileSystem::readFile(string_view path) const {
     auto file = contents.find(makeAbsolute(rootPath, path));
     if (file == contents.end()) {
-        throw sorbet::FileNotFoundException();
+        throw sorbet::FileNotFoundException(fmt::format("Cannot find file `{}`", path));
     } else {
         return file->second;
     }
@@ -35,7 +35,7 @@ void MockFileSystem::writeFile(string_view filename, string_view text) {
 void MockFileSystem::deleteFile(string_view filename) {
     auto file = contents.find(makeAbsolute(rootPath, filename));
     if (file == contents.end()) {
-        throw sorbet::FileNotFoundException();
+        throw sorbet::FileNotFoundException(fmt::format("Cannot find file `{}`", filename));
     } else {
         contents.erase(file);
     }
