@@ -45,11 +45,11 @@ string sorbet::FileOps::read(string_view filename) {
         fclose(fp);
         if (readBytes != contents.size()) {
             // Error reading file?
-            throw sorbet::FileNotFoundException();
+            throw sorbet::FileNotFoundException(fmt::format("Error reading file: `{}`: {}", filename, errno));
         }
         return contents;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}`", filename));
 }
 
 void sorbet::FileOps::write(string_view filename, const vector<uint8_t> &data) {
@@ -59,7 +59,7 @@ void sorbet::FileOps::write(string_view filename, const vector<uint8_t> &data) {
         fclose(fp);
         return;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}` for writing", filename));
 }
 
 bool sorbet::FileOps::dirExists(string_view path) {
@@ -108,7 +108,7 @@ void sorbet::FileOps::write(string_view filename, string_view text) {
         fclose(fp);
         return;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}` for writing", filename));
 }
 
 bool sorbet::FileOps::writeIfDifferent(string_view filename, string_view text) {
@@ -126,7 +126,7 @@ void sorbet::FileOps::append(string_view filename, string_view text) {
         fclose(fp);
         return;
     }
-    throw sorbet::FileNotFoundException();
+    throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}` for writing", filename));
 }
 
 string_view sorbet::FileOps::getFileName(string_view path) {
@@ -261,7 +261,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                 throw sorbet::FileNotDirException();
             default:
                 // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
-                throw sorbet::FileNotFoundException();
+                throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path));
         }
     }
 

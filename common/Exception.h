@@ -18,7 +18,7 @@ public:
 
 class FileNotFoundException : SorbetException {
 public:
-    FileNotFoundException() : SorbetException("File not found") {}
+    FileNotFoundException(const std::string &message) : SorbetException(message) {}
 };
 
 class FileNotDirException : SorbetException {
