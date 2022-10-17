@@ -251,7 +251,9 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
 
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       bool recursive, vector<string> &result, const std::vector<std::string> &absoluteIgnorePatterns,
-                      const std::vector<std::string> &relativeIgnorePatterns) {
+                      const std::vector<std::string> &relativeIgnorePatterns,
+                      std::shared_ptr<std::unordered_set<string>> seen =
+                        std::shared_ptr<std::unordered_set<string>>(new std::unordered_set<string>())) {
     DIR *dir;
     struct dirent *entry;
 
@@ -274,7 +276,14 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                 continue;
             }
             appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
-                             relativeIgnorePatterns);
+                             relativeIgnorePatterns, seen);
+        } else if (recursive && entry->d_type == DT_LNK && sorbet::FileOps::dirExists(fullPath)) {
+            if (seen->find(fullPath) != seen->end()) { // Avoid symlink cycles
+                continue;
+            }
+            seen->insert(fullPath);
+            appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
+                             relativeIgnorePatterns, seen);
         } else {
             auto dotLocation = fullPath.rfind('.');
             if (dotLocation != string::npos) {
