@@ -16,7 +16,6 @@ cc_library(
         "FieldFinder.h",
         "LSPFileUpdates.h",
         "LSPIndexer.h",
-        "LSPPathType.h",
         "LSPTask.h",
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",

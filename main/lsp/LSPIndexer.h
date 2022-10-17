@@ -1,7 +1,6 @@
 #ifndef RUBY_TYPER_LSP_LSPINDEXER_H
 #define RUBY_TYPER_LSP_LSPINDEXER_H
 
-#include "LSPPathType.h"
 #include "core/core.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
@@ -51,12 +50,13 @@ class LSPIndexer final {
      * Determines if the given edit can take the fast path relative to the most recently committed edit.
      * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `initialGS` (in that order).
      */
-    PathType getTypecheckingPath(const LSPFileUpdates &edit,
-                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+    TypecheckingPath
+    getTypecheckingPath(const LSPFileUpdates &edit,
+                        const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
     /**
      * INVARIANT: `changedFiles` must have hashes computed.
      */
-    PathType
+    TypecheckingPath
     getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
@@ -68,7 +68,7 @@ public:
     /**
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
-    PathType getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.

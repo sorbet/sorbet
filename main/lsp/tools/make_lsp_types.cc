@@ -1361,7 +1361,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto SorbetTypecheckRunStatus =
         makeIntEnum("SorbetTypecheckRunStatus", {{"Started", 0}, {"Cancelled", 1}, {"Ended", 2}}, enumTypes);
 
-    auto TypecheckingPath = makeStrEnum("TypecheckingPath", {"fast", "slow"}, enumTypes);
+    auto TypecheckingPath = makeStrEnum("TypecheckingPath", {"fast", "slow", "slowWithIncrementalResolver"}, enumTypes);
 
     auto SorbetTypecheckRunInfo = makeObject("SorbetTypecheckRunInfo",
                                              {
