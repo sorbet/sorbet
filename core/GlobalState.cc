@@ -1691,15 +1691,14 @@ NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
     return name;
 }
 
-void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind) {
-    ENFORCE(!what.isClassOrModule(), "Class symbols should take precedence over all other symbols");
-    auto owner = what.owner(*this).asClassOrModuleRef();
+void GlobalState::mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind) {
+    auto owner = what.data(*this)->owner;
     auto ownerData = owner.data(*this);
     auto &ownerMembers = ownerData->members();
     auto fnd = ownerMembers.find(origName);
     ENFORCE(fnd != ownerMembers.end());
     ENFORCE(fnd->second == what);
-    ENFORCE(what.name(*this) == origName);
+    ENFORCE(what.data(*this)->name == origName);
     NameRef name;
     if (kind == UniqueNameKind::MangleRename) {
         name = nextMangledName(owner, origName);
@@ -1713,7 +1712,6 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
         // We know that there is no method with this name, because otherwise resolver would not have
         // called mangleRenameForOverload.
         ENFORCE(kind == UniqueNameKind::MangleRenameOverload);
-        ENFORCE(what.isMethod());
         name = freshNameUnique(UniqueNameKind::MangleRenameOverload, origName, 1);
     }
     // Both branches of the above `if` condition should ENFORCE this (either due to the loop post
@@ -1722,29 +1720,7 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
             name.showRaw(*this));
     ownerMembers.erase(fnd);
     ownerMembers[name] = what;
-    switch (what.kind()) {
-        case SymbolRef::Kind::ClassOrModule: {
-            auto whatKlass = what.asClassOrModuleRef().data(*this);
-            whatKlass->name = name;
-            auto singleton = whatKlass->lookupSingletonClass(*this);
-            if (singleton.exists()) {
-                mangleRenameMethod(singleton, singleton.data(*this)->name);
-            }
-            break;
-        }
-        case SymbolRef::Kind::Method:
-            what.asMethodRef().data(*this)->name = name;
-            break;
-        case SymbolRef::Kind::FieldOrStaticField:
-            what.asFieldRef().data(*this)->name = name;
-            break;
-        case SymbolRef::Kind::TypeArgument:
-            what.asTypeArgumentRef().data(*this)->name = name;
-            break;
-        case SymbolRef::Kind::TypeMember:
-            what.asTypeMemberRef().data(*this)->name = name;
-            break;
-    }
+    what.data(*this)->name = name;
 }
 
 // We have to use this mangle renaming logic to get old methods out of the way, because method
@@ -1753,16 +1729,11 @@ void GlobalState::mangleRenameSymbolInternal(SymbolRef what, NameRef origName, U
 //
 // (Constant redefinition errors are always enforced at `# typed: false`, so we can afford to simply
 // define a new symbol with a mangled name, instead of mangling AND renaming constant symbols.)
-//
-// TODO(jez) Rename this to mangleRenameMethod?
-// TODO(jez) Update implementation of mangleRenameSymbolInternal to delete all the code that deals with non-methods?
-void GlobalState::mangleRenameMethod(SymbolRef what, NameRef origName) {
-    ENFORCE(what.isMethod());
-    mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRename);
+void GlobalState::mangleRenameMethod(MethodRef what, NameRef origName) {
+    mangleRenameMethodInternal(what, origName, UniqueNameKind::MangleRename);
 }
-void GlobalState::mangleRenameForOverload(SymbolRef what, NameRef origName) {
-    ENFORCE(what.isMethod());
-    mangleRenameSymbolInternal(what, origName, UniqueNameKind::MangleRenameOverload);
+void GlobalState::mangleRenameForOverload(MethodRef what, NameRef origName) {
+    mangleRenameMethodInternal(what, origName, UniqueNameKind::MangleRenameOverload);
 }
 
 // This method should be used sparingly, because using it correctly is tricky.

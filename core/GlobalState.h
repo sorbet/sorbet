@@ -168,8 +168,8 @@ public:
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
-    void mangleRenameMethod(SymbolRef what, NameRef origName);
-    void mangleRenameForOverload(SymbolRef what, NameRef origName);
+    void mangleRenameMethod(MethodRef what, NameRef origName);
+    void mangleRenameForOverload(MethodRef what, NameRef origName);
     // NOTE: You likely want to use mangleRenameMethod not deleteMethodSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
@@ -357,7 +357,7 @@ private:
     SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
-    void mangleRenameSymbolInternal(SymbolRef what, NameRef origName, UniqueNameKind kind);
+    void mangleRenameMethodInternal(MethodRef what, NameRef origName, UniqueNameKind kind);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };
