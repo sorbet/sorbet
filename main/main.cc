@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
     } catch (sorbet::EarlyReturnWithCode &c) {
         return c.returnCode;
     } catch (sorbet::SorbetException &e) {
+        fprintf(stderr, "caught %s: %s\n", typeid(e).name(), e.what());
         return 1;
     }
 };
