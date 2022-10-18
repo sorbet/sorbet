@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # typed: strict
-# assert-fast-path: a.rb
+# assert-fast-path: a.rb,__package.rb
 
 # Various things in the standard library mention `run`, so we currently type check them on the fast path.
 

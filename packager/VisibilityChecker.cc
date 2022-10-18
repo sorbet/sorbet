@@ -598,10 +598,4 @@ std::vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, Worke
     return VisibilityCheckerPass::run(gs, workers, std::move(files));
 }
 
-std::vector<ast::ParsedFile> VisibilityChecker::runIncremental(const core::GlobalState &gs, WorkerPool &workers,
-                                                               std::vector<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "visibility_checker.runIncremental");
-    return VisibilityCheckerPass::run(gs, workers, std::move(files));
-}
-
 } // namespace sorbet::packager

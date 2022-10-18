@@ -777,7 +777,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees)).result());
 
     if (enablePackager) {
-        trees = packager::VisibilityChecker::runIncremental(*gs, *workers, move(trees));
+        trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
 
     for (auto &resolvedTree : trees) {
