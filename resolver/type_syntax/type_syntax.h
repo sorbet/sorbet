@@ -10,8 +10,9 @@ namespace sorbet::resolver {
 
 struct ParsedSig {
     struct ArgSpec {
-        core::Loc loc;
+        core::Loc nameLoc;
         core::NameRef name;
+        core::Loc typeLoc;
         core::TypePtr type;
         core::ClassOrModuleRef rebind;
     };

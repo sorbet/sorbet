@@ -3435,18 +3435,30 @@ private:
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
 
-                // It would be nice to remove the restriction on more than these two specific binds, but that would
-                // raise a lot more errors
-                if (!isSyntheticBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
-                                           spec->rebind == core::Symbols::MagicBindToSelfType())) {
-                    if (auto e = ctx.state.beginError(spec->loc, core::errors::Resolver::BindNonBlockParameter)) {
+                // TODO(#4095) Raise error if `bind` used for non-`&blk` arg
+                if (!isBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
+                                  spec->rebind == core::Symbols::MagicBindToSelfType())) {
+                    if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");
                     }
                 }
 
                 arg.type = std::move(spec->type);
-                arg.loc = spec->loc;
+                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
+                    if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
+                                    "Proc", "T.proc");
+                        e.addErrorNote(
+                            "Ruby allows classes to have custom `{}` methods to convert `{}`-passed arguments into\n"
+                            "    `{}` objects, but even those methods must return `{}` objects.",
+                            "to_proc", "&blk", "Proc", "Proc");
+
+                        e.replaceWith("Convert block to `T.nilable(Proc)`", spec->typeLoc, "T.nilable(Proc)");
+                    }
+                    arg.type = core::Types::untypedUntracked();
+                }
+                arg.loc = spec->nameLoc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
                 // Since methods always have (synthesized if necessary) block arguments,
@@ -3493,7 +3505,7 @@ private:
 
         for (const auto &spec : sig.argTypes) {
             info.allArgsMatched = false;
-            if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
+            if (auto e = ctx.state.beginError(spec.nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
             }
         }
@@ -3511,7 +3523,7 @@ private:
                     if (auto e = ctx.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
                         e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname.show(ctx),
                                     sname.show(ctx));
-                        e.addErrorLine(spec.loc, "Expected index in signature:");
+                        e.addErrorLine(spec.nameLoc, "Expected index in signature:");
                     }
                 }
                 j++;
