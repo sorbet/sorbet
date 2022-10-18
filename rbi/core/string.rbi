@@ -587,7 +587,7 @@ class String < Object
   sig {returns(T::Array[Integer])}
   sig do
     params(
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T::Array[Integer])
   end
@@ -1774,7 +1774,7 @@ class String < Object
   sig do
     params(
         arg0: T.any(Regexp, String),
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T::Array[T.any(String, T::Array[String])])
   end

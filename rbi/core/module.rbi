@@ -425,7 +425,7 @@ class Module < Object
   sig do
     params(
         args: BasicObject,
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T.untyped)
   end
@@ -802,7 +802,7 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(Symbol)
   end
@@ -1221,7 +1221,7 @@ class Module < Object
   sig do
     params(
         args: BasicObject,
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T.untyped)
   end
