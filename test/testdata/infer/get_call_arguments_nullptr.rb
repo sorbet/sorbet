@@ -8,6 +8,7 @@ class CallTakesBlock
 end
 
 sig {params(blk: CallTakesBlock).void}
+#           ^^^ error: Block argument type must be either `Proc` or a `T.proc` type (and possibly nilable)
 def example(&blk)
   yield 42
 end

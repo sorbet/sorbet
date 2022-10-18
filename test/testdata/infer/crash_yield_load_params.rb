@@ -3,12 +3,14 @@
 module Left
   extend T::Sig
   sig {params(blk: BasicObject).returns(NilClass)}
+  #           ^^^ error: Block argument type must be either `Proc` or a `T.proc` type (and possibly nilable)
   def foo(&blk); end
 end
 
 module Up
   extend T::Sig
   sig {params(blk: BasicObject).returns(NilClass)}
+  #           ^^^ error: Block argument type must be either `Proc` or a `T.proc` type (and possibly nilable)
   def foo(&blk); end
 end
 
