@@ -127,7 +127,7 @@ public:
                              NamedDefinition);
 
     static DefTree merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs);
-    static void markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &);
+    static void markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &autoloaderConfig);
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
