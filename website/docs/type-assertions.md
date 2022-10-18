@@ -8,7 +8,7 @@ There are five ways to assert the types of expressions in Sorbet:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
-- `T.must(expr)` / `T.must_because(expr, msg)`
+- `T.must(expr)` / `T.must_because(expr) {msg}`
 - `T.assert_type!(expr, Type)`
 - `T.bind(self, Type)`
 
@@ -107,7 +107,8 @@ not `nil`. `T.must` is similar to `T.cast` in that it will not necessarily
 trigger an error when `srb tc` is run, but can trigger an error during runtime.
 
 `T.must_because` is like `T.must` but also takes a reason why the value is not
-expected to be `nil`.
+expected to be `nil`, which appears in the exception that is raised if passed a
+`nil` argument.
 
 The following example illustrates two cases:
 
@@ -144,9 +145,9 @@ end
   → View on sorbet.run
 </a>
 
-Here's the same example with `T.must_because`, showing custom error messages.
-The error message is provided as a block, so that the error message is only
-computed if the exception would be raised.
+Here's the same example with `T.must_because`, showing the user of custom
+reasons. The reason is provided as a block that returns a `String`, so that the
+reason is only computed if the exception would be raised.
 
 ```ruby
 class A
