@@ -125,19 +125,10 @@ module T::Private::Methods::CallValidation
       end
     end
 
-    if method_sig.block_type
-      message = method_sig.block_type.error_message_for_obj(blk)
-      if message
-        CallValidation.report_error(
-          method_sig,
-          message,
-          'Block parameter',
-          method_sig.block_name,
-          method_sig.block_type,
-          blk
-        )
-      end
-    end
+    # The Ruby VM already checks that the `&blk` arg is a `Proc` type.
+    # https://github.com/ruby/ruby/blob/v2_7_6/vm_args.c#L1150-L1154
+    # And `T.proc` types don't (can't) do any runtime arg checking, so doing any
+    # runtime check against the `method_sig.block_type` here is redundant.
 
     # The following line breaks are intentional to show nice pry message
 
