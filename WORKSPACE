@@ -17,6 +17,11 @@ load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 llvm_toolchain(
     name = "llvm_toolchain_12_0_0",
     absolute_paths = True,
+    llvm_mirror_prefixes = [
+        "https://sorbet-deps.s3-us-west-2.amazonaws.com/",
+        "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
+    ],
     llvm_version = "12.0.0",
 )
 
