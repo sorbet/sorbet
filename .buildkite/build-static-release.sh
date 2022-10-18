@@ -5,12 +5,27 @@ set -euo pipefail
 export JOB_NAME=build-static-release
 source .buildkite/tools/setup-bazel.sh
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     platform="linux";;
-    Darwin*)    platform="mac";;
-    *)          exit 1
+kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+processor_name="$(uname -m)"
+
+platform="${kernel_name}-${processor_name}"
+case "$platform" in
+  linux-x86_64)
+    CONFIG_OPTS="--config=release-linux"
+    ;;
+  linux-aarch64)
+    CONFIG_OPTS="--config=release-linux-aarch64"
+    ;;
+  darwin-x86_64 | darwin-arm64)
+    CONFIG_OPTS="--config=release-mac"
+    command -v autoconf >/dev/null 2>&1 || brew install autoconf
+    ;;
+  *)
+    echo >&2 "Building on $platform is not implemented"
+    exit 1
+    ;;
 esac
+
 
 if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=release-linux"
@@ -74,7 +89,7 @@ if [[ "mac" == "$platform" ]]; then
   gem_platform="$(ruby -e "(platform = Gem::Platform.local).cpu = 'universal'; puts(platform.to_s)")"
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$gem_platform".gem
 else
-  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-x86_64-linux.gem
+  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-$(uname -m)-linux.gem
 fi
 rbenv exec gem install sorbet-*.gem
 
@@ -104,7 +119,7 @@ rm -rf _out_
 mkdir -p _out_/gems
 
 mv gems/sorbet-static/sorbet-static-*.gem _out_/gems/
-if [[ "linux" == "$platform" ]]; then
+if [[ "$kernel_name" == "linux" ]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
 

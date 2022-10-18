@@ -55,6 +55,7 @@ processor_name="$(uname -m)"
 bazel_installer_platform="${kernel_name}-${processor_name}"
 case "$bazel_installer_platform" in
   linux-x86_64) ;;
+  linux-arm64) ;;
   darwin-x86_64) ;;
   darwin-arm64)
     # Pseudo Apple Silicon support by forcing x86_64 (Rosetta) for now

@@ -25,6 +25,10 @@ llvm_toolchain(
     llvm_version = "12.0.0",
 )
 
+load("@llvm_toolchain_12_0_0//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
@@ -58,6 +62,8 @@ node_repositories()
 BAZEL_VERSION = "5.2.0"
 
 BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "7d9ef51beab5726c55725fb36675c6fed0518576d3ba51fb4067580ddf7627c4"
+
+BAZEL_INSTALLER_VERSION_LINUX_ARM64_SHA = "ae50cb7d64aebee986287134ff8ca0335651a0c1685348b3216f3fdfa20ff7e7"
 
 BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "645e7c335efc3207905e98f0c56a598b7cb0282d54d9470e80f38fb698064fb3"
 
