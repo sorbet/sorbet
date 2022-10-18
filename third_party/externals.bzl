@@ -168,12 +168,15 @@ def register_sorbet_dependencies():
         strip_prefix = "bazel-compilation-database-6b9329e37295eab431f82af5fe24219865403e0f",
     )
 
-    # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
+    LLVM_BAZEL_TOOLCHAIN_TAG = "0.7.2"
+    LLVM_BAZEL_TOOLCHAIN_SHA = "f7aa8e59c9d3cafde6edb372d9bd25fb4ee7293ab20b916d867cd0baaa642529"
+
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4.zip"),
-        sha256 = "90c59f14cada755706a38bdd0f5ad8f0402cbf766387929cfbee9c3f1b4c82d7",
-        strip_prefix = "bazel-toolchain-a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4",
+        sha256 = LLVM_BAZEL_TOOLCHAIN_SHA,
+        strip_prefix = "bazel-toolchain-{tag}".format(tag = LLVM_BAZEL_TOOLCHAIN_TAG),
+        canonical_id = LLVM_BAZEL_TOOLCHAIN_TAG,
+        url = "https://github.com/grailbio/bazel-toolchain/archive/{tag}.tar.gz".format(tag = LLVM_BAZEL_TOOLCHAIN_TAG),
     )
 
     http_archive(
@@ -194,15 +197,6 @@ def register_sorbet_dependencies():
         urls = _github_public_urls("bazelbuild/buildtools/archive/5bcc31df55ec1de770cb52887f2e989e7068301f.zip"),
         sha256 = "875d0c49953e221cfc35d2a3846e502f366dfa4024b271fa266b186ca4664b37",
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
-    )
-
-    # optimized version of blake2 hashing algorithm
-    http_archive(
-        name = "com_github_blake2_libb2",
-        urls = _github_public_urls("BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip"),
-        sha256 = "dd25f7ac53371c2a15761fc1689d04de2ff948ac7e213a10d13961e24b0c9ae6",
-        build_file = "@com_stripe_ruby_typer//third_party:libb2.BUILD",
-        strip_prefix = "libb2-fa83ddbe179912e9a7a57edf0333b33f6ff83056",
     )
 
     # portable reference implementation of blake2

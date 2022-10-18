@@ -5,12 +5,27 @@ set -euo pipefail
 export JOB_NAME=build-static-release
 source .buildkite/tools/setup-bazel.sh
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     platform="linux";;
-    Darwin*)    platform="mac";;
-    *)          exit 1
+kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+processor_name="$(uname -m)"
+
+platform="${kernel_name}-${processor_name}"
+case "$platform" in
+  linux-x86_64)
+    CONFIG_OPTS="--config=release-linux"
+    ;;
+  linux-arm64)
+    CONFIG_OPTS="--config=release-linux-aarch64"
+    ;;
+  darwin-x86_64 | darwin-arm64)
+    CONFIG_OPTS="--config=release-mac"
+    command -v autoconf >/dev/null 2>&1 || brew install autoconf
+    ;;
+  *)
+    echo >&2 "Building on $platform is not implemented"
+    exit 1
+    ;;
 esac
+
 
 if [[ "linux" == "$platform" ]]; then
   CONFIG_OPTS="--config=release-linux"
