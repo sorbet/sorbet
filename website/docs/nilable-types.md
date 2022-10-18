@@ -131,6 +131,8 @@ this code's correctness from Sorbet to the programmer, and we as programmers can
 observability, etc.). In fact, it's the same tradeoff we make every time we
 `raise` an exception, and comes with the same set of caution labels:
 
+→ For more information, see the [`T.must` docs](type-assertions.md#tmust).
+
 > **Note**: Like all other type checks in Sorbet, `T.must` will raise at runtime
 > if it fails. For more information, see [Enabling Runtime Checks](runtime.md).
 

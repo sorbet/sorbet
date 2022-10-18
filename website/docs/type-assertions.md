@@ -8,7 +8,7 @@ There are five ways to assert the types of expressions in Sorbet:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
-- `T.must(expr)`
+- `T.must(expr)` / `T.must_because(expr) {msg}`
 - `T.assert_type!(expr, Type)`
 - `T.bind(self, Type)`
 
@@ -100,9 +100,16 @@ will still be caught as a missing method statically.
 
 ## `T.must`
 
+<a id="tmust_because"></a>
+
 `T.must` is for asserting that a value of a [nilable type](nilable-types.md) is
 not `nil`. `T.must` is similar to `T.cast` in that it will not necessarily
 trigger an error when `srb tc` is run, but can trigger an error during runtime.
+
+`T.must_because` is like `T.must` but also takes a reason why the value is not
+expected to be `nil`, which appears in the exception that is raised if passed a
+`nil` argument.
+
 The following example illustrates two cases:
 
 1. a use of `T.must` with a value that Sorbet is able to determine statically is
@@ -138,16 +145,11 @@ end
   → View on sorbet.run
 </a>
 
-## `T.must_because`
+Here's the same example with `T.must_because`, showing the user of custom
+reasons. The reason is provided as a block that returns a `String`, so that the
+reason is only computed if the exception would be raised.
 
-`T.must_because`, like `T.must`, is for asserting a value of a
-[nilable type](nilable-types.md) is not `nil`. It also takes a reason why the
-value is not expected to be `nil`.
-
-If the value is `nil` at runtime, the provided reason is included in the raised
-exception's error message.
-
-```rb
+```ruby
 class A
   extend T::Sig
 
