@@ -136,15 +136,18 @@ module SorbetBenchmarks
 
       time_block("direct call Object#class") do
         example.class
+        example.class
       end
 
       class_method = Object.instance_method(:class)
       time_block(".bind(example).call Object#class") do
         class_method.bind(example).call
+        class_method.bind(example).call
       end
 
       if T::Configuration::AT_LEAST_RUBY_2_7
         time_block(".bind_call(example) Object#class") do
+          class_method.bind_call(example)
           class_method.bind_call(example)
         end
       else
