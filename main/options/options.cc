@@ -688,8 +688,8 @@ void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> 
     try {
         containedFiles = opts.fs->listFilesInDir(fileNormalized, opts.allowedExtensions, true,
                                                  opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
-    } catch (sorbet::FileNotFoundException) {
-        logger->error("Directory `{}` not found", dir);
+    } catch (sorbet::FileNotFoundException e) {
+        logger->error(e.what());
         throw EarlyReturnWithCode(1);
     } catch (sorbet::FileNotDirException) {
         logger->error("Path `{}` is not a directory", dir);
