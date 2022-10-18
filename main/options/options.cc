@@ -406,8 +406,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<vector<string>>());
     options.add_options("advanced")("autogen-autoloader-modules", "Top-level modules to include in autoloader output",
                                     cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-", "Top-level modules to include in autoloader output",
-                                    cxxopts::value<vector<string>>());
     options.add_options("advanced")("autogen-autoloader-preamble", "Preamble to add to each autoloader file",
                                     cxxopts::value<string>()->default_value(""));
     options.add_options("advanced")("autogen-autoloader-root", "Root directory for autoloader output",
