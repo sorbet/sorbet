@@ -233,7 +233,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             const string_view pathPrefix = pkg.pathPrefixes()[0];
 
             fmt::format_to(std::back_inserter(buf), "\n{}.pbal_register_package({}, '{}')\n", alCfg.registryModule,
-                           fullName, std::move(pathPrefix));
+                           fullName, pathPrefix);
         } else if (!children.empty()) {
             fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
