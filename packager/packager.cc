@@ -985,6 +985,14 @@ struct PackageInfoFinder {
             if (compatibilityAnnotationLit == nullptr || !compatibilityAnnotationLit->isString()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
                     e.setHeader("Argument to `{}` must be a string literal", send.fun.show(ctx));
+
+                    if (compatibilityAnnotationLit != nullptr && compatibilityAnnotationLit->isSymbol()) {
+                        auto symbol = compatibilityAnnotationLit->asSymbol();
+                        if (symbol == core::Names::strict() || symbol == core::Names::legacy()) {
+                            e.replaceWith("Convert to string arg", ctx.locAt(compatibilityAnnotationLit->loc), "\"{}\"",
+                                          symbol.shortName(ctx));
+                        }
+                    }
                 }
 
                 return;
