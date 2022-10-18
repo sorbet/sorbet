@@ -266,23 +266,37 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     }
 
     while ((entry = readdir(dir)) != nullptr) {
-        auto fullPath = fmt::format("{}/{}", path, entry->d_name);
-        if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
-            continue;
-        } else if (entry->d_type == DT_DIR) {
-            if (!recursive || strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+        const auto namelen = strlen(entry->d_name);
+        string_view nameview{entry->d_name, namelen};
+        if (entry->d_type == DT_DIR) {
+            if (!recursive) {
                 continue;
             }
+            if (nameview == "."sv || nameview == ".."sv) {
+                continue;
+            }
+        } else {
+            auto dotLocation = nameview.rfind('.');
+            if (dotLocation == string_view::npos) {
+                continue;
+            }
+
+            string_view ext = nameview.substr(dotLocation);
+            if (!extensions.contains(ext)) {
+                continue;
+            }
+        }
+
+        auto fullPath = fmt::format("{}/{}", path, nameview);
+        if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
+            continue;
+        }
+
+        if (entry->d_type == DT_DIR) {
             appendFilesInDir(basePath, fullPath, extensions, recursive, result, absoluteIgnorePatterns,
                              relativeIgnorePatterns);
         } else {
-            auto dotLocation = fullPath.rfind('.');
-            if (dotLocation != string::npos) {
-                string_view ext(fullPath.c_str() + dotLocation, fullPath.size() - dotLocation);
-                if (extensions.contains(ext)) {
-                    result.push_back(move(fullPath));
-                }
-            }
+            result.push_back(move(fullPath));
         }
     }
     closedir(dir);
