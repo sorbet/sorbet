@@ -1,1 +1,16 @@
-No errors! Great job.
+baz/__package.rb:4: Argument to `autoloader_compatibility` must be a string literal https://srb.help/3706
+     4 |  autoloader_compatibility :invalid
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+baz/__package.rb:5: Argument to `autoloader_compatibility` must be either 'strict' or 'legacy' https://srb.help/3706
+     5 |  autoloader_compatibility 'something'
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+baz/__package.rb:6: Argument to `autoloader_compatibility` must be a string literal https://srb.help/3706
+     6 |  autoloader_compatibility :legacy
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    baz/__package.rb:6: Replace with `"legacy"`
+     6 |  autoloader_compatibility :legacy
+                                   ^^^^^^^
+Errors: 3

@@ -419,6 +419,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
                                     cxxopts::value<vector<string>>());
+    options.add_options("advanced")("autogen-autoloader-pbal-namespaces",
+                                    "Namespaces for which path-based autoloading is enabled.",
+                                    cxxopts::value<vector<string>>());
     options.add_options("advanced")("autogen-autoloader-strip-prefix",
                                     "Prefixes to strip from file output paths. "
                                     "If path does not start with prefix, nothing is stripped",
@@ -670,6 +673,11 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     if (raw.count("autogen-autoloader-samefile") > 0) {
         for (auto &fullName : raw["autogen-autoloader-samefile"].as<vector<string>>()) {
             cfg.sameFileModules.emplace_back(absl::StrSplit(fullName, "::"));
+        }
+    }
+    if (raw.count("autogen-autoloader-pbal-namespaces") > 0) {
+        for (auto &fullName : raw["autogen-autoloader-pbal-namespaces"].as<vector<string>>()) {
+            cfg.pbalNamespaces.emplace_back(absl::StrSplit(fullName, "::"));
         }
     }
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();

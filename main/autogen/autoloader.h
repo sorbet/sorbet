@@ -27,6 +27,8 @@ struct AutoloaderConfig {
     // Should definitions in this namespace be collapsed into their
     // parent if they all are from the same file?
     bool sameFileCollapsable(const std::vector<core::NameRef> &module) const;
+    // This package is registered for path-based autoloading
+    bool registeredForPBAL(const std::vector<core::NameRef> &pkgParts) const;
     // normalize the path relative to the provided prefixes
     std::string_view normalizePath(const core::GlobalState &gs, core::FileRef file) const;
 
@@ -37,6 +39,7 @@ struct AutoloaderConfig {
     UnorderedSet<core::NameRef> topLevelNamespaceRefs;
     UnorderedSet<core::NameRef> excludedRequireRefs;
     UnorderedSet<std::vector<core::NameRef>> nonCollapsableModuleNames;
+    UnorderedSet<std::vector<core::NameRef>> pbalNamespaces;
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
     std::vector<std::string> stripPrefixes;
@@ -110,6 +113,7 @@ private:
     const NamedDefinition &definition(const core::GlobalState &) const;
     Definition::Type definitionType(const core::GlobalState &) const;
     void markPackageNamespace(core::NameRef mangledName, const std::vector<core::NameRef> &nameParts);
+    DefTree *findNode(const std::vector<core::NameRef> &nameParts);
 
     friend class DefTreeBuilder;
 };
@@ -123,7 +127,7 @@ public:
                              NamedDefinition);
 
     static DefTree merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs);
-    static void markPackages(const core::GlobalState &gs, DefTree &root);
+    static void markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &autoloaderConfig);
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
