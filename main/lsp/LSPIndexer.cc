@@ -372,6 +372,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
             break;
         }
         case TypecheckingPath::SlowWithIncrementalResolver:
+            break;
         case TypecheckingPath::Slow: {
             // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
             update.updatedGS = initialGS->deepCopy();
