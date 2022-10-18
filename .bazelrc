@@ -12,7 +12,7 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --incompatible_enable_cc_toolchain_resolution
+build --incompatible_enable_cc_toolchain_resolution --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
