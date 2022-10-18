@@ -185,6 +185,8 @@ module T
   #
   # At runtime, raises an exception if the argument is ever `nil`.
   #
+  # To provide a custom message on failure, use `T.must_because`.
+  #
   # For more, see https://sorbet.org/docs/type-assertions#tmust
   sig {params(arg: T.untyped).returns(T.untyped)}
   def self.must(arg); end
@@ -194,6 +196,10 @@ module T
   #
   # At runtime, raises an exception contining the provided reason if the
   # argument is ever `nil`.
+  #
+  # Takes the reason as a block that should return a `String`, so that the code
+  # to compute the reason is only run if there is a problem, and doesn't slow
+  # down well-behaved code.
   #
   # For more, see https://sorbet.org/docs/type-assertions#tmust_because
   sig {params(arg: T.untyped, reason_blk: T.proc.returns(String)).returns(T.untyped)}
