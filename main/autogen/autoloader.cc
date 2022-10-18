@@ -226,16 +226,14 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
 
         if (pkgName.exists()) {
             ENFORCE(!gs.packageDB().empty());
-            const string_view shortName = pkgName.shortName(gs);
-            const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
 
             auto &pkg = gs.packageDB().getPackageInfo(pkgName);
 
             // First path prefix is guaranteed to be the directory location of the package
             const string_view pathPrefix = pkg.pathPrefixes()[0];
 
-            fmt::format_to(std::back_inserter(buf), "\n{}.pbal_register_package({}, '{}', '{}')\n",
-                           alCfg.registryModule, fullName, mungedName, std::move(pathPrefix));
+            fmt::format_to(std::back_inserter(buf), "\n{}.pbal_register_package({}, '{}')\n", alCfg.registryModule,
+                           fullName, std::move(pathPrefix));
         } else if (!children.empty()) {
             fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
