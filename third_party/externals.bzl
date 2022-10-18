@@ -199,6 +199,15 @@ def register_sorbet_dependencies():
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
     )
 
+    # optimized version of blake2 hashing algorithm	
+    http_archive(	
+        name = "com_github_blake2_libb2",	
+        urls = _github_public_urls("BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip"),	
+        sha256 = "dd25f7ac53371c2a15761fc1689d04de2ff948ac7e213a10d13961e24b0c9ae6",	
+        build_file = "@com_stripe_ruby_typer//third_party:libb2.BUILD",	
+        strip_prefix = "libb2-fa83ddbe179912e9a7a57edf0333b33f6ff83056",	
+    )
+
     # portable reference implementation of blake2
     http_archive(
         name = "com_github_blake2_blake2",
