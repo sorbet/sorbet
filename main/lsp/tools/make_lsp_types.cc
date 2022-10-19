@@ -618,6 +618,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                        },
                                        classTypes);
 
+    auto InlayHintOptions = makeObject("InlayHintOptions",
+                                       {
+                                           makeField("workDoneProgress", makeOptional(JSONBool)),
+                                           makeField("resolveProvider", makeOptional(JSONBool)),
+                                       },
+                                       classTypes);
+
     auto ServerCapabilities = makeObject(
         "ServerCapabilities",
         {
@@ -633,7 +640,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("documentSymbolProvider", makeOptional(JSONBool)),
             makeField("workspaceSymbolProvider", makeOptional(JSONBool)),
             makeField("codeActionProvider", makeOptional(makeVariant({JSONBool, CodeActionOptions}))),
-            makeField("inlayHintProvider", makeOptional(JSONBool)),
+            makeField("inlayHintProvider", makeOptional(InlayHintOptions)),
             makeField("codeLensProvider", makeOptional(CodeLensOptions)),
             makeField("documentFormattingProvider", makeOptional(JSONBool)),
             makeField("documentRangeFormattingProvider", makeOptional(JSONBool)),

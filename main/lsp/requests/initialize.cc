@@ -33,7 +33,11 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->implementationProvider = true;
     serverCap->documentFormattingProvider = opts.lspDocumentFormatRubyfmtEnabled;
     serverCap->sorbetShowSymbolProvider = true;
-    serverCap->inlayHintProvider = opts.lspInlayHintsEnabled;
+    if (opts.lspInlayHintsEnabled) {
+        auto inlayHintOptions = make_unique<InlayHintOptions>();
+        inlayHintOptions->resolveProvider = false;
+        serverCap->inlayHintProvider = move(inlayHintOptions);
+    }
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
     codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet,
