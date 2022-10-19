@@ -76,11 +76,98 @@ module T::Private::Methods::CallValidation
           create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
           create_validator_method_medium(mod, original_method, method_sig, original_visibility)
+        elsif method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
+          # The Ruby VM already validates that any block passed to a method
+          # must be either `nil` or a `Proc` object, so there's no need to also
+          # have sorbet-runtime check that.
+          create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
         else
           create_validator_slow(mod, original_method, method_sig, original_visibility)
         end
       end
       mod.send(original_visibility, method_sig.method_name)
+    end
+  end
+
+  def self.create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      CallValidation.validate_call_skip_block_type(self, original_method, method_sig, args, blk)
+    end
+  end
+
+  def self.validate_call_skip_block_type(instance, original_method, method_sig, args, blk)
+    # This method is called for every `sig`. It's critical to keep it fast and
+    # reduce number of allocations that happen here.
+
+    if method_sig.bind
+      message = method_sig.bind.error_message_for_obj(instance)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Bind',
+          nil,
+          method_sig.bind,
+          instance
+        )
+      end
+    end
+
+    # NOTE: We don't bother validating for missing or extra kwargs;
+    # the method call itself will take care of that.
+    method_sig.each_args_value_type(args) do |name, arg, type|
+      message = type.error_message_for_obj(arg)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Parameter',
+          name,
+          type,
+          arg,
+          caller_offset: 2
+        )
+      end
+    end
+
+    # The original method definition allows passing `nil` for the `&blk`
+    # argument, so we do not have to do any method_sig.block_type type checks
+    # of our own.
+
+    # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+    # PRY note:
+    # this code is sig validation code.
+    # Please issue `finish` to step out of it
+
+    return_value = T::Configuration::AT_LEAST_RUBY_2_7 ? original_method.bind_call(instance, *args, &blk) : original_method.bind(instance).call(*args, &blk)
+
+    # The only type that is allowed to change the return value is `.void`.
+    # It ignores what you returned and changes it to be a private singleton.
+    if method_sig.return_type.is_a?(T::Private::Types::Void)
+      T::Private::Types::Void::VOID
+    else
+      message = method_sig.return_type.error_message_for_obj(return_value)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Return value',
+          nil,
+          method_sig.return_type,
+          return_value,
+        )
+      end
+      return_value
     end
   end
 
@@ -125,10 +212,30 @@ module T::Private::Methods::CallValidation
       end
     end
 
-    # The Ruby VM already checks that the `&blk` arg is a `Proc` type.
+    # The Ruby VM already checks that `&blk` is either a `Proc` type or `nil`:
     # https://github.com/ruby/ruby/blob/v2_7_6/vm_args.c#L1150-L1154
-    # And `T.proc` types don't (can't) do any runtime arg checking, so doing any
-    # runtime check against the `method_sig.block_type` here is redundant.
+    # And `T.proc` types don't (can't) do any runtime arg checking, so we can
+    # save work by simply checking that `blk` is non-nil (if the method allows
+    # `nil` for the block, it would not have used this validate_call path).
+    unless blk
+      # Have to use `&.` here, because it's technically a public API that
+      # people can _always_ call `validate_call` to validate any signature
+      # (i.e., the faster validators are merely optimizations).
+      # In practice, this only affects the first call to the method (before the
+      # optimized validators have a chance to replace the initial, slow
+      # wrapper).
+      message = method_sig.block_type&.error_message_for_obj(blk)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Block parameter',
+          method_sig.block_name,
+          method_sig.block_type,
+          blk
+        )
+      end
+    end
 
     # The following line breaks are intentional to show nice pry message
 
