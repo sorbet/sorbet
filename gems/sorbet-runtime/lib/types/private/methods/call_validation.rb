@@ -59,8 +59,9 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
-      original_method.parameters.all? {|(kind, _name)| kind == :req}
-    ok_for_fast_path = has_fixed_arity && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+      original_method.parameters.all? {|(kind, _name)| kind == :req || kind == :block}
+    can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
+    ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
     all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
     simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
@@ -76,7 +77,7 @@ module T::Private::Methods::CallValidation
           create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
           create_validator_method_medium(mod, original_method, method_sig, original_visibility)
-        elsif method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
+        elsif can_skip_block_type
           # The Ruby VM already validates that any block passed to a method
           # must be either `nil` or a `Proc` object, so there's no need to also
           # have sorbet-runtime check that.
