@@ -3648,6 +3648,130 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
+namespace {
+
+void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
+    if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
+        // A type error was already reported for arg mismatch
+        return;
+    }
+
+    auto baseCaseArgLocs = InlinedVector<LocOffsets, 2>{};
+    baseCaseArgLocs.emplace_back(args.locs.args[0]);
+    auto baseCaseLocs = CallLocs{
+        args.locs.file,                         // file
+        args.locs.call.copyWithZeroLength(),    // call
+        args.locs.args[0].copyWithZeroLength(), // receiver
+        args.locs.args[0].copyWithZeroLength(), // fun
+        baseCaseArgLocs,                        // args
+    };
+    auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
+    baseCaseArgTypes.emplace_back(args.args[0]);
+    auto baseCaseArgs = DispatchArgs{
+        methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
+        baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
+        args.selfType,    args.block,          args.originForUninitialized,
+        args.isPrivateOk, args.suppressErrors,
+    };
+
+    auto dispatched = args.selfType.dispatchCall(gs, baseCaseArgs);
+    for (auto &err : dispatched.main.errors) {
+        res.main.errors.emplace_back(std::move(err));
+    }
+
+    if (args.args.size() == 1) {
+        res.returnType = move(dispatched.returnType);
+        return;
+    }
+
+    auto newSelfType = Types::dropSubtypesOf(gs, dispatched.returnType, core::Symbols::NilClass());
+
+    if (newSelfType.isBottom()) {
+        // The result was `nil` (or maybe `T.nilable(T.noreturn)` == `nil`, or maybe just plain `T.noreturn`)
+        // In all these cases, Ruby's `dig` simply stops with `nil`, but in our case, we think it's
+        // more helpful to let the user know that the extra args are effectively dead calls to `dig`.
+        if (auto e = gs.beginError(args.argLoc(1), core::errors::Infer::DigExtraArgs)) {
+            e.setHeader("Unused arguments to `{}`", "dig");
+            e.addErrorLine(args.argLoc(0),
+                           "The remaining `{}` arguments will not be used because the previous argument "
+                           "dug a value that is always `{}` here",
+                           "dig", "nil");
+            auto endLastGood = args.locs.args[0].endPos();
+            auto endAll = args.locs.args[args.locs.args.size() - 1].endPos();
+            auto replaceLoc = core::Loc(args.locs.file, endLastGood, endAll);
+            if (endLastGood <= endAll && replaceLoc.exists()) {
+                e.replaceWith("Delete extra args", replaceLoc, "");
+            }
+        }
+        res.returnType = move(dispatched.returnType);
+        return;
+    }
+
+    // ---- Recursive case ----
+
+    auto digArgLocs = InlinedVector<LocOffsets, 2>{};
+    for (int i = 1; i < args.locs.args.size(); i++) {
+        digArgLocs.emplace_back(args.locs.args[i]);
+    }
+    auto digLocs = CallLocs{
+        args.locs.file,                         // file
+        args.locs.args[1],                      // call
+        args.locs.receiver,                     // receiver
+        args.locs.args[1].copyWithZeroLength(), // fun
+        digArgLocs,                             // args
+    };
+    uint16_t newNumPosArgs = args.numPosArgs - 1;
+    auto digArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
+    for (int i = 1; i < args.args.size(); i++) {
+        digArgTypes.emplace_back(args.args[i]);
+    }
+    auto fullTypeOrigins = InlinedVector<Loc, 1>{};
+    for (const auto &origin : args.fullType.origins) {
+        fullTypeOrigins.emplace_back(origin);
+    }
+    fullTypeOrigins.emplace_back(args.argLoc(0));
+    auto newFullType = TypeAndOrigins{newSelfType, fullTypeOrigins};
+    DispatchArgs digArgs{
+        Names::dig(),
+        digLocs,
+        newNumPosArgs,
+        digArgTypes,
+        newSelfType,
+        newFullType,
+        newSelfType,
+        args.block,
+        args.originForUninitialized,
+        false, /* isPrivateOk */
+        args.suppressErrors,
+    };
+
+    auto recursiveDispatch = newSelfType.dispatchCall(gs, digArgs);
+
+    for (auto it = &recursiveDispatch; it != nullptr; it = it->secondary.get()) {
+        for (auto &err : it->main.errors) {
+            res.main.errors.emplace_back(std::move(err));
+        }
+    }
+
+    res.returnType = move(recursiveDispatch.returnType);
+}
+
+} // namespace
+
+class Hash_dig : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        digImplementation(gs, args, res, Names::squareBrackets());
+    }
+} Hash_dig;
+
+class Array_dig : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        digImplementation(gs, args, res, Names::at());
+    }
+} Array_dig;
+
 class Array_flatten : public IntrinsicMethod {
     // If the element type supports the #to_ary method, then Ruby will implicitly call it when flattening. So here we
     // dispatch #to_ary and recurse further down the result if it succeeds, otherwise we just return the type.
@@ -4175,11 +4299,15 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::sample(), &Tuple_sample},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
+    // TODO(jez) Array#at intrinsic for tuples
 
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
 
+    {Symbols::Hash(), Intrinsic::Kind::Instance, Names::dig(), &Hash_dig},
+
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::dig(), &Array_dig},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},

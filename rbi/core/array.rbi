@@ -1115,7 +1115,7 @@ class Array < Object
   # a.dig(0, 0, 0)                    #=> TypeError: Integer does not have #dig method
   # [42, {foo: :bar}].dig(1, :foo)    #=> :bar
   # ```
-  def dig(*_); end
+  def dig(arg0, *_); end
 
   # Drops first `n` elements from `ary` and returns the rest of the elements in
   # an array.
