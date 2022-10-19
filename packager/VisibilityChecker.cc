@@ -28,11 +28,6 @@ class PropagateVisibility final {
     }
 
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
-        // There is a loop between a class and its singleton, and this is the easiest way to detect it.
-        if (!firstSymbol && klass.data(gs)->flags.isExported) {
-            return;
-        }
-
         // We only mark symbols from this package.
         if (!this->definedByThisPackage(gs, klass)) {
             return;
@@ -40,11 +35,15 @@ class PropagateVisibility final {
 
         klass.data(gs)->flags.isExported = true;
 
-        for (const auto &child : klass.data(gs)->members()) {
-            if (child.second.isClassOrModule()) {
-                recursiveExportSymbol(gs, false, child.second.asClassOrModuleRef());
-            } else if (child.second.isFieldOrStaticField()) {
-                child.second.asFieldRef().data(gs)->flags.isExported = true;
+        for (const auto &[name, child] : klass.data(gs)->members()) {
+            if (name == core::Names::attached()) {
+                // There is a loop between a class and its singleton, and this breaks out of the loop
+                continue;
+            }
+            if (child.isClassOrModule()) {
+                recursiveExportSymbol(gs, false, child.asClassOrModuleRef());
+            } else if (child.isFieldOrStaticField()) {
+                child.asFieldRef().data(gs)->flags.isExported = true;
             }
         }
     }
