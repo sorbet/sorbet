@@ -1532,6 +1532,10 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
         if (arg.flags.isBlock) {
             continue;
         }
+        if (arg.type == nullptr) {
+            args.emplace_back(core::Types::untyped(gs, method));
+            continue;
+        }
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
     }
     return make_type<TupleType>(move(args));
