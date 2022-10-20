@@ -3697,7 +3697,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
                            "dug a value that is always `{}` here",
                            "dig", "nil");
             auto endLastGood = args.locs.args[0].endPos();
-            auto endAll = args.locs.args[args.locs.args.size() - 1].endPos();
+            auto endAll = args.locs.args.back().endPos();
             auto replaceLoc = core::Loc(args.locs.file, endLastGood, endAll);
             if (endLastGood <= endAll && replaceLoc.exists()) {
                 e.replaceWith("Delete extra args", replaceLoc, "");
