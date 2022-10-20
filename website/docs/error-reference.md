@@ -3870,6 +3870,33 @@ For how to fix, see [Type Annotations](type-annotations.md).
 
 See also: [5028](#5028), [6002](#6002), [7017](#7017), [7027](#7027).
 
+## 7044
+
+Sorbet has built-in support for the `dig` method on `Array` and `Hash`. In
+certain cases, Sorbet can detect that there have been too many arguments
+provided to a `dig` call. For example:
+
+```ruby
+arr = T::Array[NilClass].new
+arr.dig(0, 0)
+```
+
+This tries to get the 0<sup>th</sup> element of the 0<sup>th</sup> element of
+the array, if it exists.
+
+However, Sorbet can know that the 0<sup>th</sup> element of the first array is
+always `nil` if it exists, so the second 0<sup>th</sup> element will never be
+accessed, and is thus redundant.
+
+To fix this, either delete the redundant arguments, or use an
+[Escape Hatch](troubleshooting.md#escape-hatches) to hide the call to `dig` from
+Sorbet:
+
+```ruby
+arr = T::Array[NilClass].new
+T.unsafe(arr).dig(0, 0)
+```
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

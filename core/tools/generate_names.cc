@@ -408,6 +408,7 @@ NameDef names[] = {
     {"max"},
     {"sum"},
     {"sample"},
+    {"at"},
 
     // Argument forwarding
     {"fwdArgs", "<fwd-args>"},
@@ -417,7 +418,8 @@ NameDef names[] = {
     // Enumerable#flat_map has special-case logic in Infer
     {"flatMap", "flat_map"},
 
-    // Array#flatten, #product, #compact and #zip are also custom-implemented
+    // Array#dig, Array#flatten, #product, #compact and #zip are also custom-implemented
+    {"dig"},
     {"flatten"},
     {"product"},
     {"compact"},
