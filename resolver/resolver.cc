@@ -3454,7 +3454,7 @@ private:
                             "    `{}` objects, but even those methods must return `{}` objects.",
                             "to_proc", "&blk", "Proc", "Proc");
 
-                        e.replaceWith("Convert block to `T.nilable(Proc)`", spec->typeLoc, "T.nilable(Proc)");
+                        e.replaceWith("Change block type to `T.nilable(Proc)`", spec->typeLoc, "T.nilable(Proc)");
                     }
                     arg.type = core::Types::untypedUntracked();
                 }

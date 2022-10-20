@@ -13,8 +13,8 @@ struct ParsedSig {
         core::Loc nameLoc;
         core::NameRef name;
         core::Loc typeLoc;
-        core::TypePtr type;
         core::ClassOrModuleRef rebind;
+        core::TypePtr type;
     };
     core::ClassOrModuleRef bind;
     std::vector<ArgSpec> argTypes;
