@@ -96,7 +96,7 @@ def example7(opts)
   # the underlying type. In the future we'll want to change this.
 
   x = opts.dig(T.unsafe(""))
-  #        ^^ error: Expected `Integer` but found `String("")` for argument `arg0`
+  #            ^^ error: Expected `Integer` but found `String("")` for argument `arg0`
 
   x = opts.dig(0)
   T.reveal_type(x) # error: `T.nilable(T.any(Integer, [String, {x: Float}]))`
