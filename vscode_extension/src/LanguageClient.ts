@@ -13,6 +13,7 @@ import {
   CloseAction,
   ErrorAction,
   ErrorHandler,
+  ErrorHandlerResult,
   RevealOutputChannelOn,
   SymbolInformation,
   TextDocumentPositionParams,
@@ -312,12 +313,12 @@ export default class SorbetLanguageClient implements ErrorHandler {
    * * It drops all `onReady` subscriptions after restarting, so we won't know when the Sorbet server is running.
    * * It doesn't reset `onReady` state, so we can't even reset our `onReady` callback.
    */
-  public error(): ErrorAction {
+  public error(): ErrorHandlerResult {
     if (this._status !== ServerStatus.ERROR) {
       this._updateStatus(ServerStatus.RESTARTING);
       this._restart(RestartReason.CRASH_LC_ERROR);
     }
-    return ErrorAction.Shutdown;
+    return { action: ErrorAction.Shutdown };
   }
 
   /**
