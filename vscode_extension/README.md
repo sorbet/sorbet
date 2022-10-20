@@ -55,6 +55,6 @@ To test out the changes:
 - Ensure that "Launch Extension" is selected in the dropdown
 - Click the green triangle, which will launch a new VS Code instance with the
   local copy of the extension loaded
-- Navigate to the you want to test Sorbet in
+- Navigate to the project you want to test Sorbet in
 
 Or in one command: ⇧⌘P > `Debug: Select and Start Debugging` > `Launch Extension`
