@@ -11,11 +11,12 @@ namespace sorbet::autogen {
 
 void MsgpackWriter::packName(core::NameRef nm) {
     uint32_t id;
-    auto it = symbolIds.find(nm);
-    if (it == symbolIds.end()) {
+    typename decltype(symbolIds)::value_type v{nm, 0};
+    auto [it, inserted] = symbolIds.insert(v);
+    if (inserted) {
         id = symbols.size();
         symbols.emplace_back(nm);
-        symbolIds[nm] = id;
+        it->second = id;
     } else {
         id = it->second;
     }
@@ -142,9 +143,9 @@ MsgpackWriter::MsgpackWriter(int version)
       symbols(typeCount.at(version)) {}
 
 string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
-    char *data;
-    size_t size;
-    mpack_writer_init_growable(&writer, &data, &size);
+    char *body;
+    size_t bodySize;
+    mpack_writer_init_growable(&writer, &body, &bodySize);
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
@@ -172,11 +173,11 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_finish_array(&writer);
 
     mpack_writer_destroy(&writer);
-    auto body = string(data, size);
-    MPACK_FREE(data);
 
     // write header
-    mpack_writer_init_growable(&writer, &data, &size);
+    char *header;
+    size_t headerSize;
+    mpack_writer_init_growable(&writer, &header, &headerSize);
 
     mpack_start_map(&writer, 5);
 
@@ -186,29 +187,36 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_start_array(&writer, symbols.size());
     for (auto sym : symbols) {
         ++i;
-        string str;
+        string_view str;
         if (i < numTypes) {
             switch ((Definition::Type)i) {
                 case Definition::Type::Module:
-                    str = "module";
+                    str = "module"sv;
                     break;
                 case Definition::Type::Class:
-                    str = "class";
+                    str = "class"sv;
                     break;
                 case Definition::Type::Casgn:
-                    str = "casgn";
+                    str = "casgn"sv;
                     break;
                 case Definition::Type::Alias:
-                    str = "alias";
+                    str = "alias"sv;
                     break;
                 case Definition::Type::TypeAlias:
-                    str = "typealias";
+                    str = "typealias"sv;
                     break;
-                default: // shouldn't happen
-                    str = sym.shortName(ctx);
+                default: {
+                    // shouldn't happen
+                    auto v = sym.shortName(ctx);
+                    static_assert(std::is_same_v<decltype(v), string_view>, "shortName doesn't return the right thing");
+                    str = v;
+                    break;
+                }
             }
         } else {
-            str = sym.shortName(ctx);
+            auto v = sym.shortName(ctx);
+            static_assert(std::is_same_v<decltype(v), string_view>, "shortName doesn't return the right thing");
+            str = v;
         }
 
         packString(str);
@@ -234,12 +242,13 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     }
     mpack_finish_array(&writer);
 
-    mpack_write_object_bytes(&writer, body.data(), body.size());
+    mpack_write_object_bytes(&writer, body, bodySize);
+    MPACK_FREE(body);
 
     mpack_writer_destroy(&writer);
 
-    auto ret = string(data, size);
-    MPACK_FREE(data);
+    auto ret = string(header, headerSize);
+    MPACK_FREE(header);
 
     return ret;
 }
