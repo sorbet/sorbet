@@ -201,7 +201,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
         ),
       );
     });
-    this._subscriptions.push(this._languageClient.start());
+    this._subscriptions.push(this._languageClient);
   }
 
   /**
