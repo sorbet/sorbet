@@ -84,3 +84,32 @@ def example6(opts)
   x = opts.dig("data", 0)
   T.reveal_type(x) # error: `T.untyped`
 end
+
+ATupleType = T.type_alias do
+  [Integer, [String, {x: Float}]]
+end
+
+sig {params(opts: ATupleType).void}
+def example7(opts)
+  # We don't have special handling for tuple types right now, so it decays to
+  # the underlying type. In the future we'll want to change this.
+
+  x = opts.dig("")
+  #        ^^ error: Expected `Integer` but found `String("")` for argument `arg0`
+
+  x = opts.dig(0)
+  T.reveal_type(x) # error: `T.nilable(T.any(Integer, [String, {x: Float}]))`
+
+  x = opts.dig(1)
+  T.reveal_type(x) # error: `T.nilable(T.any(Integer, [String, {x: Float}]))`
+
+  x = opts.dig(1, 0)
+  #               ^ error: Method `dig` does not exist on `Integer` component of `T.any(Integer, [String, {x: Float}])`
+  T.reveal_type(x) # error: `T.untyped`
+
+  x = opts.dig(1, 1, :x)
+  #               ^ error: Method `dig` does not exist on `Integer` component of `T.any(Integer, [String, {x: Float}])`
+  #                  ^^ error: Method `dig` does not exist on `String` component of `T.any(String, {x: Float})`
+  T.reveal_type(x) # error: `T.untyped`
+end
+
