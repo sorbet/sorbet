@@ -4,7 +4,6 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
 import { shimLanguageClient } from "../LanguageClient";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
@@ -125,7 +124,7 @@ suite("LanguageClient", () => {
 
       {
         const successResponse = await client.sendRequest(
-          new RequestType("textDocument/hover"),
+          "textDocument/hover",
           {
             textDocument: {
               uri: TestLanguageServerSpecialURIs.SUCCESS,
