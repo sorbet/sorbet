@@ -121,7 +121,7 @@ export function activate(context: ExtensionContext) {
       },
     );
 
-    sorbet.languageClient.onReady().then(
+    sorbet.languageClient.start().then(
       filterUpdatesFromOldClients(() => {
         sorbet.languageClient.onNotification(
           "sorbet/showOperation",
