@@ -123,15 +123,12 @@ suite("LanguageClient", () => {
       }
 
       {
-        const successResponse = await client.sendRequest(
-          "textDocument/hover",
-          {
-            textDocument: {
-              uri: TestLanguageServerSpecialURIs.SUCCESS,
-            },
-            position: { line: 1, character: 1 },
+        const successResponse = await client.sendRequest("textDocument/hover", {
+          textDocument: {
+            uri: TestLanguageServerSpecialURIs.SUCCESS,
           },
-        );
+          position: { line: 1, character: 1 },
+        });
         assert.equal(
           (successResponse as any).contents,
           TestLanguageServerSpecialURIs.SUCCESS,
