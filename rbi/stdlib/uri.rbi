@@ -314,7 +314,7 @@ module URI
     params(
         str: String,
         schemes: T::Array[T.untyped],
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T::Array[String])
   end

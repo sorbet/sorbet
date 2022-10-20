@@ -246,7 +246,7 @@ module Kernel
   sig do
     params(
         symbol: T.any(Symbol, String),
-        blk: BasicObject
+        blk: T.untyped
     )
     .returns(Symbol)
   end
@@ -398,7 +398,7 @@ module Kernel
     params(
         method: Symbol,
         args: BasicObject,
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T::Enumerator[T.untyped])
   end
@@ -612,7 +612,7 @@ module Kernel
     params(
         arg0: T.any(String, Symbol),
         arg1: BasicObject,
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T.untyped)
   end
@@ -672,7 +672,7 @@ module Kernel
     params(
         method: Symbol,
         args: BasicObject,
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(T::Enumerator[T.untyped])
   end
@@ -1838,7 +1838,7 @@ module Kernel
   # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new).
   sig do
     params(
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(Proc)
   end
@@ -1850,7 +1850,7 @@ module Kernel
   # objects check the number of parameters passed when called.
   sig do
     params(
-        blk: BasicObject,
+        blk: T.untyped,
     )
     .returns(Proc)
   end

@@ -105,6 +105,11 @@ TypePtr Types::procClass() {
     return make_type<ClassType>(Symbols::Proc());
 }
 
+TypePtr Types::nilableProcClass() {
+    static auto res = OrType::make_shared(nilClass(), procClass());
+    return res;
+}
+
 TypePtr Types::classClass() {
     return make_type<ClassType>(Symbols::Class());
 }

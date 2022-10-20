@@ -1,3 +1,4 @@
+# -- test/testdata/infer/get_call_arguments_nullptr.rb --
 # typed: true
 extend T::Sig
 
@@ -7,7 +8,7 @@ class CallTakesBlock
   end
 end
 
-sig {params(blk: CallTakesBlock).void}
+sig {params(blk: T.nilable(Proc)).void}
 #           ^^^ error: Block argument type must be either `Proc` or a `T.proc` type (and possibly nilable)
 def example(&blk)
   yield 42
@@ -16,3 +17,4 @@ end
 example do |x|
   T.reveal_type(x) # error: `T.untyped`
 end
+# ------------------------------

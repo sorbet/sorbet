@@ -459,7 +459,7 @@ class Proc < Object
   # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-i-lambda-3F).
   sig do
     params(
-        arg0: BasicObject,
+        arg0: T.untyped,
         blk: T.untyped,
     )
     .returns(T.untyped)

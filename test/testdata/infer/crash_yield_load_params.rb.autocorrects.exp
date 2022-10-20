@@ -1,15 +1,16 @@
+# -- test/testdata/infer/crash_yield_load_params.rb --
 # typed: true
 
 module Left
   extend T::Sig
-  sig {params(blk: BasicObject).returns(NilClass)}
+  sig {params(blk: T.nilable(Proc)).returns(NilClass)}
   #           ^^^ error: Block argument type must be either `Proc` or a `T.proc` type (and possibly nilable)
   def foo(&blk); end
 end
 
 module Up
   extend T::Sig
-  sig {params(blk: BasicObject).returns(NilClass)}
+  sig {params(blk: T.nilable(Proc)).returns(NilClass)}
   #           ^^^ error: Block argument type must be either `Proc` or a `T.proc` type (and possibly nilable)
   def foo(&blk); end
 end
@@ -25,3 +26,4 @@ class Main
     res = T.reveal_type(res) # error: `NilClass`
   end
 end
+# ------------------------------

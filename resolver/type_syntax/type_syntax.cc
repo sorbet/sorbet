@@ -415,8 +415,8 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         }
                         auto resultAndBind = move(maybeResultAndBind.value());
 
-                        sig.argTypes.emplace_back(
-                            ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, resultAndBind.type, resultAndBind.rebind});
+                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{ctx.locAt(key.loc()), name, ctx.locAt(value.loc()),
+                                                                     resultAndBind.rebind, resultAndBind.type});
                     }
                 }
                 break;
