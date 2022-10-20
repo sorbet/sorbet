@@ -141,7 +141,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
       },
     );
     shimLanguageClient(this._languageClient, this._emitTimingMetric);
-    this._languageClient.onReady().then(() => {
+    this._languageClient.start().then(() => {
       // Note: It's possible for `onReady` to fire after `stop()` is called on the language client. :(
       if (this._status !== ServerStatus.ERROR) {
         // Language client started successfully.
