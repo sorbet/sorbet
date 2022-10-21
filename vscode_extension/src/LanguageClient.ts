@@ -13,11 +13,9 @@ import {
   CloseAction,
   ErrorAction,
   ErrorHandler,
-  ErrorHandlerResult,
   RevealOutputChannelOn,
   SymbolInformation,
   TextDocumentPositionParams,
-  CloseHandlerResult,
 } from "vscode-languageclient/node";
 
 import { stopProcess } from "./connections";
@@ -143,7 +141,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
       },
     );
     shimLanguageClient(this._languageClient, this._emitTimingMetric);
-    this._languageClient.start().then(() => {
+    this._languageClient.onReady().then(() => {
       // Note: It's possible for `onReady` to fire after `stop()` is called on the language client. :(
       if (this._status !== ServerStatus.ERROR) {
         // Language client started successfully.
@@ -203,7 +201,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
         ),
       );
     });
-    this._subscriptions.push(this._languageClient);
+    this._subscriptions.push(this._languageClient.start());
   }
 
   /**
@@ -314,18 +312,18 @@ export default class SorbetLanguageClient implements ErrorHandler {
    * * It drops all `onReady` subscriptions after restarting, so we won't know when the Sorbet server is running.
    * * It doesn't reset `onReady` state, so we can't even reset our `onReady` callback.
    */
-  public error(): ErrorHandlerResult {
+  public error(): ErrorAction {
     if (this._status !== ServerStatus.ERROR) {
       this._updateStatus(ServerStatus.RESTARTING);
       this._restart(RestartReason.CRASH_LC_ERROR);
     }
-    return { action: ErrorAction.Shutdown };
+    return ErrorAction.Shutdown;
   }
 
   /**
    * Note: If the VPN is disconnected, then Sorbet will repeatedly fail to start.
    */
-  public closed(): CloseHandlerResult {
+  public closed(): CloseAction {
     if (this._status !== ServerStatus.ERROR) {
       this._updateStatus(ServerStatus.RESTARTING);
       let reason = RestartReason.CRASH_LC_CLOSED;
@@ -343,6 +341,6 @@ export default class SorbetLanguageClient implements ErrorHandler {
       }
       this._restart(reason);
     }
-    return { action: CloseAction.DoNotRestart };
+    return CloseAction.DoNotRestart;
   }
 }

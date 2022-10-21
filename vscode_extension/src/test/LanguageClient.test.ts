@@ -4,6 +4,7 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
+import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
 import { shimLanguageClient } from "../LanguageClient";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
@@ -102,7 +103,7 @@ suite("LanguageClient", () => {
     test("Shims language clients and records latency metrics", async () => {
       const client = createLanguageClient();
       shimLanguageClient(client, metricsEmitter.timing.bind(metricsEmitter));
-      await client.start();
+      await client.onReady();
       {
         const successResponse = await client.sendRequest("textDocument/hover", {
           textDocument: {
@@ -123,12 +124,15 @@ suite("LanguageClient", () => {
       }
 
       {
-        const successResponse = await client.sendRequest("textDocument/hover", {
-          textDocument: {
-            uri: TestLanguageServerSpecialURIs.SUCCESS,
+        const successResponse = await client.sendRequest(
+          new RequestType("textDocument/hover"),
+          {
+            textDocument: {
+              uri: TestLanguageServerSpecialURIs.SUCCESS,
+            },
+            position: { line: 1, character: 1 },
           },
-          position: { line: 1, character: 1 },
-        });
+        );
         assert.equal(
           (successResponse as any).contents,
           TestLanguageServerSpecialURIs.SUCCESS,
