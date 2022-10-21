@@ -61,7 +61,8 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
             // to label things as `InlayHintKind::Parameter`?
             hint->kind = InlayHintKind::Type;
             // TODO(froydnj): What do we set tooltip to?  paddingLeft?  paddingRight?
-            hint->tooltip = label;
+            hint->tooltip = fmt::format("{}: {}", ident->variable.toString(gs), label);
+            hint->paddingRight = true;
             hints.emplace_back(move(hint));
         }
     }
