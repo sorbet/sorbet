@@ -55,6 +55,10 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
                 continue;
             }
 
+            if (ident->variable._name == core::Names::selfLocal()) {
+                continue;
+            }
+
             auto position = Position::fromLoc(gs, ident->termLoc.copyWithZeroLength());
             if (position == nullptr) {
                 continue;
