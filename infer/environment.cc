@@ -1164,10 +1164,27 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
 
-                if (lspQueryMatch && !bind.value.isSynthetic()) {
-                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc),
-                                                                                              i.what.data(inWhat), tp,
-                                                                                              ctx.owner.asMethodRef()));
+                if (lspQueryMatch) {
+                    bool pushResponse = false;
+                    cfg::LocalRef varref;
+                    // Range queries wind up matching a *bunch* of stuff.  Try to
+                    // limit them to discovering things that are basically the LHS
+                    // of an assignment.
+                    if (lspQuery.kind == core::lsp::Query::Kind::RANGE) {
+                        if (bind.value.isUserExpression()) {
+                            varref = i.what;
+                            pushResponse = true;
+                        }
+                    } else if (!bind.value.isSynthetic()) {
+                        varref = i.what;
+                        pushResponse = true;
+                    }
+
+                    if (pushResponse) {
+                        core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc),
+                                                                                                  varref.data(inWhat), tp,
+                                                                                                  ctx.owner.asMethodRef()));
+                    }
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
