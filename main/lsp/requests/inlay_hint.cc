@@ -51,6 +51,12 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
         // TODO(froydnj): figure out how to handle everything else.
         if (auto *ident = queryResponse->isIdent()) {
             // TODO(froydnj): maybe we should filter these out during infer?
+            // We sort of try, but this is an extra filter for synthesized variables from the AST,
+            // e.g. from `a && b`...we should probably drill down on eliminating this check.
+            if (ident->variable.isSyntheticTemporary()) {
+                continue;
+            }
+
             if (ident->enclosingMethod.data(gs)->flags.isRewriterSynthesized) {
                 continue;
             }
