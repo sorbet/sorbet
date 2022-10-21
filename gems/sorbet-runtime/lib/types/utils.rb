@@ -9,7 +9,11 @@ module T::Utils
       elsif val.is_a?(T::Types::Base)
         val
       elsif val.is_a?(Module)
-        T::Types::Simple::Private::Pool.type_for_module(val)
+        if check_module_type && check_val.is_a?(val)
+          nil
+        else
+          T::Types::Simple::Private::Pool.type_for_module(val)
+        end
       elsif val.is_a?(::Array)
         T::Types::FixedArray.new(val)
       elsif val.is_a?(::Hash)
