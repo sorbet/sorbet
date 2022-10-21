@@ -334,7 +334,6 @@ NameDef names[] = {
     {"classMethods", "class_methods"},
 
     {"blockTemp", "<block>"},
-    {"blockRetrunType", "<block-return-type>"},
     {"blockPreCallTemp", "<block-pre-call-temp>"},
     {"blockPassTemp", "<block-pass>"},
     {"forTemp"},
