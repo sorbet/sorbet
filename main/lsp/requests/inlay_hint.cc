@@ -50,6 +50,11 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
     for (auto &queryResponse : queryResponses) {
         // TODO(froydnj): figure out how to handle everything else.
         if (auto *ident = queryResponse->isIdent()) {
+            // TODO(froydnj): maybe we should filter these out during infer?
+            if (ident->enclosingMethod.data(gs)->flags.isRewriterSynthesized) {
+                continue;
+            }
+
             auto position = Position::fromLoc(gs, ident->termLoc.copyWithZeroLength());
             if (position == nullptr) {
                 continue;
