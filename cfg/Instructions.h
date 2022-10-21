@@ -298,6 +298,8 @@ class InstructionPtr final {
     static constexpr tagged_storage TAG_MASK = 0xff;
     static constexpr tagged_storage FLAG_MASK = 0xff00;
     static constexpr tagged_storage SYNTHETIC_FLAG = 0x0100;
+    // Only really useful for `Ident` instructions at the moment, and only for LSP queries.
+    static constexpr tagged_storage USER_EXPRESSION_FLAG = 0x0200;
     static_assert((TAG_MASK & FLAG_MASK) == 0, "no bits should be shared between tags and flags");
     static constexpr tagged_storage PTR_MASK = ~(FLAG_MASK | TAG_MASK);
 
@@ -405,6 +407,14 @@ public:
 
     void setSynthetic() noexcept {
         this->ptr |= SYNTHETIC_FLAG;
+    }
+
+    bool isUserExpression() const noexcept {
+        return (this->ptr & USER_EXPRESSION_FLAG) != 0;
+    }
+
+    void setUserExpression() noexcept {
+        this->ptr |= USER_EXPRESSION_FLAG;
     }
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
