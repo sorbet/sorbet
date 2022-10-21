@@ -392,11 +392,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](ast::Assign &a) {
                 LocalRef lhs;
+                bool flagAsUser = true;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
+                    // TODO(froydnj) probably should also disallow type aliases
+                    if (lhsIdent->symbol.isTypeMember()) {
+                        flagAsUser = false;
+                    }
                     lhs = global2Local(cctx, lhsIdent->symbol);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
                     lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
+                    flagAsUser = false;
                     auto isAssign = true;
                     auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
                     lhs = newLhs;
@@ -423,7 +429,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);
-                rhsCont->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
+                auto ident = make_insn<Ident>(lhs);
+                if (flagAsUser) {
+                    ident.setUserExpression();
+                }
+                rhsCont->exprs.emplace_back(cctx.target, a.loc, move(ident));
                 ret = rhsCont;
             },
             [&](ast::InsSeq &a) {
