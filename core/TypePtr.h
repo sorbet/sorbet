@@ -9,7 +9,6 @@
 #include <memory>
 
 namespace sorbet::core {
-class Type;
 class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;

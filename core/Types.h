@@ -15,7 +15,6 @@
 #include <string>
 namespace sorbet::core {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
-class Type;
 class AppliedType;
 class IntrinsicMethod;
 class TypeConstraint;

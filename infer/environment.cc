@@ -8,8 +8,6 @@
 #include "core/TypeErrorDiagnostics.h"
 #include <algorithm> // find, remove_if
 
-template struct std::pair<sorbet::core::LocalVariable, std::shared_ptr<sorbet::core::Type>>;
-
 using namespace std;
 
 namespace sorbet::infer {
