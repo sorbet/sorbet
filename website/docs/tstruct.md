@@ -389,8 +389,11 @@ aware of.
   that the `T::Struct`'s `new` method would do:
 
   - There are no static type checks.
-  - Required properties missing in the `Hash` **do** cause raise exceptions at
+  - Required properties missing in the `Hash` **do** raise exceptions at
     runtime.
+  - Extra or unknown properties present in the `Hash` do not raise exceptions at
+    runtime unless the optional `strict` argument to `from_hash` is passed (or
+    the method is called via the `from_hash!` wrapper).
   - The types provided via the `Hash` are **not** checked at runtime.
 
 - Because [union-typed](union-types.md) properties containing `T::Struct`
@@ -467,9 +470,9 @@ exactly the same gotchas mentioned in the
 ## Legacy and Stripe-specific options
 
 There are a number of other legacy or Stripe-internal options in the `prop` DSL.
-Those include `enum`, `foreign`, `ifunset`, `immutable`, `raise_on_nil_write`,
-`redaction`, and `sensitivity`. Stripe employees can reference
-[these docs](http://go/chalk-odm-docs) to learn more.
+Those include `dont_store`, `enum`, `foreign`, `ifunset`, `immutable`,
+`raise_on_nil_write`, `redaction`, and `sensitivity`. Stripe employees can
+reference [these docs](http://go/chalk-odm-docs) to learn more.
 
 Other users of `sorbet-runtime` are not encouraged to use these options.
 
