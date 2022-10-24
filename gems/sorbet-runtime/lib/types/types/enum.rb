@@ -29,7 +29,7 @@ module T::Types
 
     # overrides Base
     def name
-      "T.deprecated_enum([#{@values.map(&:inspect).join(', ')}])"
+      @name ||= "T.deprecated_enum([#{@values.map(&:inspect).join(', ')}])"
     end
 
     # overrides Base
