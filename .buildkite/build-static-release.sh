@@ -13,7 +13,7 @@ case "$platform" in
   linux-x86_64)
     CONFIG_OPTS="--config=release-linux"
     ;;
-  linux-arm64)
+  linux-aarch64)
     CONFIG_OPTS="--config=release-linux-aarch64"
     ;;
   darwin-x86_64 | darwin-arm64)
