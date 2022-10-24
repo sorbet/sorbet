@@ -204,34 +204,6 @@ module T::Private::Methods
     @modules_with_final[mod.singleton_class.object_id]
   end
 
-  private_class_method def self.attr_accessor_reader?(method_name)
-    # If the method name ends with a "=", it's definitely not an attr_accessor reader
-    return false if method_name[-1] == "="
-
-    # If it was "attr_accessor" that triggered this, we should be 3 frames away from it:
-    # 3. `attr_accessor`
-    # 2. method_added hook
-    # 1. `_on_method_added`
-    # 0. `attr_accessor_reader?`
-    caller_frame = caller_locations(3, 1).first
-    return false unless caller_frame
-
-    caller_label = caller_frame.label
-    return false unless caller_label
-
-    caller_label.to_s == "attr_accessor"
-  end
-
-  private_class_method def self.declare_writer_sig_from_reader(method_name, current_declaration)
-    writer_decl = current_declaration.dup
-    # The block for the reader runs the block for the writer,
-    # but also adds the writer param with the same type as the return type.
-    writer_decl.blk = lambda do
-      instance_exec(&current_declaration.blk).params(**{method_name.to_sym => decl.returns})
-    end
-    T::Private::DeclState.current.active_declaration = writer_decl
-  end
-
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     if T::Private::DeclState.current.skip_on_method_added
@@ -256,8 +228,6 @@ module T::Private::Methods
       return
     end
     T::Private::DeclState.current.reset!
-
-    declare_writer_sig_from_reader(method_name, current_declaration) if attr_accessor_reader?(method_name)
 
     if method_name == :method_added || method_name == :singleton_method_added
       raise(

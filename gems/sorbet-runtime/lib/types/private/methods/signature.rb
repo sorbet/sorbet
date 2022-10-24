@@ -58,14 +58,12 @@ class T::Private::Methods::Signature
     @defined_raw = defined_raw
 
     declared_param_names = raw_arg_types.keys
-    # If sig params are declared and there is a single parameter with a missing name
+    # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
-    # by attr_writer or attr_accessor.
-    # We fix up the parameter name in that case to be the method name without the "=".
-    if declared_param_names != [nil] && parameters == [[:req]] && method_name[-1] == "="
-      parameters = [[:req, method_name[0...-1].to_sym]]
-    end
-
+    # by attr_writer or attr_accessor
+    writer_method = declared_param_names != [nil] && parameters == [[:req]] && method_name[-1] == "="
+    # For writer methods, map the single parameter to the method name without the "=" at the end
+    parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     param_names = parameters.map {|_, name| name}
     missing_names = param_names - declared_param_names
     extra_names = declared_param_names - param_names
