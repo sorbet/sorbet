@@ -39,7 +39,22 @@ Lint/UnusedMethodArgument:
 Lint/UselessMethodDefinition:
   Enabled: false
 
+# Ratcheting these down is kind of outside the purview of a linter
+Metrics/AbcSize:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/BlockNesting:
+  Enabled: false
 Metrics/ClassLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
+Metrics/PerceivedComplexity:
   Enabled: false
 
 # This can be bad for performance
