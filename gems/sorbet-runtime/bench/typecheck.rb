@@ -99,6 +99,27 @@ module SorbetBenchmarks
         integer_param(1)
       end
 
+      my_proc = proc {}
+      time_block("sig {params(x: Integer, blk: T.proc.void)} -- block literal") do
+        integer_param_and_block(0) {}
+        integer_param_and_block(0) {}
+      end
+
+      time_block("sig {params(x: Integer, blk: T.proc.void)} -- block pass") do
+        integer_param_and_block(0, &my_proc)
+        integer_param_and_block(0, &my_proc)
+      end
+
+      time_block("sig {params(x: Integer, blk: T.nilable(T.proc.void))} -- block literal") do
+        integer_param_and_nilable_block(0) {}
+        integer_param_and_nilable_block(0) {}
+      end
+
+      time_block("sig {params(x: Integer, blk: T.nilable(T.proc.void))} -- block pass") do
+        integer_param_and_nilable_block(0, &my_proc)
+        integer_param_and_nilable_block(0, &my_proc)
+      end
+
       time_block("T.let(..., T.nilable(Integer))") do
         T.let(nil, T.nilable(Integer))
         T.let(1, T.nilable(Integer))
@@ -136,15 +157,18 @@ module SorbetBenchmarks
 
       time_block("direct call Object#class") do
         example.class
+        example.class
       end
 
       class_method = Object.instance_method(:class)
       time_block(".bind(example).call Object#class") do
         class_method.bind(example).call
+        class_method.bind(example).call
       end
 
       if T::Configuration::AT_LEAST_RUBY_2_7
         time_block(".bind_call(example) Object#class") do
+          class_method.bind_call(example)
           class_method.bind_call(example)
         end
       else
@@ -157,6 +181,12 @@ module SorbetBenchmarks
 
     sig {params(x: Integer).void}
     def self.integer_param(x); end
+
+    sig {params(x: Integer, blk: T.proc.void).void}
+    def self.integer_param_and_block(x, &blk); end
+
+    sig {params(x: Integer, blk: T.nilable(T.proc.void)).void}
+    def self.integer_param_and_nilable_block(x, &blk); end
 
     sig {params(x: T.nilable(Integer)).void}
     def self.nilable_integer_param(x); end
