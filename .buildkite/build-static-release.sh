@@ -89,7 +89,7 @@ if [[ "mac" == "$platform" ]]; then
   gem_platform="$(ruby -e "(platform = Gem::Platform.local).cpu = 'universal'; puts(platform.to_s)")"
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$gem_platform".gem
 else
-  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-x86_64-linux.gem
+  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-$(uname -m)-linux.gem
 fi
 rbenv exec gem install sorbet-*.gem
 
@@ -119,7 +119,7 @@ rm -rf _out_
 mkdir -p _out_/gems
 
 mv gems/sorbet-static/sorbet-static-*.gem _out_/gems/
-if [[ "linux" == "$platform" ]]; then
+if [[ "$platform" =~ "linux.*"]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
 
