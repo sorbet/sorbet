@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Typed Structs via T::Struct · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt; TODO: This page is still a fragment. Contributions welcome!"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Typed Structs via T::Struct · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="&gt; TODO: This page is still a fragment. Contributions welcome!"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Typed Structs via T::Struct · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet includes a way to define typed structs. They behave similarly to the"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Typed Structs via T::Struct · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet includes a way to define typed structs. They behave similarly to the"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script>
               (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -62,57 +62,116 @@
                 };
               }
             });
-        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/tstruct.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Typed Structs via T::Struct</h1></header><article><div><span><blockquote>
-<p>TODO: This page is still a fragment. Contributions welcome!</p>
-</blockquote>
-<p>While Sorbet supports using Hashes and Structs, it isn’t always possible to
-model them statically.</p>
-<p>The <code>sorbet-runtime</code> gem ships with an alternative to using Ruby’s <code>Hash</code> or
-<code>Struct</code> classes that is more well supported: <code>T::Struct</code>.</p>
-<h2><a class="anchor" aria-hidden="true" id="creating-a-new-struct-class"></a><a href="#creating-a-new-struct-class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating a new struct class</h2>
-<p>To use <code>T::Struct</code>, first create a new class that directly inherits from it.
-Then, in the body of the class, declare the fields on the struct.</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
-<span class="hljs-keyword">require</span> <span class="hljs-string">'sorbet-runtime'</span>
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/tstruct.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Typed Structs via T::Struct</h1></header><article><div><span><p>Sorbet includes a way to define typed structs. They behave similarly to the
+<a href="https://docs.ruby-lang.org/en/master/Struct.html"><code>Struct</code></a> class built into Ruby, but work better with static and runtime type
+checking.</p>
+<p>Here’s a quick example:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MonetaryAmount</span> &lt; T::Struct</span>
+  <span class="hljs-comment"># (1) Define mutable struct properties with the `prop` DSL</span>
+  <span class="hljs-comment"># (like a typed version of `attr_accessor`)</span>
+  prop <span class="hljs-symbol">:amount</span>, Integer
 
-<span class="hljs-comment"># (1) Create a new class that subclasses `T::Struct`</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyStruct</span> &lt; T::Struct</span>
-  <span class="hljs-comment"># (2) Declare fields on the struct with the `prop` and `const` DSL</span>
-  prop <span class="hljs-symbol">:foo</span>, Integer
-  const <span class="hljs-symbol">:bar</span>, T.nilable(String)
-  const <span class="hljs-symbol">:quz</span>, Float, <span class="hljs-symbol">default:</span> <span class="hljs-number">0</span>.<span class="hljs-number">5</span>
+  <span class="hljs-comment"># (2) Define constant struct properties with the `const` DSL</span>
+  <span class="hljs-comment"># (like a typed version of `attr_reader`)</span>
+  const <span class="hljs-symbol">:currency</span>, String
 <span class="hljs-keyword">end</span>
-</code></pre>
-<h2><a class="anchor" aria-hidden="true" id="creating-and-using-an-instance-of-a-struct"></a><a href="#creating-and-using-an-instance-of-a-struct" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating and using an instance of a struct</h2>
-<p>After defining a struct class, create instances of the class with <code>new</code> as
-usual. Then use the generated getters and setters to access the instance’s
-fields.</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Initialize an instance of the struct</span>
-my_struct = MyStruct.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">3</span>)
 
-<span class="hljs-comment"># (2) Use the generated field getters and setters</span>
-my_struct.foo <span class="hljs-comment"># =&gt; 3</span>
-my_struct.bar <span class="hljs-comment"># =&gt; nil</span>
-my_struct.quz <span class="hljs-comment"># =&gt; 0.5</span>
-my_struct.foo = <span class="hljs-number">4</span>
-my_struct.foo <span class="hljs-comment"># =&gt; 4</span>
+<span class="hljs-comment"># (3) T::Struct constructors always take arguments via keywords</span>
+monetary = MonetaryAmount.new(<span class="hljs-symbol">amount:</span> <span class="hljs-number">1000</span>, <span class="hljs-symbol">currency:</span> <span class="hljs-string">'USD'</span>)
+
+<span class="hljs-comment"># (4) Access the values using getters and setters</span>
+p(monetary.amount) <span class="hljs-comment"># =&gt; 1000</span>
+monetary.amount = <span class="hljs-number">2100</span>
+
+<span class="hljs-comment"># (5) `const` properties cannot be updated</span>
+monetary.currency = <span class="hljs-string">'GBP'</span>
+<span class="hljs-comment">#       ^^^^^^^^^^^ undefined method `currency=`</span>
+
+<span class="hljs-comment"># (6) Everything is type checked, unlike Ruby's `Struct` class</span>
+MonetaryAmount.new(<span class="hljs-symbol">amount:</span> <span class="hljs-number">1000</span>)
+<span class="hljs-comment"># ^ error: Missing required keyword argument `currency`</span>
+MonetaryAmount.new(<span class="hljs-symbol">amount:</span> <span class="hljs-string">'not an int'</span>, <span class="hljs-symbol">currency:</span> <span class="hljs-string">'USD'</span>)
+<span class="hljs-comment"># ^ error: Expected `Integer` but found `String`</span>
+monetary.amount + <span class="hljs-string">'not an int'</span>
+<span class="hljs-comment"># ^ error: Expects an `Integer`, not `String`</span>
+monetary.amount = <span class="hljs-string">'not an int'</span>
+<span class="hljs-comment"># ^ error: Expected `Integer` but found `String`</span>
 </code></pre>
-<p>Note that:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20MonetaryAmount%20%3C%20T%3A%3AStruct%0A%20%20%23%20%281%29%20Define%20mutable%20struct%20properties%20with%20the%20%60prop%60%20DSL%0A%20%20%23%20Like%20a%20typed%20version%20of%20%60attr_accessor%60%0A%20%20prop%20%3Aamount%2C%20Integer%0A%0A%20%20%23%20%282%29%20Define%20constant%20struct%20properties%20with%20the%20%60const%60%20DSL%0A%20%20%23%20Like%20a%20typed%20version%20of%20%60attr_reader%60%0A%20%20const%20%3Acurrency%2C%20String%0Aend%0A%0A%23%20%283%29%20T%3A%3AStruct%20constructors%20always%20take%20arguments%20via%20keywords%0Amonetary%20%3D%20MonetaryAmount.new%28amount%3A%201000%2C%20currency%3A%20'USD'%29%0A%0A%23%20%284%29%20Access%20the%20values%20using%20getter%20and%20setters%0Ap%28monetary.amount%29%20%23%20%3D%3E%201000%0Amonetary.amount%20%3D%202100%0A%0A%23%20%285%29%20Attempting%20to%20set%20a%20%60const%60%20property%20results%20in%20a%20%60NoMethodError%60%0Amonetary.currency%20%3D%20'GBP'%0A%23%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%20undefined%20method%20%60currency%3D%60%0A%0A%23%20%286%29%20Everything%20is%20type%20checked%2C%20unlike%20Ruby's%20%60Struct%60%20class%0AMonetaryAmount.new%28amount%3A%201000%29%20%23%20error%0AMonetaryAmount.new%28amount%3A%20'not%20an%20int'%29%20%23%20error%0Amonetary.amount%20%2B%20'not%20an%20int'%20%23%20error%0Amonetary.amount%20%3D%20'not%20an%20int'%20%23%20error">→ View example on sorbet.run</a></p>
+<h2><a class="anchor" aria-hidden="true" id="optional-properties-tnilable-default-and-factory"></a><a href="#optional-properties-tnilable-default-and-factory" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Optional properties: <code>T.nilable</code>, <code>default:</code>, and <code>factory:</code></h2>
+<p>By default, all <code>T::Struct</code> properties are required on initialization. There are
+three ways to mark a property as optional:</p>
+<ol>
+<li><p>Provide a <code>default: ...</code> keyword argument to the <code>prop</code> or <code>const</code>.</p>
+<p>The provided value will be used if that property is omitted at
+initialization time.</p></li>
+<li><p>Provide a proc or lambda via the <code>factory: ...</code> keyword argument on a <code>prop</code>
+or <code>const</code>.</p>
+<p>This is similar to <code>default:</code>, but the argument will be called (with no
+arguments) to produce a default value when needed.</p></li>
+<li><p>Declare the prop’s type as a <code>T.nilable(...)</code> type.</p>
+<p>Not only will this allow the prop’s value to include <code>nil</code>, but it also
+implies <code>default: nil</code> if no explicit <code>default:</code> or <code>factory:</code> value is
+provided.</p></li>
+</ol>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OptionalExample</span> &lt; T::Struct</span>
+  <span class="hljs-comment"># All these props are optional</span>
+  prop <span class="hljs-symbol">:uses_default</span>, String, <span class="hljs-symbol">default:</span> <span class="hljs-string">''</span>
+  prop <span class="hljs-symbol">:created</span>, Float, <span class="hljs-symbol">factory:</span> -&gt;() { Time.now.to_f }
+  prop <span class="hljs-symbol">:nilable</span>, T.nilable(Integer)
+<span class="hljs-keyword">end</span>
+
+x = OptionalExample.new
+x.uses_default <span class="hljs-comment"># =&gt; ''</span>
+x.created      <span class="hljs-comment"># =&gt; 1666483572.897899</span>
+x.nilable      <span class="hljs-comment"># =&gt; nil</span>
+
+y = OptionalExample.new
+x.uses_default <span class="hljs-comment"># =&gt; ''</span>
+x.created      <span class="hljs-comment"># =&gt; 1666483576.475571</span>
+x.nilable      <span class="hljs-comment"># =&gt; nil</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="default-values-and-references"></a><a href="#default-values-and-references" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Default values and references</h3>
+<p>To avoid having a default value be shared and mutated by <strong>all</strong> instances of a
+<code>T::Struct</code>, certain built-in types are deeply cloned at initialization time.
+Other types that are not built into Ruby have their <code>.clone</code> method called.</p>
+<p>Before we get ahead of ourselves, consider this code:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Example</span> &lt; T::Struct</span>
+  <span class="hljs-comment"># The `[]` default is cloned on initialization,</span>
+  <span class="hljs-comment"># so it is not shared by by multiple instances.</span>
+  prop <span class="hljs-symbol">:vals</span>, T::Array[Integer], <span class="hljs-symbol">default:</span> []
+<span class="hljs-keyword">end</span>
+
+ex1 = Example.new
+ex2 = Example.new
+ex1.vals &lt;&lt; <span class="hljs-string">'elem'</span>
+p(ex2.vals)
+</code></pre>
+<p>It would be surprising if <code>p(ex2.vals)</code> printed <code>['elem']</code> in this example—it
+would mean that the default of <code>[]</code> was shared by reference across all <code>Example</code>
+instances, so that updating one instance’s <code>vals</code> property simultaneously
+affected all of them.</p>
+<p>To fix this, <code>T::Struct</code> takes measures to clone objects, so that they are not
+shared:</p>
 <ul>
-<li><code>new</code> takes in a keyword argument corresponding to each field.</li>
-<li>Props declared with <code>default</code> are initialized to their default values if an
-initializer is not provided.</li>
-<li>Props whose type is <code>T.nilable(...)</code> are initialized to <code>nil</code> if an
-initializer is not provided.</li>
-<li>Props declared as <code>const</code> may not be mutated, so they only have getters and
-don’t have setters.</li>
+<li><code>true</code>, <code>false</code>, <code>nil</code>, any <code>Symbol</code>, any <code>Numeric</code>, and <code>T::Enum</code> values are
+either value objects (not reference objects) or are known to be immutable, and
+so are not cloned when being used as a default.</li>
+<li><code>String</code> instances that are frozen (according to <code>frozen?</code>) are not cloned,
+for performance. All other <code>String</code>s have <code>.clone</code> called on them before being
+used as a default value.</li>
+<li><code>Array</code> and <code>Hash</code> default values are deeply cloned (i.e., Sorbet recursively
+calls <code>.clone</code> not only on the <code>Array</code> or <code>Hash</code> itself, but also on all their
+elements).</li>
+<li>All other default values are simply cloned by calling <code>.clone</code> on the provided
+default.</li>
 </ul>
-<h2><a class="anchor" aria-hidden="true" id="converting-structs-to-other-types"></a><a href="#converting-structs-to-other-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Converting structs to other types</h2>
-<p>A particularly common case is to convert an struct to a Hash. Because this is so
-common, this conversion has been built in (it still must be explicitly called):</p>
-<pre><code class="hljs css language-ruby">my_struct.serialize <span class="hljs-comment"># =&gt; { "foo": 4, "quz": 0.5 }</span>
-</code></pre>
-<p>Note that <code>bar</code> is skipped because it is <code>nil</code>.</p>
+<p>These rules prevent the most common misuses of accidentally mutating default
+values via references, but it is still possible to construct cases where the
+above rules are not strong enough. In such cases, use <code>factory:</code> to compute the
+default value in whatever way necessary. The value produced by <code>factory:</code> is
+used verbatim. (This means that <code>factory:</code> can be used when reference sharing
+across default values is actually the <em>desired</em> outcome.)</p>
 <h2><a class="anchor" aria-hidden="true" id="structs-and-inheritance"></a><a href="#structs-and-inheritance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structs and inheritance</h2>
 <p>Sorbet does not allow inheriting from a class which inherits from <code>T::Struct</code>.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">S</span> &lt; T::Struct</span>
@@ -122,14 +181,14 @@ common, this conversion has been built in (it still must be explicitly called):<
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bad</span> &lt; S;</span> <span class="hljs-keyword">end</span> <span class="hljs-comment"># error</span>
 </code></pre>
 <p>Sorbet imposes this limitation somewhat artificially, for performance. Sorbet
-generates a signature for the <code>initialize</code> method of a <code>T::Struct</code> subclass. In
-order to do so, it needs to know all <code>prop</code>'s defined on the class. For
-performance in large codebases, Sorbet requires that it is possible to know
-which methods are defined on a class purely based on syntax—Sorbet does not
-allow discovering the existence of methods based on things like what a class’s
-superclass is, or what methods are defined on the superclass.</p>
+generates a static signature for the <code>initialize</code> method of a <code>T::Struct</code>
+subclass. In order to do so, it needs to know all <code>prop</code>'s defined on the class.
+For performance in large codebases, Sorbet requires that it is possible to know
+which methods are defined on a <code>T::Struct</code> class purely based on syntax—Sorbet
+does not allow discovering a <code>T::Struct</code>'s properties via ancestor information,
+like the class’s superclass or mixins.</p>
 <p>One common situation where inheritance may be desired is when a parent struct
-declares some common props, and children structs declare their own props.</p>
+declares some common props, and child structs declare their own props:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parent</span> &lt; T::Struct</span>
   prop <span class="hljs-symbol">:foo</span>, Integer
 <span class="hljs-keyword">end</span>
@@ -142,7 +201,7 @@ declares some common props, and children structs declare their own props.</p>
   prop <span class="hljs-symbol">:quz</span>, Symbol
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>We can restructure the code to use composition instead of inheritance.</p>
+<p>This code can be restructured to use composition instead of inheritance:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Common</span> &lt; T::Struct</span>
   prop <span class="hljs-symbol">:foo</span>, Integer
 <span class="hljs-keyword">end</span>
@@ -157,15 +216,238 @@ declares some common props, and children structs declare their own props.</p>
   prop <span class="hljs-symbol">:quz</span>, Symbol
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p>Another option is to define a common interface, and repeat the props in each
+child class:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Common</span></span>
+  extend T::Helpers
+  interface!
+  sig {returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
+  sig {params(Integer).returns(Integer)}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo=</span><span class="hljs-params">(foo)</span></span>; <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildOne</span> &lt; T::Struct</span>
+  <span class="hljs-keyword">include</span> Common
+  prop <span class="hljs-symbol">:foo</span>, Integer
+  prop <span class="hljs-symbol">:bar</span>, String
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ChildTwo</span> &lt; T::Struct</span>
+  <span class="hljs-keyword">include</span> Common
+  prop <span class="hljs-symbol">:foo</span>, Integer
+  prop <span class="hljs-symbol">:quz</span>, Symbol
+<span class="hljs-keyword">end</span>
+</code></pre>
 <p>If the code absolutely must use inheritance and cannot use composition, either:</p>
 <ul>
 <li><p>Avoid using <code>T::Struct</code>, and instead define a normal class, with things like
 <code>attr_reader</code> and an explicit <code>initialize</code> method.</p></li>
-<li><p>Change the superclass from <code>T::Struct</code> to <code>T::InexactStruct</code>. Sorbet will no
-longer check the types of any arguments passed to the <code>initialize</code> method on
-the subclass. This should only be used as a last resort.</p></li>
+<li><p>Change the superclass from <code>T::Struct</code> to <code>T::InexactStruct</code>. This causes
+Sorbet to no longer statically check the types of any arguments passed to the
+<code>initialize</code> method on the subclass, but does allow defining <code>T::Struct</code>
+hierarchies. This should only be used as a last resort.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/exhaustiveness"><span class="arrow-prev">← </span><span>Exhaustiveness (T.absurd)</span></a><a class="docs-next button" href="/docs/tenum"><span>T::Enum</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#creating-a-new-struct-class">Creating a new struct class</a></li><li><a href="#creating-and-using-an-instance-of-a-struct">Creating and using an instance of a struct</a></li><li><a href="#converting-structs-to-other-types">Converting structs to other types</a></li><li><a href="#structs-and-inheritance">Structs and inheritance</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+<p><br></p>
+<hr>
+<p><br></p>
+<h2><a class="anchor" aria-hidden="true" id="legacy-code-and-historical-context"></a><a href="#legacy-code-and-historical-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Legacy code and historical context</h2>
+<p>The <code>prop</code> DSL used by <code>T::Struct</code> predates Sorbet by about 5 years. It was
+originally conceived at Stripe in early 2013 to form the basis for Stripe’s
+internal <a href="https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping#Object-oriented_databases">object-document mapper</a> (ODM). By the time Stripe began internal
+development on Sorbet in late 2017, Stripe’s ODM was by far the most commonly
+used internal abstraction for associating types with methods. At a time when it
+was not clear that the as-yet-unnamed Ruby type checker project would succeed or
+not, we were eager to build on existing abstractions to bootstrap early type
+coverage.</p>
+<p>A decision was made to factor the code for the <code>prop</code> DSL into a standalone
+library, to allow using it independently of the database-specific code in
+Stripe’s ODM library. From this effort, <code>T::Struct</code> was born. A <code>T::Struct</code> is
+essentially a Stripe <a href="https://en.wikipedia.org/wiki/Database_model">database model</a> class without the database.</p>
+<p>Unfortunately, this process left warts in the publicly-accessible <code>T::Struct</code>
+APIs that persist today. Certain parts of the <code>prop</code> DSL only make sense when
+used alongside Stripe-internal abstractions. The DSL also contains things that
+are technically publicly accessible that were never meant to be. This legacy
+makes it hard to evolve and improve the <code>T::Struct</code> APIs without breaking
+existing code.</p>
+<p>The remainder of this documentation is presented for completeness. Use the APIs
+below at your own discretion. Our goal here is simply to outline the potential
+pitfalls that arise when using them.</p>
+<h2><a class="anchor" aria-hidden="true" id="serialize-and-from_hash-converting-tstruct-to-and-from-hash"></a><a href="#serialize-and-from_hash-converting-tstruct-to-and-from-hash" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>serialize</code> and <code>from_hash</code>: Converting <code>T::Struct</code> to and from <code>Hash</code></h2>
+<p>It’s possible to convert a <code>T::Struct</code> instance to and from <code>Hash</code> instances:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-comment"># (1) `serialize` converts from `T::Struct` to `Hash`</span>
+serialized = A.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">42</span>).serialize
+p(serialized) <span class="hljs-comment"># =&gt; {"foo"=&gt;42}</span>
+
+<span class="hljs-comment"># (1) `from_hash` converts from `Hash` to `T::Struct`</span>
+deserialized = A.from_hash(serialized)
+p(deserialized) <span class="hljs-comment"># =&gt; &lt;A foo=42&gt;</span>
+</code></pre>
+<p><strong>However, <code>serialize</code> and especially <code>from_hash</code> are particularly fraught</strong>
+(see the “gotchas” sections below). It’s likely better to do manual conversion
+to and from <code>Hash</code> values:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Convert to hashes directly</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+
+a = A.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">12</span>)
+as_hash = {
+  <span class="hljs-symbol">foo:</span> a.foo
+}
+
+<span class="hljs-comment"># (2) Use keyword splat arguments with `new` to convert from a `Hash`</span>
+A.new(**as_hash)
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="custom-serializations-with-name"></a><a href="#custom-serializations-with-name" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Custom serializations with <code>name:</code></h3>
+<p>The <code>name:</code> option on the <code>prop</code> DSL controls the field name that will be used
+when converting to and from <code>Hash</code> values:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> &lt; T::Struct</span>
+  <span class="hljs-comment"># (1) The name `fooBar` will be used when converting to/from `Hash` values</span>
+  prop <span class="hljs-symbol">:foo_bar</span>, Integer, <span class="hljs-symbol">name:</span> <span class="hljs-string">"fooBar"</span>
+<span class="hljs-keyword">end</span>
+
+serialized = A.new(<span class="hljs-symbol">foo_bar:</span> <span class="hljs-number">42</span>).serialize
+p(serialized) <span class="hljs-comment"># =&gt; {"fooBar"=&gt;42}</span>
+
+deserialized = A.from_hash(serialized)
+p(deserialized) <span class="hljs-comment"># &lt;A foo_bar=42&gt;</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="serialize-gotchas"></a><a href="#serialize-gotchas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>serialize</code> gotchas</h3>
+<p>As mentioned in the <a href="#legacy-code-and-historical-context">previous section</a>, the <code>serialize</code> behavior was
+inherited from Stripe’s internal ODM library, and thus has some warts to be
+aware of:</p>
+<ul>
+<li><p>The <code>Hash</code> has <code>String</code>-valued keys, unlike Ruby’s <code>Struct#to_h</code> method, which
+produces <code>Symbol</code>-valued keys. Even custom names provided with <code>name:</code> must be
+<code>String</code>s.</p></li>
+<li><p><code>nil</code> properties are omitted from the resulting <code>Hash</code>.</p></li>
+<li><p>Nested <code>T::Struct</code> and <code>T::Enum</code> values are also serialized:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Nested</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:bar</span>, Integer
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XorY</span> &lt; T::Enum</span>
+  enums <span class="hljs-keyword">do</span>
+    X = new
+    Y = new
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Top</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:nested</span>, Nested
+  prop <span class="hljs-symbol">:x_or_y</span>, XorY
+<span class="hljs-keyword">end</span>
+
+p(Top.new(<span class="hljs-symbol">nested:</span> Nested.new(<span class="hljs-symbol">bar:</span> <span class="hljs-number">42</span>), <span class="hljs-symbol">x_or_y:</span> XorY::X).serialize)
+<span class="hljs-comment"># =&gt; {"nested"=&gt;{"bar"=&gt;42}, "x_or_y"=&gt;"x"}</span>
+</code></pre></li>
+<li><p><strong>However</strong>, <a href="/docs/union-types">union-typed</a> properties containing <code>T::Struct</code>
+instances are <strong>not</strong> serialized:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:bar</span>, String
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Top</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo_or_bar</span>, T.any(Foo, Bar)
+<span class="hljs-keyword">end</span>
+
+foo_top = Top.new(<span class="hljs-symbol">foo_or_bar:</span> Foo.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">12</span>))
+
+foo_serialized = foo_top.serialize
+p(foo_serialized) <span class="hljs-comment"># =&gt; {"foo_or_bar"=&gt;&lt;Foo foo=12&gt;}</span>
+</code></pre></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="from_hash-gotchas"></a><a href="#from_hash-gotchas" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>from_hash</code> gotchas</h3>
+<p>As mentioned in the <a href="#legacy-code-and-historical-context">previous section</a>, the <code>deserialize</code> behavior was
+inherited from Stripe’s internal ODM library, and thus has some warts to be
+aware of.</p>
+<ul>
+<li><p>The <code>Hash</code> given to <code>from_hash</code> must have <code>String</code>-valued keys, like the
+result of calling <code>serialize</code>.</p></li>
+<li><p>The <code>from_hash</code> method does not do the same static nor runtime type checking
+that the <code>T::Struct</code>'s <code>new</code> method would do:</p>
+<ul>
+<li>There are no static type checks.</li>
+<li>Required properties missing in the <code>Hash</code> <strong>do</strong> raise exceptions at
+runtime.</li>
+<li>Extra or unknown properties present in the <code>Hash</code> do not raise exceptions at
+runtime unless the optional <code>strict</code> argument to <code>from_hash</code> is passed (or
+the method is called via the <code>from_hash!</code> wrapper).</li>
+<li>The types provided via the <code>Hash</code> are <strong>not</strong> checked at runtime.</li>
+</ul></li>
+<li><p>Because <a href="/docs/union-types">union-typed</a> properties containing <code>T::Struct</code>
+instances are not serialized, they must also not be still serialized when
+given to <code>from_hash</code>:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo</span>, Integer
+<span class="hljs-keyword">end</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:bar</span>, String
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Top</span> &lt; T::Struct</span>
+  prop <span class="hljs-symbol">:foo_or_bar</span>, T.any(Foo, Bar)
+<span class="hljs-keyword">end</span>
+
+foo = Foo.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">12</span>)
+p(Top.from_hash({<span class="hljs-string">"foo_or_bar"</span> =&gt; foo}))
+<span class="hljs-comment"># =&gt; &lt;Top foo_or_bar=&lt;Foo foo=12&gt;&gt;</span>
+p(Top.from_hash({<span class="hljs-string">"foo_or_bar"</span> =&gt; foo.serialize}))
+<span class="hljs-comment"># =&gt; &lt;Top foo_or_bar={"foo"=&gt;12}&gt;</span>
+</code></pre>
+<p>And since there are no runtime type checks, the serialized hash value is
+directly set to the <code>foo_or_bar</code> field.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="structural-vs-reference-equality"></a><a href="#structural-vs-reference-equality" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Structural vs reference equality</h2>
+<p>By default, <code>T::Struct</code> values compare using reference equality (“Are these two
+instances literally the same object in memory?&quot;”), while classes created with
+Ruby’s <code>Struct</code> class compare using structural equality (“Are these two
+possibly-different objects both instances of the same class, containing
+pairwise-equal fields?”).</p>
+<p>While it would be nice if <code>T::Struct</code> had been built from the beginning with
+structural equality, it wasn’t, and now quite a lot of code in the wild depends
+on this.</p>
+<p>For those cases where structural equality is preferred, we recommend defining a
+custom module that can be included into a <code>T::Struct</code> to override the equality
+methods, providing structural equality.</p>
+<h2><a class="anchor" aria-hidden="true" id="immutable-property-updates-using-with"></a><a href="#immutable-property-updates-using-with" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Immutable property updates using <code>with</code></h2>
+<p>Properties defined with <code>const</code> do not have setter methods, making it impossible
+to update these properties after construction. A common pattern when working
+with such classes is to “immutably update” the instance by creating a copy of an
+object with identical fields except with a different value for the one <code>const</code>
+property.</p>
+<p>This is built into <code>T::Struct</code>, but has some limitations:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> &lt; T::Struct</span>
+  const <span class="hljs-symbol">:foo</span>, Integer
+  const <span class="hljs-symbol">:another_required</span>, Integer
+<span class="hljs-keyword">end</span>
+
+a1 = A.new(<span class="hljs-symbol">foo:</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">another_required:</span> <span class="hljs-number">42</span>)
+p(a1) <span class="hljs-comment"># =&gt; &lt;A foo=1 another_required=42&gt;</span>
+
+<span class="hljs-comment"># The `with` method</span>
+a2 = a1.with(<span class="hljs-symbol">foo:</span> <span class="hljs-number">2</span>)
+p(a2) <span class="hljs-comment"># =&gt; &lt;A foo=2 another_required=42&gt;</span>
+</code></pre>
+<p>Added in haste, the implementation of <code>with</code> uses <code>from_hash</code> to merge the new
+and old properties and create the new instance. This means it suffers from
+exactly the same gotchas mentioned in the
+<a href="#from_hash-gotchas"><code>from_hash</code> gotchas</a> section above.</p>
+<h2><a class="anchor" aria-hidden="true" id="legacy-and-stripe-specific-options"></a><a href="#legacy-and-stripe-specific-options" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Legacy and Stripe-specific options</h2>
+<p>There are a number of other legacy or Stripe-internal options in the <code>prop</code> DSL.
+Those include <code>dont_store</code>, <code>enum</code>, <code>foreign</code>, <code>ifunset</code>, <code>immutable</code>,
+<code>raise_on_nil_write</code>, <code>redaction</code>, and <code>sensitivity</code>. Stripe employees can
+reference <a href="http://go/chalk-odm-docs">these docs</a> to learn more.</p>
+<p>Other users of <code>sorbet-runtime</code> are not encouraged to use these options.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/exhaustiveness"><span class="arrow-prev">← </span><span>Exhaustiveness (T.absurd)</span></a><a class="docs-next button" href="/docs/tenum"><span>T::Enum</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#optional-properties-tnilable-default-and-factory">Optional properties: <code>T.nilable</code>, <code>default:</code>, and <code>factory:</code></a><ul class="toc-headings"><li><a href="#default-values-and-references">Default values and references</a></li></ul></li><li><a href="#structs-and-inheritance">Structs and inheritance</a></li><li><a href="#legacy-code-and-historical-context">Legacy code and historical context</a></li><li><a href="#serialize-and-from_hash-converting-tstruct-to-and-from-hash"><code>serialize</code> and <code>from_hash</code>: Converting <code>T::Struct</code> to and from <code>Hash</code></a><ul class="toc-headings"><li><a href="#custom-serializations-with-name">Custom serializations with <code>name:</code></a></li><li><a href="#serialize-gotchas"><code>serialize</code> gotchas</a></li><li><a href="#from_hash-gotchas"><code>from_hash</code> gotchas</a></li></ul></li><li><a href="#structural-vs-reference-equality">Structural vs reference equality</a></li><li><a href="#immutable-property-updates-using-with">Immutable property updates using <code>with</code></a></li><li><a href="#legacy-and-stripe-specific-options">Legacy and Stripe-specific options</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
