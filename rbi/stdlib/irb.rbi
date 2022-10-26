@@ -1523,7 +1523,9 @@ end
 
 class IRB::OutputMethod::NotImplementedError < ::StandardError; end
 
-class IRB::ReidlineInputMethod < ::IRB::InputMethod
+class IRB::ReidlineInputMethod < ::IRB::RelineInputMethod; end
+
+class IRB::RelineInputMethod < ::IRB::InputMethod
   include(::Reline)
 
   # Creates a new input method object using
