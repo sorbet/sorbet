@@ -1129,8 +1129,8 @@ class Integer < Numeric
   # [`to_int`](https://docs.ruby-lang.org/en/2.7.0/Integer.html#method-i-to_int)
   # is an alias for
   # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/Integer.html#method-i-to_i).
-  sig {returns(Integer)}
-  def to_i(); end
+  sig {params(base: Integer).returns(Integer)}
+  def to_i(base=10); end
 
   # Since `int` is already an
   # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), returns
@@ -1139,8 +1139,8 @@ class Integer < Numeric
   # [`to_int`](https://docs.ruby-lang.org/en/2.7.0/Integer.html#method-i-to_int)
   # is an alias for
   # [`to_i`](https://docs.ruby-lang.org/en/2.7.0/Integer.html#method-i-to_i).
-  sig {returns(Integer)}
-  def to_int(); end
+  sig {params(base: Integer).returns(Integer)}
+  def to_int(base=10); end
 
   # Returns the value as a rational.
   #
