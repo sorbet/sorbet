@@ -278,6 +278,14 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto sym = core::ClassOrModuleRef(gs, i);
 
+        if (sym.data(gs)->flags.isLinearizationComputed) {
+            // Without this, the addMixin below for mixedInClassMethods is not idempotent on the
+            // fast path, and will accidentally mix a `ClassMethods` module into all children (not
+            // just the class that has the `include` triggering the mixes_in_class_methods, but all
+            // subclasses of that class).
+            continue;
+        }
+
         core::ClassOrModuleRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
             // Reading the fake property created in resolver#resolveClassMethodsJob(){}
