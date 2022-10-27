@@ -5,6 +5,7 @@
   ],
   "unwantedRecommendations": [
     // Microsoft C++ intellisense (doesn't work properly with Sorbet)
+    "ms-vscode.cpptools-extension-pack",
     "ms-vscode.cpptools"
   ]
 }
