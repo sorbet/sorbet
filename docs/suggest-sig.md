@@ -122,7 +122,7 @@ reporting these errors, Sorbet attempts to guess a signature that might work for
 that method, and then adds it to the error message.
 
 ```
-editor.rb:5: This function does not have a sig https://srb.help/7017
+editor.rb:5: The method `bar` does not have a sig https://srb.help/7017
      5 |  def bar; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect

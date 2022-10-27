@@ -1,4 +1,4 @@
-test/cli/print_generics/print_generics.rb:5: This function does not have a `sig` https://srb.help/7017
+test/cli/print_generics/print_generics.rb:5: The method `foo` does not have a `sig` https://srb.help/7017
      5 |def foo(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -6,7 +6,7 @@ test/cli/print_generics/print_generics.rb:5: This function does not have a `sig`
      5 |def foo(x)
         ^
 
-test/cli/print_generics/print_generics.rb:9: This function does not have a `sig` https://srb.help/7017
+test/cli/print_generics/print_generics.rb:9: The method `bar` does not have a `sig` https://srb.help/7017
      9 |def bar(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -14,7 +14,7 @@ test/cli/print_generics/print_generics.rb:9: This function does not have a `sig`
      9 |def bar(x)
         ^
 
-test/cli/print_generics/print_generics.rb:13: This function does not have a `sig` https://srb.help/7017
+test/cli/print_generics/print_generics.rb:13: The method `qux` does not have a `sig` https://srb.help/7017
     13 |def qux(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -22,7 +22,7 @@ test/cli/print_generics/print_generics.rb:13: This function does not have a `sig
     13 |def qux(x)
         ^
 
-test/cli/print_generics/print_generics.rb:17: This function does not have a `sig` https://srb.help/7017
+test/cli/print_generics/print_generics.rb:17: The method `wub` does not have a `sig` https://srb.help/7017
     17 |def wub(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -30,7 +30,7 @@ test/cli/print_generics/print_generics.rb:17: This function does not have a `sig
     17 |def wub(x)
         ^
 
-test/cli/print_generics/print_generics.rb:21: This function does not have a `sig` https://srb.help/7017
+test/cli/print_generics/print_generics.rb:21: The method `zan` does not have a `sig` https://srb.help/7017
     21 |def zan(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -38,7 +38,7 @@ test/cli/print_generics/print_generics.rb:21: This function does not have a `sig
     21 |def zan(x)
         ^
 
-test/cli/print_generics/print_generics.rb:25: This function does not have a `sig` https://srb.help/7017
+test/cli/print_generics/print_generics.rb:25: The method `gaz` does not have a `sig` https://srb.help/7017
     25 |def gaz(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect

@@ -12,7 +12,7 @@ sig {params(x: T::Hash[Symbol, T.untyped]).void}
 def bar(x)
 end
 
-def qux(x) # error: This function does not have a `sig`
+def qux(x) # error: The method `qux` does not have a `sig`
   if T.unsafe(nil)
     foo(x)
   end
@@ -27,7 +27,7 @@ sig {params(x: {y: Integer}).void}
 def bbq(x)
 end
 
-def abc(x) # error: This function does not have a `sig`
+def abc(x) # error: The method `abc` does not have a `sig`
   if T.unsafe(nil)
     wtf(x)
   end

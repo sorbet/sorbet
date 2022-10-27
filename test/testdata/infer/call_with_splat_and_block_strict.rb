@@ -19,7 +19,7 @@ class B < A
   end
 end
 
-def no_sig(&blk) # error: This function does not have a `sig`
+def no_sig(&blk) # error: The method `no_sig` does not have a `sig`
   foo(*[1], &blk)
 end
 

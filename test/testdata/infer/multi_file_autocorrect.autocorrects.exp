@@ -4,7 +4,7 @@
 class MyClass1
   extend T::Sig
   sig {returns(NilClass)}
-  def missing_sig; end # error: This function does not have a `sig`
+  def missing_sig; end # error: The method `missing_sig` does not have a `sig`
 end
 # ------------------------------
 # -- test/testdata/infer/multi_file_autocorrect__2.rb --
