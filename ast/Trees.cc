@@ -420,6 +420,15 @@ template <class T> void printArgs(const core::GlobalState &gs, fmt::memory_buffe
 
 } // namespace
 
+core::FoundClass::Kind ClassDef::kindToFoundClassKind(Kind kind) {
+    switch (kind) {
+        case Kind::Module:
+            return core::FoundClass::Kind::Module;
+        case Kind::Class:
+            return core::FoundClass::Kind::Class;
+    }
+}
+
 string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     if (kind == ClassDef::Kind::Module) {

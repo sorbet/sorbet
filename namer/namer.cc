@@ -173,7 +173,7 @@ public:
 
         core::FoundClass found;
         found.owner = getOwner();
-        found.classKind = klass.kind;
+        found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
 
@@ -1093,7 +1093,8 @@ private:
         ENFORCE(symbol.exists());
         auto owner = symbol.owner(ctx).asClassOrModuleRef();
 
-        const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
+        const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
+        const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
         auto declLoc = ctx.locAt(klass.declLoc);
         if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
@@ -1106,7 +1107,9 @@ private:
 
             auto name = ctx.state.nextMangledName(owner, symbol.name(ctx));
             klassSymbol = ctx.state.enterClassSymbol(declLoc, owner, name);
-            klassSymbol.data(ctx)->setIsModule(isModule);
+            if (!isUnknown) {
+                klassSymbol.data(ctx)->setIsModule(isModule);
+            }
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
             auto newSingleton = klassSymbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
@@ -1116,7 +1119,7 @@ private:
         }
 
         auto klassSymbol = symbol.asClassOrModuleRef();
-        if (klassSymbol.data(ctx)->isClassModuleSet() && isModule != klassSymbol.data(ctx)->isModule()) {
+        if (klassSymbol.data(ctx)->isClassModuleSet() && !isUnknown && isModule != klassSymbol.data(ctx)->isModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
                             klassSymbol.data(ctx)->isModule() ? "module" : "class");
@@ -1128,7 +1131,9 @@ private:
                 }
             }
         } else {
-            klassSymbol.data(ctx)->setIsModule(isModule);
+            if (!isUnknown) {
+                klassSymbol.data(ctx)->setIsModule(isModule);
+            }
             auto name = klassSymbol.data(ctx)->name;
             if (isMangleRenameUniqueName(ctx, name)) {
                 // TODO(jez) is `symbol.name(ctx)` the correct name to look up with?
@@ -1142,7 +1147,7 @@ private:
     core::ClassOrModuleRef insertClass(core::MutableContext ctx, const core::FoundClass &klass) {
         auto symbol = getClassSymbol(ctx, klass);
 
-        if (klass.classKind == ast::ClassDef::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
+        if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
             symbol != core::Symbols::BasicObject()) {
             symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }

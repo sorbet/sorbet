@@ -107,6 +107,7 @@ struct FoundClass final {
     core::LocOffsets declLoc;
 
     enum class Kind : uint8_t {
+        Unknown,
         Module,
         Class,
     };

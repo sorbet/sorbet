@@ -132,8 +132,20 @@ string FoundClassRef::toString(const core::GlobalState &gs, const FoundDefinitio
 }
 
 string FoundClass::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
+    string_view classKindStr;
+    switch (classKind) {
+        case Kind::Unknown:
+            classKindStr = "unknown"sv;
+            break;
+        case Kind::Module:
+            classKindStr = "module"sv;
+            break;
+        case Kind::Class:
+            classKindStr = "class"sv;
+            break;
+    }
     return fmt::format("{{ id = {}, owner = {}, klass = {}, classKind = {} }}", id, owner.idx(), klass.idx(),
-                       classKind == Kind::Module ? "module" : "class");
+                       classKindStr);
 }
 
 string FoundStaticField::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
