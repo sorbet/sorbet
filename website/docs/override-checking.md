@@ -43,7 +43,7 @@ look into [final methods](final.md).
 
 ## A note on variance
 
-When overriding a method, the override must accept at all the same things that
+When overriding a method, the override must accept at least all the same things that
 the parent method accepts, and return at most what the parent method returns but
 no more.
 
