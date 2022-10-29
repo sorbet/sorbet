@@ -1,17 +1,17 @@
 # -- test/testdata/packager/invalid_imports_and_exports/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(123)
 
     <self>.import("hello")
 
     <self>.import(<self>.method())
 
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C REFERENCE>)
+    <self>.import(::<PackageSpecRegistry>::<C REFERENCE>)
 
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C B>)
+    <self>.import(::<PackageSpecRegistry>::<C B>)
 
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C B>)
+    <self>.import(::<PackageSpecRegistry>::<C B>)
 
     <self>.export(123)
 
@@ -65,8 +65,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C A>)
+  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C A>)
 
     <self>.export(::<root>::<C B>::<C BClass>)
 

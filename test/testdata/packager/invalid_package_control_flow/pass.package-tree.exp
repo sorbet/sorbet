@@ -2,7 +2,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C SomeConstant> = <emptyTree>::<C PackageSpec>
 
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C MyPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C MyPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.void()
     end
