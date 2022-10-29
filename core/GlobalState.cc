@@ -1086,6 +1086,10 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
 ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
+    // We should never enter mangled classes (incremental fast path relies on all constants being
+    // defined first).
+    ENFORCE_NO_TIMER(name.kind() != core::NameKind::UNIQUE ||
+                     name.dataUnique(*this)->uniqueNameKind != core::UniqueNameKind::MangleRename);
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
