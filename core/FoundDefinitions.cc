@@ -70,9 +70,9 @@ const FoundField &FoundDefinitionRef::field(const FoundDefinitions &foundDefs) c
     return foundDefs._fields[idx()];
 }
 
-core::SymbolRef FoundDefinitionRef::symbol() const {
+core::ClassOrModuleRef FoundDefinitionRef::symbol() const {
     ENFORCE(kind() == FoundDefinitionRef::Kind::Symbol);
-    return core::SymbolRef::fromRaw(_storage.id);
+    return core::ClassOrModuleRef::fromRaw(_storage.id);
 }
 
 string FoundDefinitionRef::kindToString(Kind kind) {

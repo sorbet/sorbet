@@ -146,7 +146,7 @@ class SymbolFinder {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol;
             ENFORCE(sym.exists());
-            return foundDefs->addSymbol(sym);
+            return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClassRef found;
             found.owner = squashNames(constLit->scope);
@@ -646,7 +646,7 @@ private:
     }
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
-    core::SymbolRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
+    core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
         switch (ref.kind()) {
             case core::FoundDefinitionRef::Kind::Symbol:
                 return ref.symbol();
@@ -1462,8 +1462,7 @@ private:
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
-        auto ownerSymbol = getOwnerSymbol(state, ownerRef);
-        auto owner = ownerSymbol.asClassOrModuleRef();
+        auto owner = getOwnerSymbol(state, ownerRef);
         if (oldDefHash.owner.onSingletonClass) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
@@ -1478,7 +1477,6 @@ private:
 
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
         auto ownerSymbol = getOwnerSymbol(state, ownerRef);
-        ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
 
         deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);

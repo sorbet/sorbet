@@ -29,7 +29,7 @@ public:
         Method = 3,
         StaticField = 4,
         TypeMember = 5,
-        Symbol = 6,
+        Symbol = 6, // stores ClassOrModuleRef IDs
         Field = 7,
     };
     CheckSize(Kind, 1, 1);
@@ -49,7 +49,7 @@ public:
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, core::Symbols::root().id());
     }
 
     FoundDefinitionRef::Kind kind() const {
@@ -82,7 +82,7 @@ public:
     FoundField &field(FoundDefinitions &foundDefs);
     const FoundField &field(const FoundDefinitions &foundDefs) const;
 
-    core::SymbolRef symbol() const;
+    core::ClassOrModuleRef symbol() const;
 
     static std::string kindToString(Kind kind);
 
@@ -285,8 +285,8 @@ public:
         return FoundDefinitionRef(FoundDefinitionRef::Kind::Field, idx);
     }
 
-    FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
-        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.rawId());
+    FoundDefinitionRef addSymbol(core::ClassOrModuleRef symbol) {
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.id());
     }
 
     void addModifier(FoundModifier &&mod) {
