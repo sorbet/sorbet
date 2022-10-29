@@ -432,18 +432,14 @@ bool isReferenceToPackageSpec(core::Context ctx, ast::ExpressionPtr &expr) {
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
 
-ast::ExpressionPtr name2Expr(core::NameRef name, ast::ExpressionPtr scope = ast::MK::EmptyTree(),
-                             core::LocOffsets loc = core::LocOffsets::none()) {
-    return ast::MK::UnresolvedConstant(loc, move(scope), name);
-}
-
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
     auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     ENFORCE(lastConstLit != nullptr);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
         lastConstLit = constLit;
     }
-    lastConstLit->scope = name2Expr(prefix, move(lastConstLit->scope));
+    lastConstLit->scope =
+        ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
     return scope;
 }
 
