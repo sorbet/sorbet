@@ -1036,22 +1036,21 @@ private:
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
         auto declLoc = ctx.locAt(klass.declLoc);
 
-        auto klassSymbol = symbol; // TODO(jez) Just use symbol everywhere.
-        if (klassSymbol.data(ctx)->isClassModuleSet() && !isUnknown && isModule != klassSymbol.data(ctx)->isModule()) {
+        if (symbol.data(ctx)->isClassModuleSet() && !isUnknown && isModule != symbol.data(ctx)->isModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
-                            klassSymbol.data(ctx)->isModule() ? "module" : "class");
+                            symbol.data(ctx)->isModule() ? "module" : "class");
 
-                for (auto loc : klassSymbol.data(ctx)->locs()) {
+                for (auto loc : symbol.data(ctx)->locs()) {
                     if (loc != declLoc) {
                         e.addErrorLine(loc, "Previous definition");
                     }
                 }
             }
         } else if (!isUnknown) {
-            klassSymbol.data(ctx)->setIsModule(isModule);
+            symbol.data(ctx)->setIsModule(isModule);
         }
-        return klassSymbol;
+        return symbol;
     }
 
     core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
