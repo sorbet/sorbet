@@ -140,23 +140,24 @@ class SymbolFinder {
         return getOwnerSkippingMethods().first;
     }
 
-    // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
-    core::FoundDefinitionRef squashNames(const ast::ExpressionPtr &node) {
+    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol;
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
-            core::FoundClassRef found;
-            found.owner = squashNames(constLit->scope);
+            core::FoundClass found;
+            found.owner = defineScope(owner, constLit->scope);
             found.name = constLit->cnst;
             found.loc = constLit->loc;
-            return foundDefs->addClassRef(move(found));
+            found.declLoc = constLit->loc;
+            found.classKind = core::FoundClass::Kind::Unknown;
+            return foundDefs->addClass(move(found));
         } else {
-            // `class <<self`, `::Foo`, `self::Foo`
-            // Return non-existent nameref as placeholder.
-            return core::FoundDefinitionRef();
+            // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
+            // Fall back to just using `owner`.
+            return owner;
         }
     }
 
@@ -172,25 +173,26 @@ public:
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         core::FoundClass found;
-        found.owner = getOwner();
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
-            core::FoundClassRef foundRef;
-            foundRef.name = ident->name;
-            foundRef.loc = ident->loc;
-            found.klass = foundDefs->addClassRef(move(foundRef));
+            found.owner = getOwner();
+            found.name = ident->name;
         } else {
             if (klass.symbol == core::Symbols::todo()) {
-                found.klass = squashNames(klass.name);
+                const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
+                found.owner = defineScope(getOwner(), constLit.scope);
+                found.name = constLit.cnst;
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass.symbol == core::Symbols::root());
-                found.klass = foundDefs->addSymbol(klass.symbol);
+                auto owner = foundDefs->addSymbol(klass.symbol);
+                found.owner = owner;
+                found.name = klass.symbol.data(ctx)->name;
             }
         }
 
@@ -463,8 +465,7 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::FoundStaticField found;
-        found.owner = getOwner();
-        found.scopeClass = squashNames(lhs.scope);
+        found.owner = defineScope(getOwner(), lhs.scope);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -622,29 +623,6 @@ private:
     const core::FoundDefinitions &foundDefs;
     const optional<core::FoundDefHashes> oldFoundHashes;
 
-    // Returns a symbol to the referenced name. Name must be a class or module.
-    // Prerequisite: Owner is a class or module.
-    core::SymbolRef squashNames(core::MutableContext ctx, core::FoundDefinitionRef ref, core::ClassOrModuleRef owner) {
-        switch (ref.kind()) {
-            case core::FoundDefinitionRef::Kind::Empty:
-                return owner;
-            case core::FoundDefinitionRef::Kind::Symbol: {
-                return ref.symbol();
-            }
-            case core::FoundDefinitionRef::Kind::ClassRef: {
-                auto &klassRef = ref.klassRef(foundDefs);
-                auto newOwner = squashNames(ctx, klassRef.owner, owner);
-                return getOrDefineSymbol(ctx.withOwner(newOwner), klassRef.name, klassRef.loc);
-            }
-            case core::FoundDefinitionRef::Kind::Class:
-            case core::FoundDefinitionRef::Kind::Method:
-            case core::FoundDefinitionRef::Kind::StaticField:
-            case core::FoundDefinitionRef::Kind::TypeMember:
-            case core::FoundDefinitionRef::Kind::Field:
-                Exception::raise("Invalid name reference {}", core::FoundDefinitionRef::kindToString(ref.kind()));
-        }
-    }
-
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
         switch (ref.kind()) {
@@ -655,7 +633,6 @@ private:
                 return state.definedClasses[ref.idx()];
             case core::FoundDefinitionRef::Kind::Method:
             case core::FoundDefinitionRef::Kind::Empty:
-            case core::FoundDefinitionRef::Kind::ClassRef:
             case core::FoundDefinitionRef::Kind::StaticField:
             case core::FoundDefinitionRef::Kind::TypeMember:
             case core::FoundDefinitionRef::Kind::Field:
@@ -722,58 +699,6 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::SymbolRef symbol,
                                     core::SymbolRef prevSymbol) {
         emitRedefinedConstantError(ctx, errorLoc, symbol.name(ctx), symbol.kind(), prevSymbol);
-    }
-
-    core::ClassOrModuleRef ensureScopeIsClass(core::MutableContext ctx, core::SymbolRef scope,
-                                              core::NameRef nameForErrors, core::LocOffsets loc) {
-        // Common case: Everything is fine, user is trying to define a symbol on a class or module.
-        if (scope.isClassOrModule()) {
-            ENFORCE(!isMangleRenameUniqueName(ctx, scope.name(ctx)));
-            return scope.asClassOrModuleRef();
-        }
-
-        // Check if class was already mangled.
-        auto klassSymbol = ctx.state.lookupClassSymbol(scope.owner(ctx).asClassOrModuleRef(), scope.name(ctx));
-        if (klassSymbol.exists()) {
-            ENFORCE(isMangleRenameUniqueName(ctx, klassSymbol.data(ctx)->name));
-            if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-                auto constLitName = nameForErrors.show(ctx);
-                auto scopeName = scope.show(ctx);
-                e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, scopeName,
-                            scopeName);
-                e.addErrorLine(klassSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
-            }
-            return klassSymbol;
-        }
-
-        if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidClassOwner)) {
-            auto constLitName = nameForErrors.show(ctx);
-            auto newOwnerName = scope.show(ctx);
-            e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
-                        newOwnerName);
-            e.addErrorLine(scope.loc(ctx), "`{}` defined here", newOwnerName);
-        }
-        auto scopeOwner = scope.owner(ctx).asClassOrModuleRef();
-        auto scopeName = ctx.state.nextMangledName(scopeOwner, scope.name(ctx));
-        auto scopeKlass = ctx.state.enterClassSymbol(ctx.locAt(loc), scopeOwner, scopeName);
-        scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
-        return scopeKlass;
-    }
-
-    // Gets the symbol with the given name, or defines it as a class if it does not exist.
-    core::SymbolRef getOrDefineSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
-        if (name == core::Names::singleton()) {
-            return ctx.owner.enclosingClass(ctx).data(ctx)->singletonClass(ctx);
-        }
-
-        auto scope = ensureScopeIsClass(ctx, ctx.owner, name, loc);
-        core::SymbolRef existing = scope.data(ctx)->findMember(ctx, name);
-        if (!existing.exists()) {
-            existing = ctx.state.enterClassSymbol(ctx.locAt(loc), scope, name);
-            existing.asClassOrModuleRef().data(ctx)->singletonClass(ctx); // force singleton class into existance
-        }
-
-        return existing;
     }
 
     void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos, const core::ParsedArg &parsedArg) {
@@ -1088,37 +1013,30 @@ private:
         }
     }
 
-    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const core::FoundClass &klass) {
-        core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.enclosingClass(ctx));
+    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
+        core::ClassOrModuleRef symbol;
+        if (klass.name == core::Names::Constants::Root()) {
+            symbol = core::Symbols::root();
+        } else if (klass.name == core::Names::singleton()) {
+            symbol = ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
+        } else {
+            auto owner = getOwnerSymbol(state, klass.owner);
+            auto member = owner.data(ctx)->findMember(ctx, klass.name);
+            if (member.exists()) {
+                // If member exists with this name, it must be a class or module, because we never mangle-rename them.
+                symbol = member.asClassOrModuleRef();
+            } else {
+                auto newClass = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
+                symbol = newClass;
+            }
+        }
         ENFORCE(symbol.exists());
-        auto owner = symbol.owner(ctx).asClassOrModuleRef();
 
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
         auto declLoc = ctx.locAt(klass.declLoc);
-        if (!symbol.isClassOrModule()) {
-            // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-            auto klassSymbol = ctx.state.lookupClassSymbol(owner, symbol.name(ctx));
-            if (klassSymbol.exists()) {
-                return klassSymbol;
-            }
 
-            emitRedefinedConstantError(ctx, klass.loc, symbol.name(ctx), core::SymbolRef::Kind::ClassOrModule, symbol);
-
-            auto name = ctx.state.nextMangledName(owner, symbol.name(ctx));
-            klassSymbol = ctx.state.enterClassSymbol(declLoc, owner, name);
-            if (!isUnknown) {
-                klassSymbol.data(ctx)->setIsModule(isModule);
-            }
-
-            auto oldSymCount = ctx.state.classAndModulesUsed();
-            auto newSingleton = klassSymbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton.id() >= oldSymCount,
-                    "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
-            return klassSymbol;
-        }
-
-        auto klassSymbol = symbol.asClassOrModuleRef();
+        auto klassSymbol = symbol; // TODO(jez) Just use symbol everywhere.
         if (klassSymbol.data(ctx)->isClassModuleSet() && !isUnknown && isModule != klassSymbol.data(ctx)->isModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
@@ -1130,22 +1048,14 @@ private:
                     }
                 }
             }
-        } else {
-            if (!isUnknown) {
-                klassSymbol.data(ctx)->setIsModule(isModule);
-            }
-            auto name = klassSymbol.data(ctx)->name;
-            if (isMangleRenameUniqueName(ctx, name)) {
-                // TODO(jez) is `symbol.name(ctx)` the correct name to look up with?
-                auto renamed = ctx.state.lookupSymbol(owner, symbol.name(ctx));
-                emitRedefinedConstantError(ctx, klass.loc, symbol, renamed);
-            }
+        } else if (!isUnknown) {
+            klassSymbol.data(ctx)->setIsModule(isModule);
         }
         return klassSymbol;
     }
 
-    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const core::FoundClass &klass) {
-        auto symbol = getClassSymbol(ctx, klass);
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
+        auto symbol = getClassSymbol(ctx, state, klass);
 
         if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
             symbol != core::Symbols::BasicObject()) {
@@ -1258,11 +1168,11 @@ private:
         return sym;
     }
 
-    core::FieldRef insertStaticField(core::MutableContext ctx, const core::FoundStaticField &staticField) {
+    core::FieldRef insertStaticField(core::MutableContext ctx, const State &state,
+                                     const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
-        auto scope = ensureScopeIsClass(ctx, squashNames(ctx, staticField.scopeClass, contextClass(ctx, ctx.owner)),
-                                        staticField.name, staticField.asgnLoc);
+        auto scope = getOwnerSymbol(state, staticField.owner);
         auto name = staticField.name;
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, name);
         auto currSym = ctx.state.lookupSymbol(scope, name);
@@ -1291,7 +1201,8 @@ private:
         return sym;
     }
 
-    core::SymbolRef insertTypeMember(core::MutableContext ctx, const core::FoundTypeMember &typeMember) {
+    core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
+                                     const core::FoundTypeMember &typeMember) {
         if (ctx.owner == core::Symbols::root()) {
             core::FoundStaticField staticField;
             staticField.owner = typeMember.owner;
@@ -1299,7 +1210,7 @@ private:
             staticField.asgnLoc = typeMember.asgnLoc;
             staticField.lhsLoc = typeMember.asgnLoc;
             staticField.isTypeAlias = true;
-            return insertStaticField(ctx, staticField);
+            return insertStaticField(ctx, state, staticField);
         }
 
         core::Variance variance = core::Variance::Invariant;
@@ -1508,7 +1419,8 @@ public:
         state.definedClasses.reserve(foundDefs.klasses().size());
 
         for (const auto &klass : foundDefs.klasses()) {
-            state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), klass));
+            state.definedClasses.emplace_back(
+                insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state, klass));
         }
 
         return state;
@@ -1519,17 +1431,16 @@ public:
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);
-                    insertStaticField(ctx.withOwner(getOwnerSymbol(state, staticField.owner)), staticField);
+                    insertStaticField(ctx.withOwner(getOwnerSymbol(state, staticField.owner)), state, staticField);
                     break;
                 }
                 case core::FoundDefinitionRef::Kind::TypeMember: {
                     const auto &typeMember = ref.typeMember(foundDefs);
-                    insertTypeMember(ctx.withOwner(getOwnerSymbol(state, typeMember.owner)), typeMember);
+                    insertTypeMember(ctx.withOwner(getOwnerSymbol(state, typeMember.owner)), state, typeMember);
                     break;
                 }
                 case core::FoundDefinitionRef::Kind::Class:
                 case core::FoundDefinitionRef::Kind::Empty:
-                case core::FoundDefinitionRef::Kind::ClassRef:
                 case core::FoundDefinitionRef::Kind::Method:
                 case core::FoundDefinitionRef::Kind::Field:
                 case core::FoundDefinitionRef::Kind::Symbol:
