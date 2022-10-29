@@ -144,7 +144,7 @@ class SymbolFinder {
     core::FoundDefinitionRef squashNames(core::Context ctx, const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol.dealias(ctx);
+            auto sym = id->symbol;
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
