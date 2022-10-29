@@ -528,6 +528,18 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         }
         for (const auto &file : existingFilesSet) {
             FileOps::removeFile(file);
+
+            // Remove all empty directories along path. This prevents zeitwerk from setting up dangling autoloads.
+            std::string_view filePath = file;
+            int curDirPos = filePath.find_last_of('/');
+            while (curDirPos > 0) {
+                const auto curDir = filePath.substr(0, curDirPos);
+                if (curDir == path || !FileOps::removeEmptyDir(curDir)) {
+                    break;
+                }
+
+                curDirPos = filePath.find_last_of('/', curDirPos - 1);
+            }
         }
     }
 

@@ -37,6 +37,11 @@ public:
     // when it's removed.
     static void removeDir(std::string_view path);
 
+    // NOTE: this is a minimal wrapper around rmdir, and will return false if the directory is not empty
+    // when it's removed. For any other errno, it will throw an exception. This exists as an convenience function to
+    // prevent the caller from needing to try/catch removeDir.
+    static bool removeEmptyDir(std::string_view path);
+
     static void removeFile(std::string_view path);
     /**
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.
