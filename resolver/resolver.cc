@@ -3485,7 +3485,7 @@ private:
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    treeArgName.show(ctx));
+                                    arg.argumentName(ctx.state));
                         e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }
                 }

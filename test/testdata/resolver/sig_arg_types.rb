@@ -28,4 +28,12 @@ class A
   def test_yield
     yield
   end
+
+  sig {void}
+  def test_block_type_not_specified_later; end
+end
+
+class A
+  def test_block_type_not_specified_later(&my_custom_block_name); end
+                                         # ^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`. Type not specified for argument `my_custom_block_name`
 end
