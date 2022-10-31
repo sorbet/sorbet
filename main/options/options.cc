@@ -4,6 +4,7 @@
 #include <cxxopts.hpp>
 
 #include "absl/strings/str_split.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
 #include "common/formatting.h"
@@ -733,6 +734,9 @@ void readOptions(Options &opts,
             auto rawIgnorePatterns = raw["ignore"].as<vector<string>>();
             parseIgnorePatterns(rawIgnorePatterns, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
         }
+
+        int maxInputFileThreads = raw["max-threads"].as<int>();
+        auto workerPool = WorkerPool::create(maxInputFileThreads, logger);
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
