@@ -47,7 +47,6 @@
 #include <vector>
 
 namespace sorbet::test {
-namespace spd = spdlog;
 using namespace std;
 
 string singleTest;
@@ -80,7 +79,7 @@ TEST_CASE("WhitequarkParserTest") {
         }
     }
 
-    auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
+    auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     core::GlobalState gs(errorQueue);

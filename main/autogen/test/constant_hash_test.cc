@@ -10,11 +10,10 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
-namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet {
-auto logger = spd::stderr_color_mt("parser_test");
+auto logger = spdlog::stderr_color_mt("parser_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 struct Helper {

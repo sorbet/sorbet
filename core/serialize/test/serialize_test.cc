@@ -7,10 +7,9 @@
 
 using namespace std;
 
-namespace spd = spdlog;
 namespace sorbet::core::serialize {
 
-auto logger = spd::stderr_color_mt("serialize_test");
+auto logger = spdlog::stderr_color_mt("serialize_test");
 
 TEST_CASE("U4") { // NOLINT
     Pickler p;

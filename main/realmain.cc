@@ -47,23 +47,21 @@
 #include <csignal>
 #include <poll.h>
 
-namespace spd = spdlog;
-
 using namespace std;
 
 namespace sorbet::realmain {
-shared_ptr<spd::logger> logger;
+shared_ptr<spdlog::logger> logger;
 int returnCode;
 
-shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderrColorSink() {
-    auto color_sink = make_shared<spd::sinks::ansicolor_stderr_sink_mt>();
-    color_sink->set_color(spd::level::info, color_sink->white);
-    color_sink->set_color(spd::level::debug, color_sink->magenta);
-    color_sink->set_level(spd::level::info);
+shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> make_stderrColorSink() {
+    auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
+    color_sink->set_color(spdlog::level::info, color_sink->white);
+    color_sink->set_color(spdlog::level::debug, color_sink->magenta);
+    color_sink->set_level(spdlog::level::info);
     return color_sink;
 }
 
-shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink = make_stderrColorSink();
+shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink = make_stderrColorSink();
 
 /*
  * Workaround https://bugzilla.mindrot.org/show_bug.cgi?id=2863 ; We are
@@ -345,7 +343,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
 // Returns `true` if the constant hash information provided tells us
 // we can exit `autogen` early, and `false` otherwise.
-bool autogenCanExitEarly(shared_ptr<spd::logger> &logger, const options::AutogenConstCacheConfig &cfg) {
+bool autogenCanExitEarly(shared_ptr<spdlog::logger> &logger, const options::AutogenConstCacheConfig &cfg) {
     Timer timeit(logger, "autogenCanExitEarly");
 
     if (cfg.cacheFile.empty()) {
@@ -379,12 +377,12 @@ int realmain(int argc, char *argv[]) {
     initializeSymbolizer(argv[0]);
 #endif
     returnCode = 0;
-    logger = make_shared<spd::logger>("console", stderrColorSink);
-    logger->set_level(spd::level::trace); // pass through everything, let the sinks decide
+    logger = make_shared<spdlog::logger>("console", stderrColorSink);
+    logger->set_level(spdlog::level::trace); // pass through everything, let the sinks decide
     logger->set_pattern("%v");
     fatalLogger = logger;
 
-    auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
+    auto typeErrorsConsole = make_shared<spdlog::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");
 
 #ifndef SORBET_REALMAIN_MIN
@@ -420,25 +418,25 @@ int realmain(int argc, char *argv[]) {
         auto fileSink =
             make_shared<spdlog::sinks::rotating_file_sink_mt>(opts.debugLogFile, ((size_t)1) * 1024 * 1024 * 1024, 3);
         if (opts.logLevel >= 2) {
-            fileSink->set_level(spd::level::trace);
+            fileSink->set_level(spdlog::level::trace);
         } else {
-            fileSink->set_level(spd::level::debug);
+            fileSink->set_level(spdlog::level::debug);
         }
         { // replace console & fatal loggers
-            vector<spd::sink_ptr> sinks{stderrColorSink, fileSink};
-            auto combinedLogger = make_shared<spd::logger>("consoleAndFile", begin(sinks), end(sinks));
+            vector<spdlog::sink_ptr> sinks{stderrColorSink, fileSink};
+            auto combinedLogger = make_shared<spdlog::logger>("consoleAndFile", begin(sinks), end(sinks));
             combinedLogger->flush_on(spdlog::level::err);
-            combinedLogger->set_level(spd::level::trace); // pass through everything, let the sinks decide
+            combinedLogger->set_level(spdlog::level::trace); // pass through everything, let the sinks decide
 
-            spd::register_logger(combinedLogger);
+            spdlog::register_logger(combinedLogger);
             fatalLogger = combinedLogger;
             logger = combinedLogger;
         }
         { // replace type error logger
-            vector<spd::sink_ptr> sinks{stderrColorSink, fileSink};
-            auto combinedLogger = make_shared<spd::logger>("typeDiagnosticsAndFile", begin(sinks), end(sinks));
-            spd::register_logger(combinedLogger);
-            combinedLogger->set_level(spd::level::trace); // pass through everything, let the sinks decide
+            vector<spdlog::sink_ptr> sinks{stderrColorSink, fileSink};
+            auto combinedLogger = make_shared<spdlog::logger>("typeDiagnosticsAndFile", begin(sinks), end(sinks));
+            spdlog::register_logger(combinedLogger);
+            combinedLogger->set_level(spdlog::level::trace); // pass through everything, let the sinks decide
             typeErrorsConsole = combinedLogger;
         }
     }
@@ -446,15 +444,15 @@ int realmain(int argc, char *argv[]) {
 
     switch (opts.logLevel) {
         case 0:
-            stderrColorSink->set_level(spd::level::info);
+            stderrColorSink->set_level(spdlog::level::info);
             break;
         case 1:
-            stderrColorSink->set_level(spd::level::debug);
+            stderrColorSink->set_level(spdlog::level::debug);
             logger->set_pattern("[T%t][%Y-%m-%dT%T.%f] %v");
             logger->debug("Debug logging enabled");
             break;
         default:
-            stderrColorSink->set_level(spd::level::trace);
+            stderrColorSink->set_level(spdlog::level::trace);
             logger->set_pattern("[T%t][%Y-%m-%dT%T.%f] %v");
             logger->trace("Trace logging enabled");
             break;

@@ -8,7 +8,6 @@
 
 using namespace std;
 using namespace sorbet;
-namespace spd = spdlog;
 
 auto logger = spdlog::stdout_logger_mt("console");
 auto typeErrorsConsole = spdlog::stdout_logger_mt("typeErrorsConsole");
@@ -26,7 +25,7 @@ unique_ptr<const realmain::options::Options> opts =
 unique_ptr<const OwnedKeyValueStore> kvstore;
 
 unique_ptr<core::GlobalState> buildInitialGlobalState() {
-    typeErrorsConsole->set_level(spd::level::critical);
+    typeErrorsConsole->set_level(spdlog::level::critical);
 
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger));
@@ -38,7 +37,7 @@ unique_ptr<core::GlobalState> buildInitialGlobalState() {
 }
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    logger->set_level(spd::level::critical);
+    logger->set_level(spdlog::level::critical);
     fatalLogger = logger;
     // Huh, I wish we could use cxxopts, but libfuzzer & cxxopts choke on each other argument formats
     // thus we do it manually

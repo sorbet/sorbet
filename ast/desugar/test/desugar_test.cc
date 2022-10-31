@@ -17,8 +17,7 @@
 
 using namespace std;
 
-namespace spd = spdlog;
-auto logger = spd::stderr_color_mt("desugar_test");
+auto logger = spdlog::stderr_color_mt("desugar_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST_CASE("SimpleDesugar") { // NOLINT

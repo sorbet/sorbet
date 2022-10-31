@@ -14,7 +14,6 @@
 #include "test/helpers/position_assertions.h"
 
 namespace sorbet::test {
-namespace spd = spdlog;
 using namespace std;
 
 string singleTest;

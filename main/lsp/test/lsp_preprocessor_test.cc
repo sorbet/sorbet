@@ -36,9 +36,9 @@ options::Options makeOptions(string_view rootPath) {
     return opts;
 }
 
-auto nullSink = make_shared<spd::sinks::null_sink_mt>();
-auto logger = make_shared<spd::logger>("console", nullSink);
-auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", nullSink);
+auto nullSink = make_shared<spdlog::sinks::null_sink_mt>();
+auto logger = make_shared<spdlog::logger>("console", nullSink);
+auto typeErrorsConsole = make_shared<spdlog::logger>("typeDiagnostics", nullSink);
 auto nullOpts = makeOptions("");
 auto workers = WorkerPool::create(0, *logger);
 

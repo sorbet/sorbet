@@ -1,22 +1,22 @@
 /**
-* \file
-* \author Trevor Fountain
-* \author Johannes Buchner
-* \author Erik Garrison
-* \date 2010-2014
-* \copyright BSD 3-Clause
-*
-* progressbar -- a C class (by convention) for displaying progress
-* on the command line (to stderr).
-*/
+ * \file
+ * \author Trevor Fountain
+ * \author Johannes Buchner
+ * \author Erik Garrison
+ * \date 2010-2014
+ * \copyright BSD 3-Clause
+ *
+ * progressbar -- a C class (by convention) for displaying progress
+ * on the command line (to stderr).
+ */
 
 #ifndef PROGRESSBAR_H
 #define PROGRESSBAR_H
 
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,26 +25,25 @@ extern "C" {
 /**
  * Progressbar data structure (do not modify or create directly)
  */
-typedef struct _progressbar_t
-{
-  /// maximum value
-  unsigned long max;
-  /// current value
-  unsigned long value;
+typedef struct _progressbar_t {
+    /// maximum value
+    unsigned long max;
+    /// current value
+    unsigned long value;
 
-  /// time progressbar was started
-  time_t start;
+    /// time progressbar was started
+    time_t start;
 
-  /// label
-  const char *label;
+    /// label
+    const char *label;
 
-  /// characters for the beginning, filling and end of the
-  /// progressbar. E.g. |###    | has |#|
-  struct {
-    char begin;
-    char fill;
-    char end;
-  } format;
+    /// characters for the beginning, filling and end of the
+    /// progressbar. E.g. |###    | has |#|
+    struct {
+        char begin;
+        char fill;
+        char end;
+    } format;
 } progressbar;
 
 /// Create a new progressbar with the specified label and number of steps.

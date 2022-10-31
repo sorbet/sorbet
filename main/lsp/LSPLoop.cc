@@ -23,7 +23,6 @@
 #include "sorbet_version/sorbet_version.h"
 
 using namespace std;
-namespace spd = spdlog;
 
 namespace sorbet::realmain::lsp {
 
@@ -107,7 +106,7 @@ CounterState mergeCounters(CounterState counters) {
     return getAndClearThreadCounters();
 }
 
-void tagNewRequest(spd::logger &logger, LSPMessage &msg) {
+void tagNewRequest(spdlog::logger &logger, LSPMessage &msg) {
     msg.latencyTimer = make_unique<Timer>(logger, "task_latency",
                                           initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000,
                                                                 15000, 20000, 25000, 30000, 35000, 40000});

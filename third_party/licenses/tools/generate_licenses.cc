@@ -1,5 +1,5 @@
-#include "common/common.h"
 #include "common/FileOps.h"
+#include "common/common.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -20,7 +20,7 @@ string sourceName2funcName(string sourceName) {
 }
 
 string sourceName2DepName(string sourceName) {
-    return (string) absl::StripPrefix(sourceName, ".txt");
+    return (string)absl::StripPrefix(sourceName, ".txt");
 }
 
 void emitlicenses(vector<string> sourceFileNames, ostream &out) {
@@ -33,8 +33,8 @@ void emitlicenses(vector<string> sourceFileNames, ostream &out) {
     out << "vector<pair<string_view, string_view> > all() {" << '\n';
     out << "  vector<pair<string_view, string_view> > result;" << '\n';
     for (auto &file : sourceFileNames) {
-        out << "  result.emplace_back(make_pair<string_view, string_view>(\"" + absl::CEscape(sourceName2DepName(file)) + "\"sv, " +
-                   sourceName2funcName(file) + "()));"
+        out << "  result.emplace_back(make_pair<string_view, string_view>(\"" +
+                   absl::CEscape(sourceName2DepName(file)) + "\"sv, " + sourceName2funcName(file) + "()));"
             << '\n';
     }
     out << "  return result;" << '\n';

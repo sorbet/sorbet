@@ -4,7 +4,7 @@
 
 using namespace std;
 namespace sorbet {
-unique_ptr<WorkerPool> WorkerPool::create(int size, spd::logger &logger) {
+unique_ptr<WorkerPool> WorkerPool::create(int size, spdlog::logger &logger) {
     return make_unique<WorkerPoolImpl>(size, logger);
 }
 
@@ -12,7 +12,7 @@ WorkerPool::~WorkerPool() {
     // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
 }
 
-WorkerPoolImpl::WorkerPoolImpl(int size, spd::logger &logger) : _size(size), logger(logger) {
+WorkerPoolImpl::WorkerPoolImpl(int size, spdlog::logger &logger) : _size(size), logger(logger) {
     logger.trace("Creating {} worker threads", _size);
     if (sorbet::emscripten_build) {
         ENFORCE(size == 0);
