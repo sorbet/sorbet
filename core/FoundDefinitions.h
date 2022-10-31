@@ -36,13 +36,29 @@ public:
 
 private:
     struct Storage {
-        Kind kind;
-        uint32_t id : 24; // We only support 2^24 (≈ 16M) definitions of any kind in a single file.
+        Kind kind : 4;
+        // When kind != Symbol, `id` stores indices into the assorted vectors on `FoundDefitions`.
+        // The 28-bit limit means that a single file cannot have more than 2^28 definitions in that file.
+        //
+        // When kind == Symbol, `id` stores ClassOrModule IDs. This means that a FoundDefinitionRef
+        // can only store a max ID of 2^28 (instead of the 2^32 currently allowed for
+        // ClassOrModuleRefs). But the interplay between findSymbols and defineSymbols means that
+        // any SymbolRef discovered in an AST must have been placed there by a phase that came
+        // before namer. This means that _technically_ we could have IDs as large as the largest
+        // ClassOrModuleRef ID in the payload (if we had code to directly look up symbols by name in
+        // GlobalState), but in practice (and ENFORCE'd below) the largest ID is the largest
+        // synthetic ClassOrModuleRef defined in SymbolRef.h.
+        //
+        // 2^28 ≈ 268 million
+        uint32_t id : 28;
+        //
     } _storage;
     CheckSize(Storage, 4, 4);
 
 public:
-    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({kind, idx}) {}
+    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({kind, idx}) {
+        ENFORCE(this->_storage.kind != Kind::Symbol || idx < Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS);
+    }
     FoundDefinitionRef() : FoundDefinitionRef(FoundDefinitionRef::Kind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;

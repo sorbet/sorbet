@@ -837,7 +837,7 @@ void GlobalState::initEmpty() {
         id.data(*this)->singletonClass(*this);
     }
 
-    ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().id() + 1,
+    ENFORCE(classAndModules.size() == Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS,
             "Too many synthetic class symbols? have: {} expected: {}", classAndModules.size(),
             Symbols::last_synthetic_class_sym().id() + 1);
 

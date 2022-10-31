@@ -258,17 +258,19 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     }
     p.putU4(fh->foundHashes.methodHashes.size());
     for (const auto &fdh : fh->foundHashes.methodHashes) {
-        p.putU4(fdh.owner.idx);
-        p.putU1(fdh.owner.useSingletonClass);
+        p.putU4(fdh.ownerIdx);
+        p.putU1(fdh.ownerIsSymbol);
+        p.putU1(fdh.useSingletonClass);
         p.putU4(fdh.nameHash._hashValue);
         p.putU4(fdh.arityHash._hashValue);
     }
     p.putU4(fh->foundHashes.fieldHashes.size());
     for (const auto &ffh : fh->foundHashes.fieldHashes) {
-        p.putU4(ffh.owner.idx);
-        p.putU1(ffh.owner.onSingletonClass);
-        p.putU1(ffh.owner.isInstanceVariable);
-        p.putU1(ffh.owner.fromWithinMethod);
+        p.putU4(ffh.ownerIdx);
+        p.putU1(ffh.ownerIsSymbol);
+        p.putU1(ffh.onSingletonClass);
+        p.putU1(ffh.isInstanceVariable);
+        p.putU1(ffh.fromWithinMethod);
         p.putU4(ffh.nameHash._hashValue);
     }
 }
@@ -306,24 +308,26 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     ret.foundHashes.methodHashes.reserve(foundMethodHashesSize);
     for (int it = 0; it < foundMethodHashesSize; it++) {
         auto ownerIdx = p.getU4();
+        auto ownerIsSymbol = p.getU1();
         auto useSingletonClass = p.getU1();
         FullNameHash fullNameHash;
         fullNameHash._hashValue = p.getU4();
         ArityHash arityHash;
         arityHash._hashValue = p.getU4();
-        ret.foundHashes.methodHashes.emplace_back(ownerIdx, useSingletonClass, fullNameHash, arityHash);
+        ret.foundHashes.methodHashes.emplace_back(ownerIdx, ownerIsSymbol, useSingletonClass, fullNameHash, arityHash);
     }
     auto foundFieldHashesSize = p.getU4();
     ret.foundHashes.fieldHashes.reserve(foundFieldHashesSize);
     for (int it = 0; it < foundFieldHashesSize; it++) {
         auto ownerIdx = p.getU4();
+        auto ownerIsSymbol = p.getU1();
         auto onSingletonClass = p.getU1();
         auto isInstanceVariable = p.getU1();
         auto fromWithinMethod = p.getU1();
         FullNameHash fullNameHash;
         fullNameHash._hashValue = p.getU4();
-        ret.foundHashes.fieldHashes.emplace_back(ownerIdx, onSingletonClass, isInstanceVariable, fromWithinMethod,
-                                                 fullNameHash);
+        ret.foundHashes.fieldHashes.emplace_back(ownerIdx, ownerIsSymbol, onSingletonClass, isInstanceVariable,
+                                                 fromWithinMethod, fullNameHash);
     }
     return make_unique<const FileHash>(move(ret));
 }

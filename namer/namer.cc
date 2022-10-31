@@ -1458,12 +1458,11 @@ private:
 
     void deleteFieldViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
                                     const core::FoundFieldHash &oldDefHash) {
-        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
-        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete via hash if old hash is not defined");
 
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
-        auto owner = getOwnerSymbol(state, ownerRef);
-        if (oldDefHash.owner.onSingletonClass) {
+        auto owner = getOwnerSymbol(state, oldDefHash.owner());
+        if (oldDefHash.onSingletonClass) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
 
@@ -1472,12 +1471,11 @@ private:
 
     void deleteMethodViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
                                      const core::FoundMethodHash &oldDefHash) {
-        auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
-        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete via hash if old hash is not defined");
 
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
-        auto ownerSymbol = getOwnerSymbol(state, ownerRef);
-        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
+        auto ownerSymbol = getOwnerSymbol(state, oldDefHash.owner());
+        auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.useSingletonClass);
 
         deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
     }
@@ -1488,7 +1486,7 @@ public:
             const auto &oldFoundHashesVal = oldFoundHashes.value();
 
             for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
-                if (oldFieldHash.owner.isInstanceVariable) {
+                if (oldFieldHash.isInstanceVariable) {
                     deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
                 }
             }
@@ -2150,16 +2148,18 @@ void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs
         auto owner = method.owner;
         ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
                 core::FoundDefinitionRef::kindToString(owner.kind()));
+        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
         auto fullNameHash = core::FullNameHash(ctx, method.name);
-        foundHashesOut.methodHashes.emplace_back(owner.idx(), method.flags.isSelfMethod, fullNameHash,
+        foundHashesOut.methodHashes.emplace_back(owner.idx(), ownerIsSymbol, method.flags.isSelfMethod, fullNameHash,
                                                  method.arityHash);
     }
     for (const auto &field : foundDefs.fields()) {
         auto owner = field.owner;
         ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
                 core::FoundDefinitionRef::kindToString(owner.kind()));
+        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
         auto fullNameHash = core::FullNameHash(ctx, field.name);
-        foundHashesOut.fieldHashes.emplace_back(owner.idx(), field.onSingletonClass,
+        foundHashesOut.fieldHashes.emplace_back(owner.idx(), ownerIsSymbol, field.onSingletonClass,
                                                 field.kind == core::FoundField::Kind::InstanceVariable,
                                                 field.fromWithinMethod, fullNameHash);
     }

@@ -1,5 +1,6 @@
 #include "core/FileHash.h"
 #include "common/sort.h"
+#include "core/FoundDefinitions.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/hashing/hashing.h"
@@ -93,14 +94,30 @@ void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
 }
 
+FoundDefinitionRef FoundMethodHash::owner() const {
+    if (this->ownerIsSymbol) {
+        return {FoundDefinitionRef::Kind::Symbol, this->ownerIdx};
+    } else {
+        return {FoundDefinitionRef::Kind::Class, this->ownerIdx};
+    }
+}
+
 void FoundMethodHash::sanityCheck() const {
     ENFORCE(nameHash.isDefined());
 }
 
 string FoundMethodHash::toString() const {
-    return fmt::format("FoundMethodHash {{ owner.idx = {}, owner.useSingletonClass = {}, nameHash = {}, "
+    return fmt::format("FoundMethodHash {{ ownerIdx = {}, ownerIsSymbol = {}, useSingletonClass = {}, nameHash = {}, "
                        "arityHash = {}, isSelfMethod = {} }}",
-                       owner.idx, owner.useSingletonClass, nameHash._hashValue, arityHash._hashValue);
+                       ownerIdx, ownerIsSymbol, useSingletonClass, nameHash._hashValue, arityHash._hashValue);
+}
+
+FoundDefinitionRef FoundFieldHash::owner() const {
+    if (this->ownerIsSymbol) {
+        return {FoundDefinitionRef::Kind::Symbol, this->ownerIdx};
+    } else {
+        return {FoundDefinitionRef::Kind::Class, this->ownerIdx};
+    }
 }
 
 void FoundFieldHash::sanityCheck() const {
@@ -108,10 +125,10 @@ void FoundFieldHash::sanityCheck() const {
 }
 
 string FoundFieldHash::toString() const {
-    return fmt::format("FoundFieldHash {{ owner.idx = {}, owner.onSingletonClass = {}, owner.isInstanceVariable = {}, "
-                       "owner.fromWithinMethod = {}, nameHash = {} }}",
-                       owner.idx, owner.onSingletonClass, owner.isInstanceVariable, owner.fromWithinMethod,
-                       nameHash._hashValue);
+    return fmt::format(
+        "FoundFieldHash {{ ownerIdx = {}, ownerIsSymbol = {}, onSingletonClass = {}, isInstanceVariable = {}, "
+        "fromWithinMethod = {}, nameHash = {} }}",
+        ownerIdx, ownerIsSymbol, onSingletonClass, isInstanceVariable, fromWithinMethod, nameHash._hashValue);
 }
 
 FileHash::FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundDefHashes &&foundHashes)
