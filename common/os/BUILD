@@ -1,15 +1,13 @@
 cc_library(
     name = "os",
-    srcs = glob(
-        [
-            "*.cc",
-            "*.h",
-        ],
-        exclude = [
-            "*_test.cc",
-            "flycheck_*",
-        ],
-    ),
+    srcs = [
+        "os.h",
+        "os.cc",
+    ] + select({
+        "//tools/config:darwin": ["mac.cc"],
+        "//tools/config:webasm": ["emscripten.cc"],
+        "//conditions:default": ["linux.cc"],
+    }),
     hdrs = [
         "os.h",
     ],
