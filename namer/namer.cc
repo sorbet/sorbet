@@ -2157,12 +2157,16 @@ void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs
     foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &method : foundDefs.methods()) {
         auto owner = method.owner;
+        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
+                core::FoundDefinitionRef::kindToString(owner.kind()));
         auto fullNameHash = core::FullNameHash(ctx, method.name);
         foundHashesOut.methodHashes.emplace_back(owner.idx(), method.flags.isSelfMethod, fullNameHash,
                                                  method.arityHash);
     }
     for (const auto &field : foundDefs.fields()) {
         auto owner = field.owner;
+        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
+                core::FoundDefinitionRef::kindToString(owner.kind()));
         auto fullNameHash = core::FullNameHash(ctx, field.name);
         foundHashesOut.fieldHashes.emplace_back(owner.idx(), field.onSingletonClass,
                                                 field.kind == core::FoundField::Kind::InstanceVariable,
