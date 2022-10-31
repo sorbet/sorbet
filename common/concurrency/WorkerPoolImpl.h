@@ -1,7 +1,6 @@
 #ifndef SORBET_WORKERPOOL_IMPL_H
 #define SORBET_WORKERPOOL_IMPL_H
 #include "blockingconcurrentqueue.h"
-#include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/os/os.h"
 #include "spdlog/spdlog.h"

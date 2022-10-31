@@ -1,7 +1,6 @@
 #ifndef SORBET_WORKERPOOL_H
 #define SORBET_WORKERPOOL_H
 
-#include "common/common.h"
 #include "spdlog/spdlog.h"
 namespace sorbet {
 class WorkerPool {

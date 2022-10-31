@@ -1,5 +1,6 @@
 #include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
+#include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 
 using namespace std;
