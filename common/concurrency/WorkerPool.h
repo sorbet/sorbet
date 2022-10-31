@@ -3,7 +3,6 @@
 
 #include "common/common.h"
 #include "spdlog/spdlog.h"
-namespace spd = spdlog;
 namespace sorbet {
 class WorkerPool {
 public:

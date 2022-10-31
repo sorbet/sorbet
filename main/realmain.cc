@@ -47,7 +47,6 @@
 #include <csignal>
 #include <poll.h>
 
-namespace spd = spdlog;
 
 using namespace std;
 

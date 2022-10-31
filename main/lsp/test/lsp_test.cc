@@ -3,7 +3,6 @@
 
 #include "main/lsp/LSPLoop.h"
 
-namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::realmain::lsp::test {

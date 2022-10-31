@@ -18,14 +18,12 @@
 
 using namespace std;
 
-namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("hello-test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 
-namespace spd = spdlog;
 
 TEST_CASE("GetGreet") {
     CHECK_EQ("Hello Bazel", "Hello Bazel");

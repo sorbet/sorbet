@@ -8,7 +8,6 @@
 
 using namespace std;
 using namespace sorbet;
-namespace spd = spdlog;
 
 auto logger = spdlog::stdout_logger_mt("console");
 auto typeErrorsConsole = spdlog::stdout_logger_mt("typeErrorsConsole");

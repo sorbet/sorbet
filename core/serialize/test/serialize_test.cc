@@ -7,7 +7,6 @@
 
 using namespace std;
 
-namespace spd = spdlog;
 namespace sorbet::core::serialize {
 
 auto logger = spd::stderr_color_mt("serialize_test");

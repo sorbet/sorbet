@@ -7,7 +7,6 @@
 #include "spdlog/spdlog.h"
 #include <memory>
 #include <vector>
-namespace spd = spdlog;
 namespace sorbet {
 class WorkerPoolImpl : public WorkerPool {
     int _size;

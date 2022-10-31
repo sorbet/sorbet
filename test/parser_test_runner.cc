@@ -47,7 +47,6 @@
 #include <vector>
 
 namespace sorbet::test {
-namespace spd = spdlog;
 using namespace std;
 
 string singleTest;

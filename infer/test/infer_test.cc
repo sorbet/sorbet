@@ -19,7 +19,6 @@
 #include <fstream>
 #include <memory>
 
-namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet::infer::test {

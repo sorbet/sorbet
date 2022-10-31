@@ -16,7 +16,6 @@
 
 using namespace std;
 
-namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("pkg-autocorrects-test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 

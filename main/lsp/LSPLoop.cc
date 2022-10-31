@@ -23,7 +23,6 @@
 #include "sorbet_version/sorbet_version.h"
 
 using namespace std;
-namespace spd = spdlog;
 
 namespace sorbet::realmain::lsp {
 
