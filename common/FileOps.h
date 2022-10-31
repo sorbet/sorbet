@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace sorbet {
+class WorkerPool;
 
 class FileOps final {
 public:
@@ -49,7 +50,7 @@ public:
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
      */
     static std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
-                                                   bool recursive,
+                                                   WorkerPool &workers, bool recursive,
                                                    const std::vector<std::string> &absoluteIgnorePatterns,
                                                    const std::vector<std::string> &relativeIgnorePatterns);
     /**
