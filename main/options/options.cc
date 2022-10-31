@@ -689,13 +689,13 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     return true;
 }
 
-void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> logger) {
+void addFilesFromDir(Options &opts, string_view dir, WorkerPool &workerPool, shared_ptr<spdlog::logger> logger) {
     auto fileNormalized = stripTrailingSlashes(dir);
     opts.rawInputDirNames.emplace_back(fileNormalized);
     // Expand directory into list of files.
     vector<string> containedFiles;
     try {
-        containedFiles = opts.fs->listFilesInDir(fileNormalized, opts.allowedExtensions, true,
+        containedFiles = opts.fs->listFilesInDir(fileNormalized, opts.allowedExtensions, workerPool, true,
                                                  opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
     } catch (sorbet::FileNotFoundException e) {
         logger->error(e.what());
@@ -736,7 +736,7 @@ void readOptions(Options &opts,
         }
 
         int maxInputFileThreads = raw["max-threads"].as<int>();
-        auto workerPool = WorkerPool::create(maxInputFileThreads, logger);
+        auto workerPool = WorkerPool::create(maxInputFileThreads, *logger);
 
         opts.pathPrefix = raw["remove-path-prefix"].as<string>();
         if (raw.count("files") > 0) {
@@ -744,7 +744,7 @@ void readOptions(Options &opts,
             struct stat s;
             for (auto &file : rawFiles) {
                 if (stat(file.c_str(), &s) == 0 && s.st_mode & S_IFDIR) {
-                    addFilesFromDir(opts, file, logger);
+                    addFilesFromDir(opts, file, *workerPool, logger);
                 } else {
                     opts.rawInputFileNames.push_back(file);
                     opts.inputFileNames.push_back(file);
@@ -762,7 +762,7 @@ void readOptions(Options &opts,
             auto rawDirs = raw["dir"].as<vector<string>>();
             for (auto &dir : rawDirs) {
                 // Since we don't stat here, we're unsure if the directory exists / is a directory.
-                addFilesFromDir(opts, dir, logger);
+                addFilesFromDir(opts, dir, *workerPool, logger);
             }
         }
 
