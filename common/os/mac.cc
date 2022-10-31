@@ -1,6 +1,6 @@
 #ifdef __APPLE__
 #include "absl/debugging/symbolize.h"
-#include "common/common.h"
+#include "spdlog/spdlog.h"
 #include <cassert>
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
