@@ -138,10 +138,10 @@ module T::Props::PrettyPrintable
 end
 
 module T::Props::PrettyPrintable::DecoratorMethods
-  def inspect_instance(instance, multiline: false, indent: '  ', &blk); end
-  def inspect_instance_components(instance, multiline:, indent:, &blk); end
-  def inspect_prop_value(instance, prop, multiline:, indent:, &blk); end
-  def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  ', &blk); end
+  def inspect_instance(instance, multiline: false, indent: '  '); end
+  def inspect_instance_components(instance, multiline:, indent:); end
+  def inspect_prop_value(instance, prop, multiline:, indent:); end
+  def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  '); end
   def self.method_added(name); end
   def self.singleton_method_added(name); end
   def valid_rule_key?(key); end
