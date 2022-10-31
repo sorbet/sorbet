@@ -9,7 +9,6 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <string_view>
 
-
 namespace sorbet {
 class WorkerPool;
 class KeyValueStore;

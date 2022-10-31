@@ -1,22 +1,22 @@
 /**
-* \file
-* \author Trevor Fountain
-* \author Johannes Buchner
-* \author Erik Garrison
-* \date 2010-2014
-* \copyright BSD 3-Clause
-*
-* statusbar -- a C class (by convention) for displaying indefinite progress
-* on the command line (to stderr).
-*/
+ * \file
+ * \author Trevor Fountain
+ * \author Johannes Buchner
+ * \author Erik Garrison
+ * \date 2010-2014
+ * \copyright BSD 3-Clause
+ *
+ * statusbar -- a C class (by convention) for displaying indefinite progress
+ * on the command line (to stderr).
+ */
 
 #ifndef STATUSBAR_H
 #define STATUSBAR_H
 
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,14 +25,13 @@ extern "C" {
 /**
  * Statusbar data structure (do not modify or create directly)
  */
-typedef struct _statusbar_t
-{
+typedef struct _statusbar_t {
     unsigned int start_time;
     const char *label;
     int format_index;
     int format_length;
-  char *format;
-  int last_printed;
+    char *format;
+    int last_printed;
 } statusbar;
 
 /// Create a new statusbar with the specified label and format string

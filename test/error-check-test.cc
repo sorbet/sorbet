@@ -14,7 +14,6 @@
 
 using namespace std;
 
-
 auto logger = spdlog::stderr_color_mt("error-check-test");
 auto errorCollector = make_shared<sorbet::core::ErrorCollector>();
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger, errorCollector);

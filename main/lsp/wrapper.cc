@@ -35,7 +35,8 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
 pair<unique_ptr<core::GlobalState>, unique_ptr<KeyValueStore>>
 createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options, int numWorkerThreads,
                                  shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> &stderrColorSinkOut,
-                                 shared_ptr<spdlog::logger> &loggerOut, shared_ptr<spdlog::logger> &typeErrorsConsoleOut) {
+                                 shared_ptr<spdlog::logger> &loggerOut,
+                                 shared_ptr<spdlog::logger> &typeErrorsConsoleOut) {
     options.rawInputDirNames.emplace_back(rootPath);
     options.threads = numWorkerThreads;
 

@@ -47,7 +47,6 @@
 #include <csignal>
 #include <poll.h>
 
-
 using namespace std;
 
 namespace sorbet::realmain {
