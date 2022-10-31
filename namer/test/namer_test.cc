@@ -20,7 +20,7 @@ using namespace std;
 namespace sorbet::namer::test {
 
 namespace {
-auto logger = spd::stderr_color_mt("namer_test");
+auto logger = spdlog::stderr_color_mt("namer_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 static string_view testClass_str = "Test"sv;

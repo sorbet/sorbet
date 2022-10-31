@@ -16,7 +16,7 @@
 
 using namespace std;
 
-auto logger = spd::stderr_color_mt("pkg-autocorrects-test");
+auto logger = spdlog::stderr_color_mt("pkg-autocorrects-test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 string examplePackage = "class Opus::ExamplePackage < PackageSpec\nend\n";

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-auto logger = spd::stderr_color_mt("parser_test");
+auto logger = spdlog::stderr_color_mt("parser_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST_CASE("SimpleParse") { // NOLINT

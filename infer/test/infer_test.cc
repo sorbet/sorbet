@@ -23,7 +23,7 @@ using namespace std;
 
 namespace sorbet::infer::test {
 
-auto logger = spd::stderr_color_mt("infer_test");
+auto logger = spdlog::stderr_color_mt("infer_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 void processSource(core::GlobalState &cb, string str) {

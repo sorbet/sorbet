@@ -19,7 +19,7 @@
 using namespace std;
 
 
-auto logger = spd::stderr_color_mt("hello-test");
+auto logger = spdlog::stderr_color_mt("hello-test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
@@ -152,7 +152,7 @@ TEST_CASE("CountTrees") {
 }
 
 TEST_CASE("CloneSubstitutePayload") {
-    auto logger = spd::stderr_color_mt("ClonePayload");
+    auto logger = spdlog::stderr_color_mt("ClonePayload");
     auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
     sorbet::core::GlobalState gs(errorQueue);

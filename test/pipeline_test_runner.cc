@@ -190,7 +190,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
-    auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
+    auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
