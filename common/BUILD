@@ -1,20 +1,13 @@
 cc_library(
     name = "common",
-    srcs = [
-        "os/os.h",
-        "os/os.cc",
-    ] + glob(
+    srcs = glob(
         [
             "*.cc",
             "*.h",
         ],
         # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
         exclude = ["flycheck_*"],
-    ) + select({
-        "//tools/config:darwin": ["os/mac.cc"],
-        "//tools/config:webasm": ["os/emscripten.cc"],
-        "//conditions:default": ["os/linux.cc"],
-    }),
+    ),
     hdrs = [
         "FileOps.h",
         "FileSystem.h",
@@ -35,6 +28,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common/os",
         "//sorbet_version",
         "//third_party/progressbar",
         "@com_google_absl//absl/algorithm:container",
