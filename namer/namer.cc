@@ -141,15 +141,15 @@ class SymbolFinder {
     }
 
     // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
-    core::FoundDefinitionRef squashNames(core::Context ctx, const ast::ExpressionPtr &node) {
+    core::FoundDefinitionRef squashNames(const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol.dealias(ctx);
+            auto sym = id->symbol;
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClassRef found;
-            found.owner = squashNames(ctx, constLit->scope);
+            found.owner = squashNames(constLit->scope);
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             return foundDefs->addClassRef(move(found));
@@ -185,7 +185,7 @@ public:
             found.klass = foundDefs->addClassRef(move(foundRef));
         } else {
             if (klass.symbol == core::Symbols::todo()) {
-                found.klass = squashNames(ctx, klass.name);
+                found.klass = squashNames(klass.name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
@@ -464,7 +464,7 @@ public:
 
         core::FoundStaticField found;
         found.owner = getOwner();
-        found.scopeClass = squashNames(ctx, lhs.scope);
+        found.scopeClass = squashNames(lhs.scope);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
