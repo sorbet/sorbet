@@ -1,16 +1,16 @@
 # -- test/testdata/packager/export_for_test/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C RootPkg><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C RootPkg><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
   end
 end
 # -- test/testdata/packager/export_for_test/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C Foo>::<C Bar>)
+  class ::<PackageSpecRegistry>::<C Opus>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar>)
 
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C Util>)
+    <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Util>)
 
-    <self>.test_import(<emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C TestImported>)
+    <self>.test_import(::<PackageSpecRegistry>::<C Opus>::<C TestImported>)
 
     <self>.export(::<root>::<C Opus>::<C Foo>::<C FooClass>)
 
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/foo/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(::<root>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>)
 
     <self>.export(::<root>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>)
@@ -114,7 +114,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/test_imported/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C TestImported><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C Opus>::<C TestImported><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(::<root>::<C Opus>::<C TestImported>::<C TIClass>)
 
     <self>.export(::<root>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>)
@@ -136,7 +136,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_for_test/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Opus>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C Opus>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(::<root>::<C Opus>::<C Util>::<C UtilClass>)
 
     <self>.export(::<root>::<C Test>::<C Opus>::<C Util>::<C TestUtil>)

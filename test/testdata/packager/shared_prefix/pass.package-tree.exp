@@ -1,6 +1,6 @@
 # -- test/testdata/packager/shared_prefix/bar/that/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Bar>::<C That><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Bar>::<C That><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(::<root>::<C Project>::<C Bar>::<C That>::<C Thing>)
   end
 end
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/shared_prefix/bar/this/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Bar>::<C This><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.export(::<root>::<C Project>::<C Bar>::<C This>::<C Thing>)
   end
 end
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/shared_prefix/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
   end
 end
 # -- test/testdata/packager/shared_prefix/foo/foo.rb --

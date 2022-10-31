@@ -1,7 +1,7 @@
 # -- test/testdata/packager/simple_package/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C Project>::<C Foo>)
 
     <self>.export(::<root>::<C Project>::<C Bar>::<C Bar>)
 
@@ -52,8 +52,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/simple_package/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(<emptyTree>::<C <PackageSpecRegistry>>::<C Project>::<C Bar>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C Project>::<C Bar>)
 
     <self>.export(::<root>::<C Project>::<C Foo>::<C Foo>)
 
