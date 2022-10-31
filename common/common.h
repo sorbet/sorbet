@@ -1,11 +1,11 @@
 #ifndef SORBET_COMMON_HPP
 #define SORBET_COMMON_HPP
 
-#if __cplusplus < 201402L
+#if __cplusplus < 201703L
 #define STRINGIZE(x) "C++ = " #x
 #define SSTRINGIZE(x) STRINGIZE(x)
 #pragma message(SSTRINGIZE(__cplusplus))
-static_assert(false, "Need c++14 to compile this codebase");
+static_assert(false, "Need c++17 to compile this codebase");
 #endif
 
 #include "absl/container/flat_hash_map.h"
