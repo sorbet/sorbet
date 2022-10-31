@@ -23,4 +23,9 @@ class A
   sig {void}
   def test_block_type_not_specified(&blk); end
                                    # ^^^ error: Malformed `sig`. Type not specified for argument `blk`
+
+  sig {void}
+  def test_yield
+    yield
+  end
 end
