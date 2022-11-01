@@ -1355,7 +1355,12 @@ class OpenSSL::ASN1::Constructive < OpenSSL::ASN1::ASN1Data
   #   puts asn1
   # end
   # ```
-  sig {returns(::T.untyped)}
+  sig do
+    params(
+      blk: T.nilable(T.proc.returns(::T.untyped)),
+    )
+    .returns(::T.untyped)
+  end
   def each(&blk); end
 
   sig do
@@ -2076,6 +2081,7 @@ module OpenSSL::Buffering
   sig do
     params(
       eol: ::T.untyped,
+      blk: T.nilable(T.proc.returns(::T.untyped)),
     )
     .returns(::T.untyped)
   end
@@ -3245,7 +3251,12 @@ class OpenSSL::Config
   #   # ...
   # end
   # ```
-  sig {returns(::T.untyped)}
+  sig do
+    params(
+      blk: T.nilable(T.proc.returns(::T.untyped)),
+    )
+    .returns(::T.untyped)
+  end
   def each(&blk); end
 
   # Gets the value of *key* from the given *section*

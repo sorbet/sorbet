@@ -22,7 +22,7 @@ end
 
 module T::Props::ClassMethods
   sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
-  def const(name, cls_or_args, args={}, &blk); end
+  def const(name, cls_or_args, args={}); end
   sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
   def prop(name, cls, rules = nil); end
   def decorator; end
@@ -138,10 +138,10 @@ module T::Props::PrettyPrintable
 end
 
 module T::Props::PrettyPrintable::DecoratorMethods
-  def inspect_instance(instance, multiline: false, indent: '  ', &blk); end
-  def inspect_instance_components(instance, multiline:, indent:, &blk); end
-  def inspect_prop_value(instance, prop, multiline:, indent:, &blk); end
-  def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  ', &blk); end
+  def inspect_instance(instance, multiline: false, indent: '  '); end
+  def inspect_instance_components(instance, multiline:, indent:); end
+  def inspect_prop_value(instance, prop, multiline:, indent:); end
+  def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  '); end
   def self.method_added(name); end
   def self.singleton_method_added(name); end
   def valid_rule_key?(key); end

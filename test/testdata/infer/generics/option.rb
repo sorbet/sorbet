@@ -28,10 +28,10 @@ module Option
   def and_then(&blk); end
 
   sig {abstract.returns(Elem)}
-  def unwrap!(&blk); end
+  def unwrap!; end
 
   sig {abstract.params(msg: String).returns(Elem)}
-  def expect!(msg, &blk); end
+  def expect!(msg); end
 
   class Some < T::Struct
     extend T::Generic
@@ -67,12 +67,12 @@ module Option
     end
 
     sig {override.returns(Elem)}
-    def unwrap!(&blk)
+    def unwrap!
       T.reveal_type(self.val) # error: `Option::Some::Elem`
     end
 
     sig {override.params(msg: String).returns(Elem)}
-    def expect!(msg, &blk)
+    def expect!(msg)
       T.reveal_type(self.val) # error: `Option::Some::Elem`
     end
   end
@@ -103,12 +103,12 @@ module Option
     end
 
     sig {override.returns(T.noreturn)}
-    def unwrap!(&blk)
+    def unwrap!
       raise ArgumentError.new("Called Option#unwrap! on a None value")
     end
 
     sig {override.params(msg: String).returns(Elem)}
-    def expect!(msg, &blk)
+    def expect!(msg)
       raise ArgumentError.new(msg)
     end
   end

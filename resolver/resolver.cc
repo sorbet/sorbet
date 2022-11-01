@@ -3429,7 +3429,7 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
-            bool isSyntheticBlkArg = arg.name == core::Names::blkArg();
+            bool isSyntheticBlkArg = arg.isSyntheticBlockArgument();
             bool isBlkArg = arg.flags.isBlock;
 
             if (spec != sig.argTypes.end()) {
@@ -3485,7 +3485,7 @@ private:
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    treeArgName.show(ctx));
+                                    arg.argumentName(ctx.state));
                         e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }
                 }
