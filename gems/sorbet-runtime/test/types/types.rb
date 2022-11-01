@@ -720,8 +720,8 @@ module Opus::Types::Test
       end
 
       it 'can have its metatype instantiated' do
-        assert_equal([2, 4, 6], T::Enumerator::Chain[Integer].new([1, 2], [3]) do |yielder, value|
-          yielder << value * 2
+        assert_equal([2, 4, 6], T::Enumerator::Chain[Integer].new([1, 2], [3]).map do |value|
+          value * 2
         end.to_a)
       end
     end
