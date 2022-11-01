@@ -33,8 +33,7 @@ public:
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
      */
     virtual std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
-                                                    WorkerPool &workerPool,
-                                                    bool recursive,
+                                                    WorkerPool &workerPool, bool recursive,
                                                     const std::vector<std::string> &absoluteIgnorePatterns,
                                                     const std::vector<std::string> &relativeIgnorePatterns) const = 0;
 
@@ -54,8 +53,8 @@ public:
     std::string readFile(std::string_view path) const override;
     void writeFile(std::string_view filename, std::string_view text) override;
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
-                                            WorkerPool &workerPool,
-                                            bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
+                                            WorkerPool &workerPool, bool recursive,
+                                            const std::vector<std::string> &absoluteIgnorePatterns,
                                             const std::vector<std::string> &relativeIgnorePatterns) const override;
 };
 
