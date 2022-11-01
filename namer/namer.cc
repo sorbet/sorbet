@@ -1069,20 +1069,27 @@ private:
             symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
+        // Skip adding locs when kind is Unknown, becaue that means it was a only a FoundClass for a
+        // class or static field scope (not the class def itself), and we want to treat those as
+        // usage locs, not definition locs.
+        // TODO(jez) This causes known problems on the fast path, where these locs can fail to be
+        // updated and crash. We've chosen the current approach because (1) it matches old behavior
+        // (2) adding O(files) locs for something like Opus is far too slow.
+        const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in
         // project) locs!
-        if (symbol != core::Symbols::root()) {
+        if (symbol != core::Symbols::root() && !isUnknown) {
             symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
         auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-        if (symbol != core::Symbols::root()) {
+        if (symbol != core::Symbols::root() && !isUnknown) {
             singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
             ctx.state.staticInitForFile(ctx.locAt(klass.loc));
-        } else {
+        } else if (!isUnknown) {
             ctx.state.staticInitForClass(symbol, ctx.locAt(klass.loc));
         }
 
