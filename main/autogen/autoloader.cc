@@ -486,7 +486,7 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
 }
 }; // namespace
 
-const core::FileRef DefTree::definingFile() const {
+core::FileRef DefTree::definingFile() const {
     core::FileRef definingFileRef;
 
     if (!namedDefs.empty() || (hasDef() && children.empty())) {
@@ -496,7 +496,7 @@ const core::FileRef DefTree::definingFile() const {
     return definingFileRef;
 }
 
-const bool DefTree::mustRender(const core::GlobalState &gs, std::string_view filePath) const {
+bool DefTree::mustRender(const core::GlobalState &gs, std::string_view filePath) const {
     // Either the node has a behavior-defining file, or has a package name
     if (definingFile().exists() || pkgName.exists()) {
         return true;

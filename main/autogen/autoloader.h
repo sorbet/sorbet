@@ -97,7 +97,7 @@ public:
     std::string fullName(const core::GlobalState &) const;
 
     std::string renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &) const;
-    const bool mustRender(const core::GlobalState &gs, std::string_view filePath) const;
+    bool mustRender(const core::GlobalState &gs, std::string_view filePath) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
@@ -107,7 +107,7 @@ public:
 
 private:
     core::FileRef file() const;
-    const core::FileRef definingFile() const;
+    core::FileRef definingFile() const;
     void predeclare(const core::GlobalState &gs, std::string_view fullName, fmt::memory_buffer &buf) const;
     void requireStatements(const core::GlobalState &gs, const AutoloaderConfig &, fmt::memory_buffer &buf) const;
     bool hasDifferentFile(core::FileRef) const;
