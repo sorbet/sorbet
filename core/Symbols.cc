@@ -136,8 +136,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
         bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
                                ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
                                ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator() ||
-                               ref == core::Symbols::Enumerator_Lazy() ||
-                               ref == core::Symbols::Enumerator_Chain();
+                               ref == core::Symbols::Enumerator_Lazy() || ref == core::Symbols::Enumerator_Chain();
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
