@@ -28,11 +28,11 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common/concurrency",
         "//common/enforce_no_timer",
         "//common/exception",
         "//common/os",
         "//sorbet_version",
-        "//common/concurrency",
         "//third_party/progressbar",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/container:flat_hash_map",
