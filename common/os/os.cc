@@ -1,10 +1,10 @@
 #include "os.h"
-#include "common/common.h"
 #include <climits>
 #include <pthread.h>
 #if __has_feature(address_sanitizer)
 #include <sanitizer/lsan_interface.h>
 #endif
+#include <stdexcept>
 
 using namespace std;
 
@@ -13,7 +13,6 @@ using namespace std;
 constexpr int REQUIRED_STACK_SIZE = 64 * 1024 * 1024;
 
 void *Joinable::trampoline(void *ptr) {
-    ENFORCE(ptr != nullptr);
     Joinable &self = *static_cast<Joinable *>(ptr);
     setCurrentThreadName(self.originalThreadName);
     self.realFunction();
@@ -22,7 +21,7 @@ void *Joinable::trampoline(void *ptr) {
 
 unique_ptr<Joinable> runInAThread(string_view threadName, function<void()> function, optional<int> bindToCore) {
 #ifdef EMSCRIPTEN
-    sorbet::Exception::raise("Creating threads in unsupported in EMSCRIPTEN");
+    throw logic_error("Creating threads in unsupported in EMSCRIPTEN");
 #endif
     // AFAIK this should all be:
     //    - defined behaviour
@@ -42,34 +41,34 @@ unique_ptr<Joinable> runInAThread(string_view threadName, function<void()> funct
     /*  Initialize the attribute */
     err = pthread_attr_init(&attr);
     if (err != 0) {
-        sorbet::Exception::raise("Failed to set create pthread_attr_t");
+        throw logic_error("Failed to set create pthread_attr_t");
     };
 
     /* Get the default value */
     err = pthread_attr_getstacksize(&attr, &stackSize);
     if (err != 0) {
-        sorbet::Exception::raise("Failed to get stack size");
+        throw logic_error("Failed to get stack size");
     }
 
     // This should be the default, but just to play it safe.
 
     err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     if (err != 0) {
-        sorbet::Exception::raise("Failed make thread joinable");
+        throw logic_error("Failed make thread joinable");
     }
 
     // Mac default is too low
     if (stackSize < REQUIRED_STACK_SIZE) {
         err = pthread_attr_setstacksize(&attr, REQUIRED_STACK_SIZE);
         if (err != 0) {
-            sorbet::Exception::raise("Failed to set stack size");
+            throw logic_error("Failed to set stack size");
         };
     }
 
     /*  Create the thread with our attribute */
     err = pthread_create(&thread, &attr, &Joinable::trampoline, joinablePTR);
     if (err != 0) {
-        sorbet::Exception::raise("Failed create thread");
+        throw logic_error("Failed create thread");
     }
     if (bindToCore) {
         bindThreadToCore(thread, *bindToCore);

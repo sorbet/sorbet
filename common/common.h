@@ -30,23 +30,6 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 #define Q(x) #x
 #define QUOTED(x) Q(x)
 
-#define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
-
-// A faster version of ENFORCE that does not emit a timer. Useful for checks that happen extremely frequently and
-// are O(1). Please avoid using unless ENFORCE shows up in profiles.
-#define ENFORCE_NO_TIMER(x, ...)                                                                            \
-    do {                                                                                                    \
-        if (::sorbet::debug_mode) {                                                                         \
-            if (!(x)) {                                                                                     \
-                ::sorbet::Exception::failInFuzzer();                                                        \
-                if (stopInDebugger()) {                                                                     \
-                    (void)!(x);                                                                             \
-                }                                                                                           \
-                ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
-            }                                                                                               \
-        }                                                                                                   \
-    } while (false);
-
 // Used for cases like https://xkcd.com/2200/
 // where there is some assumption that you believe should always hold.
 // Please use this to explicitly write down what assumptions was the code written under.
@@ -170,6 +153,7 @@ std::string demangle(const char *mangled);
 #pragma GCC poison cuserid
 #pragma GCC poison rexec rexec_af
 
-#include "Exception.h"
 #include "Timer.h"
+#include "enforce_no_timer/EnforceNoTimer.h"
+#include "exception/Exception.h"
 #endif

@@ -1,7 +1,8 @@
 #include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
-#include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
+#include "common/enforce_no_timer/EnforceNoTimer.h"
+#include "common/os/os.h"
 
 using namespace std;
 namespace sorbet {
@@ -16,7 +17,7 @@ WorkerPool::~WorkerPool() {
 WorkerPoolImpl::WorkerPoolImpl(int size, spdlog::logger &logger) : _size(size), logger(logger) {
     logger.trace("Creating {} worker threads", _size);
     if (sorbet::emscripten_build) {
-        ENFORCE(size == 0);
+        ENFORCE_NO_TIMER(size == 0);
         this->_size = 0;
     } else {
         bool pinThreads = (_size > 0) && (_size == thread::hardware_concurrency());
@@ -73,7 +74,7 @@ void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
     logger.trace("Multiplexing job");
     for (int i = 0; i < _size; i++) {
         const bool enqueued = threadQueues[i]->enqueue(t);
-        ENFORCE(enqueued, "Failed to enqueue (did we surpass MAX_SUBQUEUE_SIZE items enqueued?)");
+        ENFORCE_NO_TIMER(enqueued, "Failed to enqueue (did we surpass MAX_SUBQUEUE_SIZE items enqueued?)");
     }
 }
 

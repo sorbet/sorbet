@@ -1,7 +1,7 @@
 #ifndef SORBET_COMMON_EARLYRETURNWITHCODE_H
 #define SORBET_COMMON_EARLYRETURNWITHCODE_H
 
-#include "Exception.h"
+#include "exception/Exception.h"
 
 namespace sorbet {
 

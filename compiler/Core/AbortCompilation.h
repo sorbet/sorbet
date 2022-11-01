@@ -1,7 +1,7 @@
 #ifndef SORBET_COMPILER_CORE_ABORT_COMPILATION_H
 #define SORBET_COMPILER_CORE_ABORT_COMPILATION_H
 
-#include "common/Exception.h"
+#include "common/exception/Exception.h"
 
 namespace sorbet::compiler {
 class AbortCompilation : public sorbet::SorbetException {

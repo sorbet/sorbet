@@ -1,8 +1,8 @@
 #ifndef SORBET_TYPECASE_H
 #define SORBET_TYPECASE_H
 
-#include "common/Exception.h"
 #include "common/common.h"
+#include "common/exception/Exception.h"
 #include "common/has_member.h"
 #include <functional>
 #include <string>
