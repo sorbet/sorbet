@@ -400,6 +400,7 @@ class Dir < Object
   def self.rmdir(arg0); end
 
   # Returns the operating system's temporary file path.
+  sig {returns(String)}
   def self.tmpdir; end
 
   # Deletes the named directory. Raises a subclass of
