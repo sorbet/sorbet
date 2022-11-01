@@ -1,4 +1,4 @@
-#include "common/Exception.h"
+#include "common/exception/Exception.h"
 
 namespace sorbet::compiler {
 // Occasionally we need to throw errors from within LLVM optimization passes,
