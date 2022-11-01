@@ -28,6 +28,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common/exception",
         "//common/os",
         "//sorbet_version",
         "//third_party/progressbar",
