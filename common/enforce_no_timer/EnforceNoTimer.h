@@ -1,9 +1,9 @@
 #ifndef SORBET_ENFORCENOTIMER_H
 #define SORBET_ENFORCENOTIMER_H
 
-#include "sorbet_version/sorbet_version.h"
 #include "common/exception/Exception.h"
 #include "common/os/os.h"
+#include "sorbet_version/sorbet_version.h"
 
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
 

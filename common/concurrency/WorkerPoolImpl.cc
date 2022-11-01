@@ -1,8 +1,8 @@
 #include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
-#include "common/os/os.h"
-#include "common/enforce_no_timer/EnforceNoTimer.h"
 #include "common/concurrency/WorkerPool.h"
+#include "common/enforce_no_timer/EnforceNoTimer.h"
+#include "common/os/os.h"
 
 using namespace std;
 namespace sorbet {

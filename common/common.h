@@ -153,7 +153,7 @@ std::string demangle(const char *mangled);
 #pragma GCC poison cuserid
 #pragma GCC poison rexec rexec_af
 
+#include "Timer.h"
 #include "enforce_no_timer/EnforceNoTimer.h"
 #include "exception/Exception.h"
-#include "Timer.h"
 #endif
