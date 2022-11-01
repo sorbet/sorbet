@@ -1,7 +1,7 @@
 #include "common/common.h"
+#include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/FileOps.h"
 #include "common/exception/Exception.h"
 #include "common/sort.h"
 #include "os/os.h"
@@ -269,8 +269,8 @@ using Job = variant<QuitToken, string>;
 using JobOutput = variant<std::monostate, sorbet::SorbetException, vector<string>>;
 
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
-                      sorbet::WorkerPool &workers,
-                      bool recursive, vector<string> &allPaths, const std::vector<std::string> &absoluteIgnorePatterns,
+                      sorbet::WorkerPool &workers, bool recursive, vector<string> &allPaths,
+                      const std::vector<std::string> &absoluteIgnorePatterns,
                       const std::vector<std::string> &relativeIgnorePatterns) {
     auto numWorkers = max(workers.size(), 1);
     auto jobq = make_shared<ConcurrentUnBoundedQueue<Job>>();
@@ -287,7 +287,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     ++pendingJobs;
     jobq->push(path, 1);
 
-    workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions, &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
+    workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
+                                               &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
         Job job;
         vector<string> output;
 
@@ -310,12 +311,12 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
 
                 if ((dir = opendir(path.c_str())) == nullptr) {
                     switch (errno) {
-                    case ENOTDIR: {
-                        throw sorbet::FileNotDirException();
-                    }
-                    default:
-                        // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
-                        throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path));
+                        case ENOTDIR: {
+                            throw sorbet::FileNotDirException();
+                        }
+                        default:
+                            // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                            throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path));
                     }
                 }
 
@@ -342,7 +343,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                     }
 
                     auto fullPath = fmt::format("{}/{}", path, nameview);
-                    if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
+                    if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
+                                                       relativeIgnorePatterns)) {
                         continue;
                     }
 
@@ -390,8 +392,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
 
                 auto *paths = std::get_if<vector<string>>(&threadResult);
                 ENFORCE(paths != nullptr);
-                allPaths.insert(allPaths.end(), make_move_iterator(paths->begin()),
-                                make_move_iterator(paths->end()));
+                allPaths.insert(allPaths.end(), make_move_iterator(paths->begin()), make_move_iterator(paths->end()));
             }
         }
     }
@@ -405,7 +406,8 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
     // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
     // copying.
     string pathStr(path);
-    appendFilesInDir(path, pathStr, extensions, workerPool, recursive, result, absoluteIgnorePatterns, relativeIgnorePatterns);
+    appendFilesInDir(path, pathStr, extensions, workerPool, recursive, result, absoluteIgnorePatterns,
+                     relativeIgnorePatterns);
     fast_sort(result);
     return result;
 }
