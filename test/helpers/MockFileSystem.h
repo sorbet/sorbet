@@ -20,6 +20,10 @@ public:
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                             bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
                                             const std::vector<std::string> &relativeIgnorePatterns) const override;
+    std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
+                                            WorkerPool &workerPool, bool recursive,
+                                            const std::vector<std::string> &absoluteIgnorePatterns,
+                                            const std::vector<std::string> &relativeIgnorePatterns) const override;
 };
 
 } // namespace sorbet::test

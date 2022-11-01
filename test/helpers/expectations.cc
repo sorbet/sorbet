@@ -4,6 +4,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
 #include "dtl/dtl.hpp"
 #include "test/helpers/expectations.h"
@@ -104,8 +105,9 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
 }
 
 vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
+    unique_ptr<WorkerPool> workerPool = WorkerPool::create(0, *spdlog::default_logger());
     vector<string> names =
-        sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".exp"}, recursive, {}, {});
+        sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".exp"}, *workerPool, recursive, {}, {});
     const int prefixLen = dir.length() + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
