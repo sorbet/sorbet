@@ -709,7 +709,7 @@ module Opus::Types::Test
         t = T::Enumerator::Chain[Integer]
         assert_equal(
           "T::Enumerator::Chain[Integer]",
-          t.describe_obj([1, 2]).chain([3])))
+          t.describe_obj([1, 2].chain([3])))
       end
 
       it 'works if the type is right' do
