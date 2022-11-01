@@ -6,7 +6,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U TestLocals>>#<U method> (<blk>) @ Loc {file=test/testdata/namer/locals.rb start=3:3 end=3:13}
       argument <blk><block> @ Loc {file=test/testdata/namer/locals.rb start=??? end=???}
   class <S <C <U TestLocals>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/locals.rb start=2:1 end=2:17}
-    type-member(+) <S <C <U TestLocals>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestLocals>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestLocals) @ Loc {file=test/testdata/namer/locals.rb start=2:7 end=2:17}
+    type-member(+) <S <C <U TestLocals>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestLocals>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestLocals) @ Loc {file=test/testdata/namer/locals.rb start=2:1 end=2:17}
     method <S <C <U TestLocals>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/locals.rb start=2:1 end=21:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/locals.rb start=??? end=???}
 

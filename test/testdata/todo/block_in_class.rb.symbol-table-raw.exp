@@ -5,7 +5,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/todo/block_in_class.rb start=2:1 end=2:8}
     static-field <C <U C>>::<C <U L>> -> AppliedType {       klass = <C <U Proc1>>       targs = [         <C <U Return>> = Integer         <C <U Arg0>> = Integer       ]     } @ Loc {file=test/testdata/todo/block_in_class.rb start=3:3 end=3:4}
   class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/todo/block_in_class.rb start=2:1 end=2:8}
-    type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/todo/block_in_class.rb start=2:7 end=2:8}
+    type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/todo/block_in_class.rb start=2:1 end=2:8}
     method <S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/todo/block_in_class.rb start=2:1 end=4:4}
       argument <blk><block> @ Loc {file=test/testdata/todo/block_in_class.rb start=??? end=???}
 

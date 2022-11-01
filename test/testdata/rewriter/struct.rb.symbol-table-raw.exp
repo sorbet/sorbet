@@ -20,16 +20,16 @@ class <C <U <root>>> < <C <U Object>> ()
         argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=42:27 end=42:30}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U AccidentallyStruct>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
-      type-member(+) <C <U AccidentallyStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U AccidentallyStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U AccidentallyStruct>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:6}
+      type-member(+) <C <U AccidentallyStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U AccidentallyStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U AccidentallyStruct>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
       method <C <U AccidentallyStruct>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U AccidentallyStruct>>::<C <U Struct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=38:5 end=38:17}
     class <C <U AccidentallyStruct>>::<S <C <U Struct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=38:5 end=38:17}
-      type-member(+) <C <U AccidentallyStruct>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U AccidentallyStruct>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AccidentallyStruct::Struct) @ Loc {file=test/testdata/rewriter/struct.rb start=38:11 end=38:17}
+      type-member(+) <C <U AccidentallyStruct>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U AccidentallyStruct>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AccidentallyStruct::Struct) @ Loc {file=test/testdata/rewriter/struct.rb start=38:5 end=38:17}
       method <C <U AccidentallyStruct>>::<S <C <U Struct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=38:5 end=39:8}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U AccidentallyStruct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=37:25}
-    type-member(+) <S <C <U AccidentallyStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U AccidentallyStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AccidentallyStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=37:7 end=37:25}
+    type-member(+) <S <C <U AccidentallyStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U AccidentallyStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AccidentallyStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=37:25}
     method <S <C <U AccidentallyStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=43:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U BadUsages>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=78:16}
@@ -39,17 +39,17 @@ class <C <U <root>>> < <C <U Object>> ()
     static-field <C <U BadUsages>>::<C <U D>> @ Loc {file=test/testdata/rewriter/struct.rb start=85:3 end=85:4}
     static-field <C <U BadUsages>>::<C <U E>> @ Loc {file=test/testdata/rewriter/struct.rb start=87:3 end=87:4}
   class <S <C <U BadUsages>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=78:16}
-    type-member(+) <S <C <U BadUsages>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U BadUsages>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=BadUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=78:7 end=78:16}
+    type-member(+) <S <C <U BadUsages>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U BadUsages>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=BadUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=78:16}
     method <S <C <U BadUsages>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=88:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   module <C <U Foo>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=4:11}
     class <C <U Foo>>::<C <U Struct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=5:5 end=5:17}
     class <C <U Foo>>::<S <C <U Struct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=5:5 end=5:17}
-      type-member(+) <C <U Foo>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Foo>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo::Struct) @ Loc {file=test/testdata/rewriter/struct.rb start=5:11 end=5:17}
+      type-member(+) <C <U Foo>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Foo>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo::Struct) @ Loc {file=test/testdata/rewriter/struct.rb start=5:5 end=5:17}
       method <C <U Foo>>::<S <C <U Struct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=5:5 end=6:8}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U Foo>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=4:11}
-    type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/rewriter/struct.rb start=4:8 end=4:11}
+    type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=4:11}
     method <S <C <U Foo>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U FullyQualifiedStructUsages>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=115:1 end=115:33}
@@ -64,7 +64,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument a<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=117:23 end=117:24}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=117:3 end=117:25}
-      type-member(+) <C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U FullyQualifiedStructUsages>>::<C <U Bar>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=117:3 end=117:6}
+      type-member(+) <C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U FullyQualifiedStructUsages>>::<C <U Bar>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=117:3 end=117:25}
       method <C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=117:3 end=117:25}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     static-field <C <U FullyQualifiedStructUsages>>::<C <U Baz>> @ Loc {file=test/testdata/rewriter/struct.rb start=118:3 end=118:6}
@@ -79,11 +79,11 @@ class <C <U <root>>> < <C <U Object>> ()
         argument a<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=116:21 end=116:22}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U FullyQualifiedStructUsages>>::<S <C <U Foo>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=116:3 end=116:23}
-      type-member(+) <C <U FullyQualifiedStructUsages>>::<S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U FullyQualifiedStructUsages>>::<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U FullyQualifiedStructUsages>>::<C <U Foo>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=116:3 end=116:6}
+      type-member(+) <C <U FullyQualifiedStructUsages>>::<S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U FullyQualifiedStructUsages>>::<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U FullyQualifiedStructUsages>>::<C <U Foo>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=116:3 end=116:23}
       method <C <U FullyQualifiedStructUsages>>::<S <C <U Foo>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=116:3 end=116:23}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U FullyQualifiedStructUsages>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=115:1 end=115:33}
-    type-member(+) <S <C <U FullyQualifiedStructUsages>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U FullyQualifiedStructUsages>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=FullyQualifiedStructUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=115:7 end=115:33}
+    type-member(+) <S <C <U FullyQualifiedStructUsages>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U FullyQualifiedStructUsages>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=FullyQualifiedStructUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=115:1 end=115:33}
     method <S <C <U FullyQualifiedStructUsages>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=115:1 end=122:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U Immutable>> < <C <U T>>::<C <U ImmutableStruct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=124:37}
@@ -94,12 +94,12 @@ class <C <U <root>>> < <C <U Object>> ()
       argument b<keyword> -> String @ Loc {file=test/testdata/rewriter/struct.rb start=128:3 end=128:19}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U Immutable>> $1>[<C <U <AttachedClass>>>] < <C <U T>>::<S <C <U ImmutableStruct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=124:37}
-    type-member(+) <S <C <U Immutable>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Immutable>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Immutable) @ Loc {file=test/testdata/rewriter/struct.rb start=124:7 end=124:16}
+    type-member(+) <S <C <U Immutable>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Immutable>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Immutable) @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=124:37}
     method <S <C <U Immutable>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=124:1 end=129:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U ImmutableTest>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=131:1 end=131:20}
   class <S <C <U ImmutableTest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=131:1 end=131:20}
-    type-member(+) <S <C <U ImmutableTest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U ImmutableTest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ImmutableTest) @ Loc {file=test/testdata/rewriter/struct.rb start=131:7 end=131:20}
+    type-member(+) <S <C <U ImmutableTest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U ImmutableTest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ImmutableTest) @ Loc {file=test/testdata/rewriter/struct.rb start=131:1 end=131:20}
     method <S <C <U ImmutableTest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=131:1 end=138:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U InvalidMember>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=45:1 end=45:20}
@@ -114,18 +114,18 @@ class <C <U <root>>> < <C <U Object>> ()
         argument foo=<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=46:19 end=46:23}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U InvalidMember>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=46:3 end=46:24}
-      type-member(+) <C <U InvalidMember>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U InvalidMember>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U InvalidMember>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=46:3 end=46:4}
+      type-member(+) <C <U InvalidMember>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U InvalidMember>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U InvalidMember>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=46:3 end=46:24}
       method <C <U InvalidMember>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=46:3 end=46:24}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U InvalidMember>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=45:1 end=45:20}
-    type-member(+) <S <C <U InvalidMember>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U InvalidMember>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=InvalidMember) @ Loc {file=test/testdata/rewriter/struct.rb start=45:7 end=45:20}
+    type-member(+) <S <C <U InvalidMember>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U InvalidMember>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=InvalidMember) @ Loc {file=test/testdata/rewriter/struct.rb start=45:1 end=45:20}
     method <S <C <U InvalidMember>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=45:1 end=47:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U Main>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=90:1 end=90:11}
     method <C <U Main>>#<U main> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=91:5 end=91:13}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U Main>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=90:1 end=90:11}
-    type-member(+) <S <C <U Main>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Main>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Main) @ Loc {file=test/testdata/rewriter/struct.rb start=90:7 end=90:11}
+    type-member(+) <S <C <U Main>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Main>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Main) @ Loc {file=test/testdata/rewriter/struct.rb start=90:1 end=90:11}
     method <S <C <U Main>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=90:1 end=112:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U MixinStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=49:1 end=49:18}
@@ -140,14 +140,14 @@ class <C <U <root>>> < <C <U Object>> ()
         argument x<> @ Loc {file=test/testdata/rewriter/struct.rb start=60:37 end=60:38}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U MixinStruct>>::<S <C <U MyKeywordInitStruct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=60:3 end=68:6}
-      type-member(+) <C <U MixinStruct>>::<S <C <U MyKeywordInitStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyKeywordInitStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U MixinStruct>>::<C <U MyKeywordInitStruct>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=60:3 end=60:22}
+      type-member(+) <C <U MixinStruct>>::<S <C <U MyKeywordInitStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyKeywordInitStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U MixinStruct>>::<C <U MyKeywordInitStruct>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=60:3 end=68:6}
       method <C <U MixinStruct>>::<S <C <U MyKeywordInitStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=60:3 end=68:6}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     module <C <U MixinStruct>>::<C <U MyMixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
       method <C <U MixinStruct>>::<C <U MyMixin>>#<U foo> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=51:5 end=51:12}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U MixinStruct>>::<S <C <U MyMixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
-      type-member(+) <C <U MixinStruct>>::<S <C <U MyMixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyMixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MixinStruct::MyMixin) @ Loc {file=test/testdata/rewriter/struct.rb start=50:10 end=50:17}
+      type-member(+) <C <U MixinStruct>>::<S <C <U MyMixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyMixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MixinStruct::MyMixin) @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
       method <C <U MixinStruct>>::<S <C <U MyMixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=52:6}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U MixinStruct>>::<C <U MyStruct>> < <C <U Struct>> (<C <U MyMixin>>) @ Loc {file=test/testdata/rewriter/struct.rb start=54:3 end=58:6}
@@ -161,17 +161,17 @@ class <C <U <root>>> < <C <U Object>> ()
         argument x<> @ Loc {file=test/testdata/rewriter/struct.rb start=54:26 end=54:27}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U MixinStruct>>::<S <C <U MyStruct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=54:3 end=58:6}
-      type-member(+) <C <U MixinStruct>>::<S <C <U MyStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U MixinStruct>>::<C <U MyStruct>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=54:3 end=54:11}
+      type-member(+) <C <U MixinStruct>>::<S <C <U MyStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U MixinStruct>>::<C <U MyStruct>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=54:3 end=58:6}
       method <C <U MixinStruct>>::<S <C <U MyStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=54:3 end=58:6}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U MixinStruct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=49:1 end=49:18}
-    type-member(+) <S <C <U MixinStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U MixinStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MixinStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=49:7 end=49:18}
+    type-member(+) <S <C <U MixinStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U MixinStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MixinStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=49:1 end=49:18}
     method <S <C <U MixinStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=49:1 end=76:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U NotStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=9:1 end=9:16}
     static-field <C <U NotStruct>>::<C <U B>> -> Foo::Struct @ Loc {file=test/testdata/rewriter/struct.rb start=10:5 end=10:6}
   class <S <C <U NotStruct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=9:1 end=9:16}
-    type-member(+) <S <C <U NotStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U NotStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NotStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=9:7 end=9:16}
+    type-member(+) <S <C <U NotStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U NotStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NotStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=9:1 end=9:16}
     method <S <C <U NotStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=9:1 end=12:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U RealStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=14:1 end=14:17}
@@ -192,7 +192,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=15:27 end=15:30}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U RealStruct>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=15:5 end=15:31}
-      type-member(+) <C <U RealStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U RealStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStruct>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=15:5 end=15:6}
+      type-member(+) <C <U RealStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U RealStruct>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStruct>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=15:5 end=15:31}
       method <C <U RealStruct>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=15:5 end=15:31}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U RealStruct>>::<C <U KeywordInit>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=16:5 end=16:61}
@@ -212,11 +212,11 @@ class <C <U <root>>> < <C <U Object>> ()
         argument bar<optional, keyword> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=16:37 end=16:40}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U RealStruct>>::<S <C <U KeywordInit>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=16:5 end=16:61}
-      type-member(+) <C <U RealStruct>>::<S <C <U KeywordInit>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U RealStruct>>::<S <C <U KeywordInit>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStruct>>::<C <U KeywordInit>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=16:5 end=16:16}
+      type-member(+) <C <U RealStruct>>::<S <C <U KeywordInit>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U RealStruct>>::<S <C <U KeywordInit>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStruct>>::<C <U KeywordInit>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=16:5 end=16:61}
       method <C <U RealStruct>>::<S <C <U KeywordInit>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=16:5 end=16:61}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U RealStruct>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=14:1 end=14:17}
-    type-member(+) <S <C <U RealStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U RealStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=RealStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=14:7 end=14:17}
+    type-member(+) <S <C <U RealStruct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U RealStruct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=RealStruct) @ Loc {file=test/testdata/rewriter/struct.rb start=14:1 end=14:17}
     method <S <C <U RealStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=14:1 end=17:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U RealStructDesugar>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=18:1 end=18:24}
@@ -233,7 +233,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument arg0<> @ Loc {file=test/testdata/rewriter/struct.rb start=23:18 end=23:22}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U RealStructDesugar>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=19:21}
-      type-member(+) <C <U RealStructDesugar>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U RealStructDesugar>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStructDesugar>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=19:11 end=19:12}
+      type-member(+) <C <U RealStructDesugar>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U RealStructDesugar>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U RealStructDesugar>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=19:21}
       method <C <U RealStructDesugar>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=29:8}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U RealStructDesugar>>::<S <C <U A>> $1>#<U new> (foo, bar, <blk>) -> AppliedType {         klass = <C <U RealStructDesugar>>::<C <U A>>         targs = [           <C <U Elem>> = T.untyped         ]       } @ Loc {file=test/testdata/rewriter/struct.rb start=26:9 end=26:39}
@@ -241,7 +241,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument bar<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=25:39 end=25:42}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U RealStructDesugar>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=18:1 end=18:24}
-    type-member(+) <S <C <U RealStructDesugar>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U RealStructDesugar>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=RealStructDesugar) @ Loc {file=test/testdata/rewriter/struct.rb start=18:7 end=18:24}
+    type-member(+) <S <C <U RealStructDesugar>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U RealStructDesugar>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=RealStructDesugar) @ Loc {file=test/testdata/rewriter/struct.rb start=18:1 end=18:24}
     method <S <C <U RealStructDesugar>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=18:1 end=30:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U TwoStructs>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=32:1 end=32:17}
@@ -256,7 +256,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=33:21 end=33:24}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U TwoStructs>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=33:5 end=33:25}
-      type-member(+) <C <U TwoStructs>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U TwoStructs>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U TwoStructs>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=33:5 end=33:6}
+      type-member(+) <C <U TwoStructs>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U TwoStructs>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U TwoStructs>>::<C <U A>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=33:5 end=33:25}
       method <C <U TwoStructs>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=33:5 end=33:25}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U TwoStructs>>::<C <U B>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=34:5 end=34:25}
@@ -270,11 +270,11 @@ class <C <U <root>>> < <C <U Object>> ()
         argument foo<optional> -> BasicObject @ Loc {file=test/testdata/rewriter/struct.rb start=34:21 end=34:24}
         argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U TwoStructs>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Struct>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=34:5 end=34:25}
-      type-member(+) <C <U TwoStructs>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U TwoStructs>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U TwoStructs>>::<C <U B>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=34:5 end=34:6}
+      type-member(+) <C <U TwoStructs>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U TwoStructs>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U TwoStructs>>::<C <U B>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=34:5 end=34:25}
       method <C <U TwoStructs>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=34:5 end=34:25}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U TwoStructs>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=32:1 end=32:17}
-    type-member(+) <S <C <U TwoStructs>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TwoStructs>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TwoStructs) @ Loc {file=test/testdata/rewriter/struct.rb start=32:7 end=32:17}
+    type-member(+) <S <C <U TwoStructs>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TwoStructs>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TwoStructs) @ Loc {file=test/testdata/rewriter/struct.rb start=32:1 end=32:17}
     method <S <C <U TwoStructs>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=32:1 end=35:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
 

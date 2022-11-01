@@ -4,7 +4,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/bind_class_of.rb start=??? end=???}
   class <C <U Test>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/bind_class_of.rb start=3:1 end=3:11}
   class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/bind_class_of.rb start=3:1 end=3:11}
-    type-member(+) <S <C <U Test>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/resolver/bind_class_of.rb start=3:7 end=3:11}
+    type-member(+) <S <C <U Test>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/resolver/bind_class_of.rb start=3:1 end=3:11}
     method <S <C <U Test>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/bind_class_of.rb start=3:1 end=9:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/bind_class_of.rb start=??? end=???}
     method <S <C <U Test>> $1>#<U test> (blk) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/resolver/bind_class_of.rb start=7:3 end=7:22}

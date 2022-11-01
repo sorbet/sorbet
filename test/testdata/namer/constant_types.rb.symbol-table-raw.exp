@@ -10,7 +10,7 @@ class <C <U <root>>> < <C <U Object>> ()
     static-field <C <U Constants>>::<C <U E>> -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = Integer       ]     } @ Loc {file=test/testdata/namer/constant_types.rb start=8:3 end=8:4}
     static-field <C <U Constants>>::<C <U F>> -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = String       ]     } @ Loc {file=test/testdata/namer/constant_types.rb start=9:3 end=9:4}
   class <S <C <U Constants>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=3:17}
-    type-member(+) <S <C <U Constants>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Constants>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Constants) @ Loc {file=test/testdata/namer/constant_types.rb start=3:8 end=3:17}
+    type-member(+) <S <C <U Constants>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Constants>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Constants) @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=3:17}
     method <S <C <U Constants>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/constant_types.rb start=3:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/constant_types.rb start=??? end=???}
 

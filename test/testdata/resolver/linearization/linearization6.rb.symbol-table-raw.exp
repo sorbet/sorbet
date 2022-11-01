@@ -4,27 +4,27 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=??? end=???}
   module <C <U A6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=2:1 end=2:10}
   class <S <C <U A6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=2:1 end=2:10}
-    type-member(+) <S <C <U A6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=2:8 end=2:10}
+    type-member(+) <S <C <U A6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=2:1 end=2:10}
     method <S <C <U A6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=2:1 end=2:15}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=??? end=???}
   module <C <U B6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=3:1 end=3:10}
   class <S <C <U B6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=3:1 end=3:10}
-    type-member(+) <S <C <U B6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=3:8 end=3:10}
+    type-member(+) <S <C <U B6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=3:1 end=3:10}
     method <S <C <U B6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=3:1 end=3:15}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=??? end=???}
   module <C <U C6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U A6>>, <C <U B6>>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=4:1 end=4:10}
   class <S <C <U C6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=4:1 end=4:10}
-    type-member(+) <S <C <U C6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=4:8 end=4:10}
+    type-member(+) <S <C <U C6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=4:1 end=4:10}
     method <S <C <U C6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=4:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=??? end=???}
   module <C <U D6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U B6>>, <C <U A6>>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=8:1 end=8:10}
   class <S <C <U D6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=8:1 end=8:10}
-    type-member(+) <S <C <U D6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=8:8 end=8:10}
+    type-member(+) <S <C <U D6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=8:1 end=8:10}
     method <S <C <U D6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=8:1 end=11:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=??? end=???}
   module <C <U E6>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U D6>>, <C <U C6>>, <C <U A6>>, <C <U B6>>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=12:1 end=12:10}
   class <S <C <U E6>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=12:1 end=12:10}
-    type-member(+) <S <C <U E6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U E6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=E6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=12:8 end=12:10}
+    type-member(+) <S <C <U E6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U E6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=E6) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=12:1 end=12:10}
     method <S <C <U E6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=12:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization6.rb start=??? end=???}
 

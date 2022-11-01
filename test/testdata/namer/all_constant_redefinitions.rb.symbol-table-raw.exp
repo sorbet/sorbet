@@ -7,46 +7,46 @@ class <C <U <root>>> < <C <U Object>> ()
     static-field <C <U Wrapper>>::<M <C <U A>> $1> -> Integer @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=7:3 end=7:4}
     type-member(=) <C <U Wrapper>>::<M <C <U A>> $2> -> LambdaParam(<C <U Wrapper>>::<M <C <U A>> $2>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=8:3 end=8:18}
     class <C <U Wrapper>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=6:3 end=6:10}
-      type-member(+) <C <U Wrapper>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::A) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=6:9 end=6:10}
+      type-member(+) <C <U Wrapper>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::A) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=6:3 end=6:10}
       method <C <U Wrapper>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=6:3 end=6:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
     class <C <U Wrapper>>::<C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=11:3 end=11:10}
     static-field <C <U Wrapper>>::<M <C <U B>> $1> -> Integer @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=10:3 end=10:4}
     type-member(=) <C <U Wrapper>>::<M <C <U B>> $2> -> LambdaParam(<C <U Wrapper>>::<M <C <U B>> $2>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=12:3 end=12:18}
     class <C <U Wrapper>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=11:3 end=11:10}
-      type-member(+) <C <U Wrapper>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::B) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=11:9 end=11:10}
+      type-member(+) <C <U Wrapper>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::B) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=11:3 end=11:10}
       method <C <U Wrapper>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=11:3 end=11:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
     class <C <U Wrapper>>::<C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=16:3 end=16:10}
     static-field <C <U Wrapper>>::<M <C <U C>> $1> -> Integer @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=14:3 end=14:4}
     type-member(=) <C <U Wrapper>>::<M <C <U C>> $2> -> LambdaParam(<C <U Wrapper>>::<M <C <U C>> $2>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=15:3 end=15:18}
     class <C <U Wrapper>>::<S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=16:3 end=16:10}
-      type-member(+) <C <U Wrapper>>::<S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::C) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=16:9 end=16:10}
+      type-member(+) <C <U Wrapper>>::<S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::C) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=16:3 end=16:10}
       method <C <U Wrapper>>::<S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=16:3 end=16:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
     class <C <U Wrapper>>::<C <U D>> < <C <U Object>> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=18:3 end=18:10}
     type-member(=) <C <U Wrapper>>::<M <C <U D>> $1> -> LambdaParam(<C <U Wrapper>>::<M <C <U D>> $1>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=19:3 end=19:18}
     static-field <C <U Wrapper>>::<M <C <U D>> $2> -> Integer @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=20:3 end=20:4}
     class <C <U Wrapper>>::<S <C <U D>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=18:3 end=18:10}
-      type-member(+) <C <U Wrapper>>::<S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::D) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=18:9 end=18:10}
+      type-member(+) <C <U Wrapper>>::<S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::D) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=18:3 end=18:10}
       method <C <U Wrapper>>::<S <C <U D>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=18:3 end=18:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
     class <C <U Wrapper>>::<C <U E>> < <C <U Object>> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=23:3 end=23:10}
     type-member(=) <C <U Wrapper>>::<M <C <U E>> $1> -> LambdaParam(<C <U Wrapper>>::<M <C <U E>> $1>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=22:3 end=22:18}
     static-field <C <U Wrapper>>::<M <C <U E>> $2> -> Integer @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=24:3 end=24:4}
     class <C <U Wrapper>>::<S <C <U E>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=23:3 end=23:10}
-      type-member(+) <C <U Wrapper>>::<S <C <U E>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U E>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::E) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=23:9 end=23:10}
+      type-member(+) <C <U Wrapper>>::<S <C <U E>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U E>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::E) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=23:3 end=23:10}
       method <C <U Wrapper>>::<S <C <U E>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=23:3 end=23:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
     class <C <U Wrapper>>::<C <U F>> < <C <U Object>> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:3 end=28:10}
     type-member(=) <C <U Wrapper>>::<M <C <U F>> $1> -> LambdaParam(<C <U Wrapper>>::<M <C <U F>> $1>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=26:3 end=26:18}
     static-field <C <U Wrapper>>::<M <C <U F>> $2> -> Integer @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=27:3 end=27:4}
     class <C <U Wrapper>>::<S <C <U F>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:3 end=28:10}
-      type-member(+) <C <U Wrapper>>::<S <C <U F>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U F>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::F) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:9 end=28:10}
+      type-member(+) <C <U Wrapper>>::<S <C <U F>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U F>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::F) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:3 end=28:10}
       method <C <U Wrapper>>::<S <C <U F>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:3 end=28:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
   class <S <C <U Wrapper>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=3:15}
-    type-member(+) <S <C <U Wrapper>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Wrapper>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U Wrapper>>   targs = [     <M <C <U A>> $2> = T.untyped     <M <C <U B>> $2> = T.untyped     <M <C <U C>> $2> = T.untyped     <M <C <U D>> $1> = T.untyped     <M <C <U E>> $1> = T.untyped     <M <C <U F>> $1> = T.untyped   ] }) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:8 end=3:15}
+    type-member(+) <S <C <U Wrapper>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Wrapper>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U Wrapper>>   targs = [     <M <C <U A>> $2> = T.untyped     <M <C <U B>> $2> = T.untyped     <M <C <U C>> $2> = T.untyped     <M <C <U D>> $1> = T.untyped     <M <C <U E>> $1> = T.untyped     <M <C <U F>> $1> = T.untyped   ] }) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=3:15}
     method <S <C <U Wrapper>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=29:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
 

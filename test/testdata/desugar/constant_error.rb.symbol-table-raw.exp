@@ -5,7 +5,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U Foo>> < <C <U Object>> () @ Loc {file=test/testdata/desugar/constant_error.rb start=2:1 end=2:10}
     static-field <C <U Foo>>::<C <U BAR>> -> Integer @ Loc {file=test/testdata/desugar/constant_error.rb start=3:5 end=3:8}
   class <S <C <U Foo>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/desugar/constant_error.rb start=2:1 end=2:10}
-    type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/desugar/constant_error.rb start=2:7 end=2:10}
+    type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/desugar/constant_error.rb start=2:1 end=2:10}
     method <S <C <U Foo>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/constant_error.rb start=2:1 end=4:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/constant_error.rb start=??? end=???}
 
