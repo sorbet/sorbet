@@ -266,7 +266,17 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
 
 struct QuitToken {};
 using Job = variant<QuitToken, string>;
-using JobOutput = variant<std::monostate, sorbet::SorbetException, vector<string>>;
+// We record all classes of exceptions we can throw separately, rather than one single `SorbetException`.
+//
+// We do this for two reasons: one is that when looking for a `catch` handler, C++ will only look for
+// a handler matching the *static* type of the thrown exception, so when we rethrow the exceptions from
+// the workers on the main thread, we need the `throw` expressions to have the proper static types.
+//
+// "Why not use `dynamic_cast`?" you might ask: store a `SorbetException` here and then downcast as
+// necessary when rethrowing the exception.  The problem with that idea is that the originally thrown
+// exception would get copied into a `JobOutput` object as a `SorbetException`, and therefore the
+// dynamic type of the original exception would be lost.
+using JobOutput = variant<std::monostate, sorbet::FileNotFoundException, sorbet::FileNotDirException, vector<string>>;
 
 void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
                       sorbet::WorkerPool &workers, bool recursive, vector<string> &allPaths,
@@ -371,7 +381,14 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                     break;
                 }
             }
-        } catch (sorbet::SorbetException &e) {
+        } catch (sorbet::FileNotFoundException &e) {
+            resultq->push(e, 1);
+            pendingJobs += numWorkers;
+            for (auto i = 0; i < numWorkers; ++i) {
+                jobq->push(QuitToken{}, 1);
+            }
+            return;
+        } catch (sorbet::FileNotDirException &e) {
             resultq->push(e, 1);
             pendingJobs += numWorkers;
             for (auto i = 0; i < numWorkers; ++i) {
@@ -390,13 +407,19 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
              !result.done();
              result = resultq->wait_pop_timed(threadResult, sorbet::WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
-                if (auto *exception = std::get_if<sorbet::SorbetException>(&threadResult)) {
-                    throw *exception;
+                if (auto *paths = std::get_if<vector<string>>(&threadResult)) {
+                    allPaths.insert(allPaths.end(), make_move_iterator(paths->begin()),
+                                    make_move_iterator(paths->end()));
+                    continue;
                 }
 
-                auto *paths = std::get_if<vector<string>>(&threadResult);
-                ENFORCE(paths != nullptr);
-                allPaths.insert(allPaths.end(), make_move_iterator(paths->begin()), make_move_iterator(paths->end()));
+                if (auto *e = std::get_if<sorbet::FileNotFoundException>(&threadResult)) {
+                    throw *e;
+                } else if (auto *e = std::get_if<sorbet::FileNotDirException>(&threadResult)) {
+                    throw *e;
+                } else {
+                    ENFORCE(false, "should never get here!");
+                }
             }
         }
     }
