@@ -81,7 +81,7 @@ unique_ptr<LSPMessage> ProtocolTest::closeFile(string_view path) {
     // File is closed, so update contents from mock FS.
     try {
         sourceFileContents[string(path)] =
-            make_shared<core::File>(string(path), string(fs->readFile(path)), core::File::Type::Normal);
+            make_shared<core::File>(string(path), fs->readFile(string(path)), core::File::Type::Normal);
     } catch (FileNotFoundException e) {
         auto it = sourceFileContents.find(path);
         if (it != sourceFileContents.end()) {
