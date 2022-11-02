@@ -340,10 +340,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
     if (missingReturnType && guessTypes) {
         if (auto e = ctx.state.beginError(cfg->symbol.data(ctx)->loc(), core::errors::Infer::UntypedMethod)) {
-            e.setHeader("This function does not have a `{}`", "sig");
+            e.setHeader("The method `{}` does not have a `{}`", cfg->symbol.data(ctx)->name.show(ctx), "sig");
             auto maybeAutocorrect = SigSuggestion::maybeSuggestSig(ctx, cfg, methodReturnType, *constr);
             if (maybeAutocorrect.has_value()) {
                 e.addAutocorrect(move(maybeAutocorrect.value()));
+            } else if (cfg->symbol.data(ctx)->owner.data(ctx)->derivesFrom(ctx, core::Symbols::Struct())) {
+                e.addErrorNote("Struct classes defined with `{}` are hard to use in `{}` files.\n"
+                               "    Consider using `{}` instead.",
+                               "Struct", "# typed: strict", "T::Struct");
             }
         } else if (ctx.state.lspQuery.matchesSuggestSig(cfg->symbol)) {
             // Force maybeSuggestSig to run just to respond to the query (discard the result)

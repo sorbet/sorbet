@@ -9,7 +9,7 @@ class ::<root> < ::Object ()
     method ::<Class:Foo>#<static-init> (<blk>) @ -e:1
       argument <blk><block> @ Loc {file=-e start=??? end=???}
 
--e:2: This function does not have a `sig` https://srb.help/7017
+-e:2: The method `foo` does not have a `sig` https://srb.help/7017
      2 |def foo; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect

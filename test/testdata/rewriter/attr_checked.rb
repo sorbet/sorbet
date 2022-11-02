@@ -24,7 +24,7 @@ class TestAttr
   attr_writer :str7
 
   sig {void.on_failure(:raise)}
-  attr_accessor :str8 # error: This function does not have a `sig`
+  attr_accessor :str8 # error: The method `str8=` does not have a `sig`
 
   sig {params(str9: T.nilable(String)).returns(T.nilable(String)).checked(:never)}
   attr_writer :str9

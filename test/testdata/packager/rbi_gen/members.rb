@@ -332,9 +332,9 @@ module RBIGen::Public
     sig {void}
     def some_mod_fcn; end
 
-    module_function :some_mod_fcn # error: This function does not have a `sig`
+    module_function :some_mod_fcn # error: The method `some_mod_fcn` does not have a `sig`
 
-    def dotdotdot(...); end # error: This function does not have a `sig`
+    def dotdotdot(...); end # error: The method `dotdotdot` does not have a `sig`
   end
 
   module DefDelegator

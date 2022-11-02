@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/attr.rb start=2:1 end=38:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/attr.rb start=2:1 end=40:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
   class <C <U TestAttr>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/attr.rb start=2:1 end=2:15}
     field <C <U TestAttr>>#<U @strv7> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=10:5 end=10:11}
@@ -11,15 +11,15 @@ class <C <U <root>>> < <C <U Object>> ()
     field <C <U TestAttr>>#<U @v6> -> String @ Loc {file=test/testdata/rewriter/attr.rb start=9:5 end=9:8}
     method <C <U TestAttr>>#<U initialize> (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/attr.rb start=6:3 end=6:17}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
-    method <C <U TestAttr>>#<U strv7> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=31:3 end=31:22}
+    method <C <U TestAttr>>#<U strv7> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=33:3 end=33:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
-    method <C <U TestAttr>>#<U strv8=> (strv8, <blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=34:3 end=34:22}
-      argument strv8<> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=33:15 end=33:20}
+    method <C <U TestAttr>>#<U strv8=> (strv8, <blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=36:3 end=36:22}
+      argument strv8<> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=35:15 end=35:20}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
-    method <C <U TestAttr>>#<U strv9> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=37:3 end=37:24}
+    method <C <U TestAttr>>#<U strv9> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=39:3 end=39:24}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
-    method <C <U TestAttr>>#<U strv9=> (strv9, <blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=37:3 end=37:24}
-      argument strv9<> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=37:18 end=37:23}
+    method <C <U TestAttr>>#<U strv9=> (strv9, <blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=39:3 end=39:24}
+      argument strv9<> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=39:18 end=39:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v1> (<blk>) -> Integer @ Loc {file=test/testdata/rewriter/attr.rb start=16:3 end=16:11}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
@@ -41,6 +41,6 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
   class <S <C <U TestAttr>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/rewriter/attr.rb start=2:1 end=2:15}
     type-member(+) <S <C <U TestAttr>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestAttr>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=TestAttr) @ Loc {file=test/testdata/rewriter/attr.rb start=2:7 end=2:15}
-    method <S <C <U TestAttr>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/attr.rb start=2:1 end=38:4}
+    method <S <C <U TestAttr>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/attr.rb start=2:1 end=40:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
 
