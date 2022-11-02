@@ -1,50 +1,5 @@
 No errors! Great job.
 
---- output/RootPackage.rb
-# frozen_string_literal: true
-# typed: true
-
-Opus::Require.on_autoload('RootPackage')
-
-module RootPackage
-end
-
-Opus::Require.autoload_map(RootPackage, {
-  Foo: "autoloader/RootPackage/Foo.rb",
-  Nested: "autoloader/RootPackage/Nested.rb",
-  Yabba: "autoloader/RootPackage/Yabba.rb",
-})
-
---- output/RootPackage/Foo.rb
-# frozen_string_literal: true
-# typed: true
-
-Opus::Require.on_autoload('RootPackage::Foo')
-
-module RootPackage::Foo
-end
-
-Opus::Require.autoload_map(RootPackage::Foo, {
-  Bar: "autoloader/RootPackage/Foo/Bar.rb",
-  Dabba: "autoloader/RootPackage/Foo/Dabba.rb",
-  Errors: "autoloader/RootPackage/Foo/Errors.rb",
-  TOP_LEVEL_CONST: "autoloader/RootPackage/Foo/TOP_LEVEL_CONST.rb",
-})
-
---- output/RootPackage/Foo/Bar.rb
-# frozen_string_literal: true
-# typed: true
-
-Opus::Require.on_autoload('RootPackage::Foo::Bar')
-
-module RootPackage::Foo::Bar
-end
-
-Opus::Require.autoload_map(RootPackage::Foo::Bar, {
-  Jazz: "autoloader/RootPackage/Foo/Bar/Jazz.rb",
-  Quuz: "autoloader/RootPackage/Foo/Bar/Quuz.rb",
-})
-
 --- output/RootPackage/Foo/Bar/Jazz.rb
 # frozen_string_literal: true
 # typed: true
@@ -52,7 +7,6 @@ Opus::Require.autoload_map(RootPackage::Foo::Bar, {
 require 'in_class'
 require 'in_method'
 require 'my_gem'
-Opus::Require.on_autoload('RootPackage::Foo::Bar::Jazz')
 
 class RootPackage::Foo::Bar::Jazz < RootPackage::Foo::Bar::Quuz
 end
@@ -66,7 +20,6 @@ Opus::Require.for_autoload(RootPackage::Foo::Bar::Jazz, "test/cli/autogen-pkg-au
 require 'in_class'
 require 'in_method'
 require 'my_gem'
-Opus::Require.on_autoload('RootPackage::Foo::Bar::Quuz')
 
 class RootPackage::Foo::Bar::Quuz
 end
@@ -83,26 +36,10 @@ require 'my_gem'
 
 Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader/foo.rb", [RootPackage::Foo, :Dabba])
 
---- output/RootPackage/Foo/Errors.rb
-# frozen_string_literal: true
-# typed: true
-
-Opus::Require.on_autoload('RootPackage::Foo::Errors')
-
-module RootPackage::Foo::Errors
-end
-
-Opus::Require.autoload_map(RootPackage::Foo::Errors, {
-  BaseError: "autoloader/RootPackage/Foo/Errors/BaseError.rb",
-  MyError1: "autoloader/RootPackage/Foo/Errors/MyError1.rb",
-  MyError2: "autoloader/RootPackage/Foo/Errors/MyError2.rb",
-})
-
 --- output/RootPackage/Foo/Errors/BaseError.rb
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Foo::Errors::BaseError')
 
 class RootPackage::Foo::Errors::BaseError < StandardError
 end
@@ -113,7 +50,6 @@ Opus::Require.for_autoload(RootPackage::Foo::Errors::BaseError, "test/cli/autoge
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Foo::Errors::MyError1')
 
 class RootPackage::Foo::Errors::MyError1 < RootPackage::Foo::Errors::BaseError
 end
@@ -124,7 +60,6 @@ Opus::Require.for_autoload(RootPackage::Foo::Errors::MyError1, "test/cli/autogen
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Foo::Errors::MyError2')
 
 class RootPackage::Foo::Errors::MyError2 < RootPackage::Foo::Errors::BaseError
 end
@@ -145,7 +80,6 @@ Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader/foo.rb", [RootP
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Nested')
 
 module RootPackage::Nested
 end
@@ -154,40 +88,10 @@ Opus::Require.pbal_register_package(RootPackage::Nested, 'test/cli/autogen-pkg-a
 
 Opus::Require.for_autoload(RootPackage::Nested, "test/cli/autogen-pkg-autoloader/nested/nested.rb")
 
---- output/RootPackage/Yabba.rb
-# frozen_string_literal: true
-# typed: true
-
-Opus::Require.on_autoload('RootPackage::Yabba')
-
-module RootPackage::Yabba
-end
-
-Opus::Require.autoload_map(RootPackage::Yabba, {
-  Dabba: "autoloader/RootPackage/Yabba/Dabba.rb",
-})
-
---- output/RootPackage/Yabba/Dabba.rb
-# frozen_string_literal: true
-# typed: true
-
-Opus::Require.on_autoload('RootPackage::Yabba::Dabba')
-
-module RootPackage::Yabba::Dabba
-end
-
-Opus::Require.autoload_map(RootPackage::Yabba::Dabba, {
-  Bar2: "autoloader/RootPackage/Yabba/Dabba/Bar2.rb",
-  Jazz: "autoloader/RootPackage/Yabba/Dabba/Jazz.rb",
-  NoBehavior: "autoloader/RootPackage/Yabba/Dabba/NoBehavior.rb",
-  Quuz: "autoloader/RootPackage/Yabba/Dabba/Quuz.rb",
-})
-
 --- output/RootPackage/Yabba/Dabba/Bar2.rb
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Yabba::Dabba::Bar2')
 
 class RootPackage::Yabba::Dabba::Bar2
 end
@@ -198,20 +102,14 @@ Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Bar2, "test/cli/autogen-pk
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Yabba::Dabba::Jazz')
 
 class RootPackage::Yabba::Dabba::Jazz
 end
-
-Opus::Require.autoload_map(RootPackage::Yabba::Dabba::Jazz, {
-  JazBaz: "autoloader/RootPackage/Yabba/Dabba/Jazz/JazBaz.rb",
-})
 
 --- output/RootPackage/Yabba/Dabba/Jazz/JazBaz.rb
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Yabba::Dabba::Jazz::JazBaz')
 
 class RootPackage::Yabba::Dabba::Jazz::JazBaz
 end
@@ -222,7 +120,6 @@ Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Jazz::JazBaz, "test/cli/au
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Yabba::Dabba::NoBehavior')
 
 class RootPackage::Yabba::Dabba::NoBehavior
 end
@@ -233,18 +130,8 @@ Opus::Require.for_autoload(RootPackage::Yabba::Dabba::NoBehavior, "test/cli/auto
 # frozen_string_literal: true
 # typed: true
 
-Opus::Require.on_autoload('RootPackage::Yabba::Dabba::Quuz')
 
 class RootPackage::Yabba::Dabba::Quuz < AWS::String
 end
 
 Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Quuz, "test/cli/autogen-pkg-autoloader/bar.rb")
-
---- output/root.rb
-# frozen_string_literal: true
-# typed: true
-
-
-Opus::Require.autoload_map(Object, {
-  RootPackage: "autoloader/RootPackage.rb",
-})
