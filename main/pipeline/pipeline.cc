@@ -1219,7 +1219,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     return written;
 }
 
-vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, string_view cachePath,
+vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,
                                               vector<ast::ParsedFile> what, WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     Timer timeit(gs.tracer(), "autogenWriteCacheFile");
