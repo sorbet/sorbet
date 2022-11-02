@@ -19,7 +19,6 @@ public:
 
     static AutogenCache unpackForFiles(std::string_view path, const UnorderedSet<std::string> &changedFiles);
 
-    AutogenCache(UnorderedMap<std::string, unsigned int> constantHashMap) : _constantHashMap(constantHashMap){};
     AutogenCache() = default;
     AutogenCache(AutogenCache &&) = default;
     AutogenCache(const AutogenCache &) = delete;

@@ -104,7 +104,7 @@ AutogenCache AutogenCache::unpackForFiles(string_view file_contents, const Unord
         if (mpack_reader_error(&reader) != mpack_ok) {
             break;
         }
-        auto key = string(key_buf, key_len);
+        string_view key{key_buf, key_len};
         mpack_done_str(&reader);
 
         // and the value should be an int
