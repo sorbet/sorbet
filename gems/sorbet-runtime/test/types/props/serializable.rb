@@ -513,6 +513,18 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal('foo', b.f2.foo)
       assert_equal(10, b.f2.bar)
     end
+
+    it 'with nested fields as model' do
+      a = WithModel2.new(f1: 'foo')
+      b = a.with(f2: WithModel1.new(foo: 'foo', bar: 10))
+
+      assert_equal('foo', a.f1)
+      assert_nil(a.f2)
+      assert_equal('foo', b.f1)
+      refute_nil(b.f2)
+      assert_equal('foo', b.f2.foo)
+      assert_equal(10, b.f2.bar)
+    end
   end
 
   class BooleanStruct < T::Struct

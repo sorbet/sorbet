@@ -105,7 +105,9 @@ module T::Props::Serializable
   end
 
   private def recursive_stringify_keys(obj)
-    if obj.is_a?(Hash)
+    if obj.is_a?(T::Struct)
+      new_obj = recursive_stringify_keys(obj.serialize)
+    elsif obj.is_a?(Hash)
       new_obj = obj.class.new
       obj.each do |k, v|
         new_obj[k.to_s] = recursive_stringify_keys(v)
