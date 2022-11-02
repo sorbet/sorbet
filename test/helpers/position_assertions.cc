@@ -5,6 +5,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -1475,7 +1476,9 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
     UnorderedMap<string, string> actualEditedFiles;
     // map of all .rbedited files whose version equals `this->version`
     UnorderedMap<string, string> expectedEditedFiles;
-    for (auto filePath : FileOps::listFilesInDir(testDataPath, {".rb", ".rbi", ".rbedited"}, false, {}, {})) {
+    unique_ptr<WorkerPool> workerPool = WorkerPool::create(0, *spdlog::default_logger());
+    for (auto filePath :
+         FileOps::listFilesInDir(testDataPath, {".rb", ".rbi", ".rbedited"}, *workerPool, false, {}, {})) {
         auto extension = FileOps::getExtension(filePath);
         if (extension == "rbedited") {
             auto extensionIndex = filePath.rfind(".rbedited", filePath.length());

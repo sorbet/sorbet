@@ -520,7 +520,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
 
     if (FileOps::exists(path)) {
         // Clear out files that we do not plan to write.
-        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
+        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, workers, true, {}, {});
         UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
                                               make_move_iterator(existingFiles.end()));
         for (auto &task : tasks) {

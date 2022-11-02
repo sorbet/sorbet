@@ -2,6 +2,8 @@
 #define COMMON_FILESYSTEM_H
 
 #include "common/common.h"
+#include "common/concurrency/WorkerPool.h"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -31,9 +33,14 @@ public:
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
      */
     virtual std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
-                                                    bool recursive,
+                                                    WorkerPool &workerPool, bool recursive,
                                                     const std::vector<std::string> &absoluteIgnorePatterns,
                                                     const std::vector<std::string> &relativeIgnorePatterns) const = 0;
+
+    virtual std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
+                                                    bool recursive,
+                                                    const std::vector<std::string> &absoluteIgnorePatterns,
+                                                    const std::vector<std::string> &relativeIgnorePatterns) const;
 };
 
 /**
@@ -46,7 +53,8 @@ public:
     std::string readFile(const std::string &path) const override;
     void writeFile(const std::string &filename, std::string_view text) override;
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
-                                            bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,
+                                            WorkerPool &workerPool, bool recursive,
+                                            const std::vector<std::string> &absoluteIgnorePatterns,
                                             const std::vector<std::string> &relativeIgnorePatterns) const override;
 };
 
