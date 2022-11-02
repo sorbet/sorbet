@@ -31,11 +31,11 @@ shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
 bool sorbet::FileOps::exists(const string &filename) {
     struct stat buffer;
-    return (stat((string(filename)).c_str(), &buffer) == 0);
+    return (stat(filename.c_str(), &buffer) == 0);
 }
 
 string sorbet::FileOps::read(const string &filename) {
-    FILE *fp = std::fopen((string(filename)).c_str(), "rb");
+    FILE *fp = std::fopen(filename.c_str(), "rb");
     if (fp) {
         fseek(fp, 0, SEEK_END);
         auto sz = ftell(fp);
@@ -53,7 +53,7 @@ string sorbet::FileOps::read(const string &filename) {
 }
 
 void sorbet::FileOps::write(const string &filename, const vector<uint8_t> &data) {
-    FILE *fp = std::fopen(string(filename).c_str(), "wb");
+    FILE *fp = std::fopen(filename.c_str(), "wb");
     if (fp) {
         fwrite(data.data(), sizeof(uint8_t), data.size(), fp);
         fclose(fp);
@@ -64,18 +64,18 @@ void sorbet::FileOps::write(const string &filename, const vector<uint8_t> &data)
 
 bool sorbet::FileOps::dirExists(const string &path) {
     struct stat buffer;
-    return stat((string(path)).c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode);
+    return stat(path.c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode);
 }
 
 void sorbet::FileOps::createDir(const string &path) {
-    auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    auto err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (err) {
         throw sorbet::CreateDirException(fmt::format("Error in createDir('{}'): {}", path, errno));
     }
 }
 
 bool sorbet::FileOps::ensureDir(const string &path) {
-    auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    auto err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (err) {
         if (errno == EEXIST) {
             return false;
@@ -88,14 +88,14 @@ bool sorbet::FileOps::ensureDir(const string &path) {
 }
 
 void sorbet::FileOps::removeDir(const string &path) {
-    auto err = rmdir(string(path).c_str());
+    auto err = rmdir(path.c_str());
     if (err) {
         throw sorbet::CreateDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
     }
 }
 
 bool sorbet::FileOps::removeEmptyDir(const string &path) {
-    auto err = rmdir(string(path).c_str());
+    auto err = rmdir(path.c_str());
     if (err) {
         if (errno == ENOTEMPTY) {
             return false;
@@ -107,14 +107,14 @@ bool sorbet::FileOps::removeEmptyDir(const string &path) {
 }
 
 void sorbet::FileOps::removeFile(const string &path) {
-    auto err = remove(string(path).c_str());
+    auto err = remove(path.c_str());
     if (err) {
         throw sorbet::RemoveFileException(fmt::format("Error in removeFile('{}'): {}", path, errno));
     }
 }
 
 void sorbet::FileOps::write(const string &filename, string_view text) {
-    FILE *fp = std::fopen(string(filename).c_str(), "w");
+    FILE *fp = std::fopen(filename.c_str(), "w");
     if (fp) {
         fwrite(text.data(), sizeof(char), text.size(), fp);
         fclose(fp);
@@ -132,7 +132,7 @@ bool sorbet::FileOps::writeIfDifferent(const string &filename, string_view text)
 }
 
 void sorbet::FileOps::append(const string &filename, string_view text) {
-    FILE *fp = std::fopen(string(filename).c_str(), "a");
+    FILE *fp = std::fopen(filename.c_str(), "a");
     if (fp) {
         fwrite(text.data(), sizeof(char), text.size(), fp);
         fclose(fp);
