@@ -373,6 +373,10 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
             }
         } catch (sorbet::SorbetException &e) {
             resultq->push(e, 1);
+            pendingJobs += numWorkers;
+            for (auto i = 0; i < numWorkers; ++i) {
+                jobq->push(QuitToken{}, 1);
+            }
             return;
         }
 
