@@ -4,9 +4,9 @@
 #include <cxxopts.hpp>
 
 #include "absl/strings/str_split.h"
-#include "common/concurrency/WorkerPool.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "core/Error.h"
