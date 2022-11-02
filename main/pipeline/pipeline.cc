@@ -386,8 +386,8 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     if (file.dataAllowingUnsafe(gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
     }
-    auto fileName = file.dataAllowingUnsafe(gs).path();
-    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
+    string fileName{file.dataAllowingUnsafe(gs).path()};
+    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", fileName}});
     string src;
     bool fileFound = true;
     try {
@@ -404,7 +404,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     {
         core::UnfreezeFileTable unfreezeFiles(gs);
         auto fileObj =
-            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
+            make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
         // Returns nullptr if tree is not in cache.
         ast = fetchTreeFromCache(gs, file, *fileObj, kvstore);
 
