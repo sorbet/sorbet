@@ -703,9 +703,13 @@ void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> 
         logger->error("Path `{}` is not a directory", dir);
         throw EarlyReturnWithCode(1);
     }
-    opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
-    opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
-                               std::make_move_iterator(containedFiles.end()));
+    if (opts.inputFileNames.size() == 0) {
+        opts.inputFileNames = move(containedFiles);
+    } else {
+        opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
+        opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
+                                   std::make_move_iterator(containedFiles.end()));
+    }
 }
 
 void readOptions(Options &opts,
