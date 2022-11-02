@@ -403,8 +403,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
 
     {
         core::UnfreezeFileTable unfreezeFiles(gs);
-        auto fileObj =
-            make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
+        auto fileObj = make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
         // Returns nullptr if tree is not in cache.
         ast = fetchTreeFromCache(gs, file, *fileObj, kvstore);
 
