@@ -534,7 +534,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             int curDirPos = filePath.find_last_of('/');
             while (curDirPos > 0) {
                 const auto curDir = filePath.substr(0, curDirPos);
-                if (curDir == path || !FileOps::removeEmptyDir(curDir)) {
+                if (curDir == path || !FileOps::removeEmptyDir(string(curDir))) {
                     break;
                 }
 
