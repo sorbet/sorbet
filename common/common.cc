@@ -29,12 +29,12 @@ shared_ptr<spdlog::logger> makeFatalLogger() {
 } // namespace
 shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
-bool sorbet::FileOps::exists(string_view filename) {
+bool sorbet::FileOps::exists(const string &filename) {
     struct stat buffer;
     return (stat((string(filename)).c_str(), &buffer) == 0);
 }
 
-string sorbet::FileOps::read(string_view filename) {
+string sorbet::FileOps::read(const string &filename) {
     FILE *fp = std::fopen((string(filename)).c_str(), "rb");
     if (fp) {
         fseek(fp, 0, SEEK_END);
@@ -52,7 +52,7 @@ string sorbet::FileOps::read(string_view filename) {
     throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}`", filename));
 }
 
-void sorbet::FileOps::write(string_view filename, const vector<uint8_t> &data) {
+void sorbet::FileOps::write(const string &filename, const vector<uint8_t> &data) {
     FILE *fp = std::fopen(string(filename).c_str(), "wb");
     if (fp) {
         fwrite(data.data(), sizeof(uint8_t), data.size(), fp);
@@ -62,19 +62,19 @@ void sorbet::FileOps::write(string_view filename, const vector<uint8_t> &data) {
     throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}` for writing", filename));
 }
 
-bool sorbet::FileOps::dirExists(string_view path) {
+bool sorbet::FileOps::dirExists(const string &path) {
     struct stat buffer;
     return stat((string(path)).c_str(), &buffer) == 0 && S_ISDIR(buffer.st_mode);
 }
 
-void sorbet::FileOps::createDir(string_view path) {
+void sorbet::FileOps::createDir(const string &path) {
     auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (err) {
         throw sorbet::CreateDirException(fmt::format("Error in createDir('{}'): {}", path, errno));
     }
 }
 
-bool sorbet::FileOps::ensureDir(string_view path) {
+bool sorbet::FileOps::ensureDir(const string &path) {
     auto err = mkdir(string(path).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (err) {
         if (errno == EEXIST) {
@@ -87,14 +87,14 @@ bool sorbet::FileOps::ensureDir(string_view path) {
     return true;
 }
 
-void sorbet::FileOps::removeDir(string_view path) {
+void sorbet::FileOps::removeDir(const string &path) {
     auto err = rmdir(string(path).c_str());
     if (err) {
         throw sorbet::CreateDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
     }
 }
 
-bool sorbet::FileOps::removeEmptyDir(string_view path) {
+bool sorbet::FileOps::removeEmptyDir(const string &path) {
     auto err = rmdir(string(path).c_str());
     if (err) {
         if (errno == ENOTEMPTY) {
@@ -106,14 +106,14 @@ bool sorbet::FileOps::removeEmptyDir(string_view path) {
     return true;
 }
 
-void sorbet::FileOps::removeFile(string_view path) {
+void sorbet::FileOps::removeFile(const string &path) {
     auto err = remove(string(path).c_str());
     if (err) {
         throw sorbet::RemoveFileException(fmt::format("Error in removeFile('{}'): {}", path, errno));
     }
 }
 
-void sorbet::FileOps::write(string_view filename, string_view text) {
+void sorbet::FileOps::write(const string &filename, string_view text) {
     FILE *fp = std::fopen(string(filename).c_str(), "w");
     if (fp) {
         fwrite(text.data(), sizeof(char), text.size(), fp);
@@ -123,7 +123,7 @@ void sorbet::FileOps::write(string_view filename, string_view text) {
     throw sorbet::FileNotFoundException(fmt::format("Cannot open file `{}` for writing", filename));
 }
 
-bool sorbet::FileOps::writeIfDifferent(string_view filename, string_view text) {
+bool sorbet::FileOps::writeIfDifferent(const string &filename, string_view text) {
     if (!exists(filename) || text != read(filename)) {
         write(filename, text);
         return true;
@@ -131,7 +131,7 @@ bool sorbet::FileOps::writeIfDifferent(string_view filename, string_view text) {
     return false;
 }
 
-void sorbet::FileOps::append(string_view filename, string_view text) {
+void sorbet::FileOps::append(const string &filename, string_view text) {
     FILE *fp = std::fopen(string(filename).c_str(), "a");
     if (fp) {
         fwrite(text.data(), sizeof(char), text.size(), fp);
