@@ -59,7 +59,7 @@ void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
 void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     auto toWrite = AutocorrectSuggestion::apply(gs, fs, this->autocorrects);
     for (auto &[file, contents] : toWrite) {
-        fs.writeFile(file.data(gs).path(), contents);
+        fs.writeFile(string(file.data(gs).path()), contents);
     }
     autocorrects.clear();
 }
