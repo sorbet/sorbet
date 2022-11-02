@@ -14,8 +14,8 @@ private:
 public:
     MockFileSystem(std::string_view rootPath);
     void writeFiles(const std::vector<std::pair<std::string, std::string>> &files);
-    std::string readFile(std::string_view path) const override;
-    void writeFile(std::string_view filename, std::string_view text) override;
+    std::string readFile(const std::string &path) const override;
+    void writeFile(const std::string &filename, std::string_view text) override;
     void deleteFile(std::string_view filename);
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                             bool recursive, const std::vector<std::string> &absoluteIgnorePatterns,

@@ -32,7 +32,7 @@ bool isComment(string_view line) {
 void ConfigParser::readArgsFromFile(std::shared_ptr<spdlog::logger> logger, string_view filename,
                                     std::vector<std::string> &stringArgs) {
     try {
-        string argsP = FileOps::read(filename);
+        string argsP = FileOps::read(string(filename));
         string_view argsPView = argsP;
         if (!argsPView.empty() && argsPView.back() == '\n') {
             argsPView = argsPView.substr(0, argsPView.size() - 1);

@@ -12,7 +12,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
-string readFile(string_view path, const FileSystem &fs) {
+string readFile(const string &path, const FileSystem &fs) {
     try {
         return fs.readFile(path);
     } catch (FileNotFoundException e) {

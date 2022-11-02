@@ -386,8 +386,8 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     if (file.dataAllowingUnsafe(gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
     }
-    auto fileName = file.dataAllowingUnsafe(gs).path();
-    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", string(fileName)}});
+    string fileName{file.dataAllowingUnsafe(gs).path()};
+    Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", fileName}});
     string src;
     bool fileFound = true;
     try {
@@ -403,8 +403,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
 
     {
         core::UnfreezeFileTable unfreezeFiles(gs);
-        auto fileObj =
-            make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
+        auto fileObj = make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
         // Returns nullptr if tree is not in cache.
         ast = fetchTreeFromCache(gs, file, *fileObj, kvstore);
 
@@ -1219,7 +1218,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     return written;
 }
 
-vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, string_view cachePath,
+vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,
                                               vector<ast::ParsedFile> what, WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     Timer timeit(gs.tracer(), "autogenWriteCacheFile");

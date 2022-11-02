@@ -16,33 +16,34 @@ public:
         std::optional<std::string> output = std::nullopt;
     };
 
-    static bool exists(std::string_view filename);
+    static bool exists(const std::string &filename);
     static bool isFile(std::string_view path, std::string_view ignorePattern, const int pos);
     static bool isFolder(std::string_view path, std::string_view ignorePattern, const int pos);
-    static std::string read(std::string_view filename);
-    static void write(std::string_view filename, const std::vector<uint8_t> &data);
-    static void append(std::string_view filename, std::string_view text);
-    static void write(std::string_view filename, std::string_view text);
-    static bool writeIfDifferent(std::string_view filename, std::string_view text);
-    static bool dirExists(std::string_view path);
-    static void createDir(std::string_view path);
+    static std::string read(const std::string &filename);
+    static void write(const std::string &filename, const std::vector<uint8_t> &data);
+    static void append(const std::string &filename, std::string_view text);
+    static void write(const std::string &filename, std::string_view text);
+    static bool writeIfDifferent(const std::string &filename, std::string_view text);
+    static bool dirExists(const std::string &path);
+    static void createDir(const std::string &path);
 
     // This differs from createDir, as it will not raise an exception if the directory already exists. Returns true when
     // the directory was created, and false if it already existed.
     //
     // NOTE: This does not create parent directories if they exist.
-    static bool ensureDir(std::string_view path);
+    static bool ensureDir(const std::string &path);
 
     // NOTE: this is a minimal wrapper around rmdir, and as such will raise an exception if the directory is not empty
     // when it's removed.
-    static void removeDir(std::string_view path);
+    static void removeDir(const std::string &path);
 
     // NOTE: this is a minimal wrapper around rmdir, and will return false if the directory is not empty
     // when it's removed. For any other errno, it will throw an exception. This exists as an convenience function to
     // prevent the caller from needing to try/catch removeDir.
-    static bool removeEmptyDir(std::string_view path);
+    static bool removeEmptyDir(const std::string &path);
 
-    static void removeFile(std::string_view path);
+    static void removeFile(const std::string &path);
+
     /**
      * Returns a list of all files in the given directory. Returns paths that include the path to directory.
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.

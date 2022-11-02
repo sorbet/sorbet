@@ -47,7 +47,7 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs
         for (auto &edit : autocorrect.edits) {
             auto file = edit.loc.file();
             if (!sources.count(file)) {
-                sources[file] = fs.readFile(file.data(gs).path());
+                sources[file] = fs.readFile(string(file.data(gs).path()));
             }
         }
     }

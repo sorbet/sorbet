@@ -36,7 +36,7 @@ void endLine(rapidjson::StringBuffer &result, rapidjson::Writer<rapidjson::Strin
 
 // Super rudimentary support for outputing trace files in Google's Trace Event Format
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-bool Tracing::storeTraces(const CounterState &counters, string_view fileName) {
+bool Tracing::storeTraces(const CounterState &counters, const string &fileName) {
     rapidjson::StringBuffer result;
     rapidjson::Writer<rapidjson::StringBuffer> writer(result);
 

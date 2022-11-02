@@ -19,7 +19,7 @@ void MockFileSystem::writeFiles(const vector<pair<string, string>> &initialFiles
     }
 }
 
-string MockFileSystem::readFile(string_view path) const {
+string MockFileSystem::readFile(const string &path) const {
     auto file = contents.find(makeAbsolute(rootPath, path));
     if (file == contents.end()) {
         throw sorbet::FileNotFoundException(fmt::format("Cannot find file `{}`", path));
@@ -28,7 +28,7 @@ string MockFileSystem::readFile(string_view path) const {
     }
 }
 
-void MockFileSystem::writeFile(string_view filename, string_view text) {
+void MockFileSystem::writeFile(const string &filename, string_view text) {
     contents[makeAbsolute(rootPath, filename)] = text;
 }
 

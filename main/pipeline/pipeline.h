@@ -43,7 +43,7 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
                                  WorkerPool &workers, core::FoundDefHashes *foundHashes);
 
-std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string_view cachePath,
+std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
                                                    std::vector<ast::ParsedFile> what, WorkerPool &workers);
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.

@@ -13,7 +13,7 @@ namespace sorbet::autogen {
 
 const size_t MAX_SKIP_AMOUNT = 100;
 
-bool AutogenCache::canSkipAutogen(core::GlobalState &gs, string_view cachePath, const vector<string> &changedFiles) {
+bool AutogenCache::canSkipAutogen(core::GlobalState &gs, const string &cachePath, const vector<string> &changedFiles) {
     // this is here as an escape valve: if a _bunch_ of files change
     // all at once, then don't let us skip at all. This should pretty
     // rarely be the case: the autogen runner should only pass us a
