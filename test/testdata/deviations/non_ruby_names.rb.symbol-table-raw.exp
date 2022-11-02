@@ -11,8 +11,6 @@ class <C <U <root>>> < <C <U Object>> ()
           argument <blk><block> @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=??? end=???}
     class <C <U A>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
       type-member(+) <C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
-      method <C <U A>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=7:9 end=7:10}
-        argument <blk><block> @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=??? end=???}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:1 end=5:9}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:1 end=5:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/deviations/non_ruby_names.rb start=5:1 end=9:4}
