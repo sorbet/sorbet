@@ -22,6 +22,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
+#include "core/errors/namer.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
@@ -209,6 +210,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     gs->ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+
+    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
 
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs->initEmpty();
