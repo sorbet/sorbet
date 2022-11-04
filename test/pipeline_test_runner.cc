@@ -429,18 +429,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    {
+        core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
+        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
+        auto foundHashes = nullptr;
+        trees = move(namer::Namer::run(*gs, move(trees), *workers, foundHashes).result());
+    }
+
     for (auto &tree : trees) {
         // Namer
-        ast::ParsedFile namedTree;
-        {
-            core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
-            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
-            vector<ast::ParsedFile> vTmp;
-            vTmp.emplace_back(move(tree));
-            core::FoundDefHashes foundHashes; // compute this just for test coverage
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
-            namedTree = testSerialize(*gs, move(vTmp[0]));
-        }
+        auto namedTree = testSerialize(*gs, move(tree));
 
         handler.addObserved(*gs, "name-tree", [&]() { return namedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "name-tree-raw", [&]() { return namedTree.tree.showRaw(*gs); });
