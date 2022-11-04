@@ -610,7 +610,6 @@ public:
     struct State {
         // See getOwnerSymbol for how both of these work.
         vector<core::ClassOrModuleRef> definedClasses;
-        vector<core::MethodRef> definedMethods;
 
         State() = default;
         State(const State &) = delete;
@@ -1504,7 +1503,6 @@ public:
 
     void enterNonDeletableDefinitions(core::MutableContext ctx) {
         state.definedClasses.reserve(foundDefs.klasses().size());
-        state.definedMethods.reserve(foundDefs.methods().size());
 
         for (const auto &klass : foundDefs.klasses()) {
             state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
@@ -1553,13 +1551,9 @@ public:
                 // We need alias methods in the FoundDefinitions list not so that we can actually
                 // create method symbols for them yet, but just so we can know which alias methods
                 // to delete on the fast path. Alias methods will be defined later, in resolver.
-                //
-                // We still need to put something here so that other found definitions that
-                // reference methods will get the correct symbols.
-                state.definedMethods.emplace_back(core::MethodRef{});
                 continue;
             }
-            state.definedMethods.emplace_back(insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method));
+            insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method);
         }
 
         for (auto &field : foundDefs.fields()) {
@@ -1587,7 +1581,6 @@ public:
         enterNewDefinitions(ctx);
 
         state.definedClasses.clear();
-        state.definedMethods.clear();
         return move(state);
     }
 };
