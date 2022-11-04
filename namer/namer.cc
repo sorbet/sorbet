@@ -2200,49 +2200,44 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
             populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
     }
+    ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
-    if (!incrementalDefinitions.empty()) {
-        ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
-        count = 0;
-        for (auto &fileFoundDefinitions : allFoundDefinitions) {
-            count++;
-            if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-                return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
-            }
-
-            auto fref = fileFoundDefinitions.tree.file;
-            // The contents of this don't matter for incremental definition.  The
-            // old definitions should only matter when deleting old symbols (which
-            // happened in the previous phase of incremental namer), not here when
-            // entering symbols.
-            optional<core::FoundDefHashes> oldFoundHashes;
-            core::MutableContext ctx(gs, core::Symbols::root(), fref);
-
-            SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
-            incrementalDefinitions[fref] =
-                symbolDefiner.enterNonDeletableDefinitions(ctx, move(incrementalDefinitions[fref]));
+    count = 0;
+    for (auto &fileFoundDefinitions : allFoundDefinitions) {
+        count++;
+        if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
         }
+
+        auto fref = fileFoundDefinitions.tree.file;
+        // The contents of this don't matter for incremental definition.  The
+        // old definitions should only matter when deleting old symbols (which
+        // happened in the previous phase of incremental namer), not here when
+        // entering symbols.
+        optional<core::FoundDefHashes> oldFoundHashes;
+        core::MutableContext ctx(gs, core::Symbols::root(), fref);
+
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
+        incrementalDefinitions[fref] =
+            symbolDefiner.enterNonDeletableDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
-    if (!incrementalDefinitions.empty()) {
-        ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
-        count = 0;
-        for (auto &fileFoundDefinitions : allFoundDefinitions) {
-            count++;
-            if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-                return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
-            }
-
-            auto fref = fileFoundDefinitions.tree.file;
-            // The contents of this don't matter for incremental definition.  The
-            // old definitions should only matter when deleting old symbols (which
-            // happened in the previous phase of incremental namer), not here when
-            // entering symbols.
-            optional<core::FoundDefHashes> oldFoundHashes;
-            core::MutableContext ctx(gs, core::Symbols::root(), fref);
-
-            SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
-            symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
+    count = 0;
+    for (auto &fileFoundDefinitions : allFoundDefinitions) {
+        count++;
+        if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
+            return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
         }
+
+        auto fref = fileFoundDefinitions.tree.file;
+        // The contents of this don't matter for incremental definition.  The
+        // old definitions should only matter when deleting old symbols (which
+        // happened in the previous phase of incremental namer), not here when
+        // entering symbols.
+        optional<core::FoundDefHashes> oldFoundHashes;
+        core::MutableContext ctx(gs, core::Symbols::root(), fref);
+
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
+        symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return output;
 }
