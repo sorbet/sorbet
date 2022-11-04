@@ -83,7 +83,7 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
 
     // Don't format `__package.rb` files, since currently formatting them
     // can potentially break some pay-server tooling
-    if (!sourceView.empty() && !core::File::isPackagePath(path)) {
+    if (!sourceView.empty() && !core::File::isPackagePath(path) && !core::File::isRBIPath(path)) {
         auto originalLineCount = findLineBreaks(sourceView).size() - 1;
         auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(), sourceView);
 
