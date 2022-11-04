@@ -1551,9 +1551,6 @@ public:
                 // We need alias methods in the FoundDefinitions list not so that we can actually
                 // create method symbols for them yet, but just so we can know which alias methods
                 // to delete on the fast path. Alias methods will be defined later, in resolver.
-                //
-                // We still need to put something here so that other found definitions that
-                // reference methods will get the correct symbols.
                 continue;
             }
             insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method);
