@@ -619,7 +619,6 @@ public:
     };
 
 private:
-    State state;
     const core::FoundDefinitions &foundDefs;
     const optional<core::FoundDefHashes> oldFoundHashes;
 
@@ -647,7 +646,7 @@ private:
     }
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
-    core::SymbolRef getOwnerSymbol(core::FoundDefinitionRef ref) {
+    core::SymbolRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
         switch (ref.kind()) {
             case core::FoundDefinitionRef::Kind::Symbol:
                 return ref.symbol();
@@ -1452,12 +1451,13 @@ private:
         }
     }
 
-    void deleteFieldViaFullNameHash(core::MutableContext ctx, const core::FoundFieldHash &oldDefHash) {
+    void deleteFieldViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
+                                    const core::FoundFieldHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
-        auto ownerSymbol = getOwnerSymbol(ownerRef);
+        auto ownerSymbol = getOwnerSymbol(state, ownerRef);
         auto owner = ownerSymbol.asClassOrModuleRef();
         if (oldDefHash.owner.onSingletonClass) {
             owner = owner.data(ctx)->singletonClass(ctx);
@@ -1466,25 +1466,27 @@ private:
         deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
     }
 
-    void deleteMethodViaFullNameHash(core::MutableContext ctx, const core::FoundMethodHash &oldDefHash) {
+    void deleteMethodViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
+                                     const core::FoundMethodHash &oldDefHash) {
         auto ownerRef = core::FoundDefinitionRef(core::FoundDefinitionRef::Kind::Class, oldDefHash.owner.idx);
         ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
 
         // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
-        auto ownerSymbol = getOwnerSymbol(ownerRef);
+        auto ownerSymbol = getOwnerSymbol(state, ownerRef);
         ENFORCE(ownerSymbol.isClassOrModule());
         auto owner = methodOwner(ctx, ownerSymbol, oldDefHash.owner.useSingletonClass);
 
         deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
     }
 
-    void deleteOldDefinitionsInternal(core::MutableContext ctx) {
+public:
+    void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state) {
         if (oldFoundHashes.has_value()) {
             const auto &oldFoundHashesVal = oldFoundHashes.value();
 
             for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
                 if (oldFieldHash.owner.isInstanceVariable) {
-                    deleteFieldViaFullNameHash(ctx, oldFieldHash);
+                    deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
                 }
             }
 
@@ -1492,32 +1494,32 @@ private:
                 // Since we've already processed all the non-method symbols (which includes classes), we now
                 // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
                 // ref in the new definedClasses vector.
-                deleteMethodViaFullNameHash(ctx, oldMethodHash);
+                deleteMethodViaFullNameHash(ctx, state, oldMethodHash);
             }
         }
     }
 
-public:
-    SymbolDefiner(State state, const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
-        : state(move(state)), foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
+    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+        : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
-    void enterNonDeletableDefinitions(core::MutableContext ctx) {
+    SymbolDefiner::State enterNonDeletableDefinitions(core::MutableContext ctx) {
+        SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());
 
         for (const auto &klass : foundDefs.klasses()) {
-            state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(klass.owner)), klass));
+            state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), klass));
         }
 
         for (auto ref : foundDefs.nonDeletableDefinitions()) {
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);
-                    insertStaticField(ctx.withOwner(getOwnerSymbol(staticField.owner)), staticField);
+                    insertStaticField(ctx.withOwner(getOwnerSymbol(state, staticField.owner)), staticField);
                     break;
                 }
                 case core::FoundDefinitionRef::Kind::TypeMember: {
                     const auto &typeMember = ref.typeMember(foundDefs);
-                    insertTypeMember(ctx.withOwner(getOwnerSymbol(typeMember.owner)), typeMember);
+                    insertTypeMember(ctx.withOwner(getOwnerSymbol(state, typeMember.owner)), typeMember);
                     break;
                 }
                 case core::FoundDefinitionRef::Kind::Class:
@@ -1530,14 +1532,11 @@ public:
                     break;
             }
         }
+
+        return state;
     }
 
-    SymbolDefiner::State deleteOldDefinitions(core::MutableContext ctx) {
-        deleteOldDefinitionsInternal(ctx);
-        return move(state);
-    }
-
-    void enterNewDefinitions(core::MutableContext ctx) {
+    void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
         // TODO(jez) After everything but classes is handled on the fast path, I think we can go
         // back to having a single list of (non-class) definitions with a switch statement, like how
         // namer used to work.
@@ -1553,15 +1552,15 @@ public:
                 // to delete on the fast path. Alias methods will be defined later, in resolver.
                 continue;
             }
-            insertMethod(ctx.withOwner(getOwnerSymbol(method.owner)), method);
+            insertMethod(ctx.withOwner(getOwnerSymbol(state, method.owner)), method);
         }
 
         for (auto &field : foundDefs.fields()) {
-            insertField(ctx.withOwner(getOwnerSymbol(field.owner)), field);
+            insertField(ctx.withOwner(getOwnerSymbol(state, field.owner)), field);
         }
 
         for (const auto &modifier : foundDefs.modifiers()) {
-            const auto owner = getOwnerSymbol(modifier.owner);
+            const auto owner = getOwnerSymbol(state, modifier.owner);
             switch (modifier.kind) {
                 case core::FoundModifier::Kind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
@@ -1576,12 +1575,9 @@ public:
         }
     }
 
-    SymbolDefiner::State run(core::MutableContext ctx) {
-        enterNonDeletableDefinitions(ctx);
-        enterNewDefinitions(ctx);
-
-        state.definedClasses.clear();
-        return move(state);
+    void run(core::MutableContext ctx) {
+        auto state = enterNonDeletableDefinitions(ctx);
+        enterNewDefinitions(ctx, move(state));
     }
 };
 
@@ -2177,7 +2173,6 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     uint32_t foundMethods = 0;
-    SymbolDefiner::State state;
     UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions.names->methods().size();
@@ -2195,13 +2190,13 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto frefIt = oldFoundHashesForFiles.find(fref);
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
-        SymbolDefiner symbolDefiner(move(state), *fileFoundDefinitions.names, move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
         if (!oldFoundHashesForFiles.empty()) {
-            symbolDefiner.enterNonDeletableDefinitions(ctx);
-            state = symbolDefiner.deleteOldDefinitions(ctx);
+            auto state = symbolDefiner.enterNonDeletableDefinitions(ctx);
+            symbolDefiner.deleteOldDefinitions(ctx, state);
             incrementalDefinitions[fref] = move(state);
         } else {
-            state = symbolDefiner.run(ctx);
+            symbolDefiner.run(ctx);
         }
         output.emplace_back(move(fileFoundDefinitions.tree));
         if (foundHashesOut != nullptr) {
@@ -2226,9 +2221,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
             optional<core::FoundDefHashes> oldFoundHashes;
             core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-            SymbolDefiner symbolDefiner(move(incrementalDefinitions[fref]), *fileFoundDefinitions.names,
-                                        oldFoundHashes);
-            symbolDefiner.enterNewDefinitions(ctx);
+            SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
+            symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
         }
     }
     return output;
