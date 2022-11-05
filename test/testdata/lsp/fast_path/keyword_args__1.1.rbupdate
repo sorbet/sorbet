@@ -1,0 +1,10 @@
+# typed: true
+# assert-fast-path: keyword_args__1.rb,keyword_args__2.rb
+
+module A
+  extend T::Sig
+
+  sig {params(a: String, b: T.nilable(String)).void}
+  def self.some_method(a, b:)
+  end
+end
