@@ -2322,6 +2322,7 @@ uint32_t Method::hash(const GlobalState &gs) const {
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
+    result = mix(result, this->methodArityHash(gs)._hashValue);
     for (const auto &arg : arguments) {
         // If an argument's resultType changes, then the sig has changed.
         auto type = arg.type;
@@ -2329,7 +2330,6 @@ uint32_t Method::hash(const GlobalState &gs) const {
             type = Types::untypedUntracked();
         }
         result = mix(result, type.hash(gs));
-        result = mix(result, _hash(arg.name.shortName(gs)));
     }
     for (const auto &e : typeArguments()) {
         if (e.exists()) {

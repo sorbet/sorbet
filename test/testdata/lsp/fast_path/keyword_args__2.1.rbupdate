@@ -1,0 +1,10 @@
+# typed: true
+# exclude-from-file-update: true
+
+module B
+  extend T::Sig
+
+  def some_other_method
+    A.some_method("") # error: Missing required keyword argument `b` for method `A.some_method`
+  end
+end
