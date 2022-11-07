@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: const_alias_to_namespace__1.rb
+
+# This test currently shows incorrect behavior. As far as I can tell, this has
+# been incorrect for as long as Sorbet has had a fast path mode. The fact that
+# this bug is only appearing now means that maybe we can tolerate it a while
+# longer?
+#
+# In any case, we will want to fix this eventually.
+
+module Wrapper
+  Alias = Namespace2
+end
