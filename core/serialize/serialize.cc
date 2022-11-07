@@ -402,7 +402,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             switch (c.literalKind) {
                 case NamedLiteralType::LiteralTypeKind::Symbol:
                 case NamedLiteralType::LiteralTypeKind::String:
-                    p.putS8(c.unsafeAsName().rawId());
+                    p.putU4(c.unsafeAsName().rawId());
                     break;
             }
             break;
@@ -496,12 +496,12 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case TypePtr::Tag::NamedLiteralType: {
             auto kind = (core::NamedLiteralType::LiteralTypeKind)p.getU1();
-            auto value = p.getS8();
+            auto name = NameRef::fromRawUnchecked(p.getU4());
             switch (kind) {
                 case NamedLiteralType::LiteralTypeKind::String:
-                    return make_type<NamedLiteralType>(Symbols::String(), NameRef::fromRawUnchecked(value));
+                    return make_type<NamedLiteralType>(Symbols::String(), name);
                 case NamedLiteralType::LiteralTypeKind::Symbol:
-                    return make_type<NamedLiteralType>(Symbols::Symbol(), NameRef::fromRawUnchecked(value));
+                    return make_type<NamedLiteralType>(Symbols::Symbol(), name);
             }
             Exception::notImplemented();
         }
