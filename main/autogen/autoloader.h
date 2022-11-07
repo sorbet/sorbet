@@ -96,7 +96,7 @@ public:
     std::string show(const core::GlobalState &gs, int level = 0) const; // Render the entire tree
     std::string fullName(const core::GlobalState &) const;
 
-    std::string renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &) const;
+    void renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &) const;
     bool mustRender(const core::GlobalState &gs, std::string_view filePath) const;
 
     DefTree() = default;

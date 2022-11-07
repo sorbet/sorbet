@@ -198,7 +198,7 @@ core::NameRef DefTree::name() const {
     return qname.name();
 }
 
-string DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
+void DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     core::FileRef definingFileRef = definingFile();
 
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
@@ -244,7 +244,6 @@ string DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalSta
         fmt::format_to(std::back_inserter(buf), "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
                        alCfg.normalizePath(gs, definingFileRef), casgnArg);
     }
-    return to_string(buf);
 }
 
 void DefTree::requireStatements(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
@@ -562,8 +561,8 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
                     ++n;
                     auto &task = tasks[idx];
                     fmt::memory_buffer buf;
-                    auto src = task.node.renderAutoloadSrc(buf, gs, alCfg);
-                    bool rewritten = FileOps::writeIfDifferent(task.filePath, src);
+                    task.node.renderAutoloadSrc(buf, gs, alCfg);
+                    bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
 
                     // Initial read should be cheap, read outside mutex
                     if (rewritten && !modificationState.modified) {
