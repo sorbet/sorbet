@@ -198,8 +198,7 @@ core::NameRef DefTree::name() const {
     return qname.name();
 }
 
-string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
-    fmt::memory_buffer buf;
+string DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
     core::FileRef definingFileRef = definingFile();
 
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
@@ -562,7 +561,8 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
                 for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
                     ++n;
                     auto &task = tasks[idx];
-                    auto src = task.node.renderAutoloadSrc(gs, alCfg);
+                    fmt::memory_buffer buf;
+                    auto src = task.node.renderAutoloadSrc(buf, gs, alCfg);
                     bool rewritten = FileOps::writeIfDifferent(task.filePath, src);
 
                     // Initial read should be cheap, read outside mutex
