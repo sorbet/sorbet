@@ -1,6 +1,8 @@
+# typed: false
+# stripe-mode: true
 require 'x'
 
-module Foo
+module Foo # error: `Foo` has behavior defined in multiple files
    def meth; end # Defines behavior
 end
 

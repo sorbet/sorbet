@@ -1,3 +1,4 @@
+# typed: false
 require 'y' # root level 'behavior' is ignored
 
 module Foo

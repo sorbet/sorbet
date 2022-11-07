@@ -22,6 +22,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
+#include "core/errors/namer.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
@@ -209,6 +210,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     gs->ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+
+    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
 
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs->initEmpty();
@@ -429,18 +434,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    {
+        core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
+        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
+        auto foundHashes = nullptr;
+        trees = move(namer::Namer::run(*gs, move(trees), *workers, foundHashes).result());
+    }
+
     for (auto &tree : trees) {
         // Namer
-        ast::ParsedFile namedTree;
-        {
-            core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
-            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
-            vector<ast::ParsedFile> vTmp;
-            vTmp.emplace_back(move(tree));
-            core::FoundDefHashes foundHashes; // compute this just for test coverage
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
-            namedTree = testSerialize(*gs, move(vTmp[0]));
-        }
+        auto namedTree = testSerialize(*gs, move(tree));
 
         handler.addObserved(*gs, "name-tree", [&]() { return namedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "name-tree-raw", [&]() { return namedTree.tree.showRaw(*gs); });
