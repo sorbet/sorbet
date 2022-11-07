@@ -1,8 +1,8 @@
 # typed: true
 class A
-  B = 1
+  B = 1 # error: Cannot initialize the class or module `B` by constant assignment
 end
 
-A::B::C = 1 # error: Can't nest `C` under `A::B` because `A::B` is not a class or module
+A::B::C = 1
 A::B::D # error: Unable to resolve constant
 A::E # error: Unable to resolve constant

@@ -4,34 +4,34 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:1 end=7:12}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:1 end=7:12}
-    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:7 end=7:8}
+    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:1 end=7:12}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=7:1 end=8:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   static-field-type-alias <C <U Alias>> -> Object @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=16:1 end=16:6}
   class <C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=12:1 end=12:24}
   class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=12:1 end=12:24}
-    type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=12:7 end=12:8}
+    type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=12:1 end=12:24}
     method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=12:1 end=13:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   class <C <U C>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=17:1 end=17:16}
   class <S <C <U C>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=17:1 end=17:16}
-    type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=17:7 end=17:8}
+    type-member(+) <S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=17:1 end=17:16}
     method <S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=17:1 end=18:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   class <C <U D>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:1 end=21:12}
   class <S <C <U D>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:1 end=21:12}
-    type-member(+) <S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:7 end=21:8}
+    type-member(+) <S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:1 end=21:12}
     method <S <C <U D>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=21:1 end=22:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   static-field <C <U DynamicParent>> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=11:1 end=11:14}
   class <C <U F>> < <C <U G>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:1 end=25:12}
   class <S <C <U F>> $1>[<C <U <AttachedClass>>>] < <S <C <U G>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:1 end=25:12}
-    type-member(+) <S <C <U F>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U F>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=F) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:7 end=25:8}
+    type-member(+) <S <C <U F>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U F>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=F) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:1 end=25:12}
     method <S <C <U F>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=25:1 end=26:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   class <C <U G>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U StubSuperClass>> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=29:12}
   class <S <C <U G>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U StubSuperClass>> $1> () @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=29:12}
-    type-member(+) <S <C <U G>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U G>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=G) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:7 end=29:8}
+    type-member(+) <S <C <U G>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U G>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=G) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=29:12}
     method <S <C <U G>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=29:1 end=30:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/recover_from_bad_superclass.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}

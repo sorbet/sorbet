@@ -7,18 +7,18 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Child>>#<U child_method> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=30:3 end=30:19}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
   class <S <C <U Child>> $1>[<C <U <AttachedClass>>>] < <S <C <U Parent>> $1> () @ Loc {file=test/testdata/resolver/let_var.rb start=23:1 end=23:21}
-    type-member(+) <S <C <U Child>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Child>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child) @ Loc {file=test/testdata/resolver/let_var.rb start=23:7 end=23:12}
+    type-member(+) <S <C <U Child>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Child>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child) @ Loc {file=test/testdata/resolver/let_var.rb start=23:1 end=23:21}
     method <S <C <U Child>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=23:1 end=36:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
   class <C <U Child1>> < <C <U Parent>> () @ Loc {file=test/testdata/resolver/let_var.rb start=39:1 end=39:21}
   class <S <C <U Child1>> $1>[<C <U <AttachedClass>>>] < <S <C <U Parent>> $1> () @ Loc {file=test/testdata/resolver/let_var.rb start=39:1 end=39:21}
-    type-member(+) <S <C <U Child1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Child1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child1) @ Loc {file=test/testdata/resolver/let_var.rb start=39:7 end=39:13}
+    type-member(+) <S <C <U Child1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Child1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child1) @ Loc {file=test/testdata/resolver/let_var.rb start=39:1 end=39:21}
     method <S <C <U Child1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=39:1 end=41:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
   module <C <U Mixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/let_var.rb start=18:1 end=18:13}
     static-field <C <U Mixin>>::<U @@mixin_cvar> -> Integer @ Loc {file=test/testdata/resolver/let_var.rb start=19:3 end=19:15}
   class <S <C <U Mixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/let_var.rb start=18:1 end=18:13}
-    type-member(+) <S <C <U Mixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin) @ Loc {file=test/testdata/resolver/let_var.rb start=18:8 end=18:13}
+    type-member(+) <S <C <U Mixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin) @ Loc {file=test/testdata/resolver/let_var.rb start=18:1 end=18:13}
     method <S <C <U Mixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=18:1 end=21:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
   class <C <U Parent>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/let_var.rb start=2:1 end=2:13}
@@ -30,7 +30,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Parent>>#<U initialize> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=3:3 end=3:17}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
   class <S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/let_var.rb start=2:1 end=2:13}
-    type-member(+) <S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/resolver/let_var.rb start=2:7 end=2:13}
+    type-member(+) <S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/resolver/let_var.rb start=2:1 end=2:13}
     method <S <C <U Parent>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=2:1 end=16:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
 

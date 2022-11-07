@@ -4,9 +4,9 @@
 class Outer
   module A1; end
   module Inner; end
-  A2 = Inner
+  A2 = Inner # error: Cannot initialize the class or module `A2` by constant assignment
 
   A1::B = T.let('', String)
   Inner::B = T.let('', String)
-  A2::B = T.let('', String) # error: Can't nest `B` under `Outer::A2` because `Outer::A2` is not a class or module
+  A2::B = T.let('', String)
 end

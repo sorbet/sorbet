@@ -13,7 +13,6 @@ namespace sorbet::core {
 
 class FoundDefinitions;
 
-struct FoundClassRef;
 struct FoundClass;
 struct FoundStaticField;
 struct FoundTypeMember;
@@ -25,7 +24,7 @@ public:
     enum class Kind : uint8_t {
         Empty = 0,
         Class = 1,
-        ClassRef = 2,
+        // ClassRef = 2,
         Method = 3,
         StaticField = 4,
         TypeMember = 5,
@@ -80,9 +79,6 @@ public:
         return _storage.id;
     }
 
-    FoundClassRef &klassRef(FoundDefinitions &foundDefs);
-    const FoundClassRef &klassRef(const FoundDefinitions &foundDefs) const;
-
     FoundClass &klass(FoundDefinitions &foundDefs);
     const FoundClass &klass(const FoundDefinitions &foundDefs) const;
 
@@ -106,19 +102,9 @@ public:
 };
 CheckSize(FoundDefinitionRef, 4, 4);
 
-struct FoundClassRef final {
-    core::NameRef name;
-    core::LocOffsets loc;
-    // If !owner.exists(), owner is determined by reference site.
-    FoundDefinitionRef owner;
-
-    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
-};
-CheckSize(FoundClassRef, 16, 4);
-
 struct FoundClass final {
     FoundDefinitionRef owner;
-    FoundDefinitionRef klass;
+    core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
 
@@ -135,7 +121,6 @@ CheckSize(FoundClass, 28, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
-    FoundDefinitionRef scopeClass;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
@@ -143,7 +128,7 @@ struct FoundStaticField final {
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundStaticField, 32, 4);
+CheckSize(FoundStaticField, 28, 4);
 
 struct FoundTypeMember final {
     FoundDefinitionRef owner;
@@ -226,9 +211,6 @@ class FoundDefinitions final {
     // Contains references to items in _staticFields and _typeMembers.
     // Used so there is a consistent definition & redefinition ordering.
     std::vector<FoundDefinitionRef> _nonDeletableDefinitions;
-    // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
-    // Symbols for classes that are referenced from but not present in the given file.
-    std::vector<FoundClassRef> _klassRefs;
     // Contains all classes defined in the file.
     std::vector<FoundClass> _klasses;
     // Contains all methods defined in the file.
@@ -250,7 +232,6 @@ class FoundDefinitions final {
             case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::Method:
             case FoundDefinitionRef::Kind::Field:
-            case FoundDefinitionRef::Kind::ClassRef:
             case FoundDefinitionRef::Kind::Empty:
             case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
@@ -269,12 +250,6 @@ public:
         const uint32_t idx = _klasses.size();
         _klasses.emplace_back(std::move(klass));
         return FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx);
-    }
-
-    FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
-        const uint32_t idx = _klassRefs.size();
-        _klassRefs.emplace_back(std::move(klassRef));
-        return FoundDefinitionRef(FoundDefinitionRef::Kind::ClassRef, idx);
     }
 
     FoundDefinitionRef addMethod(FoundMethod &&method) {

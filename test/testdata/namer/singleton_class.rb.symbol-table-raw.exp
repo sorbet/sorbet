@@ -6,7 +6,7 @@ class <C <U <root>>> < <C <U Object>> ()
     module <C <U A>>::<C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:11}
       class <C <U A>>::<C <U B>>::<C <U C>> < <C <U Object>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=2:14}
       class <C <U A>>::<C <U B>>::<S <C <U C>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=2:14}
-        type-member(+) <C <U A>>::<C <U B>>::<S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<C <U B>>::<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B::C) @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:14}
+        type-member(+) <C <U A>>::<C <U B>>::<S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<C <U B>>::<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B::C) @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=2:14}
         method <C <U A>>::<C <U B>>::<S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/singleton_class.rb start=2:1 end=3:4}
           argument <blk><block> @ Loc {file=test/testdata/namer/singleton_class.rb start=??? end=???}
     class <C <U A>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/singleton_class.rb start=2:7 end=2:11}
