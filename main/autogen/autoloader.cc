@@ -561,7 +561,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
                     ++n;
                     auto &task = tasks[idx];
                     auto src = task.node.renderAutoloadSrc(gs, alCfg);
-                    bool rewritten = FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
+                    bool rewritten = FileOps::writeIfDifferent(task.filePath, src);
 
                     // Initial read should be cheap, read outside mutex
                     if (rewritten && !modificationState.modified) {
