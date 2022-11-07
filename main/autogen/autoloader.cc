@@ -198,7 +198,8 @@ core::NameRef DefTree::name() const {
     return qname.name();
 }
 
-void DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
+void DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs,
+                                const AutoloaderConfig &alCfg) const {
     core::FileRef definingFileRef = definingFile();
 
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
