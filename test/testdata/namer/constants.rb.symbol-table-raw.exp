@@ -7,11 +7,11 @@ class <C <U <root>>> < <C <U Object>> ()
       static-field <C <U A>>::<C <U B>>::<C <U C>> -> Integer @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:7}
       static-field <C <U A>>::<C <U B>>::<C <U D>> -> Integer @ Loc {file=test/testdata/namer/constants.rb start=8:5 end=8:6}
     class <C <U A>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constants.rb start=5:3 end=5:11}
-      type-member(+) <C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B) @ Loc {file=test/testdata/namer/constants.rb start=5:10 end=5:11}
+      type-member(+) <C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B) @ Loc {file=test/testdata/namer/constants.rb start=3:3 end=3:4}
       method <C <U A>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/constants.rb start=5:3 end=9:6}
         argument <blk><block> @ Loc {file=test/testdata/namer/constants.rb start=??? end=???}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/constants.rb start=2:1 end=2:9}
-    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/constants.rb start=2:8 end=2:9}
+    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/constants.rb start=2:1 end=2:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/constants.rb start=2:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/constants.rb start=??? end=???}
 

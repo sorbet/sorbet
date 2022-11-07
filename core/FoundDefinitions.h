@@ -13,7 +13,6 @@ namespace sorbet::core {
 
 class FoundDefinitions;
 
-struct FoundClassRef;
 struct FoundClass;
 struct FoundStaticField;
 struct FoundTypeMember;
@@ -25,31 +24,47 @@ public:
     enum class Kind : uint8_t {
         Empty = 0,
         Class = 1,
-        ClassRef = 2,
+        // ClassRef = 2,
         Method = 3,
         StaticField = 4,
         TypeMember = 5,
-        Symbol = 6,
+        Symbol = 6, // stores ClassOrModuleRef IDs
         Field = 7,
     };
     CheckSize(Kind, 1, 1);
 
 private:
     struct Storage {
-        Kind kind;
-        uint32_t id : 24; // We only support 2^24 (≈ 16M) definitions of any kind in a single file.
+        Kind kind : 4;
+        // When kind != Symbol, `id` stores indices into the assorted vectors on `FoundDefitions`.
+        // The 28-bit limit means that a single file cannot have more than 2^28 definitions in that file.
+        //
+        // When kind == Symbol, `id` stores ClassOrModule IDs. This means that a FoundDefinitionRef
+        // can only store a max ID of 2^28 (instead of the 2^32 currently allowed for
+        // ClassOrModuleRefs). But the interplay between findSymbols and defineSymbols means that
+        // any SymbolRef discovered in an AST must have been placed there by a phase that came
+        // before namer. This means that _technically_ we could have IDs as large as the largest
+        // ClassOrModuleRef ID in the payload (if we had code to directly look up symbols by name in
+        // GlobalState), but in practice (and ENFORCE'd below) the largest ID is the largest
+        // synthetic ClassOrModuleRef defined in SymbolRef.h.
+        //
+        // 2^28 ≈ 268 million
+        uint32_t id : 28;
+        //
     } _storage;
     CheckSize(Storage, 4, 4);
 
 public:
-    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({kind, idx}) {}
+    FoundDefinitionRef(FoundDefinitionRef::Kind kind, uint32_t idx) : _storage({kind, idx}) {
+        ENFORCE(this->_storage.kind != Kind::Symbol || idx < Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS);
+    }
     FoundDefinitionRef() : FoundDefinitionRef(FoundDefinitionRef::Kind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, core::Symbols::root().id());
     }
 
     FoundDefinitionRef::Kind kind() const {
@@ -63,9 +78,6 @@ public:
     uint32_t idx() const {
         return _storage.id;
     }
-
-    FoundClassRef &klassRef(FoundDefinitions &foundDefs);
-    const FoundClassRef &klassRef(const FoundDefinitions &foundDefs) const;
 
     FoundClass &klass(FoundDefinitions &foundDefs);
     const FoundClass &klass(const FoundDefinitions &foundDefs) const;
@@ -82,7 +94,7 @@ public:
     FoundField &field(FoundDefinitions &foundDefs);
     const FoundField &field(const FoundDefinitions &foundDefs) const;
 
-    core::SymbolRef symbol() const;
+    core::ClassOrModuleRef symbol() const;
 
     static std::string kindToString(Kind kind);
 
@@ -90,23 +102,14 @@ public:
 };
 CheckSize(FoundDefinitionRef, 4, 4);
 
-struct FoundClassRef final {
-    core::NameRef name;
-    core::LocOffsets loc;
-    // If !owner.exists(), owner is determined by reference site.
-    FoundDefinitionRef owner;
-
-    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
-};
-CheckSize(FoundClassRef, 16, 4);
-
 struct FoundClass final {
     FoundDefinitionRef owner;
-    FoundDefinitionRef klass;
+    core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
 
     enum class Kind : uint8_t {
+        Unknown,
         Module,
         Class,
     };
@@ -118,7 +121,6 @@ CheckSize(FoundClass, 28, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
-    FoundDefinitionRef scopeClass;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
@@ -126,7 +128,7 @@ struct FoundStaticField final {
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundStaticField, 32, 4);
+CheckSize(FoundStaticField, 28, 4);
 
 struct FoundTypeMember final {
     FoundDefinitionRef owner;
@@ -209,9 +211,6 @@ class FoundDefinitions final {
     // Contains references to items in _staticFields and _typeMembers.
     // Used so there is a consistent definition & redefinition ordering.
     std::vector<FoundDefinitionRef> _nonDeletableDefinitions;
-    // Contains references to classes in general. Separate from `FoundClass` because we sometimes need to define class
-    // Symbols for classes that are referenced from but not present in the given file.
-    std::vector<FoundClassRef> _klassRefs;
     // Contains all classes defined in the file.
     std::vector<FoundClass> _klasses;
     // Contains all methods defined in the file.
@@ -233,7 +232,6 @@ class FoundDefinitions final {
             case FoundDefinitionRef::Kind::Class:
             case FoundDefinitionRef::Kind::Method:
             case FoundDefinitionRef::Kind::Field:
-            case FoundDefinitionRef::Kind::ClassRef:
             case FoundDefinitionRef::Kind::Empty:
             case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
@@ -252,12 +250,6 @@ public:
         const uint32_t idx = _klasses.size();
         _klasses.emplace_back(std::move(klass));
         return FoundDefinitionRef(FoundDefinitionRef::Kind::Class, idx);
-    }
-
-    FoundDefinitionRef addClassRef(FoundClassRef &&klassRef) {
-        const uint32_t idx = _klassRefs.size();
-        _klassRefs.emplace_back(std::move(klassRef));
-        return FoundDefinitionRef(FoundDefinitionRef::Kind::ClassRef, idx);
     }
 
     FoundDefinitionRef addMethod(FoundMethod &&method) {
@@ -284,8 +276,8 @@ public:
         return FoundDefinitionRef(FoundDefinitionRef::Kind::Field, idx);
     }
 
-    FoundDefinitionRef addSymbol(core::SymbolRef symbol) {
-        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.rawId());
+    FoundDefinitionRef addSymbol(core::ClassOrModuleRef symbol) {
+        return FoundDefinitionRef(FoundDefinitionRef::Kind::Symbol, symbol.id());
     }
 
     void addModifier(FoundModifier &&mod) {

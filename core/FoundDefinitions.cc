@@ -4,17 +4,6 @@ using namespace std;
 
 namespace sorbet::core {
 
-FoundClassRef &FoundDefinitionRef::klassRef(FoundDefinitions &foundDefs) {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::ClassRef);
-    ENFORCE(foundDefs._klassRefs.size() > idx());
-    return foundDefs._klassRefs[idx()];
-}
-const FoundClassRef &FoundDefinitionRef::klassRef(const FoundDefinitions &foundDefs) const {
-    ENFORCE(kind() == FoundDefinitionRef::Kind::ClassRef);
-    ENFORCE(foundDefs._klassRefs.size() > idx());
-    return foundDefs._klassRefs[idx()];
-}
-
 FoundClass &FoundDefinitionRef::klass(FoundDefinitions &foundDefs) {
     ENFORCE(kind() == FoundDefinitionRef::Kind::Class);
     ENFORCE(foundDefs._klasses.size() > idx());
@@ -70,9 +59,9 @@ const FoundField &FoundDefinitionRef::field(const FoundDefinitions &foundDefs) c
     return foundDefs._fields[idx()];
 }
 
-core::SymbolRef FoundDefinitionRef::symbol() const {
+core::ClassOrModuleRef FoundDefinitionRef::symbol() const {
     ENFORCE(kind() == FoundDefinitionRef::Kind::Symbol);
-    return core::SymbolRef::fromRaw(_storage.id);
+    return core::ClassOrModuleRef::fromRaw(_storage.id);
 }
 
 string FoundDefinitionRef::kindToString(Kind kind) {
@@ -85,8 +74,6 @@ string FoundDefinitionRef::kindToString(Kind kind) {
             return "FoundStaticField";
         case FoundDefinitionRef::Kind::TypeMember:
             return "FoundTypeMember";
-        case FoundDefinitionRef::Kind::ClassRef:
-            return "FoundClassRef";
         case FoundDefinitionRef::Kind::Empty:
             return "FoundEmpty";
         case FoundDefinitionRef::Kind::Symbol:
@@ -111,9 +98,6 @@ string FoundDefinitionRef::toString(const core::GlobalState &gs, const FoundDefi
         case FoundDefinitionRef::Kind::TypeMember:
             result = this->typeMember(foundDefs).toString(gs, foundDefs, this->idx());
             break;
-        case FoundDefinitionRef::Kind::ClassRef:
-            result = this->klassRef(foundDefs).toString(gs, foundDefs, this->idx());
-            break;
         case FoundDefinitionRef::Kind::Empty:
             result = "{}";
             break;
@@ -127,18 +111,25 @@ string FoundDefinitionRef::toString(const core::GlobalState &gs, const FoundDefi
     return fmt::format("{} {}", kindToString(this->kind()), result);
 }
 
-string FoundClassRef::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
-    return fmt::format("{{ id = {}, name = {}, owner = {} }}", id, name.toString(gs), owner.idx());
-}
-
 string FoundClass::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
-    return fmt::format("{{ id = {}, owner = {}, klass = {}, classKind = {} }}", id, owner.idx(), klass.idx(),
-                       classKind == Kind::Module ? "module" : "class");
+    string_view classKindStr;
+    switch (classKind) {
+        case Kind::Unknown:
+            classKindStr = "unknown"sv;
+            break;
+        case Kind::Module:
+            classKindStr = "module"sv;
+            break;
+        case Kind::Class:
+            classKindStr = "class"sv;
+            break;
+    }
+    return fmt::format("{{ id = {}, owner = {}, name = {}, classKind = {} }}", id, owner.idx(), name.show(gs),
+                       classKindStr);
 }
 
 string FoundStaticField::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
-    return fmt::format("{{ id = {}, owner = {}, scopeClass = {}, name = {} }}", id, owner.idx(), scopeClass.idx(),
-                       name.toString(gs));
+    return fmt::format("{{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
 }
 
 string FoundTypeMember::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {

@@ -14,7 +14,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Main>>#<U yielder> (<blk>) @ Loc {file=test/testdata/namer/yield.rb start=3:5 end=3:16}
       argument <blk><block> @ Loc {file=test/testdata/namer/yield.rb start=??? end=???}
   class <S <C <U Main>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/yield.rb start=2:1 end=2:11}
-    type-member(+) <S <C <U Main>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Main>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Main) @ Loc {file=test/testdata/namer/yield.rb start=2:7 end=2:11}
+    type-member(+) <S <C <U Main>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Main>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Main) @ Loc {file=test/testdata/namer/yield.rb start=2:1 end=2:11}
     method <S <C <U Main>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/yield.rb start=2:1 end=26:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/yield.rb start=??? end=???}
 

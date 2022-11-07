@@ -1,11 +1,11 @@
 # typed: strict
 
 class Outer
-  A1 = T.let(0, Integer)
+  A1 = T.let(0, Integer) # error: Cannot initialize the class or module `A1` by constant assignment
   module Inner; end
-  A2 = Inner
+  A2 = Inner # error: Cannot initialize the class or module `A2` by constant assignment
 
-  A1::B = T.let('', String) # error: Can't nest `B` under `Outer::A1` because `Outer::A1` is not a class or module
+  A1::B = T.let('', String)
   Inner::B = T.let('', String)
-  A2::B = T.let('', String) # error: Can't nest `B` under `Outer::A2` because `Outer::A2` is not a class or module
+  A2::B = T.let('', String)
 end

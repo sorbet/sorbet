@@ -352,8 +352,13 @@ public:
     core::LocOffsets declLoc;
     core::ClassOrModuleRef symbol;
 
-    using Kind = core::FoundClass::Kind;
+    enum class Kind : uint8_t {
+        Module,
+        Class,
+    };
     Kind kind;
+
+    static core::FoundClass::Kind kindToFoundClassKind(Kind kind);
     static constexpr int EXPECTED_RHS_COUNT = 4;
     using RHS_store = InlinedVector<ExpressionPtr, EXPECTED_RHS_COUNT>;
 
