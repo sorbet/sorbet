@@ -556,11 +556,12 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             {
                 Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
                 int idx = 0;
+                fmt::memory_buffer buf;
 
                 for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
                     ++n;
                     auto &task = tasks[idx];
-                    fmt::memory_buffer buf;
+                    buf.clear();
                     task.node.renderAutoloadSrc(buf, gs, alCfg);
                     bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
 
