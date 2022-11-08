@@ -2259,7 +2259,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t ClassOrModule::hash(const GlobalState &gs) const {
+uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) const {
     uint32_t result = _hash(name.shortName(gs));
     if (!gs.lspExperimentalFastPathEnabled) {
         // resultType on a ClassOrModule is just externalType(), which is a function of this class
@@ -2308,7 +2308,13 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 }
             }
 
-            if (gs.lspExperimentalFastPathEnabled && e.second.isTypeMember()) {
+            if (skipTypeMemberNames && gs.lspExperimentalFastPathEnabled && e.second.isTypeMember()) {
+                // skipTypeMemberNames is currently the difference between `hash` and `classOrModuleShapeHash`
+                // (It felt wasteful to dupe this whole method.) Type member names have to be in the
+                // full hash so that a change to a type member name causes the right downstream
+                // files to retypecheck on the fast path (they might only mention the owner class,
+                // not the type member names themselves). They don't have to be in the shape hash
+                // because changes to type members can take the fast path.
                 continue;
             }
 

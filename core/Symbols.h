@@ -400,7 +400,11 @@ public:
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
 
-    uint32_t hash(const GlobalState &gs) const;
+    uint32_t hash(const GlobalState &gs, bool includeTypeMemberNames) const;
+    uint32_t classOrModuleShapeHash(const GlobalState &gs) const {
+        auto skipTypeMemberNames = true;
+        return hash(gs, skipTypeMemberNames);
+    }
 
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 

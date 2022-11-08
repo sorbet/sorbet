@@ -2273,7 +2273,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
     uint32_t classModuleHash = 0;
-    uint32_t typeArgumentHash = 0; // TODO(jez) Delete at same times as lspExperimentalFastPathEnabled
+    uint32_t typeArgumentHash = 0; // TODO(jez) Delete at same time as lspExperimentalFastPathEnabled
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;
     uint32_t staticFieldHash = 0;
@@ -2284,9 +2284,20 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
 
     for (const auto &sym : this->classAndModules) {
         if (!sym.ignoreInHashing(*this)) {
-            uint32_t symhash = sym.hash(*this);
-            hierarchyHash = mix(hierarchyHash, symhash);
-            classModuleHash = mix(classModuleHash, symhash);
+            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
+            auto skipTypeMemberNames = false;
+            uint32_t symhash = sym.hash(*this, skipTypeMemberNames);
+            target = mix(target, symhash);
+
+            if (this->lspExperimentalFastPathEnabled) {
+                uint32_t classOrModuleShapeHash = sym.classOrModuleShapeHash(*this);
+                hierarchyHash = mix(hierarchyHash, classOrModuleShapeHash);
+                classModuleHash = mix(classModuleHash, classOrModuleShapeHash);
+            } else {
+                hierarchyHash = mix(hierarchyHash, symhash);
+                classModuleHash = mix(classModuleHash, symhash);
+            }
+
             counter++;
             if (DEBUG_HASHING_TAIL && counter > this->classAndModules.size() - 15) {
                 errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
