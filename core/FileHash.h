@@ -270,8 +270,9 @@ struct LocalSymbolTableHashes {
     //
     // The hierarchyHash stores only enough information to know whether to take the fast path or not.
     // These symbol hashes store enough to know whether _anything_ changed, which lets us use a set
-    // difference to know the name hashes of any deletable symbols that changed in any way.
-    std::vector<SymbolHash> deletableSymbolHashes;
+    // difference to know the name hashes of any symbols that changed in any way, so that files
+    // mentioning them can be retypechecked.
+    std::vector<SymbolHash> retypecheckableSymbolHashes;
 
     static uint32_t patchHash(uint32_t hash) {
         if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {

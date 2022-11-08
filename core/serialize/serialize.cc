@@ -247,8 +247,8 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     p.putU4(fh->localSymbolTableHashes.staticFieldHash);
     p.putU4(fh->localSymbolTableHashes.classAliasHash);
     p.putU4(fh->localSymbolTableHashes.methodHash);
-    p.putU4(fh->localSymbolTableHashes.deletableSymbolHashes.size());
-    for (const auto &[key, value] : fh->localSymbolTableHashes.deletableSymbolHashes) {
+    p.putU4(fh->localSymbolTableHashes.retypecheckableSymbolHashes.size());
+    for (const auto &[key, value] : fh->localSymbolTableHashes.retypecheckableSymbolHashes) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
@@ -303,12 +303,12 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     ret.localSymbolTableHashes.staticFieldHash = p.getU4();
     ret.localSymbolTableHashes.classAliasHash = p.getU4();
     ret.localSymbolTableHashes.methodHash = p.getU4();
-    auto deletableSymbolHashSize = p.getU4();
-    ret.localSymbolTableHashes.deletableSymbolHashes.reserve(deletableSymbolHashSize);
-    for (int it = 0; it < deletableSymbolHashSize; it++) {
+    auto retypecheckableSymbolHashSize = p.getU4();
+    ret.localSymbolTableHashes.retypecheckableSymbolHashes.reserve(retypecheckableSymbolHashSize);
+    for (int it = 0; it < retypecheckableSymbolHashSize; it++) {
         WithoutUniqueNameHash key;
         key._hashValue = p.getU4();
-        ret.localSymbolTableHashes.deletableSymbolHashes.emplace_back(key, p.getU4());
+        ret.localSymbolTableHashes.retypecheckableSymbolHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
     ret.usages.nameHashes.reserve(constantsSize);

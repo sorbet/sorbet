@@ -2279,12 +2279,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     uint32_t staticFieldHash = 0;
     uint32_t classAliasHash = 0;
     uint32_t methodHash = 0;
-    UnorderedMap<WithoutUniqueNameHash, uint32_t> deletableSymbolHashesMap;
+    UnorderedMap<WithoutUniqueNameHash, uint32_t> retypecheckableSymbolHashesMap;
     int counter = 0;
 
     for (const auto &sym : this->classAndModules) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
+            auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             auto skipTypeMemberNames = false;
             uint32_t symhash = sym.hash(*this, skipTypeMemberNames);
             target = mix(target, symhash);
@@ -2327,7 +2327,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         counter++;
         // No type members are ignored in hashing.
         uint32_t symhash = typeMember.hash(*this);
-        auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, typeMember.name)];
+        auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, typeMember.name)];
         target = mix(target, symhash);
         if (!this->lspExperimentalFastPathEnabled) {
             hierarchyHash = mix(hierarchyHash, symhash);
@@ -2345,7 +2345,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
         uint32_t symhash = field.hash(*this);
         if (field.flags.isStaticField && !field.isClassAlias()) {
             // Either normal static-field or static-field-type-alias
-            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             if (!this->lspExperimentalFastPathEnabled) {
                 uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
@@ -2367,7 +2367,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             }
         } else {
             ENFORCE(field.flags.isField);
-            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
+            auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, field.name)];
             target = mix(target, symhash);
             if (!this->lspExperimentalFastPathEnabled) {
                 uint32_t fieldShapeHash = field.fieldShapeHash(*this);
@@ -2384,7 +2384,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = deletableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
+            auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
             auto needMethodShapeHash =
                 this->lspExperimentalFastPathEnabled
@@ -2412,12 +2412,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     }
 
     unique_ptr<LocalSymbolTableHashes> result = make_unique<LocalSymbolTableHashes>();
-    result->deletableSymbolHashes.reserve(deletableSymbolHashesMap.size());
-    for (const auto &[nameHash, symbolHash] : deletableSymbolHashesMap) {
-        result->deletableSymbolHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
+    result->retypecheckableSymbolHashes.reserve(retypecheckableSymbolHashesMap.size());
+    for (const auto &[nameHash, symbolHash] : retypecheckableSymbolHashesMap) {
+        result->retypecheckableSymbolHashes.emplace_back(nameHash, LocalSymbolTableHashes::patchHash(symbolHash));
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
-    fast_sort(result->deletableSymbolHashes);
+    fast_sort(result->retypecheckableSymbolHashes);
 
     result->hierarchyHash = LocalSymbolTableHashes::patchHash(hierarchyHash);
     result->classModuleHash = LocalSymbolTableHashes::patchHash(classModuleHash);
