@@ -24,7 +24,7 @@ public:
     AutogenCache(const AutogenCache &) = delete;
     AutogenCache &operator=(const AutogenCache &) = delete;
 
-    void add(std::string path, unsigned int hash) {
+    void add(std::string_view path, unsigned int hash) {
         _constantHashMap.emplace(path, hash);
     };
 

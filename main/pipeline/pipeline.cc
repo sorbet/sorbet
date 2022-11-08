@@ -1246,7 +1246,7 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
             if (!result.gotItem()) {
                 continue;
             }
-            cache.add(string(output.pf.file.data(gs).path()), output.constantHash);
+            cache.add(output.pf.file.data(gs).path(), output.constantHash);
             results.emplace_back(move(output.pf));
         }
     }
