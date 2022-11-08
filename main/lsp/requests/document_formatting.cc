@@ -135,6 +135,9 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
                              response);
                 break;
         }
+    } else {
+        // `result` here is already a `JSONNullObject`, we just need to explicitly set it.
+        response->result = move(result);
     }
 
     config.output->write(move(response));
