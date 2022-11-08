@@ -262,6 +262,7 @@ pipeline_tests(
     glob(
         [
             "testdata/**/*.rb",
+            "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
         exclude = [
