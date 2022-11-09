@@ -97,7 +97,7 @@ public:
     std::string fullName(const core::GlobalState &) const;
 
     void renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &) const;
-    bool mustRender(const core::GlobalState &gs, std::string_view filePath) const;
+    bool mustRender(const core::GlobalState &gs) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;

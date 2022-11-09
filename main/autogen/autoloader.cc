@@ -465,10 +465,10 @@ struct ModificationState {
 void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vector<RenderAutoloadTask> &tasks,
                                                const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
-    string filePath = join(path, fmt::format("{}.rb", name));
 
-    if (node.mustRender(gs, filePath)) {
-        tasks.emplace_back(RenderAutoloadTask{filePath, node});
+    if (node.mustRender(gs)) {
+        string filePath = join(path, fmt::format("{}.rb", name));
+        tasks.emplace_back(RenderAutoloadTask{move(filePath), node});
     }
 
     // Generate autoloads for child nodes if they exist and pkgName is not present (since the latter indicates
@@ -495,7 +495,7 @@ core::FileRef DefTree::definingFile() const {
     return definingFileRef;
 }
 
-bool DefTree::mustRender(const core::GlobalState &gs, std::string_view filePath) const {
+bool DefTree::mustRender(const core::GlobalState &gs) const {
     // Either the node has a behavior-defining file, or has a package name
     if (definingFile().exists() || pkgName.exists()) {
         return true;
