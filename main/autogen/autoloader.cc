@@ -512,12 +512,17 @@ bool DefTree::mustRender(const core::GlobalState &gs) const {
 void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
                                     const std::string &path, const DefTree &root) {
     vector<RenderAutoloadTask> tasks;
-    populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
+    {
+        Timer timeit(gs.tracer(), "populateAutoloadTasks");
+        populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
+    }
 
     auto modificationState = ModificationState{false};
     std::mutex modificationMutex;
 
     if (FileOps::exists(path)) {
+        Timer timeit(gs.tracer(), "removeExistingFiles");
+
         // Clear out files that we do not plan to write.
         vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, workers, true, {}, {});
         UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
