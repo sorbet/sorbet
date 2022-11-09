@@ -1,0 +1,6 @@
+# typed: true
+# assert-fast-path: private_overloads__2.rb
+
+def example
+  PrivateOverloads.new.foo # error: Non-private call to private method
+end
