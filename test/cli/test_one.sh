@@ -2,6 +2,8 @@
 script="$1"
 expect="$2"
 
+export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_12_0_0/bin/llvm-symbolizer
+
 if ! diff "$expect" -u <("$script"); then
   cat <<EOF
 ================================================================================
