@@ -71,6 +71,7 @@ def _cli_test(name, script, tags = []):
             script_path,
             ":run_{}".format(name),
             output,
+            "//test/cli:llvm-symbolizer",
         ],
         size = "medium",
         tags = tags,
