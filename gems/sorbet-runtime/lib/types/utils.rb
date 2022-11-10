@@ -2,29 +2,39 @@
 # typed: true
 
 module T::Utils
+  module Private
+    def self.coerce_and_check_module_types(val, check_val, check_module_type)
+      if val.is_a?(T::Private::Types::TypeAlias)
+        val.aliased_type
+      elsif val.is_a?(T::Types::Base)
+        val
+      elsif val.is_a?(Module)
+        if check_module_type && check_val.is_a?(val)
+          nil
+        else
+          T::Types::Simple::Private::Pool.type_for_module(val)
+        end
+      elsif val.is_a?(::Array)
+        T::Types::FixedArray.new(val)
+      elsif val.is_a?(::Hash)
+        T::Types::FixedHash.new(val)
+      elsif val.is_a?(T::Private::Methods::DeclBuilder)
+        T::Private::Methods.finalize_proc(val.decl)
+      elsif val.is_a?(::T::Enum)
+        T::Types::TEnum.new(val)
+      elsif val.is_a?(::String)
+        raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
+              "class/module, or an array. Got a String with value `#{val}`."
+      else
+        raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
+              "class/module, or an array. Got a `#{val.class}`."
+      end
+    end
+  end
+
   # Used to convert from a type specification to a `T::Types::Base`.
   def self.coerce(val)
-    if val.is_a?(T::Private::Types::TypeAlias)
-      val.aliased_type
-    elsif val.is_a?(T::Types::Base)
-      val
-    elsif val.is_a?(Module)
-      T::Types::Simple::Private::Pool.type_for_module(val)
-    elsif val.is_a?(::Array)
-      T::Types::FixedArray.new(val)
-    elsif val.is_a?(::Hash)
-      T::Types::FixedHash.new(val)
-    elsif val.is_a?(T::Private::Methods::DeclBuilder)
-      T::Private::Methods.finalize_proc(val.decl)
-    elsif val.is_a?(::T::Enum)
-      T::Types::TEnum.new(val)
-    elsif val.is_a?(::String)
-      raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
-            "class/module, or an array. Got a String with value `#{val}`."
-    else
-      raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
-            "class/module, or an array. Got a `#{val.class}`."
-    end
+    Private.coerce_and_check_module_types(val, nil, false)
   end
 
   # Dynamically confirm that `value` is recursively a valid value of

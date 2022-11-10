@@ -5,7 +5,10 @@ module T::Private
   module Casts
     def self.cast(value, type, cast_method)
       begin
-        error = T::Utils.coerce(type).error_message_for_obj(value)
+        coerced_type = T::Utils::Private.coerce_and_check_module_types(type, value, true)
+        return value unless coerced_type
+
+        error = coerced_type.error_message_for_obj(value)
         return value unless error
 
         caller_loc = T.must(caller_locations(2..2)).first
