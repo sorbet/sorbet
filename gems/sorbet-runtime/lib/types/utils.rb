@@ -4,10 +4,12 @@
 module T::Utils
   module Private
     def self.coerce_and_check_module_types(val, check_val, check_module_type)
-      if val.is_a?(T::Private::Types::TypeAlias)
-        val.aliased_type
-      elsif val.is_a?(T::Types::Base)
-        val
+      if val.is_a?(T::Types::Base)
+        if val.is_a?(T::Private::Types::TypeAlias)
+          val.aliased_type
+        else
+          val
+        end
       elsif val.is_a?(Module)
         if check_module_type && check_val.is_a?(val)
           nil
