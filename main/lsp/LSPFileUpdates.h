@@ -24,7 +24,7 @@ public:
     std::vector<std::shared_ptr<core::File>> updatedFiles;
     std::vector<ast::ParsedFile> updatedFileIndexes;
 
-    PathType typecheckingPath = PathType::Slow;
+    PathType typecheckingPath = TypecheckingPath::Slow;
 
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
