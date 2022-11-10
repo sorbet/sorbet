@@ -32,7 +32,7 @@ namespace sorbet::realmain::lsp {
 using namespace std;
 namespace {
 
-TypecheckingPath toTypecheckingPath(PathType pathType) {
+TypecheckingPath toTypecheckingPath(TypecheckingPath pathType) {
     switch (pathType) {
         case TypecheckingPath::Slow:
             return TypecheckingPath::Slow;
@@ -42,7 +42,7 @@ TypecheckingPath toTypecheckingPath(PathType pathType) {
 }
 
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
-                       PathType typecheckingPath, std::vector<core::FileRef> filesTypechecked) {
+                       TypecheckingPath typecheckingPath, std::vector<core::FileRef> filesTypechecked) {
     if (config.getClientConfig().enableTypecheckInfo) {
         auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(status, toTypecheckingPath(typecheckingPath),
                                                                        config.frefsToPaths(gs, filesTypechecked));

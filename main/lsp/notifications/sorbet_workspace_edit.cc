@@ -132,7 +132,7 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
     startedNotification.WaitForNotification();
 }
 
-PathType SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
+TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }

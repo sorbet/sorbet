@@ -75,7 +75,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
     computeFileHashes(files, *emptyWorkers);
 }
 
-PathType
+TypecheckingPath
 LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
@@ -218,7 +218,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     return TypecheckingPath::Fast;
 }
 
-PathType
+TypecheckingPath
 LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
@@ -231,7 +231,7 @@ LSPIndexer::getTypecheckingPath(const LSPFileUpdates &edit,
     return getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
 }
 
-PathType LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
