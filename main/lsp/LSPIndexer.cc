@@ -334,7 +334,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
         ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
 
         // Cancel if the new update will take the slow path anyway.
-        if (update.typecheckingPath != TypecheckingPath::Fast && initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
+        if (update.typecheckingPath != TypecheckingPath::Fast &&
+            initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
             // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
             update.mergeOlder(pendingTypecheckUpdates);
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
