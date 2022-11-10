@@ -42,9 +42,9 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
 
     // This cached information is now invalid.
     task.cachedFastPathDecisionValid = false;
-    task.cachedFastPathDecision = PathType::Slow;
+    task.cachedFastPathDecision = TypecheckingPath::Slow;
     cachedFastPathDecisionValid = false;
-    cachedFastPathDecision = PathType::Slow;
+    cachedFastPathDecision = TypecheckingPath::Slow;
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -61,7 +61,7 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
         this->indexer = &indexer;
-        ENFORCE(getTypecheckingPath(indexer) != PathType::Fast);
+        ENFORCE(getTypecheckingPath(indexer) != TypecheckingPath::Fast);
     }
 }
 
@@ -78,7 +78,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     latencyCancelSlowPath = nullptr;
     // For consistency; I don't expect this notification to be used for fast path edits.
     startedNotification.Notify();
-    if (updates->typecheckingPath != PathType::Fast) {
+    if (updates->typecheckingPath != TypecheckingPath::Fast) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     const auto newEditCount = updates->editCount - updates->committedEditCount;
@@ -132,7 +132,7 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
     startedNotification.WaitForNotification();
 }
 
-PathType SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
+TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
@@ -144,11 +144,11 @@ PathType SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) c
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
-    return getTypecheckingPath(index) == PathType::Fast;
+    return getTypecheckingPath(index) == TypecheckingPath::Fast;
 }
 
 bool SorbetWorkspaceEditTask::needsMultithreading(const LSPIndexer &index) const {
-    return getTypecheckingPath(index) != PathType::Fast;
+    return getTypecheckingPath(index) != TypecheckingPath::Fast;
 }
 
 const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {

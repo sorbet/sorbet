@@ -31,7 +31,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
         auto &ast = older.updatedFileIndexes[i];
         updatedFileIndexes.push_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
     }
-    typecheckingPath = PathType::Slow;
+    typecheckingPath = TypecheckingPath::Slow;
 }
 
 LSPFileUpdates LSPFileUpdates::copy() const {
@@ -194,10 +194,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             // One of two things could be true:
             // - We're running on the indexer thread to decide typecheckingPath, which only cares about how
             //   many extra files there are, not what they are.
-            // - We're running on the typechecker thread (knowing that typecheckingPath was already PathType::Fast)
-            //   and simply need to compute the list of files to typecheck. But that would be a
-            //   contradiction--because otherwise the indexer would have marked the update as not being
-            //   able to take the fast path.
+            // - We're running on the typechecker thread (knowing that typecheckingPath was already
+            //   TypecheckingPath::Fast) and simply need to compute the list of files to typecheck.
+            //   But that would be a contradiction--because otherwise the indexer would have marked
+            //   the update as not being able to take the fast path.
             //
             // So it's actually only the first thing that's true.
 
