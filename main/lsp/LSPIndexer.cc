@@ -358,20 +358,25 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
         clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
     }
 
-    if (update.typecheckingPath == TypecheckingPath::Fast) {
-        // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
-        auto merged = update.copy();
-        merged.mergeOlder(pendingTypecheckUpdates);
-        pendingTypecheckUpdates = move(merged);
-        if (!update.canceledSlowPath) {
-            // If a slow path is running, this update preempted.
-            pendingTypecheckUpdates.committedEditCount += update.editCount;
+    switch (update.typecheckingPath) {
+        case TypecheckingPath::Fast: {
+            // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
+            auto merged = update.copy();
+            merged.mergeOlder(pendingTypecheckUpdates);
+            pendingTypecheckUpdates = move(merged);
+            if (!update.canceledSlowPath) {
+                // If a slow path is running, this update preempted.
+                pendingTypecheckUpdates.committedEditCount += update.editCount;
+            }
+            mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
+            break;
         }
-        mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
-    } else {
-        // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
-        update.updatedGS = initialGS->deepCopy();
-        pendingTypecheckUpdates = update.copy();
+        case TypecheckingPath::Slow: {
+            // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
+            update.updatedGS = initialGS->deepCopy();
+            pendingTypecheckUpdates = update.copy();
+            break;
+        }
     }
 
     // newlyEvictedFiles contains the changes from this edit + changes from the pending typecheck, if applicable.
