@@ -5,7 +5,6 @@
 #include "common/common.h"
 #include "core/FileHash.h"
 #include "main/lsp/LSPConfiguration.h"
-#include "main/lsp/LSPPathType.h"
 
 namespace sorbet::realmain::lsp {
 /**

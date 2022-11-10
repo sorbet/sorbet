@@ -1,7 +1,6 @@
 #ifndef RUBY_TYPER_LSP_LSPINDEXER_H
 #define RUBY_TYPER_LSP_LSPINDEXER_H
 
-#include "LSPPathType.h"
 #include "core/core.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
