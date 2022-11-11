@@ -76,8 +76,6 @@
 class Vector
   include ::Enumerable
 
-  Elem = type_member(:out)
-
   # [`Vector.new`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-new)
   # is private; use Vector[] or
   # [`Vector.elements`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-elements)
@@ -320,8 +318,6 @@ end
 # determinant, or eigensystem.
 class Matrix
   include ::Enumerable
-
-  Elem = type_member(:out)
 
   # Yields all elements of the matrix, starting with those of the first row, or
   # returns an
