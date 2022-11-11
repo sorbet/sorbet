@@ -121,7 +121,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
-        committed = runSlowPath(move(updates), workers, /* cancelable */ false);
+        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
+        committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ false);
         epoch.committed = committed;
     }
     ENFORCE(committed);
@@ -178,13 +179,13 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     {
         ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
 
+        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         if (isFastPath) {
-            filesTypechecked =
-                runFastPath(updates, workers, make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter));
+            filesTypechecked = runFastPath(updates, workers, errorFlusher);
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            committed = runSlowPath(move(updates), workers, /* cancelable */ true);
+            committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ true);
         }
         epoch.committed = committed;
     }
@@ -339,7 +340,8 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return !epochManager.wasTypecheckingCanceled();
 }
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
+                                 shared_ptr<core::ErrorFlusher> errorFlusher, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -356,8 +358,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
     auto finalGS = move(updates.updatedGS.value());
     const uint32_t epoch = updates.epoch;
     // Replace error queue with one that is owned by this thread.
-    finalGS->errorQueue = make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer,
-                                                        make_shared<ErrorFlusherLSP>(epoch, errorReporter));
+    finalGS->errorQueue =
+        make_shared<core::ErrorQueue>(finalGS->errorQueue->logger, finalGS->errorQueue->tracer, errorFlusher);
     auto &epochManager = *finalGS->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
