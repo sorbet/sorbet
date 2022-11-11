@@ -121,7 +121,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     {
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
-        auto errorFlusher = make_shared<ErrorFlusherLSP>(epoch, errorReporter);
+        auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ false);
         epoch.committed = committed;
     }
