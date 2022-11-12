@@ -254,18 +254,15 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
                 // and re-added, we have to add the __package.rb files to set of files to retypecheck
                 // so that we can re-run PropagateVisibility to set export bits for any contants.
-                toTypecheck.emplace_back(gs->packageDB().getPackageInfo(pkgName).fullLoc().file());
+                auto packageFref = gs->packageDB().getPackageInfo(pkgName).fullLoc().file();
+                if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
+                    // Skip duplicates
+                    toTypecheck.emplace_back(packageFref);
+                }
             }
         }
     }
     fast_sort(toTypecheck);
-    // This used to be unique by construction, but now it's not because we sometimes will throw the
-    // `__package.rb` file for a changed file into the toTypecheck, and sometimes that file might
-    // already be in either the changedFiles or the extraFiles for this edit. (And we can only
-    // handle `__package.rb` files here, because the indexer thread doesn't have a packageDB that's
-    // up to date.)
-    auto eraseStart = unique(toTypecheck.begin(), toTypecheck.end());
-    toTypecheck.erase(eraseStart, toTypecheck.end());
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
     unique_ptr<ShowOperation> op;
