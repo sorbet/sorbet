@@ -90,6 +90,7 @@ struct Printers {
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
     bool isAutogen() const;
+    bool isAutogenPrintingDepDB() const;
 };
 
 enum class Phase {

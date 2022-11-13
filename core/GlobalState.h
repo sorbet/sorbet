@@ -243,6 +243,7 @@ public:
     // Think very hard before looking at this value in namer / resolver!
     // (hint: probably you want to find an alternate solution)
     bool runningUnderAutogen = false;
+    bool autogenPrintingDepDB = false;
     bool censorForSnapshotTests = false;
 
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;

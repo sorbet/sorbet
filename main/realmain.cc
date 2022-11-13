@@ -497,6 +497,9 @@ int realmain(int argc, char *argv[]) {
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
+    if (opts.print.isAutogenPrintingDepDB()) {
+        gs->autogenPrintingDepDB = true;
+    }
     if (opts.censorForSnapshotTests) {
         gs->censorForSnapshotTests = true;
     }
