@@ -940,12 +940,22 @@ private:
         if (name.kind() == core::NameKind::UNIQUE &&
             name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload) {
             // These name kinds are only created in resolver, which means that we must be running on
-            // the fast path with an existing GlobalState.
-            // When modifyMethod is called later, it won't be able to find the correct method entry.
-            // Let's leave the method visibility what it was.
-            // TODO(jez) After #5808 lands, can we delete this check?
-            // TODO(jez) The change to only populate oldFoundHashesForFiles if something
-            // actually changed means that no, we actually can't remove this quite yet.
+            // the fast path but not with the incremental namer.
+            // If we let the rest of insertMethod run, it will mark this method as public even if it was
+            // already private. Then modifyMethod will attempt to mark a method private by name
+            // (instead of by name and arity hash), which will have the effect of NOT re-marking the
+            // MangleRenameOverload method as private (it will remain public). Then later in
+            // resolver, the visibility of the MangleRenameOverload is propagated to all overloads,
+            // which will make them all public.
+            //
+            // Any case where the visibility would have actually changed would have come via an
+            // edit, which would then trigger an incremental namer run. So we know that this
+            // typecheck is only for the purpose of e.g. answering a hover, and we don't actually
+            // need to mutate GlobalState for any changes. So we can just short circuit.
+            //
+            // One way to change this in the future might be to make FoundModifier attempt to record
+            // something about the method arity in addition to just the method's name. But for the
+            // time being this hack suffices. (See the commit where this comment was added a test)
             return symbol;
         }
 
