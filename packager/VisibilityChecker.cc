@@ -37,7 +37,7 @@ class PropagateVisibility final {
 
         for (const auto &[name, child] : klass.data(gs)->members()) {
             if (name == core::Names::attached()) {
-                // There is a loop between a class and its singleton, and this breaks out of the loop
+                // There is a cycle between a class and its singleton, and this avoids infinite recursion.
                 continue;
             }
             if (child.isClassOrModule()) {

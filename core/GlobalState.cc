@@ -1807,6 +1807,7 @@ void GlobalState::deleteTypeMemberSymbol(TypeMemberRef what) {
 
     auto &ownerTypeMembers = owner.data(*this)->existingTypeMembers();
     auto fndTypeMember = absl::c_find(ownerTypeMembers, what);
+    ENFORCE(fndTypeMember != ownerTypeMembers.end());
     ownerTypeMembers.erase(fndTypeMember);
 
     this->typeMembers[what.id()] = this->typeMembers[0].deepCopy(*this);
