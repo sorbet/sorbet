@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: remove_const_from_generic.rb
+# assert-fast-path: remove_static_field_from_generic_class.rb
 
 extend T::Sig
 
