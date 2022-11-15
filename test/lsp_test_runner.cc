@@ -641,8 +641,7 @@ TEST_CASE("LSPTest") {
             vector<unique_ptr<LSPMessage>> updates;
             for (auto &filename : filenames) {
                 auto textDocContents = test.sourceFileContents[filename]->source();
-                updates.push_back(
-                    makeChange(testFileUris[filename], string(textDocContents.begin(), textDocContents.end()), 2 + i));
+                updates.push_back(makeChange(testFileUris[filename], textDocContents, 2 + i));
             }
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
