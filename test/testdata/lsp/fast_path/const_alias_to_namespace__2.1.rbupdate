@@ -1,0 +1,10 @@
+# typed: true
+# exclude-from-file-update: true
+
+module Namespace1
+  X = 1
+end
+
+module Namespace2
+  X = ''
+end

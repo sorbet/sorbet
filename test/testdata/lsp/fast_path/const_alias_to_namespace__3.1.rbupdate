@@ -1,0 +1,4 @@
+# typed: true
+# exclude-from-file-update: true
+
+T.reveal_type(Wrapper::Alias::X) # error: `Integer`
