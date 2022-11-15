@@ -1,0 +1,11 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  def self.foo; end
+end
+
+C = A
+
+B.foo # error: Unable to resolve constant `B`
+C.foo

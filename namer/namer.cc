@@ -1095,6 +1095,18 @@ private:
             singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
 
+        // Reset resultType to nullptr for idempotency on the fast path--it will always be
+        // re-entered in resolver.
+        symbol.data(ctx)->resultType = nullptr;
+        singletonClass.data(ctx)->resultType = nullptr;
+        // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
+        // singletonClass to reset the <AttachedClass> type template to what it used to be.
+        // Is there a better way to accomplish this? (This is largely the same as the bad locs problem above;
+        // we can probably be more principled about what state calling `singletonClass` sets up/resets.)
+        auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+        auto tp = singletonClass.data(ctx)->members()[core::Names::Constants::AttachedClass()].asTypeMemberRef();
+        tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
             ctx.state.staticInitForFile(ctx.locAt(klass.loc));
@@ -1374,6 +1386,8 @@ private:
                         ctx.state.deleteFieldSymbol(oldSymbol.asFieldRef());
                         break;
                     case core::SymbolRef::Kind::TypeMember:
+                        ctx.state.deleteTypeMemberSymbol(oldSymbol.asTypeMemberRef());
+                        break;
                     case core::SymbolRef::Kind::ClassOrModule:
                     case core::SymbolRef::Kind::TypeArgument:
                         ENFORCE(false);
@@ -1381,6 +1395,31 @@ private:
                 }
             }
         }
+    }
+
+    void deleteStaticFieldViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
+                                          const core::FoundStaticFieldHash &oldDefHash) {
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+
+        auto owner = getOwnerSymbol(state, oldDefHash.owner());
+        deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
+    }
+
+    void deleteTypeMemberViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
+                                         const core::FoundTypeMemberHash &oldDefHash) {
+        ENFORCE(oldDefHash.nameHash.isDefined(), "Can't delete rename if old hash is not defined");
+
+        // Changes to classes/modules take the slow path, so getOwnerSymbol is okay to call here
+        auto owner = getOwnerSymbol(state, oldDefHash.owner());
+        if (oldDefHash.isTypeTemplate) {
+            // Also have to delete the static-field-class-alias that forwards from a constant
+            // literal on the attached class to the type template on the singleton class
+            deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
+
+            owner = owner.data(ctx)->singletonClass(ctx);
+        }
+
+        deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
     }
 
     void deleteFieldViaFullNameHash(core::MutableContext ctx, const SymbolDefiner::State &state,
@@ -1412,10 +1451,47 @@ public:
         if (oldFoundHashes.has_value()) {
             const auto &oldFoundHashesVal = oldFoundHashes.value();
 
-            for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
-                if (oldFieldHash.isInstanceVariable) {
-                    deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
+            for (const auto &oldStaticFieldHash : oldFoundHashesVal.staticFieldHashes) {
+                deleteStaticFieldViaFullNameHash(ctx, state, oldStaticFieldHash);
+            }
+
+            for (const auto &oldTypeMemberHash : oldFoundHashesVal.typeMemberHashes) {
+                deleteTypeMemberViaFullNameHash(ctx, state, oldTypeMemberHash);
+            }
+
+            for (auto klass : state.definedClasses) {
+                // In the process of recovering from "parent type member must be re-declared in child" errors,
+                // GlobalPass will create type members even if there isn't a `type_member` in the child class' body.
+                // There won't be an entry in the old typeMemberHashes for these type members, so we have to
+                // delete them manually.
+                auto currentClass = klass;
+                vector<core::TypeMemberRef> toDelete;
+                do {
+                    const auto &typeMembers = currentClass.data(ctx)->typeMembers();
+                    toDelete.reserve(typeMembers.size());
+                    for (const auto &typeMember : typeMembers) {
+                        if (typeMember.data(ctx)->name == core::Names::Constants::AttachedClass()) {
+                            // <AttachedClass> type templates are created when the singleton class was created.
+                            // Since we don't delete and re-add classes on the fast path, we both can and must leave
+                            // these `<AttachedClass>` type templates alone
+                            continue;
+                        }
+                        toDelete.emplace_back(typeMember);
+                    }
+
+                    currentClass = currentClass.data(ctx)->lookupSingletonClass(ctx);
+                } while (currentClass.exists());
+
+                for (auto oldTypeMember : toDelete) {
+                    oldTypeMember.data(ctx)->removeLocsForFile(ctx.file);
+                    if (oldTypeMember.data(ctx)->locs().empty()) {
+                        ctx.state.deleteTypeMemberSymbol(oldTypeMember);
+                    }
                 }
+            }
+
+            for (const auto &oldFieldHash : oldFoundHashesVal.fieldHashes) {
+                deleteFieldViaFullNameHash(ctx, state, oldFieldHash);
             }
 
             for (const auto &oldMethodHash : oldFoundHashesVal.methodHashes) {
@@ -1442,8 +1518,13 @@ public:
         return state;
     }
 
-    SymbolDefiner::State enterNonDeletableDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
-        for (auto ref : foundDefs.nonDeletableDefinitions()) {
+    void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
+        // We have to defer defining "deletable" symbols until this (second) phase of incremental
+        // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
+        // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
+        // chance to process _all_ files.
+
+        for (auto ref : foundDefs.deletableDefinitions()) {
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);
@@ -1465,18 +1546,6 @@ public:
             }
         }
 
-        return move(state);
-    }
-
-    void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
-        // TODO(jez) After everything but classes is handled on the fast path, I think we can go
-        // back to having a single list of (non-class) definitions with a switch statement, like how
-        // namer used to work.
-
-        // We have to defer defining "deletable" symbols until this (second) phase of incremental
-        // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
-        // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
-        // chance to process _all_ files.
         for (auto &method : foundDefs.methods()) {
             if (method.arityHash.isAliasMethod()) {
                 // We need alias methods in the FoundDefinitions list not so that we can actually
@@ -2067,10 +2136,33 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
 
 void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
                             core::FoundDefHashes &foundHashesOut) {
+    ENFORCE(foundHashesOut.staticFieldHashes.empty());
+    foundHashesOut.staticFieldHashes.reserve(foundDefs.staticFields().size());
+    for (const auto &staticField : foundDefs.staticFields()) {
+        auto owner = staticField.owner;
+        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                    owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+        auto fullNameHash = core::FullNameHash(ctx, staticField.name);
+        foundHashesOut.staticFieldHashes.emplace_back(owner.idx(), ownerIsSymbol, fullNameHash);
+    }
+
+    ENFORCE(foundHashesOut.typeMemberHashes.empty());
+    foundHashesOut.typeMemberHashes.reserve(foundDefs.typeMembers().size());
+    for (const auto &typeMember : foundDefs.typeMembers()) {
+        auto owner = typeMember.owner;
+        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                    owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+        auto fullNameHash = core::FullNameHash(ctx, typeMember.name);
+        foundHashesOut.typeMemberHashes.emplace_back(owner.idx(), ownerIsSymbol, typeMember.isTypeTemplate,
+                                                     fullNameHash);
+    }
+
     ENFORCE(foundHashesOut.methodHashes.empty());
-    ENFORCE(foundHashesOut.fieldHashes.empty());
     foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
-    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &method : foundDefs.methods()) {
         auto owner = method.owner;
         ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
@@ -2080,6 +2172,9 @@ void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs
         foundHashesOut.methodHashes.emplace_back(owner.idx(), ownerIsSymbol, method.flags.isSelfMethod, fullNameHash,
                                                  method.arityHash);
     }
+
+    ENFORCE(foundHashesOut.fieldHashes.empty());
+    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
     for (const auto &field : foundDefs.fields()) {
         auto owner = field.owner;
         ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
@@ -2132,25 +2227,6 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     }
     ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
-    count = 0;
-    for (auto &fileFoundDefinitions : allFoundDefinitions) {
-        count++;
-        if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled::cancel(move(output), workers);
-        }
-
-        auto fref = fileFoundDefinitions.tree.file;
-        // The contents of this don't matter for incremental definition.  The
-        // old definitions should only matter when deleting old symbols (which
-        // happened in the previous phase of incremental namer), not here when
-        // entering symbols.
-        optional<core::FoundDefHashes> oldFoundHashes;
-        core::MutableContext ctx(gs, core::Symbols::root(), fref);
-
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
-        incrementalDefinitions[fref] =
-            symbolDefiner.enterNonDeletableDefinitions(ctx, move(incrementalDefinitions[fref]));
-    }
     count = 0;
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         count++;

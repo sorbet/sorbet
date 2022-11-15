@@ -1,0 +1,5 @@
+# typed: strict
+# exclude-from-file-update: true
+
+class Child < Parent # error: Type `AnotherElem` declared by parent `Parent` must be re-declared in `Child`
+end

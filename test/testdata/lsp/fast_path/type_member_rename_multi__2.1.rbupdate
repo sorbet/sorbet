@@ -1,0 +1,11 @@
+# typed: true
+# exclude-from-file-update: true
+
+  class Child < Parent
+# ^^^^^^^^^^^^^^^^^^^^ error: Type `AnotherElem` declared by parent `Parent` must be re-declared in `Child`
+    MyElem = type_member
+
+    sig {override.params(x: MyElem).void}
+    def example(x)
+    end
+  end

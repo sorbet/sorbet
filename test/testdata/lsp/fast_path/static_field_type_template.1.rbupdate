@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: static_field_type_template.rb
 
 class GenericPlaceholder
   extend T::Helpers

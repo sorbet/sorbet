@@ -2259,9 +2259,15 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t ClassOrModule::hash(const GlobalState &gs) const {
+uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) const {
     uint32_t result = _hash(name.shortName(gs));
-    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    if (!gs.lspExperimentalFastPathEnabled) {
+        // resultType on a ClassOrModule is just externalType(), which is a function of this class
+        // (including singletons and attached classes) and its type members. If any of those things
+        // change, either they will be reflected elsewhere in the hash, or they don't need to be
+        // included in the hash at all.
+        result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    }
     result = mix(result, this->flags.serialize());
     result = mix(result, this->owner.id());
     result = mix(result, this->superClass_.id());
@@ -2281,8 +2287,34 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
                 continue;
             }
 
-            if (e.second.isFieldOrStaticField() && e.second.asFieldRef().data(gs)->flags.isField &&
-                gs.lspExperimentalFastPathEnabled) {
+            if (gs.lspExperimentalFastPathEnabled && e.second.isFieldOrStaticField()) {
+                const auto &field = e.second.asFieldRef().data(gs);
+                if (field->flags.isStaticField && !field->isClassAlias()) {
+                    continue;
+                } else if (field->flags.isField) {
+                    continue;
+                } else {
+                    // Currently only static field class aliases must take the slow path
+                    ENFORCE(field->flags.isStaticField && field->isClassAlias());
+
+                    const auto &dealiased = field->dealias(gs);
+                    if (dealiased.isTypeMember() && field->name == dealiased.name(gs) &&
+                        dealiased.owner(gs) == this->lookupSingletonClass(gs)) {
+                        // This is a static field class alias that forwards to a type_template on the singleton class
+                        // (in service of constant literal resolution). Treat this as a type member (which we can
+                        // handle on the fast path) and not like other class aliases.
+                        continue;
+                    }
+                }
+            }
+
+            if (skipTypeMemberNames && gs.lspExperimentalFastPathEnabled && e.second.isTypeMember()) {
+                // skipTypeMemberNames is currently the difference between `hash` and `classOrModuleShapeHash`
+                // (It felt wasteful to dupe this whole method.) Type member names have to be in the
+                // full hash so that a change to a type member name causes the right downstream
+                // files to retypecheck on the fast path (they might only mention the owner class,
+                // not the type member names themselves). They don't have to be in the shape hash
+                // because changes to type members can take the fast path.
                 continue;
             }
 
@@ -2302,9 +2334,11 @@ uint32_t ClassOrModule::hash(const GlobalState &gs) const {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
-    for (const auto &e : typeMembers()) {
-        if (e.exists()) {
-            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
+    if (!gs.lspExperimentalFastPathEnabled) {
+        for (const auto &e : typeMembers()) {
+            if (e.exists()) {
+                result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
+            }
         }
     }
 

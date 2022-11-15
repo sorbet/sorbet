@@ -105,6 +105,50 @@ private:                                    \
 public:                                     \
     FoundDefinitionRef owner() const;
 
+struct FoundStaticFieldHash {
+    // The owner of this static field (index into namer's definedClasses vector)
+    FOUND_HASH_OWNER_INFO();
+    // Hash of this static field's name
+    const FullNameHash nameHash;
+
+    FoundStaticFieldHash(uint32_t ownerIdx, bool ownerIsSymbol, FullNameHash nameHash)
+        : ownerIdx(ownerIdx), ownerIsSymbol(ownerIsSymbol), nameHash(nameHash) {
+        sanityCheck();
+    }
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundStaticFieldHash, 8, 4);
+
+using FoundStaticFieldHashes = std::vector<FoundStaticFieldHash>;
+
+struct FoundTypeMemberHash {
+    // The owner of this type member (index into namer's definedClasses vector)
+    FOUND_HASH_OWNER_INFO();
+
+    // If this is true, then the actual owner is the singleton class of the class pointed to by `idx`
+    bool isTypeTemplate : 1;
+
+    // Hash of this type member's name
+    const FullNameHash nameHash;
+
+    FoundTypeMemberHash(uint32_t ownerIdx, bool ownerIsSymbol, bool isTypeTemplate, FullNameHash nameHash)
+        : ownerIdx(ownerIdx), ownerIsSymbol(ownerIsSymbol), isTypeTemplate(isTypeTemplate), nameHash(nameHash) {
+        sanityCheck();
+    }
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundTypeMemberHash, 8, 4);
+
+using FoundTypeMemberHashes = std::vector<FoundTypeMemberHash>;
+
 // A fingerprint of a FoundDefinition suitable for storing on a File.
 // Allows a current Namer run to reference information about a previous Namer run.
 struct FoundMethodHash {
@@ -168,6 +212,8 @@ CheckSize(FoundFieldHash, 8, 4);
 using FoundFieldHashes = std::vector<FoundFieldHash>;
 
 struct FoundDefHashes {
+    FoundStaticFieldHashes staticFieldHashes;
+    FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
     FoundFieldHashes fieldHashes;
 };
@@ -224,8 +270,9 @@ struct LocalSymbolTableHashes {
     //
     // The hierarchyHash stores only enough information to know whether to take the fast path or not.
     // These symbol hashes store enough to know whether _anything_ changed, which lets us use a set
-    // difference to know the name hashes of any deletable symbols that changed in any way.
-    std::vector<SymbolHash> deletableSymbolHashes;
+    // difference to know the name hashes of any symbols that changed in any way, so that files
+    // mentioning them can be retypechecked.
+    std::vector<SymbolHash> retypecheckableSymbolHashes;
 
     static uint32_t patchHash(uint32_t hash) {
         if (hash == LocalSymbolTableHashes::HASH_STATE_NOT_COMPUTED) {

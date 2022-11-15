@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 class A
   extend T::Generic
   B = type_member

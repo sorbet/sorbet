@@ -1,0 +1,5 @@
+# typed: true
+# assert-slow-path: true
+
+Z = 1 # error: Cannot initialize the class or module `Z` by constant assignment
+Z::Y = 1

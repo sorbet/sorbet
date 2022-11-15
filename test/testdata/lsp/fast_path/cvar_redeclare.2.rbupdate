@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: cvar_redeclare.rb
 
 class A
   @@var = T.let(0, Integer)

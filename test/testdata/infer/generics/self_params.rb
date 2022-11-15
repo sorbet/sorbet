@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 class Foo
   extend T::Generic
   extend T::Sig

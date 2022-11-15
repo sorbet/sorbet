@@ -1,0 +1,9 @@
+# typed: true
+# spacer for exclude-from-file-update
+
+T.reveal_type( # error: `T.untyped`
+  A::X # error: Unable to resolve constant `X`
+)
+T.reveal_type( # error: `Integer`
+  A::Y
+)

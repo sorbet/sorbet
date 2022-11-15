@@ -273,7 +273,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
             auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-            what = packager::VisibilityChecker::runIncremental(gs, *emptyWorkers, std::move(what));
+            what = packager::VisibilityChecker::run(gs, *emptyWorkers, std::move(what));
         }
 #endif
 

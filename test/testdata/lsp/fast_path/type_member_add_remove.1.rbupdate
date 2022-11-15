@@ -1,0 +1,17 @@
+# typed: true
+# assert-fast-path: type_member_add_remove.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  MyElem = type_member
+
+  sig {params(x: MyElem).returns(MyElem)}
+  def example(x)
+    T.reveal_type(x) # error: `Parent::MyElem`
+  end
+end
+
+parent = Parent[Integer].new
+T.reveal_type(parent.example(0)) # error: `Integer`

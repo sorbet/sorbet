@@ -1,0 +1,15 @@
+# typed: true
+# assert-fast-path: static_field_type_member.rb
+
+class Example
+  extend T::Sig
+  extend T::Generic
+
+  X = 
+
+  sig {params(x: X).void}
+  #              ^ error: is not a class or type alias
+  def example(x)
+    T.reveal_type(x) # error: `T.untyped`
+  end
+end

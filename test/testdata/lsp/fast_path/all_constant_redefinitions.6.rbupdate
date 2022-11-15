@@ -1,0 +1,9 @@
+# typed: strict
+# assert-fast-path: all_constant_redefinitions.rb
+
+module Wrapper
+  extend T::Generic
+
+  A = 1 # error: Cannot initialize the class `A` by constant assignment
+  class A; end
+end

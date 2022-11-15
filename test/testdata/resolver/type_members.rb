@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 class CovariantNotAllowed
   extend T::Generic
   Elem = type_member(:in) # error: can only have invariant type members

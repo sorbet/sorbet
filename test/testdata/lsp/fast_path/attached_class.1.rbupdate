@@ -1,0 +1,28 @@
+# typed: true
+# assert-fast-path: attached_class.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  X = type_member
+
+  sig {returns(T.attached_class)}
+  def self.make
+    res = new
+    T.reveal_type(res) # error: `T.attached_class (of Parent)`
+    res
+  end
+
+  sig {params(x: X).void}
+  def example(x)
+    T.reveal_type(x) # error: `Parent::X`
+  end
+end
+
+class Child < Parent
+  X = type_member
+end
+
+T.reveal_type(Parent.make) # error: `Parent[T.untyped]`
+T.reveal_type(Child.make) # error: `Child[T.untyped]`

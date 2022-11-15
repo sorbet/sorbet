@@ -27,9 +27,10 @@ public:
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
                                                               WorkerPool &workers);
 
+    static void finalizeSymbols(core::GlobalState &gs);
+
 private:
     static void finalizeAncestors(core::GlobalState &gs);
-    static void finalizeSymbols(core::GlobalState &gs);
 };
 
 } // namespace sorbet::resolver

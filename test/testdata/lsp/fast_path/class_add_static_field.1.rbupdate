@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: class_add_static_field.rb
 
 class A extend T::Sig
   sig {params(x: Integer).returns(String)}

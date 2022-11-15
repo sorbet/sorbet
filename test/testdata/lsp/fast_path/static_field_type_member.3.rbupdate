@@ -1,0 +1,14 @@
+# typed: true
+# assert-fast-path: static_field_type_member.rb
+
+class Example
+  extend T::Sig
+  extend T::Generic
+
+  X = T.type_alias {Integer}
+
+  sig {params(x: X).void}
+  def example(x)
+    T.reveal_type(x) # error: `Integer`
+  end
+end

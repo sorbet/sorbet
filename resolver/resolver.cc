@@ -4043,6 +4043,10 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
+    // (verifyLinearizationComputed vs finalizeAncestors is currently the only difference between
+    // `run` and `runIncremental`. If we ever change the fast path in a way that needs linearization
+    // to be recomputed, we can simply make `runIncremental` be `run`.)
+    Resolver::finalizeSymbols(gs);
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);

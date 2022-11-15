@@ -1,0 +1,22 @@
+# typed: strict
+# assert-fast-path: type_template_rename.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  AnotherElem = type_template
+
+  sig {params(x: MyElem).void}
+  #              ^^^^^^ error: Unable to resolve constant `MyElem`
+  def self.example1(x)
+  end
+
+  sig {params(x: AnotherElem).void}
+  def self.example2(x)
+  end
+end
+
+  class Child < Parent
+# ^^^^^^^^^^^^^^^^^^^^ error: Type `AnotherElem` declared by parent `T.class_of(Parent)` must be re-declared in `T.class_of(Child)`
+  end

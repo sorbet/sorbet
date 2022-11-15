@@ -1,0 +1,18 @@
+# typed: strict
+# assert-fast-path: reorder_type_members__1.rb,reorder_type_members__2.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  Elem2 = type_member
+  Elem1 = type_member
+
+  sig {params(x: Elem1, y: Elem2).returns(Elem1)}
+  def example(x, y)
+    T.reveal_type(x) # error: `Parent::Elem1`
+    T.reveal_type(y) # error: `Parent::Elem2`
+
+    x
+  end
+end

@@ -1,5 +1,5 @@
 # typed: true
-# assert-slow-path: true
+# assert-fast-path: field_edits.rb
 class C
   @@food = T.let(3, Integer)
 

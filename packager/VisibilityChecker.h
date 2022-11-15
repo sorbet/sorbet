@@ -12,9 +12,6 @@ class VisibilityChecker final {
 public:
     static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files);
-
-    static std::vector<ast::ParsedFile> runIncremental(const core::GlobalState &gs, WorkerPool &workers,
-                                                       std::vector<ast::ParsedFile> files);
 };
 
 } // namespace sorbet::packager

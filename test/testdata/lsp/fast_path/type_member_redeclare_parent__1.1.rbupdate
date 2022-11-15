@@ -1,0 +1,12 @@
+# typed: strict
+# assert-fast-path: type_member_redeclare_parent__1.rb,type_member_redeclare_parent__2.rb
+
+# ^ ideally should also include __3
+# becuse it doesn't, the error in `__3.1.rbupdate` references the old name
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  AnotherElem = type_member
+end

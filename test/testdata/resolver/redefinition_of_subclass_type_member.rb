@@ -1,5 +1,5 @@
 # typed: true
-# disable-fast-path: true
+
 
 # This was a fuzzer-generated test file. The specific edge case that
 # it ended up uncovering was that `Foo` here has two type members, and

@@ -1,0 +1,13 @@
+# typed: true
+# assert-slow-path: true
+
+class Example
+  extend T::Sig
+
+  AliasToInteger = T.
+
+  sig {params(x: AliasToInteger).void}
+  def example(x)
+    T.reveal_type(x) # error: `T.untyped`
+  end
+end

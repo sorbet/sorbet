@@ -247,14 +247,27 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     p.putU4(fh->localSymbolTableHashes.staticFieldHash);
     p.putU4(fh->localSymbolTableHashes.classAliasHash);
     p.putU4(fh->localSymbolTableHashes.methodHash);
-    p.putU4(fh->localSymbolTableHashes.deletableSymbolHashes.size());
-    for (const auto &[key, value] : fh->localSymbolTableHashes.deletableSymbolHashes) {
+    p.putU4(fh->localSymbolTableHashes.retypecheckableSymbolHashes.size());
+    for (const auto &[key, value] : fh->localSymbolTableHashes.retypecheckableSymbolHashes) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
     p.putU4(fh->usages.nameHashes.size());
     for (const auto &e : fh->usages.nameHashes) {
         p.putU4(e._hashValue);
+    }
+    p.putU4(fh->foundHashes.staticFieldHashes.size());
+    for (const auto &ffh : fh->foundHashes.staticFieldHashes) {
+        p.putU4(ffh.ownerIdx);
+        p.putU1(ffh.ownerIsSymbol);
+        p.putU4(ffh.nameHash._hashValue);
+    }
+    p.putU4(fh->foundHashes.typeMemberHashes.size());
+    for (const auto &ffh : fh->foundHashes.typeMemberHashes) {
+        p.putU4(ffh.ownerIdx);
+        p.putU1(ffh.ownerIsSymbol);
+        p.putU1(ffh.isTypeTemplate);
+        p.putU4(ffh.nameHash._hashValue);
     }
     p.putU4(fh->foundHashes.methodHashes.size());
     for (const auto &fdh : fh->foundHashes.methodHashes) {
@@ -290,12 +303,12 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     ret.localSymbolTableHashes.staticFieldHash = p.getU4();
     ret.localSymbolTableHashes.classAliasHash = p.getU4();
     ret.localSymbolTableHashes.methodHash = p.getU4();
-    auto deletableSymbolHashSize = p.getU4();
-    ret.localSymbolTableHashes.deletableSymbolHashes.reserve(deletableSymbolHashSize);
-    for (int it = 0; it < deletableSymbolHashSize; it++) {
+    auto retypecheckableSymbolHashSize = p.getU4();
+    ret.localSymbolTableHashes.retypecheckableSymbolHashes.reserve(retypecheckableSymbolHashSize);
+    for (int it = 0; it < retypecheckableSymbolHashSize; it++) {
         WithoutUniqueNameHash key;
         key._hashValue = p.getU4();
-        ret.localSymbolTableHashes.deletableSymbolHashes.emplace_back(key, p.getU4());
+        ret.localSymbolTableHashes.retypecheckableSymbolHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
     ret.usages.nameHashes.reserve(constantsSize);
@@ -303,6 +316,25 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         WithoutUniqueNameHash key;
         key._hashValue = p.getU4();
         ret.usages.nameHashes.emplace_back(key);
+    }
+    auto foundStaticFieldHashesSize = p.getU4();
+    ret.foundHashes.staticFieldHashes.reserve(foundStaticFieldHashesSize);
+    for (int it = 0; it < foundStaticFieldHashesSize; it++) {
+        auto ownerIdx = p.getU4();
+        auto ownerIsSymbol = p.getU1();
+        FullNameHash fullNameHash;
+        fullNameHash._hashValue = p.getU4();
+        ret.foundHashes.staticFieldHashes.emplace_back(ownerIdx, ownerIsSymbol, fullNameHash);
+    }
+    auto foundTypeMemberHashesSize = p.getU4();
+    ret.foundHashes.typeMemberHashes.reserve(foundTypeMemberHashesSize);
+    for (int it = 0; it < foundTypeMemberHashesSize; it++) {
+        auto ownerIdx = p.getU4();
+        auto ownerIsSymbol = p.getU1();
+        auto isTypeTemplate = p.getU1();
+        FullNameHash fullNameHash;
+        fullNameHash._hashValue = p.getU4();
+        ret.foundHashes.typeMemberHashes.emplace_back(ownerIdx, ownerIsSymbol, isTypeTemplate, fullNameHash);
     }
     auto foundMethodHashesSize = p.getU4();
     ret.foundHashes.methodHashes.reserve(foundMethodHashesSize);

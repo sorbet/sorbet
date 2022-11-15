@@ -1,0 +1,6 @@
+# typed: true
+# assert-fast-path: static_field_rename__1.rb,static_field_rename__2.rb
+
+class A
+  Y = T.let(1, Integer)
+end

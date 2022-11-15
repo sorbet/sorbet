@@ -1,5 +1,5 @@
 # typed: strict
-# assert-slow-path: true
+# assert-fast-path: good_field_edits.rb
 class C
   extend T::Sig
 

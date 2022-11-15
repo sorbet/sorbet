@@ -176,6 +176,9 @@ public:
     // NOTE: You likely want to use mangleRenameMethod not deleteFieldSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteFieldSymbol(FieldRef what);
+    // NOTE: You likely want to use mangleRenameSymbol not deleteTypeMemberSymbol, unless you know what you're doing.
+    // See the comment on the implementation for more.
+    void deleteTypeMemberSymbol(TypeMemberRef what);
     spdlog::logger &tracer() const;
     unsigned int namesUsedTotal() const;
     unsigned int utf8NamesUsed() const;

@@ -1,0 +1,11 @@
+# typed: true
+# assert-fast-path: leave_class_alias_alone.rb
+
+class Wrapper
+  ClassAlias = Integer
+
+  StaticField = T.let('', Float) # error: Argument does not have asserted type `Float`
+
+  T.reveal_type(ClassAlias)  # error: `T.class_of(Integer)`
+  T.reveal_type(StaticField) # error: `Float`
+end

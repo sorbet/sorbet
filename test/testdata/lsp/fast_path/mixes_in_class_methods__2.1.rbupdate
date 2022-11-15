@@ -1,0 +1,6 @@
+# typed: true
+# exclude-from-file-update: true
+
+class Example
+  include Opus::TsGen::DocsTypeGenerator
+end

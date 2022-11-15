@@ -1,0 +1,12 @@
+# typed: strict
+# assert-fast-path: type_member_rename.rb
+
+class Parent
+  extend T::Sig
+  extend T::Generic
+
+  AnotherElem = type_member
+end
+
+class Child < Parent # error: Type `AnotherElem` declared by parent `Parent` must be re-declared in `Child`
+end
