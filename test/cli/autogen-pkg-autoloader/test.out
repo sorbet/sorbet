@@ -5,7 +5,6 @@ No errors! Great job.
 # typed: true
 
 require 'in_class'
-require 'in_method'
 require 'my_gem'
 
 class RootPackage::Foo::Bar::Jazz < RootPackage::Foo::Bar::Quuz
@@ -18,7 +17,6 @@ Opus::Require.for_autoload(RootPackage::Foo::Bar::Jazz, "test/cli/autogen-pkg-au
 # typed: true
 
 require 'in_class'
-require 'in_method'
 require 'my_gem'
 
 class RootPackage::Foo::Bar::Quuz
@@ -31,7 +29,6 @@ Opus::Require.for_autoload(RootPackage::Foo::Bar::Quuz, "test/cli/autogen-pkg-au
 # typed: true
 
 require 'in_class'
-require 'in_method'
 require 'my_gem'
 
 Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader/foo.rb", [RootPackage::Foo, :Dabba])
@@ -71,7 +68,6 @@ Opus::Require.for_autoload(RootPackage::Foo::Errors::MyError2, "test/cli/autogen
 # typed: true
 
 require 'in_class'
-require 'in_method'
 require 'my_gem'
 
 Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader/foo.rb", [RootPackage::Foo, :TOP_LEVEL_CONST])
