@@ -2351,7 +2351,7 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
             if (!this->lspExperimentalFastPathEnabled) {
                 uint32_t staticFieldShapeHash = field.fieldShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, staticFieldShapeHash);
-                staticFieldHash = mix(fieldHash, staticFieldShapeHash);
+                staticFieldHash = mix(staticFieldHash, staticFieldShapeHash);
             }
         } else if (field.flags.isStaticField) {
             const auto &dealiased = field.dealias(*this);
