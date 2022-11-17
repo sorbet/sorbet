@@ -217,8 +217,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
+    auto shouldRunIncrementalNamer =
+        config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty();
     for (auto [fref, idx] : result.changedFiles) {
-        if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty()) {
+        if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.
             //
             // This means that no-op edits (and thus calls to LSPTypechecker::retypecheck) don't
@@ -245,19 +247,23 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
         toTypecheck.emplace_back(fref);
 
-        // TODO(jez) Using `gs` to access package information here assumes that edits to
-        // __package.rb files don't take the fast path. We'll want (or maybe need) to revisit this
-        // when we start making edits to `__package.rb` take fast paths.
-        if (!(fref.data(*gs).isPackage())) {
-            auto pkgName = gs->packageDB().getPackageNameForFile(fref);
-            if (pkgName.exists()) {
-                // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
-                // and re-added, we have to add the __package.rb files to set of files to retypecheck
-                // so that we can re-run PropagateVisibility to set export bits for any contants.
-                auto packageFref = gs->packageDB().getPackageInfo(pkgName).fullLoc().file();
-                if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
-                    // Skip duplicates
-                    toTypecheck.emplace_back(packageFref);
+        // Only need to re-run packager if we're going to delete constants and have to re-define
+        // their visibility, which only happens if we're running incrementalNamer.
+        if (shouldRunIncrementalNamer) {
+            // TODO(jez) Using `gs` to access package information here assumes that edits to
+            // __package.rb files don't take the fast path. We'll want (or maybe need) to revisit this
+            // when we start making edits to `__package.rb` take fast paths.
+            if (!(fref.data(*gs).isPackage())) {
+                auto pkgName = gs->packageDB().getPackageNameForFile(fref);
+                if (pkgName.exists()) {
+                    // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
+                    // and re-added, we have to add the __package.rb files to set of files to retypecheck
+                    // so that we can re-run PropagateVisibility to set export bits for any contants.
+                    auto packageFref = gs->packageDB().getPackageInfo(pkgName).fullLoc().file();
+                    if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
+                        // Skip duplicates
+                        toTypecheck.emplace_back(packageFref);
+                    }
                 }
             }
         }
@@ -281,8 +287,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
         // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
-        if (config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty() &&
-            oldFoundHashesForFiles.find(f) == oldFoundHashesForFiles.end()) {
+        if (shouldRunIncrementalNamer && oldFoundHashesForFiles.find(f) == oldFoundHashesForFiles.end()) {
             // This is an extra file that we need to typecheck which was not part of the original
             // edited files, so whatever it happens to have in foundMethodHashes is still "old"
             // (but we can't use `move` to steal it like before, because we're not replacing the
@@ -293,7 +298,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     ENFORCE(gs->lspQuery.isEmpty());
     auto resolved =
-        config->opts.lspExperimentalFastPathEnabled
+        shouldRunIncrementalNamer
             ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles), config->opts)
             : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
