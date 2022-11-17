@@ -1,5 +1,5 @@
 # typed: strict
-
+# disable-fast-path: true
 class Parent
   extend T::Sig
   extend T::Generic
