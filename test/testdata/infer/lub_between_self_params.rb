@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
          class QueryProfile < Hash
 #        ^^^^^^^^^^^^^^^^^^^^^^^^^ noerror Type `K` declared by parent `Hash` must be re-declared in `QueryProfile`
 #        ^^^^^^^^^^^^^^^^^^^^^^^^^ noerror Type `Elem` declared by parent `Hash` must be re-declared in `QueryProfile`
