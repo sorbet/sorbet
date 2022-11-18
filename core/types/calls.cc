@@ -172,8 +172,8 @@ void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, cor
             if (blockPassLoc.exists()) {
                 auto blockPassSource = blockPassLoc.source(gs).value();
                 if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                    e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc, " {{|x| {}(x).{}}}",
-                                  wrapInFn, shortName);
+                    e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                  " {{ |x| {}(x).{} }}", wrapInFn, shortName);
                 }
             }
         } else {
@@ -795,7 +795,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto blockPassSource = blockPassLoc.source(gs).value();
                         if (blockPassSource == fmt::format("(&:{})", shortName)) {
                             e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
+                                          " {{ |x| {}(x).{} }}", wrapInFn, shortName);
                         }
                     }
                 } else if (errLoc == args.funLoc() &&

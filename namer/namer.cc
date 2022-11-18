@@ -1448,6 +1448,7 @@ private:
 
 public:
     void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state) {
+        Timer timeit(ctx.state.tracer(), "deleteOldDefinitions");
         if (oldFoundHashes.has_value()) {
             const auto &oldFoundHashesVal = oldFoundHashes.value();
 
@@ -1908,7 +1909,8 @@ public:
                     insertLoc, fmt::format(" do\n{0}  {{{1}}}\n{0}end", indent, kwArgsSource)});
             }
         } else {
-            edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, fmt::format(" {{{{{}}}}}", kwArgsSource)});
+            edits.emplace_back(
+                core::AutocorrectSuggestion::Edit{insertLoc, fmt::format(" {{ {{{}}} }}", kwArgsSource)});
         }
         e.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Convert `{}` to block form", send->fun.show(ctx)),

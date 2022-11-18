@@ -421,7 +421,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (enclosingClass.data(ctx)->flags.isFinal) {
         fmt::format_to(std::back_inserter(ss), "(:final)");
     }
-    fmt::format_to(std::back_inserter(ss), " {{");
+    fmt::format_to(std::back_inserter(ss), " {{ ");
 
     ENFORCE(!methodSymbol.data(ctx)->arguments.empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments.size() == 1 &&
@@ -483,9 +483,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                          !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
 
     if (suggestsVoid) {
-        fmt::format_to(std::back_inserter(ss), "void}}");
+        fmt::format_to(std::back_inserter(ss), "void }}");
     } else {
-        fmt::format_to(std::back_inserter(ss), "returns({})}}", guessedReturnType.show(ctx));
+        fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx));
     }
 
     auto [replacementLoc, padding] = loc.findStartOfLine(ctx);
