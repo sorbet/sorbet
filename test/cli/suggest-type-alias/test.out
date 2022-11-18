@@ -5,7 +5,7 @@ suggest-type-alias.rb:4: Reassigning a type alias is not allowed https://srb.hel
      3 |A = T.type_alias {Integer}
         ^
   Autocorrect: Done
-    suggest-type-alias.rb:4: Replaced with `T.type_alias {A}`
+    suggest-type-alias.rb:4: Replaced with `T.type_alias { A }`
      4 |B = A
             ^
 Errors: 1
@@ -15,4 +15,4 @@ Errors: 1
 # typed: strict
 
 A = T.type_alias {Integer}
-B = T.type_alias {A}
+B = T.type_alias { A }

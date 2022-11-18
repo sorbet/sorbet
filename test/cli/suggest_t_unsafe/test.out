@@ -78,7 +78,7 @@ suggest_t_unsafe.rb:17: Method `even?` does not exist on `NilClass` component of
     17 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                               ^
   Autocorrect: Done
-    suggest_t_unsafe.rb:17: Replaced with `{|x| T.unsafe(x).even?}`
+    suggest_t_unsafe.rb:17: Replaced with `{ |x| T.unsafe(x).even? }`
     17 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                             ^^^^^^^^^
 Errors: 6
@@ -101,7 +101,7 @@ T.unsafe(bar).even?
 
 "hi" + T.unsafe(1)
 
-T::Array[T.nilable(Integer)].new.map {|x| T.unsafe(x).even?}
+T::Array[T.nilable(Integer)].new.map { |x| T.unsafe(x).even? }
 
 sig {params(str: String).void}
 def takes_string_kw(str:); end
@@ -194,7 +194,7 @@ suggest_t_unsafe.rb:17: Method `even?` does not exist on `NilClass` component of
     17 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                               ^
   Autocorrect: Done
-    suggest_t_unsafe.rb:17: Replaced with `{|x| custom_wrapper(x).even?}`
+    suggest_t_unsafe.rb:17: Replaced with `{ |x| custom_wrapper(x).even? }`
     17 |T::Array[T.nilable(Integer)].new.map(&:even?)
                                             ^^^^^^^^^
 Errors: 6
@@ -217,7 +217,7 @@ custom_wrapper(bar).even?
 
 "hi" + custom_wrapper(1)
 
-T::Array[T.nilable(Integer)].new.map {|x| custom_wrapper(x).even?}
+T::Array[T.nilable(Integer)].new.map { |x| custom_wrapper(x).even? }
 
 sig {params(str: String).void}
 def takes_string_kw(str:); end

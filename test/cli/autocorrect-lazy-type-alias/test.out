@@ -2,7 +2,7 @@ autocorrect-lazy-type-alias.rb:1: No block given to `T.type_alias` https://srb.h
      1 |MyAlias = T.type_alias(T.any(Integer, String))
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect-lazy-type-alias.rb:1: Replaced with `T.type_alias {T.any(Integer, String)}`
+    autocorrect-lazy-type-alias.rb:1: Replaced with `T.type_alias { T.any(Integer, String) }`
      1 |MyAlias = T.type_alias(T.any(Integer, String))
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -10,7 +10,7 @@ autocorrect-lazy-type-alias.rb:3: No block given to `T.type_alias` https://srb.h
      3 |HashWithCurly = T.type_alias({foo: String, bar: Integer})
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect-lazy-type-alias.rb:3: Replaced with `T.type_alias {{foo: String, bar: Integer}}`
+    autocorrect-lazy-type-alias.rb:3: Replaced with `T.type_alias { {foo: String, bar: Integer} }`
      3 |HashWithCurly = T.type_alias({foo: String, bar: Integer})
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -18,7 +18,7 @@ autocorrect-lazy-type-alias.rb:5: No block given to `T.type_alias` https://srb.h
      5 |BareHash = T.type_alias(foo: String, bar: Integer)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect-lazy-type-alias.rb:5: Replaced with `T.type_alias {{foo: String, bar: Integer}}`
+    autocorrect-lazy-type-alias.rb:5: Replaced with `T.type_alias { {foo: String, bar: Integer} }`
      5 |BareHash = T.type_alias(foo: String, bar: Integer)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -59,11 +59,11 @@ Errors: 5
 
 --------------------------------------------------------------------------
 
-MyAlias = T.type_alias {T.any(Integer, String)}
+MyAlias = T.type_alias { T.any(Integer, String) }
 
-HashWithCurly = T.type_alias {{foo: String, bar: Integer}}
+HashWithCurly = T.type_alias { {foo: String, bar: Integer} }
 
-BareHash = T.type_alias {{foo: String, bar: Integer}}
+BareHash = T.type_alias { {foo: String, bar: Integer} }
 
 module Bar
   class Foo
