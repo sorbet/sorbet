@@ -34,7 +34,7 @@ UnorderedMap<string, TestFile> loadFiles(const vector<string> &files) {
         OSFileSystem fs;
         vector<string> fileContents;
         string uri;
-        fileContents.push_back(fs.readFile(filePath));
+        fileContents.push_back(fs.readFile(string(filePath)));
         if (extension == ".rbupdate") {
             // Find basename[.]version.rbupdate
             const auto versionIdx = filePath.rfind('.', idx - 1);
