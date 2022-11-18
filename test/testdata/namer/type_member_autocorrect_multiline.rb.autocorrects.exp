@@ -21,12 +21,12 @@ module Example
   B1 = type_member(
     :out,
     # error: syntax for bounds has changed
-  ) {{fixed: Integer}}
+  ) { {fixed: Integer} }
   B2 = type_member(
     :out,
    
-  ) {{lower: Integer, # error: syntax for bounds has changed
-    upper: T.any(Integer, String)}}
+  ) { {lower: Integer, # error: syntax for bounds has changed
+    upper: T.any(Integer, String)} }
 
   C1 = type_member do
     {
@@ -36,9 +36,9 @@ module Example
       ),
     }
   end
-  C2 = type_member(:out) {{fixed: T.any( # error: syntax for bounds has changed
+  C2 = type_member(:out) { {fixed: T.any( # error: syntax for bounds has changed
     Integer,
     String
-  )}}
+  )} }
 end
 # ------------------------------

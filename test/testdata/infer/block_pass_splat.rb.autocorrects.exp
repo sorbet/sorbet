@@ -16,7 +16,7 @@ end
 
 sig {params(xs: T::Array[T.nilable(Integer)]).void}
 def example2(xs)
-  xs.map {|x| T.must(x).even?}
+  xs.map { |x| T.must(x).even? }
   #       ^^^^^^ error: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)`
 end
 
