@@ -324,7 +324,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                     e.setHeader("The argument to `{}` must be a lambda", "foreign:");
                     auto foreignLoc = core::Loc{ctx.file, ret.foreign.loc()};
                     if (auto foreignSource = foreignLoc.source(ctx)) {
-                        e.replaceWith("Convert to lambda", foreignLoc, "-> {{{}}}", foreignSource.value());
+                        e.replaceWith("Convert to lambda", foreignLoc, "-> {{ {} }}", foreignSource.value());
                     }
                 }
             }

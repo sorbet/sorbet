@@ -1,34 +1,34 @@
 # typed: strict
 
 # Don't extend T::Sig for this one, because the class wasn't defined here.
-sig {returns(NilClass)}
+sig { returns(NilClass) }
 def top_level; end
 
 # Should only add one extend
 class SuggestSigAndExtend
   extend T::Sig
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def bar; end
 end
 
 # This doesn't work right now, for both the injected 'sig' and 'extend'.
-sig {returns(NilClass)}
+sig { returns(NilClass) }
 class SigAndExtendOneLine; def foo; end; end
   extend T::Sig
 
 class DontSuggestExtend
   extend T::Sig
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 end
 
 class Parent; end
 class Child < Parent
   extend T::Sig
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 end
 
@@ -37,13 +37,13 @@ def project(x); x; end
 class MethodBetweenExtendAndSig
   extend T::Sig
   project :sorbet
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 end
 
 class MethodOnSelf
   extend T::Sig
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def self.foo; end
 end
 
@@ -51,13 +51,13 @@ end
 class ProperIndentation
   extend T::Sig
 
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 
   class Nested
     extend T::Sig
 
-    sig {returns(NilClass)}
+    sig { returns(NilClass) }
     def bar; end
   end
 end

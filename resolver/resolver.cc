@@ -869,7 +869,7 @@ private:
                 e.addErrorLine(rhsSym.loc(ctx), "Originally defined here");
                 auto rhsLoc = ctx.locAt(it.rhs->loc);
                 if (rhsLoc.exists()) {
-                    e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
+                    e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{ {} }}", rhsLoc.source(ctx).value());
                 }
             }
             it.lhs.setResultType(ctx, core::Types::untypedUntracked());

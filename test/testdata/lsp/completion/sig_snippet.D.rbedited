@@ -38,7 +38,7 @@ def passes_array_untyped(xs)
   T.unsafe(nil)
 end
 
-sig {params(x: T::Hash[${1:T.untyped}, ${2:T.untyped}]).returns(${3:T.untyped})}${0} # error: no block
+sig { params(x: T::Hash[${1:T.untyped}, ${2:T.untyped}]).returns(${3:T.untyped}) }${0} # error: no block
 #  ^ apply-completion: [D] item: 0
 def passes_shape(x)
   takes_shape(x)

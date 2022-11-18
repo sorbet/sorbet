@@ -2,7 +2,7 @@ test/cli/isolate-error-code/isolate-error-code.rb:6: The method `foo` does not h
      6 | def foo
          ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig {returns(Integer)}`
+    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig { returns(Integer) }`
      6 | def foo
          ^
     test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `extend T::Sig`
@@ -14,7 +14,7 @@ test/cli/isolate-error-code/isolate-error-code.rb:6: The method `foo` does not h
      6 | def foo
          ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig {returns(Integer)}`
+    test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `sig { returns(Integer) }`
      6 | def foo
          ^
     test/cli/isolate-error-code/isolate-error-code.rb:6: Insert `extend T::Sig`

@@ -24,7 +24,7 @@ def passes_untyped_proc(x, f)
   T.unsafe(nil)
 end
 
-sig {params(x: String).returns(${1:T.untyped})}${0} # error: no block
+sig { params(x: String).returns(${1:T.untyped}) }${0} # error: no block
 #  ^ apply-completion: [B] item: 0
 def passes_string(x)
   takes_string(x)

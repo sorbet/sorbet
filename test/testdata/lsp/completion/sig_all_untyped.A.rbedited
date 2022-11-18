@@ -7,7 +7,7 @@ extend T::Sig
 # the sig unconditionally, so that it at least gives users something to start
 # filling in the holes.
 
-sig {params(x: ${1:T.untyped}).returns(${2:T.untyped})}${0} # error: no block
+sig { params(x: ${1:T.untyped}).returns(${2:T.untyped}) }${0} # error: no block
 #  ^ apply-completion: [A] item: 0
 def all_untyped(x)
   T.unsafe(nil)

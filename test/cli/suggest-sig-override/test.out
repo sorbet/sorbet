@@ -14,11 +14,11 @@ extend T::Sig
 
 class ParentNoSig
   extend T::Sig
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 end
 class ChildNoSig < ParentNoSig
-  sig {returns(NilClass)}
+  sig { returns(NilClass) }
   def foo; end
 end
 
@@ -28,7 +28,7 @@ class ParentStandardSig
   def foo; end
 end
 class ChildStandardSig < ParentStandardSig
-  sig {void}
+  sig { void }
   def foo; end
 end
 
@@ -38,7 +38,7 @@ class ParentOverridable
   def foo; end
 end
 class ChildOverridable < ParentOverridable
-  sig {override.void}
+  sig { override.void }
   def foo; end
 end
 
@@ -50,7 +50,7 @@ class ParentAbstract
   def foo; end
 end
 class ChildAbstract < ParentAbstract
-  sig {override.void}
+  sig { override.void }
   def foo; end
 end
 
@@ -65,7 +65,7 @@ class ParentOverride < GrandParentOverride
   def foo; end
 end
 class ChildOverride < ParentOverride
-  sig {override.void}
+  sig { override.void }
   def foo; end
 end
 
@@ -82,6 +82,6 @@ class ParentImplementation < GrandParentImplementation
   def foo; end
 end
 class ChildImplementation < ParentImplementation
-  sig {override.void}
+  sig { override.void }
   def foo; end
 end

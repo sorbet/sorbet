@@ -13,7 +13,7 @@ class A
     ''
   end
 
-  sig {returns(Symbol)}${0} # error: no block
+  sig { returns(Symbol) }${0} # error: no block
   #  ^ apply-completion: [A] item: 0
 
   def returns_symbol

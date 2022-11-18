@@ -12,7 +12,7 @@ class A
   end
 end
 
-sig {returns(String)}${0} # error: no block
+sig { returns(String) }${0} # error: no block
 #  ^ apply-completion: [B] item: 0
 def self.main
   ''

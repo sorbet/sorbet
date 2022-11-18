@@ -2,7 +2,7 @@ suggest-foreign-lambda.rb:7: The argument to `foreign:` must be a lambda https:/
      7 |  prop :my_model, String, foreign: MyModel
                                            ^^^^^^^
   Autocorrect: Done
-    suggest-foreign-lambda.rb:7: Replaced with `-> {MyModel}`
+    suggest-foreign-lambda.rb:7: Replaced with `-> { MyModel }`
      7 |  prop :my_model, String, foreign: MyModel
                                            ^^^^^^^
 Errors: 1
@@ -15,5 +15,5 @@ class MyModel; end
 
 class MyOtherModel
   include T::Props
-  prop :my_model, String, foreign: -> {MyModel}
+  prop :my_model, String, foreign: -> { MyModel }
 end

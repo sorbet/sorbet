@@ -7,7 +7,7 @@
 class Normal
   extend T::Sig
 
-  sig {returns(NilClass)}${0} # error: no block
+  sig { returns(NilClass) }${0} # error: no block
   #  ^ completion: sig
   #  ^ apply-completion: [A] item: 0
   def nullary_returns_nil

@@ -41,10 +41,10 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
 
     if (start.line == end.line) {
         if (wrapHash) {
-            e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias {{{{{}}}}}",
+            e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias {{ {{{}}} }}",
                           argsLoc.source(ctx).value());
         } else {
-            e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias {{{}}}",
+            e.replaceWith("Convert to lazy type alias", ctx.locAt(send->loc), "T.type_alias {{ {} }}",
                           argsLoc.source(ctx).value());
         }
     } else {

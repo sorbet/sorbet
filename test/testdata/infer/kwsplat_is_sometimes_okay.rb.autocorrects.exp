@@ -23,11 +23,11 @@ def takes_some_required_untyped(x:, y: ''); end
 sig {params(x: String, y: String).void}
 def takes_all_optional_untyped(x: '', y: ''); end
 
-sig {params(x: T.untyped, y: T.untyped).returns(NilClass)}
+sig { params(x: T.untyped, y: T.untyped).returns(NilClass) }
 def takes_all_required_unsigged(x:, y:); end # error: does not have a `sig`
-sig {params(x: T.untyped, y: T.untyped).returns(NilClass)}
+sig { params(x: T.untyped, y: T.untyped).returns(NilClass) }
 def takes_some_required_unsigged(x:, y: ''); end # error: does not have a `sig`
-sig {params(x: T.untyped, y: T.untyped).returns(NilClass)}
+sig { params(x: T.untyped, y: T.untyped).returns(NilClass) }
 def takes_all_optional_unsigged(x: '', y: ''); end # error: does not have a `sig`
 
 sig {params(x: Integer, y: String).void}

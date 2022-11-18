@@ -31,7 +31,7 @@ def passes_string(x)
   T.unsafe(nil)
 end
 
-sig {params(xs: T::Array[${1:T.untyped}]).returns(${2:T.untyped})}${0} # error: no block
+sig { params(xs: T::Array[${1:T.untyped}]).returns(${2:T.untyped}) }${0} # error: no block
 #  ^ apply-completion: [C] item: 0
 def passes_array_untyped(xs)
   takes_array_untyped(xs)
