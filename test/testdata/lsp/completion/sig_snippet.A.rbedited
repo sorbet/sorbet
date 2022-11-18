@@ -17,7 +17,7 @@ sig {params(x: {y: String}).void}
 def takes_shape(x)
 end
 
-sig {params(x: T.proc.params(arg0: ${1:T.untyped}).returns(${2:T.untyped}), f: ${3:T.untyped}).returns(${4:T.untyped})}${0} # error: no block
+sig { params(x: T.proc.params(arg0: ${1:T.untyped}).returns(${2:T.untyped}), f: ${3:T.untyped}).returns(${4:T.untyped}) }${0} # error: no block
 #  ^ apply-completion: [A] item: 0
 def passes_untyped_proc(x, f)
   takes_untyped_proc(x)

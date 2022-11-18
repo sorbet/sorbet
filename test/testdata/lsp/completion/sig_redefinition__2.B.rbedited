@@ -3,7 +3,7 @@
 class A
   def foo; end
 
-  sig {returns(NilClass)}${0} # error: no block
+  sig { returns(NilClass) }${0} # error: no block
   #  ^ apply-completion: [B] item: 0
   def bar; end
 end

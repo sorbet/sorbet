@@ -3,6 +3,6 @@ extend T::Sig
 
 # Tests an edge case arising from the difference between <root> and Object
 
-sig {returns(NilClass)}${0} # error: no block
+sig { returns(NilClass) }${0} # error: no block
 #  ^ apply-completion: [A] item: 0
 def foo; end

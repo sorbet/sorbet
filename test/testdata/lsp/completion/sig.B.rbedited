@@ -13,7 +13,7 @@ class Normal
   def nullary_returns_nil
   end
 
-  sig {params(x: Integer).returns(Integer)}${0} # error: no block
+  sig { params(x: Integer).returns(Integer) }${0} # error: no block
   #  ^ completion: sig
   #  ^ apply-completion: [B] item: 0
   def typed_params_and_returns(x)

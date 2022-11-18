@@ -5,7 +5,7 @@ class Module
 end
 
 class A
-  sig {returns(NilClass)}${0} # error: no block
+  sig { returns(NilClass) }${0} # error: no block
   #  ^ apply-completion: [A] item: 0
   def foo; end
 
