@@ -258,7 +258,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
                 if (pkgName.exists()) {
                     // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
                     // and re-added, we have to add the __package.rb files to set of files to retypecheck
-                    // so that we can re-run PropagateVisibility to set export bits for any contants.
+                    // so that we can re-run PropagateVisibility to set export bits for any constants.
                     auto packageFref = gs->packageDB().getPackageInfo(pkgName).fullLoc().file();
                     if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
                         // Skip duplicates
