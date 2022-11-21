@@ -20,6 +20,10 @@ module Foo
       class JazBaz
         p 'x'
         require 'in_class'
+
+        def honk
+          require 'in_method'
+        end
       end
     end
   end

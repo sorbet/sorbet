@@ -498,6 +498,7 @@ int realmain(int argc, char *argv[]) {
         gs->runningUnderAutogen = true;
     }
     if (opts.print.isAutogenPrintingSubclassesOrAutoloaderOnly()) {
+        ENFORCE(gs->runningUnderAutogen);
         gs->autogenPrintingSubclassesOrAutoloaderOnly = true;
     }
     if (opts.censorForSnapshotTests) {

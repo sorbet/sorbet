@@ -320,11 +320,14 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
     bool removeBody = dctx.ctx.state.autogenPrintingSubclassesOrAutoloaderOnly;
     ExpressionPtr desugaredBody;
-    if (!removeBody) {
+    if (removeBody) {
+        // For performance reasons, we remove method bodies in autogen when only generating
+        // autoloader files or subclass lists. In this configuration, passing method bodies
+        // is not required for correctness.
+        desugaredBody = MK::EmptyTree();
+    } else {
         desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
         desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
-    } else {
-        desugaredBody = MK::EmptyTree();
     }
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
