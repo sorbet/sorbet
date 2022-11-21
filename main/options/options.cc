@@ -154,12 +154,12 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     });
 }
 
-bool Printers::isAutogenPrintingDepDB() const {
-    return Autogen.enabled || AutogenMsgPack.enabled;
-}
-
 bool Printers::isAutogen() const {
     return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled || AutogenAutoloader.enabled;
+}
+
+bool Printers::isAutogenPrintingSubclassesOrAutoloaderOnly() const {
+    return isAutogen() && !(Autogen.enabled || AutogenMsgPack.enabled);
 }
 
 struct StopAfterOptions {

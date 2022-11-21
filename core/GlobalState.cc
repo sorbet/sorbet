@@ -1966,7 +1966,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->autocorrect = this->autocorrect;
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
-    result->autogenPrintingDepDB = this->autogenPrintingDepDB;
+    result->autogenPrintingSubclassesOrAutoloaderOnly = this->autogenPrintingSubclassesOrAutoloaderOnly;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
@@ -2063,7 +2063,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->autocorrect = this->autocorrect;
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
-    result->autogenPrintingDepDB = this->autogenPrintingDepDB;
+    result->autogenPrintingSubclassesOrAutoloaderOnly = this->autogenPrintingSubclassesOrAutoloaderOnly;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->lspExperimentalFastPathEnabled = this->lspExperimentalFastPathEnabled;
     result->sleepInSlowPathSeconds = this->sleepInSlowPathSeconds;
