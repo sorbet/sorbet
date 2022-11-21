@@ -15,7 +15,7 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
     }
 
     std::string flavor;
-    if (opts.print.isAutogen() && !opts.print.isAutogenPrintingDepDB()) {
+    if (opts.print.isAutogenPrintingSubclassesOrAutoloaderOnly()) {
         flavor = "autogenemptymethodbodies";
     } else if (opts.lspExperimentalFastPathEnabled) {
         flavor = "experimentalfastpath";
