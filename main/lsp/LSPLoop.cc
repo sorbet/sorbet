@@ -38,7 +38,13 @@ LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &worke
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 
 bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) const {
-    return !config->opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL;
+    // If --web-trace-file, always flush after every task (probably: someone is debugging).
+    // Otherwise, batch up connections to hitting statsd (probably: normal mode of operation).
+    // Note: passing --web-trace-file will override the "only send every STATSD_INTERVAL" for
+    // statsd reporting. So it's *likely* bad to pass all of `--lsp`, `--statsd-host`, and
+    // `--web-trace-file` at the same time.
+    return !config->opts.webTraceFile.empty() ||
+           (!config->opts.statsdHost.empty() && (currentTime - lastMetricUpdateTime) > STATSD_INTERVAL);
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {

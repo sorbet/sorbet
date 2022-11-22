@@ -37,6 +37,22 @@ To collect a trace, run Sorbet with the `--web-trace-file=<file>` flag:
 Sorbet will typecheck the file or codebase like normal, and then write out
 `trace.json` (or whatever `<file>` name you chose).
 
+### Tracing and LSP
+
+The traces Sorbet submits are the same as the [metrics] that Sorbet submits to
+StatsD (if enabled with the `--statsd-host` option).
+
+[metrics]: https://sorbet.org/docs/metrics
+
+For better performance in LSP mode, Sorbet will only report stats to the
+specified host after it finishes processing a task **and** it's been 5 minutes
+since the last stats dump.
+
+Passing `--web-trace-file` overrides this behavior, forcibly flushing the trace
+file and the StatsD stats after **every** task (no matter how long ago the last
+flush was). This is often desired when debugging but can potentially cause
+increased traffic on StatsD and/or slower IDE performance in normal operation.
+
 ## Loading a trace into the viewer
 
 Once you've [Collected a trace](#collecting-a-trace), you can load it into the
