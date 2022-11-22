@@ -232,13 +232,14 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
+        auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
         {
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
             auto emptyWorkers = WorkerPool::create(0, gs.tracer());
 
-            auto result = foundHashesForFiles.has_value()
+            auto result = runIncrementalNamer
                               ? sorbet::namer::Namer::runIncremental(
                                     gs, move(what), std::move(foundHashesForFiles.value()), *emptyWorkers)
                               : sorbet::namer::Namer::run(gs, move(what), *emptyWorkers, nullptr);
@@ -259,7 +260,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what));
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer);
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());

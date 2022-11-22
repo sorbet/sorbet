@@ -4038,7 +4038,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     return result;
 }
 
-ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees, bool ranIncrementalNamer) {
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
@@ -4046,7 +4046,13 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     // (verifyLinearizationComputed vs finalizeAncestors is currently the only difference between
     // `run` and `runIncremental`. If we ever change the fast path in a way that needs linearization
     // to be recomputed, we can simply make `runIncremental` be `run`.)
-    Resolver::finalizeSymbols(gs);
+    // Note: While this ^ is technically true from a correctness perspective, finalizeSymbols is too
+    // slow to run on all fast path edits, and so is skipped for performance (unless required).
+    // If we had a faster/incremental way to do finalizeSymbols, we could maybe start
+    // unconditionally finalizing symbols again, and then the above note about lineraization would apply.
+    if (ranIncrementalNamer) {
+        Resolver::finalizeSymbols(gs);
+    }
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
