@@ -1,16 +1,7 @@
-From 5484a6da6fb63ec2be679e0d1aadc01aaf4ed5ff Mon Sep 17 00:00:00 2001
-From: Mirek Klimos <mirek@stripe.com>
-Date: Tue, 22 Nov 2022 11:41:19 -0800
-Subject: [PATCH] [GC] Expose need_major_gc via GC.latest_gc_info
-
----
- gc.c | 19 +++++++++++++++++--
- 1 file changed, 17 insertions(+), 2 deletions(-)
-
-diff --git a/gc.c b/gc.c
+diff --git gc.c gc.c
 index 67a709ff79..2825466788 100644
---- a/gc.c
-+++ b/gc.c
+--- gc.c
++++ gc.c
 @@ -8738,7 +8738,7 @@ gc_count(rb_execution_context_t *ec, VALUE self)
  static VALUE
  gc_info_decode(rb_objspace_t *objspace, const VALUE hash_or_key, const int orig_flags)
@@ -59,6 +50,3 @@ index 67a709ff79..2825466788 100644
      SET(gc_by,
          (flags & GPR_FLAG_NEWOBJ) ? sym_newobj :
          (flags & GPR_FLAG_MALLOC) ? sym_malloc :
--- 
-2.38.1
-
