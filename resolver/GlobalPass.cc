@@ -285,39 +285,43 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     // that resolves types and we don't want to introduce additional passes if
     // we don't have to. It would be a tractable refactor to merge it
     // `ResolveConstantsWalk` if it becomes necessary to process earlier.
-    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto sym = core::ClassOrModuleRef(gs, i);
+    {
+        Timer timer(gs.tracer(), "resolver.mix_in_class_methods");
 
-        if (sym.data(gs)->flags.isLinearizationComputed) {
-            // Without this, the addMixin below for mixedInClassMethods is not idempotent on the
-            // fast path, and will accidentally mix a `ClassMethods` module into all children (not
-            // just the class that has the `include` triggering the mixes_in_class_methods, but all
-            // subclasses of that class).
-            continue;
-        }
+        for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+            auto sym = core::ClassOrModuleRef(gs, i);
 
-        core::ClassOrModuleRef singleton;
-        for (auto ancst : sym.data(gs)->mixins()) {
-            // Reading the fake property created in resolver#resolveClassMethodsJob(){}
-            auto mixedInClassMethods = ancst.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
-            if (!mixedInClassMethods.exists()) {
+            if (sym.data(gs)->flags.isLinearizationComputed) {
+                // Without this, the addMixin below for mixedInClassMethods is not idempotent on the
+                // fast path, and will accidentally mix a `ClassMethods` module into all children (not
+                // just the class that has the `include` triggering the mixes_in_class_methods, but all
+                // subclasses of that class).
                 continue;
             }
-            if (!singleton.exists()) {
-                singleton = sym.data(gs)->singletonClass(gs);
-            }
 
-            auto &resultType = mixedInClassMethods.data(gs)->resultType;
-            ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
-            auto types = core::cast_type<core::TupleType>(resultType);
+            core::ClassOrModuleRef singleton;
+            for (auto ancst : sym.data(gs)->mixins()) {
+                // Reading the fake property created in resolver#resolveClassMethodsJob(){}
+                auto mixedInClassMethods = ancst.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
+                if (!mixedInClassMethods.exists()) {
+                    continue;
+                }
+                if (!singleton.exists()) {
+                    singleton = sym.data(gs)->singletonClass(gs);
+                }
 
-            for (auto &type : types->elems) {
-                ENFORCE(core::isa_type<core::ClassType>(type));
-                auto classType = core::cast_type_nonnull<core::ClassType>(type);
-                if (!singleton.data(gs)->addMixin(gs, classType.symbol)) {
-                    // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before
-                    // adding it as a member.
-                    ENFORCE(false);
+                auto &resultType = mixedInClassMethods.data(gs)->resultType;
+                ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
+                auto types = core::cast_type<core::TupleType>(resultType);
+
+                for (auto &type : types->elems) {
+                    ENFORCE(core::isa_type<core::ClassType>(type));
+                    auto classType = core::cast_type_nonnull<core::ClassType>(type);
+                    if (!singleton.data(gs)->addMixin(gs, classType.symbol)) {
+                        // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before
+                        // adding it as a member.
+                        ENFORCE(false);
+                    }
                 }
             }
         }
@@ -325,17 +329,21 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
 
     gs.computeLinearization();
 
-    vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
-    typeAliases.resize(gs.classAndModulesUsed());
-    vector<bool> resolved;
-    resolved.resize(gs.classAndModulesUsed());
-    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto sym = core::ClassOrModuleRef(gs, i);
-        resolveTypeMembers(gs, sym, typeAliases, resolved);
+    {
+        Timer timer(gs.tracer(), "resolver.resolve_type_members");
 
-        if (gs.requiresAncestorEnabled) {
-            // Precompute the list of all required ancestors for this symbol
-            sym.data(gs)->computeRequiredAncestorLinearization(gs);
+        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
+        typeAliases.resize(gs.classAndModulesUsed());
+        vector<bool> resolved;
+        resolved.resize(gs.classAndModulesUsed());
+        for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
+            auto sym = core::ClassOrModuleRef(gs, i);
+            resolveTypeMembers(gs, sym, typeAliases, resolved);
+
+            if (gs.requiresAncestorEnabled) {
+                // Precompute the list of all required ancestors for this symbol
+                sym.data(gs)->computeRequiredAncestorLinearization(gs);
+            }
         }
     }
 }
