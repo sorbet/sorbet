@@ -54,6 +54,15 @@ T.reveal_type([1,2].detect(-> {})) # error: Revealed type: `T::Enumerator[T.unty
 T.reveal_type([1,2].detect(p) {|x| false}) # error: Revealed type: `Integer`
 T.reveal_type([1,2].detect(p)) # error: Revealed type: `T::Enumerator[Integer]`
 
+# find
+p = T.let(->{ 1 }, T.proc.returns(Integer))
+T.reveal_type([1,2].find) # error: Revealed type: `T::Enumerator[Integer]`
+T.reveal_type([1,2].find {|x| false}) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type([1,2].find(-> {}) {|x| false}) # error: Revealed type: `T.untyped`
+T.reveal_type([1,2].find(-> {})) # error: Revealed type: `T::Enumerator[T.untyped]`
+T.reveal_type([1,2].find(p) {|x| false}) # error: Revealed type: `Integer`
+T.reveal_type([1,2].find(p)) # error: Revealed type: `T::Enumerator[Integer]`
+
 sig {params(xs: T::Array[Integer]).void}
 def example(xs)
   res = xs.reduce('') do |acc, x|
