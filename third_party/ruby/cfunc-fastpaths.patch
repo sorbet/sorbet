@@ -1,0 +1,354 @@
+commit 97299f2e91d3ca0067686b7ad1a4675fc5b32032
+Author: Nathan Froyd <froydnj@gmail.com>
+Date:   Wed Sep 14 10:30:38 2022 -0900
+
+    add fastpaths for fixed-arg cfunc invocations
+
+diff --git vm_insnhelper.c vm_insnhelper.c
+index c0d9092a67..ecb9161b69 100644
+--- vm_insnhelper.c
++++ vm_insnhelper.c
+@@ -2478,44 +2478,48 @@ vm_method_cfunc_entry(const rb_callable_method_entry_t *me)
+ }
+ 
+ /* -- Remove empty_kw_splat In 3.0 -- */
++ALWAYS_INLINE(static VALUE vm_call_cfunc_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, int check_kw_splat, int empty_kw_splat,
++                                                           int func_argc, int argc, VALUE (*invoker)(VALUE, int, const VALUE *, VALUE (*)(ANYARGS))));
++
+ static VALUE
+-vm_call_cfunc_with_frame(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, int empty_kw_splat)
++vm_call_cfunc_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, int check_kw_splat, int empty_kw_splat,
++                                int func_argc, int argc, VALUE (*invoker)(VALUE, int, const VALUE *, VALUE (*)(ANYARGS)))
+ {
+     const struct rb_call_info *ci = &cd->ci;
+     const struct rb_call_cache *cc = &cd->cc;
+     VALUE val;
+     const rb_callable_method_entry_t *me = cc->me;
+     const rb_method_cfunc_t *cfunc = vm_method_cfunc_entry(me);
+-    int len = cfunc->argc;
+ 
+     VALUE recv = calling->recv;
+     VALUE block_handler = calling->block_handler;
+     VALUE frame_type = VM_FRAME_MAGIC_CFUNC | VM_FRAME_FLAG_CFRAME | VM_ENV_FLAG_LOCAL;
+-    int argc = calling->argc;
+     int orig_argc = argc;
+ 
+-    if (UNLIKELY(calling->kw_splat)) {
+-        frame_type |= VM_FRAME_FLAG_CFRAME_KW;
+-    }
+-    else if (UNLIKELY(empty_kw_splat)) {
+-        frame_type |= VM_FRAME_FLAG_CFRAME_EMPTY_KW;
++    if (check_kw_splat) {
++        if (UNLIKELY(calling->kw_splat)) {
++            frame_type |= VM_FRAME_FLAG_CFRAME_KW;
++        }
++        else if (UNLIKELY(empty_kw_splat)) {
++            frame_type |= VM_FRAME_FLAG_CFRAME_EMPTY_KW;
++        }
+     }
+ 
+     RUBY_DTRACE_CMETHOD_ENTRY_HOOK(ec, me->owner, me->def->original_id);
+     EXEC_EVENT_HOOK(ec, RUBY_EVENT_C_CALL, recv, me->def->original_id, ci->mid, me->owner, Qundef);
+ 
+-    vm_push_frame(ec, NULL, frame_type, recv,
+-		  block_handler, (VALUE)me,
+-		  0, ec->cfp->sp, 0, 0);
++    rb_control_frame_t *new_cfp = vm_push_frame(ec, NULL, frame_type, recv,
++                                                block_handler, (VALUE)me,
++                                                0, ec->cfp->sp, 0, 0);
+ 
+-    if (len >= 0) rb_check_arity(argc, len, len);
++    if (func_argc >= 0) rb_check_arity(argc, func_argc, func_argc);
+ 
+     reg_cfp->sp -= orig_argc + 1;
+-    val = (*cfunc->invoker)(recv, argc, reg_cfp->sp + 1, cfunc->func);
++    val = (*invoker)(recv, argc, reg_cfp->sp + 1, cfunc->func);
+ 
+     CHECK_CFP_CONSISTENCY("vm_call_cfunc");
+ 
+-    rb_vm_pop_frame(ec);
++    vm_pop_frame(ec, new_cfp, new_cfp->ep);
+ 
+     EXEC_EVENT_HOOK(ec, RUBY_EVENT_C_RETURN, recv, me->def->original_id, ci->mid, me->owner, val);
+     RUBY_DTRACE_CMETHOD_RETURN_HOOK(ec, me->owner, me->def->original_id);
+@@ -2524,6 +2528,175 @@ vm_call_cfunc_with_frame(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp
+ }
+ 
+ static VALUE
++vm_call_cfunc_with_frame(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, int empty_kw_splat)
++{
++    const int check_kw_splat = 1;
++    const rb_callable_method_entry_t *me = cd->cc.me;
++    const rb_method_cfunc_t *cfunc = vm_method_cfunc_entry(me);
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, cfunc->argc, calling->argc, cfunc->invoker);
++}
++
++VALUE
++vm_call_cfunc_fast_0params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 0;
++    const int calling_argc = 0;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_0);
++}
++
++VALUE
++vm_call_cfunc_fast_1params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 1;
++    const int calling_argc = 1;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_1);
++}
++
++VALUE
++vm_call_cfunc_fast_2params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 2;
++    const int calling_argc = 2;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_2);
++}
++
++VALUE
++vm_call_cfunc_fast_3params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 3;
++    const int calling_argc = 3;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_3);
++}
++
++VALUE
++vm_call_cfunc_fast_4params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 4;
++    const int calling_argc = 4;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_4);
++}
++
++VALUE
++vm_call_cfunc_fast_5params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 5;
++    const int calling_argc = 5;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_5);
++}
++
++VALUE
++vm_call_cfunc_fast_6params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 6;
++    const int calling_argc = 6;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_6);
++}
++
++VALUE
++vm_call_cfunc_fast_7params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 7;
++    const int calling_argc = 7;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_7);
++}
++
++VALUE
++vm_call_cfunc_fast_8params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 8;
++    const int calling_argc = 8;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_8);
++}
++
++VALUE
++vm_call_cfunc_fast_9params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 9;
++    const int calling_argc = 9;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_9);
++}
++
++VALUE
++vm_call_cfunc_fast_10params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 10;
++    const int calling_argc = 10;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_10);
++}
++
++VALUE
++vm_call_cfunc_fast_11params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 11;
++    const int calling_argc = 11;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_11);
++}
++
++VALUE
++vm_call_cfunc_fast_12params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 12;
++    const int calling_argc = 12;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_12);
++}
++
++VALUE
++vm_call_cfunc_fast_13params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 13;
++    const int calling_argc = 13;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_13);
++}
++
++VALUE
++vm_call_cfunc_fast_14params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 14;
++    const int calling_argc = 14;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_14);
++}
++
++VALUE
++vm_call_cfunc_fast_15params(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const int check_kw_splat = 0;
++    const int empty_kw_splat = 0;
++    const int func_argc = 15;
++    const int calling_argc = 15;
++    return vm_call_cfunc_with_frame_normal(ec, reg_cfp, calling, cd, check_kw_splat, empty_kw_splat, func_argc, calling_argc, call_cfunc_15);
++}
++
++static VALUE
+ vm_call_cfunc(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
+ {
+     const struct rb_call_info *ci = &cd->ci;
+@@ -2539,6 +2712,95 @@ vm_call_cfunc(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb
+     return vm_call_cfunc_with_frame(ec, reg_cfp, calling, cd, empty_kw_splat);
+ }
+ 
++static VALUE (*vm_call_cfunc_fast_func(int argc))(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd) {
++    switch (argc) {
++    case 0: return &vm_call_cfunc_fast_0params;
++    case 1: return &vm_call_cfunc_fast_1params;
++    case 2: return &vm_call_cfunc_fast_2params;
++    case 3: return &vm_call_cfunc_fast_3params;
++    case 4: return &vm_call_cfunc_fast_4params;
++    case 5: return &vm_call_cfunc_fast_5params;
++    case 6: return &vm_call_cfunc_fast_6params;
++    case 7: return &vm_call_cfunc_fast_7params;
++    case 8: return &vm_call_cfunc_fast_8params;
++    case 9: return &vm_call_cfunc_fast_9params;
++    case 10: return &vm_call_cfunc_fast_10params;
++    case 11: return &vm_call_cfunc_fast_11params;
++    case 12: return &vm_call_cfunc_fast_12params;
++    case 13: return &vm_call_cfunc_fast_13params;
++    case 14: return &vm_call_cfunc_fast_14params;
++    case 15: return &vm_call_cfunc_fast_15params;
++    default:
++        rb_bug("cfunc fast funcs unsupported for argc %d", argc);
++    }
++}
++
++static int
++vm_call_cfunc_optimizable_p(const struct rb_call_info *ci, const struct rb_call_cache *cc,
++                             const struct rb_calling_info *calling, const rb_method_cfunc_t *cfunc)
++{
++    /* Splat calls are generally not interesting, because they can introduce kwsplats
++     * and require extra processing anyway to resolve the splat. */
++    if (IS_ARGS_SPLAT(ci)) {
++        return 0;
++    }
++
++    /* Similarly for keyword splats. */
++    if (IS_ARGS_KW_SPLAT(ci)) {
++        return 0;
++    }
++
++    /* Protected methods are weird, so don't deal with them. */
++    if (METHOD_ENTRY_VISI(cc->me) == METHOD_VISI_PROTECTED) {
++        return 0;
++    }
++
++    /* If the method does its own argument parsing, we can't do anything. */
++    if (cfunc->argc < 0) {
++        return 0;
++    }
++
++    /* We can't make calls with keyword args fast. */
++    if (IS_ARGS_KEYWORD(ci)) {
++        return 0;
++    }
++
++    return 1;
++}
++
++static VALUE
++vm_call_cfunc_maybe_setup_fastpath(rb_execution_context_t *ec, rb_control_frame_t *cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
++{
++    const struct rb_call_info *ci = &cd->ci;
++    struct rb_call_cache *cc = &cd->cc;
++    const rb_method_cfunc_t *cfunc = vm_method_cfunc_entry(cc->me);
++
++    if (!vm_call_cfunc_optimizable_p(ci, cc, calling, cfunc)) {
++        return vm_call_cfunc(ec, cfp, calling, cd);
++    }
++
++    /* At this point, we know that the method we're calling takes only positional
++     * arguments.  But we need to verify that the method is being passed only
++     * positional arguments and there aren't any kwarg fixups that we need to do.
++     * We only need to do this once, cf. vm_callee_setup_arg.
++     */
++    CALLER_SETUP_ARG(cfp, calling, ci);
++    int empty_kw_splat = calling->kw_splat;
++    CALLER_REMOVE_EMPTY_KW_SPLAT(cfp, calling, ci);
++    if (empty_kw_splat && calling->kw_splat) {
++        empty_kw_splat = 0;
++    }
++
++    if (UNLIKELY(calling->argc != cfunc->argc)) {
++        return vm_call_cfunc_with_frame(ec, cfp, calling, cd, empty_kw_splat);
++    }
++
++    VALUE (*fastfunc)(rb_execution_context_t *, rb_control_frame_t *, struct rb_calling_info *, struct rb_call_data *cd)
++        = vm_call_cfunc_fast_func(calling->argc);
++    CC_SET_FASTPATH(cc, fastfunc, TRUE);
++    return vm_call_cfunc_with_frame(ec, cfp, calling, cd, empty_kw_splat);
++}
++
+ static VALUE
+ vm_call_ivar(rb_execution_context_t *ec, rb_control_frame_t *cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
+ {
+@@ -2922,7 +3184,7 @@ vm_call_method_each_type(rb_execution_context_t *ec, rb_control_frame_t *cfp, st
+       case VM_METHOD_TYPE_NOTIMPLEMENTED:
+       case VM_METHOD_TYPE_CFUNC:
+         CC_SET_FASTPATH(cc, vm_call_cfunc, TRUE);
+-        return vm_call_cfunc(ec, cfp, calling, cd);
++        return vm_call_cfunc_maybe_setup_fastpath(ec, cfp, calling, cd);
+ 
+       case VM_METHOD_TYPE_ATTRSET:
+         CALLER_SETUP_ARG(cfp, calling, ci);
