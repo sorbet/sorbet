@@ -1,0 +1,35 @@
+diff --git compile.c compile.c
+index 5f86a5bd67..14bfbc4269 100644
+--- compile.c
++++ compile.c
+@@ -3252,6 +3252,18 @@ iseq_peephole_optimize(rb_iseq_t *iseq, LINK_ELEMENT *list, const int do_tailcal
+         }
+     }
+ 
++    if (IS_INSN_ID(iobj, send)) {
++      struct rb_call_info *ci = (struct rb_call_info *)OPERAND_AT(iobj, 0);
++      if ((ci->flag & VM_CALL_ARGS_SIMPLE) && ci->orig_argc == 1 && ci->mid == idUnsafe) {
++        INSN *pop = new_insn_core(iseq, iobj->insn_info.line_no,
++            BIN(pop), 0, 0);
++        INSN *swap = new_insn_core(iseq, iobj->insn_info.line_no,
++            BIN(swap), 0, 0);
++        ELEM_REPLACE(&iobj->link, &swap->link);
++        ELEM_INSERT_NEXT(&swap->link, &pop->link);
++      }
++    }
++
+     return COMPILE_OK;
+ }
+ 
+diff --git defs/id.def defs/id.def
+index fc7a04ffbc..76287ef1d5 100644
+--- defs/id.def
++++ defs/id.def
+@@ -16,6 +16,7 @@ firstline, predefined = __LINE__+1, %[\
+   method_undefined
+   singleton_method_undefined
+   length
++  unsafe
+   size
+   gets
+   succ
