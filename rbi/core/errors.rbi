@@ -335,6 +335,9 @@ end
 class NotImplementedError < ScriptError
 end
 
+class NoMatchingPatternError < StandardError
+end
+
 # Raised when a given numerical value is out of range.
 #
 # ```ruby
